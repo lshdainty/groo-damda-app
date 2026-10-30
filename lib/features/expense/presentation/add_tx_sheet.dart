@@ -1873,7 +1873,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 description: l.smsLowConfidence,
               ),
             ),
-          if (_isEdit || _isReplace) _typeChips(l, cats),
+          if (_isEdit || _isReplace || _isSms) _typeChips(l, cats),
           if (_isEdit || _isReplace || _isSms) ..._amountRows(l, masked),
           if (!isTransfer) ...[
             Padding(
