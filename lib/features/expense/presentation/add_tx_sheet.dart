@@ -345,7 +345,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final tr = widget.editTransfer;
     final sms = _smsDraft?.parsed;
     DateTime date;
-    TimeOfDay time = TimeOfDay.now();
+    TimeOfDay time = TimeOfDay.fromDateTime(txNow());
     String? raw = tr?.transferDate ?? e?.expenseDate ?? sms?.expenseDate;
     if (raw != null && raw.length >= 10) {
       date = parseIsoDate(raw.substring(0, 10));
@@ -359,7 +359,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     } else if (widget.defaultDate != null) {
       date = parseIsoDate(widget.defaultDate!);
     } else {
-      date = DateTime.now();
+      date = txNow();
     }
     final old = _inputOrNull;
     old?.dispose();
@@ -819,7 +819,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       context,
       title: l.expDate,
       value: _input.date,
-      today: DateTime.now(),
+      today: txNow(),
     );
     if (picked == null || !mounted) return;
     setState(() {
@@ -1776,7 +1776,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 : a.assetName);
     }
 
-    final dayText = formatDateValue(c.date, DateTime.now());
+    final dayText = formatDateValue(c.date, txNow());
     final timeText = formatTimeValue(
       PTimeValue(c.time.hour, c.time.minute),
       labels: PTimePickerLabels.of(context),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:groo_damda_app/core/format/amount_limits.dart';
@@ -8,6 +9,10 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
 // ─────────────────────────────────────────────
 // 거래 입력 (inline) — recurring 과 독립. tx_input_form.dart 해체 후 add_tx 자체 보유.
+
+/// 폼이 "지금" 으로 읽는 시계 — 렌더 · 시험이 같은 날짜로 고정하려고 바꾼다(앱은 건드리지 않는다).
+@visibleForTesting
+DateTime Function() txNow = DateTime.now;
 
 const kTxPaymentMethodCodes = ['CASH', 'CARD', 'TRANSFER', 'OTHER'];
 
@@ -107,8 +112,8 @@ class TxInput {
     this.paymentMethod = '',
     DateTime? date,
     TimeOfDay? time,
-  }) : date = date ?? DateTime.now(),
-       time = time ?? TimeOfDay.now(),
+  }) : date = date ?? txNow(),
+       time = time ?? TimeOfDay.fromDateTime(txNow()),
        amountCtrl = TextEditingController(text: amount),
        merchantCtrl = TextEditingController(text: merchant),
        memoCtrl = TextEditingController(text: memo),
