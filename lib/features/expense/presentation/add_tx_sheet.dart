@@ -660,16 +660,18 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   }
 
   // ── 고르기 시트 ─────────────────────────────────────────
-  Future<T?> _sheet<T>(String title, Widget body) => PBottomSheet.show<T>(
-    context,
-    builder: (ctx) => PBottomSheetContent(
-      title: title,
-      closeLabel: AppLocalizations.of(ctx).actionClose,
-      flushBody: true,
-      scrollFog: true,
-      body: body,
-    ),
-  );
+  /// 고르기 시트의 틀 — 목록형(카테고리 · 계좌 · 할부 · 통화)은 끝 흐림을 켜고, 줄이 정해진 고정형(결제 수단)은 끈다.
+  Future<T?> _sheet<T>(String title, Widget body, {bool fog = true}) =>
+      PBottomSheet.show<T>(
+        context,
+        builder: (ctx) => PBottomSheetContent(
+          title: title,
+          closeLabel: AppLocalizations.of(ctx).actionClose,
+          flushBody: true,
+          scrollFog: fog,
+          body: body,
+        ),
+      );
 
   Future<void> _pickCategory() async {
     final l = AppLocalizations.of(context);
@@ -764,6 +766,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             PickItem(value: code, title: txPaymentMethodLabel(l, code)),
         ],
       ),
+      fog: false,
     );
     if (v == null || !mounted) return;
     final assets = ref.read(assetsProvider).value ?? const <Asset>[];
