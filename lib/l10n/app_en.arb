@@ -4783,5 +4783,10 @@
   },
   "txfPresetNameTooLong": "Keep the name within 12 characters.",
   "txfMemoStepTitle": "Memo",
-  "txfTimeTitle": "Time"
+  "txfTimeTitle": "Time",
+  "txfNoCategory": "No category",
+  "txfNoDepositAccount": "No deposit account",
+  "txfNoIncomeMethod": "No income method",
+  "txfSelectFrom": "Select sending account",
+  "txfSelectTo": "Select receiving account"
 }

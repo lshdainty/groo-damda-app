@@ -8660,4 +8660,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txfTimeTitle => 'Time';
+
+  @override
+  String get txfNoCategory => 'No category';
+
+  @override
+  String get txfNoDepositAccount => 'No deposit account';
+
+  @override
+  String get txfNoIncomeMethod => 'No income method';
+
+  @override
+  String get txfSelectFrom => 'Select sending account';
+
+  @override
+  String get txfSelectTo => 'Select receiving account';
 }

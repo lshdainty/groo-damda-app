@@ -120,7 +120,8 @@ class TxUnderlineAmount extends StatelessWidget {
       semanticLabel: semanticLabel,
       placeholder: '0',
       invalid: invalid,
-      suffixText: chip == null ? suffixText : null,
+      // 칩이 있으면 칩 자리만큼 뒤 글자를 비워 둔다 — 밑줄 · 초점 · 오류 선이 칩 아래까지 같은 폭으로 간다(결정 그림 .ul2 가 칩을 품음)
+      suffixText: chip == null ? suffixText : _chipSlot,
       keyboardType: TextInputType.numberWithOptions(decimal: decimal),
       textInputAction: TextInputAction.done,
       inputFormatters: formatters,
@@ -144,10 +145,7 @@ class TxUnderlineAmount extends StatelessWidget {
             : Stack(
                 alignment: Alignment.centerRight,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: _chipReserve),
-                    child: input,
-                  ),
+                  input,
                   Positioned(right: 0, top: 4, child: chip!),
                 ],
               ),
@@ -155,7 +153,8 @@ class TxUnderlineAmount extends StatelessWidget {
     );
   }
 
-  static const double _chipReserve = 96;
+  /// 칩 자리 — 글자 크기에 따라 자라는 em 공백(칩도 같은 배율로 자란다).
+  static final String _chipSlot = '\u2003' * 5;
 }
 
 /// 목록 제목(프리셋) + 오른쪽 글 버튼 "현재 입력값 저장" + 칩 줄 + 끝 "모두 보기".

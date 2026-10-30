@@ -15223,6 +15223,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'시각'**
   String get txfTimeTitle;
+
+  /// No description provided for @txfNoCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리 없음'**
+  String get txfNoCategory;
+
+  /// No description provided for @txfNoDepositAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'입금 계좌 없음'**
+  String get txfNoDepositAccount;
+
+  /// No description provided for @txfNoIncomeMethod.
+  ///
+  /// In ko, this message translates to:
+  /// **'수입 방식 없음'**
+  String get txfNoIncomeMethod;
+
+  /// No description provided for @txfSelectFrom.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌 선택'**
+  String get txfSelectFrom;
+
+  /// No description provided for @txfSelectTo.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌 선택'**
+  String get txfSelectTo;
 }
 
 class _AppLocalizationsDelegate

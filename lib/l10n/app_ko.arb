@@ -5046,5 +5046,10 @@
   },
   "txfPresetNameTooLong": "이름은 12자 이내로 입력해주세요.",
   "txfMemoStepTitle": "메모",
-  "txfTimeTitle": "시각"
+  "txfTimeTitle": "시각",
+  "txfNoCategory": "카테고리 없음",
+  "txfNoDepositAccount": "입금 계좌 없음",
+  "txfNoIncomeMethod": "수입 방식 없음",
+  "txfSelectFrom": "보내는 계좌 선택",
+  "txfSelectTo": "받는 계좌 선택"
 }

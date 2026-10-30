@@ -1929,6 +1929,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 title: l.expCategory,
                 icon: LucideIcons.tags,
                 value: catValue,
+                placeholder: l.txfNoCategory,
                 dot: catDot,
                 onTap: _pickCategory,
                 errorMessage: _errs.category,
@@ -1938,7 +1939,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 title: isIncome ? l.expDepositAccount : l.expAccountCard,
                 icon: LucideIcons.wallet,
                 value: assetName(c.assetRowId),
-                placeholder: l.txfNone,
+                placeholder: isIncome
+                    ? l.txfNoDepositAccount
+                    : l.txfNoAccountOption,
                 locked: locked,
                 onTap: () => _pickAsset(income: isIncome),
               ),
@@ -1949,7 +1952,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 value: c.paymentMethod.isEmpty
                     ? null
                     : txPaymentMethodLabel(l, c.paymentMethod),
-                placeholder: l.txfNone,
+                placeholder: isIncome
+                    ? l.txfNoIncomeMethod
+                    : l.txfNoMethodOption,
                 locked: locked,
                 onTap: _pickMethod,
               ),
@@ -1985,7 +1990,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 title: l.transferFromLabel,
                 icon: LucideIcons.wallet,
                 value: assetName(c.assetRowId),
-                placeholder: l.txfNone,
+                placeholder: l.txfSelectFrom,
                 locked: locked,
                 onTap: () => _pickAsset(income: false),
                 errorMessage: _errs.from,
@@ -1995,7 +2000,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 title: l.transferToLabel,
                 icon: LucideIcons.wallet,
                 value: assetName(c.toAssetRowId),
-                placeholder: l.txfNone,
+                placeholder: l.txfSelectTo,
                 locked: locked,
                 onTap: () => _pickAsset(income: false, to: true),
                 errorMessage: _errs.to,

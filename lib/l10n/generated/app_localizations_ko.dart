@@ -8459,4 +8459,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get txfTimeTitle => '시각';
+
+  @override
+  String get txfNoCategory => '카테고리 없음';
+
+  @override
+  String get txfNoDepositAccount => '입금 계좌 없음';
+
+  @override
+  String get txfNoIncomeMethod => '수입 방식 없음';
+
+  @override
+  String get txfSelectFrom => '보내는 계좌 선택';
+
+  @override
+  String get txfSelectTo => '받는 계좌 선택';
 }
