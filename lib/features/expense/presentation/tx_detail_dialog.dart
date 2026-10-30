@@ -187,12 +187,14 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   }
 
   /// 삭제 — 확인창 → 요청. **확인창 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]** 다(스낵바 호스트는 길잡이 바깥이라 시트 ·
-  /// 확인창 위에 뜬다 — 웹과 같다). 다시 시도는 묻지 않고 바로 지운다(이미 한 번 확정한 삭제). 요청이 끝날 때까지 확정 버튼이 로딩이고
-  /// 지운 뒤에는 목록을 다시 받고 시트를 닫으며 그동안 버튼은 다시 열리지 않는다. 폼 저장 실패(환불 처리 단계)만 시트 안 Callout 이다.
+  /// 확인창 위에 뜬다 — 웹과 같다). 다시 시도는 묻지 않고 바로 지운다(이미 한 번 확정한 삭제). 요청은 **컨테이너로** 나가 시트 수명과
+  /// 무관하다 — 시트를 닫은 뒤 스낵바의 [다시 시도] 도 요청을 보낸다. 요청이 끝날 때까지 확정 버튼이 로딩이고 지운 뒤에는 목록을 다시
+  /// 받고 시트를 닫으며 그동안 버튼은 다시 열리지 않는다. 폼 저장 실패(환불 처리 단계)만 시트 안 Callout 이다.
   Future<void> _delete() async {
     if (_busy) return;
     final l = AppLocalizations.of(context);
     final snack = PSnackbar.of(context);
+    final container = ProviderScope.containerOf(context);
     final asset = _assetOf(_e);
     Object? failure;
     final ok = await PAlertDialog.show(
@@ -202,28 +204,24 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       actionLabel: l.actionDelete,
       destructive: true,
       cancelLabel: l.actionCancel,
-      onAction: () async => failure = await _requestDelete(asset),
+      onAction: () async => failure = await _requestDelete(container, asset),
     );
     if (!ok || !mounted) return;
     if (failure != null) {
-      _deleteFailed(snack, l);
+      _deleteFailed(snack, l, container, asset);
     } else {
       _finishDelete();
     }
   }
 
-  /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null).
-  Future<Object?> _requestDelete(Asset? asset) async {
+  /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null). 화면이 없어도(`mounted` 아님) 요청은 나간다.
+  Future<Object?> _requestDelete(
+    ProviderContainer container,
+    Asset? asset,
+  ) async {
     if (mounted) setState(() => _deleting = true);
     try {
-      await expenseActions.delete(
-        context,
-        ref,
-        _e,
-        asset: asset,
-        silent: true,
-        throwOnError: true,
-      );
+      await deleteExpenseRequest(container, widget.host, _e, asset: asset);
       return null;
     } on ApiException catch (e) {
       return e;
@@ -232,26 +230,31 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     }
   }
 
+  /// 지운 뒤 — 시트가 아직 열려 있으면 닫는다(없으면 이미 닫힌 것).
   void _finishDelete() {
     if (!mounted) return;
     setState(() => _closing = true);
     PBottomSheet.of(context).close();
   }
 
-  void _deleteFailed(PSnackbarApi snack, AppLocalizations l) {
+  void _deleteFailed(
+    PSnackbarApi snack,
+    AppLocalizations l,
+    ProviderContainer container,
+    Asset? asset,
+  ) {
     snack.show(
       message: l.expTxDeleteFailed,
       tone: PSnackbarTone.critical,
       action: PSnackbarAction(
         label: l.actionRetry,
         onPressed: () async {
-          if (!mounted || _busy) return;
-          final err = await _requestDelete(_assetOf(_e));
-          if (!mounted) return;
+          if (mounted && _busy) return;
+          final err = await _requestDelete(container, asset);
           if (err == null) {
             _finishDelete();
           } else {
-            _deleteFailed(snack, l);
+            _deleteFailed(snack, l, container, asset);
           }
         },
       ),
@@ -299,6 +302,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
             closedCycleSpanOfExpense(_e, _assetOf(_e)),
           );
     final snack = PSnackbar.of(context);
+    final container = ProviderScope.containerOf(context);
     Object? failure;
     final ok = await PAlertDialog.show(
       context,
@@ -306,23 +310,18 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       description: message,
       actionLabel: l.expRefundCancel,
       cancelLabel: l.actionCancel,
-      onAction: () async => failure = await _requestCancelRefund(),
+      onAction: () async => failure = await _requestCancelRefund(container),
     );
     if (!ok || !mounted) return;
-    if (failure != null) _cancelRefundFailed(snack, l);
+    if (failure != null) _cancelRefundFailed(snack, l, container);
   }
 
-  /// 환불 취소 요청 — 성공하면 응답으로 상세를 다시 그리고 null, 실패하면 그 오류.
-  Future<Object?> _requestCancelRefund() async {
+  /// 환불 취소 요청 — 성공하면 응답으로 상세를 다시 그리고(화면이 있을 때) null, 실패하면 그 오류. 화면이 없어도 요청은 나간다.
+  Future<Object?> _requestCancelRefund(ProviderContainer container) async {
     if (mounted) setState(() => _cancelling = true);
     try {
-      final updated = await expenseActions.cancelRefund(
-        ref,
-        _e,
-        silent: true,
-        throwOnError: true,
-      );
-      if (mounted && updated != null) setState(() => _e = updated);
+      final updated = await cancelRefundRequest(container, _e);
+      if (mounted) setState(() => _e = updated);
       return null;
     } on ApiException catch (e) {
       return e;
@@ -331,16 +330,20 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     }
   }
 
-  void _cancelRefundFailed(PSnackbarApi snack, AppLocalizations l) {
+  void _cancelRefundFailed(
+    PSnackbarApi snack,
+    AppLocalizations l,
+    ProviderContainer container,
+  ) {
     snack.show(
       message: l.expRefundCancelFailed,
       tone: PSnackbarTone.critical,
       action: PSnackbarAction(
         label: l.actionRetry,
         onPressed: () async {
-          if (!mounted || _busy) return;
-          final err = await _requestCancelRefund();
-          if (mounted && err != null) _cancelRefundFailed(snack, l);
+          if (mounted && _busy) return;
+          final err = await _requestCancelRefund(container);
+          if (err != null) _cancelRefundFailed(snack, l, container);
         },
       ),
     );

@@ -65,11 +65,13 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
   bool get _busy => _deleting || _closing;
 
   /// 삭제 — 확인창 → 요청. **확인창 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]** 다(스낵바 호스트는 길잡이 바깥이라 시트 · 확인창
-  /// 위에 뜬다). 다시 시도는 묻지 않고 바로 지운다. 지운 뒤에는 목록을 다시 받고 시트를 닫으며 그동안 버튼은 다시 열리지 않는다.
+  /// 위에 뜬다). 다시 시도는 묻지 않고 바로 지운다. 요청은 **컨테이너로** 나가 시트 수명과 무관하다(시트를 닫은 뒤 [다시 시도] 도 요청을
+  /// 보낸다). 지운 뒤에는 목록을 다시 받고 시트를 닫으며 그동안 버튼은 다시 열리지 않는다.
   Future<void> _delete() async {
     if (_busy) return;
     final l = AppLocalizations.of(context);
     final snack = PSnackbar.of(context);
+    final container = ProviderScope.containerOf(context);
     Object? failure;
     final ok = await PAlertDialog.show(
       context,
@@ -78,38 +80,21 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
       actionLabel: l.actionDelete,
       destructive: true,
       cancelLabel: l.actionCancel,
-      onAction: () async => failure = await _requestDelete(),
+      onAction: () async => failure = await _requestDelete(container),
     );
     if (!ok || !mounted) return;
     if (failure != null) {
-      _deleteFailed(snack, l);
+      _deleteFailed(snack, l, container);
     } else {
       _finishDelete();
     }
   }
 
-  /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null).
-  Future<Object?> _requestDelete() async {
+  /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null). 화면이 없어도 요청은 나간다.
+  Future<Object?> _requestDelete(ProviderContainer container) async {
     if (mounted) setState(() => _deleting = true);
     try {
-      final repo = await ref.read(assetRepositoryProvider.future);
-      await repo.deleteTransfer(_t.rowId, silent: true);
-      // 서버가 양쪽 자산의 잔액 이력을 되돌리므로 자산 · 요약 · 통계를 모두 새로 받는다. 이체도 거래다.
-      invalidateAfterExpenseChange(ref);
-      final d = _t.transferDate;
-      if (d != null && d.length >= 7) {
-        final key = (
-          year: int.parse(d.substring(0, 4)),
-          month: int.parse(d.substring(5, 7)),
-        );
-        ref.invalidate(monthExpensesProvider(key));
-        // 목록을 다시 받은 다음 닫는다 — 닫히며 옛 줄이 비치지 않게
-        try {
-          await ref.read(monthExpensesProvider(key).future);
-        } catch (_) {
-          // 받지 못해도 닫는다
-        }
-      }
+      await deleteTransferRequest(container, _t);
       return null;
     } on ApiException catch (e) {
       return e;
@@ -124,20 +109,23 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     PBottomSheet.of(context).close();
   }
 
-  void _deleteFailed(PSnackbarApi snack, AppLocalizations l) {
+  void _deleteFailed(
+    PSnackbarApi snack,
+    AppLocalizations l,
+    ProviderContainer container,
+  ) {
     snack.show(
       message: l.transferDeleteFailed,
       tone: PSnackbarTone.critical,
       action: PSnackbarAction(
         label: l.actionRetry,
         onPressed: () async {
-          if (!mounted || _busy) return;
-          final err = await _requestDelete();
-          if (!mounted) return;
+          if (mounted && _busy) return;
+          final err = await _requestDelete(container);
           if (err == null) {
             _finishDelete();
           } else {
-            _deleteFailed(snack, l);
+            _deleteFailed(snack, l, container);
           }
         },
       ),
@@ -304,5 +292,29 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
           ? AssetLogo(asset: asset)
           : PLogoTile(name: title, face: PLogoTileFace.name),
     );
+  }
+}
+
+/// 이체 삭제 요청 — 컨테이너로 한다(화면 State 와 무관). 서버가 양쪽 자산의 잔액 이력을 되돌리므로 자산 · 요약 · 통계를 모두 새로 받고
+/// 그 달 목록을 다시 받은 뒤 돌아온다(닫히며 옛 줄이 비치지 않게). 실패(`ApiException`)는 던진다.
+Future<void> deleteTransferRequest(
+  ProviderContainer container,
+  AssetTransfer t,
+) async {
+  final repo = await container.read(assetRepositoryProvider.future);
+  await repo.deleteTransfer(t.rowId, silent: true);
+  invalidateAfterExpenseChangeIn(container);
+  final d = t.transferDate;
+  if (d != null && d.length >= 7) {
+    final key = (
+      year: int.parse(d.substring(0, 4)),
+      month: int.parse(d.substring(5, 7)),
+    );
+    container.invalidate(monthExpensesProvider(key));
+    try {
+      await container.read(monthExpensesProvider(key).future);
+    } catch (_) {
+      // 받지 못해도 닫는다
+    }
   }
 }

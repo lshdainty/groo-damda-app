@@ -293,3 +293,64 @@ Asset? assetOfExpense(WidgetRef ref, Expense e) {
   if (id == null) return null;
   return ref.read(assetsProvider).value?.byRowId(id);
 }
+
+/// 거래 삭제 요청 — **컨테이너로** 한다(화면 State 와 무관하게 나간다 — 시트를 닫은 뒤 스낵바의 [다시 시도] 도 이걸 부른다).
+/// 실패(`ApiException`)는 던진다 — 알리는 일은 부른 쪽 몫. 지운 뒤 바뀐 달 목록을 다시 받고, 결과 토스트는 오래 사는 [host] 에 띄운다.
+Future<void> deleteExpenseRequest(
+  ProviderContainer container,
+  BuildContext host,
+  Expense e, {
+  Asset? asset,
+}) async {
+  final target =
+      asset ??
+      (e.assetRowId == null
+          ? null
+          : container.read(assetsProvider).value?.byRowId(e.assetRowId!));
+  final fixBalance = fixBalanceTargetOf(e, target);
+  final repo = await container.read(expenseRepositoryProvider.future);
+  final refunded = await repo.delete(e.rowId, silent: true);
+  final date = e.expenseDate;
+  if (date != null && date.length >= 10) {
+    final y = int.tryParse(date.substring(0, 4));
+    final m = int.tryParse(date.substring(5, 7));
+    if (y != null && m != null) {
+      container.invalidate(monthExpensesProvider((year: y, month: m)));
+    }
+  }
+  invalidateAfterExpenseChangeIn(container);
+  await _refetchMonthIn(container, e);
+  if (host.mounted) {
+    showChangeResultToast(
+      host,
+      refundedAmount: refunded,
+      fixBalanceAssetId: fixBalance,
+    );
+  }
+}
+
+/// 환불 취소 요청 — 컨테이너판([deleteExpenseRequest] 와 같은 이유). 서버가 돌려준 거래를 돌려준다. 실패는 던진다.
+Future<Expense> cancelRefundRequest(
+  ProviderContainer container,
+  Expense e,
+) async {
+  final repo = await container.read(expenseRepositoryProvider.future);
+  final updated = await repo.cancelRefund(e.rowId, silent: true);
+  container.invalidate(monthExpensesProvider);
+  invalidateAfterExpenseChangeIn(container);
+  await _refetchMonthIn(container, e);
+  return updated;
+}
+
+Future<void> _refetchMonthIn(ProviderContainer container, Expense e) async {
+  final date = e.expenseDate;
+  if (date == null || date.length < 7) return;
+  final y = int.tryParse(date.substring(0, 4));
+  final m = int.tryParse(date.substring(5, 7));
+  if (y == null || m == null) return;
+  try {
+    await container.read(monthExpensesProvider((year: y, month: m)).future);
+  } catch (_) {
+    // 받지 못해도 돌아간다
+  }
+}

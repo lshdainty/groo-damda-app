@@ -33,6 +33,7 @@ import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart'
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
@@ -131,9 +132,36 @@ class _FakeRepo extends ExpenseRepository {
 
   bool failDelete;
   bool failRefund;
+  bool failCancel = false;
+  final cancelled = <int>[];
+
+  @override
+  Future<Expense> cancelRefund(int id, {bool silent = false}) async {
+    if (failCancel) {
+      throw ApiException(code: 'SERVER', message: '서버 원문', statusCode: 500);
+    }
+    cancelled.add(id);
+    return _plain;
+  }
+
   final deleted = <int>[];
   final silentFlags = <bool>[];
   String? refundedAt;
+
+  /// 달 목록을 다시 받은 횟수 — 요청 뒤 목록 갱신을 본다.
+  int listCalls = 0;
+
+  @override
+  Future<List<Expense>> list({
+    String? startDate,
+    String? endDate,
+    int? categoryId,
+    int? assetId,
+    String? expenseType,
+  }) async {
+    listCalls++;
+    return const [];
+  }
 
   @override
   Future<int?> delete(int id, {bool silent = false}) async {
@@ -596,6 +624,74 @@ void main() {
       expect(find.text('지출 상세'), findsNothing, reason: '지운 뒤 시트가 닫힌다');
     });
 
+    testWidgets('시트를 닫은 뒤 [다시 시도] 를 눌러도 요청이 나가고 목록이 갱신된다', (tester) async {
+      final repo = _FakeRepo(failDelete: true);
+      await _pump(
+        tester,
+        _opener((ctx) => showTxDetailDialog(ctx, _plain)),
+        repo: repo,
+      );
+      await _openDetail(tester);
+      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제').last);
+      await tester.pumpAndSettle();
+      expect(find.text('다시 시도'), findsOneWidget);
+
+      // 스낵바가 떠 있는 동안 시트를 닫는다(State 가 사라진다)
+      Navigator.of(
+        tester.element(find.byType(PBottomSheetContent)),
+        rootNavigator: true,
+      ).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('지출 상세'), findsNothing);
+      expect(find.text('다시 시도'), findsOneWidget, reason: '스낵바는 시트 밖이라 남아 있다');
+
+      repo.failDelete = false;
+      final before = repo.listCalls;
+      await tester.tap(find.text('다시 시도'));
+      await tester.pumpAndSettle();
+
+      expect(repo.deleted, [5], reason: '시트가 없어도 요청이 나간다');
+      expect(repo.listCalls, greaterThan(before), reason: '지운 뒤 달 목록을 다시 받는다');
+    });
+
+    testWidgets('환불 취소: 실패 → 스낵바, 시트를 닫은 뒤 [다시 시도] 도 요청이 나가고 목록이 갱신된다', (
+      tester,
+    ) async {
+      final repo = _FakeRepo()..failCancel = true;
+      await _pump(
+        tester,
+        _opener(
+          (ctx) => showTxDetailDialog(
+            ctx,
+            _plain.copyWith(refundedAt: '2026-10-29T12:00:00'),
+          ),
+        ),
+        repo: repo,
+      );
+      await _openDetail(tester);
+      await tester.tap(find.widgetWithText(PButton, '환불 취소'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('환불 취소').last);
+      await tester.pumpAndSettle();
+      expect(find.text('환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
+
+      Navigator.of(
+        tester.element(find.byType(PBottomSheetContent)),
+        rootNavigator: true,
+      ).pop();
+      await tester.pumpAndSettle();
+
+      repo.failCancel = false;
+      final before = repo.listCalls;
+      await tester.tap(find.text('다시 시도'));
+      await tester.pumpAndSettle();
+
+      expect(repo.cancelled, [5]);
+      expect(repo.listCalls, greaterThan(before));
+    });
+
     testWidgets('지우면 시트가 닫히고, 닫히는 동안 버튼은 다시 열리지 않는다', (tester) async {
       final repo = _FakeRepo();
       await _pump(
@@ -710,6 +806,37 @@ void main() {
       expect(find.byType(AlertDialog), findsNothing, reason: '다시 묻지 않는다');
       expect(assetRepo.deleted, [7001]);
       expect(find.text('이체 상세'), findsNothing);
+    });
+
+    testWidgets('이체: 시트를 닫은 뒤 [다시 시도] 도 요청이 나가고 목록이 갱신된다', (tester) async {
+      final assetRepo = _FakeAssetRepo()..fail = true;
+      final repo = _FakeRepo();
+      await _pump(
+        tester,
+        _opener((ctx) => showTransferDetailSheet(ctx, transfer)),
+        assetRepo: assetRepo,
+        repo: repo,
+      );
+      await _openDetail(tester);
+      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제').last);
+      await tester.pumpAndSettle();
+
+      Navigator.of(
+        tester.element(find.byType(PBottomSheetContent)),
+        rootNavigator: true,
+      ).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('이체 상세'), findsNothing);
+
+      assetRepo.fail = false;
+      final before = repo.listCalls;
+      await tester.tap(find.text('다시 시도'));
+      await tester.pumpAndSettle();
+
+      expect(assetRepo.deleted, [7001]);
+      expect(repo.listCalls, greaterThan(before));
     });
 
     testWidgets('삭제 확인창 제목은 "이체 삭제" — 조용한 요청', (tester) async {
