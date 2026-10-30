@@ -2,16 +2,55 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/core/auth/oauth_callback_handler.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
+import 'package:groo_damda_app/core/auth/oauth_link_listener.dart';
 import 'package:groo_damda_app/core/auth/oauth_link_return.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations_ko.dart';
 
 void main() {
+  test('linkError 의 서버 글은 알림 글에 들어가지 않는다', () {
+    final back = parseOAuthLinkReturn(
+      Uri.parse(
+        'porestdesk://oauth/linked?linkError=Cannot+unlink+SERVER-TEXT',
+      ),
+    )!;
+    final msg = oauthLinkReturnMessage(back, AppLocalizationsKo());
+    expect(msg, '계정을 연결하지 못했어요.');
+    expect(msg, isNot(contains('SERVER-TEXT')));
+  });
+
+  test('연결 성공 알림은 Google(대문자 GOOGLE 아님)', () {
+    final back = parseOAuthLinkReturn(
+      Uri.parse('porestdesk://oauth/linked?linked=GOOGLE'),
+    )!;
+    expect(
+      oauthLinkReturnMessage(back, AppLocalizationsKo()),
+      'Google 계정이 연결되었어요',
+    );
+  });
+
   group('parseOAuthLinkReturn', () {
     test('연동 복귀(?linked=google)는 linked', () {
       final r = parseOAuthLinkReturn(
         Uri.parse('porestdesk://oauth/linked?linked=google'),
       );
       expect(r?.kind, OAuthLinkReturnKind.linked);
-      expect(r?.provider, 'google');
+      // 알림 이름은 표의 글이다
+      expect(r?.provider, 'Google');
+    });
+
+    test('서버가 대문자(GOOGLE)로 줘도 알림 이름은 Google', () {
+      final r = parseOAuthLinkReturn(
+        Uri.parse('porestdesk://oauth/linked?linked=GOOGLE'),
+      );
+      expect(r?.provider, 'Google');
+    });
+
+    test('표에 없는 값(가짜 linked=)은 알리지 않는다', () {
+      final r = parseOAuthLinkReturn(
+        Uri.parse('porestdesk://oauth/linked?linked=아무글'),
+      );
+      expect(r?.kind, OAuthLinkReturnKind.unknown);
+      expect(r?.provider, isNull);
     });
 
     test('?linkError 는 서버 글과 상관없이 failed', () {
