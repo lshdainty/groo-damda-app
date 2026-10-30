@@ -190,6 +190,7 @@ class PBottomSheetContent extends StatelessWidget {
     super.key,
     required this.title,
     this.description,
+    this.eyebrow,
     this.showCloseButton = true,
     this.closeLabel,
     this.onClose,
@@ -225,6 +226,9 @@ class PBottomSheetContent extends StatelessWidget {
 
   /// 덧붙일 말이 있을 때만 한 문장(해요체 · 마침표).
   final String? description;
+
+  /// 제목 위 작은 글("1 / 2단계") — t3 13/18 · fg-neutral-subtle, 제목과 사이 2. 단계가 있는 폼 시트에만 둔다.
+  final String? eyebrow;
 
   /// 오른쪽 위 닫기 버튼(기본 켬).
   final bool showCloseButton;
@@ -282,6 +286,21 @@ class PBottomSheetContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x2,
         children: [
+          if (eyebrow != null)
+            Padding(
+              padding: EdgeInsets.only(
+                left: onBack == null
+                    ? 0
+                    : kBottomSheetBackSize +
+                          kBottomSheetBackGap -
+                          (kBottomSheetBackSize - kBottomSheetBackIcon) / 2,
+              ),
+              child: Text(
+                eyebrow!,
+                key: const ValueKey('p-bottom-sheet-eyebrow'),
+                style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+              ),
+            ),
           Padding(
             // 닫기 버튼 자리 — 24 + 원 28 + 12 = 64 중 화면 여백 24 를 뺀 40
             padding: EdgeInsets.only(
@@ -331,6 +350,10 @@ class PBottomSheetContent extends StatelessWidget {
             // 누르는 영역은 사방 2 넓은 44 — 제목 첫 줄은 글자 배율을 따라 커지므로 가운데도 따라간다
             top:
                 PSpacing.x6 +
+                (eyebrow == null
+                    ? 0
+                    : MediaQuery.textScalerOf(context).scale(18) +
+                          PSpacing.x2) +
                 MediaQuery.textScalerOf(context).scale(30) / 2 -
                 PTouch.min / 2,
             left:
