@@ -68,6 +68,8 @@ class PickerRow extends StatelessWidget {
         ],
         style: hasValue ? null : TextStyle(color: c.fgPlaceholder),
       ),
+      // 값은 줄 수와 상관없이 줄 끝 오른쪽 맞춤 — 둘째 줄도 오른쪽(본문 아래로 내려간 값만 ds 가 왼쪽으로 돌린다)
+      textAlign: TextAlign.end,
       semanticsLabel: hasValue ? (semanticValue ?? shown) : semanticValue,
     );
     Widget? suffix = shown.isEmpty ? null : valueText;

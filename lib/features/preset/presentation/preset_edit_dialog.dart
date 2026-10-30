@@ -197,9 +197,18 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
   /// 금액이 있으면 고정 — 서버 규칙과 같다.
   bool get _lock => _amountValue > 0;
 
+  /// 자산을 받았는가 — 못 받았으면 "받는 계좌가 대출인가" 를 모른다.
+  bool get _assetsLoaded => ref.read(assetsProvider).hasValue;
+
   /// 이자는 **금액이 있을 때만** 받는다(금액이 매달 다르면 이자도 매달 다르다 — 2026-09-15). 받는 계좌가 대출일 때만 보인다.
+  /// 자산을 아직 못 받았으면 읽어 온 이자가 있는 한 보인다 — 모르는 채로 지우거나 저장에서 빼면 자산이 온 뒤에도 비어 이자가 사라진다
+  /// (웹 20-2 후속에서 찾은 순서 문제).
   bool get _showInterest =>
-      _isTransfer && _lock && isLoanTarget(_assets, _toAssetRowId);
+      _isTransfer &&
+      _lock &&
+      (_assetsLoaded
+          ? isLoanTarget(_assets, _toAssetRowId)
+          : _interest.isNotEmpty);
 
   String get _nameTrim => _nameCtrl.text.trim();
 
@@ -369,7 +378,6 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
           title: title,
           closeLabel: l.actionClose,
           flushBody: true,
-          scrollFog: true,
           body: PickList<int>(
             label: title,
             selected: selected ?? (withNone ? _kNoAsset : null),

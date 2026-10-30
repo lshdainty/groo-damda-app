@@ -174,8 +174,8 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
     return PBottomSheetContent(
       title: l.presetDetailTitle,
       closeLabel: l.actionClose,
+      // 내용만큼 높다(스펙 "내용만큼 높고 90% 를 넘지 않는다") — 끝 흐림은 위 20 · 아래 80 여백을 더해 시트를 키우므로 두지 않는다
       flushBody: true,
-      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

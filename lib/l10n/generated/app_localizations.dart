@@ -8183,7 +8183,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetSortUsed.
   ///
   /// In ko, this message translates to:
-  /// **'사용 많은 순'**
+  /// **'많이 쓴 순'**
   String get presetSortUsed;
 
   /// No description provided for @presetSortRecent.

@@ -1,6 +1,8 @@
 // 프리셋 추가 · 수정 폼(I-20 C 19) — 시트를 실제로 조작해 **무엇을 보내는가** 를 잠근다.
 // 금액은 "고정 금액 사용" 스위치 없이 줄 하나다: 금액 > 0 ⇔ lockAmount Y, 비우면 N + 이자도 비운다.
 // 비운 칸(거래처 · 메모 · 결제 수단 · 계좌)은 명시적 null 로 실려야 지워진다(서버가 키가 없으면 유지로 읽는다).
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -140,7 +142,11 @@ class _Repo extends PresetRepository {
   }
 }
 
-Future<_Repo> _open(WidgetTester tester, ExpenseTemplate? edit) async {
+Future<_Repo> _open(
+  WidgetTester tester,
+  ExpenseTemplate? edit, {
+  Future<List<Asset>>? assetsFuture,
+}) async {
   final repo = _Repo();
   tester.view.physicalSize = const Size(1170, 3000);
   tester.view.devicePixelRatio = 3;
@@ -317,5 +323,26 @@ void main() {
     await tester.tap(find.bySemanticsLabel(l.actionBack).first);
     await tester.pumpAndSettle();
     expect(_t(l.sheetLeaveTitle), findsOneWidget);
+  });
+
+  // 웹 20-2 후속에서 찾은 순서 문제 — 자산을 받기 전에는 "받는 계좌가 대출인가" 를 모른다. 모르는 채로 이자를 지우거나 저장에서 빼면
+  // 자산이 온 뒤에도 비어 이자가 사라진다.
+  testWidgets('자산이 오기 전에 저장해도 읽어 온 이자는 그대로 실린다', (tester) async {
+    final late = Completer<List<Asset>>();
+    final repo = await _open(tester, _loanTransfer, assetsFuture: late.future);
+    await tester.tap(_btn(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.interestAmount.present, isTrue);
+    expect(repo.interestAmount.value, 20000);
+  });
+
+  testWidgets('자산이 오기 전에 다른 칸을 고쳐도 이자 줄이 지워지지 않는다', (tester) async {
+    final late = Completer<List<Asset>>();
+    await _open(tester, _loanTransfer, assetsFuture: late.future);
+    await _step(tester, l.expDescription, '메모');
+    expect(_t(l.expInterest), findsOneWidget);
+    late.complete([_bank, _savings, _loan, _card]);
+    await tester.pumpAndSettle();
+    expect(_t(l.expInterest), findsOneWidget, reason: '자산이 온 뒤에도 대출 이자 줄이 남는다');
   });
 }

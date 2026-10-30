@@ -158,42 +158,43 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
     );
   }
 
-  Widget _failure(AppLocalizations l) => ListView(
-    padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
-    children: [
-      PResultSection(
-        kind: PResultKind.failure,
-        size: PResultSize.large,
-        title: l.presetLoadFailed,
-        description: l.dashFailDesc,
-        primaryAction: PResultAction(
-          label: l.actionRetry,
-          onPressed: () {
-            if (!ref.read(presetListProvider).hasValue) {
-              ref.invalidate(presetListProvider);
-            }
-            if (!ref.read(categoriesProvider).hasValue) {
-              ref.invalidate(categoriesProvider);
-            }
-          },
-        ),
-      ),
+  /// 본문 높이를 채워 가운데에 놓는다(웹과 같다) — 새로 고침은 그대로 된다.
+  Widget _centered(Widget child) => CustomScrollView(
+    slivers: [
+      SliverFillRemaining(hasScrollBody: false, child: Center(child: child)),
     ],
   );
 
-  /// 빈 화면 — 안내는 여기에만. 머리 버튼이 없어서 본문 버튼이 하나다.
-  Widget _empty(AppLocalizations l) => ListView(
-    padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
-    children: [
-      PResultSection(
-        kind: PResultKind.empty,
-        size: PResultSize.large,
-        icon: LucideIcons.bookmark,
-        title: l.presetEmptyTitle,
-        description: l.presetEmptyDesc,
-        primaryAction: PResultAction(label: l.presetAdd, onPressed: _add),
+  Widget _failure(AppLocalizations l) => _centered(
+    PResultSection(
+      kind: PResultKind.failure,
+      size: PResultSize.large,
+      title: l.presetLoadFailed,
+      description: l.dashFailDesc,
+      primaryAction: PResultAction(
+        label: l.actionRetry,
+        onPressed: () {
+          if (!ref.read(presetListProvider).hasValue) {
+            ref.invalidate(presetListProvider);
+          }
+          if (!ref.read(categoriesProvider).hasValue) {
+            ref.invalidate(categoriesProvider);
+          }
+        },
       ),
-    ],
+    ),
+  );
+
+  /// 빈 화면 — 안내는 여기에만. 머리 버튼이 없어서 본문 버튼이 하나다.
+  Widget _empty(AppLocalizations l) => _centered(
+    PResultSection(
+      kind: PResultKind.empty,
+      size: PResultSize.large,
+      icon: LucideIcons.bookmark,
+      title: l.presetEmptyTitle,
+      description: l.presetEmptyDesc,
+      primaryAction: PResultAction(label: l.presetAdd, onPressed: _add),
+    ),
   );
 
   Widget _list(

@@ -2529,7 +2529,7 @@
   "presetTypeLabel": "종류",
   "presetDeleteConfirm": "이미 기록된 거래는 그대로 남아요. 삭제한 프리셋은 되돌릴 수 없어요.",
   "presetDeleteFailed": "프리셋을 삭제하지 못했어요",
-  "presetSortUsed": "사용 많은 순",
+  "presetSortUsed": "많이 쓴 순",
   "presetSortRecent": "최근 사용",
   "presetSortName": "이름순",
   "presetListTitle": "프리셋 {count}개",

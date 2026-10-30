@@ -4399,7 +4399,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetDeleteFailed => '프리셋을 삭제하지 못했어요';
 
   @override
-  String get presetSortUsed => '사용 많은 순';
+  String get presetSortUsed => '많이 쓴 순';
 
   @override
   String get presetSortRecent => '최근 사용';

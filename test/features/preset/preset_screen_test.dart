@@ -145,7 +145,7 @@ void main() {
     expect(find.bySemanticsLabel(RegExp('더보기')), findsNothing);
   });
 
-  testWidgets('정렬 — 사용 많은 순이 처음, 이름순으로 바꾸면 가나다', (tester) async {
+  testWidgets('정렬 — 많이 쓴 순이 처음, 이름순으로 바꾸면 가나다', (tester) async {
     await _open(tester, [_a, _b, _tr]);
     final titles = () => [
       for (final w in tester.widgetList<PListButtonItem>(
