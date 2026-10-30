@@ -464,8 +464,10 @@ class _GoogleRow extends ConsumerWidget {
     final c = context.colors;
     final l = AppLocalizations.of(context);
     final providers = ref.watch(oauthProvidersProvider);
-    final loading = providers.isLoading && !providers.hasValue;
-    final failed = providers.hasError && !providers.hasValue;
+    // 실패는 이전 값이 남아 있어도 실패다(해제 · 복귀 뒤 다시 받기가 실패하면 옛 "연결됨" 대신 [다시 시도]) — 웹과 같다
+    final failed = providers.hasError;
+    final loading =
+        providers.isLoading && !providers.hasValue && !providers.hasError;
     final google = providers.value
         ?.where((p) => p.type == 'GOOGLE')
         .cast<OAuthProviderInfo?>()
