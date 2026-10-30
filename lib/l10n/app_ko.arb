@@ -2302,7 +2302,7 @@
       }
     }
   },
-  "accountEditComingSoon": "프로필 수정은 준비 중이에요",
+  "accountEditComingSoon": "프로필 수정은 곧 열려요.",
   "accountSecurity": "보안",
   "accountPasswordDesc": "주기적으로 바꾸면 안전해요",
   "accountTwoFa": "2단계 인증",

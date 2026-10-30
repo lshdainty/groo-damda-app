@@ -7373,7 +7373,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountEditComingSoon.
   ///
   /// In ko, this message translates to:
-  /// **'프로필 수정은 준비 중이에요'**
+  /// **'프로필 수정은 곧 열려요.'**
   String get accountEditComingSoon;
 
   /// No description provided for @accountSecurity.

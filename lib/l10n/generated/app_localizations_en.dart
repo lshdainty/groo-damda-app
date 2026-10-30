@@ -4035,7 +4035,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountEditComingSoon => 'Profile editing is coming soon';
+  String get accountEditComingSoon => 'Profile editing is coming soon.';
 
   @override
   String get accountSecurity => 'Security';

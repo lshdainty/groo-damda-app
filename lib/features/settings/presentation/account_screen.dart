@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
@@ -110,12 +111,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     try {
       final repo = await ref.read(oauthLinkRepositoryProvider.future);
       await repo.unlink('google');
-      // 목록을 다시 받은 뒤 푼다 — 줄이 이전 상태로 잠깐 되돌아 보이지 않게
+    } catch (_) {
+      // 서버 거절(마지막 로그인 수단 · 네트워크 오류 포함)은 글을 가르지 않고 고정 글 하나(웹과 같다)
+      _toast(l.accountUnlinkError, PSnackSeverity.error);
+      if (mounted) setState(() => _unlinking = false);
+      return;
+    }
+    _toast(l.accountUnlinkedToast, PSnackSeverity.success);
+    try {
+      // 목록을 다시 받은 뒤 푼다 — 줄이 이전 상태로 잠깐 되돌아 보이지 않게. 다시 받기 실패는 줄이 [다시 시도] 로 말한다
       ref.invalidate(oauthProvidersProvider);
       await ref.read(oauthProvidersProvider.future);
-      _toast(l.accountUnlinkedToast, PSnackSeverity.success);
     } catch (_) {
-      _toast(l.accountUnlinkError, PSnackSeverity.error);
+      // 해제는 이미 됐다 — 실패 알림을 띄우지 않는다
     } finally {
       if (mounted) setState(() => _unlinking = false);
     }
@@ -342,7 +350,7 @@ class _Group extends StatelessWidget {
   }
 }
 
-/// 머리 — 카드 없이 흰 면 위, 가운데 맞춤 세로. 위 24 · 좌우 24 · 아래 8(T1 · T2).
+/// 머리 — 카드 없이 흰 면 위, 가운데 맞춤 세로. 위 24 · 좌우 24, 맨 끝은 이유 Callout(그 아래 16 은 목록 제목의 위 16, T1 · T2).
 class _AccountHead extends StatelessWidget {
   const _AccountHead({
     required this.name,
@@ -366,7 +374,7 @@ class _AccountHead extends StatelessWidget {
         PSpacing.globalGutter,
         PSpacing.x6,
         PSpacing.globalGutter,
-        PSpacing.x2,
+        0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -421,6 +429,13 @@ class _AccountHead extends StatelessWidget {
               style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
             ),
           ],
+          // 막은 단추의 이유 줄(D3 B) — 머리 바로 아래 16, 읽는 이름은 이 글과 잇는다
+          const SizedBox(height: PSpacing.x4),
+          PCallout(
+            key: const ValueKey('account-edit-callout'),
+            tone: PCalloutTone.informative,
+            description: l.accountEditComingSoon,
+          ),
         ],
       ),
     );

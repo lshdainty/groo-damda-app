@@ -109,6 +109,8 @@ void main() {
       expect(find.text('0 / ${kAllHideCards.length}'), findsOneWidget);
       // '준비중' 자리표시 행은 사라졌다.
       expect(find.text('준비중'), findsNothing);
+      // [수정] 은 막혀 있고 이유 Callout 이 머리 아래에 선다(D3 B)
+      expect(find.text('프로필 수정은 곧 열려요.'), findsOneWidget);
       // 누를 수 없던 줄 넷(로그인 기록 · Apple · 카카오 · 네이버)은 걷었다(I-14 9)
       expect(find.text('로그인 기록'), findsNothing);
       expect(find.text('Apple ID'), findsNothing);

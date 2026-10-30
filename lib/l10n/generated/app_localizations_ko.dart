@@ -3964,7 +3964,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get accountEditComingSoon => '프로필 수정은 준비 중이에요';
+  String get accountEditComingSoon => '프로필 수정은 곧 열려요.';
 
   @override
   String get accountSecurity => '보안';

@@ -2285,7 +2285,7 @@
       }
     }
   },
-  "accountEditComingSoon": "Profile editing is coming soon",
+  "accountEditComingSoon": "Profile editing is coming soon.",
   "accountSecurity": "Security",
   "accountPasswordDesc": "Change it regularly to stay secure",
   "accountTwoFa": "Two-factor authentication",
