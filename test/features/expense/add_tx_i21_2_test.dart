@@ -5,6 +5,8 @@
 // 저장 실패는 시트 안 Callout + silent 요청(M1) · 바뀐 채 닫기는 묻는다(M3).
 //
 // 작성만 했다 — 로컬에서 돌리지 않는다(UI 이관이 끝날 때까지 시험 실행 금지).
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +18,7 @@ import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/data/asset_repository.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/data/expense_repository.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
@@ -148,6 +151,36 @@ class _Repo extends ExpenseRepository {
     return _foreignTx.copyWith(amount: amount);
   }
 }
+
+class _TransferRepo extends AssetRepository {
+  _TransferRepo() : super(Dio());
+  final updates = <Map<String, Object?>>[];
+
+  @override
+  Future<void> updateTransfer({
+    required int rowId,
+    required int fromAssetRowId,
+    required int toAssetRowId,
+    required int amount,
+    int? fee,
+    int? interestAmount,
+    String? description,
+    required String transferDate,
+    bool silent = false,
+  }) async {
+    updates.add({'interest': interestAmount, 'fee': fee, 'amount': amount});
+  }
+}
+
+const _loanTransfer = AssetTransfer(
+  rowId: 31,
+  fromAssetRowId: 10,
+  toAssetRowId: 11,
+  amount: 900000,
+  interestAmount: 120000,
+  principalAmount: 780000,
+  transferDate: '2026-10-25T10:00:00',
+);
 
 Future<_Repo> _open(
   WidgetTester tester,
@@ -392,5 +425,52 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls, isEmpty, reason: '값을 추측해 보내지 않는다');
     expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+  });
+
+  testWidgets('N1 — 자산 목록이 오기 전에 이체 수정을 저장해도 이자가 본문에 남는다', (tester) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+    final late = Completer<List<Asset>>();
+    final repo = _TransferRepo();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          categoriesProvider.overrideWith((ref) async => [_cat]),
+          assetsProvider.overrideWith((ref) => late.future),
+          presetListProvider.overrideWith((ref) async => []),
+          assetRepositoryProvider.overrideWith((ref) async => repo),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => TextButton(
+                onPressed: () =>
+                    showAddTxSheet(ctx, editTransfer: _loanTransfer),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pump(const Duration(milliseconds: 500));
+    // 목록이 오기 전에 [저장]
+    await tester.tap(find.text('저장'));
+    await tester.pump();
+    late.complete([_bank, _loan]);
+    await tester.pumpAndSettle();
+
+    expect(repo.updates, hasLength(1));
+    expect(
+      repo.updates.single['interest'],
+      120000,
+      reason: '목록이 없다고 이자를 지우지 않는다',
+    );
   });
 }

@@ -553,6 +553,29 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   }
 
   // ── 값 바꿈 ─────────────────────────────────────────────
+  /// 프리셋 · 문자로 채운 값이 지금 목록에 없으면 비우고 칸 오류로 안내한다(20-2 와 같은 규칙, N4). 거래에서 읽어 온 값(수정)은 기록이라 건드리지 않는다.
+  void _dropUnknownRefs() {
+    final c = _input;
+    final cats = ref.read(categoriesProvider).value;
+    if (cats != null &&
+        c.categoryRowId != null &&
+        cats.byRowId(c.categoryRowId!) == null) {
+      c.categoryRowId = null;
+      _errs.category = AppLocalizations.of(context).txfErrCategory;
+    }
+    final assets = ref.read(assetsProvider).value;
+    if (assets != null &&
+        c.assetRowId != null &&
+        assets.byRowId(c.assetRowId!) == null) {
+      c.assetRowId = null;
+    }
+    if (assets != null &&
+        c.toAssetRowId != null &&
+        assets.byRowId(c.toAssetRowId!) == null) {
+      c.toAssetRowId = null;
+    }
+  }
+
   void _clearPresetMark() {
     if (_appliedPresetId == null && _emptyPresetName == null) return;
     _appliedPresetId = null;
@@ -569,6 +592,18 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             .where((x) => x.rowId == _input.categoryRowId)
             .firstOrNull;
         if (cat == null || cat.expenseType != v) _input.categoryRowId = null;
+      }
+      // 종류를 바꿔 지금 계좌가 허용 밖이 되면(수입 예적금 → 지출) 비운다
+      final curAsset = _input.assetRowId == null
+          ? null
+          : ref
+                .read(assetsProvider)
+                .value
+                ?.where((a) => a.rowId == _input.assetRowId)
+                .firstOrNull;
+      if (curAsset != null &&
+          !allowTxAsset(curAsset, _input.paymentMethod, v)) {
+        _input.assetRowId = null;
       }
       if (v == 'TRANSFER') {
         // 이체에는 통화 칩이 없다 — 원화 값으로
@@ -640,6 +675,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       c.isFixed = p.expenseType == 'TRANSFER' ? false : p.isFixed;
       _emptyPresetName = fixed ? null : p.templateName;
       _errs = _Errs();
+      _dropUnknownRefs();
       _saveError = null;
       _step = fixed ? _S.two : _S.one;
     });
@@ -898,6 +934,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         _initialSig = _sig(_input);
         _smsLow = parsed.isLowConfidence;
         _errs = _Errs();
+        _dropUnknownRefs();
         _step = _S.two;
       });
     } on ApiException {
@@ -1680,10 +1717,6 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       ('INCOME', l.expTypeIncome),
       ('TRANSFER', l.expTypeTransfer),
     ];
-    // 이체 수정은 이체 칩 하나(웹과 같다)
-    if (widget.editTransfer != null) {
-      types.removeWhere((t) => t.$1 != 'TRANSFER');
-    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         PSpacing.globalGutter,
@@ -1941,7 +1974,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
               ),
             ),
           if (_isEdit || _isReplace || _isSms) _typeChips(l, cats),
-          if (_isEdit || _isReplace || _isSms) ..._amountRows(l, masked),
+          // 금액 줄 — 수정 · 고쳐 쓰기, 그리고 1단계가 없는 문자 초안(앱 밖 길). 시트 안 문자 길은 ← 가 있어 금액 줄이 없다(웹과 같다)
+          if (_isEdit || _isReplace || (_isSms && !_hasStepOne))
+            ..._amountRows(l, masked),
           if (!isTransfer) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -1974,6 +2009,27 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
               ),
             ),
             if (foreign && !locked) ..._fxRows(l, fxHint),
+            if (foreign && locked)
+              PList(
+                children: [
+                  TxRow(
+                    key: const ValueKey('tx-row-fx-locked'),
+                    title: l.expExchangeRate,
+                    icon: LucideIcons.percent,
+                    value: groupDecimal(trimNum(c.fxRateOrNull)),
+                    locked: true,
+                    onTap: null,
+                  ),
+                  TxRow(
+                    key: const ValueKey('tx-row-krw-locked'),
+                    title: l.txfKrwAmount,
+                    icon: LucideIcons.coins,
+                    value: krwSigned(c.amountInt, false, unit: true),
+                    locked: true,
+                    onTap: null,
+                  ),
+                ],
+              ),
           ],
           section([
             if (!isTransfer) ...[
