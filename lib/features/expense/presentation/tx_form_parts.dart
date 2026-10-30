@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_event_for
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
@@ -451,3 +452,11 @@ class TxDateRow extends StatelessWidget {
 /// 카테고리 고르기 본문의 한 줄 앞 타일.
 Widget txCategoryTile(BuildContext context, ExpenseCategory cat) =>
     categoryTile(context, cat);
+
+/// 실패 알림은 폼 본문 맨 위에 서므로 내려가 있으면 안 보인다 — 실패가 그려진 다음 프레임에 본문을 맨 위로 올린다.
+void scrollSheetBodyToTop(BuildContext context) {
+  final controller = PBottomSheet.maybeOf(context)?.bodyController;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (controller != null && controller.hasClients) controller.jumpTo(0);
+  });
+}

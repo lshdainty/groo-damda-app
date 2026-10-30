@@ -27,8 +27,6 @@ import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/card_cycle.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
-import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart'
-    show scrollSheetBodyToTop;
 import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_input.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
