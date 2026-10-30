@@ -8671,8 +8671,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txfNoIncomeMethod => 'No income method';
 
   @override
-  String get txfSelectFrom => 'Select sending account';
+  String get txfSelectFrom => 'Select the sending account';
 
   @override
-  String get txfSelectTo => 'Select receiving account';
+  String get txfSelectTo => 'Select the receiving account';
 }
