@@ -108,6 +108,7 @@ class PCallout extends StatefulWidget {
     this.onDismiss,
     this.dismissLabel,
     this.alert = false,
+    this.moreDescriptions = const [],
   }) : assert(
          interaction != PCalloutInteraction.actionable || onPressed != null,
          'actionable 은 상자를 누르면 하는 일(onPressed)이 있다',
@@ -158,6 +159,9 @@ class PCallout extends StatefulWidget {
   /// 나중에 나타나는 경고 · 위험이면 보조 기술에 알린다.
   final bool alert;
 
+  /// [description] 다음 문단들 — 문단 사이 8(웹 Callout 안 문단 `mt-x2`). 글만 받는다(제목 · 링크는 첫 문단에만).
+  final List<String> moreDescriptions;
+
   @override
   State<PCallout> createState() => _PCalloutState();
 }
@@ -179,6 +183,27 @@ class _PCalloutState extends State<PCallout> {
     moveFocusAfterDismiss(_closeFocus);
     widget.onDismiss?.call();
     if (widget.open == null) setState(() => _selfOpen = false);
+  }
+
+  /// 첫 문단 + 다음 문단들(사이 8).
+  Widget _body(Color color) {
+    if (widget.moreDescriptions.isEmpty) return _paragraph(color);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: PSpacing.x2,
+      children: [
+        _paragraph(color),
+        for (final d in widget.moreDescriptions)
+          Text(
+            keepAll(d),
+            semanticsLabel: d,
+            style: PTypography.t4.copyWith(
+              color: color,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+      ],
+    );
   }
 
   /// 제목 · 본문 · 링크가 이어 흐르는 한 문단.
@@ -259,7 +284,7 @@ class _PCalloutState extends State<PCallout> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: _padding),
-            child: _paragraph(look.foreground),
+            child: _body(look.foreground),
           ),
         ),
         if (actionable) ...[

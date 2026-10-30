@@ -106,4 +106,22 @@ void main() {
     expect(find.textContaining('boom'), findsNothing);
     expect(_text('다시 시도'), findsOneWidget);
   });
+
+  testWidgets('유의사항이 둘이면 한 Callout 안 두 문단, 사이 8', (t) async {
+    await t.pumpWidget(
+      _app(
+        () => _detail().copyWith(
+          cautions: const [
+            CardBenefit(detail: '첫째 유의예요.'),
+            CardBenefit(detail: '둘째 유의예요.'),
+          ],
+        ),
+      ),
+    );
+    await _open(t);
+    expect(find.byType(PCallout), findsOneWidget);
+    final a = t.getRect(_text('첫째 유의예요.'));
+    final b = t.getRect(_text('둘째 유의예요.'));
+    expect(b.top - a.bottom, closeTo(8, 1.0));
+  });
 }

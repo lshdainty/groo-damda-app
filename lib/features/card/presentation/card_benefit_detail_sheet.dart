@@ -220,7 +220,8 @@ class _DetailBodyState extends State<_DetailBody> {
             padding: gutter,
             child: PCallout(
               tone: PCalloutTone.informative,
-              description: cautions.join('\n'),
+              description: cautions.first,
+              moreDescriptions: cautions.skip(1).toList(),
             ),
           ),
         ],
