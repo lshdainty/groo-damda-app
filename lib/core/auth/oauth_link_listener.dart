@@ -8,6 +8,10 @@ import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/oauth_callback_handler.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
+import 'package:groo_damda_app/core/auth/oauth_link_return.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/features/settings/application/oauth_link_providers.dart';
+import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// PKCE 흐름 보관소 — 로그인 화면(저장)과 콜백 리스너(복원)가 같은 인스턴스를 본다.
 final oauthFlowStoreProvider = Provider<OAuthFlowStore>(
@@ -36,6 +40,27 @@ final oauthLinkListenerProvider = Provider<void>((ref) {
   );
 
   Future<void> onLink(Uri uri) async {
+    // 소셜 계정 연동에서 돌아온 주소(`/linked`)는 로그인 콜백으로 넘기지 않는다 — 연결 상태를 다시 받고
+    // 결과를 알린다. 서버(그루 계정)가 쓴 글은 내지 않고 고정 글만 쓴다. 콜드 스타트(initial link)도 같은 길이다.
+    final back = parseOAuthLinkReturn(uri);
+    if (back != null) {
+      ref.invalidate(oauthProvidersProvider);
+      switch (back.kind) {
+        case OAuthLinkReturnKind.linked:
+          showGlobalSnack(
+            (l) => l.accountLinkedToast(_providerName(back.provider)),
+            severity: PSnackSeverity.success,
+          );
+        case OAuthLinkReturnKind.failed:
+          showGlobalSnack(
+            (l) => l.accountLinkError,
+            severity: PSnackSeverity.error,
+          );
+        case OAuthLinkReturnKind.unknown:
+          break;
+      }
+      return;
+    }
     try {
       final result = await handler.handle(uri);
       if (result != OAuthCallbackResult.exchanged &&
@@ -59,3 +84,8 @@ final oauthLinkListenerProvider = Provider<void>((ref) {
   final sub = appLinks.uriLinkStream.listen(onLink);
   ref.onDispose(sub.cancel);
 });
+
+/// 알림에 쓰는 이름 — 연결할 수 있는 소셜은 Google 하나다.
+String _providerName(String? provider) => provider == null || provider.isEmpty
+    ? 'Google'
+    : provider[0].toUpperCase() + provider.substring(1);

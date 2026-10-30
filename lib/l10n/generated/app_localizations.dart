@@ -6821,7 +6821,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceThemeSystemDesc.
   ///
   /// In ko, this message translates to:
-  /// **'자동 전환'**
+  /// **'OS 설정 따라가기'**
   String get appearanceThemeSystemDesc;
 
   /// No description provided for @hideAmountsLockAllDesc.
@@ -7214,16 +7214,10 @@ abstract class AppLocalizations {
   /// **'기준 지역'**
   String get appearanceRegion;
 
-  /// No description provided for @appearanceRegionPlaceholder.
-  ///
-  /// In ko, this message translates to:
-  /// **'지역 선택'**
-  String get appearanceRegionPlaceholder;
-
   /// No description provided for @appearanceRegionDesc.
   ///
   /// In ko, this message translates to:
-  /// **'\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요'**
+  /// **'\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요.'**
   String get appearanceRegionDesc;
 
   /// No description provided for @appearanceCurrency.
@@ -7256,16 +7250,40 @@ abstract class AppLocalizations {
   /// **'일본 엔'**
   String get appearanceCurrencyJpy;
 
+  /// No description provided for @appearanceCurrencyDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 자산·거래를 만들 때 이 통화가 먼저 골라져요.'**
+  String get appearanceCurrencyDesc;
+
+  /// No description provided for @appearanceRegionLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'기준 지역을 불러오지 못했어요'**
+  String get appearanceRegionLoadError;
+
+  /// No description provided for @appearanceCurrencyLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 통화를 불러오지 못했어요'**
+  String get appearanceCurrencyLoadError;
+
+  /// No description provided for @appearanceSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 바꾸지 못했어요.'**
+  String get appearanceSaveFailed;
+
   /// No description provided for @passwordChanged.
   ///
   /// In ko, this message translates to:
-  /// **'비밀번호가 변경되었습니다'**
+  /// **'비밀번호를 바꿨어요'**
   String get passwordChanged;
 
   /// No description provided for @passwordChangeFailed.
   ///
   /// In ko, this message translates to:
-  /// **'비밀번호 변경에 실패했습니다.'**
+  /// **'비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get passwordChangeFailed;
 
   /// No description provided for @passwordCurrent.
@@ -7274,17 +7292,23 @@ abstract class AppLocalizations {
   /// **'현재 비밀번호'**
   String get passwordCurrent;
 
+  /// No description provided for @passwordChangeDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 비밀번호를 확인한 뒤 새 비밀번호로 바꿔요'**
+  String get passwordChangeDescription;
+
+  /// No description provided for @passwordCurrentInvalid.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 비밀번호가 맞지 않아요'**
+  String get passwordCurrentInvalid;
+
   /// No description provided for @passwordNew.
   ///
   /// In ko, this message translates to:
   /// **'새 비밀번호'**
   String get passwordNew;
-
-  /// No description provided for @passwordNewPlaceholder.
-  ///
-  /// In ko, this message translates to:
-  /// **'8자 이상, 특수문자 포함'**
-  String get passwordNewPlaceholder;
 
   /// No description provided for @passwordNewConfirm.
   ///
@@ -7292,22 +7316,16 @@ abstract class AppLocalizations {
   /// **'새 비밀번호 확인'**
   String get passwordNewConfirm;
 
-  /// No description provided for @passwordConfirmPlaceholder.
-  ///
-  /// In ko, this message translates to:
-  /// **'한 번 더 입력'**
-  String get passwordConfirmPlaceholder;
-
   /// No description provided for @passwordMismatch.
   ///
   /// In ko, this message translates to:
-  /// **'새 비밀번호가 일치하지 않습니다'**
+  /// **'새 비밀번호가 일치하지 않아요'**
   String get passwordMismatch;
 
   /// No description provided for @passwordMatched.
   ///
   /// In ko, this message translates to:
-  /// **'새 비밀번호가 일치합니다'**
+  /// **'새 비밀번호가 일치해요'**
   String get passwordMatched;
 
   /// No description provided for @passwordRuleLength.
@@ -7331,7 +7349,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordChangeAction.
   ///
   /// In ko, this message translates to:
-  /// **'변경'**
+  /// **'저장'**
   String get passwordChangeAction;
 
   /// No description provided for @accountTitle.
@@ -7355,7 +7373,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountEditComingSoon.
   ///
   /// In ko, this message translates to:
-  /// **'프로필 수정은 준비중입니다'**
+  /// **'프로필 수정은 준비 중이에요'**
   String get accountEditComingSoon;
 
   /// No description provided for @accountSecurity.
@@ -7367,7 +7385,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountPasswordDesc.
   ///
   /// In ko, this message translates to:
-  /// **'최근 변경 없음'**
+  /// **'주기적으로 바꾸면 안전해요'**
   String get accountPasswordDesc;
 
   /// No description provided for @accountTwoFa.
@@ -7375,18 +7393,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'2단계 인증'**
   String get accountTwoFa;
-
-  /// No description provided for @accountOn.
-  ///
-  /// In ko, this message translates to:
-  /// **'사용 중'**
-  String get accountOn;
-
-  /// No description provided for @accountOff.
-  ///
-  /// In ko, this message translates to:
-  /// **'사용 안 함'**
-  String get accountOff;
 
   /// No description provided for @accountDevices.
   ///
@@ -7399,18 +7405,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'현재 기기'**
   String get accountCurrentDevice;
-
-  /// No description provided for @accountLoginHistory.
-  ///
-  /// In ko, this message translates to:
-  /// **'로그인 기록'**
-  String get accountLoginHistory;
-
-  /// No description provided for @accountLast30Days.
-  ///
-  /// In ko, this message translates to:
-  /// **'최근 30일'**
-  String get accountLast30Days;
 
   /// No description provided for @devicesTitle.
   ///
@@ -7526,11 +7520,53 @@ abstract class AppLocalizations {
   /// **'연결'**
   String get accountConnect;
 
-  /// No description provided for @accountSocialComingSoon.
+  /// No description provided for @accountLinked.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 연결은 준비중입니다'**
-  String accountSocialComingSoon(String name);
+  /// **'연결됨'**
+  String get accountLinked;
+
+  /// No description provided for @accountDisconnect.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제'**
+  String get accountDisconnect;
+
+  /// No description provided for @accountProvidersError.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 상태를 불러오지 못했어요'**
+  String get accountProvidersError;
+
+  /// No description provided for @accountLinkError.
+  ///
+  /// In ko, this message translates to:
+  /// **'계정을 연결하지 못했어요.'**
+  String get accountLinkError;
+
+  /// No description provided for @accountUnlinkError.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결을 해제하지 못했어요.'**
+  String get accountUnlinkError;
+
+  /// No description provided for @accountLinkedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 계정이 연결되었어요'**
+  String accountLinkedToast(String name);
+
+  /// No description provided for @accountUnlinkedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'Google 연결을 해제했어요'**
+  String get accountUnlinkedToast;
+
+  /// No description provided for @accountSecuritiesDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'토스·나무 등 증권사 API 키를 연결해요'**
+  String get accountSecuritiesDesc;
 
   /// No description provided for @accountBilling.
   ///
@@ -7613,7 +7649,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountLogoutConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'정말 로그아웃 하시겠어요?'**
+  /// **'이 기기에서 로그아웃할까요?'**
   String get accountLogoutConfirm;
 
   /// No description provided for @accountWithdrawTitle.
