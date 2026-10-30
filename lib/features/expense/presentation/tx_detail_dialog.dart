@@ -12,6 +12,7 @@ import 'package:groo_damda_app/core/settings/mask_flags.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_edit_route.dart';
+import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
 import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_from_tx_dialog.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -112,7 +113,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   _Failure _failure = _Failure.none;
 
   static DateTime _today() {
-    final n = DateTime.now();
+    final n = calendarNow();
     return DateTime(n.year, n.month, n.day);
   }
 

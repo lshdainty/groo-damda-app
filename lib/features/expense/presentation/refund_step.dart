@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
 import 'package:groo_damda_app/features/expense/domain/card_cycle.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
@@ -25,7 +26,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
   Expense expense, {
   DateTime? now,
 }) {
-  final n = now ?? DateTime.now();
+  final n = now ?? calendarNow();
   final today = DateTime(n.year, n.month, n.day);
   final raw = expense.expenseDate;
   final txDay = raw == null || raw.length < 10
@@ -149,7 +150,7 @@ class RefundStepBody extends StatelessWidget {
           ),
           child: Text(
             key: const ValueKey('refund-hint'),
-            l.expRefundDateHint(monthDay(txDay ?? range.first)),
+            keepAll(l.expRefundDateHint(monthDay(txDay ?? range.first))),
             style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
           ),
         ),
@@ -157,13 +158,18 @@ class RefundStepBody extends StatelessWidget {
     );
   }
 
-  /// 문장 안의 금액만 굵게(700) — 금액 가리기를 따른다(가리면 점이 굵다).
+  /// 문장 안의 금액만 굵게(700) — 금액 가리기를 따른다(가리면 점이 굵다). 문장 안 금액은 낱말 하나로 통째로 넘어간다
+  /// (keep-all — 쉼표 뒤 줄바꿈 예외는 줄 값 칸에서 칸이 모자랄 때뿐이다): 문장 전체에 낱말 단위 줄바꿈을 건 다음 그 안에서
+  /// 금액 구간만 굵게 가른다("114,200원이" 가 한 덩어리).
   Widget _boldAmountText(String text, String amount, TextStyle style) {
-    final i = text.indexOf(amount);
+    final k = keepAll(text);
+    final ka = keepAll(amount);
+    final i = k.indexOf(ka);
     if (i < 0) {
       return Text(
-        keepAll(text),
+        k,
         key: const ValueKey('refund-text'),
+        semanticsLabel: text,
         style: style,
       );
     }
@@ -172,12 +178,12 @@ class RefundStepBody extends StatelessWidget {
       TextSpan(
         style: style,
         children: [
-          TextSpan(text: keepAll(text.substring(0, i))),
+          TextSpan(text: k.substring(0, i)),
           TextSpan(
-            text: keepAllAmount(amount),
+            text: ka,
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
-          TextSpan(text: keepAll(text.substring(i + amount.length))),
+          TextSpan(text: k.substring(i + ka.length)),
         ],
       ),
       semanticsLabel: text,
@@ -217,18 +223,15 @@ Future<DateTime?> showRefundDateSheet(
           title: l.expRefundDate,
           closeLabel: l.actionClose,
           flushBody: true,
-          body: SizedBox(
-            height: PDatePicker.sheetBodyHeight(ctx),
-            child: PDatePicker.single(
-              labels: PDatePickerLabels.of(ctx),
-              semanticLabel: l.expRefundDate,
-              value: draft,
-              today: max,
-              min: min,
-              max: max,
-              visibleRange: PDateVisibleRange.continuous,
-              onChanged: (v) => setSheet(() => draft = v),
-            ),
+          // 환불일은 폼의 날짜 칸이라 한 달씩 넘기는 달력이다(date-picker.md "어디에 놓나") — 거래한 날 ~ 오늘만 고른다
+          body: PDatePicker.single(
+            labels: PDatePickerLabels.of(ctx),
+            semanticLabel: l.expRefundDate,
+            value: draft,
+            today: max,
+            min: min,
+            max: max,
+            onChanged: (v) => setSheet(() => draft = v),
           ),
           footer: [
             PButton(

@@ -466,6 +466,11 @@ void main() {
 
       expect(find.byKey(const ValueKey('refund-step')), findsOneWidget);
       expect(find.byKey(const ValueKey('refund-date-row')), findsOneWidget);
+      // 문장 안 금액은 낱말 하나로 통째로 넘어간다(쉼표 뒤 줄바꿈 예외 없음 — 그 예외는 줄 값 칸뿐)
+      final sentence = tester.widget<Text>(
+        find.byKey(const ValueKey('refund-text')),
+      );
+      expect(sentence.textSpan!.toPlainText(), isNot(contains('\u200B')));
       expect(find.byType(AlertDialog), findsNothing);
       expect(find.byType(TextField), findsNothing);
       expect(find.text('지출 상세'), findsNothing, reason: '같은 시트의 머리가 바뀐다');
