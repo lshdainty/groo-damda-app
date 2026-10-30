@@ -17,8 +17,6 @@ import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
-enum _DetailAction { edit }
-
 /// 메모 상세(I-15 14) — ds Bottom Sheet 조회. 바깥 누름 · 끌어내림으로 닫힌다.
 ///
 /// 머리 제목 = 메모 제목(줄바꿈, 비면 "제목 없음"). 본문 맨 위 메타 = 색 점 8 + "{태그 또는 태그 없음} · {수정 시각} 수정 · 고정"(고정일 때만
@@ -26,12 +24,13 @@ enum _DetailAction { edit }
 /// 머리 ⋮ = [고정 / 고정 해제, 삭제(빨강)] — 삭제는 확인창(Alert Dialog)을 먼저 연다. 바닥은 [수정] 하나(바닥 [삭제] 는 걷었다).
 /// 상세는 목록의 최신 값으로 그려 고정을 바꾸면 메타 "· 고정" 과 메뉴 글이 바로 따라간다.
 Future<void> showMemoDetailDialog(BuildContext context, Memo memo) async {
-  final action = await PBottomSheet.show<_DetailAction>(
+  // [수정] 은 상세가 그리던 **최신 값**(고정을 바꿨으면 바뀐 값)을 돌려준다 — 처음 받은 값으로 폼을 열면 고정 스위치가 어긋난다
+  final toEdit = await PBottomSheet.show<Memo>(
     context,
     builder: (_) => _MemoDetailSheet(memo: memo),
   );
-  if (action == _DetailAction.edit && context.mounted) {
-    showMemoEditDialog(context, edit: memo);
+  if (toEdit != null && context.mounted) {
+    showMemoEditDialog(context, edit: toEdit);
   }
 }
 
@@ -45,6 +44,17 @@ class _MemoDetailSheet extends ConsumerStatefulWidget {
 
 class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
   bool _busy = false;
+
+  /// 시트를 닫았다 — 삭제 성공 뒤 닫기와 "목록에서 사라졌다" 닫기가 겹쳐 두 번 pop 되면 시트 밑 화면(메모 화면)까지 빠진다. 한 번만 닫는다.
+  bool _closed = false;
+
+  void _closeOnce([Memo? result]) {
+    if (_closed || !mounted) {
+      return;
+    }
+    _closed = true;
+    PBottomSheet.of(context).close(result);
+  }
 
   Future<void> _togglePin(Memo m) async {
     if (_busy) return;
@@ -61,7 +71,9 @@ class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
     _busy = true;
     try {
       final deleted = await memoActions.confirmAndDelete(context, m);
-      if (deleted && mounted) PBottomSheet.of(context).close();
+      if (deleted) {
+        _closeOnce();
+      }
     } finally {
       _busy = false;
     }
@@ -77,15 +89,15 @@ class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
     if (list != null) {
       final found = list.where((x) => x.rowId == memo.rowId).firstOrNull;
       if (found == null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) PBottomSheet.of(context).close();
-        });
+        WidgetsBinding.instance.addPostFrameCallback((_) => _closeOnce());
       } else {
         memo = found;
       }
     }
     final name = memoLabelOf(l, memo);
-    final content = (memo.content ?? '').trim();
+    // 본문은 trim 하지 않는다(들여쓰기도 사용자 글) — 비었는지만 trim 으로 본다
+    final raw = memo.content ?? '';
+    final blank = raw.trim().isEmpty;
     final stamp = formatMemoStamp(memo.modifyAt);
     return PBottomSheetContent(
       title: name,
@@ -160,12 +172,12 @@ class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
             padding: const EdgeInsets.only(bottom: PSpacing.x2),
             child: Text(
               // 낱말 단위 줄바꿈(v114) — 읽는 글이라 건다. 읽는 이름은 원래 글
-              keepAll(content.isEmpty ? l.memoDetailNoContent : content),
-              semanticsLabel: content.isEmpty ? l.memoDetailNoContent : content,
+              keepAll(blank ? l.memoDetailNoContent : raw),
+              semanticsLabel: blank ? l.memoDetailNoContent : raw,
               key: const ValueKey('memo-detail-content'),
-              style: PTypography.t5.copyWith(
-                color: content.isEmpty ? c.fgNeutralSubtle : c.fgNeutral,
-                fontWeight: FontWeight.w400,
+              // 긴 글 본문 R11 16/24(DESIGN.desk.md:2688) — 일정 상세의 본문과 같다
+              style: PTypography.articleBody.copyWith(
+                color: blank ? c.fgNeutralSubtle : c.fgNeutral,
               ),
             ),
           ),
@@ -175,7 +187,7 @@ class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
         PButton(
           label: l.actionEdit,
           size: PButtonSize.large,
-          onPressed: () => PBottomSheet.of(context).close(_DetailAction.edit),
+          onPressed: () => _closeOnce(memo),
         ),
       ],
     );

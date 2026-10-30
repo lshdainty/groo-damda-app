@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -26,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
+import 'package:groo_damda_app/shared/forms/utf16_limit.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 
 /// 제목 · 본문 입력 상한 — 서버 `FieldLimits`(TITLE_MAX 200 · CONTENT_MAX 10,000)와 같은 값.
@@ -88,6 +88,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
   bool _submitting = false;
   bool _titleError = false;
   bool _saveError = false;
+  final _errorKey = GlobalKey();
   bool get _isEdit => widget.edit != null;
 
   @override
@@ -124,8 +125,8 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
   }
 
   /// 태그 선택지 — 서버 마스터 목록 + 지금 값(목록에 없으면 맨 앞에 보존). 둘 다 비어도 "태그 없음" 은 늘 앞에 붙는다.
-  List<String> _tagChoices() {
-    final server = ref.watch(memoTagListProvider).value ?? const <MemoTag>[];
+  /// (웹의 "다른 메모에만 남은 이름" 은 더하지 않는다 — 지시서 13 4 의 선택지 그대로)
+  List<String> _tagChoices(List<MemoTag> server) {
     final names = [for (final t in server) t.tagName];
     final current = _tag;
     return [
@@ -136,7 +137,6 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
 
   Future<void> _pickTag() async {
     FocusScope.of(context).unfocus();
-    final choices = _tagChoices();
     final picked = await PBottomSheet.show<String>(
       context,
       builder: (sheetContext) {
@@ -148,35 +148,44 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
           flushBody: true,
           // 태그 수는 사용자 데이터라 늘어나는 목록 — 끝 흐림을 건다(spec-cleanup-pending: 개수가 데이터에 따라 느는 목록)
           scrollFog: true,
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              PickList<String>(
-                label: l.memoFieldTag,
-                selected: _tag,
-                items: [
-                  // "{칸 이름} 없음" 을 맨 앞에
-                  PickItem(value: kMemoNoTagKey, title: l.memoTagNone),
-                  for (final name in choices)
-                    PickItem(value: name, title: name),
+          // 목록이 시트를 연 뒤에 도착해도 바뀐다(스냅숏이 아니다)
+          body: Consumer(
+            builder: (context, ref, _) {
+              final tags = ref.watch(memoTagListProvider);
+              final choices = _tagChoices(tags.value ?? const <MemoTag>[]);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  PickList<String>(
+                    label: l.memoFieldTag,
+                    selected: _tag,
+                    items: [
+                      // "{칸 이름} 없음" 을 맨 앞에
+                      PickItem(value: kMemoNoTagKey, title: l.memoTagNone),
+                      for (final name in choices)
+                        PickItem(value: name, title: name),
+                    ],
+                  ),
+                  // 태그가 0개로 **확인됐을 때만** 어디서 만드는지 알린다(불러오는 중 · 실패에는 "없다" 고 말하지 않는다 — 이름을 지어 넣지 않는다 QA #105)
+                  if (tags.hasValue && choices.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        PSpacing.globalGutter,
+                        PSpacing.x4,
+                        PSpacing.globalGutter,
+                        PSpacing.x2,
+                      ),
+                      child: Text(
+                        l.memoTagEmptyHint,
+                        textAlign: TextAlign.center,
+                        style: PTypography.t4.copyWith(
+                          color: c.fgNeutralSubtle,
+                        ),
+                      ),
+                    ),
                 ],
-              ),
-              // 태그가 0개면 고를 게 '태그 없음' 뿐이라 어디서 만드는지 한 줄로 알린다(이름을 지어 넣지 않는다 — QA #105)
-              if (choices.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    PSpacing.globalGutter,
-                    PSpacing.x4,
-                    PSpacing.globalGutter,
-                    PSpacing.x2,
-                  ),
-                  child: Text(
-                    l.memoTagEmptyHint,
-                    textAlign: TextAlign.center,
-                    style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
-                  ),
-                ),
-            ],
+              );
+            },
           ),
         );
       },
@@ -205,7 +214,8 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       _titleFocus.requestFocus();
       return;
     }
-    final content = _contentCtrl.text.trim();
+    // 본문은 trim 하지 않는다(들여쓰기 · 빈 줄도 사용자 글) — 웹과 같다. 비었으면 ""(서버는 "" 도 null 도 지운 것으로 읽는다)
+    final content = _contentCtrl.text;
     // 요청이 끝나기 전에 시트가 닫혀도 목록을 비울 수 있게 미리 잡아 둔다(`ref` 는 unmount 뒤에 던진다)
     final c = ProviderScope.containerOf(context, listen: false);
     final snack = PSnackbar.maybeOf(context);
@@ -222,7 +232,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
           id: widget.edit!.rowId,
           title: title,
           // 본문을 지우고 저장하면 지워져야 한다 — 키를 빼면 서버가 옛 본문을 지킨다.
-          content: Patch.set(content.isEmpty ? null : content),
+          content: Patch.set(content),
           // "태그 없음" 은 키를 빼지 말고 명시적 null 로 실어야 서버가 지운다(QA #99). sentinel 은 서버로 안 나간다.
           tag: Patch.set(_tag == kMemoNoTagKey ? null : _tag),
           color: _color,
@@ -230,17 +240,23 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       } else {
         saved = await repo.create(
           title: title,
-          content: content.isEmpty ? null : content,
+          content: content,
           tag: _tag == kMemoNoTagKey ? null : _tag,
           color: _color,
         );
       }
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        // 저장 중에 시트를 닫았다 — 실패 Callout 을 둘 자리가 없으니 스낵바로 알린다(L8)
+        snack?.show(message: l.memoSaveFailed, tone: PSnackbarTone.critical);
+        return;
+      }
       setState(() {
         _saveError = true;
         _submitting = false;
       });
+      // 키보드 · 큰 글자로 맨 위 Callout 이 화면 밖이면 올린다(M2)
+      revealFormError(_errorKey);
       return;
     }
     c.invalidate(memoListProvider);
@@ -288,7 +304,10 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
               padding: const EdgeInsets.symmetric(
                 horizontal: PSpacing.globalGutter,
               ),
-              child: FormErrorCallout(message: l.memoSaveFailed),
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.memoSaveFailed,
+              ),
             ),
           // 제목 — Input large. 위 12 · 좌우 24 · 아래 8
           Padding(
@@ -308,8 +327,9 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
                 autofocus: !_isEdit,
                 semanticLabel: l.memoFieldTitle,
                 placeholder: l.memoFieldTitle,
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(kMemoTitleMax),
+                // 서버가 세는 단위(UTF-16)로 막는다 — 이모지로 한도를 넘겨 400 이 나지 않게(M6)
+                inputFormatters: const [
+                  Utf16LengthLimitingFormatter(kMemoTitleMax),
                 ],
                 onChanged: (_) {
                   if (_titleError) setState(() => _titleError = false);
@@ -325,14 +345,17 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
               PSpacing.globalGutter,
               PSpacing.x2,
             ),
+            // 최대 길이가 있으면 글자 수를 붙인다(textarea.md:60 · :139) — 초과 붙여넣기는 잘리고 "10,000/10,000" 으로 보인다.
+            // 자르는 단위는 서버(UTF-16)다 — 이모지로 한도를 넘기지 못한다(M6)
             child: PField(
+              maxGraphemeCount: kMemoContentMax,
               child: PTextarea(
                 controller: _contentCtrl,
                 semanticLabel: l.memoFieldContent,
                 placeholder: l.memoContentPlaceholder,
                 maxHeight: maxHeight,
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(kMemoContentMax),
+                inputFormatters: const [
+                  Utf16LengthLimitingFormatter(kMemoContentMax),
                 ],
               ),
             ),

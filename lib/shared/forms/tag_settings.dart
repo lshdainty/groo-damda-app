@@ -133,6 +133,7 @@ class _TagSettingsState extends State<TagSettings> {
     final l = AppLocalizations.of(context);
     final snack = PSnackbar.maybeOf(context);
     final outcome = await showTagEditSheet(
+      snack: snack,
       context,
       copy: widget.copy,
       tag: tag,
@@ -206,7 +207,13 @@ class _TagSettingsState extends State<TagSettings> {
 
     // 목록 제목의 동작은 정적 UI 라 불러오는 동안에도 진짜를 쓴다 — 수만 기다린다.
     final header = PListHeader(
-      title: tags == null ? copy.title : '${copy.title} · ${tags.length}',
+      // 불러오는 동안에도 버튼은 진짜, 수 자리만 Skeleton(웹 TagSettings 와 같다 — 실패에서는 수를 비운다)
+      title: tags == null
+          ? (widget.failed ? copy.title : '${copy.title} · ')
+          : '${copy.title} · ${tags.length}',
+      titleSuffix: tags == null && !widget.failed
+          ? PSkeleton.text(PTypography.t4, width: PSpacing.x4)
+          : null,
       variant: PListHeaderVariant.boldSolid,
       action: PTextButton(
         label: copy.addCta,
@@ -384,6 +391,7 @@ enum TagEditOutcome { saved, deleteRequested }
 /// (고정 글) — 시트는 열려 있고 쓴 값은 그대로다. 성공하면 닫는다.
 Future<TagEditOutcome?> showTagEditSheet(
   BuildContext context, {
+  PSnackbarApi? snack,
   required TagSettingsCopy copy,
   TagItem? tag,
   List<TagItem> existing = const [],
@@ -407,6 +415,7 @@ Future<TagEditOutcome?> showTagEditSheet(
       existing: existing,
       onSave: onSave,
       probe: probe,
+      snack: snack,
     ),
   );
 }
@@ -422,7 +431,9 @@ class _TagEditSheet extends StatefulWidget {
     required this.existing,
     required this.onSave,
     required this.probe,
+    this.snack,
   });
+  final PSnackbarApi? snack;
   final TagSettingsCopy copy;
   final TagItem? tag;
   final List<TagItem> existing;
@@ -442,6 +453,10 @@ class _TagEditSheetState extends State<_TagEditSheet> {
   bool _touched = false;
   bool _submitting = false;
   bool _saveError = false;
+  final _errorKey = GlobalKey();
+
+  /// 저장된 색이 팔레트 밖이면 그 값 — "지금 색" 칸이 격자를 고른 뒤에도 남아 되돌릴 수 있다(color-swatch.md)
+  String? _foreignColor;
 
   NameIssue? get _issue => nameIssue(_nameCtrl.text, kTagNameMax, [
     for (final t in widget.existing)
@@ -470,6 +485,9 @@ class _TagEditSheetState extends State<_TagEditSheet> {
         : firstUnusedHex([for (final t in widget.existing) t.color]);
     _nameCtrl = TextEditingController(text: _initialName);
     _color = _initialColor;
+    if (chartColorOfHex(_initialColor) == null) {
+      _foreignColor = _initialColor;
+    }
     widget.probe.dirty = () =>
         _nameCtrl.text != _initialName || _color != _initialColor;
   }
@@ -501,6 +519,14 @@ class _TagEditSheetState extends State<_TagEditSheet> {
           _saveError = true;
           _submitting = false;
         });
+        // 키보드 · 큰 글자로 맨 위 Callout 이 화면 밖이면 올린다
+        revealFormError(_errorKey);
+      } else {
+        // 저장 중에 시트를 닫았다 — Callout 을 둘 자리가 없으니 스낵바로 알린다
+        widget.snack?.show(
+          message: widget.copy.saveFailed,
+          tone: PSnackbarTone.critical,
+        );
       }
       return;
     }
@@ -531,7 +557,8 @@ class _TagEditSheetState extends State<_TagEditSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x4,
         children: [
-          if (_saveError) FormErrorCallout(message: copy.saveFailed),
+          if (_saveError)
+            FormErrorCallout(key: _errorKey, message: copy.saveFailed),
           // 미리보기 — 색 타일 + 이름.
           Container(
             padding: const EdgeInsets.all(PSpacing.x3_5),
@@ -602,13 +629,20 @@ class _TagEditSheetState extends State<_TagEditSheet> {
               value: key == null
                   ? const PColorSwatchValue.current()
                   : PColorSwatchValue.color(key),
-              currentColor: key == null
-                  ? parseColor(_color, fallback: const Color(0xFF9E9E9E))
-                  : null,
+              // 팔레트 밖 색을 들고 열었으면 격자를 고른 뒤에도 "지금 색" 칸을 남긴다
+              currentColor: _foreignColor == null
+                  ? null
+                  : parseColor(
+                      _foreignColor!,
+                      fallback: const Color(0xFF9E9E9E),
+                    ),
               onChanged: (v) {
-                // "지금 색" 칸을 고르면 저장 값을 그대로 둔다 — 몰래 바꾸지 않는다
-                if (v.isCurrent) return;
-                setState(() => _color = chartHexOf(v.color!));
+                // "지금 색" 칸을 고르면 저장된 값으로 돌아간다 — 몰래 바꾸지 않는다
+                setState(
+                  () => _color = v.isCurrent
+                      ? (_foreignColor ?? _color)
+                      : chartHexOf(v.color!),
+                );
               },
             ),
           ),

@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/memo/presentation/memo_detail_dialog.dar
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import '../../support/plain_text.dart';
 import '../todo/todo_test_support.dart';
 
@@ -69,6 +70,7 @@ Future<_Repo> _open(
   WidgetTester tester,
   Memo memo, {
   double textScale = 1,
+  bool snackbarHost = false,
 }) async {
   final repo = _Repo();
   _memos = [memo];
@@ -87,6 +89,7 @@ Future<_Repo> _open(
       memoListProvider.overrideWith((ref) async => _memos),
     ].cast(),
     textScale: textScale,
+    snackbarHost: snackbarHost,
   );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
@@ -201,5 +204,84 @@ void main() {
   testWidgets('x2 글자 — 넘침 오류 0', (tester) async {
     await _open(tester, _memo(), textScale: 2);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('H1 — 삭제가 성공하면 상세만 닫힌다: 시트 밑 화면(여기서는 open 단추)은 남고 예외가 없다', (
+    tester,
+  ) async {
+    await _open(tester, _memo());
+    await _openMenu(tester);
+    await tester.tap(find.text('삭제').last);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PAlertDialogView),
+        matching: find.text('삭제'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(
+      find.text('open'),
+      findsOneWidget,
+      reason: '두 번 닫히면 시트 밑 화면까지 pop 된다',
+    );
+    expect(_button('수정'), findsNothing);
+  });
+
+  testWidgets('H2 — 상세에서 고정한 뒤 [수정] 하면 폼의 "상단에 고정" 이 켜진 채 열린다(최신 값)', (
+    tester,
+  ) async {
+    await _open(tester, _memo());
+    await _openMenu(tester);
+    await tester.tap(findPlain('고정'));
+    await tester.pumpAndSettle();
+    await tester.tap(_button('수정'));
+    await tester.pumpAndSettle();
+    final row = tester.widget<PListSwitchItem>(find.byType(PListSwitchItem));
+    expect(row.checked, isTrue);
+  });
+
+  testWidgets('삭제 실패 — 확인창이 닫히고 스낵바 "삭제하지 못했어요…" + [다시 시도], 누르면 다시 지운다', (
+    tester,
+  ) async {
+    final repo = await _open(tester, _memo(), snackbarHost: true);
+    repo.failDelete = true;
+    await _openMenu(tester);
+    await tester.tap(find.text('삭제').last);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PAlertDialogView),
+        matching: find.text('삭제'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(findPlain('삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findPlain('다시 시도'), findsOneWidget);
+    repo.failDelete = false;
+    await tester.tap(findPlain('다시 시도'));
+    await tester.pumpAndSettle();
+    expect(repo.deleted, [7]);
+    expect(
+      find.text('open'),
+      findsOneWidget,
+      reason: '다시 시도로 지워도 시트는 한 번만 닫힌다',
+    );
+  });
+
+  testWidgets('L1 — 본문은 16 / 24 이고 앞뒤 공백 · 빈 줄을 지키며, 공백뿐이면 "내용 없음"', (
+    tester,
+  ) async {
+    await _open(tester, _memo(content: '  들여쓴 줄\n\n'));
+    final t = tester.widget<Text>(
+      find.byKey(const ValueKey('memo-detail-content')),
+    );
+    expect(t.style!.fontSize, 16);
+    expect(t.style!.height, closeTo(24 / 16, 0.001));
+    expect(t.semanticsLabel, '  들여쓴 줄\n\n');
+    await tester.pumpWidget(const SizedBox());
+    await _open(tester, _memo(content: '   '));
+    expect(findPlain('내용 없음'), findsOneWidget);
   });
 }

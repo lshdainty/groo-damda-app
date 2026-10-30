@@ -114,7 +114,7 @@ class _MemoTagManagementScreenState
                     usageCount: t.usageCount,
                   ),
               ],
-        failed: list == null && async.hasError,
+        failed: list == null && async.hasError && !async.isLoading,
         onRetry: () => ref.invalidate(memoTagListProvider),
         create: (name, color) async {
           final repo = await _container.read(memoTagRepositoryProvider.future);

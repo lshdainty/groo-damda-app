@@ -210,8 +210,53 @@ void main() {
       isTrue,
       reason: 'content 키가 빠지면 서버가 옛 본문을 지킨다 — QA #99 의 그 증상이다',
     );
-    expect(repo.content.value, isNull);
+    expect(
+      repo.content.value,
+      '',
+      reason: '웹과 같은 값("") — 서버는 "" 도 null 도 지운 것으로 읽는다',
+    );
   });
+
+  testWidgets('M3 — 본문을 안 건드리고 저장해도 앞뒤 공백 · 빈 줄이 지켜진다', (tester) async {
+    final repo = await _open(
+      tester,
+      edit: _memo.copyWith(content: '  들여쓴 줄\n\n'),
+    );
+    await tester.tap(_button('저장'));
+    await tester.pumpAndSettle();
+    expect(repo.content.value, '  들여쓴 줄\n\n');
+  });
+
+  testWidgets(
+    'M6 — 15,000 자를 붙여 넣으면 10,000 으로 잘리고, 이모지로도 UTF-16 10,000 을 넘지 못한다',
+    (tester) async {
+      await _open(tester, edit: null);
+      await tester.enterText(find.byType(PTextarea), 'a' * 15000);
+      await tester.pump();
+      expect(
+        tester
+            .widget<PTextarea>(find.byType(PTextarea))
+            .controller!
+            .text
+            .length,
+        10000,
+      );
+      await tester.enterText(find.byType(PTextarea), '😀' * 9000);
+      await tester.pump();
+      final text = tester
+          .widget<PTextarea>(find.byType(PTextarea))
+          .controller!
+          .text;
+      expect(text.length, lessThanOrEqualTo(10000));
+      expect(text.length.isEven, isTrue, reason: '서로게이트 쌍을 쪼개지 않는다');
+      await tester.enterText(find.byType(PInput), '😀' * 150);
+      await tester.pump();
+      expect(
+        tester.widget<PInput>(find.byType(PInput)).controller!.text.length,
+        lessThanOrEqualTo(200),
+      );
+    },
+  );
 
   testWidgets('본문을 고쳐 저장하면 고친 값이 실리고 시트가 닫힌다', (tester) async {
     final repo = await _open(tester);
@@ -273,6 +318,18 @@ void main() {
       );
       expect(tester.widget<PButton>(_button('저장')).onPressed, isNotNull);
     });
+
+    testWidgets('M2 — 큰 글자(x2)에서도 실패 Callout 이 화면 안으로 올라온다', (tester) async {
+      final repo = await _open(tester, edit: null, textScale: 2);
+      repo.failSave = true;
+      await tester.enterText(find.byType(PInput), '새 메모');
+      await tester.pumpAndSettle();
+      await tester.tap(_button('저장'));
+      await tester.pumpAndSettle();
+      final r = tester.getRect(find.byType(PCallout));
+      expect(r.top, greaterThanOrEqualTo(0));
+      expect(r.bottom, lessThanOrEqualTo(780));
+    });
   });
 
   group('태그 줄 (QA #98)', () {
@@ -322,6 +379,13 @@ void main() {
       await tester.tap(_row('태그'));
       await tester.pumpAndSettle();
       expect(findPlain('태그는 설정 › 메모 태그에서 만들어요.'), findsOneWidget);
+    });
+
+    testWidgets('L3 — 태그 목록을 불러오는 중 · 실패에는 "만들어요" 안내를 띄우지 않는다', (tester) async {
+      await _open(tester, edit: _untagged, tagsFail: true);
+      await tester.tap(_row('태그'));
+      await tester.pumpAndSettle();
+      expect(findPlain('태그는 설정 › 메모 태그에서 만들어요.'), findsNothing);
     });
 
     testWidgets('조회가 실패해도 죽지 않고 지금 태그를 지킨다', (tester) async {

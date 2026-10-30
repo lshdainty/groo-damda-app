@@ -114,7 +114,7 @@ class _TodoTagManagementScreenState
                     usageCount: t.usageCount,
                   ),
               ],
-        failed: list == null && async.hasError,
+        failed: list == null && async.hasError && !async.isLoading,
         onRetry: () => ref.invalidate(todoTagListProvider),
         create: (name, color) async {
           final repo = await _container.read(todoTagRepositoryProvider.future);

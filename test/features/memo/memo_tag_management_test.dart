@@ -1,6 +1,7 @@
 // 메모 태그 설정(I-15 20 ~ 24) — 할 일 태그와 같은 한 부품([TagSettings])을 쓴다. 글 키만 다르다(메모 `mtag*` · 할 일 `ttag*`).
 // 여기서 고정하는 것은 ① 메모 글 ② 화면이 저장소의 어느 메서드를 무슨 인자로 부르는지 ③ 실패 안내(저장 = 시트 안 Callout, 삭제 = 확인창을
 // 닫고 다시 시도) ④ 두 화면이 한 부품을 import 하는 것이다. 시험은 작성만 했다(UI 이관이 끝날 때까지 돌리지 않는다).
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -87,6 +88,7 @@ Finder _tagRow(String name) =>
 Future<_Repo> _open(
   WidgetTester tester, {
   List<MemoTag> tags = const [],
+  bool snackbarHost = false,
 }) async {
   final repo = _Repo();
   await pumpApp(
@@ -97,6 +99,7 @@ Future<_Repo> _open(
       memoTagListProvider.overrideWith((ref) async => tags),
       memoListProvider.overrideWith((ref) async => const <Memo>[]),
     ].cast(),
+    snackbarHost: snackbarHost,
   );
   return repo;
 }
@@ -236,5 +239,68 @@ void main() {
       expect(src, contains("shared/forms/tag_settings.dart"), reason: path);
       expect(src, contains('TagSettings('), reason: path);
     }
+  });
+
+  testWidgets('삭제 실패 — 스낵바 "삭제하지 못했어요…" + [다시 시도], 누르면 다시 지운다', (tester) async {
+    final repo = await _open(
+      tester,
+      tags: [_tag(11, '회의록')],
+      snackbarHost: true,
+    );
+    repo.fail = true;
+    await tester.tap(_tagRow('회의록'));
+    await tester.pumpAndSettle();
+    await tester.tap(_button('삭제'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PAlertDialogView),
+        matching: find.text('삭제'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(findPlain('삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    repo.fail = false;
+    await tester.tap(findPlain('다시 시도'));
+    await tester.pumpAndSettle();
+    expect(repo.deleted, [11]);
+  });
+
+  testWidgets('L4 — 팔레트 밖 색 태그는 격자를 고른 뒤에도 "지금 색" 칸이 남고, 다시 고르면 저장 값으로 돌아간다', (
+    tester,
+  ) async {
+    final repo = await _open(tester, tags: [_tag(11, '옛색', color: '#9e9e9e')]);
+    await tester.tap(_tagRow('옛색'));
+    await tester.pumpAndSettle();
+    expect(findPlain('지금 색'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('빨강'));
+    await tester.pumpAndSettle();
+    expect(findPlain('지금 색'), findsOneWidget, reason: '격자를 골라도 칸이 사라지지 않는다');
+    await tester.tap(find.bySemanticsLabel('지금 색'));
+    await tester.pumpAndSettle();
+    await tester.tap(_button('저장'));
+    await tester.pumpAndSettle();
+    expect(repo.updatedId, 11);
+  });
+
+  testWidgets('L2 — 불러오는 동안 목록 제목은 "메모 태그 · " + Skeleton, 버튼은 진짜', (
+    tester,
+  ) async {
+    final repo = _Repo();
+    await pumpApp(
+      tester,
+      const MemoTagManagementScreen(),
+      overrides: [
+        memoTagRepositoryProvider.overrideWith((ref) async => repo),
+        memoTagListProvider.overrideWith(
+          (ref) => Completer<List<MemoTag>>().future,
+        ),
+        memoListProvider.overrideWith((ref) async => const <Memo>[]),
+      ].cast(),
+      settle: false,
+    );
+    final header = tester.widget<PListHeader>(find.byType(PListHeader));
+    expect(header.titleSuffix, isNotNull);
+    expect(find.byType(PTextButton), findsOneWidget);
   });
 }

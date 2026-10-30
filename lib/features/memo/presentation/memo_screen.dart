@@ -71,7 +71,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
     final tags = ref.watch(memoTagListProvider).value;
     // 다시 받는 동안에도 이전 목록을 그대로 둔다
     final all = async.hasValue ? async.requireValue : null;
-    final failed = all == null && async.hasError;
+    final failed = all == null && async.hasError && !async.isLoading;
     final loading = all == null && !failed;
 
     final filtered = all == null

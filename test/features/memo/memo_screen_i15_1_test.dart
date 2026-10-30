@@ -2,6 +2,8 @@
 //
 // 가장 나쁜 값(두 줄 넘는 제목 · 12자 태그 · 제목 없음 · 지난해 · 태그 없음 · 고정 둘)과 200% · 다크를 본다.
 // 시험은 작성만 했다(UI 이관이 끝날 때까지 돌리지 않는다).
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -347,4 +349,32 @@ void main() {
       });
     }
   }
+
+  testWidgets(
+    'L5 — 목록 실패에서 [다시 시도] 를 누르면 실패 상자가 불러오는 줄 자리로 바뀐다(눌렀는데 그대로가 아니다)',
+    (tester) async {
+      var calls = 0;
+      await pumpApp(
+        tester,
+        const MemoScreen(),
+        overrides: [
+          memoRepositoryProvider.overrideWith((ref) async => _Repo()),
+          memoListProvider.overrideWith((ref) {
+            calls++;
+            if (calls == 1) throw Exception('RAW_SERVER_TEXT_9137');
+            return Completer<List<Memo>>().future;
+          }),
+          memoTagListProvider.overrideWith((ref) async => _tags),
+        ].cast(),
+      );
+      expect(find.byType(PResultSection), findsOneWidget);
+      await tester.tap(find.text('다시 시도'));
+      await tester.pump();
+      expect(
+        find.byType(PResultSection),
+        findsNothing,
+        reason: '다시 받는 동안은 줄 자리 Skeleton',
+      );
+    },
+  );
 }
