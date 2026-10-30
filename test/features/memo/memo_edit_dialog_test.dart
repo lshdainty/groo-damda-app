@@ -290,6 +290,25 @@ void main() {
       expect(none, lessThan(tester.getRect(findPlain('업무')).top));
     });
 
+    testWidgets(
+      '태그 고르기 시트는 끝 흐림을 건다(개수가 데이터에 따라 느는 목록) — 머리 아래 → 첫 줄 위 = 본문 안 위 20',
+      (tester) async {
+        await _open(tester, edit: null, tags: [_tag(11, '업무')]);
+        await tester.tap(_row('태그'));
+        await tester.pumpAndSettle();
+        final header = tester.getRect(
+          find.byKey(const ValueKey('p-bottom-sheet-header')).last,
+        );
+        final first = tester.getRect(
+          find.ancestor(
+            of: findPlain('태그 없음').last,
+            matching: find.byType(PListButtonItem),
+          ),
+        );
+        expect(first.top - header.bottom, closeTo(20, 1.5));
+      },
+    );
+
     testWidgets('서버에 없는 지금 태그도 남는다 — 편집하다 태그를 잃지 않는다', (tester) async {
       await _open(tester, tags: [_tag(11, '회의록')]);
       await tester.tap(_row('태그'));

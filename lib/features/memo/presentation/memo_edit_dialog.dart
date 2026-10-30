@@ -146,6 +146,8 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
           title: l.memoFieldTag,
           closeLabel: l.actionClose,
           flushBody: true,
+          // 태그 수는 사용자 데이터라 늘어나는 목록 — 끝 흐림을 건다(spec-cleanup-pending: 개수가 데이터에 따라 느는 목록)
+          scrollFog: true,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
