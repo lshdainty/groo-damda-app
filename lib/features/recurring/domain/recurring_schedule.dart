@@ -5,6 +5,9 @@ import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.d
 /// (웹 `recurring-schedule.ts` 와 같은 함수 · 같은 결과): 시작일에서 주기대로, 매월은 말일을 넘기지 않고, 매년은 시작일의 월 · 일,
 /// 격주 · 격월은 `intervalValue`. 끝 날짜를 넘는 날 · 최대 횟수를 넘는 차례는 회차가 아니다. '오늘'은 여기서 만들지 않는다 —
 /// 부르는 쪽이 넘긴다(시험이 시계를 고정할 수 있게).
+/// 지금 — 목록 합 · 폼 처음 날짜 · 줄 날짜 글이 같은 시계를 본다. 시험 · 렌더 하네스가 시계를 고정할 때만 바꾼다.
+DateTime Function() recurringNow = DateTime.now;
+
 class ScheduleRule {
   const ScheduleRule({
     required this.startDate,

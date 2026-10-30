@@ -91,7 +91,7 @@ String? recEndPiece(AppLocalizations l, RecurringTransaction it) {
 
 /// 날짜 글 — 올해는 "10월 25일", 다른 해는 "2027년 1월 25일"(en "Oct 25" · "Jan 25, 2027").
 String recDateText(DateTime d, {DateTime? now}) {
-  final sameYear = d.year == (now ?? DateTime.now()).year;
+  final sameYear = d.year == (now ?? recurringNow()).year;
   if (localeIsEn()) {
     return sameYear
         ? DateFormat.MMMd('en').format(d)

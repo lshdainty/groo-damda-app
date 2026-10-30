@@ -207,7 +207,7 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
           ? l.recEndSentenceCount(it.maxOccurrences!, it.executedCount)
           : it.endDate != null
           ? l.recEndSentenceDate(
-              recDateLong(parseDayKey(it.endDate) ?? DateTime.now()),
+              recDateLong(parseDayKey(it.endDate) ?? recurringNow()),
             )
           : l.recEndSentenceNone;
       final next =
@@ -265,7 +265,6 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
       closeLabel: l.actionClose,
       headerAction: _headerAction(l, it),
       flushBody: true,
-      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

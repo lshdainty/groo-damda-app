@@ -144,7 +144,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
     List<ExpenseCategory> categories,
   ) {
     final masked = ref.watch(hideCardProvider('etc.recurring'));
-    final now = DateTime.now();
+    final now = recurringNow();
     final groups = <({String type, String kind})>[
       (type: 'EXPENSE', kind: l.expTypeExpense),
       (type: 'INCOME', kind: l.expTypeIncome),

@@ -189,7 +189,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   bool get _isTransfer => _type == 'TRANSFER';
 
   static DateTime _today() {
-    final n = DateTime.now();
+    final n = recurringNow();
     return DateTime(n.year, n.month, n.day);
   }
 
@@ -867,17 +867,22 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     return _buildForm(l);
   }
 
-  Widget _stepShell(AppLocalizations l, Widget body) => PBottomSheetContent(
-    title: _stepTitle(l, _step),
-    closeLabel: l.actionClose,
-    showCloseButton: false,
-    onBack: _requestLeaveStep,
-    backLabel: l.actionBack,
-    headerAction: StepDoneButton(label: l.actionDone, onPressed: _confirmStep),
-    flushBody: true,
-    scrollFog: true,
-    body: body,
-  );
+  /// 단계 틀 — 끝 흐림은 본문이 시트 90% 에 닿는 단계(반복: 격자 + 휠)만 켠다. 나머지 단계는 내용 높이라 끈다(넘치지 않는 곳에 위 20 · 아래 80 을 더하지 않는다).
+  Widget _stepShell(AppLocalizations l, Widget body, {bool fog = false}) =>
+      PBottomSheetContent(
+        title: _stepTitle(l, _step),
+        closeLabel: l.actionClose,
+        showCloseButton: false,
+        onBack: _requestLeaveStep,
+        backLabel: l.actionBack,
+        headerAction: StepDoneButton(
+          label: l.actionDone,
+          onPressed: _confirmStep,
+        ),
+        flushBody: true,
+        scrollFog: fog,
+        body: body,
+      );
 
   Widget _buildStep(AppLocalizations l) {
     const gutter = EdgeInsets.fromLTRB(
@@ -950,7 +955,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           ),
         );
       case _Step.repeat:
-        return _stepShell(l, _buildRepeatStep(l));
+        return _stepShell(l, _buildRepeatStep(l), fog: true);
       case _Step.end:
         return _stepShell(l, _buildEndStep(l));
       case _Step.none:
