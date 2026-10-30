@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
 import 'package:groo_damda_app/features/settings/presentation/appearance_section.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 
 /// 서버 대신 값을 들고 있는 가짜 — 무엇이 나갔는지까지 잡는다.
 class _FakePrefsRepo extends UserPreferencesRepository {
@@ -183,5 +184,22 @@ void main() {
     ];
     expect(ys, [...ys]..sort());
     expect(find.byIcon(LucideIcons.chevronRight), findsNothing);
+  });
+
+  testWidgets('끝 흐림은 지역 고르기(18개)만 켠다 — 위 20 · 아래 80', (tester) async {
+    await _pump(tester);
+
+    await tester.tap(find.text('기준 지역'));
+    await tester.pumpAndSettle();
+    final fog = tester.widget<PScrollFogMask>(find.byType(PScrollFogMask));
+    expect(fog.start, 20);
+    expect(fog.end, 80);
+
+    // 테마 · 통화 고르기는 줄이 적어 흐림을 끈다
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('기본 통화'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PScrollFogMask), findsNothing);
   });
 }

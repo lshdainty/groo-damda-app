@@ -84,8 +84,9 @@ class AppearanceSection extends ConsumerWidget {
   Future<void> _sheet(
     BuildContext context,
     String title,
-    Widget Function(BuildContext sheetContext) body,
-  ) {
+    Widget Function(BuildContext sheetContext) body, {
+    bool scrollFog = false,
+  }) {
     final l = AppLocalizations.of(context);
     return PBottomSheet.show<void>(
       context,
@@ -93,6 +94,8 @@ class AppearanceSection extends ConsumerWidget {
         title: title,
         closeLabel: l.actionClose,
         flushBody: true,
+        // 넘치는 목록(지역 18)만 끝 흐림 — 위 20 · 아래 80. 줄이 셋 · 넷인 고르기는 끈다
+        scrollFog: scrollFog,
         body: Builder(builder: body),
       ),
     );
@@ -256,6 +259,7 @@ class AppearanceSection extends ConsumerWidget {
                         ),
                     ],
                   ),
+                  scrollFog: true,
                 ),
         ),
         // 기본 통화 — 서버에 보관한다(D7 · QA #124). 받기 전에는 값 글을 비워 둔다(원화로 그리지 않는다).
