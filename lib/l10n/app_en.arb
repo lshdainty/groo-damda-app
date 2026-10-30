@@ -4788,5 +4788,7 @@
   "txfNoDepositAccount": "No deposit account",
   "txfNoIncomeMethod": "No income method",
   "txfSelectFrom": "Select the sending account",
-  "txfSelectTo": "Select the receiving account"
+  "txfSelectTo": "Select the receiving account",
+  "txfDeletedAsset": "Deleted account",
+  "txfDeletedCategory": "Deleted category"
 }

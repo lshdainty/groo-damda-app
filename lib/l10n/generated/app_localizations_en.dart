@@ -8675,4 +8675,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txfSelectTo => 'Select the receiving account';
+
+  @override
+  String get txfDeletedAsset => 'Deleted account';
+
+  @override
+  String get txfDeletedCategory => 'Deleted category';
 }

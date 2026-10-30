@@ -825,8 +825,8 @@
   "calFormTitleRequired": "제목을 입력해주세요",
   "calFormRows": "일정 정보",
   "calFormRowsMore": "반복 · 알림 · 장소 · 설명",
-  "calFormSaveFailed": "일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
-  "calFormDeleteFailed": "일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
+  "calFormSaveFailed": "일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "calFormDeleteFailed": "일정을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "calReminderMinutesBefore": "{n}분 전",
   "@calReminderMinutesBefore": {
     "placeholders": {
@@ -4547,7 +4547,7 @@
   "expFilterClearOne": "{name} 지우기",
   "@expFilterClearOne": {"placeholders": {"name": {"type": "String"}}},
   "expFilterModeGroup": "{name} 고르는 방식",
-  "expLoadErrorDesc": "잠시 뒤에 다시 시도해주세요.",
+  "expLoadErrorDesc": "잠시 뒤 다시 시도해주세요.",
   "@expFilterModeGroup": {"placeholders": {"name": {"type": "String"}}},
   "statsNoMonthlyData": "월별 데이터가 없어요.",
   "statsLoadFailedCategory": "카테고리별 지출을 불러오지 못했어요",
@@ -4902,10 +4902,10 @@
       }
     }
   },
-  "expRefundFailed": "환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
-  "expRefundCancelFailed": "환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
-  "expTxDeleteFailed": "거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
-  "transferDeleteFailed": "이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
+  "expRefundFailed": "환불하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "expRefundCancelFailed": "환불을 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "expTxDeleteFailed": "거래를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "transferDeleteFailed": "이체를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "transferDetailTitle": "이체 상세",
   "transferFromLabel": "보내는 계좌",
   "transferToLabel": "받는 계좌",
@@ -5051,5 +5051,7 @@
   "txfNoDepositAccount": "입금 계좌 없음",
   "txfNoIncomeMethod": "수입 방식 없음",
   "txfSelectFrom": "보내는 계좌 선택",
-  "txfSelectTo": "받는 계좌 선택"
+  "txfSelectTo": "받는 계좌 선택",
+  "txfDeletedAsset": "지운 계좌",
+  "txfDeletedCategory": "지운 카테고리"
 }

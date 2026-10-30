@@ -244,6 +244,17 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   late TxInput _input;
   _S _step = _S.one;
   _S _returnTo = _S.one;
+
+  /// 프리셋 저장 단계를 연 단계 — 금액 단계가 끝나도 이 값은 그대로다(N2).
+  _S _presetOrigin = _S.one;
+
+  /// 한 단계가 끝날 때 돌아갈 곳 — 프리셋 금액 → 프리셋 저장 → 연 단계.
+  _S get _backTarget => switch (_step) {
+    _S.presetAmount => _S.presetSave,
+    _S.presetSave => _presetOrigin,
+    _S.presetAll => _S.one,
+    _ => _returnTo,
+  };
   bool _submitting = false;
   bool _leaving = false;
 
@@ -281,6 +292,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   // 편집 모드 분할 일치화: 서버 분할 + 이번 세션에서 맞춘 분할.
   List<SplitInput> _serverSplits = const [];
   bool _splitsPending = false;
+
+  /// 나눈 내역 조회가 실패했다 — 저장 · 고쳐 쓰기를 막는다(N5). 분할을 모르는 채 보내면 서버가 옛 분할로 판정해 어긋난다.
+  bool _splitsFailed = false;
   List<SplitInput>? _reconciledSplits;
   List<SplitInput> get _effectiveSplits => _reconciledSplits ?? _serverSplits;
   int get _splitSum => _effectiveSplits.fold<int>(0, (s, x) => s + x.amount);
@@ -493,7 +507,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     FocusScope.of(context).unfocus();
     setState(() {
       _errs = _Errs();
-      _step = _returnTo;
+      _step = _backTarget;
     });
   }
 
@@ -533,7 +547,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     }
     FocusScope.of(context).unfocus();
     setState(() {
-      _step = _step == _S.presetAll ? _S.one : _returnTo;
+      _step = _backTarget;
       _errs = _Errs();
     });
   }
@@ -907,6 +921,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     _presetNameError = null;
     _presetFormError = null;
     _presetNameGen++;
+    _presetOrigin = _step;
     _openSub(_S.presetSave, focus: _subFocus);
   }
 
@@ -974,7 +989,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       );
       ref.invalidate(presetListProvider);
       if (!mounted) return;
-      setState(() => _step = _returnTo);
+      setState(() => _step = _presetOrigin);
       showPSnackBar(
         hostContextOf(context),
         l.txfPresetSaved(name),
@@ -1011,7 +1026,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         e.to = l.txfErrTo;
       }
       final interest = c.interestOrNull;
-      if (showTxInterest(c, ref.read(assetsProvider).value) &&
+      if (showTxInterest(c, _assetsAtSave) &&
           interest != null &&
           interest > c.amountInt) {
         e.interest = l.txfErrInterest;
@@ -1020,6 +1035,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       e.category = l.txfErrCategory;
     }
     if (_splitsPending) e.splits = l.txfSplitsLoading;
+    if (_splitsFailed) e.splits = l.expSplitLoadFailed;
     return e;
   }
 
@@ -1047,8 +1063,32 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     });
   }
 
+  /// 저장 전에 자산 목록을 확보한다 — 목록이 없는 채로 판정하면 이자 · 할부가 조용히 지워진다(N1). 못 받으면 요청을 보내지 않는다.
+  List<Asset>? _assetsAtSave;
+
+  Future<bool> _ensureAssets() async {
+    final cur = ref.read(assetsProvider);
+    if (cur.hasValue) {
+      _assetsAtSave = cur.value;
+      return true;
+    }
+    try {
+      _assetsAtSave = await ref.read(assetsProvider.future);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> _save() async {
     if (_submitting) return;
+    if (!await _ensureAssets()) {
+      if (!mounted) return;
+      setState(() => _saveError = AppLocalizations.of(context).txfSaveFailed);
+      scrollSheetBodyToTop(context);
+      return;
+    }
+    if (!mounted) return;
     final errs = _validate();
     if (errs.any) {
       setState(() {
@@ -1087,7 +1127,11 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final desc = c.memoOrNull;
     final merchant = c.merchantOrNull;
     final payment = c.paymentMethodOrNull;
-    final installment = c.installmentMonths > 1 ? c.installmentMonths : null;
+    // 할부는 신용카드 지출에만(웹과 같다) — 카드가 아니게 되었거나 수입이면 값을 싣지 않는다(N3)
+    final installment =
+        showTxInstallment(c, _assetsAtSave) && c.installmentMonths > 1
+        ? c.installmentMonths
+        : null;
     final origAmount = c.origAmountOrNull;
     final origCurrency = origAmount != null ? c.currency : null;
     final fxRate = origAmount != null ? c.fxRateOrNull : null;
@@ -1244,7 +1288,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     });
     try {
       final fee = int.tryParse(c.feeCtrl.text.replaceAll(',', ''));
-      final interest = showTxInterest(c, ref.read(assetsProvider).value)
+      final interest = showTxInterest(c, _assetsAtSave)
           ? int.tryParse(c.interestCtrl.text.replaceAll(',', ''))
           : null;
       final aRepo = await ref.read(assetRepositoryProvider.future);
@@ -1514,6 +1558,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           spAsync.isLoading &&
           !spAsync.hasValue &&
           !spAsync.hasError;
+      _splitsFailed = spAsync.hasError && !spAsync.hasValue;
       final sp = spAsync.value;
       _serverSplits = sp == null
           ? const []
@@ -1759,8 +1804,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final c = _input;
     final assetsAsync = ref.watch(assetsProvider);
     final assets = assetsAsync.value ?? const <Asset>[];
-    final cats =
-        ref.watch(categoriesProvider).value ?? const <ExpenseCategory>[];
+    final catsAsync2 = ref.watch(categoriesProvider);
+    final catsLoaded = catsAsync2.hasValue;
+    final cats = catsAsync2.value ?? const <ExpenseCategory>[];
     final isTransfer = c.type == 'TRANSFER';
     final isIncome = c.type == 'INCOME';
     final locked = c.moneyFieldsLocked;
@@ -1779,12 +1825,15 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           ? cat.categoryName
           : '${parent.categoryName} · ${cat.categoryName}';
       catDot = chartToneOf(context, cat.color).solid;
+    } else if (c.categoryRowId != null && catsLoaded) {
+      catValue = l.txfDeletedCategory;
     }
     String assetName(int? id) {
       if (id == null) return '';
       final a = assets.byRowId(id);
+      // 목록에 없는 값 — 거래에서 읽어 온 기록은 유지하고 "지운 계좌" 로 보인다(본문은 지금 id 그대로, N4)
       return a == null
-          ? ''
+          ? (assetsAsync.hasValue ? l.txfDeletedAsset : '')
           : (a.institution != null && a.institution!.isNotEmpty
                 ? '${a.institution} · ${a.assetName}'
                 : a.assetName);
@@ -2507,7 +2556,6 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                   // 이름 · 금액은 이 단계 안의 값 — 금액 단계는 이 단계 위의 한 단계다
                   final keepName = _presetNameCtrl.text;
                   _openSub(_S.presetAmount, focus: _amountFocus);
-                  _returnTo = _S.presetSave;
                   _presetNameCtrl.text = keepName;
                 },
               ),

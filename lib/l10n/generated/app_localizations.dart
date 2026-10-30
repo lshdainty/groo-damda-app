@@ -2849,13 +2849,13 @@ abstract class AppLocalizations {
   /// No description provided for @calFormSaveFailed.
   ///
   /// In ko, this message translates to:
-  /// **'일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calFormSaveFailed;
 
   /// No description provided for @calFormDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'일정을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calFormDeleteFailed;
 
   /// No description provided for @calReminderMinutesBefore.
@@ -13901,7 +13901,7 @@ abstract class AppLocalizations {
   /// No description provided for @expLoadErrorDesc.
   ///
   /// In ko, this message translates to:
-  /// **'잠시 뒤에 다시 시도해주세요.'**
+  /// **'잠시 뒤 다시 시도해주세요.'**
   String get expLoadErrorDesc;
 
   /// No description provided for @statsNoMonthlyData.
@@ -14903,25 +14903,25 @@ abstract class AppLocalizations {
   /// No description provided for @expRefundFailed.
   ///
   /// In ko, this message translates to:
-  /// **'환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'환불하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get expRefundFailed;
 
   /// No description provided for @expRefundCancelFailed.
   ///
   /// In ko, this message translates to:
-  /// **'환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'환불을 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get expRefundCancelFailed;
 
   /// No description provided for @expTxDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'거래를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get expTxDeleteFailed;
 
   /// No description provided for @transferDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'이체를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get transferDeleteFailed;
 
   /// No description provided for @transferDetailTitle.
@@ -15253,6 +15253,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'받는 계좌 선택'**
   String get txfSelectTo;
+
+  /// No description provided for @txfDeletedAsset.
+  ///
+  /// In ko, this message translates to:
+  /// **'지운 계좌'**
+  String get txfDeletedAsset;
+
+  /// No description provided for @txfDeletedCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'지운 카테고리'**
+  String get txfDeletedCategory;
 }
 
 class _AppLocalizationsDelegate

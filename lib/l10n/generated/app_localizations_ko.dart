@@ -1486,10 +1486,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calFormRowsMore => '반복 · 알림 · 장소 · 설명';
 
   @override
-  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calFormDeleteFailed => '일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormDeleteFailed => '일정을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String calReminderMinutesBefore(int n) {
@@ -7703,7 +7703,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get expLoadErrorDesc => '잠시 뒤에 다시 시도해주세요.';
+  String get expLoadErrorDesc => '잠시 뒤 다시 시도해주세요.';
 
   @override
   String get statsNoMonthlyData => '월별 데이터가 없어요.';
@@ -8278,16 +8278,16 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get expRefundFailed => '환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get expRefundFailed => '환불하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get expRefundCancelFailed => '환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get expRefundCancelFailed => '환불을 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get expTxDeleteFailed => '거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get expTxDeleteFailed => '거래를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get transferDeleteFailed => '이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get transferDeleteFailed => '이체를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get transferDetailTitle => '이체 상세';
@@ -8474,4 +8474,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get txfSelectTo => '받는 계좌 선택';
+
+  @override
+  String get txfDeletedAsset => '지운 계좌';
+
+  @override
+  String get txfDeletedCategory => '지운 카테고리';
 }

@@ -273,17 +273,23 @@ void main() {
       expect(find.textContaining('원래 거래는 지워지고'), findsOneWidget);
     });
 
-    testWidgets('못 불러왔으면 막지 않는다 — 서버가 옛 분할로 판정한다', (tester) async {
+    testWidgets('못 불러왔으면 저장 · 고쳐 쓰기를 막는다 — 분할을 모르는 채 보내지 않는다(N5)', (
+      tester,
+    ) async {
+      final repo = _FakeRepo();
       await _open(
         tester,
         _locked,
+        repo: repo,
         splits: () => Future.error(Exception('network')),
       );
       await _openRewrite(tester);
 
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('원래 거래는 지워지고'), findsOneWidget);
+      expect(find.text('나눈 내역을 불러오지 못했어요'), findsOneWidget);
+      expect(find.textContaining('원래 거래는 지워지고'), findsNothing);
+      expect(repo.replaced, 0);
     });
   });
 }

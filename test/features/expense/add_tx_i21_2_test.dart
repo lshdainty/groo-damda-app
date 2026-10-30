@@ -153,6 +153,7 @@ Future<_Repo> _open(
   WidgetTester tester,
   void Function(BuildContext) show, {
   List<ExpenseTemplate> presets = const [],
+  bool assetsFail = false,
 }) async {
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3.0;
@@ -162,7 +163,10 @@ Future<_Repo> _open(
     ProviderScope(
       overrides: [
         categoriesProvider.overrideWith((ref) async => [_cat]),
-        assetsProvider.overrideWith((ref) async => [_bank, _loan]),
+        assetsProvider.overrideWith(
+          (ref) async =>
+              assetsFail ? throw Exception('network') : [_bank, _loan],
+        ),
         presetListProvider.overrideWith((ref) async => presets),
         expenseRepositoryProvider.overrideWith((ref) async => repo),
         assetRepositoryProvider.overrideWith(
@@ -345,5 +349,48 @@ void main() {
     expect(c['exchangeRate'], 1388.75);
     expect(c['originalCurrency'], 'USD');
     expect(c['amount'], 137160491, reason: '현지 × 환율 = 원화(쉼표 없는 정수)');
+  });
+
+  testWidgets('N2 — 프리셋 저장에서 금액 줄을 열었다 닫아도 ← 는 1단계, 저장 뒤에도 연 단계로 간다', (
+    tester,
+  ) async {
+    await _open(tester, (c) => showAddTxSheet(c));
+    await tester.enterText(find.byType(EditableText).first, '9000');
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tx-row-category')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PListButtonItem && w.title.contains('식비'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('뒤로').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('현재 입력값 저장'));
+    await tester.pumpAndSettle();
+    // 금액 › → 완료 → 프리셋 저장 단계로 돌아온다
+    await tester.tap(find.byKey(const ValueKey('tx-preset-amount-row')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('완료'));
+    await tester.pumpAndSettle();
+    expect(find.text('프리셋으로 저장'), findsOneWidget);
+    // ← → 연 단계(1단계)
+    await tester.tap(find.bySemanticsLabel('뒤로').first);
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 2단계'), findsOneWidget);
+  });
+
+  testWidgets('N1 — 자산 목록을 못 받으면 저장 요청을 보내지 않고 Callout 을 낸다', (tester) async {
+    final repo = await _open(
+      tester,
+      (c) => showAddTxSheet(c, edit: _foreignTx),
+      assetsFail: true,
+    );
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, isEmpty, reason: '값을 추측해 보내지 않는다');
+    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
   });
 }
