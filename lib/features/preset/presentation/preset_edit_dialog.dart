@@ -1057,7 +1057,6 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
                 ),
               ],
             ),
-          const SizedBox(height: PSpacing.x2),
         ],
       ),
       footer: [
