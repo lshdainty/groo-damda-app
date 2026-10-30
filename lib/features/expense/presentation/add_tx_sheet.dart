@@ -327,7 +327,10 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       context,
       presets: mine,
       categories: categoriesAsync.value ?? const [],
-      categoriesFailed: !categoriesAsync.hasValue && categoriesAsync.hasError,
+      categoriesFailed:
+          !categoriesAsync.hasValue &&
+          categoriesAsync.hasError &&
+          !categoriesAsync.isLoading,
       onRetry: () => ref.invalidate(categoriesProvider),
     );
     if (picked == null || !mounted) return;

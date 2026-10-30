@@ -53,7 +53,8 @@ class CategoryPickBody extends ConsumerWidget {
     final c = context.colors;
     final async = ref.watch(categoriesProvider);
     if (!async.hasValue) {
-      if (async.hasError) {
+      // 다시 받는 중에는 오류가 남아 있어도 Skeleton 이다(비어 있는 목록 · 이전 실패로 읽히지 않게) — 실패는 받기를 마치고도 실패일 때만
+      if (async.hasError && !async.isLoading) {
         return Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: PSpacing.globalGutter,
