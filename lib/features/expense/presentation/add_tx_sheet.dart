@@ -317,22 +317,12 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
   /// 칩은 8개까지라 아홉 번째부터는 여기서만 쓸 수 있다.
   Future<void> _showAllPresets() async {
     final type = _input.type;
-    final categoriesAsync = ref.read(categoriesProvider);
     final mine = [
       for (final p
           in ref.read(presetListProvider).value ?? const <ExpenseTemplate>[])
         if (p.expenseType == type) p,
     ];
-    final picked = await showPresetPickSheet(
-      context,
-      presets: mine,
-      categories: categoriesAsync.value ?? const [],
-      categoriesFailed:
-          !categoriesAsync.hasValue &&
-          categoriesAsync.hasError &&
-          !categoriesAsync.isLoading,
-      onRetry: () => ref.invalidate(categoriesProvider),
-    );
+    final picked = await showPresetPickSheet(context, presets: mine);
     if (picked == null || !mounted) return;
     _applyPreset(picked);
   }

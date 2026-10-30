@@ -8336,6 +8336,12 @@ abstract class AppLocalizations {
   /// **'선택 사항'**
   String get presetMemoPlaceholder;
 
+  /// No description provided for @presetInterestTooLarge.
+  ///
+  /// In ko, this message translates to:
+  /// **'이자는 금액보다 클 수 없어요.'**
+  String get presetInterestTooLarge;
+
   /// No description provided for @presetNoneValue.
   ///
   /// In ko, this message translates to:

@@ -48,6 +48,20 @@ class PresetDetailBody extends ConsumerStatefulWidget {
 class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
   bool _busy = false;
   bool _deleteFailed = false;
+  final _failKey = GlobalKey();
+
+  /// 실패 Callout 을 보이는 자리로 올린다 — 본문이 길어 스크롤된 채 실패하면 맨 위 Callout 이 화면 밖이다.
+  void _revealFailure() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final c = _failKey.currentContext;
+      if (c != null) {
+        Scrollable.ensureVisible(
+          c,
+          duration: const Duration(milliseconds: 200),
+        );
+      }
+    });
+  }
 
   Future<void> _delete() async {
     if (_busy) return;
@@ -66,6 +80,7 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
       _busy = false;
       _deleteFailed = r.confirmed && r.failure != null;
     });
+    if (_deleteFailed) _revealFailure();
   }
 
   /// 시트 안 "다시 시도" — 묻지 않고 바로 지운다(이미 한 번 확정한 삭제).
@@ -86,6 +101,7 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
           _busy = false;
           _deleteFailed = true;
         });
+        _revealFailure();
       }
     }
   }
@@ -188,6 +204,7 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
                 PSpacing.x3,
               ),
               child: PCallout(
+                key: _failKey,
                 tone: PCalloutTone.critical,
                 alert: true,
                 description: l.presetDeleteFailed,

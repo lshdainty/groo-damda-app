@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
+import 'package:groo_damda_app/core/settings/settings_notifier.dart';
+import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -10,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/forms/search_match.dart';
 
 /// 내역 추가 시트의 "프리셋 고르기"(I-20 C 20) — 칩 줄 끝 "모두 보기" 를 누르면 뜬다. 밑줄 검색칸(이름 · 기본 내역에서 찾는다) +
@@ -21,9 +24,6 @@ import 'package:groo_damda_app/shared/forms/search_match.dart';
 Future<ExpenseTemplate?> showPresetPickSheet(
   BuildContext context, {
   required List<ExpenseTemplate> presets,
-  required List<ExpenseCategory> categories,
-  bool categoriesFailed = false,
-  VoidCallback? onRetry,
 }) {
   return PBottomSheet.show<ExpenseTemplate>(
     context,
@@ -34,60 +34,85 @@ Future<ExpenseTemplate?> showPresetPickSheet(
         closeLabel: l.actionClose,
         flushBody: true,
         scrollFog: true,
-        body: PresetPickBody(
-          presets: presets,
-          categories: categories,
-          failed: categoriesFailed,
-          onRetry: onRetry,
-        ),
+        body: PresetPickBody(presets: presets),
       );
     },
   );
 }
 
-class PresetPickBody extends StatefulWidget {
-  const PresetPickBody({
-    super.key,
-    required this.presets,
-    required this.categories,
-    this.failed = false,
-    this.onRetry,
-  });
+/// 본문은 **카테고리 조회를 스스로 지켜본다** — 시트를 연 뒤 [다시 시도] 로 받아 와도 화면이 바뀐다(예전엔 열 때 찍은 값을 들고 있어 실패
+/// 화면이 그대로였다). 받는 중에는 Skeleton, 못 받으면 실패 Result Section + 다시 시도, 받으면 줄(회색 "없는 카테고리" 로 읽히지 않는다).
+class PresetPickBody extends ConsumerStatefulWidget {
+  const PresetPickBody({super.key, required this.presets});
 
   /// 지금 종류의 프리셋 전부.
   final List<ExpenseTemplate> presets;
-  final List<ExpenseCategory> categories;
-
-  /// 카테고리 조회가 실패했다 — 줄 타일이 "없는 카테고리" 로 읽히지 않게 실패 Result Section + 다시 시도.
-  final bool failed;
-  final VoidCallback? onRetry;
 
   @override
-  State<PresetPickBody> createState() => _PresetPickBodyState();
+  ConsumerState<PresetPickBody> createState() => _PresetPickBodyState();
 }
 
-class _PresetPickBodyState extends State<PresetPickBody> {
+class _PresetPickBodyState extends ConsumerState<PresetPickBody> {
   String _query = '';
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.colors;
-    if (widget.failed) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: PSpacing.globalGutter),
-        child: PResultSection(
-          kind: PResultKind.failure,
-          size: PResultSize.medium,
-          title: l.presetCategoryLoadFailed,
-          description: l.dashFailDesc,
-          primaryAction: PResultAction(
-            label: l.actionRetry,
-            onPressed: widget.onRetry,
+    final catsAsync = ref.watch(categoriesProvider);
+    final masked = ref.watch(hideCardProvider('etc.preset'));
+    if (!catsAsync.hasValue) {
+      if (catsAsync.hasError && !catsAsync.isLoading) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: PSpacing.globalGutter,
           ),
-        ),
+          child: PResultSection(
+            kind: PResultKind.failure,
+            size: PResultSize.medium,
+            title: l.presetCategoryLoadFailed,
+            description: l.dashFailDesc,
+            primaryAction: PResultAction(
+              label: l.actionRetry,
+              onPressed: () => ref.invalidate(categoriesProvider),
+            ),
+          ),
+        );
+      }
+      return Column(
+        children: [
+          for (var i = 0; i < 4; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: PSpacing.globalGutter,
+                vertical: PSpacing.x3,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: PSpacing.x3,
+                children: [
+                  const PSkeleton(
+                    width: PListTile.size,
+                    height: PListTile.size,
+                    radius: PSkeletonRadius.r12,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: PSpacing.x1,
+                      children: [
+                        PSkeleton.text(PTypography.t5, width: 140),
+                        PSkeleton.text(PTypography.t3, width: 100),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       );
     }
+    final categories = catsAsync.requireValue;
     final shown = [
       for (final p in widget.presets)
         if (_query.trim().isEmpty ||
@@ -140,9 +165,10 @@ class _PresetPickBodyState extends State<PresetPickBody> {
                   preset: p,
                   category: p.categoryRowId == null
                       ? null
-                      : widget.categories
+                      : categories
                             .where((x) => x.rowId == p.categoryRowId)
                             .firstOrNull,
+                  masked: masked,
                   onTap: () => PBottomSheet.of(context).close(p),
                 ),
             ],

@@ -8,7 +8,6 @@ import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
@@ -138,6 +137,12 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
   String _stepOrigin = '';
   bool _leaving = false;
 
+  /// 규칙(받았는데 없음 · 카드 · 같은 계좌)이 화면 모르게 비운 칸 — 사용자가 바꾼 값이 아니므로 "바뀐 값" 으로 세지 않는다.
+  bool _catAuto = false;
+  bool _assetAuto = false;
+  bool _toAuto = false;
+  final _saveErrorKey = GlobalKey();
+
   bool get _isNew => widget.edit == null;
   bool get _isTransfer => _type == 'TRANSFER';
 
@@ -153,7 +158,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     _iPayment = e?.paymentMethod ?? '';
     _iAsset = e?.assetRowId;
     _iToAsset = e?.toAssetRowId;
-    _iFee = (e?.fee ?? 0) > 0 ? '${e!.fee}' : '';
+    _iFee = e?.fee != null && e!.fee! > 0 ? '${e.fee}' : '';
     _iInterest = (e?.interestAmount ?? 0) > 0 ? '${e!.interestAmount}' : '';
     // 금액이 있으면 고정(서버 resolveAmount: 고정 켬 ⇔ 금액 > 0)
     _iAmount = e != null && (e.lockAmount ?? 'N') == 'Y' && (e.amount ?? 0) > 0
@@ -210,6 +215,12 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
           ? isLoanTarget(_assets, _toAssetRowId)
           : _interest.isNotEmpty);
 
+  /// 이자는 금액을 넘을 수 없다 — 서버 `ASSET_TRANSFER_INVALID_INTEREST`. 저장을 누르면 이자 칸 아래에 알린다.
+  bool get _interestTooLarge =>
+      _showInterest &&
+      _interest.isNotEmpty &&
+      (int.tryParse(_interest) ?? 0) > _amountValue;
+
   String get _nameTrim => _nameCtrl.text.trim();
 
   /// 카테고리를 받았는가 — 못 받았으면 읽어 온 카테고리가 지워진 것인지 모른다.
@@ -231,29 +242,67 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
   bool get _dirty =>
       _type != _iType ||
       _nameCtrl.text != _iName ||
-      _categoryRowId != _iCategory ||
+      (_categoryRowId != _iCategory && !_catAuto) ||
       _merchant != _iMerchant ||
       _description != _iDescription ||
       _paymentMethod != _iPayment ||
-      _assetRowId != _iAsset ||
-      _toAssetRowId != _iToAsset ||
+      (_assetRowId != _iAsset && !_assetAuto) ||
+      (_toAssetRowId != _iToAsset && !_toAuto) ||
       _fee != _iFee ||
       _interest != _iInterest ||
       _amount != _iAmount ||
       _isFixed != _iFixed;
 
-  /// 종류 · 받는 계좌 · 금액이 바뀌면 이어진 칸을 맞춘다 — 안 맞는 값이 남으면 저장할 때 서버가 거절한다.
+  /// 종류 · 계좌 · 금액이 바뀌면 이어진 칸을 맞춘다 — **규칙 밖 값은 서버가 거절하기 전에 화면이 먼저 비우고** 그 칸 아래 오류 글로
+  /// 안내한다(저장 때 누르면 보인다). 목록을 **받기 전에는** 지우지 않는다(모르는 채로 지우면 읽어 온 값이 사라진다 — 웹 20-2 후속).
+  /// - 받았는데 목록에 없는(지운) 계좌 · 카테고리 · 하위가 생겨 상위가 된 카테고리
+  /// - 이체인데 카드인 계좌(카드는 이체 상대가 될 수 없다 — 서버 `RecurringTransferValidator`)
+  /// - 보내는 계좌와 같은 받는 계좌
   void _normalize() {
+    if (_assetsLoaded) {
+      final all = _assets;
+      bool exists(int? id) => id == null || all.any((a) => a.rowId == id);
+      if (!exists(_assetRowId)) {
+        _assetRowId = null;
+        _assetAuto = true;
+      }
+      if (!exists(_toAssetRowId)) {
+        _toAssetRowId = null;
+        _toAuto = true;
+      }
+      if (_isTransfer) {
+        final ok = transferEligibleAssets(all);
+        if (_assetRowId != null && !ok.any((a) => a.rowId == _assetRowId)) {
+          _assetRowId = null;
+          _assetAuto = true;
+        }
+        if (_toAssetRowId != null && !ok.any((a) => a.rowId == _toAssetRowId)) {
+          _toAssetRowId = null;
+          _toAuto = true;
+        }
+      }
+    }
     if (_isTransfer) {
       _categoryRowId = null;
+      if (_assetRowId != null && _assetRowId == _toAssetRowId) {
+        _toAssetRowId = null;
+        _toAuto = true;
+      }
     } else {
       _toAssetRowId = null;
       _fee = '';
       _interest = '';
       final cat = _selectedCategory;
       if (cat != null && cat.expenseType != _type) _categoryRowId = null;
-      // 받았는데 목록에 없는(지운) 카테고리는 비운다 — 받기 전에는 두는 것이 위 [_hasCategory] 규칙이다
-      if (_categoriesLoaded && cat == null) _categoryRowId = null;
+      if (_categoriesLoaded) {
+        final id = _categoryRowId;
+        // 받았는데 목록에 없거나 하위가 생겨 상위가 됐으면(고를 수 없다) 비운다
+        if (id != null &&
+            (cat == null || _categories.any((c) => c.parentRowId == id))) {
+          _categoryRowId = null;
+          _catAuto = true;
+        }
+      }
     }
     if (!_showInterest) _interest = '';
   }
@@ -271,7 +320,10 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
           in ref.read(presetListProvider).value ?? const <ExpenseTemplate>[])
         if (p.rowId != widget.edit?.rowId) p.templateName,
     ];
-    return nameIssue(_nameCtrl.text, kPresetNameMax, taken);
+    final issue = nameIssue(_nameCtrl.text, kPresetNameMax, taken);
+    // 안 바꾼 옛 이름은 12자 검사에서 뺀다(웹과 같다) — 12자가 넘는 옛 프리셋도 다른 칸은 고칠 수 있어야 한다
+    if (issue == NameIssue.tooLong && _nameCtrl.text == _iName) return null;
+    return issue;
   }
 
   String? _nameError(AppLocalizations l) {
@@ -320,7 +372,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         final n = parseAmountInput(text) ?? 0;
         final digits = n > 0 ? '$n' : '';
         if (s == _Step.amount) _amount = digits;
-        if (s == _Step.fee) _fee = digits;
+        // 수수료 0 은 0 으로 둔다(웹과 같다 — 비우면 없음)
+        if (s == _Step.fee) _fee = text.trim().isEmpty ? '' : '$n';
         if (s == _Step.interest) _interest = digits;
       } else if (s == _Step.merchant) {
         _merchant = text;
@@ -363,7 +416,10 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       selectedRowId: _selectedCategory?.rowId,
     );
     if (picked == null || !mounted) return;
-    setState(() => _categoryRowId = picked);
+    setState(() {
+      _categoryRowId = picked;
+      _catAuto = false;
+    });
   }
 
   PickItem<int> _assetItem(Asset a) => PickItem<int>(
@@ -412,7 +468,10 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       withNone: true,
     );
     if (picked == null || !mounted) return;
-    setState(() => _assetRowId = picked == _kNoAsset ? null : picked);
+    setState(() {
+      _assetRowId = picked == _kNoAsset ? null : picked;
+      _assetAuto = false;
+    });
   }
 
   Future<void> _pickFrom() async {
@@ -424,7 +483,15 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       withNone: false,
     );
     if (picked == null || !mounted) return;
-    setState(() => _assetRowId = picked);
+    setState(() {
+      _assetRowId = picked;
+      _assetAuto = false;
+      // 받는 계좌와 같으면 받는 계좌를 비운다 — 후보에서 빼지 않는다. 저장을 누르면 "받는 계좌를 골라주세요." 가 그 칸 아래에 뜬다
+      if (_toAssetRowId == picked) {
+        _toAssetRowId = null;
+        _toAuto = false;
+      }
+    });
   }
 
   Future<void> _pickTo() async {
@@ -441,6 +508,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     if (picked == null || !mounted) return;
     setState(() {
       _toAssetRowId = picked;
+      _toAuto = false;
       _normalize();
     });
   }
@@ -493,14 +561,17 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         (_isTransfer
             ? !transferPartiesReady(_assetRowId, _toAssetRowId)
             : !_hasCategory) ||
-        _amountValue > kAmountMax;
+        _amountValue > kAmountMax ||
+        _interestTooLarge;
     if (bad) {
       if (issue != null) _nameFocus.requestFocus();
       return;
     }
+    // 요청이 오가는 동안 시트가 닫힐 수 있다 — 닫힌 뒤에는 ref 를 못 쓰므로 컨테이너를 먼저 잡는다
+    final container = ProviderScope.containerOf(context);
     setState(() => _submitting = true);
     try {
-      final repo = await ref.read(presetRepositoryProvider.future);
+      final repo = await container.read(presetRepositoryProvider.future);
       final name = _nameTrim;
       final merchant = _merchant.trim();
       final desc = _description.trim();
@@ -516,7 +587,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         await repo.update(
           id: widget.edit!.rowId,
           templateName: name,
-          categoryRowId: _isTransfer ? null : _categoryRowId,
+          // 이체는 명시적 null — 키를 빼면 서버가 옛 카테고리를 유지해 TRANSFER 와 짝이 안 맞아 400 이다
+          categoryRowId: Patch.set(_isTransfer ? null : _categoryRowId),
           assetRowId: Patch.set(_assetRowId),
           toAssetRowId: Patch.set(_isTransfer ? _toAssetRowId : null),
           fee: Patch.set(fee),
@@ -556,16 +628,26 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         );
       }
       // 목록을 다시 받은 **뒤에** 닫는다 — 닫혔을 때 줄이 이미 새 값이다
-      ref.invalidate(presetListProvider);
+      container.invalidate(presetListProvider);
       try {
-        await ref.read(presetListProvider.future);
+        await container.read(presetListProvider.future);
       } catch (_) {}
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
-      // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글)
+    } catch (_) {
+      // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글). 서버가 거절하든 저장소를 못 만들든 같다
       if (!mounted) return;
       setState(() => _saveError = true);
+      // 폼을 아래까지 내려 저장했으면 Callout 이 화면 밖이다 — 보이는 자리로 올린다
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final c = _saveErrorKey.currentContext;
+        if (c != null) {
+          Scrollable.ensureVisible(
+            c,
+            duration: const Duration(milliseconds: 200),
+          );
+        }
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -665,7 +747,6 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         onPressed: _confirmStep,
       ),
       flushBody: true,
-      scrollFog: true,
       body: body,
     );
   }
@@ -677,23 +758,72 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     required String value,
     required _Step step,
     int maxLines = 2,
-  }) => PListButtonItem(
-    title: title,
-    prefix: Icon(icon),
-    onTap: () => _enterStep(step),
-    suffix: PListSuffix(
-      children: [
-        Text(
-          keepAll(value),
-          semanticsLabel: value,
-          textAlign: TextAlign.end,
-          maxLines: maxLines,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const ExcludeSemantics(child: Icon(LucideIcons.chevronRight)),
-      ],
+    String? errorMessage,
+  }) => _withError(
+    errorMessage,
+    PListButtonItem(
+      title: title,
+      prefix: Icon(icon),
+      onTap: () => _enterStep(step),
+      suffix: PListSuffix(
+        children: [
+          Text(
+            keepAll(value),
+            semanticsLabel: value,
+            textAlign: TextAlign.end,
+            maxLines: maxLines,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const ExcludeSemantics(child: Icon(LucideIcons.chevronRight)),
+        ],
+      ),
     ),
   );
+
+  /// 줄 아래 오류 한 줄(좌우 24) — [PickerRow] 의 오류와 같은 모양이다.
+  Widget _withError(String? message, Widget row) {
+    if (message == null) return row;
+    final c = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        row,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            PSpacing.globalGutter,
+            0,
+            PSpacing.globalGutter,
+            PSpacing.x2,
+          ),
+          child: Semantics(
+            liveRegion: true,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: PSpacing.x1_5,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: PSpacing.x0_5),
+                  child: ExcludeSemantics(
+                    child: Icon(
+                      LucideIcons.circleAlert,
+                      size: 16,
+                      color: c.fgCritical,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: PTypography.t4.copyWith(color: c.fgCritical),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildForm(AppLocalizations l) {
     final c = context.colors;
@@ -714,6 +844,12 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     String won(String digits) =>
         krwSigned(int.parse(digits), false, unit: true);
     final amountValue = _amount.isEmpty ? l.presetAmountBlank : won(_amount);
+    final amountError = _attempted && _amountValue > kAmountMax
+        ? l.amountTooLarge
+        : null;
+    final interestError = _attempted && _interestTooLarge
+        ? l.presetInterestTooLarge
+        : null;
     final preview = ExpenseTemplate(
       rowId: 0,
       templateName: '',
@@ -737,6 +873,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
                 PSpacing.x3,
               ),
               child: PCallout(
+                key: _saveErrorKey,
                 tone: PCalloutTone.critical,
                 alert: true,
                 description: l.presetSaveFailed,
@@ -836,6 +973,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               icon: LucideIcons.coins,
               value: amountValue,
               step: _Step.amount,
+              errorMessage: amountError,
             ),
             _stepRow(
               title: l.presetFeeLabel,
@@ -849,6 +987,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
                 icon: LucideIcons.percent,
                 value: _interest.isEmpty ? none : won(_interest),
                 step: _Step.interest,
+                errorMessage: interestError,
               ),
           ] else ...[
             PickerRow(
@@ -891,6 +1030,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               icon: LucideIcons.coins,
               value: amountValue,
               step: _Step.amount,
+              errorMessage: amountError,
             ),
           ],
           _stepRow(

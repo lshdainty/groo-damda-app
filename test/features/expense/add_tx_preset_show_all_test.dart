@@ -46,14 +46,20 @@ List<ExpenseTemplate> _mixed() => [
     ExpenseTemplate(rowId: i + 10, templateName: '수입$i', expenseType: 'INCOME'),
 ];
 
-Future<void> _open(WidgetTester tester, List<ExpenseTemplate> presets) async {
+Future<void> _open(
+  WidgetTester tester,
+  List<ExpenseTemplate> presets, {
+  Future<List<ExpenseCategory>> Function()? categories,
+}) async {
   tester.view.physicalSize = const Size(1500, 2600);
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        categoriesProvider.overrideWith((ref) async => [_cat]),
+        categoriesProvider.overrideWith(
+          (ref) => categories?.call() ?? Future.value([_cat]),
+        ),
         assetsProvider.overrideWith((ref) async => []),
         presetListProvider.overrideWith((ref) async => presets),
       ],
@@ -108,5 +114,28 @@ void main() {
     await tester.enterText(find.byType(EditableText).last, '없는이름');
     await tester.pumpAndSettle();
     expect(find.text(l.presetNoResult), findsOneWidget);
+  });
+
+  // B2 — 고르기 시트가 카테고리 조회를 스스로 지켜본다: 실패 → [다시 시도] → 받으면 화면이 줄로 바뀐다
+  testWidgets('카테고리 조회가 실패하면 실패 화면 · 다시 시도로 받으면 줄이 나온다', (tester) async {
+    var calls = 0;
+    await _open(
+      tester,
+      _nine(),
+      categories: () async {
+        calls++;
+        if (calls == 1) throw Exception('x');
+        return [_cat];
+      },
+    );
+    await tester.drag(find.byType(ListView).first, const Offset(-3000, 0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l.presetShowAll));
+    await tester.pumpAndSettle();
+    expect(find.text(l.presetCategoryLoadFailed), findsOneWidget);
+    await tester.tap(find.text(l.actionRetry));
+    await tester.pumpAndSettle();
+    expect(find.text(l.presetCategoryLoadFailed), findsNothing);
+    expect(find.text('지출8'), findsOneWidget);
   });
 }

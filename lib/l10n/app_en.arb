@@ -2576,6 +2576,7 @@
   "presetAmountBlank": "Left blank",
   "presetAmountHint": "If left blank, you enter the amount when you load it.",
   "presetMemoPlaceholder": "Optional",
+  "presetInterestTooLarge": "Interest can't be more than the amount.",
   "presetNoneValue": "None",
   "presetMemoNone": "No memo",
   "presetNoAccount": "No account or card",

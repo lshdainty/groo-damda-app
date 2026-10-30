@@ -93,7 +93,7 @@ class _Repo extends PresetRepository {
   Future<ExpenseTemplate> update({
     required int id,
     required String templateName,
-    int? categoryRowId,
+    Patch<int> categoryRowId = const Patch.keep(),
     Patch<int> assetRowId = const Patch.keep(),
     Patch<int> toAssetRowId = const Patch.keep(),
     Patch<int> fee = const Patch.keep(),
@@ -108,7 +108,7 @@ class _Repo extends PresetRepository {
     bool silent = false,
   }) async {
     sent = {'id': id, 'silent': silent};
-    categorySent = categoryRowId;
+    categorySent = categoryRowId.value;
     this.assetRowId = assetRowId;
     this.merchant = merchant;
     this.paymentMethod = paymentMethod;

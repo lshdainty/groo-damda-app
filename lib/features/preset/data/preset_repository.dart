@@ -84,7 +84,7 @@ class PresetRepository {
   /// 읽어 온 값을 그대로 되돌려 보냈는데(#326), 이제 시트에 칸이 생겼으므로(D2)
   /// **비운 상태 그대로 실어야 지워진다.**
   ///
-  /// [categoryRowId] 는 폼이 필수로 강제한다(비면 저장 버튼이 안 눌린다) — 늘 값이 실린다.
+  /// [categoryRowId] 는 지출 · 수입에서 폼이 필수로 강제하고, 이체는 명시적 null 로 지운다(아래 매개변수 설명).
   ///
   /// [amount] 는 [lockAmount] 가 정한다. 서버 `resolveAmount` 가 `lockAmount != 'Y'` 면
   /// 실린 금액과 상관없이 null 로 접으므로, 고정을 끄면 키가 빠져도 금액이 지워진다.
@@ -92,7 +92,10 @@ class PresetRepository {
   Future<ExpenseTemplate> update({
     required int id,
     required String templateName,
-    int? categoryRowId,
+
+    /// 이 시트가 가진 칸이라 **늘 싣는다** — 이체로 바꿔 저장하면 명시적 null 로 옛 카테고리를 지운다. 서버는 키가 없으면 유지로 읽어
+    /// (`ExpenseTemplateServiceImpl`) 옛 카테고리와 TRANSFER 가 짝이 안 맞아 400 이 된다.
+    Patch<int> categoryRowId = const Patch.keep(),
     Patch<int> assetRowId = const Patch.keep(),
 
     /// 이체 칸도 이 시트의 칸이다 — 지출·수입으로 바꿔 저장하면 null 을 실어 지운다.
@@ -115,7 +118,7 @@ class PresetRepository {
         '/expense-template/$id',
         data: {
           'templateName': templateName,
-          'categoryRowId': ?categoryRowId,
+          if (categoryRowId.present) 'categoryRowId': categoryRowId.value,
           if (assetRowId.present) 'assetRowId': assetRowId.value,
           if (toAssetRowId.present) 'toAssetRowId': toAssetRowId.value,
           if (fee.present) 'fee': fee.value,

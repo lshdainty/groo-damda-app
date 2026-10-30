@@ -4487,6 +4487,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetMemoPlaceholder => '선택 사항';
 
   @override
+  String get presetInterestTooLarge => '이자는 금액보다 클 수 없어요.';
+
+  @override
   String get presetNoneValue => '없음';
 
   @override

@@ -109,9 +109,10 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
     final listAsync = ref.watch(presetListProvider);
     final catsAsync = ref.watch(categoriesProvider);
     // 두 조회 중 **아직 값도 오류도 없는** 쪽이 있으면 첫 로딩이다 — 다시 받는 중이어도 값이 있으면 그 값을 그린다.
+    // 오류를 든 채 다시 받는 중(AsyncLoading + 이전 오류)은 실패 화면이 아니라 Skeleton 이다(웹과 같다)
     final loading =
-        (!listAsync.hasValue && !listAsync.hasError) ||
-        (!catsAsync.hasValue && !catsAsync.hasError);
+        (!listAsync.hasValue && (!listAsync.hasError || listAsync.isLoading)) ||
+        (!catsAsync.hasValue && (!catsAsync.hasError || catsAsync.isLoading));
     final failed = !loading && (!listAsync.hasValue || !catsAsync.hasValue);
     final items = listAsync.value ?? const <ExpenseTemplate>[];
 
@@ -193,7 +194,11 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
       icon: LucideIcons.bookmark,
       title: l.presetEmptyTitle,
       description: l.presetEmptyDesc,
-      primaryAction: PResultAction(label: l.presetAdd, onPressed: _add),
+      primaryAction: PResultAction(
+        label: l.presetAdd,
+        onPressed: _add,
+        icon: LucideIcons.plus,
+      ),
     ),
   );
 

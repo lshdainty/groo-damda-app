@@ -4576,6 +4576,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presetMemoPlaceholder => 'Optional';
 
   @override
+  String get presetInterestTooLarge =>
+      'Interest can\'t be more than the amount.';
+
+  @override
   String get presetNoneValue => 'None';
 
   @override
