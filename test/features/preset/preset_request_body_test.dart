@@ -342,12 +342,14 @@ void main() {
     expect(cap.requests, hasLength(1));
   });
 
-  testWidgets('D6 수수료 0 은 0 으로 나간다(웹과 같다)', (tester) async {
+  testWidgets('D6 수수료 0 은 없음 · null 로 나간다(웹과 같다)', (tester) async {
     final cap = await open(tester, _loanPreset);
     await step(tester, l.presetFeeLabel, '0');
-    expect(t('0원'), findsOneWidget);
+    expect(t(l.presetNoneValue), findsWidgets);
+    expect(t('0원'), findsNothing);
     await tap(tester, btn(l.actionSave));
-    expect(cap.lastBody!['fee'], 0);
+    expect(cap.lastBody!.containsKey('fee'), isTrue);
+    expect(cap.lastBody!['fee'], isNull);
   });
 
   testWidgets('지운 카테고리를 가리키는 프리셋은 열기만 해서 닫을 때는 안 묻는다', (tester) async {

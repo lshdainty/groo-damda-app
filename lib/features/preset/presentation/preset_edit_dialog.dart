@@ -372,8 +372,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         final n = parseAmountInput(text) ?? 0;
         final digits = n > 0 ? '$n' : '';
         if (s == _Step.amount) _amount = digits;
-        // 수수료 0 은 0 으로 둔다(웹과 같다 — 비우면 없음)
-        if (s == _Step.fee) _fee = text.trim().isEmpty ? '' : '$n';
+        // 수수료 0 은 수수료가 없는 것이다 — 비운 것과 같이 "없음" · null (서버도 null 과 0 을 같게 읽는다)
+        if (s == _Step.fee) _fee = digits;
         if (s == _Step.interest) _interest = digits;
       } else if (s == _Step.merchant) {
         _merchant = text;
