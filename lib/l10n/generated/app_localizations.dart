@@ -4610,12 +4610,6 @@ abstract class AppLocalizations {
   /// **'설정된 카테고리 예산이 없어요'**
   String get budgetNoCategorySet;
 
-  /// No description provided for @cardBenefitTypeAll.
-  ///
-  /// In ko, this message translates to:
-  /// **'혜택 전체'**
-  String get cardBenefitTypeAll;
-
   /// No description provided for @cardBenefitTypeDiscount.
   ///
   /// In ko, this message translates to:
@@ -4627,12 +4621,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'적립'**
   String get cardBenefitTypePoint;
-
-  /// No description provided for @cardBenefitTypeCashback.
-  ///
-  /// In ko, this message translates to:
-  /// **'캐시백'**
-  String get cardBenefitTypeCashback;
 
   /// No description provided for @cardBenefitTypeMileage.
   ///
@@ -4655,7 +4643,7 @@ abstract class AppLocalizations {
   /// No description provided for @cardSearchHintFull.
   ///
   /// In ko, this message translates to:
-  /// **'카드명, 브랜드, 혜택으로 검색'**
+  /// **'카드 이름, 카드사로 검색'**
   String get cardSearchHintFull;
 
   /// No description provided for @cardSearchHintNameCompany.
@@ -4667,7 +4655,7 @@ abstract class AppLocalizations {
   /// No description provided for @cardDetailLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'카드 상세 로드 실패'**
+  /// **'카드 정보를 불러오지 못했어요'**
   String get cardDetailLoadError;
 
   /// No description provided for @cardSearchError.
@@ -4703,7 +4691,7 @@ abstract class AppLocalizations {
   /// No description provided for @cardBenefitDetailCount.
   ///
   /// In ko, this message translates to:
-  /// **'혜택 상세 · {count}건'**
+  /// **'혜택 {count}개'**
   String cardBenefitDetailCount(int count);
 
   /// No description provided for @cardExpandAll.
@@ -4745,7 +4733,7 @@ abstract class AppLocalizations {
   /// No description provided for @cardPerfNone.
   ///
   /// In ko, this message translates to:
-  /// **'실적 무관'**
+  /// **'실적 없음'**
   String get cardPerfNone;
 
   /// No description provided for @cardFeeDomesticOnly.
@@ -4763,14 +4751,8 @@ abstract class AppLocalizations {
   /// No description provided for @cardPerfMonthly.
   ///
   /// In ko, this message translates to:
-  /// **'실적 {amount}/월'**
+  /// **'실적 {amount}'**
   String cardPerfMonthly(String amount);
-
-  /// No description provided for @cardAnnualFeeValue.
-  ///
-  /// In ko, this message translates to:
-  /// **'연회비 {fee}'**
-  String cardAnnualFeeValue(String fee);
 
   /// No description provided for @cardPerfMonthTitle.
   ///
@@ -4799,20 +4781,86 @@ abstract class AppLocalizations {
   /// No description provided for @cardTotalCount.
   ///
   /// In ko, this message translates to:
-  /// **'총 {count}건'**
-  String cardTotalCount(int count);
+  /// **'총 {count}장'**
+  String cardTotalCount(String count);
 
   /// No description provided for @cardNoResults.
   ///
   /// In ko, this message translates to:
-  /// **'결과가 없어요'**
+  /// **'찾는 카드가 없어요'**
   String get cardNoResults;
 
   /// No description provided for @cardNoResultsHint.
   ///
   /// In ko, this message translates to:
-  /// **'다른 검색어를 시도해보세요'**
+  /// **'다른 검색어나 조건으로 찾아보세요.'**
   String get cardNoResultsHint;
+
+  /// No description provided for @cardRowFeeAmount.
+  ///
+  /// In ko, this message translates to:
+  /// **'연회비 {amount}'**
+  String cardRowFeeAmount(String amount);
+
+  /// No description provided for @cardRowFeeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'연회비 {label}'**
+  String cardRowFeeLabel(String label);
+
+  /// No description provided for @cardRowFeeNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'연회비 없음'**
+  String get cardRowFeeNone;
+
+  /// No description provided for @cardRowFeeUnknown.
+  ///
+  /// In ko, this message translates to:
+  /// **'연회비 정보 없음'**
+  String get cardRowFeeUnknown;
+
+  /// No description provided for @cardTypeChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 종류'**
+  String get cardTypeChip;
+
+  /// No description provided for @cardBenefitChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'혜택'**
+  String get cardBenefitChip;
+
+  /// No description provided for @cardFilterBar.
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 거르기'**
+  String get cardFilterBar;
+
+  /// No description provided for @cardFilterClear.
+  ///
+  /// In ko, this message translates to:
+  /// **'조건 모두 지우기'**
+  String get cardFilterClear;
+
+  /// No description provided for @cardFailDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get cardFailDesc;
+
+  /// No description provided for @cardBrands.
+  ///
+  /// In ko, this message translates to:
+  /// **'브랜드'**
+  String get cardBrands;
+
+  /// No description provided for @cardNoBenefits.
+  ///
+  /// In ko, this message translates to:
+  /// **'등록된 혜택이 없어요.'**
+  String get cardNoBenefits;
 
   /// No description provided for @cardPickerNoMatch.
   ///

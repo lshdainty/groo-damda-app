@@ -1470,22 +1470,20 @@
   },
   "budgetAdd": "Add budget",
   "budgetNoCategorySet": "No category budgets set",
-  "cardBenefitTypeAll": "All benefits",
   "cardBenefitTypeDiscount": "Discount",
   "cardBenefitTypePoint": "Points",
-  "cardBenefitTypeCashback": "Cashback",
   "cardBenefitTypeMileage": "Mileage",
   "cardBenefitsTitle": "Card benefits",
   "cardSelectTitle": "Select card",
-  "cardSearchHintFull": "Search by name, brand, or benefit",
+  "cardSearchHintFull": "Search by card name or issuer",
   "cardSearchHintNameCompany": "Search card / issuer",
-  "cardDetailLoadError": "Failed to load card details",
+  "cardDetailLoadError": "Couldn't load card information",
   "cardSearchError": "Card search failed",
   "cardAddFailed": "Failed to add",
   "cardDeleteFailed": "Failed to delete",
   "cardLastMonthPerf": "Last month spend",
   "cardKeyBenefitTags": "Key benefit tags",
-  "cardBenefitDetailCount": "Benefit details · {count}",
+  "cardBenefitDetailCount": "{count} benefits",
   "@cardBenefitDetailCount": {
     "placeholders": {
       "count": {
@@ -1499,7 +1497,7 @@
   "cardNone": "None",
   "cardFeeUnknown": "Unknown",
   "cardFeeFree": "Free",
-  "cardPerfNone": "No spend requirement",
+  "cardPerfNone": "No spending requirement",
   "cardFeeDomesticOnly": "Domestic only {amount}",
   "@cardFeeDomesticOnly": {
     "placeholders": {
@@ -1516,18 +1514,10 @@
       }
     }
   },
-  "cardPerfMonthly": "Spend {amount}/mo",
+  "cardPerfMonthly": "Spending {amount}",
   "@cardPerfMonthly": {
     "placeholders": {
       "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "cardAnnualFeeValue": "Annual fee {fee}",
-  "@cardAnnualFeeValue": {
-    "placeholders": {
-      "fee": {
         "type": "String"
       }
     }
@@ -1550,16 +1540,41 @@
     }
   },
   "cardIncludeDiscontinued": "Include discontinued cards",
-  "cardTotalCount": "{count} total",
+  "cardTotalCount": "{count} cards",
   "@cardTotalCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
-  "cardNoResults": "No results",
-  "cardNoResultsHint": "Try a different search term",
+  "cardNoResults": "No cards found",
+  "cardNoResultsHint": "Try a different search term or filter.",
+  "cardRowFeeAmount": "Annual fee {amount}",
+  "@cardRowFeeAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardRowFeeLabel": "Annual fee {label}",
+  "@cardRowFeeLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "cardRowFeeNone": "No annual fee",
+  "cardRowFeeUnknown": "Annual fee unknown",
+  "cardTypeChip": "Card type",
+  "cardBenefitChip": "Benefit",
+  "cardFilterBar": "Card filters",
+  "cardFilterClear": "Clear all filters",
+  "cardFailDesc": "Please try again in a moment.",
+  "cardBrands": "Brands",
+  "cardNoBenefits": "No registered benefits.",
   "cardPickerNoMatch": "No matching cards",
   "categoryManageTitle": "Manage categories",
   "categorySearchHint": "Search categories",
