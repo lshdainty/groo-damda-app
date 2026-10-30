@@ -1902,7 +1902,6 @@
   "expPresetEmpty": "저장된 프리셋이 없어요. 자주 쓰는 내역을 입력 후 “현재 입력값 저장”을 눌러보세요.",
   "expPresetFilled": "프리셋 값이 채워졌어요. 금액·내역만 수정해서 저장하세요.",
   "expClear": "해제",
-  "expPresetManageHint": "설정 → 프리셋 관리",
   "expSaveFailed": "저장 실패",
   "expPresetSaveTitle": "프리셋으로 저장",
   "expPresetNamePlaceholder": "예: 점심 도시락",
@@ -2526,54 +2525,96 @@
   "notiEmailWeekly": "매주",
   "notiEmailMonthly": "매월",
   "presetManageTitle": "프리셋 관리",
-  "presetLoadError": "프리셋 로드 실패",
-  "presetDeleteTitle": "프리셋 삭제",
   "presetDetailTitle": "프리셋 상세",
-  "presetTypeLabel": "유형",
-  "presetDeleteConfirm": "\"{name}\" 프리셋을 삭제할까요? 이미 저장된 거래 내역에는 영향이 없어요. 삭제한 프리셋은 되돌릴 수 없어요.",
-  "@presetDeleteConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "presetDeleted": "프리셋이 삭제되었습니다",
-  "presetDeleteFailed": "삭제 실패",
-  "presetIntroTitle": "프리셋이란?",
-  "presetIntroBody": "자주 쓰는 내역(점심·커피·교통비 등)을 미리 저장해두면, 내역 추가 화면에서 한 번 탭으로 카테고리·결제수단·내역을 모두 채워넣어요. 금액만 바꿔서 단건으로 저장하기 좋습니다.",
-  "presetStatSaved": "저장된 프리셋",
-  "presetStatUses": "누적 사용",
-  "presetUsesCount": "{count}회",
-  "@presetUsesCount": {
+  "presetTypeLabel": "종류",
+  "presetDeleteConfirm": "이미 기록된 거래는 그대로 남아요. 삭제한 프리셋은 되돌릴 수 없어요.",
+  "presetDeleteFailed": "프리셋을 삭제하지 못했어요",
+  "presetSortUsed": "사용 많은 순",
+  "presetSortRecent": "최근 사용",
+  "presetSortName": "이름순",
+  "presetListTitle": "프리셋 {count}개",
+  "@presetListTitle": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "presetStatType": "지출 / 수입",
-  "presetSortUsed": "사용 많은 순",
-  "presetSortRecent": "최근 사용",
-  "presetSortName": "이름순",
+  "presetUses": "{count}번",
+  "@presetUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "presetSortLabel": "정렬",
+  "presetLoadFailed": "프리셋을 불러오지 못했어요",
+  "presetCategoryLoadFailed": "카테고리를 불러오지 못했어요",
+  "presetDeleteConfirmTitle": "\"{name}\" 프리셋을 삭제할까요?",
+  "@presetDeleteConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "presetNoteFixed": "고정 금액",
+  "presetNoteUses": "{count}번 썼어요",
+  "@presetNoteUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "presetNoteUnused": "아직 쓰지 않았어요",
+  "presetNoteLast": "마지막 {month}월 {day}일",
+  "@presetNoteLast": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "presetFixedOn": "켬",
+  "presetFixedOff": "끔",
+  "presetNameRequired": "이름을 입력해주세요.",
+  "presetNameTooLong": "프리셋 이름은 12자 이내로 입력해주세요.",
+  "presetCategoryRequired": "카테고리를 골라주세요.",
+  "presetFromRequired": "보내는 계좌를 골라주세요.",
+  "presetToRequired": "받는 계좌를 골라주세요.",
+  "presetSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "presetAmountLabel": "금액",
+  "presetFeeLabel": "수수료",
+  "presetAmountBlank": "비워 둠",
+  "presetAmountHint": "비워 두면 불러올 때 금액을 직접 넣어요.",
+  "presetMemoPlaceholder": "선택 사항",
+  "presetNoneValue": "없음",
+  "presetMemoNone": "메모 없음",
+  "presetNoAccount": "계좌·카드 없음",
+  "presetNoPayment": "결제 수단 없음",
+  "presetNoCategoryOfKind": "이 종류의 카테고리가 없어요.",
+  "presetFromAccount": "보내는 계좌",
+  "presetToAccount": "받는 계좌",
+  "presetShowAll": "모두 보기",
+  "presetPickTitle": "프리셋 고르기",
+  "presetSearch": "프리셋 검색",
+  "presetNoResult": "찾는 프리셋이 없어요.",
   "presetAdd": "프리셋 추가",
   "presetAmountEmpty": "금액 비움",
   "presetNoCategory": "카테고리 없음",
   "presetEmptyTitle": "저장된 프리셋이 없어요",
-  "presetEmptyDesc": "자주 쓰는 내역을 추가해 매번 입력하는 수고를 줄여보세요.",
+  "presetEmptyDesc": "자주 쓰는 내역(점심 · 교통비 등)을 저장해 두면 내역을 추가할 때 한 번 눌러 카테고리 · 계좌 · 내역을 채워요.",
   "presetEditTitle": "프리셋 수정",
   "presetSubmitAdd": "추가",
   "presetName": "프리셋 이름",
   "presetMerchant": "기본 내역",
-  "presetMerchantPlaceholder": "예: 한솥 도시락",
-  "presetSelectNone": "선택 안 함",
+  "presetMerchantPlaceholder": "예: 회사 앞 도시락",
   "presetAssetCard": "계좌·카드",
-  "presetAssetLoadError": "자산 로드 실패",
-  "presetLockToggle": "고정 금액 사용",
-  "presetLockDesc": "꺼두면 불러올 때 금액이 비어있어요. 매번 다른 금액일 때 편해요.",
-  "presetLockAmountLabel": "고정 금액",
-  "presetUpdated": "프리셋이 수정되었습니다",
-  "presetCreated": "프리셋이 추가되었습니다",
   "recurringToggleFailed": "변경 실패",
   "recurringDeleteTitle": "반복 거래 삭제",
   "recurringDeleteConfirm": "\"{name}\" 반복 설정을 삭제할까요? 이미 기록된 거래는 그대로 남아요. 삭제한 반복 설정은 되돌릴 수 없어요.",
@@ -4356,7 +4397,7 @@
   "recurringFixedSub": "이 반복이 앞으로 만드는 거래가 고정으로 기록돼요",
   "presetFixedTitleExpense": "고정 지출로 기록",
   "presetFixedTitleIncome": "고정 수입으로 기록",
-  "presetFixedDesc": "이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요. 위의 고정 금액과는 별개예요.",
+  "presetFixedDesc": "이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요.",
   "hideCardStatsFixed": "고정·변동 탭",
   "statsTabFixed": "고정·변동",
   "statsFixedViewAria": "보기 방식",

@@ -1,181 +1,289 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
-import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
+import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
+import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
+import 'package:groo_damda_app/features/preset/presentation/preset_actions.dart';
+import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
-import 'package:groo_damda_app/shared/widgets/p_detail.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 
-/// 프리셋 상세 시트 — 행 탭 → 읽기 전용 상세 → footer 에서 삭제·수정.
+/// 상세에서 돌려주는 동작 — 삭제는 이 시트 안에서 끝낸다(확인창 → 지움 → 목록을 다시 받은 뒤 닫힘).
+enum PresetDetailAction { edit }
+
+const _tabular = [FontFeature.tabularFigures()];
+
+/// 프리셋 상세(I-20 C 18) — 조회 시트(바깥 누름 · 끌어내림으로 닫힌다). 머리(타일 48 + 이름) → 금액 → 설명 한 줄 → 키-값 줄.
+/// 값이 없는 줄은 그리지 않는다. 바닥은 [삭제](ghost critical 왼쪽) + [수정](나머지). 줄 끝 ⋮ 가 없으니 지우기는 여기다.
 ///
-/// 모바일 행에서 `✎`·`🗑` 를 걷어냈다. 탭이 그 자리를 대신하는 비제스처 경로다 —
-/// 스와이프만 남기면 제스처 없이는 아무것도 못 한다(spec swipe-actions.md · WCAG 2.1.1).
-///
-/// 프리셋에는 예정일이 없다(`ExpenseTemplate` 은 useCount·lastUsedAt 만 갖는다).
-/// 반복 거래 상세와 달리 "다음 예정일" 섹션이 없고 지금 저장된 내용만 보여준다.
-void showPresetDetailSheet(
+/// [삭제] → 확인창(PAlertDialog) → 지움. 실패하면 확인창을 닫고 **시트 안**에 고정 글 Callout + 다시 시도로 알린다(전역 오류
+/// 토스트와 겹치지 않는다). 지우는 동안과 지운 뒤 닫히기 전에는 두 버튼을 막는다.
+Future<PresetDetailAction?> showPresetDetailSheet(
   BuildContext context, {
   required ExpenseTemplate template,
-  required VoidCallback onEdit,
-  required VoidCallback onDelete,
 }) {
-  final l = AppLocalizations.of(context);
-  showPSheet<void>(
+  return PBottomSheet.show<PresetDetailAction>(
     context,
-    title: l.presetDetailTitle,
-    // 내용이 짧다 — 기본 0.85 를 쓰면 아래가 텅 빈 채로 뜬다.
-    shrinkWrap: true,
-    contentBuilder: (ctx, _) => _Body(template: template),
-    footerBuilder: (ctx) => PViewFooter(
-      onDelete: () {
-        Navigator.of(ctx).pop();
-        onDelete();
-      },
-      deleteLabel: l.actionDelete,
-      onEdit: () {
-        Navigator.of(ctx).pop();
-        onEdit();
-      },
-      editLabel: l.actionEdit,
-    ),
+    builder: (_) => PresetDetailBody(template: template),
   );
 }
 
-class _Body extends ConsumerWidget {
-  const _Body({required this.template});
+class PresetDetailBody extends ConsumerStatefulWidget {
+  const PresetDetailBody({super.key, required this.template});
   final ExpenseTemplate template;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    final isExpense = template.expenseType == 'EXPENSE';
-    // 이체는 지출도 수입도 아니다 — 가계부의 이체 행과 같이 중립색·무부호.
-    final isTransfer = template.expenseType == 'TRANSFER';
-    final categories = ref.watch(categoriesProvider).value ?? const [];
-    final cat = template.categoryRowId == null
-        ? null
-        : categories
-              .where((c) => c.rowId == template.categoryRowId)
-              .cast<dynamic>()
-              .firstOrNull;
-    final fg = resolveChartColor(context, cat?.color, fallback: t.fgBrand);
-    final bg = softBg(context, fg);
-    // 금액 고정이 아니면 쓸 때마다 입력한다 — 값이 없는 게 정상이다.
-    final locked = template.lockAmount == 'Y';
+  ConsumerState<PresetDetailBody> createState() => _PresetDetailBodyState();
+}
 
-    // shrinkWrap 시트라 ListView 가 아니라 Column 이다(showPSheet 문서).
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
+  bool _busy = false;
+  bool _deleteFailed = false;
+
+  Future<void> _delete() async {
+    if (_busy) return;
+    final sheet = PBottomSheet.of(context);
+    setState(() {
+      _busy = true;
+      _deleteFailed = false;
+    });
+    final r = await askDeletePreset(context, widget.template);
+    if (!mounted) return;
+    if (r.confirmed && r.failure == null) {
+      sheet.close();
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _deleteFailed = r.confirmed && r.failure != null;
+    });
+  }
+
+  /// 시트 안 "다시 시도" — 묻지 않고 바로 지운다(이미 한 번 확정한 삭제).
+  Future<void> _retry() async {
+    if (_busy) return;
+    final sheet = PBottomSheet.of(context);
+    final container = ProviderScope.containerOf(context);
+    setState(() {
+      _busy = true;
+      _deleteFailed = false;
+    });
+    try {
+      await deletePresetRequest(container, widget.template.rowId);
+      if (mounted) sheet.close();
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _deleteFailed = true;
+        });
+      }
+    }
+  }
+
+  List<({String key, String name, String value})> _rows(AppLocalizations l) {
+    final p = widget.template;
+    final rows = <({String key, String name, String value})>[];
+    void add(String key, String name, String? value) {
+      if (value != null && value.isNotEmpty) {
+        rows.add((key: key, name: name, value: value));
+      }
+    }
+
+    final isTransfer = p.expenseType == 'TRANSFER';
+    final isIncome = p.expenseType == 'INCOME';
+    add(
+      'type',
+      l.presetTypeLabel,
+      isTransfer
+          ? l.expTypeTransfer
+          : (isIncome ? l.expTypeIncome : l.expTypeExpense),
+    );
+    if (isTransfer) {
+      add('from', l.presetFromAccount, p.assetName);
+      add('to', l.presetToAccount, p.toAssetName);
+      add(
+        'fee',
+        l.presetFeeLabel,
+        (p.fee ?? 0) > 0 ? krwSigned(p.fee!, false, unit: true) : null,
+      );
+      add(
+        'interest',
+        l.expInterest,
+        (p.interestAmount ?? 0) > 0
+            ? krwSigned(p.interestAmount!, false, unit: true)
+            : null,
+      );
+    } else {
+      add('category', l.expCategory, p.categoryName);
+      add('asset', l.presetAssetCard, p.assetName);
+      add('payment', l.expPaymentMethod, switch (p.paymentMethod) {
+        'CASH' => l.expPayCash,
+        'CARD' => l.expPayCard,
+        'TRANSFER' => l.expPayTransfer,
+        'OTHER' => l.expPayOther,
+        _ => null,
+      });
+      add('merchant', l.presetMerchant, p.merchant);
+    }
+    add('memo', l.expDescription, p.description);
+    if (!isTransfer) {
+      add(
+        'fixed',
+        isIncome ? l.presetFixedTitleIncome : l.presetFixedTitleExpense,
+        p.isFixed ? l.presetFixedOn : l.presetFixedOff,
+      );
+    }
+    return rows;
+  }
+
+  /// 설명 한 줄 — "고정 금액 · 3번 썼어요 · 마지막 10월 3일"(0번이면 "아직 쓰지 않았어요", 마지막 쓴 날이 없으면 그 조각을 뺀다).
+  String _note(AppLocalizations l) {
+    final p = widget.template;
+    final uses = p.useCount ?? 0;
+    final last = p.lastUsedAt == null ? null : DateTime.tryParse(p.lastUsedAt!);
+    return [
+      presetHasAmount(p) ? l.presetNoteFixed : l.presetAmountEmpty,
+      uses > 0 ? l.presetNoteUses(uses) : l.presetNoteUnused,
+      if (uses > 0 && last != null) l.presetNoteLast(last.month, last.day),
+    ].join(' · ');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.colors;
+    final p = widget.template;
+    final masked = ref.watch(hideCardProvider('etc.preset'));
+    final categories =
+        ref.watch(categoriesProvider).value ?? const <ExpenseCategory>[];
+    final category = p.categoryRowId == null
+        ? null
+        : categories.byRowId(p.categoryRowId!);
+    final amount = presetAmountText(p, masked: masked);
+
+    return PBottomSheetContent(
+      title: l.presetDetailTitle,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      scrollFog: true,
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PDetailHero(
-            icon: Container(
-              width: 32,
-              height: 32,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: PRadius.tile(32),
+          if (_deleteFailed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.globalGutter,
+                0,
+                PSpacing.globalGutter,
+                PSpacing.x3,
               ),
-              child: Icon(
-                lucideByName(cat?.icon ?? 'bookmark'),
-                size: 16,
-                color: fg,
-              ),
-            ),
-            title: template.templateName,
-            amount: Text(
-              locked && template.amount != null
-                  ? krwSigned(
-                      template.amount!.abs(),
-                      false,
-                      sign: isTransfer ? '' : (isExpense ? kMinus : '+'),
-                      unit: true,
-                    )
-                  : l.presetAmountEmpty,
-              style: PTypo.displayMd.copyWith(
-                color: !locked
-                    ? t.fgTertiary
-                    : isTransfer
-                    ? t.fgPrimary
-                    : (isExpense ? t.fgExpense : t.fgIncome),
-                fontWeight: PFontWeight.bold,
+              child: PCallout(
+                tone: PCalloutTone.critical,
+                alert: true,
+                description: l.presetDeleteFailed,
+                link: PCalloutLink(label: l.actionRetry, onPressed: _retry),
               ),
             ),
-            meta:
-                '${l.presetStatUses} ${l.presetUsesCount(template.useCount ?? 0)}',
-          ),
-          PDetailFieldGroup(
-            children: [
-              PDetailField(
-                label: l.presetTypeLabel,
-                child: Text(
-                  isTransfer
-                      ? l.expTypeTransfer
-                      : (isExpense ? l.expTypeExpense : l.expTypeIncome),
-                  style: PTypo.bodySm,
+          // 머리 — 타일 48 + 이름(t7 · 700 · 줄바꿈), 사이 12 · 위 4 · 아래 8(T16)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              PSpacing.globalGutter,
+              PSpacing.x1,
+              PSpacing.globalGutter,
+              PSpacing.x2,
+            ),
+            child: Row(
+              spacing: PSpacing.x3,
+              children: [
+                presetTile(
+                  context,
+                  p,
+                  category,
+                  size: PSpacing.x12,
+                  iconSize: PSpacing.x6,
                 ),
-              ),
-              // 이체에는 카테고리가 없다 — 대신 보내는·받는 계좌를 나눠 보여 준다.
-              if (isTransfer) ...[
-                PDetailField(
-                  label: l.expWithdrawAccount,
-                  child: Text(template.assetName ?? '-', style: PTypo.bodySm),
-                ),
-                PDetailField(
-                  label: l.expDepositAccount,
-                  child: Text(template.toAssetName ?? '-', style: PTypo.bodySm),
-                ),
-                if ((template.fee ?? 0) > 0)
-                  PDetailField(
-                    label: l.transferFeePrefix,
-                    child: Text(krw(template.fee!), style: PTypo.bodySm),
-                  ),
-                if ((template.interestAmount ?? 0) > 0)
-                  PDetailField(
-                    label: l.expInterest,
-                    child: Text(
-                      krw(template.interestAmount!),
-                      style: PTypo.bodySm,
+                Expanded(
+                  child: Text(
+                    keepAll(p.templateName),
+                    semanticsLabel: p.templateName,
+                    style: PTypography.t7.copyWith(
+                      color: c.fgNeutral,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-              ] else ...[
-                PDetailField(
-                  label: l.expCategory,
-                  child: Text(
-                    template.categoryName ?? '-',
-                    style: PTypo.bodySm,
-                  ),
-                ),
-                PDetailField(
-                  label: l.presetAssetCard,
-                  child: Text(template.assetName ?? '-', style: PTypo.bodySm),
                 ),
               ],
-              if (template.merchant?.isNotEmpty == true)
-                PDetailField(
-                  label: l.presetMerchant,
-                  child: Text(template.merchant!, style: PTypo.bodySm),
+            ),
+          ),
+          // 금액(고정일 때만 t9) · 설명 — 금액 위 12 · 아래 4, 설명 위 4 · 아래 8
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              PSpacing.globalGutter,
+              PSpacing.x3,
+              PSpacing.globalGutter,
+              PSpacing.x1,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (amount != null)
+                  Text(
+                    keepAllAmount(amount),
+                    semanticsLabel: amount,
+                    style: PTypography.t9.copyWith(
+                      color: presetAmountColor(context, p),
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: _tabular,
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: PSpacing.x1,
+                    bottom: PSpacing.x2,
+                  ),
+                  child: Text(
+                    keepAll(_note(l)),
+                    semanticsLabel: _note(l),
+                    style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+                  ),
                 ),
-              if (template.description?.isNotEmpty == true)
-                PDetailField(
-                  label: l.expDescription,
-                  child: Text(template.description!, style: PTypo.bodySm),
+              ],
+            ),
+          ),
+          // 키-값 줄 — 열쇠 fg-neutral · 값 fg-neutral-muted 줄 끝 오른쪽 맞춤(줄 수와 상관없이)
+          PList(
+            semanticLabel: l.presetDetailTitle,
+            children: [
+              for (final r in _rows(l))
+                PListItem(
+                  key: ValueKey('preset-detail-${r.key}'),
+                  title: r.name,
+                  suffix: Text(r.value, textAlign: TextAlign.end),
                 ),
             ],
           ),
         ],
+      ),
+      footerRow: PFormDeleteFooter(
+        deleteLabel: l.actionDelete,
+        onDelete: _busy ? null : _delete,
+        save: PButton(
+          label: l.actionEdit,
+          size: PButtonSize.large,
+          onPressed: _busy
+              ? null
+              : () => PBottomSheet.of(context).close(PresetDetailAction.edit),
+        ),
       ),
     );
   }

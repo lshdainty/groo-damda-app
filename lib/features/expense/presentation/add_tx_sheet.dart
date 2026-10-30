@@ -34,6 +34,8 @@ import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
 import 'package:groo_damda_app/features/asset/presentation/transfer_account_fields.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
+import 'package:groo_damda_app/features/preset/presentation/preset_pick_sheet.dart';
+import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
@@ -309,6 +311,27 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       // 프리셋의 고정 표식이 기본값이 된다 — 월세 프리셋을 불러오면 고정으로 켜져 있다. 이체는 해당 없음.
       _input.isFixed = p.expenseType == 'TRANSFER' ? false : p.isFixed;
     });
+  }
+
+  /// "모두 보기"(I-20 C 20) — 지금 종류의 프리셋 모두를 고르는 시트. 고르면 [_applyPreset] 으로 채운다.
+  /// 칩은 8개까지라 아홉 번째부터는 여기서만 쓸 수 있다.
+  Future<void> _showAllPresets() async {
+    final type = _input.type;
+    final categoriesAsync = ref.read(categoriesProvider);
+    final mine = [
+      for (final p
+          in ref.read(presetListProvider).value ?? const <ExpenseTemplate>[])
+        if (p.expenseType == type) p,
+    ];
+    final picked = await showPresetPickSheet(
+      context,
+      presets: mine,
+      categories: categoriesAsync.value ?? const [],
+      categoriesFailed: !categoriesAsync.hasValue && categoriesAsync.hasError,
+      onRetry: () => ref.invalidate(categoriesProvider),
+    );
+    if (picked == null || !mounted) return;
+    _applyPreset(picked);
   }
 
   void _clearPresetMark() {
@@ -850,6 +873,7 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
                   appliedId: _appliedPresetId,
                   canSave: _canSavePreset,
                   onTap: _applyPreset,
+                  onShowAll: _showAllPresets,
                   onSave: _showSavePresetDialog,
                   onClear: _clearPresetMark,
                   tokens: t,
@@ -948,6 +972,7 @@ class _PresetSection extends StatelessWidget {
     required this.appliedId,
     required this.canSave,
     required this.onTap,
+    required this.onShowAll,
     required this.onSave,
     required this.onClear,
     required this.tokens,
@@ -961,6 +986,9 @@ class _PresetSection extends StatelessWidget {
   final int? appliedId;
   final bool canSave;
   final ValueChanged<ExpenseTemplate> onTap;
+
+  /// 칩 줄 끝 "모두 보기" — 지금 종류의 프리셋이 칩 수(8)보다 많을 때만 보인다.
+  final VoidCallback onShowAll;
   final VoidCallback onSave;
   final VoidCallback onClear;
   final GrooTokens tokens;
@@ -1043,7 +1071,14 @@ class _PresetSection extends StatelessWidget {
               itemCount: top.length + (hasMore ? 1 : 0),
               separatorBuilder: (_, _) => const SizedBox(width: 6),
               itemBuilder: (_, i) {
-                if (i == top.length) return _MorePresetsHint(tokens: tokens);
+                if (i == top.length) {
+                  return PChip(
+                    label: l.presetShowAll,
+                    variant: PChipVariant.solid,
+                    suffixIcon: LucideIcons.chevronRight,
+                    onPressed: onShowAll,
+                  );
+                }
                 final p = top[i];
                 final active = p.rowId == appliedId;
                 final showAmount =
@@ -1203,40 +1238,6 @@ class _PresetChip extends StatelessWidget {
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MorePresetsHint extends StatelessWidget {
-  const _MorePresetsHint({required this.tokens});
-  final GrooTokens tokens;
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: tokens.borderDefault,
-          style: BorderStyle.solid,
-        ),
-        borderRadius: PRadius.brFull,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(LucideIcons.moreHorizontal, size: 14, color: tokens.fgTertiary),
-          const SizedBox(width: 4),
-          Text(
-            l.expPresetManageHint,
-            style: TextStyle(
-              fontSize: PFontSize.caption,
-              fontWeight: PFontWeight.semi,
-              color: tokens.fgTertiary,
-            ),
-          ),
-        ],
       ),
     );
   }

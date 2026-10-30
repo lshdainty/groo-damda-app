@@ -10,6 +10,10 @@ class PresetRepository {
   PresetRepository(this._dio);
   final Dio _dio;
 
+  /// 화면이 실패를 자기 자리에서 알릴 때 전역 오류 토스트(서버 원문)를 끈다 — 둘이 겹치지 않게.
+  Options? _opts(bool silent) =>
+      silent ? Options(extra: {kSilentErrorToast: true}) : null;
+
   Future<List<ExpenseTemplate>> list() async {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/expense-templates');
@@ -40,6 +44,7 @@ class PresetRepository {
 
     /// 고정 수입·지출 기본값 — 이체에는 싣지 않는다(서버도 무시한다).
     bool isFixed = false,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -60,6 +65,7 @@ class PresetRepository {
           'lockAmount': lockAmount ? 'Y' : 'N',
           'isFixed': isFixed,
         },
+        options: _opts(silent),
       );
       return _unwrap(res, ExpenseTemplate.fromJson);
     } on DioException catch (e) {
@@ -102,6 +108,7 @@ class PresetRepository {
 
     /// 고정 수입·지출 기본값 — 이 시트가 그리는 칸이라 늘 싣는다. 이체는 호출처가 false 를 준다.
     bool isFixed = false,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
@@ -121,6 +128,7 @@ class PresetRepository {
           'lockAmount': lockAmount ? 'Y' : 'N',
           'isFixed': isFixed,
         },
+        options: _opts(silent),
       );
       return _unwrap(res, ExpenseTemplate.fromJson);
     } on DioException catch (e) {
@@ -128,9 +136,9 @@ class PresetRepository {
     }
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/expense-template/$id');
+      await _dio.delete<void>('/expense-template/$id', options: _opts(silent));
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
