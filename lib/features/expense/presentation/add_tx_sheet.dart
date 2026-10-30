@@ -52,6 +52,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/forms/name_policy.dart';
@@ -2112,7 +2113,11 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                rewritable ? l.expMoneyLockedNote : l.expMoneyLockedPaidOffNote,
+                keepAll(
+                  rewritable
+                      ? l.expMoneyLockedNote
+                      : l.expMoneyLockedPaidOffNote,
+                ),
                 style: noteStyle,
               ),
               if (rewritable) ...[
