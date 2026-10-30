@@ -4485,10 +4485,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presetDeleteFailed => 'Could not delete the preset';
 
   @override
-  String get presetSortUsed => 'Most used';
+  String get presetSortUsed => 'Frequent';
 
   @override
-  String get presetSortRecent => 'Recently used';
+  String get presetSortRecent => 'Recent';
 
   @override
   String get presetSortName => 'By name';

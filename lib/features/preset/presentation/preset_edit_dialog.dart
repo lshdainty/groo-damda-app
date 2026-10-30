@@ -212,12 +212,21 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
 
   String get _nameTrim => _nameCtrl.text.trim();
 
-  /// 지워진 카테고리를 가리키는 프리셋도 열린다 — 다만 그 카테고리는 없는 것으로 본다(저장하려면 다시 골라야 한다).
+  /// 카테고리를 받았는가 — 못 받았으면 읽어 온 카테고리가 지워진 것인지 모른다.
+  bool get _categoriesLoaded => ref.read(categoriesProvider).hasValue;
+
+  /// 고른 카테고리 — 받은 목록에 있는 것만. 지워진 카테고리를 가리키는 프리셋도 열린다(웹과 같다).
   ExpenseCategory? get _selectedCategory {
     final id = _categoryRowId;
     if (id == null) return null;
     return _categories.byRowId(id);
   }
+
+  /// 카테고리가 정해져 있는가 — **받기 전에는 읽어 온 값을 그대로 둔다**(모르는 채로 없다고 보면 저장 · 검증이 틀린다). 받았는데
+  /// 목록에 없으면(지운 카테고리) 없는 것이다 — 저장하려면 다시 골라야 하고 지운 카테고리 id 는 나가지 않는다.
+  bool get _hasCategory =>
+      _categoryRowId != null &&
+      (!_categoriesLoaded || _selectedCategory != null);
 
   bool get _dirty =>
       _type != _iType ||
@@ -243,6 +252,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       _interest = '';
       final cat = _selectedCategory;
       if (cat != null && cat.expenseType != _type) _categoryRowId = null;
+      // 받았는데 목록에 없는(지운) 카테고리는 비운다 — 받기 전에는 두는 것이 위 [_hasCategory] 규칙이다
+      if (_categoriesLoaded && cat == null) _categoryRowId = null;
     }
     if (!_showInterest) _interest = '';
   }
@@ -474,13 +485,14 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     setState(() {
       _attempted = true;
       _saveError = false;
+      _normalize();
     });
     final issue = _issue;
     final bad =
         issue != null ||
         (_isTransfer
             ? !transferPartiesReady(_assetRowId, _toAssetRowId)
-            : _selectedCategory == null) ||
+            : !_hasCategory) ||
         _amountValue > kAmountMax;
     if (bad) {
       if (issue != null) _nameFocus.requestFocus();
@@ -690,7 +702,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     final from = _assets.where((a) => a.rowId == _assetRowId).firstOrNull;
     final to = _assets.where((a) => a.rowId == _toAssetRowId).firstOrNull;
     final nameError = _nameError(l);
-    final categoryError = _attempted && !_isTransfer && cat == null
+    final categoryError = _attempted && !_isTransfer && !_hasCategory
         ? l.presetCategoryRequired
         : null;
     final fromError = _attempted && _isTransfer && _assetRowId == null

@@ -2512,8 +2512,8 @@
   "presetTypeLabel": "Type",
   "presetDeleteConfirm": "Transactions already recorded stay as they are. A deleted preset cannot be restored.",
   "presetDeleteFailed": "Could not delete the preset",
-  "presetSortUsed": "Most used",
-  "presetSortRecent": "Recently used",
+  "presetSortUsed": "Frequent",
+  "presetSortRecent": "Recent",
   "presetSortName": "By name",
   "presetListTitle": "{count} presets",
   "@presetListTitle": {

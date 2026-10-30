@@ -87,6 +87,7 @@ class _Repo extends PresetRepository {
   Patch<int> interestAmount = const Patch.keep();
   bool? lock;
   int? amountSent;
+  int? categorySent;
 
   @override
   Future<ExpenseTemplate> update({
@@ -107,6 +108,7 @@ class _Repo extends PresetRepository {
     bool silent = false,
   }) async {
     sent = {'id': id, 'silent': silent};
+    categorySent = categoryRowId;
     this.assetRowId = assetRowId;
     this.merchant = merchant;
     this.paymentMethod = paymentMethod;
@@ -146,6 +148,7 @@ Future<_Repo> _open(
   WidgetTester tester,
   ExpenseTemplate? edit, {
   Future<List<Asset>>? assetsFuture,
+  Future<List<ExpenseCategory>>? categoriesFuture,
 }) async {
   final repo = _Repo();
   tester.view.physicalSize = const Size(1170, 3000);
@@ -159,10 +162,11 @@ Future<_Repo> _open(
         ),
         presetRepositoryProvider.overrideWith((ref) async => repo),
         categoriesProvider.overrideWith(
-          (ref) async => [_food, _parent, _child],
+          (ref) => categoriesFuture ?? Future.value([_food, _parent, _child]),
         ),
         assetsProvider.overrideWith(
-          (ref) async => [_bank, _savings, _loan, _card],
+          (ref) =>
+              assetsFuture ?? Future.value([_bank, _savings, _loan, _card]),
         ),
       ],
       child: MaterialApp(
@@ -344,5 +348,27 @@ void main() {
     late.complete([_bank, _savings, _loan, _card]);
     await tester.pumpAndSettle();
     expect(_t(l.expInterest), findsOneWidget, reason: '자산이 온 뒤에도 대출 이자 줄이 남는다');
+  });
+
+  // 카테고리도 같은 순서 문제 — 받기 전에는 읽어 온 값을 유지하고, 받았는데 목록에 없으면(지운 카테고리) 비운다.
+  testWidgets('카테고리를 받기 전에는 읽어 온 카테고리가 그대로 실린다', (tester) async {
+    final late = Completer<List<ExpenseCategory>>();
+    final repo = await _open(tester, _filled, categoriesFuture: late.future);
+    await tester.tap(_btn(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(_t(l.presetCategoryRequired), findsNothing);
+    expect(repo.categorySent, 1);
+  });
+
+  testWidgets('카테고리를 받았는데 목록에 없으면(지운 카테고리) 비우고 저장은 막힌다', (tester) async {
+    final repo = await _open(
+      tester,
+      _filled,
+      categoriesFuture: Future.value([_parent, _child]),
+    );
+    await tester.tap(_btn(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(_t(l.presetCategoryRequired), findsOneWidget);
+    expect(repo.sent, isNull, reason: '지운 카테고리 id 가 나가지 않는다');
   });
 }

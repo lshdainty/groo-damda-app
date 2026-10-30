@@ -268,7 +268,11 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
                 PListItem(
                   key: ValueKey('preset-detail-${r.key}'),
                   title: r.name,
-                  suffix: Text(r.value, textAlign: TextAlign.end),
+                  suffix: Text(
+                    keepAll(r.value),
+                    semanticsLabel: r.value,
+                    textAlign: TextAlign.end,
+                  ),
                 ),
             ],
           ),
