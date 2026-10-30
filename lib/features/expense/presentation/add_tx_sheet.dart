@@ -1077,7 +1077,7 @@ class _PresetSection extends StatelessWidget {
                 if (i == top.length) {
                   return PChip(
                     label: l.presetShowAll,
-                    variant: PChipVariant.solid,
+                    variant: PChipVariant.outlineWeak,
                     suffixIcon: LucideIcons.chevronRight,
                     onPressed: onShowAll,
                   );
