@@ -16,6 +16,8 @@ import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
@@ -104,6 +106,8 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
                     icon: active ? LucideIcons.pause : LucideIcons.play,
                     onSelect: () => _toggle(it),
                   ),
+                ]),
+                PMenuSheetGroup([
                   PMenuSheetItem(
                     label: l.actionDelete,
                     icon: LucideIcons.trash2,
@@ -196,12 +200,27 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
     final List<InlineSpan> spans;
     if (it.isActive != 'Y') {
       spans = [
-        TextSpan(text: l.recSentencePausedPre),
-        TextSpan(text: l.recSentencePausedBold, style: bold),
-        TextSpan(text: l.recSentencePausedPost),
+        TextSpan(
+          text: keepAll(l.recSentencePausedPre),
+          semanticsLabel: l.recSentencePausedPre,
+        ),
+        TextSpan(
+          text: keepAll(l.recSentencePausedBold),
+          semanticsLabel: l.recSentencePausedBold,
+          style: bold,
+        ),
+        TextSpan(
+          text: keepAll(l.recSentencePausedPost),
+          semanticsLabel: l.recSentencePausedPost,
+        ),
       ];
     } else if (isFinished(it)) {
-      spans = [TextSpan(text: l.recSentenceFinished)];
+      spans = [
+        TextSpan(
+          text: keepAll(l.recSentenceFinished),
+          semanticsLabel: l.recSentenceFinished,
+        ),
+      ];
     } else {
       final end = it.maxOccurrences != null
           ? l.recEndSentenceCount(it.maxOccurrences!, it.executedCount)
@@ -213,11 +232,24 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
       final next =
           '${recDateKeyText(it.nextExecutionDate ?? '')} ${recClockText((it.executionTime ?? '09:00:00').substring(0, 5))}';
       spans = [
-        TextSpan(text: l.recSentenceLead(recCycleOf(l, it), end)),
+        TextSpan(
+          text: keepAll(l.recSentenceLead(recCycleOf(l, it), end)),
+          semanticsLabel: l.recSentenceLead(recCycleOf(l, it), end),
+        ),
         const TextSpan(text: ' '),
-        TextSpan(text: l.recSentenceNextPre),
-        TextSpan(text: recNoBreak(next), style: bold),
-        TextSpan(text: l.recSentenceNextPost),
+        TextSpan(
+          text: keepAll(l.recSentenceNextPre),
+          semanticsLabel: l.recSentenceNextPre,
+        ),
+        TextSpan(
+          text: keepAll(recNoBreak(next)),
+          semanticsLabel: next,
+          style: bold,
+        ),
+        TextSpan(
+          text: keepAll(l.recSentenceNextPost),
+          semanticsLabel: l.recSentenceNextPost,
+        ),
       ];
     }
     return Padding(
@@ -369,23 +401,27 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
           ],
         ],
       ),
-      footer: [
-        PButton(
-          label: active ? l.recPause : l.recResume,
-          variant: PButtonVariant.neutralWeak,
-          size: PButtonSize.large,
-          prefixIcon: active ? LucideIcons.pause : LucideIcons.play,
-          onPressed: _busy ? null : () => _toggle(it),
+      // 알림(스낵바)이 바닥 버튼을 덮지 않고 그 위 8 에 선다(웹 `SnackbarAvoidOverlap` 과 같다)
+      footerRow: PSnackbarAvoidOverlap(
+        child: PResponsivePair(
+          secondary: PButton(
+            label: active ? l.recPause : l.recResume,
+            variant: PButtonVariant.neutralWeak,
+            size: PButtonSize.large,
+            prefixIcon: active ? LucideIcons.pause : LucideIcons.play,
+            onPressed: _busy ? null : () => _toggle(it),
+          ),
+          primary: PButton(
+            label: l.actionEdit,
+            size: PButtonSize.large,
+            onPressed: _busy
+                ? null
+                : () => PBottomSheet.of(
+                    context,
+                  ).close(RecurringDetailAction.edit),
+          ),
         ),
-        PButton(
-          label: l.actionEdit,
-          size: PButtonSize.large,
-          onPressed: _busy
-              ? null
-              : () =>
-                    PBottomSheet.of(context).close(RecurringDetailAction.edit),
-        ),
-      ],
+      ),
     );
   }
 }

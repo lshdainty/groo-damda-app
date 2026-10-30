@@ -73,6 +73,8 @@ PLeaveConfirmCopy _leaveCopy(AppLocalizations l) => PLeaveConfirmCopy(
 );
 
 class _Probe {
+  /// 새 폼의 첫 초점(금액 칸) — 시트가 열릴 때 내용에 넘겨 준다(일정 폼과 같은 길: `PBottomSheet.show(initialFocus:)`).
+  final FocusNode amountFocus = FocusNode();
   bool Function() dirty = () => false;
   bool Function() interceptClose = () => false;
 }
@@ -115,13 +117,15 @@ Future<void> showRecurringFormSheet(
     form: true,
     isDirty: () => probe.dirty(),
     interceptClose: () => probe.interceptClose(),
+    // 새로 만들 때만 금액 칸이 첫 초점이다(수정은 시트에 둔다)
+    initialFocus: recurring == null ? probe.amountFocus : null,
     leaveCopy: _leaveCopy(l),
     builder: (_) => _RecurringForm(
       recurring: recurring,
       transferSeed: transferSeed,
       probe: probe,
     ),
-  );
+  ).whenComplete(probe.amountFocus.dispose);
 }
 
 class _RecurringForm extends ConsumerStatefulWidget {
@@ -140,7 +144,7 @@ class _RecurringForm extends ConsumerStatefulWidget {
 
 class _RecurringFormState extends ConsumerState<_RecurringForm> {
   final _amountCtrl = TextEditingController();
-  final _amountFocus = FocusNode();
+  FocusNode get _amountFocus => widget.probe.amountFocus;
   final _draftCtrl = TextEditingController();
   final _draftFocus = FocusNode();
   final _countCtrl = TextEditingController();
@@ -291,7 +295,6 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     widget.probe.dirty = () => false;
     widget.probe.interceptClose = () => false;
     _amountCtrl.dispose();
-    _amountFocus.dispose();
     _draftCtrl.dispose();
     _draftFocus.dispose();
     _countCtrl.dispose();
@@ -1127,7 +1130,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               child: PInput(
                 controller: _countCtrl,
                 semanticLabel: l.recEndCountLabel,
-                placeholder: '12',
+                placeholder: '0',
                 suffixText: l.recTimesUnit,
                 tabularFigures: true,
                 keyboardType: TextInputType.number,
@@ -1289,7 +1292,6 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               child: PInput(
                 controller: _amountCtrl,
                 focusNode: _amountFocus,
-                autofocus: !_isEdit,
                 semanticLabel: l.expAmount,
                 placeholder: '0',
                 suffixText: wonUnit(),
