@@ -861,4 +861,27 @@ void main() {
       expect(assetRepo.silent, isTrue);
     });
   });
+
+  group('7a — 수정은 같은 시트 안 한 단계', () {
+    testWidgets('[수정] → ← 로 상세로 돌아오고 시트는 하나다', (tester) async {
+      await _pump(
+        tester,
+        _opener((ctx) => showTxDetailDialog(ctx, _plain)),
+        repo: _FakeRepo(),
+      );
+      await _openDetail(tester);
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
+      expect(find.text('지출 상세'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(PButton, '수정'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
+      expect(find.text('거래 수정'), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('뒤로').first);
+      await tester.pumpAndSettle();
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
+      expect(find.text('지출 상세'), findsOneWidget);
+    });
+  });
 }

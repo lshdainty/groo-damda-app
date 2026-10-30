@@ -28,6 +28,7 @@ import 'package:groo_damda_app/features/expense_split/data/expense_split_reposit
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
@@ -72,6 +73,26 @@ const _emptyPreset = ExpenseTemplate(
   amount: 0,
   lockAmount: 'N',
   useCount: 1,
+);
+
+const _card = Asset(
+  rowId: 12,
+  assetName: '현대카드',
+  assetType: 'CREDIT_CARD',
+  balance: -1000,
+  isIncludedInTotal: 'Y',
+);
+
+const _installTx = Expense(
+  rowId: 78,
+  categoryRowId: 5,
+  assetRowId: 12,
+  expenseType: 'EXPENSE',
+  amount: 120000,
+  expenseDate: '2026-10-20T12:00:00',
+  merchant: '가전',
+  paymentMethod: 'CARD',
+  installmentMonths: 12,
 );
 
 const _foreignTx = Expense(
@@ -145,6 +166,8 @@ class _Repo extends ExpenseRepository {
       'amount': amount,
       'originalAmount': originalAmount.value,
       'exchangeRate': exchangeRate.value,
+      'installment': installmentMonths.value,
+      'installmentPresent': installmentMonths.present,
       'silent': silent,
     });
     if (fail) throw ApiException(code: 'X', message: 'x', statusCode: 500);
@@ -187,8 +210,11 @@ Future<_Repo> _open(
   void Function(BuildContext) show, {
   List<ExpenseTemplate> presets = const [],
   bool assetsFail = false,
+  Future<List<Asset>>? assetsLate,
+  Future<List<ExpenseCategory>>? categoriesLate,
+  Size size = const Size(1170, 2532),
 }) async {
-  tester.view.physicalSize = const Size(1170, 2532);
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
   final repo = _Repo();
@@ -472,5 +498,66 @@ void main() {
       120000,
       reason: '목록이 없다고 이자를 지우지 않는다',
     );
+  });
+
+  testWidgets('N1 — 자산 목록이 늦게 와도 할부가 본문에 남는다(신용카드 지출)', (tester) async {
+    final late = Completer<List<Asset>>();
+    final repo = await _open(
+      tester,
+      (c) => showAddTxSheet(c, edit: _installTx),
+      assetsLate: late.future,
+    );
+    await tester.tap(find.text('저장'));
+    await tester.pump();
+    late.complete([_bank, _loan, _card]);
+    await tester.pumpAndSettle();
+    // 닫힌 회차 확인창이 뜰 수 있다 — 뜨면 [저장]
+    if (find.text('저장할까요?').evaluate().isNotEmpty ||
+        find.text('거래 수정').evaluate().length > 1) {
+      await tester.tap(find.text('저장').last);
+      await tester.pumpAndSettle();
+    }
+    final c = repo.calls.single;
+    expect(c['installmentPresent'], isTrue);
+    expect(c['installment'], 12, reason: '목록이 늦게 와도 할부를 지우지 않는다');
+  });
+
+  testWidgets('카테고리 목록이 늦게 오는 동안 "지운 카테고리" 로 보이지 않는다', (tester) async {
+    final late = Completer<List<ExpenseCategory>>();
+    await _open(
+      tester,
+      (c) => showAddTxSheet(c, edit: _foreignTx),
+      categoriesLate: late.future,
+    );
+    expect(find.text('지운 카테고리'), findsNothing);
+    late.complete([_cat]);
+    await tester.pumpAndSettle();
+    expect(find.text('지운 카테고리'), findsNothing);
+    expect(find.textContaining('식비'), findsWidgets);
+  });
+
+  testWidgets('M1 — 내려간 채 저장이 실패하면 본문이 맨 위로 올라가 Callout 이 보인다', (tester) async {
+    final repo = await _open(
+      tester,
+      (c) => showAddTxSheet(c, edit: _foreignTx),
+      size: const Size(1170, 1500),
+    );
+    final scrollable = find
+        .descendant(
+          of: find.byType(PBottomSheetContent),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.drag(scrollable, const Offset(0, -2000));
+    await tester.pumpAndSettle();
+    expect(
+      tester.state<ScrollableState>(scrollable).position.pixels,
+      greaterThan(0),
+    );
+    repo.fail = true;
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(tester.state<ScrollableState>(scrollable).position.pixels, 0);
+    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
   });
 }

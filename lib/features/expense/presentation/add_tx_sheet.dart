@@ -284,6 +284,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   bool _smsLow = false;
   String? _presetNameError;
   String? _presetFormError;
+
+  /// 프리셋 저장 요청 실패 — 맨 위 Callout(웹 TxSubs 와 같다).
+  String? _presetSaveError;
   bool _presetSaving = false;
   int _presetNameGen = 0;
 
@@ -880,7 +883,6 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     if (picked == null || !mounted) return;
     setState(() {
       _input.date = DateTime(picked.year, picked.month, picked.day);
-      _clearPresetMark();
     });
   }
 
@@ -929,7 +931,6 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         _smsDraft = SmsDraft(text: text, parsed: parsed);
         _clearPresetMark();
         _seed();
-        _initialSig = _sig(_input);
         _smsLow = parsed.isLowConfidence;
         _errs = _Errs();
         _dropUnknownRefs();
@@ -988,6 +989,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     setState(() {
       _presetFormError = formError;
       _presetNameError = nameError;
+      _presetSaveError = null;
     });
     if (formError != null || nameError != null) return;
     final amount = parseAmountInput(_presetAmountCtrl.text) ?? 0;
@@ -1033,7 +1035,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     } on ApiException {
       if (!mounted) return;
       // 고칠 수 있는 서버 거절(이름 중복 등)은 위에서 먼저 막았다 — 남는 건 우리 글
-      setState(() => _presetFormError = l.txfSaveFailed);
+      setState(() => _presetSaveError = l.txfSaveFailed);
     } finally {
       if (mounted) setState(() => _presetSaving = false);
     }
@@ -1790,7 +1792,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 ? null
                 : l.txfEmptyPresetHint(_emptyPresetName!),
             onChanged: (_) {
-              if (foreign) fillKrwFromForeign(c);
+              if (foreign) {
+                fillKrwFromForeign(c);
+                _clearPresetMark(); // 현지 금액을 고치면 프리셋 표시를 지운다(웹과 같다)
+              }
               setState(() => _errs.amount = null);
             },
             onSubmitted: (_) => _next(),
@@ -1904,7 +1909,6 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           checked: c.isFixed,
           onChanged: (v) => setState(() {
             c.isFixed = v;
-            _clearPresetMark();
           }),
         ),
       );
@@ -1994,7 +1998,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                       : l.expPayeePlaceholder,
                   textInputAction: TextInputAction.done,
                   inputFormatters: [LengthLimitingTextInputFormatter(100)],
-                  onChanged: (_) => setState(() => _clearPresetMark()),
+                  onChanged: (_) => setState(() {}),
                   // 한글 조합 중 Enter 는 저장이 아니라 글자 확정이다(L2)
                   onSubmitted: (_) {
                     if (c.merchantCtrl.value.composing.isValid &&
@@ -2550,6 +2554,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_presetSaveError != null)
+            CalendarSaveErrorCallout(message: _presetSaveError!),
           PList(
             children: [
               PListItem(
