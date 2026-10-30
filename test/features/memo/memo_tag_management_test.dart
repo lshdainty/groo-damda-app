@@ -1,43 +1,59 @@
-// 메모 태그 관리 화면 — 앱만 쓰는 사람도 태그를 만들 수 있어야 한다.
-//
-// 서버엔 `POST/PUT/DELETE /memo-tag` 가 다 있는데 앱 리포지토리엔 목록 조회만
-// 있었다. 그래서 **메모 편집기의 선택지를 늘릴 길이 웹에만 있었다** — 태그 목록의
-// SoT 는 서버 마스터이고(QA #98) 앱은 그 마스터를 못 늘렸다.
-//
-// 화면은 할 일 태그 관리(`todo_tag_management_screen.dart`)를 그대로 미러링한다.
-// 여기서 고정하는 것은 **화면이 리포지토리의 어느 메서드를 무슨 인자로 부르는지**다.
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
+// 메모 태그 설정(I-15 20 ~ 24) — 할 일 태그와 같은 한 부품([TagSettings])을 쓴다. 글 키만 다르다(메모 `mtag*` · 할 일 `ttag*`).
+// 여기서 고정하는 것은 ① 메모 글 ② 화면이 저장소의 어느 메서드를 무슨 인자로 부르는지 ③ 실패 안내(저장 = 시트 안 Callout, 삭제 = 확인창을
+// 닫고 다시 시도) ④ 두 화면이 한 부품을 import 하는 것이다. 시험은 작성만 했다(UI 이관이 끝날 때까지 돌리지 않는다).
+import 'dart:io';
 
-import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/memo/application/memo_providers.dart';
 import 'package:groo_damda_app/features/memo/data/memo_tag_repository.dart';
+import 'package:groo_damda_app/features/memo/domain/memo.dart';
 import 'package:groo_damda_app/features/memo/domain/memo_tag.dart';
 import 'package:groo_damda_app/features/memo/presentation/memo_tag_management_screen.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
+import '../../support/plain_text.dart';
+import '../todo/todo_test_support.dart';
 
 MemoTag _tag(int rowId, String name, {String? color, int usage = 0}) => MemoTag(
   rowId: rowId,
   tagName: name,
   userRowId: 1,
-  color: color,
+  color: color ?? '#2c70bf',
   usageCount: usage,
 );
 
-class _CapturingRepo extends MemoTagRepository {
-  _CapturingRepo() : super(Dio());
+class _Repo extends MemoTagRepository {
+  _Repo() : super(Dio());
 
   String? createdName;
   String? createdColor;
   int? updatedId;
   String? updatedName;
-  int? deletedId;
+  final deleted = <int>[];
+  bool fail = false;
+
+  void _maybeFail() {
+    if (fail) {
+      throw ApiException(
+        code: 'M',
+        message: 'RAW_SERVER_TEXT_4471',
+        statusCode: 500,
+      );
+    }
+  }
 
   @override
   Future<MemoTag> create({required String tagName, String? color}) async {
+    _maybeFail();
     createdName = tagName;
     createdColor = color;
     return _tag(99, tagName, color: color);
@@ -49,6 +65,7 @@ class _CapturingRepo extends MemoTagRepository {
     required String tagName,
     String? color,
   }) async {
+    _maybeFail();
     updatedId = id;
     updatedName = tagName;
     return _tag(id, tagName, color: color);
@@ -56,102 +73,168 @@ class _CapturingRepo extends MemoTagRepository {
 
   @override
   Future<void> delete(int id) async {
-    deletedId = id;
+    _maybeFail();
+    deleted.add(id);
   }
 }
 
-Finder _field(String hint) => find.byWidgetPredicate(
-  (w) => w is TextField && w.decoration?.hintText == hint,
-);
-
 Finder _button(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.byWidgetPredicate((w) => w is PButton && w.label == label);
 
-Future<_CapturingRepo> _open(
+Finder _tagRow(String name) =>
+    find.ancestor(of: findPlain(name), matching: find.byType(PListButtonItem));
+
+Future<_Repo> _open(
   WidgetTester tester, {
   List<MemoTag> tags = const [],
 }) async {
-  final repo = _CapturingRepo();
-  tester.view.physicalSize = const Size(1200, 4000);
-  tester.view.devicePixelRatio = 1.0;
-  addTearDown(tester.view.reset);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        memoTagRepositoryProvider.overrideWith((ref) async => repo),
-        memoTagListProvider.overrideWith((ref) async => tags),
-      ],
-      child: MaterialApp(
-        theme: GrooTheme.light(),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('ko'),
-        home: const MemoTagManagementScreen(),
-      ),
-    ),
+  final repo = _Repo();
+  await pumpApp(
+    tester,
+    const MemoTagManagementScreen(),
+    overrides: [
+      memoTagRepositoryProvider.overrideWith((ref) async => repo),
+      memoTagListProvider.overrideWith((ref) async => tags),
+      memoListProvider.overrideWith((ref) async => const <Memo>[]),
+    ].cast(),
   );
-  await tester.pumpAndSettle();
   return repo;
 }
 
 void main() {
-  late AppLocalizations l;
-  setUpAll(() async {
-    l = await AppLocalizations.delegate.load(const Locale('ko'));
-  });
+  setUpAll(loadRealFonts);
 
-  testWidgets('태그 목록과 사용 건수를 그린다', (tester) async {
+  testWidgets('안내 Callout 은 메모 글 — "태그별 묶음" 이 없고 "태그 없음" 으로 남는다고 말한다', (
+    tester,
+  ) async {
     await _open(tester, tags: [_tag(11, '회의록', usage: 3)]);
-
-    expect(find.text('회의록'), findsOneWidget);
-    expect(find.text(l.mtagUsage(3)), findsOneWidget);
+    final callout = tester.widget<PCallout>(find.byType(PCallout));
+    expect(callout.tone, PCalloutTone.informative);
+    expect(callout.title, isNull);
+    expect(callout.icon, LucideIcons.tag);
+    expect(
+      callout.description,
+      "메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 '태그 없음' 으로 남아요.",
+    );
+    expect(callout.description, isNot(contains('태그별 묶음')));
   });
 
-  testWidgets('태그가 없으면 빈 상태를 그린다', (tester) async {
-    await _open(tester);
-
-    expect(find.text(l.mtagEmpty), findsOneWidget);
+  testWidgets('목록 제목 "메모 태그 · 1" boldSolid + 글 버튼 "태그 추가" · 줄 "3건에 사용 중"', (
+    tester,
+  ) async {
+    await _open(tester, tags: [_tag(11, '회의록', usage: 3)]);
+    final header = tester.widget<PListHeader>(find.byType(PListHeader));
+    expect(header.title, '메모 태그 · 1');
+    expect(header.variant, PListHeaderVariant.boldSolid);
+    expect(tester.widget<PTextButton>(find.byType(PTextButton)).label, '태그 추가');
+    expect(findPlain('3건에 사용 중'), findsOneWidget);
+    expect(find.byType(PListTile), findsOneWidget);
+    expect(find.byIcon(LucideIcons.ellipsisVertical), findsNothing);
   });
 
-  testWidgets('새 태그를 만들면 create 가 불린다 — 앱만 써도 태그를 만들 수 있다', (tester) async {
+  testWidgets('새 태그를 만들면 create 가 불리고 목록을 다시 받은 뒤 시트가 닫힌다', (tester) async {
     final repo = await _open(tester);
-
-    await tester.tap(_button(l.memoNewTag));
+    await tester.tap(find.text('태그 추가'));
     await tester.pumpAndSettle();
-    await tester.enterText(_field(l.memoTagNamePlaceholder), '아이디어');
+    expect(_button('삭제'), findsNothing);
+    await tester.enterText(find.byType(PInput).first, '아이디어');
     await tester.pumpAndSettle();
-    await tester.tap(_button(l.actionSave));
+    await tester.tap(_button('저장'));
     await tester.pumpAndSettle();
-
     expect(repo.createdName, '아이디어');
-    // 색은 화면이 늘 고른 값을 들고 있다 — 팔레트 기본값이라도 실려야 한다.
     expect(repo.createdColor, isNotNull);
+    expect(findPlain('작성한 내용이 사라져요'), findsNothing);
   });
 
-  testWidgets('행을 탭해 이름을 고치면 update 가 그 rowId 로 불린다', (tester) async {
+  testWidgets('행을 눌러 이름을 고치면 update 가 그 rowId 로 불린다 · 수정 시트엔 왼쪽 [삭제]', (
+    tester,
+  ) async {
     final repo = await _open(tester, tags: [_tag(11, '회의록')]);
-
-    await tester.tap(find.text('회의록'));
+    await tester.tap(_tagRow('회의록'));
     await tester.pumpAndSettle();
-    await tester.enterText(_field(l.memoTagNamePlaceholder), '회의 기록');
+    expect(_button('삭제'), findsOneWidget);
+    await tester.enterText(find.byType(PInput).first, '회의 기록');
     await tester.pumpAndSettle();
-    await tester.tap(_button(l.actionSave));
+    await tester.tap(_button('저장'));
     await tester.pumpAndSettle();
-
     expect(repo.updatedId, 11);
     expect(repo.updatedName, '회의 기록');
-    expect(repo.createdName, isNull, reason: '수정인데 새로 만들면 태그가 둘로 늘어난다');
+    expect(repo.createdName, isNull);
   });
 
-  testWidgets('삭제 확인 문구가 사용 건수를 말한다', (tester) async {
-    await _open(tester, tags: [_tag(11, '회의록', usage: 4)]);
-
+  testWidgets('저장이 실패하면 시트 안 critical Callout(고정 글) — 시트는 열려 있고 서버 원문은 없다', (
+    tester,
+  ) async {
+    final repo = await _open(tester);
+    repo.fail = true;
+    await tester.tap(find.text('태그 추가'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(PInput).first, '아이디어');
+    await tester.pumpAndSettle();
+    await tester.tap(_button('저장'));
+    await tester.pumpAndSettle();
+    final callouts = tester
+        .widgetList<PCallout>(find.byType(PCallout))
+        .toList();
+    final fail = callouts.firstWhere((c) => c.tone == PCalloutTone.critical);
+    expect(fail.description, '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.');
+    expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
     expect(
-      l.memoDeleteTagConfirm('회의록', 4).contains('4'),
-      isTrue,
-      reason: '건수를 못 넣으면 몇 개가 태그 없음으로 남는지 알 수 없다',
+      tester.widget<PInput>(find.byType(PInput).first).controller!.text,
+      '아이디어',
     );
-    // 문구가 약속하는 결과 — 서버도 그렇게 동작한다(`MemoTagServiceImpl.deleteTag`).
-    expect(l.memoDeleteTagConfirm('회의록', 4).contains('태그 없음'), isTrue);
+  });
+
+  testWidgets('삭제는 확인 한 번 → 지운다 · 글에 건수를 넣는다', (tester) async {
+    final repo = await _open(tester, tags: [_tag(11, '회의록', usage: 4)]);
+    await tester.tap(_tagRow('회의록'));
+    await tester.pumpAndSettle();
+    await tester.tap(_button('삭제'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PAlertDialogView), findsOneWidget);
+    expect(
+      findPlain(
+        '"회의록" 태그를 삭제하면 이 태그를 쓰는 메모 4건은 태그 없음으로 남아요. 삭제한 태그는 되돌릴 수 없어요.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PAlertDialogView),
+        matching: find.text('삭제'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(repo.deleted, [11]);
+  });
+
+  testWidgets('삭제가 실패하면 확인창이 닫힌다 · 서버 원문은 없다', (tester) async {
+    final repo = await _open(tester, tags: [_tag(11, '회의록')]);
+    repo.fail = true;
+    await tester.tap(_tagRow('회의록'));
+    await tester.pumpAndSettle();
+    await tester.tap(_button('삭제'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PAlertDialogView),
+        matching: find.text('삭제'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(PAlertDialogView), findsNothing);
+    expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
+    expect(_tagRow('회의록'), findsOneWidget);
+  });
+
+  test('메모 태그 · 할 일 태그 두 화면이 한 부품(TagSettings)을 import 한다', () {
+    for (final path in const [
+      'lib/features/memo/presentation/memo_tag_management_screen.dart',
+      'lib/features/todo/presentation/todo_tag_management_screen.dart',
+    ]) {
+      final src = File(path).readAsStringSync();
+      expect(src, contains("shared/forms/tag_settings.dart"), reason: path);
+      expect(src, contains('TagSettings('), reason: path);
+    }
   });
 }

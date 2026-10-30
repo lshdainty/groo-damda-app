@@ -246,7 +246,7 @@ void main() {
       },
     );
 
-    testWidgets('새 태그에는 [삭제] 가 없고 주 버튼은 "추가" 하나', (tester) async {
+    testWidgets('새 태그에는 [삭제] 가 없고 주 버튼은 "저장" 하나', (tester) async {
       await pumpApp(
         tester,
         const TodoTagManagementScreen(),
@@ -255,9 +255,9 @@ void main() {
       await tester.tap(find.text('태그 추가'));
       await tester.pumpAndSettle();
       expect(_button('삭제'), findsNothing);
-      expect(_button('추가'), findsOneWidget);
-      expect(tester.getRect(_button('추가')).left, 24);
-      expect(tester.getRect(_button('추가')).right, 336);
+      expect(_button('저장'), findsOneWidget);
+      expect(tester.getRect(_button('저장')).left, 24);
+      expect(tester.getRect(_button('저장')).right, 336);
     });
 
     testWidgets('[삭제] 를 누르면 시트가 닫히고 확인이 한 번 묻는다 → 지운다', (tester) async {
@@ -308,7 +308,7 @@ void main() {
       );
       await tester.tap(find.text('태그 추가'));
       await tester.pumpAndSettle();
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(find.text(keepAll('이름을 입력해주세요.')), findsOneWidget);
       expect(repo.saved, isEmpty);
@@ -320,7 +320,7 @@ void main() {
       expect(findPlain('작성한 내용이 사라져요'), findsOneWidget);
       await tester.tap(findPlain('계속 작성'));
       await tester.pumpAndSettle();
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(repo.saved.single.name, '새 태그');
     });
@@ -339,7 +339,7 @@ void main() {
       await tester.enterText(find.byType(PInput).first, '업무');
       await tester.pumpAndSettle();
       expect(find.text(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(repo.saved, isEmpty);
       expect(find.text(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
@@ -408,7 +408,7 @@ void main() {
       );
       await tester.tap(find.text('태그 추가'));
       await tester.pumpAndSettle();
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(find.text(keepAll('이름을 입력해주세요.')), findsOneWidget);
     });

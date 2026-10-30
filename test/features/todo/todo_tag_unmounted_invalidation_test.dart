@@ -147,9 +147,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(_field(), '개인');
     await tester.pumpAndSettle();
-    await tester.tap(_button(l.calAdd));
-    // 저장이 나갔고 서버는 아직 대답하지 않았다.
-    await tester.pumpAndSettle();
+    await tester.tap(_button(l.actionSave));
+    // 저장이 나갔고 서버는 아직 대답하지 않았다 — 저장 버튼이 로딩이라 가라앉지 않는다.
+    await tester.pump(const Duration(milliseconds: 100));
 
     await closeScreen(tester);
 
@@ -189,7 +189,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(_button(l.actionDelete).last);
-    await tester.pumpAndSettle();
+    // 확정 버튼이 끝날 때까지 로딩이라 가라앉지 않는다.
+    await tester.pump(const Duration(milliseconds: 100));
 
     await closeScreen(tester);
 
