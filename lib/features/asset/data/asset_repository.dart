@@ -534,9 +534,12 @@ class AssetRepository {
     }
   }
 
-  Future<void> deleteTransfer(int id) async {
+  Future<void> deleteTransfer(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/asset-transfer/$id');
+      await _dio.delete<void>(
+        '/asset-transfer/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

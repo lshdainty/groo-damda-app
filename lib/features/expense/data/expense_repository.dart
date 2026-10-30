@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -11,6 +12,10 @@ import 'package:groo_damda_app/features/expense_split/data/expense_split_reposit
 class ExpenseRepository {
   ExpenseRepository(this._dio);
   final Dio _dio;
+
+  /// 실패 알림을 전역 스낵바로 띄우지 않는 요청(시트 안에서 따로 말하는 자리).
+  static Options? _quiet(bool silent) =>
+      silent ? Options(extra: {kSilentErrorToast: true}) : null;
 
   // ─────────────────────────────────────────────
   // Expense
@@ -223,11 +228,18 @@ class ExpenseRepository {
   /// [refundedAt] 은 사용자가 고른 **환불일**이다(정오로 온다 — 자정이면 같은 날
   /// 앞서 찍힌 거래보다 과거가 되어 카드 회차 판정이 하루 밀린다). 거래일부터
   /// 오늘까지만 받는다(D16). 안 고르면 키를 안 싣고 서버가 제 시각으로 찍는다.
-  Future<Expense> refund(int id, {String? refundedAt}) async {
+  ///
+  /// [silent] 면 실패를 전역 스낵바로 띄우지 않는다 — 부르는 쪽이 시트 안(보이는 자리)에서 말한다(I-21 21-1).
+  Future<Expense> refund(
+    int id, {
+    String? refundedAt,
+    bool silent = false,
+  }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/expense/$id/refund',
         data: {'refundedAt': ?refundedAt},
+        options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
     } on DioException catch (e) {
@@ -239,10 +251,11 @@ class ExpenseRepository {
   ///
   /// 표식만 풀린다. 옛 환급 이체가 묶인 거래(`refundTransferRowId`)만 그 이체까지
   /// 되돌린다 — 통장에서 다시 빠진다.
-  Future<Expense> cancelRefund(int id) async {
+  Future<Expense> cancelRefund(int id, {bool silent = false}) async {
     try {
       final res = await _dio.delete<Map<String, dynamic>>(
         '/expense/$id/refund',
+        options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
     } on DioException catch (e) {
@@ -254,9 +267,12 @@ class ExpenseRepository {
   ///
   /// 열린 회차에서 미리 낸 돈이 남아 결제계좌로 돌려줬다면 그 금액이 함께 온다
   /// (없으면 null, D3·D4). 옛 서버는 본문 없이 200 을 주므로 그때도 null 이다.
-  Future<int?> delete(int id) async {
+  Future<int?> delete(int id, {bool silent = false}) async {
     try {
-      final res = await _dio.delete<Map<String, dynamic>>('/expense/$id');
+      final res = await _dio.delete<Map<String, dynamic>>(
+        '/expense/$id',
+        options: _quiet(silent),
+      );
       final data = res.data?['data'];
       return data is Map<String, dynamic>
           ? data['refundedAmount'] as int?

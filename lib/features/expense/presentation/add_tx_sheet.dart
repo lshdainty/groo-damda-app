@@ -72,11 +72,26 @@ void showAddTxSheet(
   /// 시트로 열고, 저장은 `POST /expense/{id}/replace` 로 보낸다(옛 거래 삭제 + 새 거래
   /// 생성 + 분할·연결 이전이 서버 한 트랜잭션). 문자 초안과 같은 자리의 시드다.
   Expense? replaceOf,
+
+  /// 상세에서 [수정] 으로 열었을 때의 길(I-21 B 7a) — 저장하면 응답 값(수정한 거래)을 넘기고, 저장 없이 닫히면 [onCancelled].
+  /// 시트가 닫힌 뒤에 부른다(그때 부르는 쪽이 상세를 다시 연다). 목록을 다시 받은 다음이다.
+  ValueChanged<Expense>? onSaved,
+
+  /// 이체 수정 저장 — 저장한 값으로 만든 이체를 넘긴다(서버 응답이 본문 없이 온다).
+  ValueChanged<AssetTransfer>? onTransferSaved,
+
+  /// 저장하지 않고 닫혔다 — 고쳐 쓰기로 넘어가거나 저장을 마친 뒤는 아니다.
+  VoidCallback? onCancelled,
 }) {
   final controller = PSheetController();
   final l = AppLocalizations.of(context);
   final isEdit = edit != null || editTransfer != null;
   final isReplace = replaceOf != null && !isEdit;
+  final hooks = _AddTxHooks(
+    onSaved: onSaved,
+    onTransferSaved: onTransferSaved,
+    onCancelled: onCancelled,
+  );
   showPSheet<void>(
     context,
     title: isReplace ? l.expRewrite : (isEdit ? l.expEdit : l.expAdd),
@@ -88,12 +103,25 @@ void showAddTxSheet(
       replaceOf: isReplace ? replaceOf : null,
       scrollController: scrollCtrl,
       controller: controller,
+      hooks: hooks,
     ),
     footerBuilder: (ctx) => PSheetFooter(
       controller: controller,
       submitLabel: isEdit || isReplace ? l.actionSave : l.expAddShort,
     ),
-  ).whenComplete(controller.dispose);
+  ).whenComplete(() {
+    controller.dispose();
+    if (!hooks.done) onCancelled?.call();
+  });
+}
+
+/// 상세에서 이 시트를 연 길(I-21 B 7a)의 되돌아가는 줄 — 저장 · 넘김이 끝났으면 [done] 이라 닫힘이 "취소" 로 읽히지 않는다.
+class _AddTxHooks {
+  _AddTxHooks({this.onSaved, this.onTransferSaved, this.onCancelled});
+  final ValueChanged<Expense>? onSaved;
+  final ValueChanged<AssetTransfer>? onTransferSaved;
+  final VoidCallback? onCancelled;
+  bool done = false;
 }
 
 class _AddTxBody extends ConsumerStatefulWidget {
@@ -105,7 +133,9 @@ class _AddTxBody extends ConsumerStatefulWidget {
     this.replaceOf,
     required this.scrollController,
     required this.controller,
+    required this.hooks,
   });
+  final _AddTxHooks hooks;
   final String? defaultDate;
   final Expense? edit;
   final AssetTransfer? editTransfer;
@@ -404,6 +434,7 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
             : null;
         final aRepo = await ref.read(assetRepositoryProvider.future);
         final editing = widget.editTransfer;
+        AssetTransfer? savedTransfer;
         if (editing != null) {
           await aRepo.updateTransfer(
             rowId: editing.rowId,
@@ -415,6 +446,25 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
             description: desc,
             transferDate: dateStr,
           );
+          if (widget.hooks.onTransferSaved != null) {
+            final assets = ref.read(assetsProvider).value;
+            savedTransfer = AssetTransfer(
+              rowId: editing.rowId,
+              userRowId: editing.userRowId,
+              fromAssetRowId: _input.assetRowId!,
+              fromAssetName: assets?.byRowId(_input.assetRowId!)?.assetName,
+              toAssetRowId: _input.toAssetRowId!,
+              toAssetName: assets?.byRowId(_input.toAssetRowId!)?.assetName,
+              amount: amount,
+              fee: fee,
+              interestAmount: interest,
+              autoSource: editing.autoSource,
+              principalAmount: amount - (interest ?? 0),
+              description: desc,
+              transferDate: dateStr,
+              createAt: editing.createAt,
+            );
+          }
         } else {
           await aRepo.createTransfer(
             fromAssetRowId: _input.assetRowId!,
@@ -433,8 +483,18 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
         // "사용 많은 순" 정렬인데 이체 프리셋만 영영 0 이었다(#174).
         // 시트를 닫기 전에 부른다 — 닫고 나면 이 State 가 사라진다.
         await _touchAppliedPreset();
+        // 상세로 돌아가는 길이면 이체 목록을 다시 받은 다음 닫는다 — 돌아간 상세가 옛 값을 먼저 그리지 않게
+        if (savedTransfer != null) {
+          await _refetchMonth(d.year, d.month);
+        }
         if (!mounted) return;
+        final hooks = widget.hooks;
+        if (savedTransfer != null) hooks.done = true;
+        final host = hostContextOf(context);
         Navigator.of(context).pop();
+        if (savedTransfer != null && host.mounted) {
+          hooks.onTransferSaved?.call(savedTransfer);
+        }
       } on ApiException {
         if (!mounted) return;
       } finally {
@@ -468,6 +528,7 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
     _setSubmitting(true);
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
+      Expense? savedEdit;
       final edited = widget.edit;
       if (edited != null) {
         // 이 시트가 소유한 칸은 비운 상태 그대로 실어야 지워진다 — 키를 빼면
@@ -504,6 +565,7 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
           // 잠긴 거래는 금액이 안 바뀌니 맞출 분할도 없다.
           splits: locked ? null : _reconciledSplits,
         );
+        savedEdit = saved;
         // 열린 회차에서 미리 낸 돈이 남아 계좌로 돌아갔으면 사후에 알린다(D4).
         if (mounted) {
           showChangeResultToast(
@@ -576,12 +638,31 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       }
       ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
       invalidateAfterExpenseChange(ref);
+      // 상세로 돌아가는 길이면 목록을 다시 받은 다음 닫는다 — 돌아간 상세가 옛 값을 먼저 그리지 않게(I-21 ⑧)
+      if (savedEdit != null && widget.hooks.onSaved != null) {
+        await _refetchMonth(d.year, d.month);
+      }
       if (!mounted) return;
+      final hooks = widget.hooks;
+      final host = hostContextOf(context);
+      if (savedEdit != null && hooks.onSaved != null) hooks.done = true;
       Navigator.of(context).pop();
+      if (savedEdit != null && hooks.onSaved != null && host.mounted) {
+        hooks.onSaved!(savedEdit);
+      }
     } on ApiException {
       if (!mounted) return;
     } finally {
       if (mounted) _setSubmitting(false);
+    }
+  }
+
+  /// 그 달 목록을 다시 받는다 — 받지 못해도 닫는다(실패 알림은 그 조회가 말한다).
+  Future<void> _refetchMonth(int year, int month) async {
+    try {
+      await ref.read(monthExpensesProvider((year: year, month: month)).future);
+    } catch (_) {
+      // 받지 못해도 돌아간다
     }
   }
 
@@ -677,6 +758,8 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       ref.invalidate(expenseSplitsProvider(original.rowId));
       ref.invalidate(expenseSplitsProvider(saved.rowId));
       invalidateAfterExpenseChange(ref);
+      // 옛 거래가 지워졌으니 돌아갈 상세가 없다 — 모두 닫는다
+      widget.hooks.done = true;
       if (mounted) Navigator.of(context).pop();
       if (host.mounted) {
         showChangeResultToast(
@@ -699,6 +782,8 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
         ref.invalidate(monthExpensesProvider);
         ref.invalidate(expenseSplitsProvider(original.rowId));
         invalidateAfterExpenseChange(ref);
+        // 옛 거래가 지워졌으니 돌아갈 상세가 없다 — 닫힘이 "취소" 로 읽혀 상세를 다시 열지 않게
+        widget.hooks.done = true;
         if (mounted) Navigator.of(context).pop();
       }
     } finally {
@@ -711,8 +796,11 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
     final e = widget.edit;
     if (e == null) return;
     final host = hostContextOf(context);
+    // 같은 값으로 새 시트가 이어 열리므로 이 시트의 닫힘은 "취소" 가 아니다. 그 새 시트를 저장 없이 닫으면 상세로 돌아간다.
+    final cancelled = widget.hooks.onCancelled;
+    widget.hooks.done = true;
     Navigator.of(context).pop();
-    showAddTxSheet(host, replaceOf: e);
+    showAddTxSheet(host, replaceOf: e, onCancelled: cancelled);
   }
 
   /// 결제가 끝난 회차에 걸리는 카드 거래면 저장 전에 한 번 묻는다(D1·D2).
