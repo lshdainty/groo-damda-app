@@ -14,12 +14,9 @@ enum OAuthLinkReturnKind {
 
 /// 알림에 쓰는 제공자 이름 표 — **허용 값 화이트리스트**다. 복귀 주소의 `linked` 값은 소문자로 바꿔 이 표에서만 찾고,
 /// 서버가 대문자(`GOOGLE`)로 줘도 · 아무 글이 와도 알림 이름은 표의 글이다. 표에 없으면 알리지 않는다(웹 `OAUTH_PROVIDER_LABELS` 와 짝).
-/// 지금 연결할 수 있는 소셜은 Google 하나지만 서버 목록이 늘면 이 표에 더한다.
-const Map<String, String> kOAuthProviderLabels = {
-  'google': 'Google',
-  'kakao': '카카오',
-  'naver': '네이버',
-};
+/// **지금 연결할 수 있는 소셜은 Google 하나**라 표도 하나다(카카오 · 네이버는 연결할 수 없다 — 서버 목록이 늘면 더한다). 모르는 값은 알림이 없다.
+/// Dart `Map` 조회라 `constructor` 같은 프로토타입 키가 새지 않는다.
+const Map<String, String> kOAuthProviderLabels = {'google': 'Google'};
 
 class OAuthLinkReturn {
   const OAuthLinkReturn(this.kind, {this.provider});

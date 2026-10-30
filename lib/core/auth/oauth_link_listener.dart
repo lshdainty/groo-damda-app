@@ -28,6 +28,10 @@ final oauthFlowStoreProvider = Provider<OAuthFlowStore>(
 /// 후자가 핵심이다 — 예전 flutter_appauth 는 이 경우 진행 상태를 잃어
 /// "No stored state" 로 로그인이 깨졌다. 지금은 code_verifier 가
 /// [OAuthFlowStore](디스크)에 있으므로 콜드 스타트에서도 교환을 이어간다.
+///
+/// **iOS 는 앱이 떠 있을 때만 받는다** — 프로세스가 죽었다 뜨는 콜드 복귀는 SceneDelegate 가 시작 URL 을
+/// app_links 에 넘기지 않아 initial link 가 비어 있다(기존 문제, 후속: `SceneDelegate.scene(_:willConnectTo:options:)` 에서
+/// `AppLinks.shared.handleLink(url:)`). Android 는 둘 다 받는다.
 final oauthLinkListenerProvider = Provider<void>((ref) {
   final handler = OAuthCallbackHandler(
     store: ref.watch(oauthFlowStoreProvider),
@@ -72,20 +76,28 @@ final oauthLinkListenerProvider = Provider<void>((ref) {
 
   final appLinks = AppLinks();
   // 콜드 스타트 분 — 놓친 initial link 를 먼저 소화하고 스트림을 켠다.
-  unawaited(
-    appLinks.getInitialLink().then((uri) {
-      // 같은 프로세스에서 사용자가 바뀌어 리스너가 다시 떠도 옛 시작 링크를 또 처리하지 않는다
-      if (uri == null || uri.toString() == _initialHandled) return;
-      _initialHandled = uri.toString();
-      onLink(uri);
-    }),
-  );
+  unawaited(() async {
+    // 시작 링크는 프로세스당 한 번만 묻는다 — 로그아웃 뒤 다음 사람의 리스너가 옛 복귀를 또 받으면 안 된다
+    if (!takeInitialLinkTurn()) return;
+    final uri = await appLinks.getInitialLink();
+    if (uri != null) onLink(uri);
+  }());
   final sub = appLinks.uriLinkStream.listen(onLink);
   ref.onDispose(sub.cancel);
 });
 
-/// 처리한 시작 링크 — 프로세스 전역이다(리스너가 세션마다 다시 뜬다).
-String? _initialHandled;
+bool _initialAsked = false;
+
+/// 시작 링크를 물을 차례 — 프로세스에서 **처음 한 번만 true**. 계정과 상관없이 유지된다(리스너가 세션마다 다시 뜬다).
+@visibleForTesting
+bool takeInitialLinkTurn() {
+  if (_initialAsked) return false;
+  _initialAsked = true;
+  return true;
+}
+
+@visibleForTesting
+void resetInitialLinkTurn() => _initialAsked = false;
 
 /// 마지막 연동 복귀와 그 시각 — 2초 안에 같은 주소가 또 오면 무시한다.
 Uri? _lastLink;
