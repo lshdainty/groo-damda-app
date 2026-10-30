@@ -1826,9 +1826,23 @@ class _TxInputForm extends ConsumerWidget {
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Center(child: PCircularProgressIndicator()),
             ),
-            error: (e, _) => Text(
-              '${l.categoryLoadError}: $e',
-              style: PTypo.caption.copyWith(color: t.statusDangerFg),
+            // 서버·예외 원문을 그대로 보이지 않는다 — 고정 글 + 다시 시도(조회는 토스트를 띄우지 않는다)
+            error: (e, _) => Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l.presetCategoryLoadFailed,
+                    style: PTypo.caption.copyWith(color: t.statusDangerFg),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                PButton(
+                  label: l.actionRetry,
+                  variant: PButtonVariant.outline,
+                  size: PButtonSize.sm,
+                  onPressed: () => ref.invalidate(categoriesProvider),
+                ),
+              ],
             ),
             data: (categories) {
               final topCategories =
