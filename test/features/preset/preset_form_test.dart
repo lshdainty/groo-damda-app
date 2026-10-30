@@ -204,6 +204,25 @@ Future<void> _step(WidgetTester tester, String row, String text) async {
 }
 
 void main() {
+  testWidgets('새 폼은 열리면 이름 칸에 초점이 있다(시트가 처음 초점을 가로채지 않는다)', (tester) async {
+    await _open(tester, null);
+    final focused = FocusManager.instance.primaryFocus;
+    expect(focused, isNotNull);
+    expect(
+      focused!.context!.findAncestorStateOfType<EditableTextState>(),
+      isNotNull,
+    );
+  });
+
+  testWidgets('수정 폼은 이름 칸에 초점을 주지 않는다', (tester) async {
+    await _open(tester, _filled);
+    final focused = FocusManager.instance.primaryFocus;
+    expect(
+      focused?.context?.findAncestorStateOfType<EditableTextState>(),
+      isNull,
+    );
+  });
+
   late AppLocalizations l;
   setUpAll(
     () async => l = await AppLocalizations.delegate.load(const Locale('ko')),

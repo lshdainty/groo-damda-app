@@ -20,6 +20,7 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -78,20 +79,27 @@ Future<void> showPresetEditDialog(
 }) {
   final l = AppLocalizations.of(context);
   final probe = _Probe();
+  // 새 폼은 첫 칸(이름)에 초점이 간다 — 시트가 처음 초점을 컨테이너에 두므로(autofocus 가 이긴다) 시트에 첫 초점 노드를 넘긴다.
+  // 노드의 주인은 폼 State 다(닫힐 때 거기서 버린다)
+  final nameFocus = FocusNode(debugLabel: 'PresetForm name');
   return PBottomSheet.show<void>(
     context,
     form: true,
+    initialFocus: edit == null ? nameFocus : null,
     isDirty: () => probe.dirty(),
     interceptClose: () => probe.interceptClose(),
     leaveCopy: _leaveCopy(l),
-    builder: (_) => _PresetForm(edit: edit, probe: probe),
+    builder: (_) => _PresetForm(edit: edit, probe: probe, nameFocus: nameFocus),
   );
 }
 
 class _PresetForm extends ConsumerStatefulWidget {
-  const _PresetForm({this.edit, required this.probe});
+  const _PresetForm({this.edit, required this.probe, required this.nameFocus});
   final ExpenseTemplate? edit;
   final _Probe probe;
+
+  /// 이름 칸의 초점 노드 — 호출처가 만들어 시트의 첫 초점으로 넘기고, 폼 State 가 버린다.
+  final FocusNode nameFocus;
 
   @override
   ConsumerState<_PresetForm> createState() => _PresetFormState();
@@ -99,7 +107,7 @@ class _PresetForm extends ConsumerStatefulWidget {
 
 class _PresetFormState extends ConsumerState<_PresetForm> {
   late final TextEditingController _nameCtrl;
-  final _nameFocus = FocusNode();
+  late final FocusNode _nameFocus = widget.nameFocus;
   final _draftCtrl = TextEditingController();
   final _draftFocus = FocusNode();
 
@@ -642,10 +650,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final c = _saveErrorKey.currentContext;
         if (c != null) {
-          Scrollable.ensureVisible(
-            c,
-            duration: const Duration(milliseconds: 200),
-          );
+          revealBelowFog(c);
         }
       });
     } finally {
@@ -941,7 +946,6 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
                     child: PInput(
                       controller: _nameCtrl,
                       focusNode: _nameFocus,
-                      autofocus: _isNew,
                       semanticLabel: l.presetName,
                       placeholder: l.expPresetNamePlaceholder,
                       onChanged: (_) => setState(() {}),
