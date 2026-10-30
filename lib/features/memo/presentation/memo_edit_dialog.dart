@@ -146,7 +146,6 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
           title: l.memoFieldTag,
           closeLabel: l.actionClose,
           flushBody: true,
-          scrollFog: true,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -278,7 +277,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       title: _isEdit ? l.memoEditTitle : l.memoNew,
       closeLabel: l.actionClose,
       flushBody: true,
-      scrollFog: true,
+      // 끝 흐림은 390 × 844 보통 값에서 본문이 시트 90%(759.6)에 닿을 때만 건다 — 이 폼은 10,000자여도 653(내용 칸 최대 32%)이라 걸지 않는다
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

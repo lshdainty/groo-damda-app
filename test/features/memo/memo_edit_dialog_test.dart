@@ -164,7 +164,7 @@ void main() {
   );
 
   testWidgets(
-    '끝 흐림(스펙 bottom-sheet.md — 넘칠 수 있는 긴 폼) — 머리 아래 → 제목 칸 = 본문 안 위 20 + 12, 스위치 줄 아래 → [저장] 위 ≥ 80',
+    '끝 흐림 없음(390 × 844 보통 값에서 시트 90% 에 닿지 않는 폼) — 머리 아래 → 제목 칸 12 · 스위치 줄 아래 → [저장] 위 12',
     (tester) async {
       await _open(tester, edit: null);
       final header = tester.getRect(
@@ -172,12 +172,12 @@ void main() {
       );
       expect(
         tester.getRect(find.byType(PInput)).top - header.bottom,
-        closeTo(20 + 12, 1.5),
+        closeTo(12, 1.5),
       );
       expect(
         tester.getRect(_button('저장')).top -
             tester.getRect(_row('상단에 고정')).bottom,
-        greaterThanOrEqualTo(80),
+        closeTo(12, 1),
       );
     },
   );
