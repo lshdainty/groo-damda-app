@@ -526,7 +526,7 @@ class _TagEditSheetState extends State<_TagEditSheet> {
     return PBottomSheetContent(
       title: _isEdit ? copy.editTitle : copy.addCta,
       closeLabel: l.actionClose,
-      scrollFog: true,
+      // 칸 두셋처럼 늘 들어맞는 본문이라 끝 흐림을 걸지 않는다(bottom-sheet.md)
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x4,
