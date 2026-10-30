@@ -113,8 +113,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       await repo.unlink('google');
     } catch (_) {
       // 서버 거절(마지막 로그인 수단 · 네트워크 오류 포함)은 글을 가르지 않고 고정 글 하나(웹과 같다)
-      _toast(l.accountUnlinkError, PSnackSeverity.error);
-      if (mounted) setState(() => _unlinking = false);
+      if (mounted) {
+        setState(() => _unlinking = false);
+        // 다시 시도 — 같은 해제를 다시 요청한다(snackbar.md:71)
+        showPSnackBar(
+          context,
+          l.accountUnlinkError,
+          severity: PSnackSeverity.error,
+          duration: const Duration(seconds: 6),
+          actionLabel: l.actionRetry,
+          onAction: _unlink,
+        );
+      }
       return;
     }
     _toast(l.accountUnlinkedToast, PSnackSeverity.success);
