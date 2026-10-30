@@ -12,7 +12,7 @@ import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
-import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
@@ -25,8 +25,8 @@ const _tabular = [FontFeature.tabularFigures()];
 /// 프리셋 상세(I-20 C 18) — 조회 시트(바깥 누름 · 끌어내림으로 닫힌다). 머리(타일 48 + 이름) → 금액 → 설명 한 줄 → 키-값 줄.
 /// 값이 없는 줄은 그리지 않는다. 바닥은 [삭제](ghost critical 왼쪽) + [수정](나머지). 줄 끝 ⋮ 가 없으니 지우기는 여기다.
 ///
-/// [삭제] → 확인창(PAlertDialog) → 지움. 실패하면 확인창을 닫고 **시트 안**에 고정 글 Callout + 다시 시도로 알린다(전역 오류
-/// 토스트와 겹치지 않는다). 지우는 동안과 지운 뒤 닫히기 전에는 두 버튼을 막는다.
+/// [삭제] → 확인창(PAlertDialog) → 지움. 실패하면 확인창을 닫고 critical 스낵바 + [다시 시도](바로 요청)로 알린다 — 전역 오류
+/// 토스트와 겹치지 않는다. 지우는 동안과 지운 뒤 닫히기 전에는 두 버튼을 막는다.
 Future<PresetDetailAction?> showPresetDetailSheet(
   BuildContext context, {
   required ExpenseTemplate template,
@@ -47,63 +47,49 @@ class PresetDetailBody extends ConsumerStatefulWidget {
 
 class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
   bool _busy = false;
-  bool _deleteFailed = false;
-  final _failKey = GlobalKey();
 
-  /// 실패 Callout 을 보이는 자리로 올린다 — 본문이 길어 스크롤된 채 실패하면 맨 위 Callout 이 화면 밖이다.
-  void _revealFailure() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final c = _failKey.currentContext;
-      if (c != null) {
-        Scrollable.ensureVisible(
-          c,
-          duration: const Duration(milliseconds: 200),
-        );
-      }
-    });
-  }
-
+  /// [삭제] → 확인창 → 지움. **확인창 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]** 다(웹과 같다 — 스낵바 호스트는 길잡이 바깥이라
+  /// 시트 · 확인창 위에 뜬다). 다시 시도는 묻지 않고 바로 지운다(이미 한 번 확정한 삭제). 지우는 동안과 지운 뒤 닫히기 전에는 두 버튼을 막는다.
   Future<void> _delete() async {
     if (_busy) return;
+    final l = AppLocalizations.of(context);
     final sheet = PBottomSheet.of(context);
-    setState(() {
-      _busy = true;
-      _deleteFailed = false;
-    });
+    final snack = PSnackbar.of(context);
+    final container = ProviderScope.containerOf(context);
+    setState(() => _busy = true);
     final r = await askDeletePreset(context, widget.template);
-    if (!mounted) return;
     if (r.confirmed && r.failure == null) {
       sheet.close();
       return;
     }
-    setState(() {
-      _busy = false;
-      _deleteFailed = r.confirmed && r.failure != null;
-    });
-    if (_deleteFailed) _revealFailure();
+    if (mounted) setState(() => _busy = false);
+    if (r.confirmed && r.failure != null) {
+      _failed(container, snack, l, sheet);
+    }
   }
 
-  /// 시트 안 "다시 시도" — 묻지 않고 바로 지운다(이미 한 번 확정한 삭제).
-  Future<void> _retry() async {
-    if (_busy) return;
-    final sheet = PBottomSheet.of(context);
-    final container = ProviderScope.containerOf(context);
-    setState(() {
-      _busy = true;
-      _deleteFailed = false;
-    });
-    try {
-      await deletePresetRequest(container, widget.template.rowId);
-      if (mounted) sheet.close();
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _busy = false;
-          _deleteFailed = true;
-        });
-        _revealFailure();
-      }
-    }
+  void _failed(
+    ProviderContainer container,
+    PSnackbarApi snack,
+    AppLocalizations l,
+    PBottomSheetController sheet,
+  ) {
+    snack.show(
+      message: l.presetDeleteFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          try {
+            await deletePresetRequest(container, widget.template.rowId);
+            // 시트가 아직 열려 있으면 닫는다(지운 프리셋의 상세가 남지 않게)
+            if (mounted) sheet.close();
+          } catch (_) {
+            _failed(container, snack, l, sheet);
+          }
+        },
+      ),
+    );
   }
 
   List<({String key, String name, String value})> _rows(AppLocalizations l) {
@@ -195,22 +181,6 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_deleteFailed)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                PSpacing.globalGutter,
-                0,
-                PSpacing.globalGutter,
-                PSpacing.x3,
-              ),
-              child: PCallout(
-                key: _failKey,
-                tone: PCalloutTone.critical,
-                alert: true,
-                description: l.presetDeleteFailed,
-                link: PCalloutLink(label: l.actionRetry, onPressed: _retry),
-              ),
-            ),
           // 머리 — 타일 48 + 이름(t7 · 700 · 줄바꿈), 사이 12 · 위 4 · 아래 8(T16)
           Padding(
             padding: const EdgeInsets.fromLTRB(

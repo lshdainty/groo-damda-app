@@ -183,7 +183,7 @@ void main() {
     expect(find.textContaining('x'), findsNothing);
   });
 
-  testWidgets('삭제 실패 — 확인창을 닫고 시트 안 Callout + 다시 시도', (tester) async {
+  testWidgets('삭제 실패 — 확인창을 닫고 critical 스낵바 + 다시 시도(시트는 열려 있다)', (tester) async {
     final repo = await _open(tester, [_a], failDelete: true);
     await tester.tap(_t('점심'));
     await tester.pumpAndSettle();
