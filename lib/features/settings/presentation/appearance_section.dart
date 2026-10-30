@@ -14,7 +14,6 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
-import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
@@ -360,7 +359,7 @@ class _ChoiceRow extends StatelessWidget {
           detail: failedText,
           suffix: PListAction(
             child: ListBleedTarget(
-              bleed: kTextButtonPaddingX,
+              bleed: 0,
               child: Semantics(
                 container: true,
                 button: true,

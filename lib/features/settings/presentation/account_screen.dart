@@ -31,7 +31,6 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
-import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
@@ -531,10 +530,10 @@ class _GoogleRow extends ConsumerWidget {
         detailChild: loading
             ? SizedBox(width: 96, child: PSkeleton.text(PTypography.t3))
             : null,
-        // 오른쪽 14 블리드 — 글 끝이 화면 끝 24 에 선다. 누르는 영역은 44 까지.
+        // 바탕이 보이는 버튼 — 상자 끝이 끝선 24 에 선다(오른쪽 블리드 없음). 위아래 겹침 · 누르는 영역 44 는 그대로.
         suffix: PListAction(
           child: ListBleedTarget(
-            bleed: kTextButtonPaddingX,
+            bleed: 0,
             child: Semantics(
               container: true,
               button: true,

@@ -6,11 +6,13 @@ import 'package:flutter/widgets.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 
-/// 줄 뒤 작은 버튼을 오른쪽으로 [bleed] 내어 그리고(레이아웃 자리는 그대로), 보이는 상자 밖 위아래 · 블리드까지 누르는 영역을
-/// 44 로 넓힌다 — 버튼 글 끝이 화면 끝 24 에 선다(웹 `-mr-x3_5` 와 같다). [PTouchExtendable] 이라 줄 위에서
+/// 줄 뒤 작은 버튼의 누르는 영역을 44 로 넓힌다. [bleed] 는 **바탕이 안 보이는 글 버튼(ghost)** 일 때만 14 를 준다 — 글 끝이 화면 끝 24 에
+/// 서게 오른쪽으로 내어 그린다(레이아웃 자리는 그대로). **바탕이 보이는 버튼(neutralWeak · outline 등)은 0** — 상자 끝이 끝선 24 에 서야 값과
+/// 끝선이 맞는다. 보이는 상자 밖 위아래 · 블리드까지 누르는 영역을
+/// 44 로 넓힌다. [PTouchExtendable] 이라 줄 위에서
 /// [PTouchTargetScope] 가 이어 준다. 정사각 minSize 인 `PTouchTarget` 은 가로 블리드를 못 받는다.
 ///
-/// 임시 — ds List 차례에 PListRowFrame 스코프로 걷는다(spec-cleanup-pending). `DevicesScreen` 의 같은 모양(비공개)과 짝이다.
+/// 임시 — ds List 차례에 PListRowFrame 스코프로 걷는다(spec-cleanup-pending).
 class ListBleedTarget extends SingleChildRenderObjectWidget {
   const ListBleedTarget({super.key, required this.bleed, required super.child});
 
