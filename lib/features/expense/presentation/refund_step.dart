@@ -174,7 +174,7 @@ class RefundStepBody extends StatelessWidget {
         children: [
           TextSpan(text: keepAll(text.substring(0, i))),
           TextSpan(
-            text: amount,
+            text: keepAllAmount(amount),
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
           TextSpan(text: keepAll(text.substring(i + amount.length))),
