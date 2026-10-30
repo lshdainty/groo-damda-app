@@ -15,6 +15,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/add_tx_drive.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -35,7 +36,7 @@ import 'package:groo_damda_app/features/expense_split/data/expense_split_reposit
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 const _closedLine = '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
@@ -245,14 +246,7 @@ void main() {
       );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).first, '13000');
-      await tester.pump();
-      await tester.tap(find.text('식비').last);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('선택 안 함').last);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('현대카드').last);
-      await tester.pumpAndSettle();
+      await fillNewTx(tester, amount: '13000', asset: '현대카드');
 
       await tester.tap(_submit('추가'));
       await tester.pumpAndSettle();

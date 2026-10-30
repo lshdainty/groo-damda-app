@@ -28,8 +28,9 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_switch.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/add_tx_drive.dart';
 
 const _category = ExpenseCategory(
   rowId: 11,
@@ -159,8 +160,10 @@ Future<void> _open(
 Finder _submit(String label) =>
     find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
 
-PSwitch _fixedSwitch(WidgetTester tester) =>
-    tester.widget<PSwitch>(find.byType(PSwitch).first);
+const _switchKey = ValueKey('tx-fixed-switch');
+
+PListSwitchItem _fixedSwitch(WidgetTester tester) =>
+    tester.widget<PListSwitchItem>(find.byKey(_switchKey));
 
 const _rent = Expense(
   rowId: 7,
@@ -176,16 +179,13 @@ void main() {
   testWidgets('새 거래는 변동으로 시작하고, 스위치를 켜면 고정으로 나간다', (tester) async {
     final repo = _FakeRepo();
     await _open(tester, repo: repo);
-    expect(find.byType(PSwitch), findsOneWidget);
-    expect(_fixedSwitch(tester).value, isFalse);
-
-    await tester.enterText(find.byType(TextField).first, '700000');
-    await tester.pump();
-    await tester.tap(find.text('식비').last);
+    // 새 거래: 금액 → [다음] → 2단계에 스위치
+    await fillNewTx(tester, amount: '700000');
+    expect(find.byKey(_switchKey), findsOneWidget);
+    expect(_fixedSwitch(tester).checked, isFalse);
+    await tester.tap(find.byKey(_switchKey));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(PSwitch).first);
-    await tester.pumpAndSettle();
-    expect(_fixedSwitch(tester).value, isTrue);
+    expect(_fixedSwitch(tester).checked, isTrue);
 
     await tester.tap(_submit('추가'));
     await tester.pumpAndSettle();
@@ -197,10 +197,7 @@ void main() {
   testWidgets('건드리지 않고 저장하면 변동(false)이 나간다 — 키가 빠지지 않는다', (tester) async {
     final repo = _FakeRepo();
     await _open(tester, repo: repo);
-    await tester.enterText(find.byType(TextField).first, '5000');
-    await tester.pump();
-    await tester.tap(find.text('식비').last);
-    await tester.pumpAndSettle();
+    await fillNewTx(tester, amount: '5000');
     await tester.tap(_submit('추가'));
     await tester.pumpAndSettle();
 
@@ -210,7 +207,7 @@ void main() {
   testWidgets('고정 거래를 열면 켜져 있고, 그대로 저장하면 고정을 지킨다', (tester) async {
     final repo = _FakeRepo();
     await _open(tester, repo: repo, edit: _rent);
-    expect(_fixedSwitch(tester).value, isTrue);
+    expect(_fixedSwitch(tester).checked, isTrue);
 
     await tester.tap(_submit('저장'));
     await tester.pumpAndSettle();
@@ -223,9 +220,9 @@ void main() {
   testWidgets('고정 거래의 스위치를 끄면 변동으로 되돌아간다', (tester) async {
     final repo = _FakeRepo();
     await _open(tester, repo: repo, edit: _rent);
-    await tester.tap(find.byType(PSwitch).first);
+    await tester.tap(find.byKey(_switchKey));
     await tester.pumpAndSettle();
-    expect(_fixedSwitch(tester).value, isFalse);
+    expect(_fixedSwitch(tester).checked, isFalse);
 
     await tester.tap(_submit('저장'));
     await tester.pumpAndSettle();
@@ -236,11 +233,13 @@ void main() {
   testWidgets('이체에는 스위치가 없다 — 내 통장끼리 옮기는 돈이라 합계가 안 달라진다', (tester) async {
     final repo = _FakeRepo();
     await _open(tester, repo: repo);
-    expect(find.byType(PSwitch), findsOneWidget);
-
-    await tester.tap(find.text('이체').first);
+    // 1단계에서 이체 칩 → 금액 → 2단계: 스위치 줄이 없다
+    await tester.tap(find.byKey(const ValueKey('tx-type-TRANSFER')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(EditableText).first, '1000');
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(PSwitch), findsNothing);
+    expect(find.byKey(_switchKey), findsNothing);
   });
 }

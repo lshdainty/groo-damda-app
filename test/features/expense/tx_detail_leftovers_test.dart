@@ -230,26 +230,23 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
-    // 통화 select — 결제수단 select 와 둘뿐인 문자열 select 의 마지막.
-    await tester.tap(find.byType(PSelect<String>).last);
+    // 1단계 통화 칩 → 고르기 시트 → USD → 현지 금액 → [다음] → 2단계 환율 칸
+    await tester.tap(find.byKey(const ValueKey('tx-currency-chip')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('\$ USD').last);
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PListButtonItem && w.title.contains('USD'),
+      ),
+    );
     await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byWidgetPredicate(
-        (w) => w is TextField && w.decoration?.hintText == '현지 금액',
-      ),
-      '5.5',
-    );
-    await tester.enterText(
-      find.byWidgetPredicate(
-        (w) => w is TextField && w.decoration?.hintText == '환율',
-      ),
-      '1400',
-    );
+    await tester.enterText(find.byType(EditableText).first, '5.5');
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    // 2단계: 거래처 칸 다음이 환율 칸
+    await tester.enterText(find.byType(EditableText).at(1), '1400');
     await tester.pump();
 
-    expect(find.textContaining('→ 7,700원'), findsOneWidget);
+    expect(find.textContaining('= 7,700원'), findsOneWidget);
   });
 
   group('카드 결제 시트 — 금액에 단위(원)', () {

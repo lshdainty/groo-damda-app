@@ -12,6 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/add_tx_drive.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -28,7 +29,7 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 const _closedLine = '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
 
@@ -172,16 +173,12 @@ Future<void> _open(
 
 /// 금액 · 카테고리 · 카드를 채운다(문자 초안은 이미 채워져 온다).
 Future<void> _fill(WidgetTester tester) async {
-  await tester.enterText(find.byType(TextField).first, '13000');
-  await tester.pump();
-  await tester.tap(find.text('식비').last);
-  await tester.pumpAndSettle();
-  await _pickCard(tester);
+  await fillNewTx(tester, amount: '13000', asset: '현대카드');
 }
 
+/// 문자 초안은 2단계로 열린다 — 계좌·카드 줄에서 카드를 고른다.
 Future<void> _pickCard(WidgetTester tester) async {
-  // '선택 안 함' 이 둘(결제 수단·자산)이라 마지막 것이 자산이다.
-  await tester.tap(find.text('선택 안 함').last);
+  await tester.tap(find.byKey(const ValueKey('tx-row-asset')));
   await tester.pumpAndSettle();
   await tester.tap(find.text('현대카드').last);
   await tester.pumpAndSettle();

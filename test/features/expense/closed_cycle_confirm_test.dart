@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/add_tx_drive.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -461,15 +462,7 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField).first, '13000');
-      await tester.pump();
-      await tester.tap(find.text('식비').last);
-      await tester.pumpAndSettle();
-      // 계좌·카드 선택 — '선택 안 함' 이 둘(결제 수단·자산)이라 마지막 것이 자산이다.
-      await tester.tap(find.text('선택 안 함').last);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('현대카드').last);
-      await tester.pumpAndSettle();
+      await fillNewTx(tester, amount: '13000', asset: '현대카드');
       return repo;
     }
 

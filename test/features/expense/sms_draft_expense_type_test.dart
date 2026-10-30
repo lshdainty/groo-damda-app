@@ -32,7 +32,7 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 const _expenseCategory = ExpenseCategory(
   rowId: 5,
@@ -111,12 +111,6 @@ class _CapturingSmsRepo extends SmsRepository {
 }
 
 /// 저장 버튼 — onPressed 가 null 이면 잠긴 상태.
-bool _submitEnabled(WidgetTester tester, String label) {
-  final btn = tester.widget<PButton>(
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).first,
-  );
-  return btn.onPressed != null;
-}
 
 Future<(_CapturingSmsRepo, AppLocalizations)> _open(
   WidgetTester tester, {
@@ -168,7 +162,7 @@ void main() {
     final (_, l) = await _open(tester, draft: _draft);
 
     expect(find.text(l.expPayee), findsOneWidget);
-    await tester.tap(find.text(l.expTypeIncome));
+    await tester.tap(find.byKey(const ValueKey('tx-type-INCOME')));
     await tester.pumpAndSettle();
 
     expect(
@@ -180,25 +174,31 @@ void main() {
   });
 
   testWidgets('수입으로 바꾸면 지출 카테고리를 놓는다', (tester) async {
-    final (_, l) = await _open(tester, draft: _draft);
+    final (repo, l) = await _open(tester, draft: _draft);
 
-    // 문자가 채워 온 지출 카테고리 그대로면 저장이 열려 있다.
-    expect(_submitEnabled(tester, l.expAddShort), isTrue);
-
-    await tester.tap(find.text(l.expTypeIncome));
+    await tester.tap(find.byKey(const ValueKey('tx-type-INCOME')));
+    await tester.pumpAndSettle();
+    // 카테고리를 놓았으니 [추가] 는 요청 없이 카테고리 오류를 낸다 — 지출 카테고리를 든 채 저장하면 서버가 400 으로 막는다
+    await tester.tap(
+      find
+          .ancestor(
+            of: find.text(l.expAddShort),
+            matching: find.byType(PButton),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
 
-    expect(
-      _submitEnabled(tester, l.expAddShort),
-      isFalse,
-      reason: '지출 카테고리를 든 채 수입으로 저장하면 서버가 400 으로 막는다',
-    );
+    expect(find.text(l.txfErrCategory), findsOneWidget);
+    expect(repo.called, isFalse);
   });
 
   testWidgets('수입으로 저장하면 INCOME 이 실린다', (tester) async {
     final (repo, l) = await _open(tester, draft: _draft);
 
-    await tester.tap(find.text(l.expTypeIncome));
+    await tester.tap(find.byKey(const ValueKey('tx-type-INCOME')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tx-row-category')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('급여').last);
     await tester.pumpAndSettle();
