@@ -14863,6 +14863,618 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'환율 없음'**
   String get namuFxUnavailableShort;
+
+  /// No description provided for @recDefaultTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 거래'**
+  String get recDefaultTitle;
+
+  /// No description provided for @recGroupTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{kind} {count}개'**
+  String recGroupTitle(String kind, int count);
+
+  /// No description provided for @recMonthLead.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달'**
+  String get recMonthLead;
+
+  /// No description provided for @recRowNext.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 {date}'**
+  String recRowNext(String date);
+
+  /// No description provided for @recRowPaused.
+  ///
+  /// In ko, this message translates to:
+  /// **'쉬는 중'**
+  String get recRowPaused;
+
+  /// No description provided for @recRowFinished.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝남'**
+  String get recRowFinished;
+
+  /// No description provided for @recCycleDaily.
+  ///
+  /// In ko, this message translates to:
+  /// **'매일'**
+  String get recCycleDaily;
+
+  /// No description provided for @recCycleWeekly.
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 {day}요일'**
+  String recCycleWeekly(String day);
+
+  /// No description provided for @recCycleMonthly.
+  ///
+  /// In ko, this message translates to:
+  /// **'매월 {day}일'**
+  String recCycleMonthly(int day);
+
+  /// No description provided for @recCycleYearly.
+  ///
+  /// In ko, this message translates to:
+  /// **'매년 {month}월 {day}일'**
+  String recCycleYearly(int month, int day);
+
+  /// No description provided for @recCountOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{total}번 중 {done}번'**
+  String recCountOf(int total, int done);
+
+  /// No description provided for @recUntilMonth.
+  ///
+  /// In ko, this message translates to:
+  /// **'{year}년 {month}월까지'**
+  String recUntilMonth(int year, int month);
+
+  /// No description provided for @recDowShort0.
+  ///
+  /// In ko, this message translates to:
+  /// **'일'**
+  String get recDowShort0;
+
+  /// No description provided for @recDowShort1.
+  ///
+  /// In ko, this message translates to:
+  /// **'월'**
+  String get recDowShort1;
+
+  /// No description provided for @recDowShort2.
+  ///
+  /// In ko, this message translates to:
+  /// **'화'**
+  String get recDowShort2;
+
+  /// No description provided for @recDowShort3.
+  ///
+  /// In ko, this message translates to:
+  /// **'수'**
+  String get recDowShort3;
+
+  /// No description provided for @recDowShort4.
+  ///
+  /// In ko, this message translates to:
+  /// **'목'**
+  String get recDowShort4;
+
+  /// No description provided for @recDowShort5.
+  ///
+  /// In ko, this message translates to:
+  /// **'금'**
+  String get recDowShort5;
+
+  /// No description provided for @recDowShort6.
+  ///
+  /// In ko, this message translates to:
+  /// **'토'**
+  String get recDowShort6;
+
+  /// No description provided for @recDowLong0.
+  ///
+  /// In ko, this message translates to:
+  /// **'일요일'**
+  String get recDowLong0;
+
+  /// No description provided for @recDowLong1.
+  ///
+  /// In ko, this message translates to:
+  /// **'월요일'**
+  String get recDowLong1;
+
+  /// No description provided for @recDowLong2.
+  ///
+  /// In ko, this message translates to:
+  /// **'화요일'**
+  String get recDowLong2;
+
+  /// No description provided for @recDowLong3.
+  ///
+  /// In ko, this message translates to:
+  /// **'수요일'**
+  String get recDowLong3;
+
+  /// No description provided for @recDowLong4.
+  ///
+  /// In ko, this message translates to:
+  /// **'목요일'**
+  String get recDowLong4;
+
+  /// No description provided for @recDowLong5.
+  ///
+  /// In ko, this message translates to:
+  /// **'금요일'**
+  String get recDowLong5;
+
+  /// No description provided for @recDowLong6.
+  ///
+  /// In ko, this message translates to:
+  /// **'토요일'**
+  String get recDowLong6;
+
+  /// No description provided for @recDetailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 거래 상세'**
+  String get recDetailTitle;
+
+  /// No description provided for @recEndSentenceNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝나는 날 없이 반복해요'**
+  String get recEndSentenceNone;
+
+  /// No description provided for @recEndSentenceDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}까지 반복해요'**
+  String recEndSentenceDate(String date);
+
+  /// No description provided for @recEndSentenceCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{total}번 반복해요({done}번 했어요)'**
+  String recEndSentenceCount(int total, int done);
+
+  /// No description provided for @recSentenceLead.
+  ///
+  /// In ko, this message translates to:
+  /// **'{cycle}, {end}.'**
+  String recSentenceLead(String cycle, String end);
+
+  /// No description provided for @recSentenceNextPre.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음은 '**
+  String get recSentenceNextPre;
+
+  /// No description provided for @recSentenceNextPost.
+  ///
+  /// In ko, this message translates to:
+  /// **'예요.'**
+  String get recSentenceNextPost;
+
+  /// No description provided for @recSentencePausedPre.
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 쉬고 있어요. 다시 켜면 쉬는 동안 지난 회차는 건너뛰고 '**
+  String get recSentencePausedPre;
+
+  /// No description provided for @recSentencePausedBold.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 회차부터'**
+  String get recSentencePausedBold;
+
+  /// No description provided for @recSentencePausedPost.
+  ///
+  /// In ko, this message translates to:
+  /// **' 기록해요.'**
+  String get recSentencePausedPost;
+
+  /// No description provided for @recSentenceFinished.
+  ///
+  /// In ko, this message translates to:
+  /// **'정한 회차를 모두 기록했어요.'**
+  String get recSentenceFinished;
+
+  /// No description provided for @recOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'켬'**
+  String get recOn;
+
+  /// No description provided for @recOff.
+  ///
+  /// In ko, this message translates to:
+  /// **'끔'**
+  String get recOff;
+
+  /// No description provided for @recOnWithCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'켬 · {count}번 기록'**
+  String recOnWithCount(int count);
+
+  /// No description provided for @recAutoLog.
+  ///
+  /// In ko, this message translates to:
+  /// **'자동 기록'**
+  String get recAutoLog;
+
+  /// No description provided for @recAutoLogSub.
+  ///
+  /// In ko, this message translates to:
+  /// **'그날 거래를 저절로 추가해요.'**
+  String get recAutoLogSub;
+
+  /// No description provided for @recNotifyDayBefore.
+  ///
+  /// In ko, this message translates to:
+  /// **'하루 전 알림'**
+  String get recNotifyDayBefore;
+
+  /// No description provided for @recNotifyDayBeforeSub.
+  ///
+  /// In ko, this message translates to:
+  /// **'예정일 전날 알려 드려요.'**
+  String get recNotifyDayBeforeSub;
+
+  /// No description provided for @recNextDatesTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 예정일'**
+  String get recNextDatesTitle;
+
+  /// No description provided for @recNextDatesLine.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 예정일 — {dates}'**
+  String recNextDatesLine(String dates);
+
+  /// No description provided for @recPause.
+  ///
+  /// In ko, this message translates to:
+  /// **'일시정지'**
+  String get recPause;
+
+  /// No description provided for @recResume.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 켜기'**
+  String get recResume;
+
+  /// No description provided for @recPausedBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'일시정지'**
+  String get recPausedBadge;
+
+  /// No description provided for @recMoreOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 더보기'**
+  String recMoreOf(String name);
+
+  /// No description provided for @recToastPaused.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 반복을 멈췄어요'**
+  String recToastPaused(String name);
+
+  /// No description provided for @recToastResumed.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 반복을 다시 켰어요'**
+  String recToastResumed(String name);
+
+  /// No description provided for @recToastDeleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 반복 설정을 삭제했어요'**
+  String recToastDeleted(String name);
+
+  /// No description provided for @recPauseFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복을 멈추지 못했어요'**
+  String get recPauseFailed;
+
+  /// No description provided for @recResumeFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복을 다시 켜지 못했어요'**
+  String get recResumeFailed;
+
+  /// No description provided for @recDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 설정을 삭제하지 못했어요'**
+  String get recDeleteFailed;
+
+  /// No description provided for @recDeleteTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'\"{name}\" 반복 설정을 삭제할까요?'**
+  String recDeleteTitle(String name);
+
+  /// No description provided for @recDeleteMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 기록된 거래는 그대로 남아요. 삭제한 반복 설정은 되돌릴 수 없어요.'**
+  String get recDeleteMessage;
+
+  /// No description provided for @recLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 거래를 불러오지 못했어요'**
+  String get recLoadFailed;
+
+  /// No description provided for @recEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 거래가 없어요'**
+  String get recEmptyTitle;
+
+  /// No description provided for @recEmptyDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 · 월세처럼 정해진 날 오가는 돈을 등록해 두면 그날 저절로 기록해요.'**
+  String get recEmptyDesc;
+
+  /// No description provided for @recAddButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 거래 추가'**
+  String get recAddButton;
+
+  /// No description provided for @recTypeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'유형'**
+  String get recTypeLabel;
+
+  /// No description provided for @recMerchantPlaceholderExpense.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 관리비'**
+  String get recMerchantPlaceholderExpense;
+
+  /// No description provided for @recMerchantPlaceholderIncome.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 월급'**
+  String get recMerchantPlaceholderIncome;
+
+  /// No description provided for @recMemoPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모를 적어 주세요'**
+  String get recMemoPlaceholder;
+
+  /// No description provided for @recRepeatRow.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복'**
+  String get recRepeatRow;
+
+  /// No description provided for @recStartDay.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작일'**
+  String get recStartDay;
+
+  /// No description provided for @recEndRow.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝'**
+  String get recEndRow;
+
+  /// No description provided for @recEndDay.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝나는 날'**
+  String get recEndDay;
+
+  /// No description provided for @recNoneValue.
+  ///
+  /// In ko, this message translates to:
+  /// **'없음'**
+  String get recNoneValue;
+
+  /// No description provided for @recEndNoneRadio.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝 없음'**
+  String get recEndNoneRadio;
+
+  /// No description provided for @recEndUntilDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'날짜까지'**
+  String get recEndUntilDate;
+
+  /// No description provided for @recEndCountTimes.
+  ///
+  /// In ko, this message translates to:
+  /// **'횟수만큼'**
+  String get recEndCountTimes;
+
+  /// No description provided for @recEndCountLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'횟수'**
+  String get recEndCountLabel;
+
+  /// No description provided for @recTimesUnit.
+  ///
+  /// In ko, this message translates to:
+  /// **'번'**
+  String get recTimesUnit;
+
+  /// No description provided for @recEndValueDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}까지'**
+  String recEndValueDate(String date);
+
+  /// No description provided for @recEndValueCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}번'**
+  String recEndValueCount(int count);
+
+  /// No description provided for @recOnWhichDay.
+  ///
+  /// In ko, this message translates to:
+  /// **'며칠에'**
+  String get recOnWhichDay;
+
+  /// No description provided for @recOnWhichWeekday.
+  ///
+  /// In ko, this message translates to:
+  /// **'무슨 요일에'**
+  String get recOnWhichWeekday;
+
+  /// No description provided for @recAtWhatTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'몇 시에'**
+  String get recAtWhatTime;
+
+  /// No description provided for @recYearlyHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작일과 같은 날에 해마다 기록해요.'**
+  String get recYearlyHint;
+
+  /// No description provided for @recMonthDayNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'{day}일이 없는 달은 그달 마지막 날에 기록해요.'**
+  String recMonthDayNote(int day);
+
+  /// No description provided for @recDayN.
+  ///
+  /// In ko, this message translates to:
+  /// **'{day}일'**
+  String recDayN(int day);
+
+  /// No description provided for @recFreqDaily.
+  ///
+  /// In ko, this message translates to:
+  /// **'매일'**
+  String get recFreqDaily;
+
+  /// No description provided for @recFreqWeekly.
+  ///
+  /// In ko, this message translates to:
+  /// **'매주'**
+  String get recFreqWeekly;
+
+  /// No description provided for @recFreqMonthly.
+  ///
+  /// In ko, this message translates to:
+  /// **'매월'**
+  String get recFreqMonthly;
+
+  /// No description provided for @recFreqYearly.
+  ///
+  /// In ko, this message translates to:
+  /// **'매년'**
+  String get recFreqYearly;
+
+  /// No description provided for @recErrAmount.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액을 입력해주세요.'**
+  String get recErrAmount;
+
+  /// No description provided for @recErrCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 골라주세요.'**
+  String get recErrCategory;
+
+  /// No description provided for @recErrFrom.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌를 골라주세요.'**
+  String get recErrFrom;
+
+  /// No description provided for @recErrTo.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌를 골라주세요.'**
+  String get recErrTo;
+
+  /// No description provided for @recErrEndBeforeStart.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝나는 날이 시작일보다 빨라요.'**
+  String get recErrEndBeforeStart;
+
+  /// No description provided for @recErrCountMax.
+  ///
+  /// In ko, this message translates to:
+  /// **'{max}번까지 입력할 수 있어요.'**
+  String recErrCountMax(int max);
+
+  /// No description provided for @recErrCountMin.
+  ///
+  /// In ko, this message translates to:
+  /// **'1번 이상 입력해주세요.'**
+  String get recErrCountMin;
+
+  /// No description provided for @recSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get recSaveFailed;
+
+  /// No description provided for @recNoAssets.
+  ///
+  /// In ko, this message translates to:
+  /// **'고를 수 있는 계좌가 없어요.'**
+  String get recNoAssets;
+
+  /// No description provided for @recNoCategoryOfKind.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 종류의 카테고리가 없어요.'**
+  String get recNoCategoryOfKind;
+
+  /// No description provided for @recFromAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'출금 계좌'**
+  String get recFromAccount;
+
+  /// No description provided for @recDepositAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'입금 계좌'**
+  String get recDepositAccount;
+
+  /// No description provided for @recIncomeMethod.
+  ///
+  /// In ko, this message translates to:
+  /// **'수입 방식'**
+  String get recIncomeMethod;
+
+  /// No description provided for @recClearValue.
+  ///
+  /// In ko, this message translates to:
+  /// **'값 지우기'**
+  String get recClearValue;
 }
 
 class _AppLocalizationsDelegate

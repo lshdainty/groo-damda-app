@@ -34,7 +34,9 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
+import 'package:groo_damda_app/features/recurring/domain/recurring_schedule.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
+import 'package:groo_damda_app/features/recurring/presentation/recurring_form.dart';
 
 /// 반복 설정 drawer — **거래 기반 신규 생성**과 **기존 반복 수정**을 공용으로 처리.
 ///
@@ -58,24 +60,28 @@ void showRecurringSettingsDialog(
     !(expense != null && recurring != null),
     'expense 와 recurring 을 동시에 줄 수 없습니다 (둘 다 null = 신규 추가)',
   );
-  final isAdd = expense == null && recurring == null;
+  // 추가 · 수정 · 이체 씨앗은 새 폼(I-20 D 26). 거래에서 만들기(`expense:`)는 I-21 이 새 폼에 옮길 때까지 아래 옛 몸 그대로다.
+  if (expense == null) {
+    showRecurringFormSheet(
+      context,
+      recurring: recurring,
+      transferSeed: transferSeed,
+    );
+    return;
+  }
   final l = AppLocalizations.of(context);
   final controller = PSheetController();
   showPSheet<void>(
     context,
-    title: isAdd
-        ? l.recurringAddTitle
-        : (recurring != null ? l.recurringEditTitle : l.expConvertRecurring),
+    title: l.expConvertRecurring,
     contentBuilder: (ctx, scrollCtrl) => _RecurringSettingsBody(
       expense: expense,
-      recurring: recurring,
-      transferSeed: transferSeed,
       scrollController: scrollCtrl,
       controller: controller,
     ),
     footerBuilder: (ctx) => PSheetFooter(
       controller: controller,
-      submitLabel: isAdd ? l.recurringAdd : l.recurringSaveSubmit,
+      submitLabel: l.recurringSaveSubmit,
     ),
   );
 }
@@ -84,15 +90,15 @@ enum _EndMode { none, count, date }
 
 class _RecurringSettingsBody extends ConsumerStatefulWidget {
   const _RecurringSettingsBody({
-    this.expense,
-    this.recurring,
+    required this.expense,
     required this.scrollController,
     required this.controller,
-    this.transferSeed,
   });
   final Expense? expense;
-  final RecurringTransaction? recurring;
-  final AssetTransfer? transferSeed;
+
+  /// 추가 · 수정 · 이체 씨앗은 새 폼(`recurring_form.dart`)이 맡는다 — 이 몸은 거래에서 만들기만 한다(I-21 이 옮긴다).
+  RecurringTransaction? get recurring => null;
+  AssetTransfer? get transferSeed => null;
   final ScrollController scrollController;
   final PSheetController controller;
 
@@ -949,54 +955,25 @@ class _ToggleRow extends StatelessWidget {
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-/// front `previewNextDates` 미러 (UI dow 0=일 ~ 6=토 사용).
-/// 다음 예정일 미리보기 — 추가 시트와 상세 시트가 같은 계산을 쓴다.
-/// 둘이 갈라지면 "추가할 때 본 날짜"와 "상세에서 보는 날짜"가 달라진다.
+/// 다음 예정일 미리보기 — 서버 회차 규칙(`recurring_schedule.dart`: `adjustToFrequency` · `firstOccurrenceOnOrAfter` ·
+/// `calculateNextDate`)과 같은 셈이다. 시작일이 매월 날보다 뒤면 다음 달부터, 매주는 그 요일까지 앞으로, 매월 29 ~ 31 은 말일로
+/// 줄인다(I-20 D 29). UI dow 0=일 ~ 6=토. 거래에서 만들기(`expense:`)의 안내 날짜가 이 함수를 쓴다.
 List<DateTime> previewNextDates(
   DateTime start,
   String frequency,
   int dayOfWeekUi, // 0=일 ~ 6=토
   int dayOfMonth,
   int count,
-) {
-  final out = <DateTime>[];
-  var cursor = DateTime(start.year, start.month, start.day);
-
-  if (frequency == 'WEEKLY') {
-    // DateTime.weekday: Mon=1..Sun=7. UI: Sun=0..Sat=6 → 변환.
-    final cursorUi = cursor.weekday % 7; // Sun(7) → 0, Mon(1) → 1, ...
-    final diff = (dayOfWeekUi - cursorUi + 7) % 7;
-    cursor = cursor.add(Duration(days: diff));
-  } else if (frequency == 'MONTHLY') {
-    final last = DateTime(cursor.year, cursor.month + 1, 0).day;
-    final d = dayOfMonth.clamp(1, last);
-    cursor = DateTime(cursor.year, cursor.month, d);
-  }
-
-  for (var i = 0; i < count; i++) {
-    out.add(cursor);
-    switch (frequency) {
-      case 'DAILY':
-        cursor = cursor.add(const Duration(days: 1));
-        break;
-      case 'WEEKLY':
-        cursor = cursor.add(const Duration(days: 7));
-        break;
-      case 'MONTHLY':
-        final ny = cursor.year;
-        final nm = cursor.month + 1;
-        final last = DateTime(ny, nm + 1, 0).day;
-        cursor = DateTime(ny, nm, dayOfMonth.clamp(1, last));
-        break;
-      case 'YEARLY':
-        cursor = DateTime(cursor.year + 1, cursor.month, cursor.day);
-        break;
-      default:
-        return out;
-    }
-  }
-  return out;
-}
+) => [
+  for (final k in previewNextDateKeys(
+    dayKey(start),
+    frequency,
+    dayOfWeekUi,
+    dayOfMonth,
+    count,
+  ))
+    ?parseDayKey(k),
+];
 
 // ─────────────────────────────────────────────
 // 거래 입력 (inline) — add_tx_sheet 와 독립. 지출/수입만, 시간 없음, 날짜 = 반복 시작일.

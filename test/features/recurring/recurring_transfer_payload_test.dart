@@ -1,38 +1,22 @@
-// 이체 반복이 **보내는 것**을 고정한다.
+// 이체 반복이 **보내는 것**을 고정한다(새 폼 — I-20 D 26).
 //
-// 이 본문은 밤마다 서버가 그대로 실행한다 — 잘못 저장되면 화면엔 "저장됐다" 가 남고
-// 자정 배치만 조용히 실패한다(실패는 로그만 남는다). 그래서 두 방향을 함께 잰다.
-//
-// - 이체로 저장하면 받는 계좌·수수료가 실리고 카테고리·거래처·결제 수단은 안 실린다.
-// - 종류를 지출로 되돌리면 이체 칸이 빠진다 — 남겨 두면 서버가 400 으로 거절한다.
-//
-// 카드가 이체 상대 후보에 없다는 것도 여기서 잠근다 — 거래 시트와 같은 규칙을 써야
-// "시트에서 만든 이체를 반복으로는 못 만든다" 가 안 생긴다(`transfer_rules.dart`).
+// 이 본문은 밤마다 서버가 그대로 실행한다 — 잘못 저장되면 화면엔 "저장됐다" 가 남고 자정 배치만 조용히 실패한다.
+// - 이체로 저장하면 받는 계좌 · 수수료가 실리고 카테고리 · 거래처 · 결제 수단은 안 실린다.
+// - 카드는 이체 상대 후보에 없다 — 거래 시트와 같은 규칙(`transfer_rules.dart`).
+// - 저장 요청은 silent 이고, 실패하면 시트 안 Callout 고정 글이 서고 쓴 값이 남는다.
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
-import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/data/recurring_repository.dart';
-import 'package:groo_damda_app/features/recurring/presentation/recurring_settings_drawer.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_select.dart';
+import 'package:groo_damda_app/features/recurring/presentation/recurring_form.dart';
 
-const _category = ExpenseCategory(
-  rowId: 1,
-  categoryName: '식비',
-  expenseType: 'EXPENSE',
-  sortOrder: 0,
-  icon: 'utensils',
-  color: '#2c70bf',
-);
+import 'recurring_test_support.dart';
 
 const _bank = Asset(
   rowId: 7,
@@ -46,8 +30,6 @@ const _savings = Asset(
   assetType: 'SAVINGS',
   institution: '신한',
 );
-
-/// 이체 후보에서 빠져야 하는 카드.
 const _card = Asset(
   rowId: 9,
   assetName: '체크',
@@ -56,9 +38,10 @@ const _card = Asset(
 );
 
 class _CapturingRepo extends RecurringRepository {
-  _CapturingRepo() : super(Dio());
-
+  _CapturingRepo({this.fail = false}) : super(Dio());
+  final bool fail;
   bool called = false;
+  bool silent = false;
   Map<String, Object?> created = {};
 
   @override
@@ -85,14 +68,16 @@ class _CapturingRepo extends RecurringRepository {
     bool autoLog = false,
     bool notifyDayBefore = false,
     bool isFixed = false,
+    bool silent = false,
   }) async {
     called = true;
+    this.silent = silent;
+    if (fail) throw ApiException(code: 'X', message: '서버 원문');
     created = {
       'categoryRowId': categoryRowId,
       'assetRowId': assetRowId,
       'toAssetRowId': toAssetRowId,
       'fee': fee,
-      'interestAmount': interestAmount,
       'expenseType': expenseType,
       'amount': amount,
       'merchant': merchant,
@@ -101,107 +86,113 @@ class _CapturingRepo extends RecurringRepository {
   }
 }
 
-Finder _field(String hint) => find.byWidgetPredicate(
-  (w) => w is TextField && w.decoration?.hintText == hint,
-);
-
-Finder _submitButton(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
-
-Future<_CapturingRepo> _open(WidgetTester tester) async {
-  final repo = _CapturingRepo();
-  // 시트 본문은 ListView 다 — 좁은 화면에서는 아래쪽 칸이 아예 안 만들어진다.
-  tester.view.physicalSize = const Size(1200, 4000);
-  tester.view.devicePixelRatio = 1.0;
-  addTearDown(tester.view.reset);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        recurringRepositoryProvider.overrideWith((ref) async => repo),
-        categoriesProvider.overrideWith((ref) async => [_category]),
-        assetsProvider.overrideWith((ref) async => [_bank, _savings, _card]),
-      ],
-      child: MaterialApp(
-        theme: GrooTheme.light(),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('ko'),
-        home: Scaffold(
-          body: Builder(
-            builder: (ctx) => TextButton(
-              onPressed: () => showRecurringSettingsDialog(ctx),
-              child: const Text('open'),
-            ),
-          ),
+Future<_CapturingRepo> _open(WidgetTester tester, {bool fail = false}) async {
+  final repo = _CapturingRepo(fail: fail);
+  await pumpApp(
+    tester,
+    Scaffold(
+      body: Builder(
+        builder: (ctx) => TextButton(
+          onPressed: () => showRecurringFormSheet(ctx),
+          child: const Text('open'),
         ),
       ),
     ),
+    [
+      recurringRepositoryProvider.overrideWith((ref) async => repo),
+      categoriesProvider.overrideWith((ref) async => const []),
+      assetsProvider.overrideWith((ref) async => [_bank, _savings, _card]),
+    ],
   );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
   return repo;
 }
 
-Future<void> _pickSelect(WidgetTester tester, int index, String label) async {
-  await tester.tap(find.byType(PSelect<int>).at(index));
+Future<void> _pickRow(WidgetTester tester, String row, String item) async {
+  await tester.tap(plain(row).last);
   await tester.pumpAndSettle();
-  await tester.tap(find.text(label).last);
+  await tester.tap(plain(item).last);
   await tester.pumpAndSettle();
 }
 
 void main() {
-  late AppLocalizations l;
-  setUpAll(() async {
-    l = await AppLocalizations.delegate.load(const Locale('ko'));
-  });
-
-  testWidgets('이체로 저장하면 받는 계좌·수수료가 실리고 카테고리는 안 실린다', (tester) async {
+  testWidgets('이체로 저장하면 받는 계좌 · 수수료가 실리고 카테고리는 안 실린다', (tester) async {
     final repo = await _open(tester);
-    await tester.tap(find.text(l.expTypeTransfer));
+    await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
-    await tester.enterText(_field('0').first, '300000'); // 금액
+    await tester.enterText(find.byType(EditableText).first, '300000');
+    await _pickRow(tester, '출금 계좌', '주거래');
+    await _pickRow(tester, '입금 계좌', '청약');
+    // 수수료는 같은 시트 안 한 단계 — 쓰고 "완료"
+    await tester.tap(plain('수수료').last);
     await tester.pumpAndSettle();
-    await _pickSelect(tester, 0, '신한 · 주거래');
-    await _pickSelect(tester, 1, '신한 · 청약');
-    // 금액 다음의 '0' 자리가 수수료다.
-    await tester.enterText(_field('0').at(1), '500');
+    await tester.enterText(find.byType(EditableText).last, '500');
+    await tester.tap(plain('완료').last);
     await tester.pumpAndSettle();
-    await tester.tap(_submitButton(l.recurringAdd));
+    await tester.tap(plain('추가').last);
     await tester.pumpAndSettle();
 
     expect(repo.called, isTrue, reason: '저장이 안 불렸다 — 테스트가 아무것도 안 본다');
+    expect(repo.silent, isTrue);
     expect(repo.created['expenseType'], 'TRANSFER');
     expect(repo.created['assetRowId'], 7);
     expect(repo.created['toAssetRowId'], 8);
     expect(repo.created['fee'], 500);
     expect(repo.created['amount'], 300000);
-    // 이체에는 카테고리·거래처·결제 수단이 없다 — 실려 가면 서버가 400 이다.
     expect(repo.created['categoryRowId'], isNull);
     expect(repo.created['merchant'], isNull);
     expect(repo.created['paymentMethod'], isNull);
   });
 
-  testWidgets('양쪽 계좌가 없으면 저장이 안 열린다 — 자정마다 조용히 실패할 규칙이 된다', (tester) async {
+  testWidgets('양쪽 계좌가 없으면 저장이 안 나가고 칸 아래에 알린다', (tester) async {
     final repo = await _open(tester);
-    await tester.tap(find.text(l.expTypeTransfer));
+    await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
-    await tester.enterText(_field('0').first, '300000');
-    await tester.pumpAndSettle();
-    await tester.tap(_submitButton(l.recurringAdd));
+    await tester.enterText(find.byType(EditableText).first, '300000');
+    await tester.tap(plain('추가').last);
     await tester.pumpAndSettle();
 
     expect(repo.called, isFalse);
+    expect(plain('보내는 계좌를 골라주세요.'), findsOneWidget);
+    expect(plain('받는 계좌를 골라주세요.'), findsOneWidget);
   });
 
   testWidgets('카드는 이체 상대 후보에 없다 — 거래 시트와 같은 규칙', (tester) async {
     await _open(tester);
-    await tester.tap(find.text(l.expTypeTransfer));
+    await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(PSelect<int>).first);
+    await tester.tap(plain('출금 계좌').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('신한 · 주거래'), findsWidgets);
-    expect(find.text('신한 · 청약'), findsWidgets);
-    expect(find.text('신한 · 체크'), findsNothing);
+    expect(plain('주거래'), findsWidgets);
+    expect(plain('청약'), findsWidgets);
+    expect(plain('체크'), findsNothing);
+  });
+
+  testWidgets('저장이 실패하면 고정 글 Callout 이 서고 시트가 닫히지 않는다', (tester) async {
+    await _open(tester, fail: true);
+    await tester.tap(plain('이체').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(EditableText).first, '300000');
+    await _pickRow(tester, '출금 계좌', '주거래');
+    await _pickRow(tester, '입금 계좌', '청약');
+    await tester.tap(plain('추가').last);
+    await tester.pumpAndSettle();
+
+    expect(plain('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(plain('반복 거래 추가'), findsOneWidget);
+  });
+
+  testWidgets('끝 횟수 칸은 999 까지 — 999999 를 치면 999', (tester) async {
+    await _open(tester);
+    await tester.tap(plain('끝').last);
+    await tester.pumpAndSettle();
+    await tester.tap(plain('횟수만큼').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(EditableText).last, '999999');
+    await tester.pumpAndSettle();
+    expect(find.text('999'), findsOneWidget);
   });
 }

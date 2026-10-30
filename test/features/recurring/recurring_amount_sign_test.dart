@@ -1,119 +1,60 @@
-// 반복 거래 요약 카드의 금액 부호 — QA #69(홈 밖에 남아 있던 `-0`·ASCII 하이픈).
-//
-// 홈(`dashboard_amount_sign_test.dart`)과 **같은 규칙**이다. 규칙은 이제 한 곳에
-// 있다 — `core/format/krw.dart` 의 `minusOf`(웹 `shared/lib/groo/format.ts` 미러).
-//   0   → 부호 없음  (반복 거래가 하나도 없을 때 `-0` 이 뜨던 자리)
-//   양수 → U+2212 `−`
-//
-// 수입 쪽도 같은 규칙이다(`plusOf`) — 지출만 고쳐 두는 바람에 매월 고정 수입은
-// `+0` 으로 남아 있었다. 같은 카드 안에서 한쪽은 `0`, 한쪽은 `+0` 이었다.
-//
-// 에뮬레이터를 못 쓰는 환경이라(QA #23) 화면을 띄워 글자를 읽는다.
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// 반복 거래 목록의 금액 부호 — 지출은 U+2212(−), 수입은 +, 이체는 부호 없음. 묶음 머리 합도 같다. 0 이면 부호를 떼고 합 없는 묶음은 그리지 않는다.
+// (옛 요약 카드가 걷혀 "매월 고정 지출" 셈 대신 묶음 머리의 이번 달 합을 잠근다 — I-20 D 22)
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:groo_damda_app/app/theme/theme_data.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/features/recurring/presentation/recurring_screen.dart';
 
-/// 매월 고정 지출로 잡히는 한 건 — 활성 · MONTHLY · EXPENSE.
-RecurringTransaction _monthlyExpense(int amount) => RecurringTransaction(
-  rowId: 1,
-  expenseType: 'EXPENSE',
-  amount: amount,
-  frequency: 'MONTHLY',
-  isActive: 'Y',
-);
-
-/// 매월 고정 수입으로 잡히는 한 건 — 활성 · MONTHLY · INCOME.
-RecurringTransaction _monthlyIncome(int amount) => RecurringTransaction(
-  rowId: 2,
-  expenseType: 'INCOME',
-  amount: amount,
-  frequency: 'MONTHLY',
-  isActive: 'Y',
-);
+import 'recurring_test_support.dart';
 
 Future<void> _pumpRecurring(
   WidgetTester tester,
   List<RecurringTransaction> items,
-) async {
-  tester.view.physicalSize = const Size(390 * 3, 844 * 3);
-  tester.view.devicePixelRatio = 3.0;
-  addTearDown(tester.view.reset);
-
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        recurringListProvider.overrideWith((ref) async => items),
-        categoriesProvider.overrideWith((ref) async => const []),
-      ],
-      child: MaterialApp(
-        theme: GrooTheme.light(),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('ko'),
-        home: const RecurringScreen(),
-      ),
-    ),
-  );
-  await tester.pumpAndSettle();
-}
+) => pumpApp(tester, const RecurringScreen(), [
+  recurringListProvider.overrideWith((ref) async => items),
+  categoriesProvider.overrideWith((ref) async => const []),
+]);
 
 void main() {
-  testWidgets('반복 거래가 없으면 매월 고정 지출이 `-0` 이 아니라 `0` 이다', (tester) async {
+  testWidgets('지출 줄은 U+2212 로 찍는다 — ASCII 하이픈이 아니다', (tester) async {
+    await _pumpRecurring(tester, [rec(1, '관리비', 51750)]);
+    expect(plain('−51,750원'), findsOneWidget);
+    expect(plain('-51,750원'), findsNothing);
+  });
+
+  testWidgets('묶음 머리 합 — 지출은 이번 달 −, 수입은 +', (tester) async {
+    await _pumpRecurring(tester, [
+      rec(1, '관리비', 51750, start: '2026-01-01', dom: 1),
+      rec(2, '급여', 990000, type: 'INCOME', dom: 1, start: '2026-01-01'),
+    ]);
+    expect(plainStarts('이번 달 −'), findsOneWidget);
+    expect(plainStarts('이번 달 +'), findsOneWidget);
+  });
+
+  testWidgets('수입 줄은 +, 이체 줄은 부호 없음', (tester) async {
+    await _pumpRecurring(tester, [
+      rec(2, '급여', 990000, type: 'INCOME'),
+      rec(3, '적금', 100000, type: 'TRANSFER', dom: 10),
+    ]);
+    expect(plain('+990,000원'), findsOneWidget);
+    expect(plain('100,000원'), findsOneWidget);
+  });
+
+  testWidgets('금액이 0 인 반복 줄에는 부호가 없다', (tester) async {
+    await _pumpRecurring(tester, [
+      rec(1, '무료', 0),
+      rec(2, '무료 수입', 0, type: 'INCOME'),
+    ]);
+    expect(plain('+0원'), findsNothing);
+    expect(plain('−0원'), findsNothing);
+    expect(plain('0원'), findsWidgets);
+  });
+
+  testWidgets('반복이 없으면 묶음 머리를 그리지 않는다', (tester) async {
     await _pumpRecurring(tester, const []);
-
-    // 옛 코드는 `sign: '-'` 를 무조건 붙여 `-0` 을 냈다.
-    expect(find.text('-0'), findsNothing);
-    expect(find.text('−0'), findsNothing);
-    expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
-      findsNothing,
-    );
-    expect(find.text('0'), findsWidgets);
-  });
-
-  testWidgets('고정 지출이 있으면 U+2212 로 찍는다 — ASCII 하이픈이 아니다', (tester) async {
-    await _pumpRecurring(tester, [_monthlyExpense(51750)]);
-
-    // 요약 카드와 목록 행 — 한 화면 안 두 자리가 같은 기호를 쓴다
-    // (QA #22 는 한 카드에서 `−`/`-` 가 섞여 tabular 정렬이 어긋난 걸 잡았다).
-    expect(find.text('−51,750'), findsNWidgets(2));
-    expect(find.text('-51,750'), findsNothing);
-    expect(find.textContaining('−', findRichText: true), findsWidgets);
-    expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
-      findsNothing,
-    );
-  });
-
-  testWidgets('반복 수입이 없으면 매월 고정 수입이 `+0` 이 아니라 `0` 이다', (tester) async {
-    // 지출만 있는(= 수입이 없는) 계정. 카드 왼쪽 지출은 `−51,750`, 오른쪽 수입은
-    // 0 인데 옛 코드는 `sign: '+'` 를 무조건 붙여 `+0` 을 냈다.
-    await _pumpRecurring(tester, [_monthlyExpense(51750)]);
-
-    expect(find.text('+0'), findsNothing);
-    expect(find.text('0'), findsOneWidget);
-  });
-
-  testWidgets('고정 수입이 있으면 `+` 를 붙인다', (tester) async {
-    await _pumpRecurring(tester, [_monthlyIncome(990000)]);
-
-    // 요약 카드 + 목록 행. 0 일 때만 부호를 떼는 것이지 부호 자체가 사라지면 안 된다.
-    expect(find.text('+990,000'), findsNWidgets(2));
-  });
-
-  testWidgets('금액이 0 인 반복 거래는 행에도 부호가 없다', (tester) async {
-    // `amount` 는 모델 기본값이 0 이라 서버가 안 주면 그대로 0 으로 온다.
-    await _pumpRecurring(tester, [_monthlyIncome(0), _monthlyExpense(0)]);
-
-    expect(find.text('+0'), findsNothing);
-    expect(find.text('−0'), findsNothing);
-    expect(find.text('-0'), findsNothing);
+    expect(plainStarts('이번 달'), findsNothing);
+    expect(plain('반복 거래가 없어요'), findsOneWidget);
   });
 }
