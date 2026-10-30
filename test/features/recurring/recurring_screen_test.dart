@@ -117,8 +117,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(plain('삭제').last);
     await tester.pumpAndSettle();
-    expect(plain('"관리비" 반복 설정을 삭제할까요?'), findsOneWidget);
-    expect(plain('이미 기록된 거래는 그대로 남아요. 삭제한 반복 설정은 되돌릴 수 없어요.'), findsOneWidget);
+    expect(plain('반복 거래 삭제'), findsOneWidget);
+    expect(
+      plain('"관리비" 반복 설정을 삭제할까요? 이미 기록된 거래는 그대로 남아요. 삭제한 반복 설정은 되돌릴 수 없어요.'),
+      findsOneWidget,
+    );
     await tester.tap(plain('삭제').last);
     await tester.pumpAndSettle();
     expect(repo.calls, ['delete 1 silent=true']);

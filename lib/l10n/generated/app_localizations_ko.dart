@@ -8456,14 +8456,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recDeleteFailed => '반복 설정을 삭제하지 못했어요';
 
   @override
-  String recDeleteTitle(String name) {
-    return '\"$name\" 반복 설정을 삭제할까요?';
-  }
-
-  @override
-  String get recDeleteMessage => '이미 기록된 거래는 그대로 남아요. 삭제한 반복 설정은 되돌릴 수 없어요.';
-
-  @override
   String get recLoadFailed => '반복 거래를 불러오지 못했어요';
 
   @override

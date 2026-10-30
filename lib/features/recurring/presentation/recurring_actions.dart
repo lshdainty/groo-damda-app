@@ -79,8 +79,8 @@ Future<({bool confirmed, Object? failure})> askDeleteRecurring(
   Object? failure;
   final ok = await PAlertDialog.show(
     context,
-    title: l.recDeleteTitle(recDisplayTitle(l, it)),
-    description: l.recDeleteMessage,
+    title: l.recurringDeleteTitle,
+    description: l.recurringDeleteConfirm(recDisplayTitle(l, it)),
     cancelLabel: l.actionCancel,
     actionLabel: l.actionDelete,
     destructive: true,

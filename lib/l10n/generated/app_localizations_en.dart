@@ -8649,15 +8649,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recDeleteFailed => 'Could not delete the recurring setting';
 
   @override
-  String recDeleteTitle(String name) {
-    return 'Delete the \"$name\" recurring setting?';
-  }
-
-  @override
-  String get recDeleteMessage =>
-      'Transactions already recorded stay as they are. A deleted recurring setting cannot be restored.';
-
-  @override
   String get recLoadFailed => 'Could not load recurring transactions';
 
   @override
