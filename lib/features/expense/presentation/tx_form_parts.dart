@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/features/category/presentation/category_tile.dart';
@@ -170,45 +171,45 @@ class TxPresetBlock extends StatelessWidget {
         else
           SizedBox(
             height: 36,
-            child: ListView.separated(
+            // 가로 스크롤 줄은 끝 흐림 32(Scroll Fog row) — 칩 필터 바와 같은 방식
+            child: PScrollFog(
               key: const ValueKey('tx-preset-chips'),
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpacing.globalGutter,
+              use: PScrollFogUse.row,
+              child: Row(
+                spacing: PSpacing.x2,
+                children: [
+                  for (final p in top) _chip(context, l, p),
+                  if (hasMore)
+                    // 칩 묶음은 한 변형(outlineWeak) — "모두 보기" 도 같다
+                    PChip(
+                      label: l.txfShowAll,
+                      variant: PChipVariant.outlineWeak,
+                      suffixIcon: LucideIcons.chevronRight,
+                      onPressed: onShowAll,
+                    ),
+                ],
               ),
-              itemCount: top.length + (hasMore ? 1 : 0),
-              separatorBuilder: (_, _) => const SizedBox(width: PSpacing.x2),
-              itemBuilder: (_, i) {
-                if (i == top.length) {
-                  // 칩 묶음은 한 변형(outlineWeak) — "모두 보기" 도 같다
-                  return PChip(
-                    label: l.txfShowAll,
-                    variant: PChipVariant.outlineWeak,
-                    suffixIcon: LucideIcons.chevronRight,
-                    onPressed: onShowAll,
-                  );
-                }
-                final p = top[i];
-                final cat = p.categoryRowId == null
-                    ? null
-                    : categories.byRowId(p.categoryRowId!);
-                final fixed =
-                    (p.lockAmount ?? 'N') == 'Y' && (p.amount ?? 0) > 0;
-                return PChip(
-                  key: ValueKey('tx-preset-chip-${p.rowId}'),
-                  label: fixed
-                      ? '${p.templateName}  ${formatChartAxis(p.amount!.toDouble())}'
-                      : p.templateName,
-                  variant: PChipVariant.outlineWeak,
-                  selected: p.rowId == appliedId,
-                  leading: _chipTile(context, p, cat),
-                  onPressed: () => onTap(p),
-                );
-              },
             ),
           ),
         const SizedBox(height: PSpacing.x2),
       ],
+    );
+  }
+
+  Widget _chip(BuildContext context, AppLocalizations l, ExpenseTemplate p) {
+    final cat = p.categoryRowId == null
+        ? null
+        : categories.byRowId(p.categoryRowId!);
+    final fixed = (p.lockAmount ?? 'N') == 'Y' && (p.amount ?? 0) > 0;
+    return PChip(
+      key: ValueKey('tx-preset-chip-${p.rowId}'),
+      label: fixed
+          ? '${p.templateName}  ${formatChartAxis(p.amount!.toDouble())}'
+          : p.templateName,
+      variant: PChipVariant.outlineWeak,
+      selected: p.rowId == appliedId,
+      leading: _chipTile(context, p, cat),
+      onPressed: () => onTap(p),
     );
   }
 

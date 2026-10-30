@@ -4699,7 +4699,6 @@
   "txfErrInterest": "Interest can't be more than the amount.",
   "txfSplitsLoading": "Loading the split items. Try again in a moment.",
   "txfSaveFailed": "Couldn't save. Please try again in a moment.",
-  "txfSaveFailedCheck": "Couldn't save. Check what you entered.",
   "txfCategoryLoadFailed": "Couldn't load categories",
   "txfAssetLoadFailed": "Couldn't load accounts and cards",
   "txfNoCategoryOfType": "There are no categories of this kind.",

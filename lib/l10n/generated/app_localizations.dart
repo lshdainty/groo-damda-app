@@ -15074,12 +15074,6 @@ abstract class AppLocalizations {
   /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get txfSaveFailed;
 
-  /// No description provided for @txfSaveFailedCheck.
-  ///
-  /// In ko, this message translates to:
-  /// **'저장하지 못했어요. 입력한 내용을 확인해주세요.'**
-  String get txfSaveFailedCheck;
-
   /// No description provided for @txfCategoryLoadFailed.
   ///
   /// In ko, this message translates to:

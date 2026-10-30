@@ -8373,9 +8373,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get txfSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get txfSaveFailedCheck => '저장하지 못했어요. 입력한 내용을 확인해주세요.';
-
-  @override
   String get txfCategoryLoadFailed => '카테고리를 불러오지 못했어요';
 
   @override

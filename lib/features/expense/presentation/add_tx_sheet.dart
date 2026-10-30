@@ -1064,16 +1064,11 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     await _submit();
   }
 
+  /// 저장 실패 — 웹과 같은 한 글(서버 원문 없음). 확인창을 거친 저장의 실패도 보이게 본문을 맨 위로 올린다.
   void _failSave(ApiException e) {
     if (!mounted) return;
     final l = AppLocalizations.of(context);
-    final code = e.statusCode;
-    // 고칠 수 있는 거절(4xx)과 "잠시 뒤" 가 말이 되는 실패(5xx · 네트워크)를 가른다 — 다시 눌러도 영영 안 되는 일에 "잠시 뒤" 라고 하지 않는다
-    final fixable = code != null && code >= 400 && code < 500 && code != 429;
-    setState(
-      () => _saveError = fixable ? l.txfSaveFailedCheck : l.txfSaveFailed,
-    );
-    // 확인창을 거친 저장의 실패도 보이게 — 확인창은 이미 닫혔고 Callout 은 본문 맨 위다
+    setState(() => _saveError = l.txfSaveFailed);
     scrollSheetBodyToTop(context);
   }
 
@@ -1573,7 +1568,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   PBottomSheetContent _frame({
     required String title,
     required Widget body,
-    String? description,
+    String? eyebrow,
     VoidCallback? onBack,
     Widget? headerAction,
     bool showClose = true,
@@ -1584,7 +1579,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     return PBottomSheetContent(
       key: key,
       title: title,
-      description: description,
+      eyebrow: eyebrow,
       closeLabel: l.actionClose,
       showCloseButton: showClose,
       // 닫기 원은 한 단계가 아니라 시트 전체(← · 뒤로 가기가 한 단계)
@@ -1676,7 +1671,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     return _frame(
       key: const ValueKey('tx-step-one'),
       title: l.expAdd,
-      description: l.txfStepMeta('1', '2'),
+      eyebrow: l.txfStepMeta('1', '2'),
       footer: [
         PButton(
           label: l.actionNext,
@@ -1841,7 +1836,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             : 'new'}',
       ),
       title: title,
-      description: _hasStepOne ? l.txfStepMeta('2', '2') : null,
+      eyebrow: _hasStepOne ? l.txfStepMeta('2', '2') : null,
       onBack: _hasStepOne
           ? _goOne
           : (_embedded

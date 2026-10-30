@@ -8571,9 +8571,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txfSaveFailed => 'Couldn\'t save. Please try again in a moment.';
 
   @override
-  String get txfSaveFailedCheck => 'Couldn\'t save. Check what you entered.';
-
-  @override
   String get txfCategoryLoadFailed => 'Couldn\'t load categories';
 
   @override

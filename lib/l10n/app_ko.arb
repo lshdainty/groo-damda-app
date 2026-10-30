@@ -4962,7 +4962,6 @@
   "txfErrInterest": "이자는 금액보다 클 수 없어요.",
   "txfSplitsLoading": "나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.",
   "txfSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
-  "txfSaveFailedCheck": "저장하지 못했어요. 입력한 내용을 확인해주세요.",
   "txfCategoryLoadFailed": "카테고리를 불러오지 못했어요",
   "txfAssetLoadFailed": "계좌·카드를 불러오지 못했어요",
   "txfNoCategoryOfType": "이 종류의 카테고리가 없어요.",
