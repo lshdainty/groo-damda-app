@@ -494,6 +494,20 @@ void main() {
       expect(find.byKey(const ValueKey('more-split')), findsNothing);
     });
 
+    testWidgets('환불됨 Callout 의 버튼은 Callout 상자 안에 있다', (tester) async {
+      await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, _plain)));
+      await _openDetail(tester);
+      await toRefund(tester);
+      await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+      await tester.pumpAndSettle();
+
+      final box = tester.getRect(find.byKey(const ValueKey('callout-box')));
+      final cancel = tester.getRect(find.widgetWithText(PButton, '환불 취소'));
+      expect(box.contains(cancel.topLeft), isTrue);
+      expect(box.contains(cancel.bottomRight), isTrue);
+      expect(find.byKey(const ValueKey('callout-actions')), findsOneWidget);
+    });
+
     testWidgets('처리가 실패하면 단계에 남고 단계 위에 우리 글의 Callout', (tester) async {
       await _pump(
         tester,

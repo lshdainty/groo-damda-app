@@ -140,7 +140,8 @@ class TxStatusSlot extends StatelessWidget {
   );
 }
 
-/// 환불됨 · 기록만 · 자동 거래 Callout(neutral) — 있을 때만, 이 차례로.
+/// 환불됨 · 기록만 · 자동 거래 Callout(neutral) — 있을 때만, 이 차례로. [actions] 는 Callout 안 본문 아래 작은 버튼(환불됨의
+/// [잔액 고치기][환불 취소]).
 class TxNoticeCallout extends StatelessWidget {
   const TxNoticeCallout({
     super.key,
@@ -151,27 +152,11 @@ class TxNoticeCallout extends StatelessWidget {
 
   final IconData icon;
   final String text;
-
-  /// Callout 아래 작은 버튼 줄(환불됨의 [잔액 고치기][환불 취소]) — ds Callout 은 본문 안에 버튼을 두지 못해 상자 바로 아래
-  /// 8 에 같은 폭으로 선다.
   final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) => TxStatusSlot(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        PCallout(icon: icon, description: text),
-        if (actions.isNotEmpty) ...[
-          const SizedBox(height: PSpacing.x2),
-          Wrap(
-            spacing: PSpacing.x2,
-            runSpacing: PSpacing.x2,
-            children: actions,
-          ),
-        ],
-      ],
-    ),
+    child: PCallout(icon: icon, description: text, actions: actions),
   );
 }
 
@@ -461,8 +446,9 @@ class TxSplitSection extends StatelessWidget {
         size: PTagGroupSize.t3,
         overflow: PTagGroupOverflow.truncate,
         items: [
-          if (parent != null) PTag(parent.categoryName, shrink: 0),
-          PTag(s.categoryName ?? '-', shrink: 0),
+          // 좁은 줄(큰 글자)에서도 비율이 잘리지 않게 — 줄어드는 쪽은 상위 · 카테고리 이름이고 비율은 줄지 않는다
+          if (parent != null) PTag(parent.categoryName, shrink: 2),
+          PTag(s.categoryName ?? '-', shrink: 1),
           PTag('$pct%', shrink: 0),
         ],
       ),
