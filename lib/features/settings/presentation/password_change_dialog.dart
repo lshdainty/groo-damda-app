@@ -120,18 +120,23 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
         (l) => l.passwordChanged,
         severity: PSnackSeverity.success,
       );
-    } on ApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _submitting = false;
         // 서버 글은 어디에도 내지 않는다 — 코드로만 가른다
-        if (e.code == kPasswordChangeFailedCode) {
+        if (e is ApiException && e.code == kPasswordChangeFailedCode) {
           _currentInvalid = true;
         } else {
           _failed = true;
         }
       });
-      if (_currentInvalid) _currentFocus.requestFocus();
+      // 칸이 다시 켜진 뒤(오류를 반영한 프레임 다음)에 초점 — 제출 중에는 칸이 막혀 초점을 받지 못한다
+      if (_currentInvalid) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _currentFocus.requestFocus();
+        });
+      }
     }
   }
 
@@ -158,7 +163,7 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
                 PSpacing.globalGutter,
                 0,
                 PSpacing.globalGutter,
-                PSpacing.x4,
+                PSpacing.x5,
               ),
               child: PCallout(
                 tone: PCalloutTone.critical,
@@ -234,7 +239,6 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
               padding: gutter.copyWith(top: PSpacing.x2),
               child: _RuleRow(ok: true, label: l.passwordMatched),
             ),
-          const SizedBox(height: PSpacing.x2),
         ],
       ),
       footer: [

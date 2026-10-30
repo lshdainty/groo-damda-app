@@ -93,6 +93,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('현재 비밀번호가 맞지 않아요'), findsOneWidget);
+    // 현재 칸에 초점이 간다(오류를 반영한 다음 프레임에)
+    final first = tester.widget<EditableText>(find.byType(EditableText).at(0));
+    expect(first.focusNode.hasFocus, isTrue);
     expect(find.text('서버 원문 글입니다'), findsNothing);
   });
 
