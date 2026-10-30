@@ -32,6 +32,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 
@@ -73,9 +74,6 @@ class _TxFlowHooks {
 
 enum _Step { detail, refund }
 
-/// 상세 본문 맨 위 실패 알림의 종류.
-enum _Failure { none, delete, cancelRefund }
-
 class _TxDetailFlow extends ConsumerStatefulWidget {
   const _TxDetailFlow({
     required this.expense,
@@ -110,7 +108,6 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   /// 지우기를 마치고 시트가 닫히는 중 — 닫히는 동안 버튼을 다시 열지 않는다.
   bool _closing = false;
   bool _leaving = false;
-  _Failure _failure = _Failure.none;
 
   static DateTime _today() {
     final n = calendarNow();
@@ -189,12 +186,15 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     return ref.read(assetsProvider).value?.byRowId(id);
   }
 
-  /// 삭제 — 확인창 → 요청. 실패는 확인창을 닫은 뒤 시트 안 보이는 자리(본문 맨 위 Callout)에 알리고 [삭제] 로 다시 시도한다.
-  /// 지운 뒤에는 목록을 다시 받고 시트를 닫으며, 그동안 버튼은 다시 열리지 않는다.
+  /// 삭제 — 확인창 → 요청. **확인창 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]** 다(스낵바 호스트는 길잡이 바깥이라 시트 ·
+  /// 확인창 위에 뜬다 — 웹과 같다). 다시 시도는 묻지 않고 바로 지운다(이미 한 번 확정한 삭제). 요청이 끝날 때까지 확정 버튼이 로딩이고
+  /// 지운 뒤에는 목록을 다시 받고 시트를 닫으며 그동안 버튼은 다시 열리지 않는다. 폼 저장 실패(환불 처리 단계)만 시트 안 Callout 이다.
   Future<void> _delete() async {
     if (_busy) return;
     final l = AppLocalizations.of(context);
+    final snack = PSnackbar.of(context);
     final asset = _assetOf(_e);
+    Object? failure;
     final ok = await PAlertDialog.show(
       context,
       title: expenseActions.deleteConfirmTitle(context, _e),
@@ -202,12 +202,19 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       actionLabel: l.actionDelete,
       destructive: true,
       cancelLabel: l.actionCancel,
+      onAction: () async => failure = await _requestDelete(asset),
     );
     if (!ok || !mounted) return;
-    setState(() {
-      _deleting = true;
-      _failure = _Failure.none;
-    });
+    if (failure != null) {
+      _deleteFailed(snack, l);
+    } else {
+      _finishDelete();
+    }
+  }
+
+  /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null).
+  Future<Object?> _requestDelete(Asset? asset) async {
+    if (mounted) setState(() => _deleting = true);
     try {
       await expenseActions.delete(
         context,
@@ -217,17 +224,38 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         silent: true,
         throwOnError: true,
       );
-      if (!mounted) return;
-      _closing = true;
-      PBottomSheet.of(context).close();
-    } on ApiException {
-      if (mounted) {
-        setState(() => _failure = _Failure.delete);
-        scrollSheetBodyToTop(context);
-      }
+      return null;
+    } on ApiException catch (e) {
+      return e;
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
+  }
+
+  void _finishDelete() {
+    if (!mounted) return;
+    setState(() => _closing = true);
+    PBottomSheet.of(context).close();
+  }
+
+  void _deleteFailed(PSnackbarApi snack, AppLocalizations l) {
+    snack.show(
+      message: l.expTxDeleteFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          if (!mounted || _busy) return;
+          final err = await _requestDelete(_assetOf(_e));
+          if (!mounted) return;
+          if (err == null) {
+            _finishDelete();
+          } else {
+            _deleteFailed(snack, l);
+          }
+        },
+      ),
+    );
   }
 
   /// 환불 처리 — 요청이 끝나고 목록을 다시 받은 뒤에 상세로 돌아온다("환불됨" Callout 이 바로 보인다).
@@ -251,7 +279,6 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       setState(() {
         if (updated != null) _e = updated;
         _step = _Step.detail;
-        _failure = _Failure.none;
       });
     } on ApiException {
       if (mounted) setState(() => _refundFailed = true);
@@ -271,18 +298,23 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
             l.expRefundCancelConfirmPlain,
             closedCycleSpanOfExpense(_e, _assetOf(_e)),
           );
+    final snack = PSnackbar.of(context);
+    Object? failure;
     final ok = await PAlertDialog.show(
       context,
       title: l.expRefundCancel,
       description: message,
       actionLabel: l.expRefundCancel,
       cancelLabel: l.actionCancel,
+      onAction: () async => failure = await _requestCancelRefund(),
     );
     if (!ok || !mounted) return;
-    setState(() {
-      _cancelling = true;
-      _failure = _Failure.none;
-    });
+    if (failure != null) _cancelRefundFailed(snack, l);
+  }
+
+  /// 환불 취소 요청 — 성공하면 응답으로 상세를 다시 그리고 null, 실패하면 그 오류.
+  Future<Object?> _requestCancelRefund() async {
+    if (mounted) setState(() => _cancelling = true);
     try {
       final updated = await expenseActions.cancelRefund(
         ref,
@@ -291,14 +323,27 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         throwOnError: true,
       );
       if (mounted && updated != null) setState(() => _e = updated);
-    } on ApiException {
-      if (mounted) {
-        setState(() => _failure = _Failure.cancelRefund);
-        scrollSheetBodyToTop(context);
-      }
+      return null;
+    } on ApiException catch (e) {
+      return e;
     } finally {
       if (mounted) setState(() => _cancelling = false);
     }
+  }
+
+  void _cancelRefundFailed(PSnackbarApi snack, AppLocalizations l) {
+    snack.show(
+      message: l.expRefundCancelFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          if (!mounted || _busy) return;
+          final err = await _requestCancelRefund();
+          if (mounted && err != null) _cancelRefundFailed(snack, l);
+        },
+      ),
+    );
   }
 
   /// [수정] — 상세를 내리고 옛 수정 시트를 연다(21-2 가 단계로 옮긴다). 저장하면 응답으로, 저장 없이 닫혀도 상세로 돌아온다.
@@ -425,20 +470,10 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     final loading =
         (categoriesAsync.isLoading && !categoriesAsync.hasValue) ||
         (assetsAsync.isLoading && !assetsAsync.hasValue);
-    final failure = _failure == _Failure.none
-        ? const SizedBox.shrink()
-        : TxFailureCallout(
-            message: _failure == _Failure.delete
-                ? l.expTxDeleteFailed
-                : l.expRefundCancelFailed,
-            onRetry: _busy
-                ? null
-                : (_failure == _Failure.delete ? _delete : _cancelRefund),
-          );
     if (loading) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [failure, const TxDetailSkeleton()],
+        children: const [TxDetailSkeleton()],
       );
     }
 
@@ -532,7 +567,6 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        failure,
         TxDetailHead(
           tileBackground: softBg(context, tileFg),
           tileColor: tileFg,

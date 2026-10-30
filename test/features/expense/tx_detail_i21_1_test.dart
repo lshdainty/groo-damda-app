@@ -33,11 +33,11 @@ import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart'
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 const _card = Asset(
   rowId: 9,
@@ -165,11 +165,15 @@ class _FakeAssetRepo extends AssetRepository {
     : super(Dio(BaseOptions(baseUrl: 'https://example.invalid')));
   final deleted = <int>[];
   bool? silent;
+  bool fail = false;
 
   @override
   Future<void> deleteTransfer(int id, {bool silent = false}) async {
-    deleted.add(id);
     this.silent = silent;
+    if (fail) {
+      throw ApiException(code: 'SERVER', message: '서버 원문', statusCode: 500);
+    }
+    deleted.add(id);
   }
 }
 
@@ -219,7 +223,11 @@ Future<void> _pump(
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(textScale)),
-          child: child!,
+          // 앱과 같은 자리 — 길잡이 바깥이라 시트 · 확인창 위에 뜬다
+          child: Material(
+            type: MaterialType.transparency,
+            child: PSnackbarHost(closeLabel: '닫기', child: child!),
+          ),
         ),
         home: Scaffold(body: home),
       ),
@@ -538,7 +546,7 @@ void main() {
   });
 
   group('삭제', () {
-    testWidgets('실패하면 확인창은 닫히고 시트 안 Callout 이 말한다 — [삭제] 로 다시 시도', (
+    testWidgets('실패하면 확인창은 닫히고 critical 스낵바 + [다시 시도] — 시트 안 Callout 아님', (
       tester,
     ) async {
       final repo = _FakeRepo(failDelete: true);
@@ -554,47 +562,38 @@ void main() {
       await tester.tap(find.text('삭제').last);
       await tester.pumpAndSettle();
 
-      expect(repo.silentFlags, [true]);
+      expect(repo.silentFlags, [true], reason: '전역 오류 알림은 끄고 화면이 말한다');
       expect(find.byType(AlertDialog), findsNothing, reason: '확인창은 닫혔다');
-      expect(find.byKey(const ValueKey('tx-detail-failure')), findsOneWidget);
+      expect(find.byKey(const ValueKey('tx-detail-failure')), findsNothing);
       expect(find.text('거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
-      // 다시 시도할 수 있다 — 버튼이 풀려 있다
+      expect(find.text('다시 시도'), findsOneWidget);
+      // 시트는 그대로 열려 있고 버튼은 풀려 있다
       expect(
         tester.widget<PButton>(find.widgetWithText(PButton, '삭제')).onPressed,
         isNotNull,
       );
     });
 
-    testWidgets('긴 상세를 내린 채 삭제가 실패하면 본문이 맨 위로 올라가 Callout 이 보인다', (
-      tester,
-    ) async {
+    testWidgets('[다시 시도] 는 확인창을 다시 거치지 않고 바로 지운다', (tester) async {
+      final repo = _FakeRepo(failDelete: true);
       await _pump(
         tester,
-        _opener((ctx) => showTxDetailDialog(ctx, _worst)),
-        repo: _FakeRepo(failDelete: true),
-        history: [_worst, for (var i = 0; i < 8; i++) _other(i)],
+        _opener((ctx) => showTxDetailDialog(ctx, _plain)),
+        repo: repo,
       );
       await _openDetail(tester);
-      final scrollable = find
-          .descendant(
-            of: find.byType(PBottomSheetContent),
-            matching: find.byType(Scrollable),
-          )
-          .first;
-      await tester.drag(scrollable, const Offset(0, -2000));
-      await tester.pumpAndSettle();
-      expect(
-        tester.state<ScrollableState>(scrollable).position.pixels,
-        greaterThan(0),
-      );
-
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('삭제').last);
       await tester.pumpAndSettle();
 
-      expect(tester.state<ScrollableState>(scrollable).position.pixels, 0);
-      expect(find.byKey(const ValueKey('tx-detail-failure')), findsOneWidget);
+      repo.failDelete = false;
+      await tester.tap(find.text('다시 시도'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing, reason: '다시 묻지 않는다');
+      expect(repo.deleted, [5]);
+      expect(find.text('지출 상세'), findsNothing, reason: '지운 뒤 시트가 닫힌다');
     });
 
     testWidgets('지우면 시트가 닫히고, 닫히는 동안 버튼은 다시 열리지 않는다', (tester) async {
@@ -686,6 +685,31 @@ void main() {
       expect(find.widgetWithText(PButton, '수정'), findsNothing);
       expect(find.byKey(const ValueKey('more-recurring')), findsNothing);
       expect(_plainText('따로 고칠 수 없어요.'), findsOneWidget);
+    });
+
+    testWidgets('이체 삭제가 실패하면 스낵바 + [다시 시도], 다시 시도는 바로 요청', (tester) async {
+      final assetRepo = _FakeAssetRepo()..fail = true;
+      await _pump(
+        tester,
+        _opener((ctx) => showTransferDetailSheet(ctx, transfer)),
+        assetRepo: assetRepo,
+      );
+      await _openDetail(tester);
+      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제').last);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.text('이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
+      expect(assetRepo.deleted, isEmpty);
+
+      assetRepo.fail = false;
+      await tester.tap(find.text('다시 시도'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing, reason: '다시 묻지 않는다');
+      expect(assetRepo.deleted, [7001]);
+      expect(find.text('이체 상세'), findsNothing);
     });
 
     testWidgets('삭제 확인창 제목은 "이체 삭제" — 조용한 요청', (tester) async {

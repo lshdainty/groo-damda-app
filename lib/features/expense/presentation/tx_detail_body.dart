@@ -13,7 +13,6 @@ import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row
 import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
-import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
@@ -699,13 +698,4 @@ class TxDetailSkeleton extends StatelessWidget {
         ),
     ],
   );
-}
-
-/// 실패 알림은 본문 맨 위에 서므로 내려가 있으면 안 보인다 — 실패가 그려진 다음 프레임에 본문을 맨 위로 올린다(시트 위라
-/// 스낵바가 아니라 Callout 이 맞다 — 전역 스낵바는 시트 뒤에 가려진다).
-void scrollSheetBodyToTop(BuildContext context) {
-  final controller = PBottomSheet.maybeOf(context)?.bodyController;
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (controller != null && controller.hasClients) controller.jumpTo(0);
-  });
 }

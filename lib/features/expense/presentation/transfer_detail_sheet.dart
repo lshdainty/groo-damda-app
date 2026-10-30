@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 
 /// 이체 상세(I-21 21-1 · C) — 거래 상세와 한 벌이다. 머리 "이체 상세" · 닫기 → 회색 타일 48 + "이체" → 금액 → 날짜 → 보내는 · 받는
@@ -59,15 +60,17 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
 
   /// 지우기를 마치고 시트가 닫히는 중 — 닫히는 동안 버튼을 다시 열지 않는다.
   bool _closing = false;
-  bool _deleteFailed = false;
 
   AssetTransfer get _t => widget.transfer;
   bool get _busy => _deleting || _closing;
 
-  /// 삭제 — 확인창 → 요청. 실패는 확인창을 닫은 뒤 시트 안 보이는 자리(본문 맨 위 Callout)에 알리고 [삭제] 로 다시 시도한다.
+  /// 삭제 — 확인창 → 요청. **확인창 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]** 다(스낵바 호스트는 길잡이 바깥이라 시트 · 확인창
+  /// 위에 뜬다). 다시 시도는 묻지 않고 바로 지운다. 지운 뒤에는 목록을 다시 받고 시트를 닫으며 그동안 버튼은 다시 열리지 않는다.
   Future<void> _delete() async {
     if (_busy) return;
     final l = AppLocalizations.of(context);
+    final snack = PSnackbar.of(context);
+    Object? failure;
     final ok = await PAlertDialog.show(
       context,
       title: l.transferDeleteTitle,
@@ -75,12 +78,19 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
       actionLabel: l.actionDelete,
       destructive: true,
       cancelLabel: l.actionCancel,
+      onAction: () async => failure = await _requestDelete(),
     );
     if (!ok || !mounted) return;
-    setState(() {
-      _deleting = true;
-      _deleteFailed = false;
-    });
+    if (failure != null) {
+      _deleteFailed(snack, l);
+    } else {
+      _finishDelete();
+    }
+  }
+
+  /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null).
+  Future<Object?> _requestDelete() async {
+    if (mounted) setState(() => _deleting = true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       await repo.deleteTransfer(_t.rowId, silent: true);
@@ -100,17 +110,38 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
           // 받지 못해도 닫는다
         }
       }
-      if (!mounted) return;
-      _closing = true;
-      PBottomSheet.of(context).close();
-    } on ApiException {
-      if (mounted) {
-        setState(() => _deleteFailed = true);
-        scrollSheetBodyToTop(context);
-      }
+      return null;
+    } on ApiException catch (e) {
+      return e;
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
+  }
+
+  void _finishDelete() {
+    if (!mounted) return;
+    setState(() => _closing = true);
+    PBottomSheet.of(context).close();
+  }
+
+  void _deleteFailed(PSnackbarApi snack, AppLocalizations l) {
+    snack.show(
+      message: l.transferDeleteFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          if (!mounted || _busy) return;
+          final err = await _requestDelete();
+          if (!mounted) return;
+          if (err == null) {
+            _finishDelete();
+          } else {
+            _deleteFailed(snack, l);
+          }
+        },
+      ),
+    );
   }
 
   /// [수정] — 상세를 내리고 옛 수정 시트를 연다. 저장하면 저장한 값으로, 저장 없이 닫혀도 상세로 돌아온다.
@@ -185,11 +216,6 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (_deleteFailed)
-          TxFailureCallout(
-            message: l.transferDeleteFailed,
-            onRetry: _busy ? null : _delete,
-          ),
         TxDetailHead(
           // 이체는 회색(list.md "이체 줄은 회색")
           tileBackground: c.chartGrayWeak,
