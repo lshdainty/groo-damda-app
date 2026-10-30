@@ -163,6 +163,24 @@ void main() {
     },
   );
 
+  testWidgets('시트 머리 아래 → 제목 칸 12 · 스위치 줄 아래 → [저장] 위 12 (끝 흐림 여백 없음)', (
+    tester,
+  ) async {
+    await _open(tester, edit: null);
+    final header = tester.getRect(
+      find.byKey(const ValueKey('p-bottom-sheet-header')),
+    );
+    expect(
+      tester.getRect(find.byType(PInput)).top - header.bottom,
+      closeTo(12, 1.5),
+      reason: '필드 위 12',
+    );
+    expect(
+      tester.getRect(_button('저장')).top - tester.getRect(_row('상단에 고정')).bottom,
+      closeTo(12, 1),
+    );
+  });
+
   testWidgets('줄 높이 — 태그 · 색상 줄 46 (보이는 줄) · 누르는 칸 44 이상', (tester) async {
     await _open(tester, edit: null);
     expect(tester.getSize(_row('태그')).height, 46);

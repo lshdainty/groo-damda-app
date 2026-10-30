@@ -239,7 +239,7 @@ class _TagSettingsState extends State<TagSettings> {
           size: PResultSize.medium,
           icon: LucideIcons.tags,
           title: copy.emptyTitle,
-          description: copy.emptyHint("'${copy.addCta}'"),
+          description: copy.emptyHint('"${copy.addCta}"'),
         ),
       ];
     } else {
@@ -297,7 +297,6 @@ class _TagSettingsState extends State<TagSettings> {
             ),
             child: PCallout(
               tone: PCalloutTone.informative,
-              icon: LucideIcons.tag,
               description: copy.desc,
             ),
           ),
@@ -527,7 +526,6 @@ class _TagEditSheetState extends State<_TagEditSheet> {
     return PBottomSheetContent(
       title: _isEdit ? copy.editTitle : copy.addCta,
       closeLabel: l.actionClose,
-      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x4,

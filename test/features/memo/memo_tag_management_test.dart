@@ -111,7 +111,7 @@ void main() {
     final callout = tester.widget<PCallout>(find.byType(PCallout));
     expect(callout.tone, PCalloutTone.informative);
     expect(callout.title, isNull);
-    expect(callout.icon, LucideIcons.tag);
+    expect(callout.icon, isNull, reason: 'informative 기본 아이콘(ⓘ)');
     expect(
       callout.description,
       "메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 '태그 없음' 으로 남아요.",

@@ -216,6 +216,23 @@ void main() {
     expect(findPlain('읽을 책 목록'), findsOneWidget);
   });
 
+  testWidgets('칩 폭 — "전체 6" 은 웹과 같은 67(좌우 12 + 글 + 글↔건수 10)', (tester) async {
+    await _pump(tester);
+    expect(
+      tester.getSize(find.byType(PChipRadio<String>).first).width,
+      closeTo(67, 1.5),
+    );
+  });
+
+  testWidgets('끝 칩을 고르면 칩 줄이 그 칩이 화면 여백(24) 안에 들어오게 스크롤된다', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.bySemanticsLabel('태그 없음 2'));
+    await tester.pumpAndSettle();
+    final r = tester.getRect(find.byType(PChipRadio<String>).last);
+    expect(r.right, lessThanOrEqualTo(360 - 24 + 0.5));
+    expect(r.left, greaterThanOrEqualTo(0));
+  });
+
   testWidgets('묶음 제목 "고정 · 2" · "모든 메모 · 4" · 줄 6 · 고정 0이면 "모든 메모" 제목이 없다', (
     tester,
   ) async {

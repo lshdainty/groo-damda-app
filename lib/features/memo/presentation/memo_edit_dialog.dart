@@ -278,7 +278,6 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       title: _isEdit ? l.memoEditTitle : l.memoNew,
       closeLabel: l.actionClose,
       flushBody: true,
-      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

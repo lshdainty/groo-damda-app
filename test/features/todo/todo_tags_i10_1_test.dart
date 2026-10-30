@@ -121,7 +121,7 @@ void main() {
     expect(callout.tone, PCalloutTone.informative);
     expect(callout.interaction, PCalloutInteraction.display);
     expect(callout.title, isNull);
-    expect(callout.icon, LucideIcons.tag);
+    expect(callout.icon, isNull, reason: 'informative 기본 아이콘(ⓘ)');
     expect(callout.description, contains('태그별 개수'));
     expect(callout.description, isNot(contains('분포')));
     expect(callout.description, contains("'태그 없음'으로 남아요"));
@@ -190,7 +190,7 @@ void main() {
     expect(r.size, PResultSize.medium);
     expect(r.primaryAction, isNull);
     expect(r.title, '태그가 없어요');
-    expect(r.description, "'태그 추가' 버튼으로 첫 태그를 만들어보세요.");
+    expect(r.description, "\"태그 추가\" 버튼으로 첫 태그를 만들어보세요.");
     expect(
       tester.widget<PListHeader>(find.byType(PListHeader)).title,
       '할 일 태그 · 0',

@@ -226,7 +226,7 @@ class ChipVisual extends StatelessWidget {
   /// 글 앞에 6 을 두고 놓는 것 — 아이콘 대신 색 점처럼 화면이 그린 표식(앞 아이콘과 같이 쓰지 않는다).
   final Widget? leading;
 
-  /// 글 뒤 건수 — 같은 칩 안에서 글과 4 를 두고 `fg-neutral-subtle` 로 놓는다(고른 칩에서는 칩의 글색 그대로). 메모 태그 필터 칩(I-15 8).
+  /// 글 뒤 건수 — 같은 칩 안에서 글과 10(웹 칩 묶음 gap 6 + 건수 margin 4)을 두고 `fg-neutral-subtle` 로 놓는다(고른 칩에서는 칩의 글색 그대로). 메모 태그 필터 칩(I-15 8).
   final int? count;
 
   @override
@@ -294,7 +294,9 @@ class ChipVisual extends StatelessWidget {
                                       TextSpan(text: label),
                                       if (count != null) ...[
                                         const WidgetSpan(
-                                          child: SizedBox(width: PSpacing.x1),
+                                          child: SizedBox(
+                                            width: PSpacing.x1_5 + PSpacing.x1,
+                                          ),
                                         ),
                                         TextSpan(
                                           text: '$count',
@@ -935,6 +937,48 @@ class _PChipRadioState<T> extends State<PChipRadio<T>> with RadioClient<T> {
     _groupEnabled = _ChipRadioScope.enabledOf(context);
   }
 
+  /// 지난 그림에서 고른 칩이었나 — null 이면 아직 그린 적 없다.
+  bool? _wasSelected;
+
+  /// 가로 스크롤 줄 안의 칩이 화면 여백(24) 안에 들어오게 줄을 옮긴다 — 가로 스크롤이 아니면(wrap) 하지 않는다.
+  void _reveal() {
+    if (!mounted) return;
+    final scrollable = Scrollable.maybeOf(context);
+    if (scrollable == null) {
+      return;
+    }
+    final dir = scrollable.axisDirection;
+    if (dir != AxisDirection.right && dir != AxisDirection.left) {
+      return;
+    }
+    final box = context.findRenderObject();
+    final viewport = scrollable.context.findRenderObject();
+    if (box is! RenderBox || viewport is! RenderBox) return;
+    final left = box.localToGlobal(Offset.zero, ancestor: viewport).dx;
+    final right = left + box.size.width;
+    const edge = PSpacing.globalGutter;
+    var delta = 0.0;
+    if (right > viewport.size.width - edge) {
+      delta = right - (viewport.size.width - edge);
+    }
+    if (left - delta < edge) delta = left - edge;
+    if (delta == 0) return;
+    final position = scrollable.position;
+    final target = (position.pixels + delta).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      position.jumpTo(target);
+    } else {
+      position.animateTo(
+        target,
+        duration: const Duration(milliseconds: 200),
+        curve: PEasing.easing,
+      );
+    }
+  }
+
   @override
   void dispose() {
     registry = null;
@@ -949,6 +993,11 @@ class _PChipRadioState<T> extends State<PChipRadio<T>> with RadioClient<T> {
       'PChipRadio 는 같은 값 타입(T)의 PChipRadioGroup 안에서만 쓴다 — T: $T',
     );
     final selected = registry?.groupValue == widget.value;
+    // 고르는 순간 가로 스크롤 줄 안이면 고른 칩이 보이게 옮긴다(웹: 고른 칩이 줄 안으로 스크롤된다). 처음 그릴 때는 옮기지 않는다
+    if (selected && _wasSelected == false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _reveal());
+    }
+    _wasSelected = selected;
     final enabled = this.enabled;
     // iOS 의 VoiceOver 는 선택을 selected 로 읽는다 — 고르지 않은 칩은 "선택되지 않음" 을 덧붙인다(PRadio 와 같다)
     final apple = switch (defaultTargetPlatform) {

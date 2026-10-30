@@ -89,7 +89,6 @@ class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
     return PBottomSheetContent(
       title: name,
       closeLabel: l.actionClose,
-      scrollFog: true,
       headerAction: PButton.icon(
         icon: LucideIcons.ellipsisVertical,
         semanticLabel: l.memoMoreOf(name),
