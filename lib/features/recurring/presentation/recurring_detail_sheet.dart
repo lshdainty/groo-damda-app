@@ -265,6 +265,8 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
       closeLabel: l.actionClose,
       headerAction: _headerAction(l, it),
       flushBody: true,
+      // 이름 · 메모 · 다음 예정일이 사용자 값이고 200% 에서 넘친다 — 끝 흐림을 켠다(웹 50bf362c 와 같은 판정)
+      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -867,7 +867,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     return _buildForm(l);
   }
 
-  /// 단계 틀 — 끝 흐림은 본문이 시트 90% 에 닿는 단계(반복: 격자 + 휠)만 켠다. 나머지 단계는 내용 높이라 끈다(넘치지 않는 곳에 위 20 · 아래 80 을 더하지 않는다).
+  /// 단계 틀 — 끝 흐림은 본문이 시트 90% 에 닿는 단계(반복의 매주 — 라디오 일곱 + 휠)만 켠다. 나머지 단계는 내용 높이라 끈다(넘치지 않는 곳에 위 20 · 아래 80 을 더하지 않는다).
   Widget _stepShell(AppLocalizations l, Widget body, {bool fog = false}) =>
       PBottomSheetContent(
         title: _stepTitle(l, _step),
@@ -955,7 +955,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           ),
         );
       case _Step.repeat:
-        return _stepShell(l, _buildRepeatStep(l), fog: true);
+        return _stepShell(l, _buildRepeatStep(l), fog: _dFrequency == 'WEEKLY');
       case _Step.end:
         return _stepShell(l, _buildEndStep(l));
       case _Step.none:
