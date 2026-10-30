@@ -533,6 +533,9 @@ class _PListRowFrameState extends State<PListRowFrame> {
   }) => DefaultTextStyle(
     key: key,
     style: PTypography.t5.copyWith(color: detailColor),
+    // 값은 줄 수와 상관없이 줄 끝 오른쪽 맞춤 — 여러 줄이어도 모든 줄의 끝이 한 줄 값과 같은 세로선(list.md suffixText
+    // textAlign end). 좁은 줄에서 본문 아래로 내려간 값은 [_narrowBody] 가 start 로 따로 입힌다.
+    textAlign: TextAlign.end,
     child: IconTheme(
       data: IconThemeData(size: PSpacing.x4_5, color: arrowColor),
       child: suffix,
