@@ -19,6 +19,7 @@ import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
+import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_pickers.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -347,7 +348,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final tr = widget.editTransfer;
     final sms = _smsDraft?.parsed;
     DateTime date;
-    TimeOfDay time = TimeOfDay.fromDateTime(txNow());
+    TimeOfDay time = TimeOfDay.fromDateTime(calendarNow());
     String? raw = tr?.transferDate ?? e?.expenseDate ?? sms?.expenseDate;
     if (raw != null && raw.length >= 10) {
       date = parseIsoDate(raw.substring(0, 10));
@@ -361,7 +362,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     } else if (widget.defaultDate != null) {
       date = parseIsoDate(widget.defaultDate!);
     } else {
-      date = txNow();
+      date = calendarNow();
     }
     final old = _inputOrNull;
     old?.dispose();
@@ -823,7 +824,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       context,
       title: l.expDate,
       value: _input.date,
-      today: txNow(),
+      today: calendarNow(),
     );
     if (picked == null || !mounted) return;
     setState(() {
@@ -1786,7 +1787,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 : a.assetName);
     }
 
-    final dayText = formatDateValue(c.date, txNow());
+    final dayText = formatDateValue(c.date, calendarNow());
     final timeText = formatTimeValue(
       PTimeValue(c.time.hour, c.time.minute),
       labels: PTimePickerLabels.of(context),
