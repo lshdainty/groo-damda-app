@@ -560,4 +560,62 @@ void main() {
     expect(tester.state<ScrollableState>(scrollable).position.pixels, 0);
     expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
   });
+
+  testWidgets('자산 목록을 기다리는 동안 [추가] 를 두 번 눌러도 요청은 한 번이다', (tester) async {
+    final late = Completer<List<Asset>>();
+    final repo = await _open(
+      tester,
+      (c) => showAddTxSheet(c, edit: _foreignTx),
+      assetsLate: late.future,
+    );
+    await tester.tap(find.text('저장'));
+    await tester.pump();
+    await tester.tap(find.text('저장'), warnIfMissed: false);
+    await tester.pump();
+    late.complete([_bank, _loan, _card]);
+    await tester.pumpAndSettle();
+    expect(repo.calls, hasLength(1), reason: '같은 거래가 둘 저장되면 안 된다');
+  });
+
+  testWidgets('자산 목록을 기다리는 동안 이체 수정 [저장] 을 두 번 눌러도 요청은 한 번이다', (tester) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+    final late = Completer<List<Asset>>();
+    final repo = _TransferRepo();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          categoriesProvider.overrideWith((ref) async => [_cat]),
+          assetsProvider.overrideWith((ref) => late.future),
+          presetListProvider.overrideWith((ref) async => []),
+          assetRepositoryProvider.overrideWith((ref) async => repo),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => TextButton(
+                onPressed: () =>
+                    showAddTxSheet(ctx, editTransfer: _loanTransfer),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text('저장'));
+    await tester.pump();
+    await tester.tap(find.text('저장'), warnIfMissed: false);
+    await tester.pump();
+    late.complete([_bank, _loan]);
+    await tester.pumpAndSettle();
+    expect(repo.updates, hasLength(1));
+  });
 }

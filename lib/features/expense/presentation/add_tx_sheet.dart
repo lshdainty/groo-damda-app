@@ -1117,8 +1117,18 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     }
   }
 
+  /// 저장 — 들어오는 순간 막는 표시를 켜고(자산 목록을 기다리는 동안 [추가] 를 또 눌러도 요청이 둘 나가지 않게) 어떤 길로 끝나도 푼다.
   Future<void> _save() async {
     if (_submitting) return;
+    setState(() => _submitting = true);
+    try {
+      await _saveInner();
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _saveInner() async {
     if (!await _ensureAssets()) {
       if (!mounted) return;
       setState(() => _saveError = AppLocalizations.of(context).txfSaveFailed);
