@@ -2849,13 +2849,13 @@ abstract class AppLocalizations {
   /// No description provided for @calFormSaveFailed.
   ///
   /// In ko, this message translates to:
-  /// **'일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calFormSaveFailed;
 
   /// No description provided for @calFormDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'일정을 삭제하지 못했어요.'**
   String get calFormDeleteFailed;
 
   /// No description provided for @calReminderMinutesBefore.

@@ -22,6 +22,7 @@ import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
 import 'package:groo_damda_app/features/calendar/domain/holiday.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_screen.dart';
+import 'package:groo_damda_app/features/dashboard/application/dashboard_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -88,6 +89,9 @@ class _World {
   /// 삭제 요청이 실패한다.
   bool failDelete = false;
   int deleteCalls = 0;
+
+  /// 홈 위젯 원본(dashboardSummaryProvider)을 받은 횟수 — 삭제 뒤 무효화되면 늘어난다.
+  int dashboardBuilds = 0;
 
   /// 있으면 월 일정 조회가 이 신호를 기다린다 — 삭제 · 저장 뒤 "다시 받는 동안" 을 붙잡아 둔다.
   Completer<void>? gate;
@@ -212,6 +216,10 @@ void main() {
           userCalendarListProvider.overrideWith((ref) async => _cals),
           eventLabelsProvider.overrideWith((ref) async => const <EventLabel>[]),
           holidayListProvider.overrideWith((ref, k) async => <Holiday>[]),
+          dashboardSummaryProvider.overrideWith((ref) async {
+            world.dashboardBuilds++;
+            throw StateError('home summary stub');
+          }),
           monthEventsProvider.overrideWith((ref, k) async {
             world.builds[k] = (world.builds[k] ?? 0) + 1;
             await world.gate?.future;
@@ -238,6 +246,9 @@ void main() {
                 Consumer(
                   builder: (context, ref, _) {
                     ref.watch(monthEventsProvider((year: 2026, month: 11)));
+                    ref.watch(
+                      dashboardSummaryProvider,
+                    ); // 홈 위젯 원본 — 상주 화면처럼 들고 있는다
                     return const SizedBox.shrink();
                   },
                 ),
@@ -734,9 +745,15 @@ void main() {
 
       world.failDelete = false;
       final octBefore = world.builds[(year: 2026, month: 10)]!;
+      final dashBefore = world.dashboardBuilds;
       await tapRetry(tester);
       expect(world.deleted, {1});
       expect(world.deleteCalls, 2, reason: '실패 한 번 + 다시 시도 한 번');
+      expect(
+        world.dashboardBuilds,
+        greaterThan(dashBefore),
+        reason: '시트가 없어도 홈 위젯 원본(dashboardSummaryProvider)을 무효화한다',
+      );
       expect(
         world.builds[(year: 2026, month: 10)],
         greaterThan(octBefore),
