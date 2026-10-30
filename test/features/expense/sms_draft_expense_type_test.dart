@@ -101,6 +101,7 @@ class _CapturingSmsRepo extends SmsRepository {
     String? originalCurrency,
     num? exchangeRate,
     required bool rememberCard,
+    bool silent = false,
   }) async {
     called = true;
     this.expenseType = expenseType;

@@ -74,6 +74,7 @@ class _FakeRepo extends ExpenseRepository {
     String? originalCurrency,
     double? exchangeRate,
     bool? isFixed,
+    bool silent = false,
   }) async {
     created++;
     return Expense(
@@ -110,6 +111,7 @@ class _FakeSmsRepo extends SmsRepository {
     String? originalCurrency,
     num? exchangeRate,
     required bool rememberCard,
+    bool silent = false,
   }) async {
     committed++;
     return SmsCommitResult(

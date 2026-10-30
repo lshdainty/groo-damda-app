@@ -104,6 +104,7 @@ class _CapturingRepo extends PresetRepository {
     int? sortOrder,
     bool lockAmount = false,
     bool isFixed = false,
+    bool silent = false,
   }) async {
     called = true;
     createdDescription = description;

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
 import 'package:groo_damda_app/core/network/dio_provider.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 
 // ─── 모델 (백엔드 dataimport.sms 미러) ─────────────────────────
 
@@ -159,11 +160,12 @@ class SmsRepository {
   final Dio _dio;
 
   /// 문자 해석 — 저장하지 않는다.
-  Future<SmsParseResult> parse(String text) async {
+  Future<SmsParseResult> parse(String text, {bool silent = false}) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/import/sms/parse',
         data: {'text': text},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       final api = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data!,
@@ -197,6 +199,7 @@ class SmsRepository {
     String? originalCurrency,
     num? exchangeRate,
     required bool rememberCard,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -217,6 +220,7 @@ class SmsRepository {
           'exchangeRate': exchangeRate,
           'rememberCard': rememberCard,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       final api = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data!,

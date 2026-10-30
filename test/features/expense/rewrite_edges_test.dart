@@ -92,6 +92,7 @@ class _FakeRepo extends ExpenseRepository {
     double? exchangeRate,
     List<SplitInput>? splits,
     bool? isFixed,
+    bool silent = false,
   }) async {
     replaced++;
     final err = replaceError;

@@ -361,6 +361,7 @@ class AssetRepository {
     int? interestAmount,
     String? description,
     required String transferDate, // ISO-LOCAL-DATETIME 'YYYY-MM-DDTHH:mm:ss'
+    bool silent = false,
   }) async {
     try {
       await _dio.post<dynamic>(
@@ -374,6 +375,7 @@ class AssetRepository {
           'description': ?description,
           'transferDate': transferDate,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -392,6 +394,7 @@ class AssetRepository {
     int? interestAmount,
     String? description,
     required String transferDate,
+    bool silent = false,
   }) async {
     try {
       await _dio.put<dynamic>(
@@ -405,6 +408,7 @@ class AssetRepository {
           'description': ?description,
           'transferDate': transferDate,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

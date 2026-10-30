@@ -40,6 +40,7 @@ class PresetRepository {
 
     /// 고정 수입·지출 기본값 — 이체에는 싣지 않는다(서버도 무시한다).
     bool isFixed = false,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -60,6 +61,7 @@ class PresetRepository {
           'lockAmount': lockAmount ? 'Y' : 'N',
           'isFixed': isFixed,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, ExpenseTemplate.fromJson);
     } on DioException catch (e) {

@@ -61,6 +61,7 @@ class ExpenseRepository {
 
     /// 고정 수입·지출 — 안 실으면 서버가 변동으로 만든다. 이체에는 쓰지 않는다.
     bool? isFixed,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -80,6 +81,7 @@ class ExpenseRepository {
           'exchangeRate': ?exchangeRate,
           'isFixed': ?isFixed,
         },
+        options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
     } on DioException catch (e) {
@@ -117,6 +119,7 @@ class ExpenseRepository {
     // 고정 수입·지출 — 안 실으면 서버가 지금 표식을 지킨다(옛 앱의 수정이 표식을 지우지 않는다).
     Patch<bool> isFixed = const Patch.keep(),
     List<SplitInput>? splits,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
@@ -148,6 +151,7 @@ class ExpenseRepository {
                 },
             ],
         },
+        options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
     } on DioException catch (e) {
@@ -182,6 +186,7 @@ class ExpenseRepository {
     /// 고정 수입·지출 — 안 실으면 서버가 옛 거래의 표식을 잇는다.
     bool? isFixed,
     List<SplitInput>? splits,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -211,6 +216,7 @@ class ExpenseRepository {
                 },
             ],
         },
+        options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
     } on DioException catch (e) {

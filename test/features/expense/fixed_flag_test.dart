@@ -62,6 +62,7 @@ class _FakeRepo extends ExpenseRepository {
     String? originalCurrency,
     double? exchangeRate,
     bool? isFixed,
+    bool silent = false,
   }) async {
     created++;
     createdFixed = isFixed;
@@ -92,6 +93,7 @@ class _FakeRepo extends ExpenseRepository {
     Patch<double> exchangeRate = const Patch.keep(),
     Patch<bool> isFixed = const Patch.keep(),
     List<SplitInput>? splits,
+    bool silent = false,
   }) async {
     updatedFixed = isFixed;
     return Expense(

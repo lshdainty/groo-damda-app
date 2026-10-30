@@ -66,6 +66,7 @@ class _FakeAssetRepo extends AssetRepository {
     int? interestAmount,
     String? description,
     required String transferDate,
+    bool silent = false,
   }) async {
     created = true;
   }
