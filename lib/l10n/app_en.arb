@@ -1919,8 +1919,8 @@
   },
   "expIncomeSource": "Income source",
   "expPayee": "Merchant",
-  "expIncomeSourcePlaceholder": "e.g. Forest Inc.",
-  "expPayeePlaceholder": "e.g. Starbucks Gangnam",
+  "expIncomeSourcePlaceholder": "e.g. Salary",
+  "expPayeePlaceholder": "e.g. Lunch near the office",
   "expIncomeMethod": "Income method",
   "expNone": "None",
   "expDepositAccount": "Deposit account",
@@ -4123,8 +4123,8 @@
   "dsInputClear": "Clear",
   "fixedSwitchExpense": "Fixed expense",
   "fixedSwitchIncome": "Fixed income",
-  "fixedHintExpense": "Money that goes out every month like rent or phone bills. You can view it separately in statistics",
-  "fixedHintIncome": "Money that comes in every month like a salary. You can view it separately in statistics",
+  "fixedHintExpense": "Money that goes out every month like rent or phone bills. You can view it separately in statistics.",
+  "fixedHintIncome": "Money that comes in every month like a salary. You can view it separately in statistics.",
   "fixedBadge": "Fixed",
   "recurringFixedSub": "Transactions this schedule creates from now on are recorded as fixed",
   "presetFixedTitleExpense": "Record as fixed expense",
@@ -4645,5 +4645,144 @@
   "transferDeleteFailed": "Couldn't delete the transfer. Please try again in a moment.",
   "transferDetailTitle": "Transfer details",
   "transferFromLabel": "From account",
-  "transferToLabel": "To account"
+  "transferToLabel": "To account",
+  "txfStepMeta": "Step {current} of {total}",
+  "@txfStepMeta": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "txfTypeGroup": "Transaction type",
+  "txfEntryRequired": "Enter an amount.",
+  "txfAmountTooLarge": "Amount can be up to 10 billion won.",
+  "txfCurrencyChip": "Currency, {code}",
+  "@txfCurrencyChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetsTitle": "Presets",
+  "txfPresetApplied": "{name} applied",
+  "@txfPresetApplied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfNoPresets": "No saved presets yet. Enter values and tap “Save current input” to create one.",
+  "txfPresetLoadFailed": "Couldn't load presets.",
+  "txfEmptyPresetHint": "The “{name}” preset has no amount. Enter one and press Next.",
+  "@txfEmptyPresetHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetAllTitle": "Choose a preset",
+  "txfShowAll": "See all",
+  "txfNone": "None",
+  "txfNoAccountOption": "No account or card",
+  "txfNoMethodOption": "No payment method",
+  "txfErrCategory": "Choose a category.",
+  "txfErrFrom": "Choose the account to send from.",
+  "txfErrTo": "Choose the account to send to.",
+  "txfErrFx": "Enter the exchange rate or the amount in won.",
+  "txfErrInterest": "Interest can't be more than the amount.",
+  "txfSplitsLoading": "Loading the split items. Try again in a moment.",
+  "txfSaveFailed": "Couldn't save. Please try again in a moment.",
+  "txfSaveFailedCheck": "Couldn't save. Check what you entered.",
+  "txfCategoryLoadFailed": "Couldn't load categories",
+  "txfAssetLoadFailed": "Couldn't load accounts and cards",
+  "txfNoCategoryOfType": "There are no categories of this kind.",
+  "txfNoPickableAsset": "No account or card fits this payment method.",
+  "txfFxHint": "{local} {code} × {rate} = {krw}",
+  "@txfFxHint": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "krw": {
+        "type": "String"
+      }
+    }
+  },
+  "txfKrwAmount": "Amount in won",
+  "txfInstallmentValue": "{months} months · about {amount} a month",
+  "@txfInstallmentValue": {
+    "placeholders": {
+      "months": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitMismatchTitle": "The split items don't match the amount",
+  "txfSplitMismatchBody": "New total {total} · split total {sum} — {diffText}",
+  "@txfSplitMismatchBody": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "sum": {
+        "type": "String"
+      },
+      "diffText": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitOver": "{diff} over.",
+  "@txfSplitOver": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitShort": "{diff} short.",
+  "@txfSplitShort": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfMatchSplits": "Adjust split items",
+  "txfSaveSplitAndSave": "Adjust split items & save",
+  "txfSmsStepTitle": "Paste a payment text",
+  "txfSmsHelp": "Paste the payment text from your card company as it is. The amount, merchant and time it finds are filled in.",
+  "txfPresetAmountEmpty": "Left empty",
+  "txfPresetAmountHint": "If left empty, you enter the amount each time you use it.",
+  "txfPresetNameRequired": "Enter a preset name.",
+  "txfPresetNeedParties": "Choose the sending and receiving accounts first.",
+  "txfPresetNeedCategory": "Choose a category first.",
+  "txfPresetNoMerchant": "No details",
+  "txfPresetSaved": "Saved the {name} preset",
+  "@txfPresetSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetNameTooLong": "Keep the name within 12 characters.",
+  "txfMemoStepTitle": "Memo",
+  "txfTimeTitle": "Time"
 }

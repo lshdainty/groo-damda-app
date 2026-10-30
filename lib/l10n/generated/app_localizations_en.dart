@@ -3215,10 +3215,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expPayee => 'Merchant';
 
   @override
-  String get expIncomeSourcePlaceholder => 'e.g. Forest Inc.';
+  String get expIncomeSourcePlaceholder => 'e.g. Salary';
 
   @override
-  String get expPayeePlaceholder => 'e.g. Starbucks Gangnam';
+  String get expPayeePlaceholder => 'e.g. Lunch near the office';
 
   @override
   String get expIncomeMethod => 'Income method';
@@ -7304,11 +7304,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fixedHintExpense =>
-      'Money that goes out every month like rent or phone bills. You can view it separately in statistics';
+      'Money that goes out every month like rent or phone bills. You can view it separately in statistics.';
 
   @override
   String get fixedHintIncome =>
-      'Money that comes in every month like a salary. You can view it separately in statistics';
+      'Money that comes in every month like a salary. You can view it separately in statistics.';
 
   @override
   String get fixedBadge => 'Fixed';
@@ -8493,4 +8493,174 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferToLabel => 'To account';
+
+  @override
+  String txfStepMeta(String current, String total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get txfTypeGroup => 'Transaction type';
+
+  @override
+  String get txfEntryRequired => 'Enter an amount.';
+
+  @override
+  String get txfAmountTooLarge => 'Amount can be up to 10 billion won.';
+
+  @override
+  String txfCurrencyChip(String code) {
+    return 'Currency, $code';
+  }
+
+  @override
+  String get txfPresetsTitle => 'Presets';
+
+  @override
+  String txfPresetApplied(String name) {
+    return '$name applied';
+  }
+
+  @override
+  String get txfNoPresets =>
+      'No saved presets yet. Enter values and tap “Save current input” to create one.';
+
+  @override
+  String get txfPresetLoadFailed => 'Couldn\'t load presets.';
+
+  @override
+  String txfEmptyPresetHint(String name) {
+    return 'The “$name” preset has no amount. Enter one and press Next.';
+  }
+
+  @override
+  String get txfPresetAllTitle => 'Choose a preset';
+
+  @override
+  String get txfShowAll => 'See all';
+
+  @override
+  String get txfNone => 'None';
+
+  @override
+  String get txfNoAccountOption => 'No account or card';
+
+  @override
+  String get txfNoMethodOption => 'No payment method';
+
+  @override
+  String get txfErrCategory => 'Choose a category.';
+
+  @override
+  String get txfErrFrom => 'Choose the account to send from.';
+
+  @override
+  String get txfErrTo => 'Choose the account to send to.';
+
+  @override
+  String get txfErrFx => 'Enter the exchange rate or the amount in won.';
+
+  @override
+  String get txfErrInterest => 'Interest can\'t be more than the amount.';
+
+  @override
+  String get txfSplitsLoading =>
+      'Loading the split items. Try again in a moment.';
+
+  @override
+  String get txfSaveFailed => 'Couldn\'t save. Please try again in a moment.';
+
+  @override
+  String get txfSaveFailedCheck => 'Couldn\'t save. Check what you entered.';
+
+  @override
+  String get txfCategoryLoadFailed => 'Couldn\'t load categories';
+
+  @override
+  String get txfAssetLoadFailed => 'Couldn\'t load accounts and cards';
+
+  @override
+  String get txfNoCategoryOfType => 'There are no categories of this kind.';
+
+  @override
+  String get txfNoPickableAsset =>
+      'No account or card fits this payment method.';
+
+  @override
+  String txfFxHint(String local, String code, String rate, String krw) {
+    return '$local $code × $rate = $krw';
+  }
+
+  @override
+  String get txfKrwAmount => 'Amount in won';
+
+  @override
+  String txfInstallmentValue(String months, String amount) {
+    return '$months months · about $amount a month';
+  }
+
+  @override
+  String get txfSplitMismatchTitle => 'The split items don\'t match the amount';
+
+  @override
+  String txfSplitMismatchBody(String total, String sum, String diffText) {
+    return 'New total $total · split total $sum — $diffText';
+  }
+
+  @override
+  String txfSplitOver(String diff) {
+    return '$diff over.';
+  }
+
+  @override
+  String txfSplitShort(String diff) {
+    return '$diff short.';
+  }
+
+  @override
+  String get txfMatchSplits => 'Adjust split items';
+
+  @override
+  String get txfSaveSplitAndSave => 'Adjust split items & save';
+
+  @override
+  String get txfSmsStepTitle => 'Paste a payment text';
+
+  @override
+  String get txfSmsHelp =>
+      'Paste the payment text from your card company as it is. The amount, merchant and time it finds are filled in.';
+
+  @override
+  String get txfPresetAmountEmpty => 'Left empty';
+
+  @override
+  String get txfPresetAmountHint =>
+      'If left empty, you enter the amount each time you use it.';
+
+  @override
+  String get txfPresetNameRequired => 'Enter a preset name.';
+
+  @override
+  String get txfPresetNeedParties =>
+      'Choose the sending and receiving accounts first.';
+
+  @override
+  String get txfPresetNeedCategory => 'Choose a category first.';
+
+  @override
+  String get txfPresetNoMerchant => 'No details';
+
+  @override
+  String txfPresetSaved(String name) {
+    return 'Saved the $name preset';
+  }
+
+  @override
+  String get txfPresetNameTooLong => 'Keep the name within 12 characters.';
+
+  @override
+  String get txfMemoStepTitle => 'Memo';
+
+  @override
+  String get txfTimeTitle => 'Time';
 }

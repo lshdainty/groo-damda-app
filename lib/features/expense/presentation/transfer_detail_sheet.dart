@@ -33,22 +33,45 @@ import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 /// 수정 · 삭제는 서버가 이자 지출 · 잔액 이력을 되돌렸다 다시 만든다(rowId 는 유지). 시스템이 만든 이체(매수 예수금 충당 · 카드
 /// 자동결제)는 금액이 원본과 묶여 있어 고칠 수 없다 — 바닥을 두지 않고 왜 그런지 Callout 으로 적는다.
 ///
-/// [수정] 은 21-2 가 폼을 단계로 옮기기 전까지 지금 방식이다 — 상세를 내리고 옛 수정 시트를 열고, 저장하면 저장한 값으로 상세를 다시 연다.
+/// [수정] 은 같은 시트 안 한 단계다(2-2A · 7a) — 저장하면 새 값의 상세로, ← 는 상세로 돌아간다.
 /// "반복 설정" 은 21-3 이 단계로 옮긴다 — 그때까지 지금처럼 시트를 닫고 옛 반복 폼(이체 씨앗)을 연다.
 Future<void> showTransferDetailSheet(
   BuildContext context,
   AssetTransfer transfer,
 ) {
   final host = hostContextOf(context);
+  final l = AppLocalizations.of(context);
+  final hooks = _TransferHooks();
   return PBottomSheet.show<void>(
     context,
-    builder: (_) => _TransferDetail(transfer: transfer, host: host),
+    isForm: () => hooks.editing(),
+    isDirty: () => hooks.editing() && hooks.form.dirty(),
+    interceptClose: () => hooks.intercept(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
+    ),
+    builder: (_) =>
+        _TransferDetail(transfer: transfer, host: host, hooks: hooks),
   );
 }
 
+class _TransferHooks {
+  final TxFormProbe form = TxFormProbe();
+  bool Function() editing = () => false;
+  bool Function() intercept = () => false;
+}
+
 class _TransferDetail extends ConsumerStatefulWidget {
-  const _TransferDetail({required this.transfer, required this.host});
+  const _TransferDetail({
+    required this.transfer,
+    required this.host,
+    required this.hooks,
+  });
   final AssetTransfer transfer;
+  final _TransferHooks hooks;
   final BuildContext host;
 
   @override
@@ -61,7 +84,32 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
   /// 지우기를 마치고 시트가 닫히는 중 — 닫히는 동안 버튼을 다시 열지 않는다.
   bool _closing = false;
 
-  AssetTransfer get _t => widget.transfer;
+  /// 수정 단계 중인가 — 같은 시트 안 한 단계다.
+  bool _editing = false;
+  bool _leaving = false;
+
+  /// 저장하면 갈아 끼우는 값 — 상세가 새 값을 그린다.
+  AssetTransfer? _saved;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.hooks.editing = () => mounted && _editing;
+    widget.hooks.intercept = () {
+      if (!mounted || !_editing) return false;
+      if (!widget.hooks.form.interceptClose()) _leaveEdit();
+      return true;
+    };
+  }
+
+  @override
+  void dispose() {
+    widget.hooks.editing = () => false;
+    widget.hooks.intercept = () => false;
+    super.dispose();
+  }
+
+  AssetTransfer get _t => _saved ?? widget.transfer;
   bool get _busy => _deleting || _closing;
 
   /// 삭제 — 확인창 → 요청. **확인창 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]** 다(스낵바 호스트는 길잡이 바깥이라 시트 · 확인창
@@ -132,18 +180,32 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     );
   }
 
-  /// [수정] — 상세를 내리고 옛 수정 시트를 연다. 저장하면 저장한 값으로, 저장 없이 닫혀도 상세로 돌아온다.
+  /// [수정] — 같은 시트 안 한 단계.
   void _edit() {
     if (_busy) return;
-    final host = widget.host;
-    final current = _t;
-    PBottomSheet.of(context).close();
-    showAddTxSheet(
-      host,
-      editTransfer: current,
-      onTransferSaved: (saved) => showTransferDetailSheet(host, saved),
-      onCancelled: () => showTransferDetailSheet(host, current),
+    setState(() => _editing = true);
+  }
+
+  /// 수정 → 상세. 바뀐 값이 있으면 먼저 "작성한 내용이 사라져요".
+  Future<void> _leaveEdit() async {
+    if (_leaving) return;
+    if (!widget.hooks.form.dirty()) {
+      setState(() => _editing = false);
+      return;
+    }
+    _leaving = true;
+    final l = AppLocalizations.of(context);
+    final leave = await PAlertDialog.confirmLeave(
+      context,
+      PLeaveConfirmCopy(
+        title: l.sheetLeaveTitle,
+        description: l.sheetLeaveDescription,
+        stayLabel: l.sheetLeaveStay,
+        leaveLabel: l.sheetLeaveLeave,
+      ),
     );
+    _leaving = false;
+    if (leave && mounted) setState(() => _editing = false);
   }
 
   /// 반복 설정 — 이 이체와 **같은 값으로 규칙을 새로 만든다**. 이 이체 자체는 건드리지 않는다(이미 일어난 이체와 앞으로 실행될
@@ -159,6 +221,21 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    if (_editing) {
+      return TxFormFlow(
+        key: ValueKey('transfer-edit-${_t.rowId}'),
+        editTransfer: _t,
+        probe: widget.hooks.form,
+        onBack: _leaveEdit,
+        onTransferSaved: (saved) async {
+          if (!mounted) return;
+          setState(() {
+            _saved = saved;
+            _editing = false;
+          });
+        },
+      );
+    }
     final locked = _t.autoSource != null;
     return PBottomSheetContent(
       key: const ValueKey('transfer-detail'),

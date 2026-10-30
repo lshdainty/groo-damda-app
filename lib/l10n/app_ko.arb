@@ -1936,8 +1936,8 @@
   },
   "expIncomeSource": "수입처",
   "expPayee": "거래처",
-  "expIncomeSourcePlaceholder": "예: (주)포레스트",
-  "expPayeePlaceholder": "예: 스타벅스 강남점",
+  "expIncomeSourcePlaceholder": "예: 월급",
+  "expPayeePlaceholder": "예: 회사 앞 도시락",
   "expIncomeMethod": "수입 방식",
   "expNone": "선택 안 함",
   "expDepositAccount": "입금 계좌",
@@ -4332,8 +4332,8 @@
   },
   "fixedSwitchExpense": "고정 지출",
   "fixedSwitchIncome": "고정 수입",
-  "fixedHintExpense": "월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요",
-  "fixedHintIncome": "월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요",
+  "fixedHintExpense": "월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.",
+  "fixedHintIncome": "월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.",
   "fixedBadge": "고정",
   "recurringFixedSub": "이 반복이 앞으로 만드는 거래가 고정으로 기록돼요",
   "presetFixedTitleExpense": "고정 지출로 기록",
@@ -4908,5 +4908,144 @@
   "transferDeleteFailed": "이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
   "transferDetailTitle": "이체 상세",
   "transferFromLabel": "보내는 계좌",
-  "transferToLabel": "받는 계좌"
+  "transferToLabel": "받는 계좌",
+  "txfStepMeta": "{current} / {total}단계",
+  "@txfStepMeta": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "txfTypeGroup": "거래 종류",
+  "txfEntryRequired": "금액을 입력해주세요.",
+  "txfAmountTooLarge": "금액은 100억원까지 입력할 수 있어요.",
+  "txfCurrencyChip": "통화, {code}",
+  "@txfCurrencyChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetsTitle": "프리셋",
+  "txfPresetApplied": "{name} 적용됨",
+  "@txfPresetApplied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfNoPresets": "저장된 프리셋이 없어요. 값을 넣고 “현재 입력값 저장” 을 누르면 만들어져요.",
+  "txfPresetLoadFailed": "프리셋을 불러오지 못했어요.",
+  "txfEmptyPresetHint": "“{name}” 프리셋은 금액이 비어 있어요. 금액을 넣고 [다음]을 눌러주세요.",
+  "@txfEmptyPresetHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetAllTitle": "프리셋 고르기",
+  "txfShowAll": "모두 보기",
+  "txfNone": "없음",
+  "txfNoAccountOption": "계좌·카드 없음",
+  "txfNoMethodOption": "결제 수단 없음",
+  "txfErrCategory": "카테고리를 골라주세요.",
+  "txfErrFrom": "보내는 계좌를 골라주세요.",
+  "txfErrTo": "받는 계좌를 골라주세요.",
+  "txfErrFx": "환율을 입력하거나 원화 금액을 넣어주세요.",
+  "txfErrInterest": "이자는 금액보다 클 수 없어요.",
+  "txfSplitsLoading": "나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.",
+  "txfSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "txfSaveFailedCheck": "저장하지 못했어요. 입력한 내용을 확인해주세요.",
+  "txfCategoryLoadFailed": "카테고리를 불러오지 못했어요",
+  "txfAssetLoadFailed": "계좌·카드를 불러오지 못했어요",
+  "txfNoCategoryOfType": "이 종류의 카테고리가 없어요.",
+  "txfNoPickableAsset": "이 결제 수단에 맞는 계좌·카드가 없어요.",
+  "txfFxHint": "{local} {code} × {rate} = {krw}원",
+  "@txfFxHint": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "krw": {
+        "type": "String"
+      }
+    }
+  },
+  "txfKrwAmount": "원화 금액",
+  "txfInstallmentValue": "{months}개월 · 매달 약 {amount}원",
+  "@txfInstallmentValue": {
+    "placeholders": {
+      "months": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitMismatchTitle": "나눈 내역과 금액이 달라요",
+  "txfSplitMismatchBody": "새 총액 {total}원 · 나눈 합계 {sum}원 — {diffText}",
+  "@txfSplitMismatchBody": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "sum": {
+        "type": "String"
+      },
+      "diffText": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitOver": "{diff}원 넘쳐요.",
+  "@txfSplitOver": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitShort": "{diff}원 모자라요.",
+  "@txfSplitShort": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfMatchSplits": "나눈 내역 맞추기",
+  "txfSaveSplitAndSave": "나눈 내역 맞추고 저장",
+  "txfSmsStepTitle": "결제 문자 붙여넣기",
+  "txfSmsHelp": "카드사에서 온 결제 문자를 그대로 붙여넣어주세요. 읽은 금액 · 가맹점 · 시각이 칸에 채워져요.",
+  "txfPresetAmountEmpty": "비워 둠",
+  "txfPresetAmountHint": "비워 두면 불러올 때 금액을 직접 넣어요.",
+  "txfPresetNameRequired": "프리셋 이름을 입력해주세요.",
+  "txfPresetNeedParties": "보내는 계좌와 받는 계좌를 먼저 골라주세요.",
+  "txfPresetNeedCategory": "카테고리를 먼저 골라주세요.",
+  "txfPresetNoMerchant": "내역 없음",
+  "txfPresetSaved": "{name} 프리셋을 저장했어요",
+  "@txfPresetSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetNameTooLong": "이름은 12자 이내로 입력해주세요.",
+  "txfMemoStepTitle": "메모",
+  "txfTimeTitle": "시각"
 }

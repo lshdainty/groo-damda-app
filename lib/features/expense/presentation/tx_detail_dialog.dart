@@ -67,12 +67,14 @@ Future<void> showTxDetailDialog(BuildContext context, Expense expense) {
 
 /// 시트의 닫는 길이 그 순간의 단계를 묻는 자리 — 단계의 주인은 [_TxDetailFlowState] 라 시트 밖에서 이 줄로 닿는다.
 class _TxFlowHooks {
+  /// 수정 단계의 폼 — 바뀐 값 · 한 단계 닫기를 시트의 닫는 길에 알린다.
+  final TxFormProbe form = TxFormProbe();
   bool Function() isForm = () => false;
   bool Function() isDirty = () => false;
   bool Function() interceptClose = () => false;
 }
 
-enum _Step { detail, refund }
+enum _Step { detail, refund, edit }
 
 class _TxDetailFlow extends ConsumerStatefulWidget {
   const _TxDetailFlow({
@@ -120,8 +122,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   void initState() {
     super.initState();
     final h = widget.hooks;
-    h.isForm = () => mounted && _step == _Step.refund;
-    h.isDirty = () => mounted && _step == _Step.refund && _refundDirty;
+    h.isForm = () => mounted && _step != _Step.detail;
+    h.isDirty = () =>
+        mounted &&
+        ((_step == _Step.refund && _refundDirty) ||
+            (_step == _Step.edit && h.form.dirty()));
     h.interceptClose = _intercept;
   }
 
@@ -140,6 +145,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   /// 뒤로 가기 · `Esc` 한 번 = 한 단계 뒤(환불 → 상세). 시트의 닫는 길이 먼저 묻는다.
   bool _intercept() {
     if (!mounted || _step == _Step.detail) return false;
+    if (_step == _Step.edit) {
+      // 폼 안 한 단계가 열려 있으면 그 단계만 — 아니면 상세로
+      if (!widget.hooks.form.interceptClose()) _leaveEdit();
+      return true;
+    }
     _leaveRefund();
     return true;
   }
@@ -349,18 +359,32 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     );
   }
 
-  /// [수정] — 상세를 내리고 옛 수정 시트를 연다(21-2 가 단계로 옮긴다). 저장하면 응답으로, 저장 없이 닫혀도 상세로 돌아온다.
+  /// [수정] — 같은 시트 안 한 단계다(2-2A · 7a). 저장하면 목록을 다시 받은 뒤 새 값의 상세로, ← 는 상세로 돌아간다.
   void _edit() {
     if (_busy) return;
-    final host = widget.host;
-    final current = _e;
-    PBottomSheet.of(context).close();
-    showAddTxSheet(
-      host,
-      edit: current,
-      onSaved: (saved) => showTxDetailDialog(host, saved),
-      onCancelled: () => showTxDetailDialog(host, current),
+    setState(() => _step = _Step.edit);
+  }
+
+  /// 수정 → 상세. 바뀐 값이 있으면 먼저 "작성한 내용이 사라져요".
+  Future<void> _leaveEdit() async {
+    if (_leaving) return;
+    if (!widget.hooks.form.dirty()) {
+      setState(() => _step = _Step.detail);
+      return;
+    }
+    _leaving = true;
+    final l = AppLocalizations.of(context);
+    final leave = await PAlertDialog.confirmLeave(
+      context,
+      PLeaveConfirmCopy(
+        title: l.sheetLeaveTitle,
+        description: l.sheetLeaveDescription,
+        stayLabel: l.sheetLeaveStay,
+        leaveLabel: l.sheetLeaveLeave,
+      ),
     );
+    _leaving = false;
+    if (leave && mounted) setState(() => _step = _Step.detail);
   }
 
   /// [잔액 고치기] — 이 시트를 닫고 결제계좌의 수정 폼으로 간다(D9).
@@ -383,6 +407,22 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     final l = AppLocalizations.of(context);
     final isIncome = _e.expenseType == 'INCOME';
     if (_step == _Step.refund) return _buildRefund(l);
+    if (_step == _Step.edit) {
+      return TxFormFlow(
+        // 같은 시트 안이라 키를 거래로 — 같은 제목의 다른 거래에서 폼이 이어지지 않게
+        key: ValueKey('tx-edit-${_e.rowId}'),
+        edit: _e,
+        probe: widget.hooks.form,
+        onBack: _leaveEdit,
+        onSaved: (saved) async {
+          if (!mounted) return;
+          setState(() {
+            _e = saved;
+            _step = _Step.detail;
+          });
+        },
+      );
+    }
     return PBottomSheetContent(
       // 단계마다 다른 시트 내용이다 — 키가 없으면 스크롤 위치가 다음 단계에 따라온다
       key: const ValueKey('tx-detail'),
