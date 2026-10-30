@@ -55,9 +55,13 @@ void showBudgetEditDialog(
 }) {
   final l = AppLocalizations.of(context);
   final probe = _DirtyProbe();
+  // 새 폼은 금액 칸에 초점 — 시트가 처음 초점을 컨테이너에 두므로(안쪽 autofocus 는 밀린다) 첫 초점 노드를 넘긴다.
+  // 수정 폼은 키보드 없이 표면. 노드는 폼 State 가 버린다
+  final amountFocus = FocusNode(debugLabel: 'Budget amount');
   PBottomSheet.show<void>(
     context,
     form: true,
+    initialFocus: edit == null ? amountFocus : null,
     isDirty: () => probe.dirty(),
     leaveCopy: PLeaveConfirmCopy(
       title: l.sheetLeaveTitle,
@@ -72,6 +76,7 @@ void showBudgetEditDialog(
       edit: edit,
       usedCategoryIds: usedCategoryIds,
       overallNew: overallNew,
+      amountFocus: amountFocus,
     ),
   );
 }
@@ -90,6 +95,7 @@ class BudgetFormSheet extends ConsumerStatefulWidget {
     this.usedCategoryIds = const {},
     this.overallNew = false,
     this.probe,
+    this.amountFocus,
   });
 
   final int year;
@@ -99,13 +105,16 @@ class BudgetFormSheet extends ConsumerStatefulWidget {
   final bool overallNew;
   final Object? probe;
 
+  /// 금액 칸 초점 노드 — 호출처가 시트의 첫 초점으로 넘기면 여기서 받아 버린다. 없으면 자기 것.
+  final FocusNode? amountFocus;
+
   @override
   ConsumerState<BudgetFormSheet> createState() => _BudgetFormSheetState();
 }
 
 class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   late final TextEditingController _amountCtrl;
-  final _amountFocus = FocusNode();
+  late final FocusNode _amountFocus = widget.amountFocus ?? FocusNode();
   final _catFocus = FocusNode();
   late final String _initialAmount;
   int? _categoryRowId;
@@ -276,7 +285,6 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                 variant: PInputVariant.underline,
                 controller: _amountCtrl,
                 focusNode: _amountFocus,
-                autofocus: true,
                 placeholder: '0',
                 suffixText: wonUnit(),
                 tabularFigures: true,

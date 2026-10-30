@@ -41,6 +41,15 @@ class _HideAmountsUnlockStepState extends ConsumerState<HideAmountsUnlockStep> {
   bool _pending = false;
 
   @override
+  void initState() {
+    super.initState();
+    // 본인 확인은 비밀번호 칸이 첫 칸이다. 시트가 이미 열려 있어(컨테이너가 초점을 쥐고 있어) 안쪽 autofocus 는 밀리므로 직접 준다
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
+
+  @override
   void dispose() {
     _ctrl.dispose();
     _focus.dispose();
@@ -104,7 +113,6 @@ class _HideAmountsUnlockStepState extends ConsumerState<HideAmountsUnlockStep> {
               variant: PInputVariant.underline,
               controller: _ctrl,
               focusNode: _focus,
-              autofocus: true,
               obscureText: true,
               autofillHints: const [AutofillHints.password],
               readOnly: _pending,

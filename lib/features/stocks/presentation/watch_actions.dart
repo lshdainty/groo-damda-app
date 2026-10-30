@@ -146,9 +146,12 @@ Future<void> showWatchGroupForm(
 }) {
   final l = AppLocalizations.of(context);
   final probe = _FormProbe();
+  // 새 그룹은 이름 칸에 초점(시트가 처음 초점을 컨테이너에 두므로 첫 초점 노드를 넘긴다), 이름 바꾸기는 키보드 없이 표면
+  final nameFocus = FocusNode(debugLabel: 'WatchGroup name');
   return PBottomSheet.show<void>(
     context,
     form: true,
+    initialFocus: group == null ? nameFocus : null,
     isDirty: () => probe.dirty(),
     leaveCopy: PLeaveConfirmCopy(
       title: l.sheetLeaveTitle,
@@ -156,7 +159,8 @@ Future<void> showWatchGroupForm(
       stayLabel: l.sheetLeaveStay,
       leaveLabel: l.sheetLeaveLeave,
     ),
-    builder: (_) => _GroupForm(group: group, probe: probe),
+    builder: (_) =>
+        _GroupForm(group: group, probe: probe, nameFocus: nameFocus),
   );
 }
 
@@ -165,9 +169,16 @@ class _FormProbe {
 }
 
 class _GroupForm extends ConsumerStatefulWidget {
-  const _GroupForm({required this.group, required this.probe});
+  const _GroupForm({
+    required this.group,
+    required this.probe,
+    required this.nameFocus,
+  });
   final StockWatchGroup? group;
   final _FormProbe probe;
+
+  /// 이름 칸 초점 노드 — 호출처가 시트의 첫 초점으로 넘기고 폼 State 가 버린다.
+  final FocusNode nameFocus;
 
   @override
   ConsumerState<_GroupForm> createState() => _GroupFormState();
@@ -177,6 +188,7 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
   late final TextEditingController _ctrl = TextEditingController(
     text: widget.group?.groupName ?? '',
   );
+  late final FocusNode _nameFocus = widget.nameFocus;
   bool _busy = false;
 
   @override
@@ -189,6 +201,7 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
   @override
   void dispose() {
     _ctrl.dispose();
+    _nameFocus.dispose();
     super.dispose();
   }
 
@@ -240,7 +253,7 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
           label: l.stocksWatchGroupNamePlaceholder,
           child: PInput(
             controller: _ctrl,
-            autofocus: true,
+            focusNode: _nameFocus,
             semanticLabel: l.stocksWatchGroupNamePlaceholder,
             onChanged: (_) => setState(() {}),
             onSubmitted: (_) => _save(),
