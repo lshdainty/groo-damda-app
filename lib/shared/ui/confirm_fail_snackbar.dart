@@ -13,7 +13,11 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 ///
 /// - 요청(`request`)은 **silent** 로 보낸다(저장소 메서드의 `silent: true`) — 전역 서버 원문 토스트와 겹치지 않게.
 /// - 실패 글(`failedMessage`)은 호출처가 준다(해요체 + 마침표, 서버 글 아님). [다시 시도] 글자(`retryLabel`)는 보통 `l.actionRetry`.
-/// - 요청은 실패하면 **던진다**. 성공했을 때의 뒷정리(무효화 · 시트 닫기)는 호출처가 `true` 를 받고 한다.
+/// - 요청은 실패하면 **던진다**.
+/// - 성공 뒷정리(무효화 · 시트 닫기)는 **두 길**이다. 확인창에서 바로 성공하면 돌려받은 `true`(ok)로, 실패한 뒤 [다시 시도] 로
+///   성공하면 [onRetried] 로 한다. 둘 다 같은 일을 해야 지운 항목을 그린 시트가 남지 않는다.
+///   [onRetried] 는 시트가 이미 닫힌 뒤에 불릴 수 있다 — 그 안에서 `context` 에 기대지 말고 `ProviderContainer` ·
+///   미리 쥔 값을 쓴다(`mounted` 확인).
 ///
 /// 확인창을 띄우고 확정하면 [request] 를 한다. 돌려주는 값 — 요청까지 성공했으면 true. 취소했거나 실패했으면 false
 /// (실패면 확인창이 닫힌 뒤 스낵바가 떠 있다).
@@ -27,7 +31,9 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 ///   request: () => deleteXxx(container, id),
 ///   failedMessage: l.xxxDeleteFailed,
 ///   retryLabel: l.actionRetry,
+///   onRetried: () => container.invalidate(xxxListProvider),
 /// );
+/// if (ok) container.invalidate(xxxListProvider);
 /// ```
 Future<bool> askConfirmThenRequest(
   BuildContext context, {
@@ -39,6 +45,7 @@ Future<bool> askConfirmThenRequest(
   required Future<void> Function() request,
   required String failedMessage,
   required String retryLabel,
+  VoidCallback? onRetried,
   bool useRootNavigator = true,
 }) async {
   // 확인창이 닫히면 이 context 가 없을 수 있다(시트가 함께 닫힘) — 스낵바 길은 미리 쥔다.
@@ -69,6 +76,7 @@ Future<bool> askConfirmThenRequest(
       message: failedMessage,
       retryLabel: retryLabel,
       retry: request,
+      onRetried: onRetried,
     );
   }
   return confirmed && succeeded;

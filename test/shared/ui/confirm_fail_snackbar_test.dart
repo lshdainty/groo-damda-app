@@ -142,4 +142,107 @@ void main() {
     expect(calls, 1);
     expect(find.text('삭제하지 못했어요.'), findsNothing);
   });
+
+  testWidgets('실패 → 다시 시도 성공이면 onRetried 가 한 번 불린다', (tester) async {
+    var calls = 0;
+    var retried = 0;
+    await _mount(
+      tester,
+      (context) => TextButton(
+        onPressed: () => askConfirmThenRequest(
+          context,
+          description: '지울까요?',
+          actionLabel: '삭제',
+          request: () async {
+            calls++;
+            if (calls == 1) throw StateError('boom');
+          },
+          failedMessage: '삭제하지 못했어요.',
+          retryLabel: '다시 시도',
+          onRetried: () => retried++,
+        ),
+        child: const Text('열기'),
+      ),
+    );
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('삭제'));
+    await tester.pumpAndSettle();
+    expect(retried, 0);
+    await tester.tap(_action);
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+    expect(retried, 1);
+  });
+
+  testWidgets('다시 시도도 실패하면 같은 띠가 다시 뜨고 onRetried 는 불리지 않는다', (tester) async {
+    var retried = 0;
+    await _mount(
+      tester,
+      (context) => TextButton(
+        onPressed: () => askConfirmThenRequest(
+          context,
+          description: '지울까요?',
+          actionLabel: '삭제',
+          request: () async => throw StateError('boom'),
+          failedMessage: '삭제하지 못했어요.',
+          retryLabel: '다시 시도',
+          onRetried: () => retried++,
+        ),
+        child: const Text('열기'),
+      ),
+    );
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('삭제'));
+    await tester.pumpAndSettle();
+    await tester.tap(_action);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('삭제하지 못했어요.'), findsOneWidget);
+    expect(retried, 0);
+  });
+
+  testWidgets('호출한 위젯이 사라진 뒤에도 다시 시도는 요청을 한 번 보낸다', (tester) async {
+    var calls = 0;
+    var retried = 0;
+    final show = ValueNotifier<bool>(true);
+    addTearDown(show.dispose);
+    await _mount(
+      tester,
+      (context) => ValueListenableBuilder<bool>(
+        valueListenable: show,
+        builder: (context, on, _) => on
+            ? Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => askConfirmThenRequest(
+                    context,
+                    description: '지울까요?',
+                    actionLabel: '삭제',
+                    request: () async {
+                      calls++;
+                      if (calls == 1) throw StateError('boom');
+                    },
+                    failedMessage: '삭제하지 못했어요.',
+                    retryLabel: '다시 시도',
+                    onRetried: () => retried++,
+                  ),
+                  child: const Text('열기'),
+                ),
+              )
+            : const SizedBox.shrink(),
+      ),
+    );
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('삭제'));
+    await tester.pumpAndSettle();
+    // 시트(호출한 위젯)가 닫힌다
+    show.value = false;
+    await tester.pumpAndSettle();
+    expect(find.text('열기'), findsNothing);
+    await tester.tap(_action);
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+    expect(retried, 1);
+  });
 }
