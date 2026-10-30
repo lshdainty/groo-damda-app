@@ -73,4 +73,42 @@ void main() {
     final p = t.renderObject<RenderParagraph>(find.text(_long));
     expect(p.localToGlobal(Offset.zero).dx, closeTo(24, 0.6));
   });
+
+  testWidgets('값은 낱말 단위로 줄을 바꾼다 — 낱말 안에 이음 문자, 읽는 이름은 원래 글', (t) async {
+    await t.pumpWidget(
+      _host(
+        const PList(
+          semanticLabel: '값',
+          children: [PListItem(title: '장소', suffix: Text(_long))],
+        ),
+      ),
+    );
+    final w = t.widget<Text>(
+      find.byWidgetPredicate(
+        (x) => x is Text && (x.data ?? '').replaceAll('\u2060', '') == _long,
+      ),
+    );
+    expect(w.data!.contains('\u2060'), isTrue);
+    expect(w.semanticsLabel, _long);
+  });
+
+  testWidgets('공백 없는 긴 값만 칸 끝에서 글자 사이로 끊긴다(넘치지 않음)', (t) async {
+    const noSpace = '서울특별시강남구테헤란로427위워크타워12층대회의실B동편엘리베이터앞';
+    await t.pumpWidget(
+      _host(
+        const PList(
+          semanticLabel: '값',
+          children: [PListItem(title: '장소', suffix: Text(noSpace))],
+        ),
+      ),
+    );
+    expect(t.takeException(), isNull);
+    final p = t.renderObject<RenderParagraph>(
+      find.byWidgetPredicate(
+        (x) => x is Text && (x.data ?? '').replaceAll('\u2060', '') == noSpace,
+      ),
+    );
+    expect(p.size.width, lessThanOrEqualTo(360 - 48));
+    expect(p.size.height, greaterThan(p.text.style!.fontSize! * 1.5));
+  });
 }

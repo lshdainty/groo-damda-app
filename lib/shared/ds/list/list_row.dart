@@ -218,6 +218,81 @@ Widget alignListValueStart(Widget w) {
   return w;
 }
 
+/// 글 값을 낱말 단위로 줄바꿈하게 한다(DESIGN.md v114 — 웹 keep-all): 호출처가 넘긴 [Text] · [Text.rich] 의 글에 [keepAll] 을
+/// 걸고 읽는 이름은 원래 글로 둔다. 한 줄보다 긴 낱말만 칸 끝에서 글자 사이로 끊긴다. 금액([PListValue] — 이미
+/// [keepAllAmount])과 이미 이음 문자가 든 글은 건드리지 않는다. [PListSuffix] 는 안의 글에 건다.
+@visibleForTesting
+Widget keepAllListValue(Widget w) {
+  if (w is PListSuffix) {
+    return PListSuffix(
+      children: [for (final c in w.children) keepAllListValue(c)],
+    );
+  }
+  if (w is! Text) return w;
+  bool joined(String t) => t.contains('\u2060') || t.contains('\u200B');
+  InlineSpan mapSpan(InlineSpan sp) {
+    if (sp is TextSpan) {
+      final t = sp.text;
+      return TextSpan(
+        text: t == null || joined(t) ? t : keepAll(t),
+        children: sp.children?.map(mapSpan).toList(),
+        style: sp.style,
+        recognizer: sp.recognizer,
+        mouseCursor: sp.mouseCursor,
+        onEnter: sp.onEnter,
+        onExit: sp.onExit,
+        semanticsLabel: sp.semanticsLabel,
+        locale: sp.locale,
+        spellOut: sp.spellOut,
+      );
+    }
+    return sp;
+  }
+
+  final span = w.textSpan;
+  final data = w.data;
+  if (data == null && span == null) return w;
+  if (data != null && joined(data)) return w;
+  final label =
+      w.semanticsLabel ?? data ?? span!.toPlainText(includePlaceholders: false);
+  if (data != null) {
+    return Text(
+      keepAll(data),
+      key: w.key,
+      style: w.style,
+      strutStyle: w.strutStyle,
+      textAlign: w.textAlign,
+      textDirection: w.textDirection,
+      locale: w.locale,
+      softWrap: w.softWrap,
+      overflow: w.overflow,
+      textScaler: w.textScaler,
+      maxLines: w.maxLines,
+      semanticsLabel: label,
+      textWidthBasis: w.textWidthBasis,
+      textHeightBehavior: w.textHeightBehavior,
+      selectionColor: w.selectionColor,
+    );
+  }
+  return Text.rich(
+    mapSpan(span!),
+    key: w.key,
+    style: w.style,
+    strutStyle: w.strutStyle,
+    textAlign: w.textAlign,
+    textDirection: w.textDirection,
+    locale: w.locale,
+    softWrap: w.softWrap,
+    overflow: w.overflow,
+    textScaler: w.textScaler,
+    maxLines: w.maxLines,
+    semanticsLabel: label,
+    textWidthBasis: w.textWidthBasis,
+    textHeightBehavior: w.textHeightBehavior,
+    selectionColor: w.selectionColor,
+  );
+}
+
 /// 목록(PList · 묶음)이 줄에 넘기는 값 — 누름 · 호버 바탕의 모서리(카드 안에서는 동심 모서리)와 단계.
 class PListScope extends InheritedWidget {
   const PListScope({
@@ -538,7 +613,7 @@ class _PListRowFrameState extends State<PListRowFrame> {
     textAlign: TextAlign.end,
     child: IconTheme(
       data: IconThemeData(size: PSpacing.x4_5, color: arrowColor),
-      child: suffix,
+      child: keepAllListValue(suffix),
     ),
   );
 
@@ -673,12 +748,13 @@ class _PListRowFrameState extends State<PListRowFrame> {
           child: IconTheme(
             data: IconThemeData(size: PSpacing.x4_5, color: arrowColor),
             child: parts.values.length == 1
-                ? alignListValueStart(parts.values.first)
+                ? keepAllListValue(alignListValueStart(parts.values.first))
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      for (final v in parts.values) alignListValueStart(v),
+                      for (final v in parts.values)
+                        keepAllListValue(alignListValueStart(v)),
                     ],
                   ),
           ),
