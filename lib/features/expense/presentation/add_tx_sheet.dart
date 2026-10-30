@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
+import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -381,17 +382,17 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     );
     if (tr != null) {
       c.toAssetRowId = tr.toAssetRowId;
-      if ((tr.fee ?? 0) > 0) c.feeCtrl.text = tr.fee.toString();
+      if ((tr.fee ?? 0) > 0) c.feeCtrl.text = groupWon(tr.fee!);
       if ((tr.interestAmount ?? 0) > 0) {
-        c.interestCtrl.text = tr.interestAmount.toString();
+        c.interestCtrl.text = groupWon(tr.interestAmount!);
       }
     }
     // 편집은 그 거래의 통화를 승계한다 — 원화 거래는 originalCurrency 가 null 이라 KRW 로 박는다(기본 통화가 흘러들지 않게).
     if (e != null) {
       c.txCurrency = e.originalCurrency ?? kDefaultCurrency;
       if (e.originalCurrency != null) {
-        c.origAmountCtrl.text = trimNum(e.originalAmount);
-        c.fxRateCtrl.text = trimNum(e.exchangeRate);
+        c.origAmountCtrl.text = groupDecimal(trimNum(e.originalAmount));
+        c.fxRateCtrl.text = groupDecimal(trimNum(e.exchangeRate));
       }
     }
     if (e?.installmentMonths != null) {
@@ -403,7 +404,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       // 문자에 외화가 안 실렸으면 원화 결제다 — 설정의 기본 통화가 외화여도 문자가 맞다.
       c.txCurrency = sms.originalCurrency ?? kDefaultCurrency;
       if (sms.originalCurrency != null) {
-        c.origAmountCtrl.text = trimNum(sms.originalAmount?.toDouble());
+        c.origAmountCtrl.text = groupDecimal(
+          trimNum(sms.originalAmount?.toDouble()),
+        );
       }
     }
     c.smsRememberAsk = _smsDraft?.canRememberCard ?? false;
@@ -568,7 +571,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     c.currencyPick = kDefaultCurrency;
     if (keepEntry && carried.isNotEmpty) {
       final n = double.tryParse(carried);
-      if (n != null) c.amountCtrl.text = n.round().toString();
+      if (n != null) c.amountCtrl.text = groupWon(n.round());
     }
     c.origAmountCtrl.clear();
     c.fxRateCtrl.clear();
@@ -584,7 +587,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         c.currencyPick = code;
       } else {
         if (!wasForeign) {
-          c.origAmountCtrl.text = c.amountCtrl.text;
+          c.origAmountCtrl.text = c.amountCtrl.text; // 쉼표 그대로(읽을 때 뗀다)
           c.amountCtrl.clear();
         }
         c.currencyPick = code;
@@ -608,14 +611,14 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       c.currencyPick = kDefaultCurrency;
       c.origAmountCtrl.clear();
       c.fxRateCtrl.clear();
-      c.amountCtrl.text = fixed ? (p.amount ?? 0).toString() : '';
+      c.amountCtrl.text = fixed ? groupWon(p.amount ?? 0) : '';
       c.categoryRowId = p.categoryRowId;
       c.assetRowId = p.assetRowId;
       c.memoCtrl.text = p.description ?? '';
       c.merchantCtrl.text = p.merchant ?? '';
       c.paymentMethod = p.paymentMethod ?? '';
       c.toAssetRowId = p.toAssetRowId;
-      c.feeCtrl.text = p.fee != null ? '${p.fee}' : '';
+      c.feeCtrl.text = p.fee != null ? groupWon(p.fee!) : '';
       c.interestCtrl.text = p.interestAmount != null
           ? '${p.interestAmount}'
           : '';
@@ -896,7 +899,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         ? merchant.substring(0, _kPresetNameMax)
         : merchant;
     _presetNameCtrl.text = name;
-    _presetAmountCtrl.text = c.amountInt > 0 ? c.amountInt.toString() : '';
+    _presetAmountCtrl.text = groupWon(c.amountInt);
     _presetNameError = null;
     _presetFormError = null;
     _presetNameGen++;
@@ -933,7 +936,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _presetNameError = nameError;
     });
     if (formError != null || nameError != null) return;
-    final amount = int.tryParse(_presetAmountCtrl.text) ?? 0;
+    final amount = parseAmountInput(_presetAmountCtrl.text) ?? 0;
     final lock = amount > 0;
     setState(() {
       _presetSaving = true;
@@ -1623,12 +1626,15 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   // ── 1단계 ───────────────────────────────────────────────
   Widget _typeChips(AppLocalizations l, List<ExpenseCategory>? cats) {
     final c = _input;
-    final allowTransfer = !_isSms && !_isReplace;
     final types = <(String, String)>[
       ('EXPENSE', l.expTypeExpense),
       ('INCOME', l.expTypeIncome),
-      if (allowTransfer) ('TRANSFER', l.expTypeTransfer),
+      ('TRANSFER', l.expTypeTransfer),
     ];
+    // 이체 수정은 이체 칩 하나(웹과 같다)
+    if (widget.editTransfer != null) {
+      types.removeWhere((t) => t.$1 != 'TRANSFER');
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         PSpacing.globalGutter,
@@ -1644,15 +1650,18 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           runSpacing: PSpacing.x2,
           children: [
             for (final (code, label) in types)
-              // 수정은 지금 종류 하나만 고른 채 다른 칩은 막힌다
-              if (!_typeLocked || code == c.type)
-                PChip(
-                  key: ValueKey('tx-type-$code'),
-                  label: label,
-                  variant: PChipVariant.outlineStrong,
-                  selected: c.type == code,
-                  onPressed: _typeLocked ? null : () => _setType(code, cats),
-                ),
+              // 막힌 칩은 보이되 비활성이다(웹과 같다) — 수정은 지금 종류만, 문자 초안 · 고쳐 쓰기는 이체가 막힌다
+              PChip(
+                key: ValueKey('tx-type-$code'),
+                label: label,
+                variant: PChipVariant.outlineStrong,
+                selected: c.type == code,
+                onPressed:
+                    (_typeLocked && code != c.type) ||
+                        ((_isSms || _isReplace) && code == 'TRANSFER')
+                    ? null
+                    : () => _setType(code, cats),
+              ),
           ],
         ),
       ),
@@ -2402,7 +2411,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         ? null
         : cats.byRowId(cat!.parentRowId!);
     final merchant = c.merchantCtrl.text.trim();
-    final amount = int.tryParse(_presetAmountCtrl.text) ?? 0;
+    final amount = parseAmountInput(_presetAmountCtrl.text) ?? 0;
     final detailParts = isTransfer
         ? [transferPartiesLabel(from?.assetName, to?.assetName)]
         : [

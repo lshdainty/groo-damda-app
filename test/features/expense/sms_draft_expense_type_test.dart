@@ -20,6 +20,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
@@ -239,16 +240,18 @@ void main() {
     expect(repo.categoryRowId, _expenseCategory.rowId);
   });
 
-  testWidgets('문자 초안에는 이체 선택지가 아예 없다', (tester) async {
-    final (_, l) = await _open(tester, draft: _draft);
+  testWidgets('문자 초안의 이체 칩은 보이되 막혀 있다', (tester) async {
+    await _open(tester, draft: _draft);
+    final chip = tester.widget<PChip>(
+      find.byKey(const ValueKey('tx-type-TRANSFER')),
+    );
     expect(
-      find.text(l.expTypeTransfer),
-      findsNothing,
-      reason: '이체를 고르면 저장이 일반 이체 경로로 새 취소 문자 차단·카드 기억이 빠진다',
+      chip.onPressed,
+      isNull,
+      reason: '이체를 고르면 저장이 일반 이체 경로로 새 취소 문자 차단 · 카드 기억이 빠진다',
     );
   });
 
-  // 반대편 — 잠금을 푸는 김에 일반 추가가 망가지지 않았는지도 본다.
   testWidgets('일반 추가에는 이체가 그대로 있다', (tester) async {
     final (_, l) = await _open(tester);
     expect(find.text(l.expTypeTransfer), findsOneWidget);

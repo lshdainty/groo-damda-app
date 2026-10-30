@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart'
+    show groupWon;
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -64,7 +66,7 @@ void fillKrwFromForeign(TxInput c) {
   final a = c.origAmountOrNull;
   final r = c.fxRateOrNull;
   if (a == null || r == null || a <= 0 || r <= 0) return;
-  c.amountCtrl.text = (a * r).round().toString();
+  c.amountCtrl.text = groupWon((a * r).round());
 }
 
 /// 이자 입력을 보일지 — 대출 상환일 때만.
@@ -112,7 +114,9 @@ class TxInput {
     TimeOfDay? time,
   }) : date = date ?? txNow(),
        time = time ?? TimeOfDay.fromDateTime(txNow()),
-       amountCtrl = TextEditingController(text: amount),
+       amountCtrl = TextEditingController(
+         text: groupWon(int.tryParse(amount) ?? 0),
+       ),
        merchantCtrl = TextEditingController(text: merchant),
        memoCtrl = TextEditingController(text: memo),
        feeCtrl = TextEditingController(),

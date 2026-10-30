@@ -13,6 +13,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
@@ -314,8 +315,10 @@ void main() {
       expect(find.byType(FormPiece), findsWidgets, reason: '날짜 조각이 열린다');
       expect(find.byKey(const ValueKey('money-lock-note')), findsNothing);
       expect(
-        find.byKey(const ValueKey('tx-type-TRANSFER')),
-        findsNothing,
+        tester
+            .widget<PChip>(find.byKey(const ValueKey('tx-type-TRANSFER')))
+            .onPressed,
+        isNull,
         reason: 'replace 본문은 지출·수입 생성 본문이다',
       );
     });

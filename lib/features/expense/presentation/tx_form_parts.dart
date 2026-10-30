@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/format/amount_limits.dart';
+import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart';
@@ -21,13 +21,13 @@ import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/features/category/presentation/category_tile.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
-/// 금액 칸 글자 거르기 — 정수(원화 · 수수료 · 이자). 쓰는 동안 쉼표 · 부호를 막고 100억에서 멈춘다(I-19 7).
-final List<TextInputFormatter> kWonFormatters = [
-  FilteringTextInputFormatter.digitsOnly,
-  const AmountLimitFormatter(kAmountMax),
-];
+/// 금액 칸 글자 거르기 — 정수(원화 · 수수료 · 이자). 쓰는 동안 천 단위 쉼표를 찍고 부호를 막고 100억에서 멈춘다(I-19 7 · 공용 포매터).
+final List<TextInputFormatter> kWonFormatters = [const AmountInputFormatter()];
 
-/// 소수 칸(현지 금액 · 환율) — 숫자와 점 하나, 소수 [maxFrac] 자리, 정수 12자리까지.
+/// 칸에 넣을 때(처음 값 · 계산 값) 쉼표를 찍는다.
+String groupWon(int v) => v <= 0 ? '' : formatAmountInput(v);
+
+/// 소수 칸(현지 금액 · 환율) — 숫자와 점 하나, 소수 [maxFrac] 자리, 정수 12자리. 쓰는 동안 정수부에 쉼표를 찍고 캐럿은 치던 자리에 둔다.
 class DecimalFormatter extends TextInputFormatter {
   const DecimalFormatter({required this.maxFrac});
   final int maxFrac;
@@ -37,13 +37,43 @@ class DecimalFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final t = newValue.text.replaceAll(',', '');
+    final raw = newValue.text;
+    final t = raw.replaceAll(',', '');
+    if (t.isEmpty) return newValue;
     if (!RegExp(r'^\d*\.?\d*$').hasMatch(t)) return oldValue;
     final parts = t.split('.');
     if (parts[0].length > 12) return oldValue;
     if (parts.length > 1 && parts[1].length > maxFrac) return oldValue;
-    return newValue;
+    final out = groupDecimal(t);
+    final cursor = newValue.selection.isValid
+        ? newValue.selection.extentOffset.clamp(0, raw.length)
+        : raw.length;
+    final before = raw.substring(0, cursor).replaceAll(',', '').length;
+    var offset = 0;
+    var seen = 0;
+    while (offset < out.length && seen < before) {
+      if (out.codeUnitAt(offset) != 0x2C) seen++;
+      offset++;
+    }
+    return TextEditingValue(
+      text: out,
+      selection: TextSelection.collapsed(offset: offset),
+    );
   }
+}
+
+/// "1234567.5" → "1,234,567.5" (쉼표가 이미 있으면 걷고 다시 찍는다).
+String groupDecimal(String text) {
+  final t = text.replaceAll(',', '');
+  final i = t.indexOf('.');
+  final head = i < 0 ? t : t.substring(0, i);
+  final tail = i < 0 ? '' : t.substring(i);
+  final out = StringBuffer();
+  for (var k = 0; k < head.length; k++) {
+    if (k > 0 && (head.length - k) % 3 == 0) out.write(',');
+    out.write(head[k]);
+  }
+  return '$out$tail';
 }
 
 /// 1단계 · 금액 단계의 밑줄 금액 칸(Input underline large 40) — 끝에 통화 칩을 얹을 수 있다. 칸 값은 칠하지 않는다.

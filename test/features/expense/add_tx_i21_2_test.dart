@@ -296,6 +296,12 @@ void main() {
     await _open(tester, (c) => showAddTxSheet(c, edit: _foreignTx));
     expect(find.text('거래 수정'), findsOneWidget);
     expect(find.text('1 / 2단계'), findsNothing);
-    expect(find.byKey(const ValueKey('tx-type-INCOME')), findsNothing);
+    expect(
+      tester
+          .widget<PChip>(find.byKey(const ValueKey('tx-type-INCOME')))
+          .onPressed,
+      isNull,
+      reason: '막힌 칩은 보이되 비활성이다',
+    );
   });
 }
