@@ -33,6 +33,7 @@ import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart'
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
@@ -267,6 +268,13 @@ void main() {
       expect(h.rows.length, 5);
       expect(h.overflow, isTrue, reason: '다른 거래가 8건 > 5');
       expect(h.monthCount, 9, reason: '이 달 전체 — 이 거래 포함');
+      // 환불된 거래는 합계에서 뺀다(건수는 그대로)
+      final refunded = txHistoryOf([
+        _worst,
+        _other(0).copyWith(refundedAt: '2026-10-29T12:00:00'),
+      ], _worst.rowId);
+      expect(refunded.monthCount, 2);
+      expect(refunded.monthTotal, _worst.amount);
       final three = txHistoryOf([_worst, _other(0), _other(1)], _worst.rowId);
       expect(three.overflow, isFalse);
       expect(three.rows.length, 2);
@@ -550,6 +558,38 @@ void main() {
         tester.widget<PButton>(find.widgetWithText(PButton, '삭제')).onPressed,
         isNotNull,
       );
+    });
+
+    testWidgets('긴 상세를 내린 채 삭제가 실패하면 본문이 맨 위로 올라가 Callout 이 보인다', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _opener((ctx) => showTxDetailDialog(ctx, _worst)),
+        repo: _FakeRepo(failDelete: true),
+        history: [_worst, for (var i = 0; i < 8; i++) _other(i)],
+      );
+      await _openDetail(tester);
+      final scrollable = find
+          .descendant(
+            of: find.byType(PBottomSheetContent),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await tester.drag(scrollable, const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      expect(
+        tester.state<ScrollableState>(scrollable).position.pixels,
+        greaterThan(0),
+      );
+
+      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제').last);
+      await tester.pumpAndSettle();
+
+      expect(tester.state<ScrollableState>(scrollable).position.pixels, 0);
+      expect(find.byKey(const ValueKey('tx-detail-failure')), findsOneWidget);
     });
 
     testWidgets('지우면 시트가 닫히고, 닫히는 동안 버튼은 다시 열리지 않는다', (tester) async {

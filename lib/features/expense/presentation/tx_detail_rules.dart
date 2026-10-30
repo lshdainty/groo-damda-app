@@ -77,7 +77,10 @@ TxHistory txHistoryOf(List<Expense> all, int excludeRowId) {
     rows: others.take(kTxHistoryRows).toList(),
     overflow: others.length > kTxHistoryRows,
     monthCount: all.length,
-    monthTotal: all.fold<int>(0, (s, x) => s + x.amount.abs()),
+    // 합계에서 환불된 거래는 뺀다(환불 안내가 "합계에서 빠져요" 라 머리 합계와 어긋나지 않게 — 웹과 같다). 건수는 줄이 보이는 대로 센다
+    monthTotal: all
+        .where((x) => !x.isRefunded)
+        .fold<int>(0, (s, x) => s + x.amount.abs()),
   );
 }
 

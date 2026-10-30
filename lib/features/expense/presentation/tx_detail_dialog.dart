@@ -220,7 +220,10 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       _closing = true;
       PBottomSheet.of(context).close();
     } on ApiException {
-      if (mounted) setState(() => _failure = _Failure.delete);
+      if (mounted) {
+        setState(() => _failure = _Failure.delete);
+        scrollSheetBodyToTop(context);
+      }
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
@@ -288,7 +291,10 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       );
       if (mounted && updated != null) setState(() => _e = updated);
     } on ApiException {
-      if (mounted) setState(() => _failure = _Failure.cancelRefund);
+      if (mounted) {
+        setState(() => _failure = _Failure.cancelRefund);
+        scrollSheetBodyToTop(context);
+      }
     } finally {
       if (mounted) setState(() => _cancelling = false);
     }

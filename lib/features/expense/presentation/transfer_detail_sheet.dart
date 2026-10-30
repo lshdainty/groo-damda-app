@@ -104,7 +104,10 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
       _closing = true;
       PBottomSheet.of(context).close();
     } on ApiException {
-      if (mounted) setState(() => _deleteFailed = true);
+      if (mounted) {
+        setState(() => _deleteFailed = true);
+        scrollSheetBodyToTop(context);
+      }
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
