@@ -1834,9 +1834,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final fxHint =
         foreign && (c.origAmountOrNull ?? 0) > 0 && (c.fxRateOrNull ?? 0) > 0
         ? l.txfFxHint(
-            trimNum(c.origAmountOrNull),
+            groupDecimal(trimNum(c.origAmountOrNull)),
             c.currency,
-            trimNum(c.fxRateOrNull),
+            groupDecimal(trimNum(c.fxRateOrNull)),
             krw((c.origAmountOrNull! * c.fxRateOrNull!).round()),
           )
         : null;
