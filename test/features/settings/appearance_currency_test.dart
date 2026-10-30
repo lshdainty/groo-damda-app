@@ -49,7 +49,10 @@ class _FakePrefsRepo extends UserPreferencesRepository {
   }
 
   @override
-  Future<UserPreferences> update(Map<String, dynamic> fields) async {
+  Future<UserPreferences> update(
+    Map<String, dynamic> fields, {
+    bool silent = false,
+  }) async {
     patches.add(fields);
     _current = _current.copyWith(
       defaultCurrency: fields['defaultCurrency'] as String?,

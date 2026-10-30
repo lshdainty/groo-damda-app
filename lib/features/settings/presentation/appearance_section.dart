@@ -110,7 +110,8 @@ class AppearanceSection extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final ok = await ref
         .read(userPreferencesProvider.notifier)
-        .patch(fields, optimistic: optimistic);
+        // 실패는 아래에서 고정 글 하나로 알린다 — 서버 글이 전역 알림으로 닿지 않게(I-14 21)
+        .patch(fields, optimistic: optimistic, silent: true);
     if (!ok && context.mounted) {
       showPSnackBar(
         context,

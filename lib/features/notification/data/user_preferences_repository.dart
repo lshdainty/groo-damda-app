@@ -184,13 +184,18 @@ class UserPreferencesRepository {
 
   /// 부분 갱신. PATCH /users/me/preferences. [fields] 의 키만 전송한다.
   /// 응답 전체 환경설정을 반환.
-  Future<UserPreferences> update(Map<String, dynamic> fields) async {
+  ///
+  /// [silent] 면 실패를 전역 오류 알림으로 띄우지 않는다 — 화면이 고정 글로 알릴 때만(표시 설정). 기본은 전역 알림을 유지한다
+  /// (알림 설정 화면은 결과를 따로 알리지 않는다).
+  Future<UserPreferences> update(
+    Map<String, dynamic> fields, {
+    bool silent = false,
+  }) async {
     try {
       final res = await _dio.patch<Map<String, dynamic>>(
         '/users/me/preferences',
         data: fields,
-        // 바꾸기 실패는 화면이 고정 글 하나로 알린다(I-14 21) — 서버 글이 전역 알림으로 닿지 않게
-        options: Options(extra: {kSilentErrorToast: true}),
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       final body = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data ?? const {},
