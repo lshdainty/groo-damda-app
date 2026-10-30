@@ -460,3 +460,18 @@ void scrollSheetBodyToTop(BuildContext context) {
     if (controller != null && controller.hasClients) controller.jumpTo(0);
   });
 }
+
+/// 상세 → 수정 → ← 로 돌아왔을 때 상세 스크롤을 되돌린다(M5) — 단계를 바꿔도 본문 스크롤 컨트롤러는 시트 하나라 위치를 직접 기억한다.
+double currentSheetScroll(BuildContext context) {
+  final c = PBottomSheet.maybeOf(context)?.bodyController;
+  return c != null && c.hasClients ? c.offset : 0;
+}
+
+void restoreSheetScroll(BuildContext context, double offset) {
+  final c = PBottomSheet.maybeOf(context)?.bodyController;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (c != null && c.hasClients) {
+      c.jumpTo(offset.clamp(0.0, c.position.maxScrollExtent));
+    }
+  });
+}

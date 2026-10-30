@@ -16,6 +16,8 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart'
+    show currentSheetScroll, restoreSheetScroll;
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
 import 'package:groo_damda_app/features/recurring/presentation/recurring_settings_drawer.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -181,8 +183,11 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
   }
 
   /// [수정] — 같은 시트 안 한 단계.
+  double _detailScroll = 0;
+
   void _edit() {
     if (_busy) return;
+    _detailScroll = currentSheetScroll(context);
     setState(() => _editing = true);
   }
 
@@ -191,6 +196,7 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     if (_leaving) return;
     if (!widget.hooks.form.dirty()) {
       setState(() => _editing = false);
+      restoreSheetScroll(context, _detailScroll);
       return;
     }
     _leaving = true;
@@ -205,7 +211,10 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
       ),
     );
     _leaving = false;
-    if (leave && mounted) setState(() => _editing = false);
+    if (leave && mounted) {
+      setState(() => _editing = false);
+      restoreSheetScroll(context, _detailScroll);
+    }
   }
 
   /// 반복 설정 — 이 이체와 **같은 값으로 규칙을 새로 만든다**. 이 이체 자체는 건드리지 않는다(이미 일어난 이체와 앞으로 실행될

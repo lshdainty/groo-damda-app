@@ -23,6 +23,8 @@ import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice
 import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
 import 'package:groo_damda_app/features/expense/presentation/refund_step.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart'
+    show currentSheetScroll, restoreSheetScroll;
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_tx_dialog.dart';
@@ -360,8 +362,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   }
 
   /// [수정] — 같은 시트 안 한 단계다(2-2A · 7a). 저장하면 목록을 다시 받은 뒤 새 값의 상세로, ← 는 상세로 돌아간다.
+  double _detailScroll = 0;
+
   void _edit() {
     if (_busy) return;
+    _detailScroll = currentSheetScroll(context);
     setState(() => _step = _Step.edit);
   }
 
@@ -370,6 +375,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     if (_leaving) return;
     if (!widget.hooks.form.dirty()) {
       setState(() => _step = _Step.detail);
+      restoreSheetScroll(context, _detailScroll);
       return;
     }
     _leaving = true;
@@ -384,7 +390,10 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       ),
     );
     _leaving = false;
-    if (leave && mounted) setState(() => _step = _Step.detail);
+    if (leave && mounted) {
+      setState(() => _step = _Step.detail);
+      restoreSheetScroll(context, _detailScroll);
+    }
   }
 
   /// [잔액 고치기] — 이 시트를 닫고 결제계좌의 수정 폼으로 간다(D9).
