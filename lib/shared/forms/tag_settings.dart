@@ -526,6 +526,7 @@ class _TagEditSheetState extends State<_TagEditSheet> {
     return PBottomSheetContent(
       title: _isEdit ? copy.editTitle : copy.addCta,
       closeLabel: l.actionClose,
+      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x4,
