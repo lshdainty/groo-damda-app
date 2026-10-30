@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 
 /// 알림음 옵션 — 백엔드 enum 미러.
 class NotificationSound {
@@ -188,6 +189,8 @@ class UserPreferencesRepository {
       final res = await _dio.patch<Map<String, dynamic>>(
         '/users/me/preferences',
         data: fields,
+        // 바꾸기 실패는 화면이 고정 글 하나로 알린다(I-14 21) — 서버 글이 전역 알림으로 닿지 않게
+        options: Options(extra: {kSilentErrorToast: true}),
       );
       final body = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data ?? const {},
