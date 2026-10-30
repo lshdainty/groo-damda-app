@@ -65,6 +65,7 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
 
   /// 그 밖 실패 — 본문 맨 위 Callout. 값은 남는다.
   bool _failed = false;
+  final _failKey = GlobalKey();
 
   @override
   void initState() {
@@ -137,6 +138,19 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
           if (mounted) _currentFocus.requestFocus();
         });
       }
+      // 저장 실패 Callout 은 본문 맨 위 — 글자를 키우거나 키보드가 올라 본문이 스크롤된 상태에서도 보이는 자리로 올린다
+      if (_failed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final ctx = _failKey.currentContext;
+          if (mounted && ctx != null) {
+            Scrollable.ensureVisible(
+              ctx,
+              duration: const Duration(milliseconds: 200),
+              alignment: 0,
+            );
+          }
+        });
+      }
     }
   }
 
@@ -159,6 +173,7 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
         children: [
           if (_failed)
             Padding(
+              key: _failKey,
               padding: const EdgeInsets.fromLTRB(
                 PSpacing.globalGutter,
                 0,
