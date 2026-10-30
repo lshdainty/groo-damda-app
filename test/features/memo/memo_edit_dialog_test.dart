@@ -2,6 +2,8 @@
 //
 // 저장 페이로드는 화면이 실제로 그 값을 넘기는지로 고정한다(본문 비우기 QA #99 · 태그 선택지 출처 QA #98 · 새 메모 태그 없음 QA #105).
 // 에뮬레이터를 쓸 수 없는 환경이라 위젯 테스트가 근거다. 시험은 작성만 했다(UI 이관이 끝날 때까지 돌리지 않는다).
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import '../../support/plain_text.dart';
 import '../todo/todo_test_support.dart';
 
@@ -47,6 +50,9 @@ class _CapturingRepo extends MemoRepository {
   bool created = false;
   String? createdTag;
   bool failSave = false;
+
+  /// 주면 저장이 이 Completer 가 끝날 때까지 기다린다(저장 중 상태 시험).
+  Completer<void>? gate;
   int pinCalls = 0;
   int saves = 0;
 
@@ -59,6 +65,7 @@ class _CapturingRepo extends MemoRepository {
     String? color,
   }) async {
     saves++;
+    await gate?.future;
     if (failSave) {
       throw ApiException(
         code: 'MEMO_500',
@@ -110,6 +117,7 @@ Finder _row(String title) =>
 
 Future<_CapturingRepo> _open(
   WidgetTester tester, {
+  bool snackbarHost = false,
   Memo? edit = _memo,
   List<MemoTag> tags = const [],
   bool tagsFail = false,
@@ -133,6 +141,7 @@ Future<_CapturingRepo> _open(
       ),
     ].cast(),
     textScale: textScale,
+    snackbarHost: snackbarHost,
   );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
@@ -470,6 +479,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.pinCalls, 0);
     });
+  });
+
+  testWidgets('L8 — 저장 중에 시트를 닫은 뒤 저장이 실패하면 스낵바 "저장하지 못했어요…" 가 뜬다', (
+    tester,
+  ) async {
+    final repo = await _open(tester, edit: null, snackbarHost: true);
+    final l = AppLocalizations.of(tester.element(find.byType(PTextarea)));
+    repo.gate = Completer<void>();
+    repo.failSave = true;
+    await tester.enterText(find.byType(PInput), '새 메모');
+    await tester.pumpAndSettle();
+    await tester.tap(_button('저장'));
+    await tester.pump(const Duration(milliseconds: 100));
+    // 저장이 나간 채로 닫는다 — 바뀐 값이 있어 "작성한 내용이 사라져요" 를 묻는다
+    await tester.tap(find.bySemanticsLabel('닫기').first);
+    await tester.pumpAndSettle();
+    await tester.tap(findPlain(l.sheetLeaveLeave));
+    await tester.pumpAndSettle();
+    expect(find.byType(PTextarea), findsNothing);
+    repo.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(
+      findPlain('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'),
+      findsOneWidget,
+      reason: 'Callout 을 둘 자리가 없으니 스낵바로 알린다',
+    );
   });
 
   testWidgets('x2 글자 — 넘침 오류 0', (tester) async {

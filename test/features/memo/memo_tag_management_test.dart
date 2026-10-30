@@ -41,6 +41,7 @@ class _Repo extends MemoTagRepository {
   String? updatedName;
   final deleted = <int>[];
   bool fail = false;
+  Completer<void>? gate;
 
   void _maybeFail() {
     if (fail) {
@@ -54,6 +55,7 @@ class _Repo extends MemoTagRepository {
 
   @override
   Future<MemoTag> create({required String tagName, String? color}) async {
+    await gate?.future;
     _maybeFail();
     createdName = tagName;
     createdColor = color;
@@ -302,5 +304,24 @@ void main() {
     final header = tester.widget<PListHeader>(find.byType(PListHeader));
     expect(header.titleSuffix, isNotNull);
     expect(find.byType(PTextButton), findsOneWidget);
+  });
+
+  testWidgets('저장이 끝나기를 기다리는 동안 — [저장] 은 로딩으로 막히고(두 번 눌러도 한 번), 끝나면 시트가 닫힌다', (
+    tester,
+  ) async {
+    final repo = await _open(tester);
+    repo.gate = Completer<void>();
+    await tester.tap(find.text('태그 추가'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(PInput).first, '아이디어');
+    await tester.pumpAndSettle();
+    await tester.tap(_button('저장'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.widget<PButton>(_button('저장')).onPressed, isNull);
+    expect(repo.createdName, isNull, reason: '서버 응답 전');
+    repo.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(repo.createdName, '아이디어');
+    expect(find.byType(PInput), findsNothing, reason: '끝나면 시트가 닫힌다');
   });
 }
