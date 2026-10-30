@@ -1832,12 +1832,16 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
     final foreign = c.isForeignTx;
     final fxHint =
-        foreign && (c.origAmountOrNull ?? 0) > 0 && (c.fxRateOrNull ?? 0) > 0
+        foreign &&
+            (c.origAmountOrNull ?? 0) > 0 &&
+            (c.fxRateOrNull ?? 0) > 0 &&
+            c.amountInt > 0
+        // 웹과 같다 — 마지막 값은 계산값이 아니라 원화 금액 줄의 값이다(카드사 청구액으로 고친 값이 그대로 보인다)
         ? l.txfFxHint(
             groupDecimal(trimNum(c.origAmountOrNull)),
             c.currency,
             groupDecimal(trimNum(c.fxRateOrNull)),
-            krw((c.origAmountOrNull! * c.fxRateOrNull!).round()),
+            krw(c.amountInt),
           )
         : null;
 
