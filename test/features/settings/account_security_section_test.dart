@@ -109,6 +109,11 @@ void main() {
       expect(find.text('0 / ${kAllHideCards.length}'), findsOneWidget);
       // '준비중' 자리표시 행은 사라졌다.
       expect(find.text('준비중'), findsNothing);
+      // 누를 수 없던 줄 넷(로그인 기록 · Apple · 카카오 · 네이버)은 걷었다(I-14 9)
+      expect(find.text('로그인 기록'), findsNothing);
+      expect(find.text('Apple ID'), findsNothing);
+      expect(find.text('카카오'), findsNothing);
+      expect(find.text('네이버'), findsNothing);
     });
 
     testWidgets('2단계 인증 행은 메뉴에 없다', (tester) async {
@@ -165,7 +170,7 @@ void main() {
   });
 
   group('표시 설정', () {
-    testWidgets('개인정보 보호 섹션이 빠지고 테마·언어만 남는다', (tester) async {
+    testWidgets('개인정보 보호 섹션이 빠지고 값 줄 넷만 남는다', (tester) async {
       SharedPreferences.setMockInitialValues({});
       final container = ProviderContainer(
         overrides: [
@@ -190,6 +195,9 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('테마'), findsOneWidget);
+      expect(find.text('언어'), findsOneWidget);
+      expect(find.text('기준 지역'), findsOneWidget);
+      expect(find.text('기본 통화'), findsOneWidget);
       expect(find.text('개인정보 보호'), findsNothing);
       expect(find.text('앱 잠금'), findsNothing);
       expect(find.text('금액 가리기'), findsNothing);

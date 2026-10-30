@@ -2,41 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
-import 'package:groo_damda_app/core/update/app_update.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/core/lock/app_lock_toggle.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
+import 'package:groo_damda_app/core/update/app_update.dart';
+import 'package:groo_damda_app/features/settings/application/oauth_link_providers.dart';
+import 'package:groo_damda_app/features/settings/data/oauth_link_repository.dart';
+import 'package:groo_damda_app/features/settings/presentation/password_change_dialog.dart';
 import 'package:groo_damda_app/features/settings/presentation/withdrawal_sheet.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/presentation/subscription_sheet.dart';
-import 'package:groo_damda_app/shared/widgets/p_back_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_badge.dart';
-import 'package:groo_damda_app/shared/widgets/p_card.dart';
-import 'package:groo_damda_app/shared/widgets/p_divider.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
-import 'package:groo_damda_app/shared/widgets/p_switch.dart';
-import 'package:groo_damda_app/features/settings/presentation/password_change_dialog.dart';
-import 'package:groo_damda_app/core/format/krw.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
+import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
+import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
-/// 계정 상세 화면 — web AccountSection 1:1 미러.
+/// 계정 화면 — 흰 화면 하나(I-14 1-B · 14-1).
 ///
-/// 프로필(중앙 정렬 헤더) + 보안 + 연결된 계정 + 구독·결제 + 계정 관리.
-/// 기능 연동: 프로필 표시, 비밀번호 변경, 로그아웃.
-/// UI only: 기기/기록, 소셜 연결, 구독/결제, 회원탈퇴.
+/// 머리(아바타 80 · 이름 · 이메일 · [수정] · 배지 · 가입 달)는 카드 없이 흰 면 위에 서고, 아래는 목록 제목
+/// (boldSolid · 위 16) + 줄 묶음 다섯 — 보안 · 연결된 계정 · 구독·결제 · (Pro 일 때) 증권 데이터 연동 · 계정 관리. 띠 ·
+/// 회색 틈 · 줄 사이 선이 없다. 웹 `AccountSection` 의 폰 갈래와 같은 줄 · 같은 글이다.
 ///
+/// 기능 연동: 프로필 표시, 비밀번호 변경, 앱 잠금, Google 연결 · 해제, 로그아웃.
 /// 2단계 인증 스위치는 뺐다 — 켜도 서버·로컬 어디에도 남지 않고 백엔드에 2FA 자체가
 /// 없다. 문구 키(`accountTwoFa`)는 남겨 둔다(웹 desk-front #360 과 같은 처리).
 class AccountScreen extends ConsumerStatefulWidget {
@@ -46,10 +51,79 @@ class AccountScreen extends ConsumerStatefulWidget {
   ConsumerState<AccountScreen> createState() => _AccountScreenState();
 }
 
-class _AccountScreenState extends ConsumerState<AccountScreen> {
+class _AccountScreenState extends ConsumerState<AccountScreen>
+    with WidgetsBindingObserver {
+  /// Google 연결을 시작해 브라우저에 가 있는 동안 — 버튼이 `loading` 이다.
+  bool _linking = false;
+  bool _unlinking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// 브라우저에서 그냥 돌아온 경우(딥링크가 없다) — 목록을 다시 받고 `loading` 을 푼다.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !_linking) return;
+    setState(() => _linking = false);
+    ref.invalidate(oauthProvidersProvider);
+  }
+
+  void _toast(String message, PSnackSeverity severity) {
+    if (!mounted) return;
+    showPSnackBar(context, message, severity: severity);
+  }
+
+  Future<void> _link() async {
+    if (_linking) return;
+    final l = AppLocalizations.of(context);
+    setState(() => _linking = true);
+    try {
+      final repo = await ref.read(oauthLinkRepositoryProvider.future);
+      final startUrl = await repo.startLink('google', Env.oauthLinkReturnUri);
+      // 로그인과 같은 까닭으로 시스템 브라우저 — 복귀는 딥링크 리스너가 받는다.
+      final launched = await launchUrl(
+        Uri.parse(startUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) throw StateError('browser');
+      // 흐름이 앱 밖으로 나갔다 — loading 은 돌아올 때(resumed · 딥링크) 푼다.
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _linking = false);
+      _toast(l.accountLinkError, PSnackSeverity.error);
+    }
+  }
+
+  Future<void> _unlink() async {
+    if (_unlinking) return;
+    final l = AppLocalizations.of(context);
+    setState(() => _unlinking = true);
+    try {
+      final repo = await ref.read(oauthLinkRepositoryProvider.future);
+      await repo.unlink('google');
+      // 목록을 다시 받은 뒤 푼다 — 줄이 이전 상태로 잠깐 되돌아 보이지 않게
+      ref.invalidate(oauthProvidersProvider);
+      await ref.read(oauthProvidersProvider.future);
+      _toast(l.accountUnlinkedToast, PSnackSeverity.success);
+    } catch (_) {
+      _toast(l.accountUnlinkError, PSnackSeverity.error);
+    } finally {
+      if (mounted) setState(() => _unlinking = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
     final user = ref.watch(authProvider).value;
     final subscription = ref.watch(mySubscriptionProvider).asData?.value;
@@ -75,361 +149,162 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ? l.subProUntil(periodEnd)
         : '${periodEnd != null ? l.accountNextBilling(periodEnd) : ''}'
               '${l.accountProActive}';
-    final nameInitial = user != null && user.userName.isNotEmpty
-        ? user.userName[0].toUpperCase()
-        : '?';
+    final name = user?.userName.isNotEmpty == true
+        ? user!.userName
+        : l.accountDefaultName;
 
     return Scaffold(
-      backgroundColor: context.colors.bgLayerBasement,
-      appBar: AppBar(
-        leadingWidth: PBackButton.leadingWidth,
-        titleSpacing: 0,
-        leading: PBackButton(onPressed: () => context.pop()),
-        title: Text(l.accountTitle),
-        backgroundColor: t.bgSurface,
-        foregroundColor: t.fgPrimary,
-        elevation: 0,
+      // 흰 화면 하나 — 띠 · 회색 바닥이 없다(T1 ~ T5)
+      backgroundColor: c.bgLayerDefault,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(PTopNavigation.heightOf(context)),
+        child: PTopNavigation(
+          title: l.accountTitle,
+          leading: PTopNavigationIconButton.back(
+            label: l.actionBack,
+            onPressed: () => context.pop(),
+          ),
+        ),
       ),
-      body: PScreenBandBody(
-        child: ListView(
-          // 최상위 24 통일(사용자 결정, web --spacing-xl 정합).
-          padding: const EdgeInsets.all(PSpace.x24),
-          children: [
-            // ── 프로필 헤더 — web: 중앙 정렬 avatar 72 + 이름 + 이메일 + 편집/Pro + 가입 시기
-            PCard(
-              // 자산 요약과 동일한 keep 카드(raised) — surface 배경 위에서 확실히 띄움.
-              variant: PCardVariant.raised,
-              padding: const EdgeInsets.symmetric(
-                vertical: 28,
-                horizontal: PSpace.x24,
+      body: ListView(
+        key: const ValueKey('account-body'),
+        // 맨 아래 24 + 안전 영역(T5) — 흰 면이 화면 끝까지 닿는다
+        padding: EdgeInsets.only(
+          bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
+        ),
+        children: [
+          _AccountHead(
+            name: name,
+            email: user?.userEmail ?? '',
+            isPro: isSubscribed,
+            joined: user?.joinedAt == null
+                ? null
+                : l.accountJoined(yearMonth(user!.joinedAt!)),
+          ),
+          // ── 보안
+          _Group(
+            label: l.accountSecurity,
+            children: [
+              PListButtonItem(
+                prefix: _icon(LucideIcons.keyRound),
+                title: l.navChangePassword,
+                detail: l.accountPasswordDesc,
+                onTap: () => showPasswordChangeDialog(context),
               ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      // 아바타 채움은 다크에서도 primary 고정(bgBrandSolid, 사용자 결정·web 정합).
-                      color: t.bgBrandSolid,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      nameInitial,
-                      style: TextStyle(
-                        fontFamily: PTypo.sans,
-                        fontSize: 24,
-                        fontWeight: PFontWeight.bold,
-                        color: t.fgOnBrand,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: PSpace.x12),
-                  Text(
-                    user?.userName ?? l.accountDefaultName,
-                    style: TextStyle(
-                      fontFamily: PTypo.sans,
-                      fontSize: 17,
-                      fontWeight: PFontWeight.bold,
-                      color: t.fgPrimary,
-                      letterSpacing: -0.34,
-                    ),
-                  ),
-                  const SizedBox(height: PSpace.x8),
-                  Text(
-                    user?.userEmail ?? '',
-                    style: TextStyle(
-                      fontFamily: PTypo.sans,
-                      fontSize: 13,
-                      color: t.fgTertiary,
-                    ),
-                  ),
-                  const SizedBox(height: PSpace.x12),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PButton(
-                        label: '✎ ${l.actionEdit}',
-                        variant: PButtonVariant.ghost,
-                        size: PButtonSize.sm,
-                        onPressed: () => showPSnackBar(
-                          context,
-                          l.accountEditComingSoon,
-                          severity: PSnackSeverity.info,
-                        ),
-                      ),
-                      const SizedBox(width: PSpace.x8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: t.bgBrandSubtle,
-                          borderRadius: PRadius.brSm,
-                        ),
-                        child: Text(
-                          isSubscribed ? 'Pro' : 'Free',
-                          style: TextStyle(
-                            fontFamily: PTypo.sans,
-                            fontSize: 11,
-                            fontWeight: PFontWeight.bold,
-                            color: t.fgBrandStrong,
-                            letterSpacing: 0.22,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (user?.joinedAt != null) ...[
-                    const SizedBox(height: PSpace.x8),
-                    Text(
-                      l.accountJoined(yearMonth(user!.joinedAt!)),
-                      style: TextStyle(
-                        fontFamily: PTypo.sans,
-                        fontSize: 12,
-                        color: t.fgTertiary,
-                      ),
-                    ),
-                  ],
-                ],
+              // 앱 잠금 — 로그인 세션과 별개로 앱 자체를 생체인증으로 잠근다. 켤 때만 인증을 거친다.
+              // 상태는 스위치가 말한다 — 옛 "사용 중 · 사용 안 함" 글은 걷었다.
+              PListSwitchItem(
+                prefix: _icon(LucideIcons.fingerprint),
+                title: l.appLockTitle,
+                checked: appLockOn,
+                onChanged: (v) => setAppLockWithAuth(context, ref, v),
               ),
-            ),
-            const SizedBox(height: PSpace.x32),
-
-            // ── 보안 — web: desc 우측 정렬 + chevron/switch
-            _SectionLabel(label: l.accountSecurity, tokens: t),
-            const SizedBox(height: PSpace.x8),
-            Column(
-              children: [
-                _AccountRow(
-                  icon: LucideIcons.key,
-                  label: l.navChangePassword,
-                  desc: l.accountPasswordDesc,
-                  chevron: true,
-                  tokens: t,
-                  onTap: () => showPasswordChangeDialog(context),
+              // 금액 가리기 — 화면·카드 37장을 훑는 목록이라 자기 화면으로 보낸다. 몇 장을 가렸는지 줄에서 보인다.
+              PListButtonItem(
+                prefix: _icon(
+                  hiddenCount == 0 ? LucideIcons.eye : LucideIcons.eyeOff,
                 ),
-                const PDivider(),
-                // 앱 잠금 — 로그인 세션과 별개로 앱 자체를 생체인증으로 잠근다.
-                // 켤 때만 인증을 거친다(setAppLockWithAuth).
-                _AccountRow(
-                  icon: LucideIcons.fingerprint,
-                  label: l.appLockTitle,
-                  desc: appLockOn ? l.accountOn : l.accountOff,
-                  tokens: t,
-                  trailing: SizedBox(
-                    height: 24,
-                    child: PSwitch(
-                      value: appLockOn,
-                      onChanged: (v) => setAppLockWithAuth(context, ref, v),
-                    ),
-                  ),
-                ),
-                const PDivider(),
-                // 금액 가리기 — 화면·카드 37장을 훑는 목록이라 자기 화면으로 보낸다.
-                _AccountRow(
-                  icon: hiddenCount == 0 ? LucideIcons.eye : LucideIcons.eyeOff,
-                  label: l.hideAmountsTitle,
-                  desc: '$hiddenCount / $hiddenTotal',
-                  chevron: true,
-                  tokens: t,
-                  onTap: () => context.push('/settings/hide-amounts'),
-                ),
-                const PDivider(),
-                _AccountRow(
-                  icon: LucideIcons.monitor,
-                  label: l.accountDevices,
-                  desc: l.accountCurrentDevice,
-                  chevron: true,
-                  tokens: t,
-                  onTap: () => context.push('/settings/devices'),
-                ),
-                const PDivider(),
-                _AccountRow(
-                  icon: LucideIcons.calendarDays,
-                  label: l.accountLoginHistory,
-                  desc: l.accountLast30Days,
-                  chevron: true,
-                  tokens: t,
-                ),
-              ],
-            ),
-            const SizedBox(height: PSpace.x32),
-
-            // ── 연결된 계정 — web: 레터 아이콘 + '연결 안 됨' + 연결 버튼
-            _SectionLabel(label: l.accountConnected, tokens: t),
-            const SizedBox(height: PSpace.x8),
-            Column(
-              children: [
-                for (final social in _socialItems) ...[
-                  if (social != _socialItems.first) const PDivider(),
-                  _AccountRow(
-                    letter: social.letter,
-                    label: social.name,
-                    desc: l.accountNotConnected,
-                    tokens: t,
-                    trailing: PButton(
-                      label: l.accountConnect,
-                      variant: PButtonVariant.outline,
-                      size: PButtonSize.sm,
-                      onPressed: () => showPSnackBar(
-                        context,
-                        l.accountSocialComingSoon(social.name),
-                        severity: PSnackSeverity.info,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: PSpace.x32),
-
-            // ── 구독·결제 — 담다 Pro 단일 행 → 구독 관리 시트(일반/프로·결제)
-            _SectionLabel(label: l.accountBilling, tokens: t),
-            const SizedBox(height: PSpace.x8),
-            // 구독·결제 — 디자인대로 제목/부제 세로 스택 + 우측 가격/배지 커스텀 행.
-            // (generic _AccountRow 가로 desc 는 긴 부제에서 label 이 글자단위로 깨짐)
-            InkWell(
-              onTap: () => showSubscriptionSheet(context),
-              borderRadius: PRadius.brLg,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: Row(
+                title: l.hideAmountsTitle,
+                suffix: PListSuffix(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: t.bgBrandSubtle,
-                        borderRadius: PRadius.brMd,
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        LucideIcons.sparkles,
-                        size: 18,
-                        color: t.fgBrand,
-                      ),
+                    Text(
+                      '$hiddenCount / $hiddenTotal',
+                      textAlign: TextAlign.end,
                     ),
-                    const SizedBox(width: PSpace.x12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '담다 Pro',
-                            style: TextStyle(
-                              fontFamily: PTypo.sans,
-                              fontSize: PFontSize.body,
-                              fontWeight: PFontWeight.bold,
-                              color: t.fgPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            proDesc,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: PTypo.caption.copyWith(color: t.fgTertiary),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: PSpace.x8),
-                    if (isSubscribed)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            krwSigned(9900, false, unit: true),
-                            style: TextStyle(
-                              fontFamily: PTypo.sans,
-                              fontSize: PFontSize.body,
-                              fontWeight: PFontWeight.bold,
-                              color: t.fgPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            l.accountPerMonth,
-                            style: PTypo.micro.copyWith(color: t.fgTertiary),
-                          ),
-                        ],
-                      )
-                    else
-                      PBadge(
-                        label: l.accountProStart,
-                        variant: PBadgeVariant.softBrand,
-                      ),
-                    const SizedBox(width: PSpace.x8),
-                    Icon(
-                      LucideIcons.chevronRight,
-                      size: 16,
-                      color: t.fgTertiary,
-                    ),
+                    const Icon(LucideIcons.chevronRight),
                   ],
                 ),
+                onTap: () => context.push('/settings/hide-amounts'),
               ),
-            ),
-
-            // ── 증권 데이터 연동 — 구독(Pro) 시에만. 증권사가 둘 이상이라 화면으로 분리했다.
-            if (hasSecurities) ...[
-              const SizedBox(height: PSpace.x32),
-              _SectionLabel(label: l.subBrokerSectionTitle, tokens: t),
-              const SizedBox(height: PSpace.x8),
-              _AccountRow(
-                icon: LucideIcons.link,
-                label: l.settingsSecuritiesLink,
-                desc: l.subBrokerConnectDesc,
-                chevron: true,
-                tokens: t,
-                onTap: () => context.push('/settings/securities'),
+              PListButtonItem(
+                prefix: _icon(LucideIcons.monitor),
+                title: l.accountDevices,
+                suffix: PListSuffix(
+                  children: [
+                    Text(l.accountCurrentDevice, textAlign: TextAlign.end),
+                    const Icon(LucideIcons.chevronRight),
+                  ],
+                ),
+                onTap: () => context.push('/settings/devices'),
               ),
             ],
-            const SizedBox(height: PSpace.x32),
-
-            // ── 계정 관리 — web: 로그아웃(일반) / 회원 탈퇴(danger)
-            _SectionLabel(label: l.accountManage, tokens: t),
-            const SizedBox(height: PSpace.x8),
-            Column(
+          ),
+          // ── 연결된 계정 — 연결할 수 있는 소셜은 Google 하나다(I-14 10)
+          _Group(
+            label: l.accountConnected,
+            children: [
+              _GoogleRow(
+                linking: _linking,
+                unlinking: _unlinking,
+                onLink: _link,
+                onUnlink: _unlink,
+              ),
+            ],
+          ),
+          // ── 구독·결제 — 14-1 은 지금 구독 시트를 연다(꺾쇠 없음 · 가격은 지금 값, 14-2 가 페이지 · 서버 값으로)
+          _Group(
+            label: l.accountBilling,
+            children: [
+              PListButtonItem(
+                // 설명이 두 줄을 넘을 수 있어 위에 맞춘다
+                align: PListAlign.top,
+                prefix: _icon(LucideIcons.sparkles),
+                title: '담다 Pro',
+                detail: proDesc,
+                suffix: isSubscribed
+                    ? Text(
+                        '${krwSigned(9900, false, unit: true)} '
+                        '${l.accountPerMonth}',
+                        textAlign: TextAlign.end,
+                      )
+                    : null,
+                onTap: () => showSubscriptionSheet(context),
+              ),
+            ],
+          ),
+          // ── 증권 데이터 연동 — 구독(Pro) 시에만. 증권사가 둘 이상이라 화면으로 분리했다.
+          if (hasSecurities)
+            _Group(
+              label: l.subBrokerSectionTitle,
               children: [
-                _AccountRow(
-                  icon: LucideIcons.logOut,
-                  label: l.navLogout,
-                  desc: l.accountLogoutDesc,
-                  chevron: true,
-                  tokens: t,
-                  onTap: () => _confirmLogout(context, ref),
-                ),
-                // web 정합 — 로그아웃 아래 구분선 없음.
-                _AccountRow(
-                  icon: LucideIcons.trash2,
-                  label: l.accountWithdraw,
-                  desc: l.accountWithdrawDesc,
-                  iconColor: t.statusDangerFg,
-                  labelColor: t.statusDangerFg,
-                  tokens: t,
-                  onTap: () => showWithdrawalSheet(context),
+                PListButtonItem(
+                  prefix: _icon(LucideIcons.link),
+                  title: l.settingsSecuritiesLink,
+                  detail: l.accountSecuritiesDesc,
+                  suffix: const Icon(LucideIcons.chevronRight),
+                  onTap: () => context.push('/settings/securities'),
                 ),
               ],
             ),
-
-            const SizedBox(height: PSpace.x32),
-
-            // 앱 버전 — 화면 맨 아래에 조용히 둔다. 스토어를 안 거치니 지금 깔린 게
-            // 어느 빌드인지 알 데가 여기밖에 없다.
-            const _AppVersionLine(),
-
-            const SizedBox(height: PSpace.x32),
-          ],
-        ),
+          // ── 계정 관리 — 로그아웃 · 이용 해지는 확인 · 시트를 여는 줄이라 꺾쇠가 없다
+          _Group(
+            label: l.accountManage,
+            children: [
+              PListButtonItem(
+                prefix: _icon(LucideIcons.logOut),
+                title: l.navLogout,
+                detail: l.accountLogoutDesc,
+                onTap: () => _confirmLogout(context, ref),
+              ),
+              PListButtonItem(
+                prefix: _icon(LucideIcons.trash2, color: c.fgCritical),
+                title: l.accountWithdraw,
+                titleColor: c.fgCritical,
+                detail: l.accountWithdrawDesc,
+                onTap: () => showWithdrawalSheet(context),
+              ),
+            ],
+          ),
+          // 앱 버전 — 화면 맨 아래에 조용히 둔다. 스토어를 안 거치니 지금 깔린 게 어느 빌드인지 알 데가 여기밖에 없다.
+          const _AppVersionLine(),
+        ],
       ),
     );
   }
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
     final l = AppLocalizations.of(context);
-    // Material 기본 AlertDialog 는 앱 테마·타이포를 안 따른다 — 공통 다이얼로그를 쓴다.
+    // ds 확인창 — 다시 로그인하면 돌아오는 일이라 빨강이 아니다(neutralSolid).
     final ok = await PAlertDialog.show(
       context,
       title: l.navLogout,
@@ -443,112 +318,218 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   }
 }
 
-const _socialItems = [
-  _SocialItem(letter: 'G', name: 'Google'),
-  _SocialItem(letter: 'A', name: 'Apple ID'),
-  _SocialItem(letter: 'K', name: '카카오'),
-  _SocialItem(letter: 'N', name: '네이버'),
-];
+/// 줄 앞 아이콘 — 크기 · 색은 줄이 입힌다(22 · `fg-neutral`). 이름은 제목이 말한다.
+Widget _icon(IconData icon, {Color? color}) =>
+    ExcludeSemantics(child: Icon(icon, color: color));
 
-class _SocialItem {
-  const _SocialItem({required this.letter, required this.name});
-  final String letter;
-  final String name;
-}
+/// 묶음 — 목록 제목(boldSolid · 위 16) + 목록. 묶음이 이어져도 띠 · 틈이 없다(T2 · T3).
+class _Group extends StatelessWidget {
+  const _Group({required this.label, required this.children});
 
-/// web AccountRow 미러 — [icon|letter] + 라벨(flex) + desc(우측 정렬) + trailing.
-class _AccountRow extends StatelessWidget {
-  const _AccountRow({
-    required this.label,
-    required this.tokens,
-    this.icon,
-    this.letter,
-    this.desc,
-    this.trailing,
-    this.chevron = false,
-    this.iconColor,
-    this.labelColor,
-    this.onTap,
-  });
-
-  final IconData? icon;
-  final String? letter;
   final String label;
-  final String? desc;
-  final Widget? trailing;
-  final bool chevron;
-  final Color? iconColor;
-  final Color? labelColor;
-  final GrooTokens tokens;
-  final VoidCallback? onTap;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    final t = tokens;
-    final fgIcon = iconColor ?? t.fgSecondary;
-    final fgLabel = labelColor ?? t.fgPrimary;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        // web row '14px 0' 정합 — 좌우 inset 삭제(사용자 결정).
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(
-          children: [
-            // web: 24px 아이콘 슬롯 (레터 아이콘은 15/700 텍스트)
-            SizedBox(
-              width: 24,
-              child: letter != null
-                  ? Text(
-                      letter!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: PTypo.sans,
-                        fontSize: 15,
-                        fontWeight: PFontWeight.bold,
-                        color: fgIcon,
-                      ),
-                    )
-                  : Icon(icon, size: 18, color: fgIcon),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: PSpacing.x4),
+        PListHeader(title: label, variant: PListHeaderVariant.boldSolid),
+        PList(semanticLabel: label, children: children),
+      ],
+    );
+  }
+}
+
+/// 머리 — 카드 없이 흰 면 위, 가운데 맞춤 세로. 위 24 · 좌우 24 · 아래 8(T1 · T2).
+class _AccountHead extends StatelessWidget {
+  const _AccountHead({
+    required this.name,
+    required this.email,
+    required this.isPro,
+    required this.joined,
+  });
+
+  final String name;
+  final String email;
+  final bool isPro;
+  final String? joined;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final l = AppLocalizations.of(context);
+    return Padding(
+      key: const ValueKey('account-head'),
+      padding: const EdgeInsets.fromLTRB(
+        PSpacing.globalGutter,
+        PSpacing.x6,
+        PSpacing.globalGutter,
+        PSpacing.x2,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          PAvatar(name: name, size: PAvatarSize.s80),
+          const SizedBox(height: PSpacing.x3),
+          // 이름은 낱말 단위로 줄을 바꾸고, 낱말이 한 줄보다 길면 칸 끝에서 끊는다
+          Text(
+            keepAll(name),
+            key: const ValueKey('account-name'),
+            textAlign: TextAlign.center,
+            style: PTypography.t7.copyWith(
+              color: c.fgNeutral,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(width: PSpace.x12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontFamily: PTypo.sans,
-                  fontSize: PFontSize.body,
-                  fontWeight: PFontWeight.semi,
-                  color: fgLabel,
-                ),
-              ),
+          ),
+          if (email.isNotEmpty) ...[
+            const SizedBox(height: PSpacing.x1),
+            // 이메일은 끊을 자리가 없다 — keepAll 을 쓰지 않고 줄 끝에서 끊는다
+            Text(
+              email,
+              key: const ValueKey('account-email'),
+              textAlign: TextAlign.center,
+              style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
             ),
-            if (desc != null) ...[
-              // 우측 상태/설명 — 짧은 desc(연결 안 됨/최근 변경 없음 등) 전용.
-              // label(Expanded)이 남은 폭을 차지해 desc·trailing 을 우측으로 민다.
-              // (긴 desc 는 구독 행처럼 호출부에서 커스텀 스택으로 처리)
-              Text(
-                desc!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: PTypo.sans,
-                  fontSize: PFontSize.caption,
-                  color: t.fgTertiary,
-                ),
-              ),
-              if (trailing != null || chevron) const SizedBox(width: PSpace.x8),
-            ],
-            ?trailing,
-            if (chevron)
-              Icon(LucideIcons.chevronRight, size: 16, color: t.fgTertiary),
           ],
+          const SizedBox(height: PSpacing.x3),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: PSpacing.x2,
+            children: [
+              // [수정] 은 개인정보 변경 자리 — 아직 열리지 않아 막아 둔다(D3 B: 누르면 가짜 알림이 뜨던 것을 걷는다)
+              Semantics(
+                hint: l.accountEditComingSoon,
+                child: PButton(
+                  label: l.actionEdit,
+                  variant: PButtonVariant.neutralWeak,
+                  size: PButtonSize.small,
+                  onPressed: null,
+                ),
+              ),
+              PBadge(
+                label: isPro ? 'Pro' : 'Free',
+                tone: isPro ? PBadgeTone.brand : PBadgeTone.neutral,
+              ),
+            ],
+          ),
+          if (joined != null) ...[
+            const SizedBox(height: PSpacing.x2),
+            Text(
+              joined!,
+              style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Google 줄 — 남는 연결된 계정 줄. 줄 자체는 누르지 않고 뒤 버튼만 누른다(I-14 10).
+///
+/// 서버 목록은 카카오 · 네이버도 주지만 연결할 수 없어 `GOOGLE` 하나만 그린다. 불러오는 중에는 설명 자리에
+/// Skeleton + 버튼 막힘, 실패하면 설명 "연결 상태를 불러오지 못했어요" + [다시 시도]. 실패 글은 서버 글이 아니라 고정 글이다.
+class _GoogleRow extends ConsumerWidget {
+  const _GoogleRow({
+    required this.linking,
+    required this.unlinking,
+    required this.onLink,
+    required this.onUnlink,
+  });
+
+  final bool linking;
+  final bool unlinking;
+  final VoidCallback onLink;
+  final VoidCallback onUnlink;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final l = AppLocalizations.of(context);
+    final providers = ref.watch(oauthProvidersProvider);
+    final loading = providers.isLoading && !providers.hasValue;
+    final failed = providers.hasError && !providers.hasValue;
+    final google = providers.value
+        ?.where((p) => p.type == 'GOOGLE')
+        .cast<OAuthProviderInfo?>()
+        .firstOrNull;
+    final linked = google?.linked ?? false;
+
+    final String? detail = loading
+        ? null
+        : failed
+        ? l.accountProvidersError
+        : linked
+        ? l.accountLinked
+        : l.accountNotConnected;
+
+    final String label;
+    final bool busy;
+    final VoidCallback? onPressed;
+    if (failed) {
+      label = l.actionRetry;
+      busy = providers.isLoading;
+      onPressed = () => ref.invalidate(oauthProvidersProvider);
+    } else if (linked) {
+      label = l.accountDisconnect;
+      busy = unlinking;
+      onPressed = loading ? null : onUnlink;
+    } else {
+      label = l.accountConnect;
+      busy = linking;
+      onPressed = loading ? null : onLink;
+    }
+
+    // 임시 — ds List 차례에 PListRowFrame 스코프로 걷는다(spec-cleanup-pending). 블리드 버튼의 밖을 이어 준다.
+    return PTouchTargetScope(
+      child: PListItem(
+        prefix: ExcludeSemantics(
+          child: SizedBox.square(
+            dimension: 22,
+            child: Center(
+              child: Text(
+                'G',
+                style: PTypography.t5.copyWith(
+                  color: c.fgNeutral,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ),
+        title: 'Google',
+        detail: detail,
+        detailChild: loading
+            ? SizedBox(width: 96, child: PSkeleton.text(PTypography.t3))
+            : null,
+        // 오른쪽 14 블리드 — 글 끝이 화면 끝 24 에 선다. 누르는 영역은 44 까지.
+        suffix: PListAction(
+          child: ListBleedTarget(
+            bleed: kTextButtonPaddingX,
+            child: Semantics(
+              container: true,
+              button: true,
+              excludeSemantics: true,
+              label: failed ? label : 'Google $label',
+              onTap: busy ? null : onPressed,
+              child: PButton(
+                label: label,
+                variant: PButtonVariant.neutralWeak,
+                size: PButtonSize.small,
+                loading: busy,
+                onPressed: onPressed,
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-/// 앱 버전과 최신 여부 한 줄.
+/// 앱 버전과 최신 여부 한 줄 — 위 16 · 좌우 24(T4), 아래 24 는 목록의 끝 여백이 준다(T5).
 ///
 /// 버전을 읽기 전에는 아무것도 그리지 않는다 — 빈 자리가 잠깐 보였다 채워지는 게
 /// 자리만 잡아 두는 것보다 낫다.
@@ -561,7 +542,7 @@ class _AppVersionLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
 
     final version = ref.watch(appVersionProvider).value;
@@ -579,48 +560,31 @@ class _AppVersionLine extends ConsumerWidget {
         ? l.accountAppVersionUpdate(status.latest!.version)
         : l.accountAppVersionLatest;
 
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: l.accountAppVersion(version)),
-          if (suffix != null) ...[
-            const TextSpan(text: ' · '),
-            TextSpan(
-              text: suffix,
-              // 새 버전이 있을 때만 눈에 걸리게. 최신이면 나머지와 같은 톤으로 묻는다.
-              style: hasUpdate
-                  ? TextStyle(color: t.fgBrand, fontWeight: PFontWeight.semi)
-                  : null,
-            ),
-          ],
-        ],
-      ),
-      style: TextStyle(
-        fontFamily: PTypo.sans,
-        fontSize: PFontSize.caption,
-        color: t.fgTertiary,
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.label, required this.tokens});
-  final String label;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.zero, // label 좌 inset 삭제(사용자 결정)
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: PTypo.sans,
-          fontSize: PFontSize.bodySm, // 웹 섹션 라벨 13 정합
-          fontWeight: PFontWeight.bold,
-          color: tokens.fgPrimary,
+      key: const ValueKey('account-version'),
+      padding: const EdgeInsets.fromLTRB(
+        PSpacing.globalGutter,
+        PSpacing.x4,
+        PSpacing.globalGutter,
+        0,
+      ),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: l.accountAppVersion(version)),
+            if (suffix != null) ...[
+              const TextSpan(text: ' · '),
+              TextSpan(
+                text: suffix,
+                // 새 버전이 있을 때만 눈에 걸리게. 최신이면 나머지와 같은 톤으로 묻는다.
+                style: hasUpdate
+                    ? TextStyle(color: c.fgBrand, fontWeight: FontWeight.w700)
+                    : null,
+              ),
+            ],
+          ],
         ),
+        style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
       ),
     );
   }
