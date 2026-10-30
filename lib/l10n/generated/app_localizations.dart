@@ -10592,23 +10592,11 @@ abstract class AppLocalizations {
   /// **'메모 수정'**
   String get memoEditTitle;
 
-  /// No description provided for @memoAdd.
-  ///
-  /// In ko, this message translates to:
-  /// **'추가'**
-  String get memoAdd;
-
   /// No description provided for @memoLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'메모 로드 실패'**
+  /// **'메모를 불러오지 못했어요'**
   String get memoLoadError;
-
-  /// No description provided for @memoTagAll.
-  ///
-  /// In ko, this message translates to:
-  /// **'전체 {count}'**
-  String memoTagAll(int count);
 
   /// No description provided for @memoSectionPinned.
   ///
@@ -10622,16 +10610,10 @@ abstract class AppLocalizations {
   /// **'모든 메모 · {count}'**
   String memoSectionAll(int count);
 
-  /// No description provided for @memoActionFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'실패: {message}'**
-  String memoActionFailed(String message);
-
   /// No description provided for @memoEmptyDesc.
   ///
   /// In ko, this message translates to:
-  /// **'생각이 떠오를 때, 새 메모를 만들어보세요.'**
+  /// **'오른쪽 아래 + 버튼으로 첫 메모를 써보세요.'**
   String get memoEmptyDesc;
 
   /// No description provided for @memoSearchEmptyDesc.
@@ -10658,12 +10640,6 @@ abstract class AppLocalizations {
   /// **'\"{name}\" 메모를 삭제할까요? 삭제한 메모는 되돌릴 수 없어요.'**
   String memoDeleteConfirm(String name);
 
-  /// No description provided for @memoDeleteFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'삭제 실패: {message}'**
-  String memoDeleteFailed(String message);
-
   /// No description provided for @memoFieldTitle.
   ///
   /// In ko, this message translates to:
@@ -10673,7 +10649,7 @@ abstract class AppLocalizations {
   /// No description provided for @memoTitleRequired.
   ///
   /// In ko, this message translates to:
-  /// **'제목을 입력해주세요'**
+  /// **'제목을 입력해주세요.'**
   String get memoTitleRequired;
 
   /// No description provided for @memoFieldContent.
@@ -10699,6 +10675,90 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'태그 없음'**
   String get memoTagNone;
+
+  /// No description provided for @memoTagEmptyHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그는 설정 › 메모 태그에서 만들어요.'**
+  String get memoTagEmptyHint;
+
+  /// No description provided for @memoAllChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체'**
+  String get memoAllChip;
+
+  /// No description provided for @memoLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get memoLoadFailedDesc;
+
+  /// No description provided for @memoTagFilter.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그로 거르기'**
+  String get memoTagFilter;
+
+  /// No description provided for @memoSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get memoSaveFailed;
+
+  /// No description provided for @memoDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get memoDeleteFailed;
+
+  /// No description provided for @memoPinFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get memoPinFailed;
+
+  /// No description provided for @memoModifiedAt.
+  ///
+  /// In ko, this message translates to:
+  /// **'{time} 수정'**
+  String memoModifiedAt(String time);
+
+  /// No description provided for @memoMoreOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 더보기'**
+  String memoMoreOf(String name);
+
+  /// No description provided for @memoSwipeUnpin.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제'**
+  String get memoSwipeUnpin;
+
+  /// No description provided for @mtagSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get mtagSaveFailed;
+
+  /// No description provided for @mtagDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get mtagDeleteFailed;
+
+  /// No description provided for @ttagSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get ttagSaveFailed;
+
+  /// No description provided for @ttagDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get ttagDeleteFailed;
 
   /// No description provided for @memoNewTag.
   ///
@@ -10727,7 +10787,7 @@ abstract class AppLocalizations {
   /// No description provided for @memoTagLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'태그 로드 실패'**
+  /// **'태그를 불러오지 못했어요'**
   String get memoTagLoadError;
 
   /// No description provided for @mtagTitle.
@@ -10739,7 +10799,7 @@ abstract class AppLocalizations {
   /// No description provided for @mtagDesc.
   ///
   /// In ko, this message translates to:
-  /// **'메모에 붙이는 태그예요. 목록 필터와 태그별 묶음에 사용돼요.'**
+  /// **'메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 \'태그 없음\' 으로 남아요.'**
   String get mtagDesc;
 
   /// No description provided for @mtagEmpty.
@@ -11017,18 +11077,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'메모'**
   String get todoDetailContent;
-
-  /// No description provided for @memoDetailTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'메모 상세'**
-  String get memoDetailTitle;
-
-  /// No description provided for @memoDetailPinned.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정됨'**
-  String get memoDetailPinned;
 
   /// No description provided for @memoDetailNoContent.
   ///

@@ -201,6 +201,7 @@ class ChipVisual extends StatelessWidget {
     this.icon,
     this.afterLabel,
     this.leading,
+    this.count,
   }) : assert(
          (label == null) != (icon == null),
          '글이 있는 칩은 label, 아이콘만 있는 칩은 icon 하나만 준다',
@@ -224,6 +225,9 @@ class ChipVisual extends StatelessWidget {
 
   /// 글 앞에 6 을 두고 놓는 것 — 아이콘 대신 색 점처럼 화면이 그린 표식(앞 아이콘과 같이 쓰지 않는다).
   final Widget? leading;
+
+  /// 글 뒤 건수 — 같은 칩 안에서 글과 4 를 두고 `fg-neutral-subtle` 로 놓는다(고른 칩에서는 칩의 글색 그대로). 메모 태그 필터 칩(I-15 8).
+  final int? count;
 
   @override
   Widget build(BuildContext context) {
@@ -284,8 +288,28 @@ class ChipVisual extends StatelessWidget {
                             // 줄바꿈하지 않는다 — 글만큼 넓어지다가 줄 폭에 닿으면 글 끝만 말줄임한다(아이콘은 남는다)
                             Flexible(
                               child: ExcludeSemantics(
-                                child: Text(
-                                  label!,
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(text: label),
+                                      if (count != null) ...[
+                                        const WidgetSpan(
+                                          child: SizedBox(width: PSpacing.x1),
+                                        ),
+                                        TextSpan(
+                                          text: '$count',
+                                          style: TextStyle(
+                                            color: selected
+                                                ? fg
+                                                : c.fgNeutralSubtle,
+                                            fontFeatures: const [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                   maxLines: 1,
                                   softWrap: false,
                                   overflow: TextOverflow.ellipsis,
@@ -870,10 +894,14 @@ class PChipRadio<T> extends StatefulWidget {
     this.size = PChipSize.medium,
     this.prefixIcon,
     this.enabled = true,
+    this.count,
   });
 
   final T value;
   final String label;
+
+  /// 글 뒤 건수 — 읽을 때는 "{글} {건수}" 로 읽는다.
+  final int? count;
   final PChipVariant variant;
   final PChipSize size;
   final IconData? prefixIcon;
@@ -946,7 +974,9 @@ class _PChipRadioState<T> extends State<PChipRadio<T>> with RadioClient<T> {
         hint: apple && !selected
             ? WidgetsLocalizations.of(context).radioButtonUnselectedLabel
             : null,
-        label: widget.label,
+        label: widget.count == null
+            ? widget.label
+            : '${widget.label} ${widget.count}',
         onTap: onTap,
         child: child,
       ),
@@ -958,6 +988,7 @@ class _PChipRadioState<T> extends State<PChipRadio<T>> with RadioClient<T> {
         pressed: pressed,
         pressSize: pressSize,
         label: widget.label,
+        count: widget.count,
         prefixIcon: widget.prefixIcon,
       ),
     );

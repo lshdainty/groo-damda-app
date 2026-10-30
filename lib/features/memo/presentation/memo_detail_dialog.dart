@@ -2,199 +2,177 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/features/memo/application/memo_providers.dart';
 import 'package:groo_damda_app/features/memo/domain/memo.dart';
 import 'package:groo_damda_app/features/memo/domain/memo_colors.dart';
 import 'package:groo_damda_app/features/memo/domain/memo_meta.dart';
 import 'package:groo_damda_app/features/memo/presentation/memo_actions.dart';
 import 'package:groo_damda_app/features/memo/presentation/memo_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
+import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 
-/// 메모 상세 시트 — 카드 탭 → 읽기 전용 상세 → 수정 버튼 → 편집 폼.
-/// tx_detail_dialog(웹 MemoDetailDialog) 패턴 미러: 톤 hero + 본문 전문 + 뷰 footer.
-void showMemoDetailDialog(BuildContext context, Memo memo) {
-  final l = AppLocalizations.of(context);
-  final controller = PSheetController();
-  showPSheet<void>(
+enum _DetailAction { edit }
+
+/// 메모 상세(I-15 14) — ds Bottom Sheet 조회. 바깥 누름 · 끌어내림으로 닫힌다.
+///
+/// 머리 제목 = 메모 제목(줄바꿈, 비면 "제목 없음"). 본문 맨 위 메타 = 색 점 8 + "{태그 또는 태그 없음} · {수정 시각} 수정 · 고정"(고정일 때만
+/// 마지막 조각), 그 아래 본문 t5 줄바꿈 그대로(비면 "내용 없음"). 색 히어로 카드 · 테두리 본문 상자 · 핀 배지는 없다.
+/// 머리 ⋮ = [고정 / 고정 해제, 삭제(빨강)] — 삭제는 확인창(Alert Dialog)을 먼저 연다. 바닥은 [수정] 하나(바닥 [삭제] 는 걷었다).
+/// 상세는 목록의 최신 값으로 그려 고정을 바꾸면 메타 "· 고정" 과 메뉴 글이 바로 따라간다.
+Future<void> showMemoDetailDialog(BuildContext context, Memo memo) async {
+  final action = await PBottomSheet.show<_DetailAction>(
     context,
-    title: l.memoDetailTitle,
-    contentBuilder: (ctx, scrollCtrl) => _DetailBody(
-      memo: memo,
-      scrollController: scrollCtrl,
-      controller: controller,
-    ),
-    footerBuilder: (ctx) => _DetailFooter(memo: memo, controller: controller),
-  ).whenComplete(controller.dispose);
-}
-
-class _DetailFooter extends StatelessWidget {
-  const _DetailFooter({required this.memo, required this.controller});
-  final Memo memo;
-  final PSheetController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (ctx, _) {
-        final busy = controller.submitting;
-        return PViewFooter(
-          onDelete: controller.onDelete,
-          deleting: busy,
-          onEdit: busy
-              ? null
-              : () {
-                  Navigator.of(ctx).pop();
-                  showMemoEditDialog(ctx, edit: memo);
-                },
-        );
-      },
-    );
+    builder: (_) => _MemoDetailSheet(memo: memo),
+  );
+  if (action == _DetailAction.edit && context.mounted) {
+    showMemoEditDialog(context, edit: memo);
   }
 }
 
-class _DetailBody extends ConsumerStatefulWidget {
-  const _DetailBody({
-    required this.memo,
-    required this.scrollController,
-    required this.controller,
-  });
+class _MemoDetailSheet extends ConsumerStatefulWidget {
+  const _MemoDetailSheet({required this.memo});
   final Memo memo;
-  final ScrollController scrollController;
-  final PSheetController controller;
 
   @override
-  ConsumerState<_DetailBody> createState() => _DetailBodyState();
+  ConsumerState<_MemoDetailSheet> createState() => _MemoDetailSheetState();
 }
 
-class _DetailBodyState extends ConsumerState<_DetailBody> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.onDelete = _delete;
-  }
+class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
+  bool _busy = false;
 
-  Future<void> _delete() async {
-    final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
-      context,
-      title: memoActions.deleteConfirmTitle(context, widget.memo),
-      description: memoActions.deleteConfirmMessage(context, widget.memo),
-      actionLabel: l.actionDelete,
-      destructive: true,
-      cancelLabel: l.actionCancel,
-    );
-    if (!ok || !mounted) return;
-    widget.controller.setSubmitting(true);
+  Future<void> _togglePin(Memo m) async {
+    if (_busy) return;
+    _busy = true;
     try {
-      // 삭제는 memoActions 가 한다 — 목록 행(스와이프)도 같은 것을 부른다.
-      final deleted = await memoActions.delete(context, ref, widget.memo);
-      if (deleted && mounted) Navigator.of(context).pop();
+      await memoActions.pin(context, m);
     } finally {
-      if (mounted) widget.controller.setSubmitting(false);
+      _busy = false;
+    }
+  }
+
+  Future<void> _delete(Memo m) async {
+    if (_busy) return;
+    _busy = true;
+    try {
+      final deleted = await memoActions.confirmAndDelete(context, m);
+      if (deleted && mounted) PBottomSheet.of(context).close();
+    } finally {
+      _busy = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
-    final memo = widget.memo;
-    final bg = memoCardBg(context, memo.color);
-    final tagFg = memoTagFg(context, memo.color);
-    final swatch = memoSwatch(context, memo.color);
-    final hasTitle = (memo.title ?? '').isNotEmpty;
-    final tag = memoTagLabel(l, memoTagKey(memo));
+    // 목록의 최신 값으로 그린다 — 고정을 바꾸면 메타 · 메뉴 글이 따라간다. 목록에서 사라졌으면(다시 시도로 지움) 시트도 닫는다
+    final list = ref.watch(memoListProvider).value;
+    Memo memo = widget.memo;
+    if (list != null) {
+      final found = list.where((x) => x.rowId == memo.rowId).firstOrNull;
+      if (found == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) PBottomSheet.of(context).close();
+        });
+      } else {
+        memo = found;
+      }
+    }
+    final name = memoLabelOf(l, memo);
     final content = (memo.content ?? '').trim();
-
-    return ListView(
-      controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      children: [
-        // Hero — 메모 카드와 동일 톤
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(color: bg, borderRadius: PRadius.brXl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: swatch,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      tag,
-                      style: PTypo.micro.copyWith(
-                        color: tagFg,
-                        fontWeight: PFontWeight.semi,
-                        letterSpacing: 0.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (memo.pinned) ...[
-                    Icon(LucideIcons.pin, size: 12, color: swatch),
-                    const SizedBox(width: 4),
-                    Text(
-                      l.memoDetailPinned,
-                      style: PTypo.micro.copyWith(
-                        color: tagFg,
-                        fontWeight: PFontWeight.semi,
-                      ),
-                    ),
-                  ],
-                ],
+    final stamp = formatMemoStamp(memo.modifyAt);
+    return PBottomSheetContent(
+      title: name,
+      closeLabel: l.actionClose,
+      scrollFog: true,
+      headerAction: PButton.icon(
+        icon: LucideIcons.ellipsisVertical,
+        semanticLabel: l.memoMoreOf(name),
+        variant: PButtonVariant.ghost,
+        ghostColor: PButtonGhostColor.neutralSubtle,
+        size: PButtonSize.small,
+        onPressed: () => PMenuSheet.show(
+          context,
+          title: name,
+          groups: [
+            PMenuSheetGroup([
+              PMenuSheetItem(
+                label: memo.pinned ? l.memoUnpin : l.memoPin,
+                icon: memo.pinned ? LucideIcons.pinOff : LucideIcons.pin,
+                onSelect: () => _togglePin(memo),
               ),
-              const SizedBox(height: 10),
-              Text(
-                hasTitle ? memo.title! : l.memoUntitled,
-                style: PTypo.h4.copyWith(
-                  color: hasTitle ? t.fgPrimary : t.fgTertiary,
-                  fontWeight: PFontWeight.bold,
-                  height: 1.3,
-                  letterSpacing: -0.3,
-                ),
+            ]),
+            PMenuSheetGroup([
+              PMenuSheetItem(
+                label: l.actionDelete,
+                icon: LucideIcons.trash2,
+                tone: PMenuSheetTone.critical,
+                onSelect: () => _delete(memo),
               ),
-              const SizedBox(height: 8),
-              Text(
-                monthDayTime(memo.modifyAt),
-                style: PTypo.micro.copyWith(color: t.fgTertiary),
-              ),
-            ],
-          ),
+            ]),
+          ],
         ),
-        const SizedBox(height: 18),
-        // 본문 전문
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(PSpace.x16),
-          decoration: BoxDecoration(
-            color: t.bgSurface,
-            border: Border.all(color: t.borderSubtle),
-            borderRadius: PRadius.brLg,
-          ),
-          child: Text(
-            content.isEmpty ? l.memoDetailNoContent : content,
-            style: PTypo.bodySm.copyWith(
-              color: content.isEmpty ? t.fgTertiary : t.fgPrimary,
-              height: 1.6,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: PSpacing.x3),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: PSpacing.x2,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ExcludeSemantics(
+                    child: SizedBox.square(
+                      dimension: 8,
+                      child: DecoratedBox(
+                        key: const ValueKey('memo-detail-dot'),
+                        decoration: BoxDecoration(
+                          color: memoSwatch(context, memo.color),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: PTagGroup(
+                    size: PTagGroupSize.t3,
+                    items: [
+                      PTag(memoTagLabel(l, memoTagKey(memo))),
+                      if (stamp.isNotEmpty) PTag(l.memoModifiedAt(stamp)),
+                      if (memo.pinned) PTag(l.memoPin),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: PSpacing.x2),
+            child: Text(
+              content.isEmpty ? l.memoDetailNoContent : content,
+              key: const ValueKey('memo-detail-content'),
+              style: PTypography.t5.copyWith(
+                color: content.isEmpty ? c.fgNeutralSubtle : c.fgNeutral,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      ),
+      footer: [
+        PButton(
+          label: l.actionEdit,
+          size: PButtonSize.large,
+          onPressed: () => PBottomSheet.of(context).close(_DetailAction.edit),
         ),
       ],
     );
