@@ -26,6 +26,7 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
 const _cat = ExpenseCategory(
   rowId: 5,
@@ -105,7 +106,14 @@ class _Repo extends ExpenseRepository {
     bool? isFixed,
     bool silent = false,
   }) async {
-    calls.add({'op': 'create', 'amount': amount, 'silent': silent});
+    calls.add({
+      'op': 'create',
+      'amount': amount,
+      'originalAmount': originalAmount,
+      'originalCurrency': originalCurrency,
+      'exchangeRate': exchangeRate,
+      'silent': silent,
+    });
     if (fail) throw ApiException(code: 'X', message: 'x', statusCode: 500);
     return _foreignTx;
   }
@@ -303,5 +311,39 @@ void main() {
       isNull,
       reason: '막힌 칩은 보이되 비활성이다',
     );
+  });
+
+  testWidgets('쉼표가 보이는 외화 금액 · 환율도 요청에는 쉼표 없는 숫자로 나간다', (tester) async {
+    final repo = await _open(tester, (c) => showAddTxSheet(c));
+    // 통화 칩 → USD → 현지 금액 → [다음] → 환율 → 카테고리 → [추가]
+    await tester.tap(find.byKey(const ValueKey('tx-currency-chip')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PListButtonItem && w.title.contains('USD'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(EditableText).first, '98765.43');
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(EditableText).at(1), '1388.75');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('tx-row-category')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PListButtonItem && w.title.contains('식비'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('추가'));
+    await tester.pumpAndSettle();
+
+    final c = repo.calls.single;
+    expect(c['originalAmount'], 98765.43);
+    expect(c['exchangeRate'], 1388.75);
+    expect(c['originalCurrency'], 'USD');
+    expect(c['amount'], 137160491, reason: '현지 × 환율 = 원화(쉼표 없는 정수)');
   });
 }
