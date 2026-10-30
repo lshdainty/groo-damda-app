@@ -24,13 +24,16 @@ import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
-import 'package:groo_damda_app/features/expense/presentation/refund_confirm_dialog.dart';
+import 'package:groo_damda_app/features/expense/presentation/refund_step.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_dialog.dart';
+import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
+import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
+import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 /// ds 확인창은 글자 사이에 낱말 단위 줄바꿈 U+2060 을 넣는다 — 그 글자를 뺀 글로 찾는다.
@@ -93,13 +96,17 @@ class _FakeRepo extends ExpenseRepository {
   String? refundedAt;
 
   @override
-  Future<int?> delete(int id) async {
+  Future<int?> delete(int id, {bool silent = false}) async {
     deleted.add(id);
     return refundedOnDelete;
   }
 
   @override
-  Future<Expense> refund(int id, {String? refundedAt}) async {
+  Future<Expense> refund(
+    int id, {
+    String? refundedAt,
+    bool silent = false,
+  }) async {
     this.refundedAt = refundedAt;
     return _closed.copyWith(
       refundedAt: refundedAt,
@@ -155,6 +162,7 @@ Future<void> _pumpApp(
   WidgetTester tester,
   Widget home, {
   required _FakeRepo repo,
+  Asset card = _card,
 }) async {
   tester.view.physicalSize = const Size(1500, 2600);
   tester.view.devicePixelRatio = 3.0;
@@ -163,13 +171,15 @@ Future<void> _pumpApp(
     ProviderScope(
       overrides: [
         expenseRepositoryProvider.overrideWith((ref) async => repo),
-        assetsProvider.overrideWith((ref) async => const [_card]),
+        assetsProvider.overrideWith((ref) async => [card]),
         categoriesProvider.overrideWith((ref) async => const [_category]),
         presetListProvider.overrideWith((ref) async => const []),
         expenseSplitsProvider.overrideWith((ref, id) async => const []),
         merchantMonthExpensesProvider.overrideWith(
           (ref, key) async => const [],
         ),
+        recurringListProvider.overrideWith((ref) async => const []),
+        dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
       ],
       child: MaterialApp(
@@ -287,75 +297,73 @@ void main() {
     });
   });
 
-  group('환불 확인창', () {
-    // 닫힌 회차는 카드로 되돌아가는 돈이 없다 — "N원을 카드로 되돌려요" 를 쓰면 바로
-    // 아래 "계좌 잔액은 그대로예요" 와 부딪친다. 본문도 갈린다(웹과 같은 문구).
-    testWidgets('닫힌 회차면 되돌린다는 말 없이 표시만 하고 한 문구를 말한다', (tester) async {
+  group('환불 단계', () {
+    /// 상세를 열어 "더 하기" 의 [환불] 줄을 눌러 같은 시트의 환불 단계로 들어간다(I-21 I 46).
+    Future<void> openStep(
+      WidgetTester tester,
+      Expense e, {
+      Asset card = _card,
+    }) async {
       await _pumpApp(
         tester,
-        _opener(
-          (ctx) => showRefundConfirmDialog(ctx, expense: _closed, asset: _card),
-        ),
+        _opener((ctx) => showTxDetailDialog(ctx, e)),
         repo: _FakeRepo(),
+        card: card,
       );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('more-refund')));
+      await tester.pumpAndSettle();
+    }
+
+    // 닫힌 회차는 카드로 되돌아가는 돈이 없다 — "N원이 카드에 돌아가요" 를 쓰면 바로
+    // 아래 "계좌 잔액은 그대로예요" 와 부딪친다. 본문도 갈린다(웹과 같은 문구).
+    testWidgets('닫힌 회차면 돌아간다는 말 없이 표시만 하고 한 문구를 말한다', (tester) async {
+      await openStep(tester, _closed);
 
       expect(find.text('이 거래를 환불로 표시해요. 합계에서 빠져요.'), findsOneWidget);
-      expect(find.textContaining('되돌려요'), findsNothing);
+      expect(find.textContaining('돌아가요'), findsNothing);
       expect(find.text(_closedLine), findsOneWidget);
+      expect(find.text('환불 처리'), findsWidgets, reason: '머리 제목 + 바닥 버튼');
+      expect(
+        find.byType(AlertDialog),
+        findsNothing,
+        reason: '확인창이 아니라 같은 시트의 한 단계',
+      );
     });
 
-    testWidgets('열린 회차는 되돌리는 금액을 단위와 함께 말한다', (tester) async {
-      await _pumpApp(
-        tester,
-        _opener(
-          (ctx) => showRefundConfirmDialog(ctx, expense: _open, asset: _card),
-        ),
-        repo: _FakeRepo(),
-      );
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
+    testWidgets('열린 회차는 돌아가는 금액을 단위와 함께 말한다(조사가 이름에 붙지 않는다)', (tester) async {
+      await openStep(tester, _open);
 
-      expect(find.textContaining('40,000원을 현대카드(으)로 되돌려요'), findsOneWidget);
+      expect(_plain('합계에서 빠지고 40,000원이 현대카드에 돌아가요.'), findsOneWidget);
+      expect(find.textContaining('(으)로'), findsNothing);
       expect(find.text(_closedLine), findsNothing);
     });
 
     testWidgets('열린 회차 + 결제계좌 없는 카드는 그 안내만', (tester) async {
-      await _pumpApp(
+      await openStep(
         tester,
-        _opener(
-          (ctx) => showRefundConfirmDialog(
-            ctx,
-            expense: _open,
-            asset: _card.copyWith(paymentAssetRowId: null),
-          ),
-        ),
-        repo: _FakeRepo(),
+        _open,
+        card: _card.copyWith(paymentAssetRowId: null),
       );
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
 
       expect(find.text(_closedLine), findsNothing);
       expect(find.text('결제계좌가 없어 카드 잔액만 정리돼요.'), findsOneWidget);
     });
 
-    testWidgets('환불일은 거래일부터 오늘까지만 고를 수 있다(D16)', (tester) async {
-      await _pumpApp(
-        tester,
-        _opener(
-          (ctx) => showRefundConfirmDialog(ctx, expense: _closed, asset: _card),
-        ),
-        repo: _FakeRepo(),
-      );
-      await tester.tap(find.text('open'));
+    testWidgets('환불일은 거래일부터 오늘까지만 고를 수 있다(D16) — 확인창 안 날짜 칸은 없다', (
+      tester,
+    ) async {
+      await openStep(tester, _closed);
+
+      expect(find.byType(TextField), findsNothing, reason: '날짜 칸 없음');
+      await tester.tap(find.byKey(const ValueKey('refund-date-row')));
       await tester.pumpAndSettle();
 
-      final input = tester.widget<PDateInput>(find.byType(PDateInput));
+      final picker = tester.widget<PDatePicker>(find.byType(PDatePicker));
       final now = DateTime.now();
-      expect(input.firstDate, DateTime(2026, 8, 20));
-      expect(input.lastDate, DateTime(now.year, now.month, now.day));
-      expect(input.value, DateTime(now.year, now.month, now.day));
+      expect(picker.min, DateTime(2026, 8, 20));
+      expect(picker.max, DateTime(now.year, now.month, now.day));
     });
 
     test('범위는 날짜만 본다 — 거래 시각 때문에 당일이 빠지지 않는다', () {
@@ -387,20 +395,13 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('환불'));
+      await tester.tap(find.byKey(const ValueKey('more-refund')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('환불 처리').last);
+      await tester.tap(find.widgetWithText(PButton, '환불 처리'));
       await tester.pumpAndSettle();
 
       expect(repo.refundedAt, endsWith('T12:00:00'));
-      // 상세 시트가 열린 채 뜬다 — 시트 위에 보여야 한다(Q5, 전엔 시트 아래 페이지에만 그려져 가려졌다).
-      expect(
-        find.descendant(
-          of: find.byType(DraggableScrollableSheet),
-          matching: find.text('미리 낸 돈 중 8,000원이 계좌로 돌아왔어요'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('미리 낸 돈 중 8,000원이 계좌로 돌아왔어요'), findsOneWidget);
       await _drainToast(tester);
     });
   });
@@ -414,7 +415,7 @@ void main() {
       );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('환불 취소'));
+      await tester.tap(find.widgetWithText(PButton, '환불 취소'));
       await tester.pumpAndSettle();
     }
 

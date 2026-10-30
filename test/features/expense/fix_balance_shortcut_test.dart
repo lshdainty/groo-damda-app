@@ -29,7 +29,9 @@ import 'package:groo_damda_app/features/expense/data/expense_repository.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_dialog.dart';
+import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
+import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
@@ -80,7 +82,7 @@ class _FakeRepo extends ExpenseRepository {
   _FakeRepo() : super(Dio(BaseOptions(baseUrl: 'https://example.invalid')));
 
   @override
-  Future<int?> delete(int id) async => null;
+  Future<int?> delete(int id, {bool silent = false}) async => null;
 }
 
 /// 라우터를 단 앱 — `/` 에 [home], 관리 화면 자리에는 들어온 주소를 적는 표지만 둔다.
@@ -118,6 +120,8 @@ Future<void> _pumpRouted(
         merchantMonthExpensesProvider.overrideWith(
           (ref, key) async => const [],
         ),
+        recurringListProvider.overrideWith((ref) async => const []),
+        dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
       ],
       child: MaterialApp.router(

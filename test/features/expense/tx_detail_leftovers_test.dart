@@ -25,13 +25,17 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_dialog.dart';
+import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
+import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
-import 'package:groo_damda_app/shared/widgets/p_detail.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 const _account = Asset(
   rowId: 3,
@@ -65,11 +69,14 @@ class _FakeRepo extends ExpenseRepository {
   _FakeRepo() : super(Dio(BaseOptions(baseUrl: 'https://example.invalid')));
 
   @override
-  Future<Expense> refund(int id, {String? refundedAt}) async =>
-      _plain.copyWith(refundedAt: refundedAt);
+  Future<Expense> refund(
+    int id, {
+    String? refundedAt,
+    bool silent = false,
+  }) async => _plain.copyWith(refundedAt: refundedAt);
 
   @override
-  Future<Expense> cancelRefund(int id) async => _plain;
+  Future<Expense> cancelRefund(int id, {bool silent = false}) async => _plain;
 }
 
 Future<void> _pump(WidgetTester tester, Widget home) async {
@@ -87,6 +94,8 @@ Future<void> _pump(WidgetTester tester, Widget home) async {
         merchantMonthExpensesProvider.overrideWith(
           (ref, key) async => const [],
         ),
+        recurringListProvider.overrideWith((ref) async => const []),
+        dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
         defaultCurrencyProvider.overrideWith((ref) => 'KRW'),
       ],
@@ -115,15 +124,16 @@ void main() {
     expect(find.text('수정'), findsOneWidget);
     expect(find.text('내역 분할'), findsOneWidget, reason: '보통 거래에는 있다');
 
-    await tester.tap(find.text('환불'));
+    // 환불은 같은 시트의 한 단계다 — "더 하기" 의 [환불] 줄 → 바닥 [환불 처리] → 상세로 돌아와 "환불됨" Callout
+    await tester.tap(find.byKey(const ValueKey('more-refund')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('환불 처리').last);
+    await tester.tap(find.widgetWithText(PButton, '환불 처리'));
     await tester.pumpAndSettle();
 
-    expect(find.text('환불 취소'), findsOneWidget, reason: '배너가 떴다');
+    expect(find.text('환불 취소'), findsOneWidget, reason: 'Callout 이 떴다');
     expect(find.text('수정'), findsNothing, reason: 'footer 도 환불된 거래를 본다');
 
-    await tester.tap(find.text('환불 취소'));
+    await tester.tap(find.widgetWithText(PButton, '환불 취소'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('환불 취소').last);
     await tester.pumpAndSettle();
@@ -165,14 +175,17 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
 
-      for (final label in ['반복 설정', '더치페이']) {
-        final action = find.widgetWithText(PDetailQuickAction, label);
-        expect(action, findsOneWidget, reason: '$label 은 숨기지 않는다');
-        expect(tester.widget<PDetailQuickAction>(action).onTap, isNull);
-        // 꺼진 모양 — button.md 비활성과 같이 통째로 0.5.
+      // 막힌 줄 — 숨기지 않는다. 누름이 없고(onTap null) 꺾쇠도 없다(비활성 색은 ds 가 입힌다)
+      for (final key in ['more-recurring', 'more-dutch']) {
+        final row = find.byKey(ValueKey(key));
+        expect(row, findsOneWidget, reason: '$key 은 숨기지 않는다');
+        expect(tester.widget<PListButtonItem>(row).onTap, isNull);
         expect(
-          find.ancestor(of: find.text(label), matching: find.byType(Opacity)),
-          findsWidgets,
+          find.descendant(
+            of: row,
+            matching: find.byIcon(LucideIcons.chevronRight),
+          ),
+          findsNothing,
         );
       }
     });
@@ -183,9 +196,11 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
-    for (final label in ['반복 설정', '더치페이']) {
-      final action = find.widgetWithText(PDetailQuickAction, label);
-      expect(tester.widget<PDetailQuickAction>(action).onTap, isNotNull);
+    for (final key in ['more-recurring', 'more-dutch']) {
+      expect(
+        tester.widget<PListButtonItem>(find.byKey(ValueKey(key))).onTap,
+        isNotNull,
+      );
     }
   });
 

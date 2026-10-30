@@ -28,7 +28,9 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_dialog.dart';
+import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
+import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
@@ -144,6 +146,8 @@ Future<_FakeRepo> _pump(WidgetTester tester, Widget home) async {
         merchantMonthExpensesProvider.overrideWith(
           (ref, key) async => const [],
         ),
+        recurringListProvider.overrideWith((ref) async => const []),
+        dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
         defaultCurrencyProvider.overrideWith((ref) => 'KRW'),
       ],

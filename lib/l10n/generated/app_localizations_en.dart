@@ -2004,7 +2004,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expRefundConfirmBody(String amount, String asset) {
-    return 'Marks this transaction as refunded and returns $amount to $asset. It leaves your totals.';
+    return 'Marks this transaction as refunded. It leaves your totals, and $amount returns to $asset.';
   }
 
   @override
@@ -2023,7 +2023,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expRefundedAt(String date) {
-    return 'Refunded · $date';
+    return 'Refunded · $date — left out of your totals.';
   }
 
   @override
@@ -2081,7 +2081,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferDeleteConfirm =>
-      'Delete this transfer? Both assets\' balances will be restored. A deleted transfer cannot be restored.';
+      'Delete this transfer? Both accounts\' balances go back to before the transfer. A deleted transfer can\'t be restored.';
 
   @override
   String get transferDeleteTitle => 'Delete transfer';
@@ -3113,9 +3113,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expDeleted => 'Transaction deleted';
 
   @override
-  String get expDeleteFailed => 'Delete failed';
-
-  @override
   String get expSplitMismatch => 'Split doesn\'t match the amount';
 
   @override
@@ -3281,20 +3278,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expUncategorized => 'Uncategorized';
 
   @override
-  String get expValueNone => 'None';
-
-  @override
-  String expItemsCount(int count) {
-    return '$count items';
-  }
-
-  @override
   String get expNotSelected => 'Not selected';
-
-  @override
-  String expPrevTxAt(String merchant) {
-    return 'Previous at $merchant';
-  }
 
   @override
   String get expThisMonth => 'This month';
@@ -7214,11 +7198,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expRecordOnlyNote =>
-      'This was added to a cycle that was already paid, so it is kept as a record only. It was not taken from your account';
+      'This was added to a cycle that was already paid, so it is kept as a record only. It was not taken from your account.';
 
   @override
   String expRecordOnlyPartNote(String amount) {
-    return '$amount of this belongs to cycles that were already paid, so it is kept as a record only. The remaining installments are billed as usual';
+    return '$amount of this belongs to cycles that were already paid, so it is kept as a record only. The remaining installments are billed as usual.';
   }
 
   @override
@@ -8446,4 +8430,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get namuFxUnavailableShort => 'No FX rate';
+
+  @override
+  String get expDetailMore => 'More';
+
+  @override
+  String expSplitValue(int count) {
+    return 'Split into $count';
+  }
+
+  @override
+  String expSplitHeader(int count) {
+    return 'Split into $count';
+  }
+
+  @override
+  String get expMerchantMonth => 'This month at this merchant';
+
+  @override
+  String get expRecentOnly => 'Showing the latest 5 only';
+
+  @override
+  String get expLinked => 'Linked';
+
+  @override
+  String get expSplitLoadFailed => 'Could not load the split items';
+
+  @override
+  String get expSplitLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String expRefundDateToday(String date) {
+    return '$date · Today';
+  }
+
+  @override
+  String expRefundDateHint(String date) {
+    return 'You can pick a day from the transaction day ($date) to today.';
+  }
+
+  @override
+  String get expRefundFailed =>
+      'Couldn\'t mark it as refunded. Please try again in a moment.';
+
+  @override
+  String get expRefundCancelFailed =>
+      'Couldn\'t undo the refund. Please try again in a moment.';
+
+  @override
+  String get expTxDeleteFailed =>
+      'Couldn\'t delete the transaction. Please try again in a moment.';
+
+  @override
+  String get transferDeleteFailed =>
+      'Couldn\'t delete the transfer. Please try again in a moment.';
+
+  @override
+  String get transferDetailTitle => 'Transfer details';
+
+  @override
+  String get transferFromLabel => 'From account';
+
+  @override
+  String get transferToLabel => 'To account';
 }

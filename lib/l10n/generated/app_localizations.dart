@@ -3743,7 +3743,7 @@ abstract class AppLocalizations {
   /// No description provided for @expRefundConfirmBody.
   ///
   /// In ko, this message translates to:
-  /// **'이 거래를 환불로 표시하고 {amount}을 {asset}(으)로 되돌려요. 합계에서 빠져요.'**
+  /// **'이 거래를 환불로 표시해요. 합계에서 빠지고 {amount}이 {asset}에 돌아가요.'**
   String expRefundConfirmBody(String amount, String asset);
 
   /// No description provided for @expRefundConfirmBodyRecordOnly.
@@ -3773,7 +3773,7 @@ abstract class AppLocalizations {
   /// No description provided for @expRefundedAt.
   ///
   /// In ko, this message translates to:
-  /// **'환불됨 · {date}'**
+  /// **'환불됨 · {date} — 합계에서 빠져 있어요.'**
   String expRefundedAt(String date);
 
   /// No description provided for @expRefundCancel.
@@ -3869,7 +3869,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferDeleteConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'이 이체를 삭제할까요? 양쪽 자산의 잔액이 되돌아가요. 삭제한 이체는 되돌릴 수 없어요.'**
+  /// **'이 이체를 삭제할까요? 양쪽 계좌 잔액이 이체 전으로 돌아가요. 삭제한 이체는 되돌릴 수 없어요.'**
   String get transferDeleteConfirm;
 
   /// No description provided for @transferDeleteTitle.
@@ -3881,25 +3881,25 @@ abstract class AppLocalizations {
   /// No description provided for @transferAutoTradeSettlement.
   ///
   /// In ko, this message translates to:
-  /// **'주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라집니다.'**
+  /// **'주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라져요.'**
   String get transferAutoTradeSettlement;
 
   /// No description provided for @transferAutoCardPayment.
   ///
   /// In ko, this message translates to:
-  /// **'카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없습니다.'**
+  /// **'카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없어요.'**
   String get transferAutoCardPayment;
 
   /// No description provided for @transferAutoCardRefund.
   ///
   /// In ko, this message translates to:
-  /// **'카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰집니다.'**
+  /// **'카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰져요.'**
   String get transferAutoCardRefund;
 
   /// No description provided for @transferAutoDefault.
   ///
   /// In ko, this message translates to:
-  /// **'자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라집니다.'**
+  /// **'자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라져요.'**
   String get transferAutoDefault;
 
   /// No description provided for @updateAvailable.
@@ -5642,12 +5642,6 @@ abstract class AppLocalizations {
   /// **'거래가 삭제되었습니다'**
   String get expDeleted;
 
-  /// No description provided for @expDeleteFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'삭제 실패'**
-  String get expDeleteFailed;
-
   /// No description provided for @expSplitMismatch.
   ///
   /// In ko, this message translates to:
@@ -5771,13 +5765,13 @@ abstract class AppLocalizations {
   /// No description provided for @expAutoSourceTradeRealized.
   ///
   /// In ko, this message translates to:
-  /// **'주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산됩니다.'**
+  /// **'주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산돼요.'**
   String get expAutoSourceTradeRealized;
 
   /// No description provided for @expAutoSourceTransferInterest.
   ///
   /// In ko, this message translates to:
-  /// **'이체에 붙은 이자예요. 금액은 이체 내역에서 계산됩니다.'**
+  /// **'이체에 붙은 이자예요. 금액은 이체 내역에서 계산돼요.'**
   String get expAutoSourceTransferInterest;
 
   /// No description provided for @expAutoSourceCardCarryover.
@@ -5789,7 +5783,7 @@ abstract class AppLocalizations {
   /// No description provided for @expAutoSourceDefault.
   ///
   /// In ko, this message translates to:
-  /// **'자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라집니다.'**
+  /// **'자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라져요.'**
   String get expAutoSourceDefault;
 
   /// No description provided for @expPresetLock.
@@ -5948,29 +5942,11 @@ abstract class AppLocalizations {
   /// **'미분류'**
   String get expUncategorized;
 
-  /// No description provided for @expValueNone.
-  ///
-  /// In ko, this message translates to:
-  /// **'없음'**
-  String get expValueNone;
-
-  /// No description provided for @expItemsCount.
-  ///
-  /// In ko, this message translates to:
-  /// **'{count}개'**
-  String expItemsCount(int count);
-
   /// No description provided for @expNotSelected.
   ///
   /// In ko, this message translates to:
   /// **'미선택'**
   String get expNotSelected;
-
-  /// No description provided for @expPrevTxAt.
-  ///
-  /// In ko, this message translates to:
-  /// **'{merchant}에서의 이전 거래'**
-  String expPrevTxAt(String merchant);
 
   /// No description provided for @expThisMonth.
   ///
@@ -12797,13 +12773,13 @@ abstract class AppLocalizations {
   /// No description provided for @expRecordOnlyNote.
   ///
   /// In ko, this message translates to:
-  /// **'결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요'**
+  /// **'결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요.'**
   String get expRecordOnlyNote;
 
   /// No description provided for @expRecordOnlyPartNote.
   ///
   /// In ko, this message translates to:
-  /// **'이 중 {amount}은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요'**
+  /// **'이 중 {amount}은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요.'**
   String expRecordOnlyPartNote(String amount);
 
   /// No description provided for @expClosedCycleLine.
@@ -14863,6 +14839,108 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'환율 없음'**
   String get namuFxUnavailableShort;
+
+  /// No description provided for @expDetailMore.
+  ///
+  /// In ko, this message translates to:
+  /// **'더 하기'**
+  String get expDetailMore;
+
+  /// No description provided for @expSplitValue.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개로 나눔'**
+  String expSplitValue(int count);
+
+  /// No description provided for @expSplitHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역 분할 {count}개'**
+  String expSplitHeader(int count);
+
+  /// No description provided for @expMerchantMonth.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 가맹점 이번 달'**
+  String get expMerchantMonth;
+
+  /// No description provided for @expRecentOnly.
+  ///
+  /// In ko, this message translates to:
+  /// **'최근 5건만 보여요'**
+  String get expRecentOnly;
+
+  /// No description provided for @expLinked.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결됨'**
+  String get expLinked;
+
+  /// No description provided for @expSplitLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 내역을 불러오지 못했어요'**
+  String get expSplitLoadFailed;
+
+  /// No description provided for @expSplitLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get expSplitLoadFailedDesc;
+
+  /// No description provided for @expRefundDateToday.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} · 오늘'**
+  String expRefundDateToday(String date);
+
+  /// No description provided for @expRefundDateHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래한 날({date})부터 오늘까지 고를 수 있어요.'**
+  String expRefundDateHint(String date);
+
+  /// No description provided for @expRefundFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  String get expRefundFailed;
+
+  /// No description provided for @expRefundCancelFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  String get expRefundCancelFailed;
+
+  /// No description provided for @expTxDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  String get expTxDeleteFailed;
+
+  /// No description provided for @transferDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  String get transferDeleteFailed;
+
+  /// No description provided for @transferDetailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'이체 상세'**
+  String get transferDetailTitle;
+
+  /// No description provided for @transferFromLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌'**
+  String get transferFromLabel;
+
+  /// No description provided for @transferToLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌'**
+  String get transferToLabel;
 }
 
 class _AppLocalizationsDelegate

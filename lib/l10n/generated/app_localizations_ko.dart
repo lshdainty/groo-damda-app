@@ -1980,7 +1980,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expRefundConfirmBody(String amount, String asset) {
-    return '이 거래를 환불로 표시하고 $amount을 $asset(으)로 되돌려요. 합계에서 빠져요.';
+    return '이 거래를 환불로 표시해요. 합계에서 빠지고 $amount이 $asset에 돌아가요.';
   }
 
   @override
@@ -1997,7 +1997,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expRefundedAt(String date) {
-    return '환불됨 · $date';
+    return '환불됨 · $date — 합계에서 빠져 있어요.';
   }
 
   @override
@@ -2054,25 +2054,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get transferDeleteConfirm =>
-      '이 이체를 삭제할까요? 양쪽 자산의 잔액이 되돌아가요. 삭제한 이체는 되돌릴 수 없어요.';
+      '이 이체를 삭제할까요? 양쪽 계좌 잔액이 이체 전으로 돌아가요. 삭제한 이체는 되돌릴 수 없어요.';
 
   @override
   String get transferDeleteTitle => '이체 삭제';
 
   @override
   String get transferAutoTradeSettlement =>
-      '주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라집니다.';
+      '주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라져요.';
 
   @override
   String get transferAutoCardPayment =>
-      '카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없습니다.';
+      '카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없어요.';
 
   @override
   String get transferAutoCardRefund =>
-      '카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰집니다.';
+      '카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰져요.';
 
   @override
-  String get transferAutoDefault => '자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라집니다.';
+  String get transferAutoDefault => '자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라져요.';
 
   @override
   String updateAvailable(String version) {
@@ -3056,9 +3056,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expDeleted => '거래가 삭제되었습니다';
 
   @override
-  String get expDeleteFailed => '삭제 실패';
-
-  @override
   String get expSplitMismatch => '분할 내역과 금액이 달라요';
 
   @override
@@ -3125,17 +3122,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expAutoSourceTradeRealized =>
-      '주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산됩니다.';
+      '주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산돼요.';
 
   @override
-  String get expAutoSourceTransferInterest => '이체에 붙은 이자예요. 금액은 이체 내역에서 계산됩니다.';
+  String get expAutoSourceTransferInterest => '이체에 붙은 이자예요. 금액은 이체 내역에서 계산돼요.';
 
   @override
   String get expAutoSourceCardCarryover =>
       '카드를 등록할 때 적은 이전 미결제 사용액이에요. 금액은 카드 수정에서 바꿔요.';
 
   @override
-  String get expAutoSourceDefault => '자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라집니다.';
+  String get expAutoSourceDefault => '자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라져요.';
 
   @override
   String get expPresetLock => '프리셋 잠금';
@@ -3220,20 +3217,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expUncategorized => '미분류';
 
   @override
-  String get expValueNone => '없음';
-
-  @override
-  String expItemsCount(int count) {
-    return '$count개';
-  }
-
-  @override
   String get expNotSelected => '미선택';
-
-  @override
-  String expPrevTxAt(String merchant) {
-    return '$merchant에서의 이전 거래';
-  }
 
   @override
   String get expThisMonth => '이번 달';
@@ -7082,11 +7066,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expRecordOnlyBadge => '기록만';
 
   @override
-  String get expRecordOnlyNote => '결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요';
+  String get expRecordOnlyNote => '결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요.';
 
   @override
   String expRecordOnlyPartNote(String amount) {
-    return '이 중 $amount은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요';
+    return '이 중 $amount은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요.';
   }
 
   @override
@@ -8254,4 +8238,63 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get namuFxUnavailableShort => '환율 없음';
+
+  @override
+  String get expDetailMore => '더 하기';
+
+  @override
+  String expSplitValue(int count) {
+    return '$count개로 나눔';
+  }
+
+  @override
+  String expSplitHeader(int count) {
+    return '내역 분할 $count개';
+  }
+
+  @override
+  String get expMerchantMonth => '이 가맹점 이번 달';
+
+  @override
+  String get expRecentOnly => '최근 5건만 보여요';
+
+  @override
+  String get expLinked => '연결됨';
+
+  @override
+  String get expSplitLoadFailed => '나눈 내역을 불러오지 못했어요';
+
+  @override
+  String get expSplitLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String expRefundDateToday(String date) {
+    return '$date · 오늘';
+  }
+
+  @override
+  String expRefundDateHint(String date) {
+    return '거래한 날($date)부터 오늘까지 고를 수 있어요.';
+  }
+
+  @override
+  String get expRefundFailed => '환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+
+  @override
+  String get expRefundCancelFailed => '환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+
+  @override
+  String get expTxDeleteFailed => '거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+
+  @override
+  String get transferDeleteFailed => '이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+
+  @override
+  String get transferDetailTitle => '이체 상세';
+
+  @override
+  String get transferFromLabel => '보내는 계좌';
+
+  @override
+  String get transferToLabel => '받는 계좌';
 }
