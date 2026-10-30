@@ -111,6 +111,17 @@ void main() {
     expect(findPlain('본문 첫 줄\n둘째 줄'), findsOneWidget);
   });
 
+  testWidgets('본문은 낱말 단위 줄바꿈(v114) — 낱말 안 글자 사이에 이음 문자(U+2060), 읽는 이름은 원래 글', (
+    tester,
+  ) async {
+    await _open(tester, _memo());
+    final t = tester.widget<Text>(
+      find.byKey(const ValueKey('memo-detail-content')),
+    );
+    expect(t.data, contains('\u2060'));
+    expect(t.semanticsLabel, '본문 첫 줄\n둘째 줄');
+  });
+
   testWidgets('메타 — "{태그} · {시각} 수정" · 고정이면 마지막에 "고정"', (tester) async {
     await _open(tester, _memo(pinned: true));
     expect(findPlain('아이디어'), findsOneWidget);

@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 enum _DetailAction { edit }
 
@@ -158,7 +159,9 @@ class _MemoDetailSheetState extends ConsumerState<_MemoDetailSheet> {
           Padding(
             padding: const EdgeInsets.only(bottom: PSpacing.x2),
             child: Text(
-              content.isEmpty ? l.memoDetailNoContent : content,
+              // 낱말 단위 줄바꿈(v114) — 읽는 글이라 건다. 읽는 이름은 원래 글
+              keepAll(content.isEmpty ? l.memoDetailNoContent : content),
+              semanticsLabel: content.isEmpty ? l.memoDetailNoContent : content,
               key: const ValueKey('memo-detail-content'),
               style: PTypography.t5.copyWith(
                 color: content.isEmpty ? c.fgNeutralSubtle : c.fgNeutral,

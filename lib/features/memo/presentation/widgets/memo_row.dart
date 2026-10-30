@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/memo/domain/memo_meta.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 메모 줄(I-15 9) — ds List 누르는 줄. 위 맞춤(제목이 두 줄을 넘는다) · 앞 색 점 8(위 7 — 제목 첫 줄 가운데) · 제목 t5 줄바꿈
 /// (말줄임 없음, 비면 "제목 없음") · 본문 한 줄(t4 muted, 한 줄 말줄임, 비면 줄을 두지 않는다) · 메타 Tag Group t3 한 줄 말줄임
@@ -54,7 +55,8 @@ class MemoRow extends StatelessWidget {
         children: [
           if (content.isNotEmpty)
             Text(
-              content,
+              keepAll(content),
+              semanticsLabel: content,
               key: const ValueKey('memo-body'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
