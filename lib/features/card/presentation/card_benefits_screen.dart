@@ -56,6 +56,9 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   Object? _error;
   int _totalElements = 0;
 
+  /// 조건(검색 · 칩 · 체크 · 당겨 새로 고침)이 바뀔 때마다 올리는 세대 번호 — 옛 조건의 응답 · 실패가 새 목록에 붙지 않게 한다.
+  int _gen = 0;
+
   @override
   void initState() {
     super.initState();
@@ -93,19 +96,24 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
       _hasMore = true;
       _initialLoading = true;
       _error = null;
+      _totalElements = 0;
+      // 받던 요청이 있어도 새 조건의 요청은 막지 않는다 — 옛 응답은 세대가 달라 버려진다
+      _gen++;
+      _loadingMore = false;
     });
     return _loadMore(initial: true);
   }
 
   Future<void> _loadMore({bool initial = false}) async {
     if (_loadingMore || (!initial && !_hasMore)) return;
+    final gen = _gen;
     setState(() => _loadingMore = true);
     final key = _keyForPage(_page);
     try {
       // 새 페이지는 항상 최신 데이터를 받도록 캐시 무효화.
       ref.invalidate(cardCatalogPageProvider(key));
       final p = await ref.read(cardCatalogPageProvider(key).future);
-      if (!mounted) return;
+      if (!mounted || gen != _gen) return;
       setState(() {
         _cards.addAll(p.content);
         _totalElements = p.totalElements;
@@ -114,13 +122,13 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
         _initialLoading = false;
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || gen != _gen) return;
       setState(() {
         _error = e;
         _initialLoading = false;
       });
     } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      if (mounted && gen == _gen) setState(() => _loadingMore = false);
     }
   }
 
@@ -220,7 +228,8 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
               ),
               // 개수 줄 — "총 n장" + 오른쪽 단종 카드 포함
               PListHeader(
-                title: _initialLoading
+                // 불러오는 중 · 첫 쪽 실패에서는 개수를 모른다(앞 조건의 숫자를 말하지 않는다)
+                title: _initialLoading || (_error != null && _cards.isEmpty)
                     ? ''
                     : l.cardTotalCount(krw(_totalElements)),
                 trailing: PCheckbox(

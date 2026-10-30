@@ -18,6 +18,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 카드 혜택 상세 — 조회 시트(I-20 E 34). 바깥 누름 · 끌어내림으로 닫히고 바닥 버튼은 없다(닫기 원 하나). 높이는 내용만큼 ·
 /// 최대 90%, 본문만 스크롤 + 끝 흐림.
@@ -124,7 +125,8 @@ class _DetailBodyState extends State<_DetailBody> {
         Padding(
           padding: gutter.copyWith(bottom: PSpacing.x2),
           child: Text(
-            s.cardName,
+            keepAll(s.cardName),
+            semanticsLabel: s.cardName,
             style: PTypography.t6.copyWith(
               color: c.fgNeutral,
               fontWeight: FontWeight.w700,
@@ -134,7 +136,8 @@ class _DetailBodyState extends State<_DetailBody> {
         Padding(
           padding: gutter.copyWith(bottom: PSpacing.x2),
           child: Text(
-            cardMetaParts(l, s).join(' · '),
+            keepAll(cardMetaParts(l, s).join(' · ')),
+            semanticsLabel: cardMetaParts(l, s).join(' · '),
             style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
           ),
         ),
@@ -183,7 +186,8 @@ class _DetailBodyState extends State<_DetailBody> {
           Padding(
             padding: gutter.copyWith(top: PSpacing.x6, bottom: PSpacing.x6),
             child: Text(
-              l.cardNoBenefits,
+              keepAll(l.cardNoBenefits),
+              semanticsLabel: l.cardNoBenefits,
               textAlign: TextAlign.center,
               style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
             ),
@@ -234,7 +238,7 @@ class _DetailBodyState extends State<_DetailBody> {
             value: id,
             title: title,
             description: description.isEmpty ? null : description,
-            child: Text(body),
+            child: Text(keepAll(body), semanticsLabel: body),
           )
         : PAccordionPlainItem(
             title: title,

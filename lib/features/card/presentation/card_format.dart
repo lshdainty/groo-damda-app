@@ -6,7 +6,11 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
 /// 글 속 네 자리 이상 숫자에 쉼표 — 서버 라벨 원문 "국내 5000원" 을 "국내 5,000원" 으로 보이기만 한다.
 String commaDigits(String text) =>
-    text.replaceAllMapped(RegExp(r'\d{4,}'), (m) => krw(int.parse(m[0]!)));
+    text.replaceAllMapped(RegExp(r'\d{4,}'), (m) {
+      // 너무 긴 숫자(int 를 넘는)는 원문 그대로 둔다
+      final n = int.tryParse(m[0]!);
+      return n == null ? m[0]! : krw(n);
+    });
 
 String _won(int amount) => krwSigned(amount, false, unit: true);
 

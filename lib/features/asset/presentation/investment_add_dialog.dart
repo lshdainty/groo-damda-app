@@ -809,7 +809,8 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
           ? PInput(
               controller: _linkedValueCtrl,
               readOnly: true,
-              suffixText: wonUnit(),
+              // 시세가 아직 없어 "—" 이면 단위를 붙이지 않는다("—원" 금지)
+              suffixText: value != null ? wonUnit() : null,
               tabularFigures: true,
             )
           : PInput(

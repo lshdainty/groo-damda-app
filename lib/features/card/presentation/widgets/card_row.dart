@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+
 import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
 import 'package:groo_damda_app/features/card/presentation/card_format.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -43,12 +45,10 @@ class CardRow extends StatelessWidget {
             overflow: PTagGroupOverflow.truncate,
             items: [for (final x in cardMetaParts(l, card)) PTag(x)],
           ),
-          PTagGroup(
-            size: PTagGroupSize.t3,
-            overflow: PTagGroupOverflow.truncate,
+          _AmountLine(
             items: [
-              PTag(annualFeeRowText(l, card.annualFee)),
-              PTag(performanceRowText(l, card.performance)),
+              annualFeeRowText(l, card.annualFee),
+              performanceRowText(l, card.performance),
             ],
           ),
         ],
@@ -56,6 +56,52 @@ class CardRow extends StatelessWidget {
       suffix: card.isDiscontinued == 'Y'
           ? PBadge(label: l.assetDiscontinued)
           : null,
+    );
+  }
+}
+
+/// 금액이 든 설명 줄("연회비 1,234,567원 · 실적 300,000원") — 한 줄에 다 들면 Tag Group 한 줄, 안 들면 금액을 말줄임하지 않고
+/// 항목을 통째로 다음 줄로 내린다(항목마다 한 줄 · 사이 구분 없음). 한 항목이 한 줄보다 길 때만 그 항목 안에서 말줄임.
+class _AmountLine extends StatelessWidget {
+  const _AmountLine({required this.items});
+
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final painter = TextPainter(
+          text: TextSpan(
+            text: items.join(tagGroupSeparator),
+            style: PTypography.t3,
+          ),
+          textDirection: TextDirection.ltr,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        final fits = painter.width <= box.maxWidth;
+        painter.dispose();
+        if (fits) {
+          return PTagGroup(
+            size: PTagGroupSize.t3,
+            overflow: PTagGroupOverflow.truncate,
+            items: [for (final x in items) PTag(x)],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final x in items)
+              PTagGroup(
+                size: PTagGroupSize.t3,
+                overflow: PTagGroupOverflow.truncate,
+                items: [PTag(x)],
+              ),
+          ],
+        );
+      },
     );
   }
 }
