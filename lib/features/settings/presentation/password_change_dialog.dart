@@ -2,81 +2,90 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/password_rules.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_section_label.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
-import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 
-/// 비밀번호 변경 다이얼로그 — front `PasswordChangeDialog` 미러.
+/// desk-back `DeskErrorCode.USER_PASSWORD_CHANGE_FAILED` — 이 폼에서는 현재 비밀번호 불일치 하나다.
+/// 판정은 문구가 아니라 코드로 한다(문구는 그루 계정 배포 · 언어마다 바뀐다). 웹 `password-change-error.ts` 와 같다.
+const kPasswordChangeFailedCode = 'USER_003';
+
+/// 비밀번호 바꾸기 — ds Bottom Sheet 입력 폼(I-14 14 ~ 16). 위 닫기 원 + 바닥 [저장] 하나.
 ///
-/// PATCH /users/me/password (currentPassword, newPassword, confirmPassword)
-/// 다이얼로그가 아니라 바텀시트로 띄운다.
-///
-/// 규칙 체크리스트(8자 이상·특수문자)와 불일치 문구가 입력 중에 붙었다 떨어졌다
-/// 하며 세로가 계속 변한다. 가운데 뜨는 다이얼로그는 그때마다 위아래로 튀지만,
-/// 시트는 아래에 붙어 있어 늘어나도 흔들리지 않는다. 웹 모바일도 같은 이유로
-/// drawer 다(front PasswordChangeDialog).
+/// 바깥 누름 · 끌어내림으로 닫히지 않고, 값이 있는 채 닫으면 "작성한 내용이 사라져요" 를 묻는다.
+/// PATCH /users/me/password (currentPassword, newPassword, confirmPassword).
 Future<void> showPasswordChangeDialog(BuildContext context) async {
   final l = AppLocalizations.of(context);
-  final controller = PSheetController();
-  await showPSheet<void>(
+  final probe = _DirtyProbe();
+  await PBottomSheet.show<void>(
     context,
-    title: l.navChangePassword,
-    // 입력 3개짜리라 화면을 85% 점유할 이유가 없다 — 내용 높이만 쓴다.
-    shrinkWrap: true,
-    contentBuilder: (ctx, _) => _PasswordChangeDialog(controller: controller),
-    footerBuilder: (ctx) => PSheetFooter(
-      controller: controller,
-      submitLabel: l.passwordChangeAction,
+    form: true,
+    isDirty: () => probe.dirty(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
     ),
+    builder: (_) => _PasswordForm(probe: probe),
   );
-  controller.dispose();
 }
 
-class _PasswordChangeDialog extends ConsumerStatefulWidget {
-  const _PasswordChangeDialog({required this.controller});
-  final PSheetController controller;
+class _DirtyProbe {
+  bool Function() dirty = () => false;
+}
+
+class _PasswordForm extends ConsumerStatefulWidget {
+  const _PasswordForm({required this.probe});
+  final _DirtyProbe probe;
 
   @override
-  ConsumerState<_PasswordChangeDialog> createState() =>
-      _PasswordChangeDialogState();
+  ConsumerState<_PasswordForm> createState() => _PasswordFormState();
 }
 
-class _PasswordChangeDialogState extends ConsumerState<_PasswordChangeDialog> {
+class _PasswordFormState extends ConsumerState<_PasswordForm> {
   final _currentCtrl = TextEditingController();
   final _newCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
-  String? _error;
+  final _currentFocus = FocusNode();
   bool _submitting = false;
+
+  /// 현재 비밀번호가 맞지 않다고 서버가 답했다 — 그 칸의 오류. 칸을 고치면 사라진다.
+  bool _currentInvalid = false;
+
+  /// 그 밖 실패 — 본문 맨 위 Callout. 값은 남는다.
+  bool _failed = false;
 
   @override
   void initState() {
     super.initState();
-    widget.controller.onSubmit = _submit;
-  }
-
-  /// 입력이 바뀔 때마다 footer 버튼 활성/로딩을 맞춘다.
-  void _syncFooter() {
-    widget.controller
-      ..setCanSubmit(_canSubmit)
-      ..setSubmitting(_submitting);
+    widget.probe.dirty = () =>
+        _currentCtrl.text.isNotEmpty ||
+        _newCtrl.text.isNotEmpty ||
+        _confirmCtrl.text.isNotEmpty;
   }
 
   @override
   void dispose() {
+    widget.probe.dirty = () => false;
     _currentCtrl.dispose();
     _newCtrl.dispose();
     _confirmCtrl.dispose();
+    _currentFocus.dispose();
     super.dispose();
   }
 
+  /// [저장] 은 네 조건(현재 칸 값 · 조건 충족 · 확인 일치 · 현재와 다름)이 맞을 때만 누를 수 있다.
   bool get _canSubmit {
     if (_submitting) return false;
     final c = _currentCtrl.text;
@@ -86,16 +95,16 @@ class _PasswordChangeDialogState extends ConsumerState<_PasswordChangeDialog> {
     return c.isNotEmpty && isPasswordValid(n) && n == f && n != c;
   }
 
-  /// 현재 비밀번호와 동일한지 — 서버(SSO)도 거부하므로 제출 전에 알린다
+  /// 현재 비밀번호와 동일한지 — 서버(그루 계정)도 거부하므로 제출 전에 알린다
   bool get _sameAsCurrent =>
       _currentCtrl.text.isNotEmpty && _newCtrl.text == _currentCtrl.text;
 
   Future<void> _submit() async {
-    final l = AppLocalizations.of(context);
+    if (!_canSubmit) return;
     setState(() {
       _submitting = true;
-      _error = null;
-      _syncFooter();
+      _failed = false;
+      _currentInvalid = false;
     });
     try {
       final repo = await ref.read(authRepositoryProvider.future);
@@ -105,125 +114,166 @@ class _PasswordChangeDialogState extends ConsumerState<_PasswordChangeDialog> {
         confirmPassword: _confirmCtrl.text,
       );
       if (!mounted) return;
-      Navigator.of(context).pop();
-      showPSnackBar(
-        context,
-        l.passwordChanged,
+      PBottomSheet.of(context).close();
+      // 시트가 닫힌 뒤 알린다 — 서버가 받았다(성공)
+      showGlobalSnack(
+        (l) => l.passwordChanged,
         severity: PSnackSeverity.success,
       );
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.message.isEmpty ? l.passwordChangeFailed : e.message;
         _submitting = false;
-        _syncFooter();
+        // 서버 글은 어디에도 내지 않는다 — 코드로만 가른다
+        if (e.code == kPasswordChangeFailedCode) {
+          _currentInvalid = true;
+        } else {
+          _failed = true;
+        }
       });
+      if (_currentInvalid) _currentFocus.requestFocus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
-    // 시트 header(제목·X)와 footer(취소·변경)는 showPSheet 이 그린다 — 여기선 폼만.
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+    const gutter = EdgeInsets.symmetric(horizontal: PSpacing.globalGutter);
+    final newText = _newCtrl.text;
+    final confirmText = _confirmCtrl.text;
+    final matched = confirmText.isNotEmpty && newText == confirmText;
+    final mismatched = confirmText.isNotEmpty && newText != confirmText;
+
+    return PBottomSheetContent(
+      title: l.navChangePassword,
+      description: l.passwordChangeDescription,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PSectionLabel(l.passwordCurrent),
-          const SizedBox(height: PSpace.x4),
-          PTextInput(
-            controller: _currentCtrl,
-            obscureText: true,
-            enabled: !_submitting,
-            placeholder: l.passwordCurrent,
-            onChanged: (_) => setState(_syncFooter),
-          ),
-          const SizedBox(height: PSpace.x12),
-          PSectionLabel(l.passwordNew),
-          const SizedBox(height: PSpace.x4),
-          PTextInput(
-            controller: _newCtrl,
-            obscureText: true,
-            enabled: !_submitting,
-            placeholder: l.passwordNewPlaceholder,
-            onChanged: (_) => setState(_syncFooter),
-          ),
-          // 입력 중 실시간 규칙 표시 — 변경 버튼을 누르기 전에 미달 조건을 알 수 있게
-          if (_newCtrl.text.isNotEmpty) ...[
-            const SizedBox(height: PSpace.xs),
-            for (final rule in kPasswordRules)
-              _RuleRow(ok: rule.test(_newCtrl.text), label: rule.label(l)),
-          ],
-          if (_sameAsCurrent)
+          if (_failed)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                l.passwordSameAsCurrent,
-                style: PTypo.caption.copyWith(color: t.statusDangerFg),
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.globalGutter,
+                0,
+                PSpacing.globalGutter,
+                PSpacing.x4,
+              ),
+              child: PCallout(
+                tone: PCalloutTone.critical,
+                alert: true,
+                description: l.passwordChangeFailed,
               ),
             ),
-          const SizedBox(height: PSpace.x12),
-          PSectionLabel(l.passwordNewConfirm),
-          const SizedBox(height: PSpace.x4),
-          PTextInput(
-            controller: _confirmCtrl,
-            obscureText: true,
-            enabled: !_submitting,
-            placeholder: l.passwordConfirmPlaceholder,
-            onChanged: (_) => setState(_syncFooter),
-          ),
-          // 입력 중 실시간 일치 표시 — 위 규칙 체크리스트와 같은 문법(체크/X).
-          // 확인 입력이 비면 표시하지 않는다(입력 시작 전부터 불일치로 겁주지 않게).
-          if (_confirmCtrl.text.isNotEmpty)
-            _RuleRow(
-              ok: _newCtrl.text == _confirmCtrl.text,
-              label: _newCtrl.text == _confirmCtrl.text
-                  ? l.passwordMatched
-                  : l.passwordMismatch,
-              // 불일치는 규칙 미달(아직 채우는 중)과 달리 두 값이 어긋난 '충돌'
-              failColor: t.statusDangerFg,
-            ),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                _error!,
-                style: PTypo.caption.copyWith(color: t.statusDangerFg),
+          // 필수 표시 · 자리 글(placeholder)은 없다 — 세 칸 모두 필수라 표시하지 않고, 조건은 아래 줄이 말한다
+          Padding(
+            padding: gutter,
+            child: PField(
+              label: l.passwordCurrent,
+              invalid: _currentInvalid,
+              errorMessage: l.passwordCurrentInvalid,
+              child: PInput(
+                controller: _currentCtrl,
+                focusNode: _currentFocus,
+                obscureText: true,
+                disabled: _submitting,
+                autofillHints: const [AutofillHints.password],
+                onChanged: (_) => setState(() => _currentInvalid = false),
               ),
             ),
+          ),
+          const SizedBox(height: PSpacing.x5),
+          Padding(
+            padding: gutter,
+            child: PField(
+              label: l.passwordNew,
+              invalid: _sameAsCurrent,
+              errorMessage: l.passwordSameAsCurrent,
+              child: PInput(
+                controller: _newCtrl,
+                obscureText: true,
+                disabled: _submitting,
+                autofillHints: const [AutofillHints.newPassword],
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+          ),
+          // 입력 중 실시간 규칙 표시 — 값이 있을 때만
+          if (newText.isNotEmpty)
+            Padding(
+              padding: gutter.copyWith(top: PSpacing.x2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: PSpacing.x1,
+                children: [
+                  for (final rule in kPasswordRules)
+                    _RuleRow(ok: rule.test(newText), label: rule.label(l)),
+                ],
+              ),
+            ),
+          const SizedBox(height: PSpacing.x5),
+          Padding(
+            padding: gutter,
+            child: PField(
+              label: l.passwordNewConfirm,
+              // 불일치는 Field 오류, 일치는 설명 자리의 체크
+              invalid: mismatched,
+              errorMessage: l.passwordMismatch,
+              child: PInput(
+                controller: _confirmCtrl,
+                obscureText: true,
+                disabled: _submitting,
+                autofillHints: const [AutofillHints.newPassword],
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+          ),
+          if (matched)
+            Padding(
+              padding: gutter.copyWith(top: PSpacing.x2),
+              child: _RuleRow(ok: true, label: l.passwordMatched),
+            ),
+          const SizedBox(height: PSpacing.x2),
         ],
       ),
+      footer: [
+        PButton(
+          label: l.passwordChangeAction,
+          size: PButtonSize.large,
+          loading: _submitting,
+          onPressed: _canSubmit ? _submit : null,
+        ),
+      ],
     );
   }
 }
 
-/// 규칙 한 줄 — 충족=체크 / 미달=X
+/// 규칙 한 줄 — 충족 `check`(fg-positive) · 미달 `x`(fg-neutral-subtle). 아이콘 16 + t4.
 class _RuleRow extends StatelessWidget {
-  const _RuleRow({required this.ok, required this.label, this.failColor});
+  const _RuleRow({required this.ok, required this.label});
 
   final bool ok;
   final String label;
 
-  /// 미달일 때 색. 규칙은 아직 채우는 중이라 기본 muted 를 쓰고,
-  /// 확인 입력 불일치는 두 값이 어긋난 '충돌'이라 호출처가 danger 를 넘긴다.
-  final Color? failColor;
-
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-    final color = ok ? t.statusSuccessFg : (failColor ?? t.fgTertiary);
-    return Padding(
-      padding: const EdgeInsets.only(top: PSpace.xs),
-      child: Row(
-        children: [
-          Icon(ok ? LucideIcons.check : LucideIcons.x, size: 14, color: color),
-          const SizedBox(width: PSpace.sm),
-          Text(label, style: PTypo.caption.copyWith(color: color)),
-        ],
-      ),
+    final c = context.colors;
+    final color = ok ? c.fgPositive : c.fgNeutralSubtle;
+    return Row(
+      spacing: PSpacing.x1_5,
+      children: [
+        ExcludeSemantics(
+          child: Icon(
+            ok ? LucideIcons.check : LucideIcons.x,
+            size: 16,
+            color: color,
+          ),
+        ),
+        Flexible(
+          child: Text(label, style: PTypography.t4.copyWith(color: color)),
+        ),
+      ],
     );
   }
 }
