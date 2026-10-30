@@ -4,6 +4,7 @@
 // 서버가 거래(EXP_009)·반복·프리셋(NOT_LEAF)을 안 받아서, 고르면 저장에서 막혔다. 웹과 같이 걷는다.
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -82,13 +83,23 @@ void main() {
     await tester.pumpAndSettle();
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
 
-    // 상위를 누르면 첫 하위(점심)가 골라지고 하위 칸이 뜬다 — 그 칸을 펼친다.
-    await tester.tap(find.text('식비').last);
+    // 1단계 금액 → 2단계 → 카테고리 줄 → 고르기 시트: 하위 있는 상위는 고를 수 없는 목록 제목이고 하위만 줄이다.
+    await tester.enterText(find.byType(EditableText).first, '1000');
+    await tester.tap(find.text(l.actionNext));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('점심').last);
+    await tester.tap(find.byKey(const ValueKey('tx-row-category')));
     await tester.pumpAndSettle();
 
-    expect(find.text('저녁'), findsWidgets, reason: '하위 목록이 안 펼쳐졌다');
+    expect(find.text('점심'), findsWidgets, reason: '하위 줄이 안 보인다');
+    expect(find.text('저녁'), findsWidgets);
     expect(find.text(l.expTopCategorySuffix('식비')), findsNothing);
+    // 상위 이름은 눌리는 줄이 아니라 목록 제목이다
+    expect(
+      find.ancestor(
+        of: find.text('식비'),
+        matching: find.byType(PListButtonItem),
+      ),
+      findsNothing,
+    );
   });
 }

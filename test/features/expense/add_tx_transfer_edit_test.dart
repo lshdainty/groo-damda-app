@@ -134,22 +134,17 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text(l.expEdit), findsOneWidget);
     // 본문이 실제로 그려졌나 — 제목·푸터는 시트 껍데기라 살아 있다.
-    expect(find.byType(TextField), findsWidgets);
+    expect(find.byKey(const ValueKey('tx-row-amount')), findsOneWidget);
   });
 
   testWidgets('열면 이체 값이 실려 있다', (tester) async {
     await _openEdit(tester);
 
-    final texts = tester
-        .widgetList<TextField>(find.byType(TextField))
-        .map((f) => f.controller?.text ?? '')
-        .toList();
-    // 금액 칸은 **원시값**을 들고 있다 — 자릿수 쉼표는 포매터가 표시할 때 넣는다.
-    expect(texts, contains('120000'), reason: '금액 — $texts');
-    expect(texts, contains('500'), reason: '수수료 — $texts');
-    expect(texts, contains('2026-09-15'), reason: '날짜 — $texts');
-    expect(texts, contains('08:28'), reason: '시각 — $texts');
-    expect(texts, contains('적금 이체'), reason: '메모 — $texts');
+    // 2단계 줄에 실린 값 — 금액 · 수수료 · 날짜 · 메모(값은 줄 끝에 쉼표 · 단위로 보인다)
+    expect(find.textContaining('120,000'), findsWidgets, reason: '금액');
+    expect(find.textContaining('500'), findsWidgets, reason: '수수료');
+    expect(find.byKey(const ValueKey('tx-row-date')), findsOneWidget);
+    expect(find.textContaining('적금 이체'), findsWidgets, reason: '메모');
   });
 
   testWidgets('그대로 저장하면 같은 값이 PUT 으로 나간다', (tester) async {

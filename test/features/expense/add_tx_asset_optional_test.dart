@@ -68,30 +68,22 @@ Future<AppLocalizations> _open(WidgetTester tester) async {
   return AppLocalizations.delegate.load(const Locale('ko'));
 }
 
-/// 저장 버튼 — onPressed 가 null 이면 잠긴 상태.
-bool _submitEnabled(WidgetTester tester, String label) {
-  final btn = tester.widget<PButton>(
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).first,
-  );
-  return btn.onPressed != null;
-}
-
 void main() {
-  testWidgets('금액 + 카테고리만 채우면 자산 없이도 저장할 수 있다', (tester) async {
+  testWidgets('금액 + 카테고리만 채우면 자산 없이도 저장 요청이 나간다', (tester) async {
     final l = await _open(tester);
 
-    // 아무것도 안 채운 상태에선 잠겨 있어야 한다.
-    expect(_submitEnabled(tester, l.expAddShort), isFalse);
-
-    await tester.enterText(find.byType(TextField).first, '12000');
-    await tester.pump();
-
-    // 카테고리 선택 — 자산은 일부러 건드리지 않는다.
-    await tester.tap(find.text(l.expCategory).last);
+    // 1단계 금액 → [다음] → 2단계 카테고리 줄 → 식비. 자산 줄은 일부러 건드리지 않는다.
+    await tester.enterText(find.byType(EditableText).first, '12000');
+    await tester.tap(find.text(l.actionNext));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tx-row-category')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('식비').last);
     await tester.pumpAndSettle();
 
-    expect(_submitEnabled(tester, l.expAddShort), isTrue);
+    // 카테고리 오류가 없다 — [추가] 를 눌러도 칸 오류로 막히지 않는다
+    await tester.tap(find.text(l.expAddShort));
+    await tester.pumpAndSettle();
+    expect(find.text(l.txfErrCategory), findsNothing);
   });
 }

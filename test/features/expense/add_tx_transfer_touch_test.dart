@@ -133,13 +133,11 @@ void main() {
     await tester.tap(find.text('적금이체'));
     await tester.pumpAndSettle();
 
-    // 이 프리셋은 금액이 없다 — 그 자리에 이번 달 금액을 적는다.
-    final amount = find.byWidgetPredicate(
-      (w) => w is TextField && w.decoration?.hintText == '0',
-    );
-    await tester.enterText(amount.first, '12345');
+    // 이 프리셋은 금액이 없다 — 1단계에 남아 금액 칸에 이번 달 금액을 적고 [다음] → [추가]
+    await tester.enterText(find.byType(EditableText).first, '12345');
     await tester.pumpAndSettle();
-
+    await tester.tap(find.text(l.actionNext));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(l.expAddShort).last);
     await tester.pumpAndSettle();
 
