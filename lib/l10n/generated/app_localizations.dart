@@ -1736,6 +1736,113 @@ abstract class AppLocalizations {
   /// **'이 거래를 취소하시겠어요? 예수금과 보유 수량이 거래 전으로 돌아가요.'**
   String get tradeDeleteConfirm;
 
+  /// No description provided for @assetDetailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'자산 상세'**
+  String get assetDetailTitle;
+
+  /// No description provided for @assetNotFoundTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'자산을 찾을 수 없어요'**
+  String get assetNotFoundTitle;
+
+  /// No description provided for @assetDetailDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'자산을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get assetDetailDeleteFailed;
+
+  /// No description provided for @assetNotFoundDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'지웠거나 없는 자산이에요.'**
+  String get assetNotFoundDesc;
+
+  /// No description provided for @assetNotFoundAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'자산으로'**
+  String get assetNotFoundAction;
+
+  /// No description provided for @assetLoadFailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'자산을 불러오지 못했어요'**
+  String get assetLoadFailTitle;
+
+  /// No description provided for @assetMoreOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 더보기'**
+  String assetMoreOf(String name);
+
+  /// No description provided for @tradeDetailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 기록'**
+  String get tradeDetailTitle;
+
+  /// No description provided for @tradeKind.
+  ///
+  /// In ko, this message translates to:
+  /// **'종류'**
+  String get tradeKind;
+
+  /// No description provided for @tradeHoldingLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'종목'**
+  String get tradeHoldingLabel;
+
+  /// No description provided for @tradeUnitPrice.
+  ///
+  /// In ko, this message translates to:
+  /// **'단가'**
+  String get tradeUnitPrice;
+
+  /// No description provided for @tradeAmountLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래대금'**
+  String get tradeAmountLabel;
+
+  /// No description provided for @tradeFeeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'수수료 · 세금'**
+  String get tradeFeeLabel;
+
+  /// No description provided for @tradeDateTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 일시'**
+  String get tradeDateTime;
+
+  /// No description provided for @tradeOpenRow.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} {name} 거래 기록'**
+  String tradeOpenRow(String date, String name);
+
+  /// No description provided for @tradeDeleteConfirmTarget.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} {name} {qty} {kind} 거래를 취소할까요? 예수금과 보유 수량이 거래 전으로 돌아가요.'**
+  String tradeDeleteConfirmTarget(
+    String date,
+    String name,
+    String qty,
+    String kind,
+  );
+
+  /// No description provided for @tradeCancelFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래를 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get tradeCancelFailed;
+
   /// No description provided for @holdingTypeStock.
   ///
   /// In ko, this message translates to:

@@ -884,6 +884,70 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cancel this trade? Cash and quantity return to their pre-trade state.';
 
   @override
+  String get assetDetailTitle => 'Asset details';
+
+  @override
+  String get assetNotFoundTitle => 'Asset not found';
+
+  @override
+  String get assetDetailDeleteFailed =>
+      'Couldn\'t delete the asset. Please try again in a moment.';
+
+  @override
+  String get assetNotFoundDesc => 'It was deleted or doesn\'t exist.';
+
+  @override
+  String get assetNotFoundAction => 'Go to assets';
+
+  @override
+  String get assetLoadFailTitle => 'Couldn\'t load the asset';
+
+  @override
+  String assetMoreOf(String name) {
+    return 'More for $name';
+  }
+
+  @override
+  String get tradeDetailTitle => 'Trade record';
+
+  @override
+  String get tradeKind => 'Type';
+
+  @override
+  String get tradeHoldingLabel => 'Holding';
+
+  @override
+  String get tradeUnitPrice => 'Unit price';
+
+  @override
+  String get tradeAmountLabel => 'Trade amount';
+
+  @override
+  String get tradeFeeLabel => 'Fees & tax';
+
+  @override
+  String get tradeDateTime => 'Trade date';
+
+  @override
+  String tradeOpenRow(String date, String name) {
+    return '$name trade record on $date';
+  }
+
+  @override
+  String tradeDeleteConfirmTarget(
+    String date,
+    String name,
+    String qty,
+    String kind,
+  ) {
+    return 'Cancel the $kind of $qty $name on $date? Cash and quantity return to their pre-trade state.';
+  }
+
+  @override
+  String get tradeCancelFailed =>
+      'Couldn\'t cancel the trade. Please try again in a moment.';
+
+  @override
   String get holdingTypeStock => 'Stock';
 
   @override

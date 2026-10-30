@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -14,6 +15,15 @@ import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
+import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsk;
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
+    show showAssetEditForm;
 import 'package:groo_damda_app/core/format/chart_axis.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
@@ -36,12 +46,12 @@ import 'package:groo_damda_app/features/expense/domain/expense_aggregates.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
 import 'package:groo_damda_app/shared/widgets/p_chart_tooltip.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_type_meta.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_actions.dart';
-import 'package:groo_damda_app/features/asset/presentation/asset_edit_route.dart';
 import 'package:groo_damda_app/features/asset/presentation/holding_format.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_trade_sheet.dart';
@@ -51,56 +61,74 @@ import 'package:groo_damda_app/features/expense/presentation/widgets/transfer_ro
 import 'package:groo_damda_app/features/stocks/application/live_prices.dart';
 import 'package:groo_damda_app/features/stocks/data/securities_repository.dart';
 
-/// 자산 상세 — front `AssetDetailDialog` 모바일 미러.
+/// 자산 상세 페이지로 간다(I-17 36) — 주소 `/asset/:id`. 라우터 밖(테스트 등)이면 같은 화면을 Navigator 로 연다.
 ///
-/// 공통 `showPSheet` 사용. 구성 (web 동일):
-/// - Hero 카드 (브랜드 그라디언트 + 아이콘 + 이름 + 잔액)
-/// - 12/24/52주 잔액 추이 + 3개월/6개월/1년 segmented
-/// - 최근 거래 12건 + "전체 보기 →"
-/// - 푸터: 편집 (+ [allowDelete] 면 삭제) — 본문 끝에 함께 스크롤
-///
-/// [allowDelete] 는 자산을 지울 수 있는 화면만 켠다(계좌·카드 관리). 자산 페이지처럼
-/// 훑어보는 상세에서 켜면 목록으로 돌아갈 수도 없는 자리에서 자산이 사라진다.
-void showAssetDetailRich(
-  BuildContext context,
-  Asset asset, {
-  VoidCallback? onEdit,
-  bool allowDelete = false,
-}) {
-  showPSheet<void>(
-    context,
-    title: _titleFor(AppLocalizations.of(context), asset),
-    contentBuilder: (ctx, scrollCtrl) =>
-        _DetailBody(asset: asset, scrollController: scrollCtrl, onEdit: onEdit),
-    footerBuilder: (ctx) =>
-        _DetailFooter(asset: asset, onEdit: onEdit, allowDelete: allowDelete),
+/// 상세는 더는 시트가 아니다. 돌아올 곳은 부른 화면이다(← = pop).
+void openAssetDetail(BuildContext context, int assetRowId) {
+  final router = GoRouter.maybeOf(context);
+  if (router != null) {
+    router.push('/asset/$assetRowId');
+    return;
+  }
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => AssetDetailScreen(assetId: assetRowId),
+    ),
   );
 }
 
-/// 상세 footer — [삭제][편집](spec drawer.md: 상세 = 삭제·편집, 편집 폼 = 취소·저장).
-/// 금액 가리기는 카드 우상단 눈 버튼과 계정 > 보안에도 있어 여기서 뺐다.
-class _DetailFooter extends ConsumerStatefulWidget {
-  const _DetailFooter({
-    required this.asset,
-    this.onEdit,
-    this.allowDelete = false,
-  });
-  final Asset asset;
-  final VoidCallback? onEdit;
-  final bool allowDelete;
+/// 옛 이름 — 자산 줄을 누르면 상세 페이지로 간다.
+void showAssetDetailRich(BuildContext context, Asset asset) =>
+    openAssetDetail(context, asset.rowId);
+
+/// 자산 상세 화면(I-17 35 · 38 · 39 · 41) — 상단 바(← + 제목 + 아이콘 둘 [수정] · [{이름} 더보기]) + 흰 면 하나.
+///
+/// 자산은 산 목록에서 id 로 찾는다. 불러오는 중은 틀 + Skeleton, 목록 실패는 Result Section(다시 시도), 목록이 왔는데
+/// id 가 없으면 "자산을 찾을 수 없어요" + [자산으로]. 삭제는 머리 더보기 → Menu Sheet → 확인창 → 지우면 ← 와 같은 길.
+class AssetDetailScreen extends ConsumerStatefulWidget {
+  const AssetDetailScreen({super.key, required this.assetId});
+  final int assetId;
 
   @override
-  ConsumerState<_DetailFooter> createState() => _DetailFooterState();
+  ConsumerState<AssetDetailScreen> createState() => _AssetDetailScreenState();
 }
 
-class _DetailFooterState extends ConsumerState<_DetailFooter> {
+class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
   bool _deleting = false;
 
-  Future<void> _delete() async {
-    if (_deleting) return;
-    final asset = widget.asset;
-    // ds Alert Dialog — 밀기 삭제와 같은 부품 · 같은 글(I-17 32). 지우면 되돌릴 수 없으니 destructive.
+  void _back() {
+    final router = GoRouter.maybeOf(context);
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else if (router != null) {
+      // 주소로 바로 열었거나 앞 화면이 없다 — 자산 탭으로.
+      router.go('/expense?tab=assets');
+    }
+  }
+
+  Future<void> _openMenu(Asset asset) async {
     final l = AppLocalizations.of(context);
+    await PMenuSheet.show(
+      context,
+      semanticLabel: l.assetMoreOf(asset.assetName),
+      layout: PMenuSheetLayout.textWithIcon,
+      groups: [
+        PMenuSheetGroup([
+          PMenuSheetItem(
+            label: l.actionDelete,
+            icon: LucideIcons.trash2,
+            tone: PMenuSheetTone.critical,
+            onSelect: () => _delete(asset),
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Future<void> _delete(Asset asset) async {
+    if (_deleting || !mounted) return;
+    final l = AppLocalizations.of(context);
+    // ds Alert Dialog — 밀기 삭제와 같은 부품 · 같은 글(I-17 32). 지우면 되돌릴 수 없으니 destructive.
     final ok = await PAlertDialog.show(
       context,
       title: assetActions.deleteConfirmTitle(context, asset),
@@ -113,8 +141,20 @@ class _DetailFooterState extends ConsumerState<_DetailFooter> {
     setState(() => _deleting = true);
     try {
       final deleted = await assetActions.delete(context, ref, asset);
-      // 지워진 자산의 상세를 열어 둘 수 없다. 실패했으면 스낵바만 뜨고 시트는 남는다.
-      if (deleted && mounted) Navigator.of(context).pop();
+      if (!mounted) return;
+      if (deleted) {
+        // 지워진 자산의 상세를 열어 둘 수 없다 — ← 와 같은 길. 목록은 delete 가 이미 다시 받는다(8).
+        _back();
+        return;
+      }
+      // 확인창은 닫혔다 — 실패는 이 화면 안에서 보인다(전역 스낵바와 겹치지 않게 화면 스낵바 하나).
+      PSnackbar.maybeOf(context)?.show(
+        message: l.assetDetailDeleteFailed,
+        action: PSnackbarAction(
+          label: l.actionRetry,
+          onPressed: () => _delete(asset),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
@@ -122,19 +162,134 @@ class _DetailFooterState extends ConsumerState<_DetailFooter> {
 
   @override
   Widget build(BuildContext context) {
-    return PViewFooter(
-      onDelete: widget.allowDelete ? _delete : null,
-      deleting: _deleting,
-      onEdit: () {
-        Navigator.of(context).pop();
-        if (widget.onEdit != null) {
-          widget.onEdit!();
-        } else {
-          // 관리 화면 목록이 아니라 이 자산의 수정 폼으로 바로 간다(D9) —
-          // [잔액 고치기]와 같은 경로다.
-          pushAssetEdit(context, widget.asset.rowId);
-        }
-      },
+    final l = AppLocalizations.of(context);
+    final c = context.colors;
+    final async = ref.watch(assetsProvider);
+    final list = async.value;
+    final Asset? asset = list
+        ?.where((a) => a.rowId == widget.assetId)
+        .firstOrNull;
+    final loading = list == null && async.isLoading;
+    final failed = list == null && async.hasError;
+
+    final title = asset == null ? l.assetDetailTitle : _titleFor(l, asset);
+    final Widget body;
+    if (asset != null) {
+      body = _DetailBody(
+        asset: asset,
+        onEdit: () => showAssetEditForm(context, asset),
+      );
+    } else if (loading) {
+      body = const _DetailSkeleton();
+    } else if (failed) {
+      body = _DetailResult(
+        kind: PResultKind.failure,
+        title: l.assetLoadFailTitle,
+        description: l.dashFailDesc,
+        action: PResultAction(
+          label: l.actionRetry,
+          onPressed: () => ref.invalidate(assetsProvider),
+        ),
+      );
+    } else {
+      body = _DetailResult(
+        kind: PResultKind.empty,
+        title: l.assetNotFoundTitle,
+        description: l.assetNotFoundDesc,
+        action: PResultAction(
+          label: l.assetNotFoundAction,
+          onPressed: () {
+            final router = GoRouter.maybeOf(context);
+            if (router != null) {
+              router.go('/expense?tab=assets');
+            } else {
+              Navigator.of(context).maybePop();
+            }
+          },
+        ),
+      );
+    }
+
+    return Scaffold(
+      // 흰 면 하나(4-A) — 회색 바닥도 띠도 없다
+      backgroundColor: c.bgLayerDefault,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(PTopNavigation.heightOf(context)),
+        child: PTopNavigation(
+          title: title,
+          leading: PTopNavigationIconButton.back(
+            label: l.actionBack,
+            onPressed: _back,
+          ),
+          actions: asset == null
+              ? const []
+              : [
+                  PTopNavigationIconButton(
+                    icon: LucideIcons.pencil,
+                    label: l.actionEdit,
+                    onPressed: () => showAssetEditForm(context, asset),
+                  ),
+                  PTopNavigationIconButton(
+                    icon: LucideIcons.ellipsis,
+                    label: l.assetMoreOf(asset.assetName),
+                    onPressed: () {
+                      if (!_deleting) _openMenu(asset);
+                    },
+                  ),
+                ],
+        ),
+      ),
+      body: SafeArea(top: false, child: body),
+    );
+  }
+}
+
+class _DetailResult extends StatelessWidget {
+  const _DetailResult({
+    required this.kind,
+    required this.title,
+    required this.description,
+    required this.action,
+  });
+  final PResultKind kind;
+  final String title;
+  final String description;
+  final PResultAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: PResultSection(
+        kind: kind,
+        size: PResultSize.large,
+        title: title,
+        description: description,
+        primaryAction: action,
+      ),
+    );
+  }
+}
+
+/// 불러오는 중 — 틀은 그리고 머리 · 금액 · 구역 자리만 Skeleton.
+class _DetailSkeleton extends StatelessWidget {
+  const _DetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(PSpacing.x6, PSpacing.x4, PSpacing.x6, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          dsk.PSkeleton(width: 200, height: 48),
+          SizedBox(height: PSpacing.x4),
+          dsk.PSkeleton(width: 120, height: 20),
+          SizedBox(height: PSpacing.x2),
+          dsk.PSkeleton(width: 220, height: 32),
+          SizedBox(height: PSpacing.x6),
+          dsk.PSkeleton(width: double.infinity, height: 140),
+        ],
+      ),
     );
   }
 }
@@ -178,13 +333,8 @@ extension on _Period {
 }
 
 class _DetailBody extends ConsumerStatefulWidget {
-  const _DetailBody({
-    required this.asset,
-    required this.scrollController,
-    this.onEdit,
-  });
+  const _DetailBody({required this.asset, this.onEdit});
   final Asset asset;
-  final ScrollController scrollController;
   final VoidCallback? onEdit;
   @override
   ConsumerState<_DetailBody> createState() => _DetailBodyState();
@@ -296,7 +446,6 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     final isCredit = asset.assetType == 'CREDIT_CARD';
 
     return ListView(
-      controller: widget.scrollController,
       padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
       children: [
         _HeroCard(
@@ -318,7 +467,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
           ],
           if (isInv) ...[
             _InvChangeLine(assetRowId: asset.rowId, masked: masked),
-            _HoldingsSection(asset: asset, onEdit: widget.onEdit),
+            _HoldingsSection(asset: asset, masked: masked),
             const SizedBox(height: PSpace.x16),
           ],
 
@@ -381,10 +530,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               ),
               InkWell(
                 borderRadius: PRadius.brSm,
-                onTap: () {
-                  Navigator.of(context).pop();
-                  context.go('/expense?assetId=${asset.rowId}');
-                },
+                onTap: () => context.push('/expense?assetId=${asset.rowId}'),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,
@@ -477,9 +623,9 @@ class _InvChangeLine extends ConsumerWidget {
 /// linked: "N주 · 현재가 X 연동" + 등락% / manual: "직접 입력". 행 탭 → 편집.
 /// 레거시 단일 연동(tossSymbol/tossQuantity) 자산은 가상 1건으로 표시(편집에서 이관).
 class _HoldingsSection extends ConsumerWidget {
-  const _HoldingsSection({required this.asset, this.onEdit});
+  const _HoldingsSection({required this.asset, required this.masked});
   final Asset asset;
-  final VoidCallback? onEdit;
+  final bool masked;
 
   List<AssetHolding> get _holdings {
     if (asset.holdings.isNotEmpty) return asset.holdings;
@@ -580,24 +726,25 @@ class _HoldingsSection extends ConsumerWidget {
                       (holdings[i].tossSymbol?.isNotEmpty ?? false)
                   ? live?.prevUnitKrw(holdings[i].tossSymbol!)
                   : null,
-              onTap: onEdit,
             ),
 
         // 거래 내역 — 언제 사고 팔았는지, 실현손익이 얼마인지. 취소도 여기서.
-        _TradeHistory(assetRowId: asset.rowId),
+        _TradeHistory(assetRowId: asset.rowId, masked: masked),
       ],
     );
   }
 }
 
-/// 매수·매도 내역 — 취소하면 예수금·보유 수량·원가가 거래 전으로 돌아간다.
+/// 거래 기록 — 언제 사고 팔았는지. 줄을 누르면 거래 기록 상세 시트로 들어가고, 취소는 그 바닥 왼쪽 [거래 취소] 에서 한다
+/// (10-25 줄 끝 ⋮ 원칙 · 10-31 17-3 판정 50). 줄 끝에 ⋮ 도 휴지통도 두지 않는다.
 class _TradeHistory extends ConsumerWidget {
-  const _TradeHistory({required this.assetRowId});
+  const _TradeHistory({required this.assetRowId, required this.masked});
   final int assetRowId;
+  final bool masked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
     final trades = ref.watch(assetTradesProvider(assetRowId)).value ?? const [];
     if (trades.isEmpty) return const SizedBox.shrink();
@@ -605,104 +752,323 @@ class _TradeHistory extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: PSpace.x16),
-        Text(
-          l.tradeHistory,
-          style: PTypo.bodySm.copyWith(
-            color: t.fgPrimary,
-            fontWeight: PFontWeight.bold,
+        const SizedBox(height: PSpacing.x4),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: PSpacing.x2),
+          child: Text(
+            '${l.tradeHistory} · ${trades.length}',
+            style: PTypography.t4.copyWith(
+              color: c.fgNeutral,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         for (final tr in trades)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: PSpace.x8),
-            child: Row(
-              children: [
-                Text(
-                  tr.tradeType == 'SELL' ? l.tradeSell : l.tradeBuy,
-                  style: PTypo.micro.copyWith(
-                    color: tr.tradeType == 'SELL'
-                        ? t.fgBrand
-                        : t.statusDangerFg,
-                    fontWeight: PFontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: PSpace.x8),
-                Expanded(
-                  child: Text(
-                    tr.holdingKey,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: PTypo.bodySm.copyWith(color: t.fgPrimary),
-                  ),
-                ),
-                Text(
-                  '${tr.quantity ?? ''} · ${(tr.tradeDate ?? '').split('T').first}',
-                  style: PTypo.micro.copyWith(color: t.fgTertiary),
-                ),
-                const SizedBox(width: PSpace.x8),
-                Text(
-                  krwSigned(tr.amount ?? 0, false, unit: true),
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                  ),
-                ),
-                if (tr.realizedPl != null && tr.realizedPl != 0) ...[
-                  const SizedBox(width: PSpace.x8),
-                  Text(
-                    krwSigned(
-                      tr.realizedPl!.abs(),
-                      false,
-                      sign: tr.realizedPl! > 0 ? '+' : kMinus,
-                    ),
-                    style: PTypo.micro.copyWith(
-                      color: tr.realizedPl! > 0
-                          ? t.statusInfoFg
-                          : t.statusDangerFg,
-                      fontWeight: PFontWeight.bold,
-                    ),
-                  ),
-                ],
-                IconButton(
-                  icon: Icon(LucideIcons.trash2, size: 14, color: t.fgTertiary),
-                  visualDensity: VisualDensity.compact,
-                  tooltip: l.actionDelete,
-                  onPressed: () => _confirmDelete(context, ref, tr.rowId),
-                ),
-              ],
+          _TradeRow(
+            trade: tr,
+            masked: masked,
+            onTap: () => showTradeDetailSheet(
+              context,
+              trade: tr,
+              masked: masked,
+              assetRowId: assetRowId,
             ),
           ),
       ],
     );
   }
+}
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-    WidgetRef ref,
-    int rowId,
-  ) async {
+/// 거래 기록 줄 — 제목 "{매수 | 매도} · {종목} {수량}{단위}"(`fg-neutral`) · 설명 날짜(+ 매도 실현손익) · 뒤 금액(부호 없음).
+/// 보이는 줄 높이 46 이상, 누르는 칸은 줄 전체(≥ 44).
+class _TradeRow extends StatelessWidget {
+  const _TradeRow({
+    required this.trade,
+    required this.masked,
+    required this.onTap,
+  });
+  final AssetTrade trade;
+  final bool masked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
     final l = AppLocalizations.of(context);
-    // "삭제" 라벨은 자산 삭제와 헷갈린다 — 웹과 같은 "거래 취소" 로 통일한다.
-    final ok = await PAlertDialog.show(
-      context,
-      title: l.tradeDeleteTitle,
-      description: l.tradeDeleteConfirm,
-      actionLabel: l.tradeDeleteTitle,
-      destructive: true,
-      cancelLabel: l.actionCancel,
+    final tr = trade;
+    final title =
+        '${tradeKindLabel(l, tr)} · ${tr.holdingKey} ${tradeQtyText(l, tr)}';
+    final pl = tr.realizedPl;
+    final desc = [
+      tradeDateOnly(tr),
+      if (tr.tradeType == 'SELL' && pl != null && pl != 0)
+        masked ? '••••' : tradeSignedKrw(pl),
+    ].join(' · ');
+    return Semantics(
+      button: true,
+      label: l.tradeOpenRow(tradeDateOnly(tr), tr.holdingKey),
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 46),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: PSpacing.x2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: PTypography.t5.copyWith(color: c.fgNeutral),
+                      ),
+                      Text(
+                        desc,
+                        style: PTypography.t3.copyWith(
+                          color: c.fgNeutralSubtle,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: PSpacing.x3),
+                Text(
+                  masked ? '••••' : '${krw(tr.amount ?? 0)}${wonUnit()}',
+                  textAlign: TextAlign.end,
+                  style: PTypography.t5.copyWith(
+                    color: c.fgNeutral,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
-    if (!ok || !context.mounted) return;
-    try {
-      final repo = await ref.read(assetRepositoryProvider.future);
-      await repo.deleteTrade(rowId);
-      // 예수금·평가액이 되돌아간다 — 순자산·추이까지 다시 받는다.
-      invalidateAfterAssetChange(ref);
-      ref.invalidate(assetTradesProvider(assetRowId));
-      if (!context.mounted) return;
-    } on ApiException {
-      if (!context.mounted) return;
+  }
+}
+
+String tradeKindLabel(AppLocalizations l, AssetTrade tr) =>
+    tr.tradeType == 'SELL' ? l.tradeSell : l.tradeBuy;
+
+String tradeDateOnly(AssetTrade tr) => (tr.tradeDate ?? '').split('T').first;
+
+/// "2026-10-19 09:30" — 날짜 + 시각(초 아래는 자른다).
+String tradeDateTimeText(AssetTrade tr) {
+  final raw = tr.tradeDate ?? '';
+  final text = raw.length >= 16
+      ? raw.substring(0, 16).replaceFirst('T', ' ')
+      : raw;
+  // 날짜 한가운데서 줄이 바뀌지 않게 — 하이픈 뒤 줄바꿈을 막는다(날짜 · 시각 사이 공백에서만 바뀐다).
+  return text.replaceAll('-', '-\u2060');
+}
+
+String tradeQtyText(AppLocalizations l, AssetTrade tr) {
+  final type = AssetHoldingType.values.firstWhere(
+    (t) => t.wire == tr.holdingType,
+    orElse: () => AssetHoldingType.stock,
+  );
+  return '${formatHoldingQty(tr.quantity, type)}${holdingUnitLabel(l, type)}';
+}
+
+String tradeSignedKrw(int v) =>
+    '${v > 0 ? '+' : kMinus}${krw(v.abs())}${wonUnit()}';
+
+/// 키-값 줄(I-17 45) — 키 t5 `fg-neutral`, 값 t5 `fg-neutral-muted` **줄 끝 오른쪽 맞춤**(몇 줄이든 end). 값이 없으면 그리지
+/// 않는다. 보이는 줄 높이 46(22 + 위아래 12), 조회 줄이라 눌림은 없다. 웹 21-1 `KvRow` 와 이름 · props 가 같다.
+class KvRow extends StatelessWidget {
+  const KvRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.inset = PSpacing.x6,
+  });
+  final String label;
+  final String? value;
+
+  /// 좌우 여백 — 시트 안은 24, 이미 24 안쪽에 선 페이지 본문은 0.
+  final double inset;
+
+  @override
+  Widget build(BuildContext context) {
+    final v = value;
+    if (v == null || v.isEmpty) return const SizedBox.shrink();
+    final c = context.colors;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: inset, vertical: PSpacing.x3),
+      child: LayoutBuilder(
+        builder: (context, box) => Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: box.maxWidth * 0.4),
+              child: Text(
+                label,
+                style: PTypography.t5.copyWith(color: c.fgNeutral),
+              ),
+            ),
+            const SizedBox(width: PSpacing.x4),
+            Expanded(
+              child: Text(
+                v,
+                textAlign: TextAlign.end,
+                style: PTypography.t5.copyWith(
+                  color: c.fgNeutralMuted,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 거래 기록 상세 시트 — 종류 · 종목 · 수량 · 단가 · 거래대금 · (수수료) · (매도 실현손익) · 일시 키-값 줄, ⋮ 없음.
+/// 조회라 바깥 · 끌기로 닫힌다. 바닥 왼쪽 [거래 취소] ghost critical → 시트를 닫고 확인창(critical, 글에 대상을 넣음).
+Future<void> showTradeDetailSheet(
+  BuildContext context, {
+  required AssetTrade trade,
+  required bool masked,
+  required int assetRowId,
+}) async {
+  final l = AppLocalizations.of(context);
+  final cancel = await PBottomSheet.show<bool>(
+    context,
+    builder: (sheetContext) => TradeDetailBody(
+      trade: trade,
+      masked: masked,
+      onCancelTrade: () => PBottomSheet.of(sheetContext).close(true),
+    ),
+  );
+  if (cancel != true || !context.mounted) return;
+  final ok = await PAlertDialog.show(
+    context,
+    title: l.tradeDeleteTitle,
+    description: l.tradeDeleteConfirmTarget(
+      tradeDateOnly(trade),
+      trade.holdingKey,
+      tradeQtyText(l, trade),
+      tradeKindLabel(l, trade),
+    ),
+    cancelLabel: l.actionCancel,
+    actionLabel: l.tradeDeleteTitle,
+    destructive: true,
+  );
+  if (!ok || !context.mounted) return;
+  await cancelTrade(context, trade: trade, assetRowId: assetRowId);
+}
+
+/// 거래 취소 요청 — 취소 뒤 목록을 다시 받는다(8). 실패는 화면 스낵바 + [다시 시도](확인창은 이미 닫혔다).
+Future<void> cancelTrade(
+  BuildContext context, {
+  required AssetTrade trade,
+  required int assetRowId,
+}) async {
+  final l = AppLocalizations.of(context);
+  final container = ProviderScope.containerOf(context);
+  final snack = PSnackbar.maybeOf(context);
+  try {
+    final repo = await container.read(assetRepositoryProvider.future);
+    await repo.deleteTrade(trade.rowId);
+    // 예수금·평가액이 되돌아간다 — 순자산·추이까지 다시 받는다.
+    for (final p in <ProviderOrFamily>[
+      assetsProvider,
+      assetSummaryProvider,
+      netWorthTrendProvider,
+      assetByIdProvider,
+      cardBillingProvider,
+      cardPerformanceProvider,
+      investmentValuationMapProvider,
+    ]) {
+      container.invalidate(p);
     }
+    container.invalidate(assetTradesProvider(assetRowId));
+    snack?.show(message: l.tradeDeleted);
+  } on ApiException {
+    snack?.show(
+      message: l.tradeCancelFailed,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () {
+          if (context.mounted) {
+            cancelTrade(context, trade: trade, assetRowId: assetRowId);
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// 거래 기록 상세 본문 — 시트가 감싼다(카탈로그 · 렌더도 이것을 직접 부른다).
+class TradeDetailBody extends StatelessWidget {
+  const TradeDetailBody({
+    super.key,
+    required this.trade,
+    required this.masked,
+    required this.onCancelTrade,
+  });
+  final AssetTrade trade;
+  final bool masked;
+  final VoidCallback onCancelTrade;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final tr = trade;
+    final sell = tr.tradeType == 'SELL';
+    final qtyValue = double.tryParse((tr.quantity ?? '').replaceAll(',', ''));
+    final amount = tr.amount ?? 0;
+    final unit = (qtyValue != null && qtyValue > 0)
+        ? (amount / qtyValue).round()
+        : null;
+    String money(int v) => masked ? '••••' : '${krw(v)}${wonUnit()}';
+    final pl = tr.realizedPl;
+    return PBottomSheetContent(
+      title: l.tradeDetailTitle,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          KvRow(label: l.tradeKind, value: tradeKindLabel(l, tr)),
+          KvRow(label: l.tradeHoldingLabel, value: tr.holdingKey),
+          KvRow(label: l.tradeQuantity, value: tradeQtyText(l, tr)),
+          KvRow(
+            label: l.tradeUnitPrice,
+            value: unit == null ? null : money(unit),
+          ),
+          KvRow(label: l.tradeAmountLabel, value: money(amount)),
+          KvRow(
+            label: l.tradeFeeLabel,
+            value: (tr.fee ?? 0) > 0 ? money(tr.fee!) : null,
+          ),
+          KvRow(
+            label: l.tradeRealizedPreview,
+            value: sell && pl != null && pl != 0
+                ? (masked ? '••••' : tradeSignedKrw(pl))
+                : null,
+          ),
+          KvRow(label: l.tradeDateTime, value: tradeDateTimeText(tr)),
+        ],
+      ),
+      footerRow: Align(
+        alignment: Alignment.centerLeft,
+        child: dsb.PButton(
+          label: l.tradeDeleteTitle,
+          variant: dsb.PButtonVariant.ghost,
+          ghostColor: dsb.PButtonGhostColor.critical,
+          size: dsb.PButtonSize.large,
+          onPressed: onCancelTrade,
+        ),
+      ),
+    );
   }
 }
 
@@ -714,7 +1080,6 @@ class _HoldingRow extends ConsumerWidget {
     required this.unitKrw,
     required this.rawPrice,
     required this.prevUnitKrw,
-    this.onTap,
     this.onTrade,
   });
   final AssetHolding holding;
@@ -724,7 +1089,6 @@ class _HoldingRow extends ConsumerWidget {
   /// 전일 종가의 KRW 환산가 — 등락 표시 전용. 부모가 livePricesProvider 에서 받아 넘긴다.
   /// 행에서 직접 캔들을 부르면 나무 사용자에게 종목 수만큼 403 이 나간다.
   final double? prevUnitKrw;
-  final VoidCallback? onTap;
 
   /// 이 종목에 대한 매수·매도. 종목이 정해진 자리라 시트에서 다시 고를 필요가 없다.
   final ValueChanged<String>? onTrade;
@@ -776,8 +1140,9 @@ class _HoldingRow extends ConsumerWidget {
       pct = (unitKrw! - prevUnitKrw!) / prevUnitKrw! * 100;
     }
 
-    return InkWell(
-      onTap: onTap,
+    return DecoratedBox(
+      position: DecorationPosition.background,
+      decoration: const BoxDecoration(),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: PSpace.x12),
         decoration: BoxDecoration(
@@ -838,8 +1203,7 @@ class _HoldingRow extends ConsumerWidget {
             ),
             // 매수·매도는 상세를 어디서 열었든 가능해야 한다 — 편집 진입(onTap)
             // 여부에 묶으면 자산 화면에서 연 상세만 매매가 막힌다(웹은 된다).
-            if (onTrade != null || onTap != null)
-              const SizedBox(width: PSpace.x8),
+            if (onTrade != null) const SizedBox(width: PSpace.x8),
             if (onTrade != null) ...[
               PButton(
                 label: l.tradeBuy,
@@ -854,8 +1218,6 @@ class _HoldingRow extends ConsumerWidget {
                 onPressed: () => onTrade!('SELL'),
               ),
             ],
-            if (onTap != null)
-              Icon(LucideIcons.chevronRight, size: 15, color: t.fgTertiary),
           ],
         ),
       ),
@@ -883,7 +1245,6 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
     final subtitle = [
       asset.institution,
@@ -906,46 +1267,39 @@ class _HeroCard extends StatelessWidget {
         : heroIsCard
         ? rawBalance.abs()
         : rawBalance;
-    // 플랫 히어로(design 신판) — 그라데이션 카드 제거, 이름 행 아래 구분선만.
+    // 머리(45) — Logo 48 + 오른쪽 12 + 이름 t6 700 줄바꿈 + 설명 t3 `fg-neutral-subtle`. 구분선 · 띠를 두지 않는다.
+    final c = context.colors;
+    final amountText = masked
+        ? '••••••'
+        : '${heroBalance < 0 ? kMinus : ''}${krw(heroBalance.abs())}${wonUnit()}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.only(bottom: 14),
-          margin: EdgeInsets.only(bottom: nameRowOnly ? 0 : 14),
-          decoration: nameRowOnly
-              ? null
-              : BoxDecoration(
-                  border: Border(bottom: BorderSide(color: t.borderSubtle)),
-                ),
+        Padding(
+          padding: const EdgeInsets.only(top: PSpacing.x4, bottom: PSpacing.x2),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // web hero 정합 — 타입 글리프 대신 AssetLogo 모노그램 (icon 제거 마이그 잔재 정리)
               AssetLogo(asset: asset, size: 48),
-              const SizedBox(width: 14),
+              const SizedBox(width: PSpacing.x3),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       asset.assetName,
-                      style: PTypo.h3.copyWith(
-                        color: t.fgPrimary,
-                        fontWeight: PFontWeight.bold,
-                        letterSpacing: -0.4,
+                      style: PTypography.t6.copyWith(
+                        color: c.fgNeutral,
+                        fontWeight: FontWeight.w700,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 2),
+                    if (subtitle.isNotEmpty)
                       Text(
                         subtitle,
-                        style: PTypo.bodySm.copyWith(color: t.fgTertiary),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        style: PTypography.t3.copyWith(
+                          color: c.fgNeutralSubtle,
+                        ),
                       ),
-                    ],
                   ],
                 ),
               ),
@@ -953,52 +1307,41 @@ class _HeroCard extends StatelessWidget {
           ),
         ),
         if (!nameRowOnly) ...[
+          const SizedBox(height: PSpacing.x3),
           Text(
             valueLabel,
-            style: PTypo.micro.copyWith(
-              color: t.fgTertiary,
-              fontWeight: PFontWeight.semi,
-              letterSpacing: 0.4,
+            style: PTypography.t3.copyWith(
+              color: c.fgNeutralSubtle,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
-          // 큰 금액 — 숫자/원 분리해서 원 폰트만 작게.
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  // 카드는 부호 없이 중립색 — 결제 예정 금액 표기(사용자 결정).
-                  // 그 밖은 마이너스면 그대로 보여 준다.
-                  text: masked
-                      ? '••••••'
-                      : (heroBalance < 0
-                            ? '−${krw(heroBalance.abs())}'
-                            : krw(heroBalance)),
-                  style: PTypo.h1.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                    letterSpacing: -0.6,
-                  ),
-                ),
-                if (!masked)
-                  TextSpan(
-                    text: wonUnit(),
-                    style: PTypo.body.copyWith(
-                      color: t.fgPrimary,
-                      fontWeight: PFontWeight.bold,
-                    ),
-                  ),
-              ],
+          const SizedBox(height: PSpacing.x1),
+          // 금액 R13 — t9 24/32 · 700 · 고정폭 · 원까지 · 빼기 U+2212. 한 줄에 못 들어가면 쉼표 뒤에서만 줄을 바꾼다.
+          Text(
+            amountText,
+            style: PTypography.t9.copyWith(
+              color: c.fgNeutral,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
-          // 예수금·평가금액 — 실제 증권 계좌처럼 나눠 보여 준다(예수금이 있을 때만).
+          // 예수금 · 평가금액 — 키-값 줄 둘(예수금이 있을 때만).
           if (asset.assetType == 'INVESTMENT' &&
               (asset.cashBalance ?? 0) != 0) ...[
-            const SizedBox(height: PSpace.x8),
-            Text(
-              '${l.assetCashBalance} ${masked ? '••••••' : krw(asset.cashBalance!)}'
-              ' · ${l.assetHoldingBalance} ${masked ? '••••••' : krw(asset.holdingBalance ?? 0)}',
-              style: PTypo.caption.copyWith(color: t.fgTertiary),
+            const SizedBox(height: PSpacing.x2),
+            KvRow(
+              inset: 0,
+              label: l.assetCashBalance,
+              value: masked
+                  ? '••••••'
+                  : '${krw(asset.cashBalance!)}${wonUnit()}',
+            ),
+            KvRow(
+              inset: 0,
+              label: l.assetHoldingBalance,
+              value: masked
+                  ? '••••••'
+                  : '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
             ),
           ],
         ],
@@ -2088,13 +2431,12 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     }
   }
 
+  /// 페이지 위에서 수정 폼 2단계를 연다(39) — 화면을 옮기지 않는다.
   void _goEdit() {
-    Navigator.of(context).pop();
     if (widget.onEdit != null) {
       widget.onEdit!();
     } else {
-      // 상세 [수정]과 같은 경로 — 이 카드의 수정 폼으로 바로 간다(D9).
-      pushAssetEdit(context, widget.asset.rowId);
+      showAssetEditForm(context, widget.asset);
     }
   }
 
@@ -2943,10 +3285,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                   const Spacer(),
                   InkWell(
                     borderRadius: PRadius.brSm,
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.go('/expense?assetId=${asset.rowId}');
-                    },
+                    onTap: () =>
+                        context.push('/expense?assetId=${asset.rowId}'),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,

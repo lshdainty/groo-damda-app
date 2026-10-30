@@ -410,6 +410,56 @@
   "tradeDeleted": "거래를 취소했어요",
   "tradeDeleteTitle": "거래 취소",
   "tradeDeleteConfirm": "이 거래를 취소하시겠어요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
+  "assetDetailTitle": "자산 상세",
+  "assetNotFoundTitle": "자산을 찾을 수 없어요",
+  "assetDetailDeleteFailed": "자산을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "assetNotFoundDesc": "지웠거나 없는 자산이에요.",
+  "assetNotFoundAction": "자산으로",
+  "assetLoadFailTitle": "자산을 불러오지 못했어요",
+  "assetMoreOf": "{name} 더보기",
+  "@assetMoreOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeDetailTitle": "거래 기록",
+  "tradeKind": "종류",
+  "tradeHoldingLabel": "종목",
+  "tradeUnitPrice": "단가",
+  "tradeAmountLabel": "거래대금",
+  "tradeFeeLabel": "수수료 · 세금",
+  "tradeDateTime": "거래 일시",
+  "tradeOpenRow": "{date} {name} 거래 기록",
+  "@tradeOpenRow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeDeleteConfirmTarget": "{date} {name} {qty} {kind} 거래를 취소할까요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
+  "@tradeDeleteConfirmTarget": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeCancelFailed": "거래를 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "holdingTypeStock": "주식",
   "holdingTypeGold": "금",
   "holdingTypeCrypto": "코인",
