@@ -27,7 +27,8 @@ class MemoRow extends StatelessWidget {
     final c = context.colors;
     final l = AppLocalizations.of(context);
     final hasTitle = (memo.title ?? '').isNotEmpty;
-    final content = (memo.content ?? '').trim();
+    // 줄바꿈 · 연속 공백은 공백 하나로 이어 한 줄 말줄임(웹과 같은 규칙) — 첫 줄만 보이지 않는다
+    final content = memoPreview(memo.content);
     final stamp = formatMemoStamp(memo.modifyAt);
     return PListButtonItem(
       align: PListAlign.top,

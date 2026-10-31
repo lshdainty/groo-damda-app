@@ -235,6 +235,18 @@ void main() {
     expect(r.left, greaterThanOrEqualTo(0));
   });
 
+  testWidgets('본문 미리보기 — 줄바꿈 · 앞 빈 줄은 공백 하나로 이어 한 줄(첫 줄이 비어도 "둘째 줄" 이 보인다)', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      memos: [_m(1, '메모', '\n\n둘째 줄\n셋째 줄', null, null, '$_y-10-22T08:10:00')],
+    );
+    final body = tester.widget<Text>(find.byKey(const ValueKey('memo-body')));
+    expect(body.semanticsLabel, '둘째 줄 셋째 줄');
+    expect(body.maxLines, 1);
+  });
+
   testWidgets('묶음 제목 "고정 · 2" · "모든 메모 · 4" · 줄 6 · 고정 0이면 "모든 메모" 제목이 없다', (
     tester,
   ) async {
