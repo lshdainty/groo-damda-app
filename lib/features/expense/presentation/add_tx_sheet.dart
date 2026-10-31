@@ -1701,9 +1701,13 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       CalendarStepDone(label: l.actionDone, onPressed: _doneSub);
 
   /// 저장 실패 Callout — 폼 맨 위(우리 글).
+  /// 맨 위 저장 실패 Callout — 좌우 24 · 위 12 · **아래 20**(14-1 비밀번호와 같다, 아래 칩 · 칸에 닿지 않게).
   Widget _failureCallout() => _saveError == null
       ? const SizedBox.shrink()
-      : CalendarSaveErrorCallout(message: _saveError!);
+      : Padding(
+          padding: const EdgeInsets.only(bottom: PSpacing.x5),
+          child: CalendarSaveErrorCallout(message: _saveError!),
+        );
 
   Widget _currencyChip(AppLocalizations l) {
     final c = _input;
@@ -1883,9 +1887,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       // 목록에 없는 값 — 거래에서 읽어 온 기록은 유지하고 "지운 계좌" 로 보인다(본문은 지금 id 그대로, N4)
       return a == null
           ? (assetsAsync.hasValue ? l.txfDeletedAsset : '')
-          : (a.institution != null && a.institution!.isNotEmpty
-                ? '${a.institution} · ${a.assetName}'
-                : a.assetName);
+          // 수정 폼의 계좌·카드 값은 이름만(기관은 고르기 시트 줄의 설명에 있다)
+          : a.assetName;
     }
 
     final dayText = formatDateValue(c.date, calendarNow());

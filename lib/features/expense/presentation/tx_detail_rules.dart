@@ -46,14 +46,16 @@ String? txPaymentMethodLabel(AppLocalizations l, String? m) => switch (m) {
   _ => null,
 };
 
-/// 계좌·카드 줄의 값 — "{기관} · {이름}". 못 찾으면 거래가 든 이름.
+/// 계좌·카드 줄의 값 — "{기관} · {이름}"(기관과 이름이 같으면 한 번만). 못 찾으면 거래가 든 이름.
 String? txAssetLabel({
   required String? institution,
   required String? assetName,
   required String? fallbackName,
 }) {
   if (assetName == null) return fallbackName;
-  return institution != null && institution.isNotEmpty
+  return institution != null &&
+          institution.isNotEmpty &&
+          institution != assetName
       ? '$institution · $assetName'
       : assetName;
 }
