@@ -181,11 +181,11 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 머리 — 타일 48 + 이름(t7 · 700 · 줄바꿈), 사이 12 · 위 4 · 아래 8(T16)
+          // 머리 — 타일 48 + 이름(t7 · 700 · 줄바꿈), 사이 12 · 위 0(머리 아래 16 에서 바로) · 아래 8(T16)
           Padding(
             padding: const EdgeInsets.fromLTRB(
               PSpacing.globalGutter,
-              PSpacing.x1,
+              0,
               PSpacing.globalGutter,
               PSpacing.x2,
             ),

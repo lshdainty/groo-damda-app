@@ -680,9 +680,10 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
   }
 
   Widget _buildStep(AppLocalizations l) {
+    // 머리 아래 16 에서 바로 첫 칸 — 본문 위 여백을 더하지 않는다(제목 줄 하단 → 입력 상자 위 끝 16, 라벨이 있으면 라벨 위 끝)
     const gutter = EdgeInsets.fromLTRB(
       PSpacing.globalGutter,
-      PSpacing.x3,
+      0,
       PSpacing.globalGutter,
       PSpacing.x2,
     );
