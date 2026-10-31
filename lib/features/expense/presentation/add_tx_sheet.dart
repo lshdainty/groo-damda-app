@@ -440,7 +440,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     }
   }
 
-  bool _dirty() => _sig(_input) != _initialSig;
+  /// 저장 중에 닫으면 저장 결과(onSaved · 알림)를 잃는다 — 저장 중에는 바뀐 값으로 보아 닫기 전에 묻는다(L1).
+  bool _dirty() => _submitting || _sig(_input) != _initialSig;
 
   // ── 단계 ────────────────────────────────────────────────
   /// 기기 뒤로 가기 · Esc — 한 단계 안이면 그 단계만, 2단계면 1단계로(값은 버리지 않는다). 처음 단계면 시트의 닫는 길이 이어받는다.
@@ -1526,7 +1527,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _seed();
       _reconciledSplits = null;
       _errs = _Errs();
-      _saveError = null;
+      _saveError = null; // 지난 저장 실패를 새 모드로 끌고 가지 않는다(N6)
+      _smsLow = false;
+      _presetSaveError = null;
       _step = _S.two;
     });
   }
@@ -2066,6 +2069,16 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 locked: locked,
                 onTap: () => _pickAsset(income: isIncome),
               ),
+              // 문자 카드 기억 — 계좌·카드 줄 바로 아래(지시서 D 22), 계좌를 고르기 전에는 막힌 줄
+              if (c.smsRememberAsk)
+                PListCheckItem(
+                  key: const ValueKey('tx-sms-remember'),
+                  title: l.smsRememberCard,
+                  checked: c.assetRowId != null && c.smsRememberCard,
+                  onChanged: c.assetRowId == null
+                      ? null
+                      : (v) => setState(() => c.smsRememberCard = v),
+                ),
               TxRow(
                 key: const ValueKey('tx-row-method'),
                 title: isIncome ? l.expIncomeMethod : l.expPaymentMethod,
@@ -2094,16 +2107,6 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                       : l.expLumpSum,
                   locked: locked,
                   onTap: _pickInstallment,
-                ),
-              // 문자 카드 기억 — 계좌를 고르기 전에는 막힌 줄
-              if (c.smsRememberAsk)
-                PListCheckItem(
-                  key: const ValueKey('tx-sms-remember'),
-                  title: l.smsRememberCard,
-                  checked: c.assetRowId != null && c.smsRememberCard,
-                  onChanged: c.assetRowId == null
-                      ? null
-                      : (v) => setState(() => c.smsRememberCard = v),
                 ),
             ] else ...[
               TxRow(

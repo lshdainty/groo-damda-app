@@ -83,6 +83,29 @@ const _card = Asset(
   isIncludedInTotal: 'Y',
 );
 
+const _closedCard = Asset(
+  rowId: 13,
+  assetName: '삼성카드',
+  assetType: 'CREDIT_CARD',
+  balance: -1000,
+  paymentDay: 12,
+  paymentAssetRowId: 10,
+  cardClosedThrough: '2026-10-31',
+  isIncludedInTotal: 'Y',
+);
+
+const _lockedTx = Expense(
+  rowId: 79,
+  categoryRowId: 5,
+  assetRowId: 13,
+  expenseType: 'EXPENSE',
+  amount: 40000,
+  expenseDate: '2026-10-20T12:00:00',
+  merchant: '버스',
+  paymentMethod: 'CARD',
+  moneyLocked: true,
+);
+
 const _installTx = Expense(
   rowId: 78,
   categoryRowId: 5,
@@ -617,5 +640,33 @@ void main() {
     late.complete([_bank, _loan]);
     await tester.pumpAndSettle();
     expect(repo.updates, hasLength(1));
+  });
+
+  testWidgets('N6 — [고쳐 쓰기] 로 갈아 끼우면 지난 저장 실패 Callout 이 사라진다', (tester) async {
+    final repo = await _open(tester, (c) => showAddTxSheet(c, edit: _lockedTx));
+    repo.fail = true;
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+
+    await tester.tap(find.text('고쳐 쓰기'));
+    await tester.pumpAndSettle();
+    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsNothing);
+  });
+
+  testWidgets('L1 — 저장 중 닫기 원을 누르면 바로 닫지 않고 묻는다', (tester) async {
+    final late = Completer<List<Asset>>();
+    await _open(
+      tester,
+      (c) => showAddTxSheet(c, edit: _foreignTx),
+      assetsLate: late.future,
+    );
+    await tester.tap(find.text('저장'));
+    await tester.pump();
+    await tester.tap(find.bySemanticsLabel('닫기').first);
+    await tester.pumpAndSettle();
+    expect(find.text('작성한 내용이 사라져요'), findsOneWidget);
+    late.complete([_bank, _loan, _card]);
+    await tester.pumpAndSettle();
   });
 }
