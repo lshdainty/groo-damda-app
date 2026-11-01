@@ -110,7 +110,7 @@ fvm flutter build apk --release --dart-define-from-file=config/prod.json    # pr
 
 - **로컬 도커**(`config/local.json`)는 `http://localhost:8002`. 단 실기기는 localhost=폰 자신이라 못 닿으니
   PC LAN IP(예: `http://192.168.0.x:8002`), Android 에뮬레이터는 `http://10.0.2.2:8002`로 바꿔 씁니다.
-- **dev**: `https://desk-dev.porest.cloud:10443` / SSO `https://sso-dev.porest.cloud:10443`
+- **dev**: `https://damda-dev.hangroo.io` / SSO `https://sso-dev.hangroo.io`
 - **prod**: `https://desk.porest.cloud` / SSO `https://sso.porest.cloud`
 
 ### 다국어 (i18n)

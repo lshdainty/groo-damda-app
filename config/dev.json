@@ -1,6 +1,6 @@
 {
   "APP_ENV": "dev",
-  "API_BASE": "https://desk-dev.porest.cloud:10443",
-  "SSO_URL": "https://sso-dev.porest.cloud:10443",
-  "WEB_BASE_URL": "https://desk-dev.porest.cloud:10443"
+  "API_BASE": "https://damda-dev.hangroo.io",
+  "SSO_URL": "https://sso-dev.hangroo.io",
+  "WEB_BASE_URL": "https://damda-dev.hangroo.io"
 }
