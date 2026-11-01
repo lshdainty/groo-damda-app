@@ -27,7 +27,12 @@ const _item = WatchItem(
 );
 
 final _groups = [
-  const StockWatchGroup(rowId: 1, groupName: '관심', sortOrder: 0, items: [_item, _item]),
+  const StockWatchGroup(
+    rowId: 1,
+    groupName: '관심',
+    sortOrder: 0,
+    items: [_item, _item],
+  ),
   const StockWatchGroup(rowId: 2, groupName: '배당주', sortOrder: 1, items: []),
 ];
 
@@ -47,11 +52,14 @@ class _Repo extends StocksRepository {
 }
 
 Finder _plainText(String s) => find.byWidgetPredicate(
-  (w) => w is Text && (w.data ?? '').replaceAll('⁠', '').replaceAll('​', '') == s,
+  (w) =>
+      w is Text && (w.data ?? '').replaceAll('⁠', '').replaceAll('​', '') == s,
 );
 
 void main() {
-  testWidgets('그룹이 둘이면 고르기 시트가 열리고 이름 · 개수 줄 + scrollFog, 고른 그룹에 담긴다', (tester) async {
+  testWidgets('그룹이 둘이면 고르기 시트가 열리고 이름 · 개수 줄 + scrollFog, 고른 그룹에 담긴다', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
