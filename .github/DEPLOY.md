@@ -117,7 +117,7 @@ groovy 를 붙여넣으면 고칠 때마다 두 곳을 맞춰야 하고, 한쪽�
 | Script Path | `Jenkinsfile` |
 
 웹훅 트리거(`GenericTrigger`)도 Jenkinsfile 안에 선언돼 있다. 토큰은
-`porest-desk-app-deploy`, Actions 가 보내는 JSON 본문에서 `$.channel`·`$.version` 을
+`groo-damda-app-deploy`, Actions 가 보내는 JSON 본문에서 `$.channel`·`$.version` 을
 읽는다. **다만 Jenkinsfile 의 `triggers` 는 한 번 실행돼야 Jenkins 에 등록된다** —
 job 을 만든 직후 수동으로 한 번 돌려 주면 그다음부터 웹훅이 걸린다.
 

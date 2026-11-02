@@ -141,11 +141,11 @@ fvm flutter build apk --release --dart-define-from-file=config/prod.json    # pr
 | Repository | Description |
 |------------|-------------|
 | [그루](https://github.com/lshdainty/groo) | 통합 레포지토리 (서비스 소개) |
-| [porest-desk-back](https://github.com/lshdainty/groo-damda-back) | Desk 백엔드 (REST API) |
-| [porest-desk-front](https://github.com/lshdainty/groo-damda-front) | Desk 웹 프론트엔드 |
+| [groo-damda-back](https://github.com/lshdainty/groo-damda-back) | Desk 백엔드 (REST API) |
+| [groo-damda-front](https://github.com/lshdainty/groo-damda-front) | Desk 웹 프론트엔드 |
 | [groo-core](https://github.com/lshdainty/groo-core) | 공통 라이브러리 |
-| [porest-sso-back](https://github.com/lshdainty/groo-sso-back) | SSO 백엔드 |
-| [porest-sso-front](https://github.com/lshdainty/groo-sso-front) | SSO 프론트엔드 |
+| [groo-sso-back](https://github.com/lshdainty/groo-sso-back) | SSO 백엔드 |
+| [groo-sso-front](https://github.com/lshdainty/groo-sso-front) | SSO 프론트엔드 |
 
 ---
 

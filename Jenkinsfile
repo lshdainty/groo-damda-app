@@ -1,4 +1,4 @@
-// porest-desk-app 배포 — 다른 groo 레포와 같이 Jenkinsfile 을 레포에 둔다.
+// groo-damda-app 배포 — 다른 groo 레포와 같이 Jenkinsfile 을 레포에 둔다.
 //
 // 다른 레포와 다른 점이 하나 있다. 앱은 여기서 빌드하지 않는다.
 // APK 는 안드로이드 SDK, IPA 는 macOS 러너가 필요해서 GitHub Actions 가 빌드하고
