@@ -86,7 +86,7 @@ pipeline {
     environment {
         // 다른 레포와 같은 전역변수를 쓴다. Jenkins 전역 설정에서 한 번만 정한다.
         APK_BASE_PATH = "${env.POREST_BASE_DIR}/apk"
-        APK_REPO = 'lshdainty/porest-desk-app'
+        APK_REPO = 'lshdainty/groo-damda-app'
     }
 
     stages {
