@@ -223,7 +223,7 @@ dev·prod 가 각자 소스를 가진다. 서버 블록마다 `/download/` 가 �
 직접 적지 않고 `config/{dev,prod}.json` 의 `WEB_BASE_URL` 을 읽는다 — 앱이 API 주소로
 쓰는 그 값이라 한쪽만 바뀌어 어긋날 일이 없다.
 
-    dev   https://desk-dev.porest.cloud:10443/download/altstore.json
+    dev   https://damda-dev.hangroo.io/download/altstore.json
     prod  https://desk.porest.cloud/download/altstore.json
 
 `iconURL` 은 `{WEB_BASE_URL}/app-icon.png` 다. 웹 프론트의 `public/app-icon.png` 라서
@@ -260,4 +260,4 @@ Xcode 로 깔아 둔 게 있으면 **홈 화면에 아이콘이 두 개 생긴�
 이어야 진짜다.
 
     curl -sk -o /dev/null -w "%{http_code} %{content_type}\n" \
-      https://desk-dev.porest.cloud:10443/download/version.json
+      https://damda-dev.hangroo.io/download/version.json
