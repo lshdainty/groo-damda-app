@@ -237,4 +237,4 @@ fvm flutter test
 - Git 컨벤션: `groo-design/GIT_CONVENTION.md`
 - spec 일람: `groo-design/specs/components/*.md`
 - DESIGN prose: `groo-design/DESIGN.md` (공유) / `groo-design/DESIGN.desk.md` (Desk 전용)
-- desk-front (React 미러): `porest-desk-front/CLAUDE.md`
+- desk-front (React 미러): `groo-damda-front/CLAUDE.md`
