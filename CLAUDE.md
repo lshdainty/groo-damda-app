@@ -176,11 +176,11 @@ build-ios:
 머지한 뒤 그 머지 커밋의 main 실행을 **반드시 확인하고 결과를 보고한다.**
 
 ```bash
-gh run list --repo lshdainty/porest-desk-app --branch main --limit 3 \
+gh run list --repo lshdainty/groo-damda-app --branch main --limit 3 \
   --json conclusion,displayTitle --jq '.[] | "\(.conclusion // "진행중")  \(.displayTitle)"'
 
 # 실패했으면 어디서 깨졌는지
-gh run view <runId> --repo lshdainty/porest-desk-app --log-failed | tail -60
+gh run view <runId> --repo lshdainty/groo-damda-app --log-failed | tail -60
 ```
 
 실패하면 **그 자리에서 고친다.** 다음 작업으로 넘어가지 않는다 — 빨간 main 위에

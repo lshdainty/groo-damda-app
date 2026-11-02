@@ -15,7 +15,7 @@ set -euo pipefail
 CHANNEL="${1:?channel(dev|prod) 이 필요합니다}"
 VERSION="${2:?version(X.Y.Z) 이 필요합니다}"
 
-REPO="${APK_REPO:-lshdainty/porest-desk-app}"
+REPO="${APK_REPO:-lshdainty/groo-damda-app}"
 BASE="${APK_BASE_PATH:-/home/groo/groo/apk}"
 
 case "$CHANNEL" in

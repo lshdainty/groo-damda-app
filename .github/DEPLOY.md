@@ -82,7 +82,7 @@ Secrets 에 4개 등록. 값을 셸 히스토리에 남기지 않으려면 `gh s
 불러 프롬프트에 입력한다.
 
 ```bash
-R=lshdainty/porest-desk-app
+R=lshdainty/groo-damda-app
 # 줄바꿈이 섞이면 base64 디코드가 깨진다 — -w0 로 한 줄로 만든다
 base64 -w0 groo-desk.jks | gh secret set ANDROID_KEYSTORE_BASE64 -R "$R"
 gh secret set ANDROID_KEYSTORE_PASSWORD -R "$R"   # keystore 비밀번호
@@ -112,7 +112,7 @@ groovy 를 붙여넣으면 고칠 때마다 두 곳을 맞춰야 하고, 한쪽�
 | 항목 | 값 |
 |---|---|
 | Definition | Pipeline script from SCM |
-| SCM | Git — `https://github.com/lshdainty/porest-desk-app.git` |
+| SCM | Git — `https://github.com/lshdainty/groo-damda-app.git` |
 | Branch | `*/main` |
 | Script Path | `Jenkinsfile` |
 
@@ -143,7 +143,7 @@ mkdir -p /home/groo/groo/apk/{dev,prod}
 
 정적 파일만 내보낸다. 업로드·실행 경로는 두지 않는다.
 
-**`desk.porest.cloud` 서버 블록 안**에 넣는다. `location` 은 `server` 안에만 올 수 있어서
+**`damda.hangroo.io` 서버 블록 안**에 넣는다. `location` 은 `server` 안에만 올 수 있어서
 `http` 직속에 두면 `"location" directive is not allowed here` 로 기동 자체가 막힌다.
 
 ```nginx
@@ -208,7 +208,7 @@ docker logs nginx-prod --since 5m 2>&1 | grep /srv/apk
 
 1. Mac 에 **AltServer**(`cdn.altstore.io/file/altstore/altserver.zip`, macOS 11+)를 깔고
    메뉴바 아이콘 → **Install AltStore** → 기기 선택 → Apple ID 로 아이폰에 AltStore 설치
-2. AltStore → Sources → **＋** → `https://desk.porest.cloud/download/altstore.json`
+2. AltStore → Sources → **＋** → `https://damda.hangroo.io/download/altstore.json`
 3. 이후 새 버전은 AltStore 안에서 받는다. 앱 배너를 누르면 이 소스로 바로 넘어간다
    (`altstore://source?url=…`, AltStore 가 없으면 다운로드 페이지로 떨어진다)
 
@@ -224,7 +224,7 @@ dev·prod 가 각자 소스를 가진다. 서버 블록마다 `/download/` 가 �
 쓰는 그 값이라 한쪽만 바뀌어 어긋날 일이 없다.
 
     dev   https://damda-dev.hangroo.io/download/altstore.json
-    prod  https://desk.porest.cloud/download/altstore.json
+    prod  https://damda.hangroo.io/download/altstore.json
 
 `iconURL` 은 `{WEB_BASE_URL}/app-icon.png` 다. 웹 프론트의 `public/app-icon.png` 라서
 웹만 배포되면 따라 올라간다. nginx 의 `/download/` 패턴은 `apk|ipa|json` 만 받으므로
