@@ -35,9 +35,16 @@ Future<void> showCategoryMoveTxSheet(
 }) {
   final l = AppLocalizations.of(context);
   final probe = _DirtyProbe();
+  // 처음 모드가 "새 하위 만들기"(하위가 없는 최상위)면 이름 칸에 초점 — 시트가 처음 초점을 컨테이너에 두므로 첫 초점 노드를
+  // 넘긴다(웹은 mode === "new" 일 때만). 기존 하위로 옮기는 모드는 입력 칸이 없어 표면에 둔다
+  final nameFocus = FocusNode(debugLabel: 'MoveTx new child name');
+  final canSplit =
+      source.parentRowId == null &&
+      !categories.any((c) => c.parentRowId == source.rowId);
   return PBottomSheet.show<void>(
     context,
     form: true,
+    initialFocus: canSplit ? nameFocus : null,
     isDirty: () => probe.dirty(),
     leaveCopy: PLeaveConfirmCopy(
       title: l.sheetLeaveTitle,
@@ -45,8 +52,12 @@ Future<void> showCategoryMoveTxSheet(
       stayLabel: l.sheetLeaveStay,
       leaveLabel: l.sheetLeaveLeave,
     ),
-    builder: (_) =>
-        _MoveTxForm(source: source, categories: categories, probe: probe),
+    builder: (_) => _MoveTxForm(
+      source: source,
+      categories: categories,
+      probe: probe,
+      nameFocus: nameFocus,
+    ),
   );
 }
 
@@ -61,10 +72,14 @@ class _MoveTxForm extends ConsumerStatefulWidget {
     required this.source,
     required this.categories,
     required this.probe,
+    required this.nameFocus,
   });
   final ExpenseCategory source;
   final List<ExpenseCategory> categories;
   final _DirtyProbe probe;
+
+  /// 새 하위 이름 칸 초점 노드 — 호출처가 시트의 첫 초점으로 넘기고 폼 State 가 버린다.
+  final FocusNode nameFocus;
 
   @override
   ConsumerState<_MoveTxForm> createState() => _MoveTxFormState();
@@ -72,7 +87,7 @@ class _MoveTxForm extends ConsumerStatefulWidget {
 
 class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
   final _nameCtrl = TextEditingController();
-  final _nameFocus = FocusNode();
+  late final FocusNode _nameFocus = widget.nameFocus;
   final _targetFocus = FocusNode();
   int? _targetRowId;
   late _Mode _mode;
@@ -273,7 +288,6 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
                 child: PInput(
                   controller: _nameCtrl,
                   focusNode: _nameFocus,
-                  autofocus: true,
                   placeholder: l.categoryMoveTxChildPlaceholder,
                   onChanged: (_) => setState(() => _showNameError = false),
                 ),

@@ -193,6 +193,13 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
   void initState() {
     super.initState();
     final e = widget.edit;
+    // 새 자산은 2단계 첫 칸에 초점(웹 focusFirstField) — 시트 컨테이너가 처음 초점을 가져가므로 그려진 뒤 직접 준다.
+    // 수정은 키보드 없이 표면
+    if (widget.edit == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _productFocus.requestFocus();
+      });
+    }
     _kind = e?.assetType == 'CHECK_CARD'
         ? AssetKind.check
         : (e != null ? AssetKind.credit : widget.initialKind);
