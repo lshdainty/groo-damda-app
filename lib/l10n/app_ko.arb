@@ -3293,6 +3293,7 @@
   "memoAllChip": "전체",
   "memoLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
   "memoTagFilter": "태그로 거르기",
+  "memoSaved": "저장했어요.",
   "memoSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "memoDeleteFailed": "삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "memoPinFailed": "고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.",

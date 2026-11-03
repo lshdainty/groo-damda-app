@@ -3221,6 +3221,7 @@
   "memoAllChip": "All",
   "memoLoadFailedDesc": "Please try again in a moment.",
   "memoTagFilter": "Filter by tag",
+  "memoSaved": "Saved.",
   "memoSaveFailed": "Could not save. Please try again in a moment.",
   "memoDeleteFailed": "Could not delete. Please try again in a moment.",
   "memoPinFailed": "Could not change the pin. Please try again in a moment.",

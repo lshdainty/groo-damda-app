@@ -458,10 +458,19 @@ class _TagEditSheetState extends State<_TagEditSheet> {
   /// 저장된 색이 팔레트 밖이면 그 값 — "지금 색" 칸이 격자를 고른 뒤에도 남아 되돌릴 수 있다(color-swatch.md)
   String? _foreignColor;
 
-  NameIssue? get _issue => nameIssue(_nameCtrl.text, kTagNameMax, [
-    for (final t in widget.existing)
-      if (t.rowId != widget.tag?.rowId) t.name,
-  ]);
+  NameIssue? get _issue {
+    final issue = nameIssue(_nameCtrl.text, kTagNameMax, [
+      for (final t in widget.existing)
+        if (t.rowId != widget.tag?.rowId) t.name,
+    ]);
+    // 안 바꾼 옛 이름은 12자 검사에서 뺀다 — 색만 고치려 해도 막히지 않게(고친 이름은 그대로 검사)
+    if (issue == NameIssue.tooLong &&
+        _isEdit &&
+        _nameCtrl.text.trim() == _initialName.trim()) {
+      return null;
+    }
+    return issue;
+  }
 
   String? _errorOf(AppLocalizations l) => !_touched
       ? null

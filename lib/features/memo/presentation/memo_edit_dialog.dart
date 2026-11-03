@@ -53,6 +53,63 @@ void showMemoEditDialog(BuildContext context, {Memo? edit}) {
   );
 }
 
+/// 저장에 쓰는 값 — 폼이 닫힌 뒤 다시 시도할 때도 같은 값을 쓴다.
+class _SaveArgs {
+  const _SaveArgs({
+    required this.editId,
+    required this.title,
+    required this.content,
+    required this.tag,
+    required this.color,
+    required this.pinChanged,
+  });
+  final int? editId;
+  final String title;
+  final String content;
+  final String? tag;
+  final String color;
+  final bool pinChanged;
+}
+
+/// 서버에 쓰고 목록 · 홈 · 별자리를 다시 받는다 — 폼과 상관없는 요청이라 컨테이너만 쓴다. 던지면 실패다.
+Future<Memo> _saveMemo(ProviderContainer c, _SaveArgs a) async {
+  final repo = await c.read(memoRepositoryProvider.future);
+  final Memo saved;
+  if (a.editId != null) {
+    saved = await repo.update(
+      id: a.editId!,
+      title: a.title,
+      // 본문을 지우고 저장하면 지워져야 한다 — 키를 빼면 서버가 옛 본문을 지킨다.
+      content: Patch.set(a.content),
+      // "태그 없음" 은 키를 빼지 말고 명시적 null 로 실어야 서버가 지운다(QA #99). sentinel 은 서버로 안 나간다.
+      tag: Patch.set(a.tag),
+      color: a.color,
+    );
+  } else {
+    saved = await repo.create(
+      title: a.title,
+      content: a.content,
+      tag: a.tag,
+      color: a.color,
+    );
+  }
+  c.invalidate(memoListProvider);
+  // 홈 위젯(메모 개수·최근 메모)의 원본 — 셸 상주라 스스로 안 받는다.
+  c.invalidate(dashboardSummaryProvider);
+  // 별자리 게이미피케이션 — 메모 작성 별빛(+1, 일 2회) 반영
+  c
+    ..invalidate(constellationTodayProvider)
+    ..invalidate(constellationSkyProvider)
+    ..invalidate(constellationCollectionProvider);
+  // 목록을 다시 받은 뒤에 끝낸다 — 받기 전에 시트를 닫으면 옛 값이 잠깐 비친다
+  try {
+    await c.read(memoListProvider.future);
+  } on Object {
+    // 저장은 끝났다 — 화면은 보던 목록을 그대로 둔다
+  }
+  return saved;
+}
+
 class _DirtyProbe {
   bool Function() dirty = () => false;
 }
@@ -224,31 +281,22 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       _submitting = true;
       _saveError = false;
     });
+    final args = _SaveArgs(
+      editId: widget.edit?.rowId,
+      title: title,
+      content: content,
+      tag: _tag == kMemoNoTagKey ? null : _tag,
+      color: _color,
+      // 고정은 저장 본문에 칸이 없고 토글 하나로만 바뀐다 — 폼의 '상단에 고정' 이 지금과 다르면 저장 뒤 한 번 더 부른다(QA 30 8)
+      pinChanged: (widget.edit?.pinned ?? false) != _pinned,
+    );
     Memo saved;
     try {
-      final repo = await c.read(memoRepositoryProvider.future);
-      if (_isEdit) {
-        saved = await repo.update(
-          id: widget.edit!.rowId,
-          title: title,
-          // 본문을 지우고 저장하면 지워져야 한다 — 키를 빼면 서버가 옛 본문을 지킨다.
-          content: Patch.set(content),
-          // "태그 없음" 은 키를 빼지 말고 명시적 null 로 실어야 서버가 지운다(QA #99). sentinel 은 서버로 안 나간다.
-          tag: Patch.set(_tag == kMemoNoTagKey ? null : _tag),
-          color: _color,
-        );
-      } else {
-        saved = await repo.create(
-          title: title,
-          content: content,
-          tag: _tag == kMemoNoTagKey ? null : _tag,
-          color: _color,
-        );
-      }
+      saved = await _saveMemo(c, args);
     } catch (_) {
       if (!mounted) {
-        // 저장 중에 시트를 닫았다 — 실패 Callout 을 둘 자리가 없으니 스낵바로 알린다(L8)
-        snack?.show(message: l.memoSaveFailed, tone: PSnackbarTone.critical);
+        // 저장 중에 시트를 닫았다 — 실패 Callout 을 둘 자리가 없으니 스낵바 + [다시 시도] 로 알린다(L8 · N4)
+        _retrySnack(c, snack, l, args);
         return;
       }
       setState(() {
@@ -259,26 +307,38 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       revealFormError(_errorKey);
       return;
     }
-    c.invalidate(memoListProvider);
-    // 홈 위젯(메모 개수·최근 메모)의 원본 — 셸 상주라 스스로 안 받는다.
-    c.invalidate(dashboardSummaryProvider);
-    // 별자리 게이미피케이션 — 메모 작성 별빛(+1, 일 2회) 반영
-    c
-      ..invalidate(constellationTodayProvider)
-      ..invalidate(constellationSkyProvider)
-      ..invalidate(constellationCollectionProvider);
-    // 목록을 다시 받은 뒤에 시트를 닫는다 — 받기 전에 닫으면 옛 값이 잠깐 비친다
-    try {
-      await c.read(memoListProvider.future);
-    } on Object {
-      // 저장은 끝났다 — 화면은 보던 목록을 그대로 둔다
-    }
-    // 고정은 저장 본문에 칸이 없고 토글 하나로만 바뀐다 — 폼의 '상단에 고정' 이 지금과 다르면 저장 뒤 한 번 더 부른다(QA 30 8)
-    final pinChanged = (widget.edit?.pinned ?? false) != _pinned;
     if (mounted) PBottomSheet.of(context).close();
-    if (pinChanged) {
+    if (args.pinChanged) {
       await memoActions.pinDetached(c, snack, l, saved);
     }
+  }
+
+  /// 닫힌 폼의 저장 실패 — 스낵바 + [다시 시도]. 다시 시도는 **폼을 건드리지 않고** 쓴 값 그대로 바로 요청한다(컨테이너 · 호스트 · 글을 미리 잡아
+  /// 둔다). 성공 · 실패 모두 스낵바로 알린다 — 그새 연 다른 폼이 닫히거나 Callout 이 그 위에 뜨지 않는다(N2).
+  static void _retrySnack(
+    ProviderContainer c,
+    PSnackbarApi? snack,
+    AppLocalizations l,
+    _SaveArgs args,
+  ) {
+    snack?.show(
+      message: l.memoSaveFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          try {
+            final saved = await _saveMemo(c, args);
+            snack.show(message: l.memoSaved, tone: PSnackbarTone.positive);
+            if (args.pinChanged) {
+              await memoActions.pinDetached(c, snack, l, saved);
+            }
+          } catch (_) {
+            _retrySnack(c, snack, l, args);
+          }
+        },
+      ),
+    );
   }
 
   @override

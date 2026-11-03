@@ -360,7 +360,7 @@ void main() {
       expect(repo.saved.single.name, '업무');
     });
 
-    testWidgets('12자 넘는 옛 이름은 저장이 막히고 "이름은 12자 이내로 입력해주세요." 가 선다', (
+    testWidgets('D5 — 안 바꾼 12자 넘는 옛 이름은 12자 검사에서 빠져 색만 고쳐 저장된다', (
       tester,
     ) async {
       final repo = _Repo();
@@ -375,8 +375,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
-      expect(repo.saved, isEmpty);
-      expect(find.text(keepAll('이름은 12자 이내로 입력해주세요.')), findsOneWidget);
+      expect(repo.saved.single.name, '아주아주긴옛태그이름열세자');
     });
 
     testWidgets('입력은 12자에서 멈추고 칸 아래에 n/12 가 보인다', (tester) async {

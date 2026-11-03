@@ -5763,6 +5763,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get memoTagFilter => '태그로 거르기';
 
   @override
+  String get memoSaved => '저장했어요.';
+
+  @override
   String get memoSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override

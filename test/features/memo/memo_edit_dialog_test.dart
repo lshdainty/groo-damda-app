@@ -505,6 +505,19 @@ void main() {
       findsOneWidget,
       reason: 'Callout 을 둘 자리가 없으니 스낵바로 알린다',
     );
+    // N4 · N2 — [다시 시도] 는 폼을 건드리지 않고 쓴 값으로 바로 요청한다(성공 · 실패 모두 스낵바)
+    expect(findPlain('다시 시도'), findsOneWidget);
+    repo.failSave = false;
+    await tester.tap(findPlain('다시 시도'));
+    await tester.pumpAndSettle();
+    expect(repo.created, isTrue);
+    expect(repo.title, '새 메모');
+    expect(findPlain('저장했어요.'), findsOneWidget);
+    expect(
+      find.byType(PTextarea),
+      findsNothing,
+      reason: '그새 열린 폼이 없다 — 다시 시도가 폼을 열거나 닫지 않는다',
+    );
   });
 
   testWidgets('x2 글자 — 넘침 오류 0', (tester) async {

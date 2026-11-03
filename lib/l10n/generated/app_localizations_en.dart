@@ -5866,6 +5866,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memoTagFilter => 'Filter by tag';
 
   @override
+  String get memoSaved => 'Saved.';
+
+  @override
   String get memoSaveFailed => 'Could not save. Please try again in a moment.';
 
   @override

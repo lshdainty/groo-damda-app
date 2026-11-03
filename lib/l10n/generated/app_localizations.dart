@@ -10700,6 +10700,12 @@ abstract class AppLocalizations {
   /// **'태그로 거르기'**
   String get memoTagFilter;
 
+  /// No description provided for @memoSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장했어요.'**
+  String get memoSaved;
+
   /// No description provided for @memoSaveFailed.
   ///
   /// In ko, this message translates to:
