@@ -151,8 +151,8 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
     final isTransfer = it.expenseType == 'TRANSFER';
     final isIncome = it.expenseType == 'INCOME';
     if (isTransfer) {
-      add('from', l.recFromAccount, it.assetName);
-      add('to', l.recDepositAccount, it.toAssetName);
+      add('from', l.recTransferFrom, it.assetName);
+      add('to', l.recTransferTo, it.toAssetName);
       add(
         'fee',
         l.expFee,

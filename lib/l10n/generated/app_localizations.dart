@@ -15739,6 +15739,18 @@ abstract class AppLocalizations {
   /// **'{field} 없음'**
   String recNoneOf(String field);
 
+  /// No description provided for @recTransferFrom.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌'**
+  String get recTransferFrom;
+
+  /// No description provided for @recTransferTo.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌'**
+  String get recTransferTo;
+
   /// No description provided for @recErrCountMin.
   ///
   /// In ko, this message translates to:

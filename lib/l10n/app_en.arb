@@ -4778,6 +4778,8 @@
   "@recSelectOf": {"placeholders": {"field": {"type": "String"}}},
   "recNoneOf": "No {field}",
   "@recNoneOf": {"placeholders": {"field": {"type": "String"}}},
+  "recTransferFrom": "Sending account",
+  "recTransferTo": "Receiving account",
   "recErrCountMin": "Enter 1 or more.",
   "recSaveFailed": "Could not save. Please try again in a moment.",
   "recNoAssets": "There is no account to choose.",

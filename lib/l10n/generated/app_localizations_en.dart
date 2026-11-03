@@ -8956,6 +8956,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get recTransferFrom => 'Sending account';
+
+  @override
+  String get recTransferTo => 'Receiving account';
+
+  @override
   String get recErrCountMin => 'Enter 1 or more.';
 
   @override

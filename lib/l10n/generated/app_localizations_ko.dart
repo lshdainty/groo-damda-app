@@ -8748,6 +8748,12 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get recTransferFrom => '보내는 계좌';
+
+  @override
+  String get recTransferTo => '받는 계좌';
+
+  @override
   String get recErrCountMin => '1번 이상 입력해주세요.';
 
   @override

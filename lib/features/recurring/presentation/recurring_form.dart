@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.d
 import 'package:groo_damda_app/features/recurring/presentation/recurring_format.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
@@ -595,32 +596,55 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           closeLabel: l.actionClose,
           flushBody: true,
           scrollFog: true,
-          body: pool.isEmpty && !withNone
-              ? Padding(
+          body: Consumer(
+            builder: (ctx, ref, _) {
+              final async = ref.watch(assetsProvider);
+              // 실패인데 "고를 수 있는 계좌가 없어요" 로 읽히면 안 된다 — 고정 글 + [다시 시도](조회는 silent)
+              if (!async.hasValue && async.hasError && !async.isLoading) {
+                return Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: PSpacing.globalGutter,
-                    vertical: PSpacing.x3,
                   ),
-                  child: Text(
-                    l.recNoAssets,
-                    textAlign: TextAlign.center,
-                    style: PTypography.t3.copyWith(
-                      color: sheetContext.colors.fgNeutralSubtle,
+                  child: PResultSection(
+                    kind: PResultKind.failure,
+                    size: PResultSize.medium,
+                    title: l.recAssetLoadFailed,
+                    description: l.dashFailDesc,
+                    primaryAction: PResultAction(
+                      label: l.actionRetry,
+                      onPressed: () => ref.invalidate(assetsProvider),
                     ),
                   ),
-                )
-              : PickList<int>(
-                  label: title,
-                  selected: selected ?? (withNone ? _kNoAsset : null),
-                  items: [
-                    if (withNone)
-                      PickItem<int>(
-                        value: _kNoAsset,
-                        title: l.recNoneOf(title),
+                );
+              }
+              return pool.isEmpty && !withNone
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: PSpacing.globalGutter,
+                        vertical: PSpacing.x3,
                       ),
-                    for (final a in pool) _assetItem(a),
-                  ],
-                ),
+                      child: Text(
+                        l.recNoAssets,
+                        textAlign: TextAlign.center,
+                        style: PTypography.t3.copyWith(
+                          color: sheetContext.colors.fgNeutralSubtle,
+                        ),
+                      ),
+                    )
+                  : PickList<int>(
+                      label: title,
+                      selected: selected ?? (withNone ? _kNoAsset : null),
+                      items: [
+                        if (withNone)
+                          PickItem<int>(
+                            value: _kNoAsset,
+                            title: l.recNoneOf(title),
+                          ),
+                        for (final a in pool) _assetItem(a),
+                      ],
+                    );
+            },
+          ),
         );
       },
     );
@@ -647,7 +671,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   Future<void> _pickFrom() async {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
-      title: l.recFromAccount,
+      title: l.recTransferFrom,
       pool: transferEligibleAssets(_assets),
       selected: _assetRowId,
       withNone: false,
@@ -663,7 +687,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   Future<void> _pickTo() async {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
-      title: l.recDepositAccount,
+      title: l.recTransferTo,
       pool: [
         for (final a in transferEligibleAssets(_assets))
           if (a.rowId != _assetRowId) a,
@@ -1265,18 +1289,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     );
   }
 
-  Widget _error(String text) => Padding(
-    padding: const EdgeInsets.fromLTRB(
-      PSpacing.globalGutter,
-      0,
-      PSpacing.globalGutter,
-      PSpacing.x1,
-    ),
-    child: Text(
-      text,
-      style: PTypography.t3.copyWith(color: context.colors.fgCritical),
-    ),
-  );
+  Widget _error(String text) => PickerErrorLine(text);
 
   String _won(String digits) => krwSigned(int.parse(digits), false, unit: true);
 
@@ -1387,18 +1400,18 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           ),
           if (_isTransfer) ...[
             PickerRow(
-              title: l.recFromAccount,
+              title: l.recTransferFrom,
               prefix: const Icon(LucideIcons.wallet),
               value: from?.assetName,
-              placeholder: l.recSelectOf(l.recFromAccount),
+              placeholder: l.recSelectOf(l.recTransferFrom),
               errorMessage: _attempted ? _errFrom(l) : null,
               onTap: _pickFrom,
             ),
             PickerRow(
-              title: l.recDepositAccount,
+              title: l.recTransferTo,
               prefix: const Icon(LucideIcons.wallet),
               value: to?.assetName,
-              placeholder: l.recSelectOf(l.recDepositAccount),
+              placeholder: l.recSelectOf(l.recTransferTo),
               errorMessage: _attempted ? _errTo(l) : null,
               onTap: _pickTo,
             ),
