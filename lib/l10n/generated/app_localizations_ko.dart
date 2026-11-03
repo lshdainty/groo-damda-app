@@ -1980,7 +1980,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expRefundConfirmBody(String amount, String asset) {
-    return '이 거래를 환불로 표시하고 $amount을 $asset(으)로 되돌려요. 합계에서 빠져요.';
+    return '이 거래를 환불로 표시해요. 합계에서 빠지고 $amount이 $asset에 돌아가요.';
   }
 
   @override
@@ -1997,7 +1997,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expRefundedAt(String date) {
-    return '환불됨 · $date';
+    return '환불됨 · $date — 합계에서 빠져 있어요.';
   }
 
   @override
@@ -2054,25 +2054,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get transferDeleteConfirm =>
-      '이 이체를 삭제할까요? 양쪽 자산의 잔액이 되돌아가요. 삭제한 이체는 되돌릴 수 없어요.';
+      '이 이체를 삭제할까요? 양쪽 계좌 잔액이 이체 전으로 돌아가요. 삭제한 이체는 되돌릴 수 없어요.';
 
   @override
   String get transferDeleteTitle => '이체 삭제';
 
   @override
   String get transferAutoTradeSettlement =>
-      '주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라집니다.';
+      '주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라져요.';
 
   @override
   String get transferAutoCardPayment =>
-      '카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없습니다.';
+      '카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없어요.';
 
   @override
   String get transferAutoCardRefund =>
-      '카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰집니다.';
+      '카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰져요.';
 
   @override
-  String get transferAutoDefault => '자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라집니다.';
+  String get transferAutoDefault => '자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라져요.';
 
   @override
   String updateAvailable(String version) {
@@ -3056,9 +3056,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expDeleted => '거래가 삭제되었습니다';
 
   @override
-  String get expDeleteFailed => '삭제 실패';
-
-  @override
   String get expSplitMismatch => '분할 내역과 금액이 달라요';
 
   @override
@@ -3122,17 +3119,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expAutoSourceTradeRealized =>
-      '주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산됩니다.';
+      '주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산돼요.';
 
   @override
-  String get expAutoSourceTransferInterest => '이체에 붙은 이자예요. 금액은 이체 내역에서 계산됩니다.';
+  String get expAutoSourceTransferInterest => '이체에 붙은 이자예요. 금액은 이체 내역에서 계산돼요.';
 
   @override
   String get expAutoSourceCardCarryover =>
       '카드를 등록할 때 적은 이전 미결제 사용액이에요. 금액은 카드 수정에서 바꿔요.';
 
   @override
-  String get expAutoSourceDefault => '자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라집니다.';
+  String get expAutoSourceDefault => '자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라져요.';
 
   @override
   String get expPresetLock => '프리셋 잠금';
@@ -3155,10 +3152,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expPayee => '거래처';
 
   @override
-  String get expIncomeSourcePlaceholder => '예: (주)포레스트';
+  String get expIncomeSourcePlaceholder => '예: 월급';
 
   @override
-  String get expPayeePlaceholder => '예: 스타벅스 강남점';
+  String get expPayeePlaceholder => '예: 회사 앞 도시락';
 
   @override
   String get expIncomeMethod => '수입 방식';
@@ -3217,20 +3214,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expUncategorized => '미분류';
 
   @override
-  String get expValueNone => '없음';
-
-  @override
-  String expItemsCount(int count) {
-    return '$count개';
-  }
-
-  @override
   String get expNotSelected => '미선택';
-
-  @override
-  String expPrevTxAt(String merchant) {
-    return '$merchant에서의 이전 거래';
-  }
 
   @override
   String get expThisMonth => '이번 달';
@@ -7186,11 +7170,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expRecordOnlyBadge => '기록만';
 
   @override
-  String get expRecordOnlyNote => '결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요';
+  String get expRecordOnlyNote => '결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요.';
 
   @override
   String expRecordOnlyPartNote(String amount) {
-    return '이 중 $amount은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요';
+    return '이 중 $amount은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요.';
   }
 
   @override
@@ -7285,10 +7269,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fixedSwitchIncome => '고정 수입';
 
   @override
-  String get fixedHintExpense => '월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요';
+  String get fixedHintExpense => '월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.';
 
   @override
-  String get fixedHintIncome => '월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요';
+  String get fixedHintIncome => '월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.';
 
   @override
   String get fixedBadge => '고정';
@@ -7822,7 +7806,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get expLoadErrorDesc => '잠시 뒤에 다시 시도해주세요.';
+  String get expLoadErrorDesc => '잠시 뒤 다시 시도해주세요.';
 
   @override
   String get statsNoMonthlyData => '월별 데이터가 없어요.';
@@ -8357,4 +8341,246 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get namuFxUnavailableShort => '환율 없음';
+
+  @override
+  String get expDetailMore => '더 하기';
+
+  @override
+  String expSplitValue(int count) {
+    return '$count개로 나눔';
+  }
+
+  @override
+  String expSplitHeader(int count) {
+    return '내역 분할 $count개';
+  }
+
+  @override
+  String get expMerchantMonth => '이 가맹점 이번 달';
+
+  @override
+  String get expRecentOnly => '최근 5건만 보여요';
+
+  @override
+  String get expLinked => '연결됨';
+
+  @override
+  String get expSplitLoadFailed => '나눈 내역을 불러오지 못했어요';
+
+  @override
+  String get expSplitLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String expRefundDateToday(String date) {
+    return '$date · 오늘';
+  }
+
+  @override
+  String expRefundDateHint(String date) {
+    return '거래한 날($date)부터 오늘까지 고를 수 있어요.';
+  }
+
+  @override
+  String get expRefundFailed => '환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+
+  @override
+  String get expRefundCancelFailed => '환불을 취소하지 못했어요.';
+
+  @override
+  String get expTxDeleteFailed => '거래를 삭제하지 못했어요.';
+
+  @override
+  String get transferDeleteFailed => '이체를 삭제하지 못했어요.';
+
+  @override
+  String get transferDetailTitle => '이체 상세';
+
+  @override
+  String get transferFromLabel => '보내는 계좌';
+
+  @override
+  String get transferToLabel => '받는 계좌';
+
+  @override
+  String txfStepMeta(String current, String total) {
+    return '$current / $total단계';
+  }
+
+  @override
+  String get txfTypeGroup => '거래 종류';
+
+  @override
+  String get txfEntryRequired => '금액을 입력해주세요.';
+
+  @override
+  String get txfAmountTooLarge => '금액은 100억원까지 입력할 수 있어요.';
+
+  @override
+  String txfCurrencyChip(String code) {
+    return '통화, $code';
+  }
+
+  @override
+  String get txfPresetsTitle => '프리셋';
+
+  @override
+  String txfPresetApplied(String name) {
+    return '$name 적용됨';
+  }
+
+  @override
+  String get txfNoPresets => '저장된 프리셋이 없어요. 값을 넣고 “현재 입력값 저장” 을 누르면 만들어져요.';
+
+  @override
+  String get txfPresetLoadFailed => '프리셋을 불러오지 못했어요.';
+
+  @override
+  String txfEmptyPresetHint(String name) {
+    return '“$name” 프리셋은 금액이 비어 있어요. 금액을 넣고 [다음]을 눌러주세요.';
+  }
+
+  @override
+  String get txfPresetAllTitle => '프리셋 고르기';
+
+  @override
+  String get txfShowAll => '모두 보기';
+
+  @override
+  String get txfNone => '없음';
+
+  @override
+  String get txfNoAccountOption => '계좌·카드 없음';
+
+  @override
+  String get txfNoMethodOption => '결제 수단 없음';
+
+  @override
+  String get txfErrCategory => '카테고리를 골라주세요.';
+
+  @override
+  String get txfErrFrom => '보내는 계좌를 골라주세요.';
+
+  @override
+  String get txfErrTo => '받는 계좌를 골라주세요.';
+
+  @override
+  String get txfErrFx => '환율을 입력하거나 원화 금액을 넣어주세요.';
+
+  @override
+  String get txfErrInterest => '이자는 금액보다 클 수 없어요.';
+
+  @override
+  String get txfSplitsLoading => '나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.';
+
+  @override
+  String get txfSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get txfCategoryLoadFailed => '카테고리를 불러오지 못했어요';
+
+  @override
+  String get txfAssetLoadFailed => '계좌·카드를 불러오지 못했어요';
+
+  @override
+  String get txfNoCategoryOfType => '이 종류의 카테고리가 없어요.';
+
+  @override
+  String get txfNoPickableAsset => '이 결제 수단에 맞는 계좌·카드가 없어요.';
+
+  @override
+  String txfFxHint(String local, String code, String rate, String krw) {
+    return '$local $code × $rate = $krw원';
+  }
+
+  @override
+  String get txfKrwAmount => '원화 금액';
+
+  @override
+  String txfInstallmentValue(String months, String amount) {
+    return '$months개월 · 매달 약 $amount원';
+  }
+
+  @override
+  String get txfSplitMismatchTitle => '나눈 내역과 금액이 달라요';
+
+  @override
+  String txfSplitMismatchBody(String total, String sum, String diffText) {
+    return '새 총액 $total원 · 나눈 합계 $sum원 — $diffText';
+  }
+
+  @override
+  String txfSplitOver(String diff) {
+    return '$diff원 넘쳐요.';
+  }
+
+  @override
+  String txfSplitShort(String diff) {
+    return '$diff원 모자라요.';
+  }
+
+  @override
+  String get txfMatchSplits => '나눈 내역 맞추기';
+
+  @override
+  String get txfSaveSplitAndSave => '나눈 내역 맞추고 저장';
+
+  @override
+  String get txfSmsStepTitle => '결제 문자 붙여넣기';
+
+  @override
+  String get txfSmsHelp =>
+      '카드사에서 온 결제 문자를 그대로 붙여넣어주세요. 읽은 금액 · 가맹점 · 시각이 칸에 채워져요.';
+
+  @override
+  String get txfPresetAmountEmpty => '비워 둠';
+
+  @override
+  String get txfPresetAmountHint => '비워 두면 불러올 때 금액을 직접 넣어요.';
+
+  @override
+  String get txfPresetNameRequired => '프리셋 이름을 입력해주세요.';
+
+  @override
+  String get txfPresetNeedParties => '보내는 계좌와 받는 계좌를 먼저 골라주세요.';
+
+  @override
+  String get txfPresetNeedCategory => '카테고리를 먼저 골라주세요.';
+
+  @override
+  String get txfPresetNoMerchant => '내역 없음';
+
+  @override
+  String txfPresetSaved(String name) {
+    return '$name 프리셋을 저장했어요';
+  }
+
+  @override
+  String get txfPresetNameTooLong => '이름은 12자 이내로 입력해주세요.';
+
+  @override
+  String get txfMemoStepTitle => '메모';
+
+  @override
+  String get txfTimeTitle => '시각';
+
+  @override
+  String get txfNoCategory => '카테고리 없음';
+
+  @override
+  String get txfNoDepositAccount => '입금 계좌 없음';
+
+  @override
+  String get txfNoIncomeMethod => '수입 방식 없음';
+
+  @override
+  String get txfSelectFrom => '보내는 계좌 선택';
+
+  @override
+  String get txfSelectTo => '받는 계좌 선택';
+
+  @override
+  String get txfDeletedAsset => '지운 계좌';
+
+  @override
+  String get txfDeletedCategory => '지운 카테고리';
 }

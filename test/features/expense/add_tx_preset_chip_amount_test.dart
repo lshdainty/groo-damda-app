@@ -75,9 +75,9 @@ void main() {
   testWidgets('1만 위 프리셋 금액은 `19k` 가 아니라 만 단위로 줄인다', (tester) async {
     await _open(tester, _preset(19900));
 
-    expect(find.text('19k'), findsNothing);
+    expect(find.textContaining('19k'), findsNothing);
     // 소수 첫째 자리까지 반올림하고 `.0` 은 뗀다 — 1.99만 → `2만`.
-    expect(find.text('2만'), findsOneWidget);
+    expect(find.textContaining('2만'), findsOneWidget);
   });
 
   testWidgets('억을 넘겨도 `k` 로 뻗지 않는다', (tester) async {
@@ -85,12 +85,12 @@ void main() {
     await _open(tester, _preset(120000000));
 
     expect(find.textContaining('k'), findsNothing);
-    expect(find.text('1.2억'), findsOneWidget);
+    expect(find.textContaining('1.2억'), findsOneWidget);
   });
 
   testWidgets('1만 아래는 예전과 같은 글자 — 천단위 콤마 정수', (tester) async {
     await _open(tester, _preset(9900));
 
-    expect(find.text('9,900'), findsOneWidget);
+    expect(find.textContaining('9,900'), findsOneWidget);
   });
 }

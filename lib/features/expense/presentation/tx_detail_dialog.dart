@@ -1,946 +1,786 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
-import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_detail.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_edit_route.dart';
-import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
+import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
+import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_from_tx_dialog.dart';
-import 'package:groo_damda_app/features/expense_split/presentation/split_tx_dialog.dart';
-import 'package:groo_damda_app/features/recurring/presentation/recurring_settings_drawer.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
-import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
-import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
-import 'package:groo_damda_app/features/expense/presentation/refund_confirm_dialog.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
-import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
-import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row.dart';
+import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
+import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
+import 'package:groo_damda_app/features/expense/presentation/refund_step.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart'
+    show currentSheetScroll, restoreSheetScroll;
+import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
+import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
+import 'package:groo_damda_app/features/expense_split/presentation/split_tx_dialog.dart';
+import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
+import 'package:groo_damda_app/features/recurring/presentation/recurring_settings_drawer.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
+import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 
-/// 거래 상세 다이얼로그 — front `TxDetailDialog` 미러.
+/// 거래 상세(I-21 21-1 · B · A) — 읽는 상세 + "더 하기" 동작 줄. 같은 시트 안에서 상세 ↔ 환불 단계가 바뀐다(2-2A).
 ///
-/// 구성:
-/// - Hero: 카테고리 색 그라데이션 배경 + 큰 아이콘 + 가맹점 + 큰 금액 + 날짜
-/// - Field rows: 카테고리 / 금액 / 계좌·카드 / 결제 수단 / 날짜·시간 / 메모
-/// - Quick actions (3-col grid): 내역 분할 / 반복 설정 / 더치페이
-/// - Footer: 삭제 / 편집 / 확인
-void showTxDetailDialog(BuildContext context, Expense expense) {
+/// - 머리 `지출 상세` · 닫기 → 타일 48 + 이름 → 금액 → 날짜 · 시각 → (상태 Callout) → 키-값 줄 → "더 하기" 줄 넷 → 내역 분할 →
+///   이 가맹점 이번 달 → 바닥 [삭제][수정].
+/// - 환불은 상세 안 한 단계다(머리 ← · "환불 처리" · 닫기 · 바닥 [환불 처리]). 환불 · 환불 취소 응답으로 상세를 다시 그린다.
+/// - 상세는 조회라 바깥 누르기 · 끌기로 닫히고, 환불 단계는 입력 폼이라 닫히지 않는다(단계마다 규칙이 바뀐다). ← · 뒤로 가기 = 상세,
+///   닫기 원 · 바깥 · 끌기 = 시트 전체. 바뀐 값(환불일)이 있으면 먼저 "작성한 내용이 사라져요" 를 묻는다.
+/// - [수정] 은 21-2 가 폼을 단계로 옮기기 전까지 지금 방식이다 — 상세를 내리고 옛 [showAddTxSheet] 를 연다. 저장하면 응답 값으로 상세를
+///   다시 열고, 저장 없이 닫혀도 상세로 돌아온다. 고쳐 쓰기 저장은 돌아갈 상세가 없어 모두 닫는다.
+/// - 나누기 · 반복 · 더치페이는 21-3 이 단계로 옮긴다 — 그때까지 지금처럼 시트를 닫고 옛 표면을 연다.
+Future<void> showTxDetailDialog(BuildContext context, Expense expense) {
   final l = AppLocalizations.of(context);
-  final controller = PSheetController();
-  // 지금 그리는 거래 — 환불·환불 취소로 서버가 돌려준 거래로 바뀐다. 본문과 footer 가
-  // 같이 본다. footer 가 열 때의 거래를 쥐고 있으면 환불 직후에도 [수정] 이 남는다
-  // (23차 낮음 — 누르면 EXP_043).
-  final current = ValueNotifier<Expense>(expense);
-  // footer 가 듣는 둘을 **한 번만** 묶는다. 빌드마다 새로 묶으면 footer 가 다시 그려질
-  // 때마다 다시 구독하는데, 시트가 닫히는 애니메이션 중엔 controller 가 이미 dispose 돼
-  // 그 자리에서 터진다.
-  final footerListenable = Listenable.merge([controller, current]);
-  final isIncome = expense.expenseType == 'INCOME';
-  showPSheet<void>(
+  final hooks = _TxFlowHooks();
+  final host = hostContextOf(context);
+  return PBottomSheet.show<void>(
     context,
-    title: isIncome ? l.expIncomeDetail : l.expExpenseDetail,
-    contentBuilder: (ctx, scrollCtrl) => _DetailBody(
-      expense: expense,
-      current: current,
-      scrollController: scrollCtrl,
-      controller: controller,
+    isForm: () => hooks.isForm(),
+    isDirty: () => hooks.isDirty(),
+    interceptClose: () => hooks.interceptClose(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
     ),
-    footerBuilder: (ctx) => _TxDetailFooter(
-      current: current,
-      controller: controller,
-      listenable: footerListenable,
-    ),
-  ).whenComplete(() {
-    controller.dispose();
-    current.dispose();
-  });
+    builder: (_) => _TxDetailFlow(expense: expense, hooks: hooks, host: host),
+  );
 }
 
-class _TxDetailFooter extends StatelessWidget {
-  const _TxDetailFooter({
-    required this.current,
-    required this.controller,
-    required this.listenable,
-  });
-  final ValueListenable<Expense> current;
-  final PSheetController controller;
-
-  /// [controller]·[current] 를 묶은 것 — 시트를 열 때 한 번 만든다.
-  final Listenable listenable;
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: listenable,
-      builder: (ctx, _) {
-        final expense = current.value;
-        final busy = controller.submitting;
-        // 고칠 수 없는 거래 둘 — 시스템이 만든 것(매도 실현손익·이체 이자)은 원본을
-        // 지워야 사라지고, 환불된 것은 돈이 이미 자산으로 돌아가 되돌릴 기준이 없다
-        // (서버도 EXP_043 으로 막는다 — 먼저 환불을 취소해야 한다). 판정은
-        // [expenseActions.canEdit] 하나다. 눌러야 거부 토스트가 뜨는 대신 아예 감춘다.
-        final canEdit = expenseActions.canEdit(expense);
-        return PViewFooter(
-          onDelete: expense.autoSource != null ? null : controller.onDelete,
-          deleting: busy,
-          onEdit: busy || !canEdit
-              ? null
-              : () {
-                  Navigator.of(ctx).pop();
-                  showAddTxSheet(ctx, edit: expense);
-                },
-        );
-      },
-    );
-  }
+/// 시트의 닫는 길이 그 순간의 단계를 묻는 자리 — 단계의 주인은 [_TxDetailFlowState] 라 시트 밖에서 이 줄로 닿는다.
+class _TxFlowHooks {
+  /// 수정 단계의 폼 — 바뀐 값 · 한 단계 닫기를 시트의 닫는 길에 알린다.
+  final TxFormProbe form = TxFormProbe();
+  bool Function() isForm = () => false;
+  bool Function() isDirty = () => false;
+  bool Function() interceptClose = () => false;
 }
 
-class _DetailBody extends ConsumerStatefulWidget {
-  const _DetailBody({
+enum _Step { detail, refund, edit }
+
+class _TxDetailFlow extends ConsumerStatefulWidget {
+  const _TxDetailFlow({
     required this.expense,
-    required this.current,
-    required this.scrollController,
-    required this.controller,
+    required this.hooks,
+    required this.host,
   });
-  final Expense expense;
 
-  /// 본문이 바꾼 거래를 footer 에 알리는 자리.
-  final ValueNotifier<Expense> current;
-  final ScrollController scrollController;
-  final PSheetController controller;
+  final Expense expense;
+  final _TxFlowHooks hooks;
+
+  /// 시트보다 오래 사는 context — 시트를 닫고 다른 표면을 열 때 쓴다.
+  final BuildContext host;
 
   @override
-  ConsumerState<_DetailBody> createState() => _DetailBodyState();
+  ConsumerState<_TxDetailFlow> createState() => _TxDetailFlowState();
 }
 
-class _DetailBodyState extends ConsumerState<_DetailBody> {
-  bool _deleting = false;
-  bool _refunding = false;
-  bool _splitExpanded = true; // 분할 요약 카드 펼침 상태
+class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
+  _Step _step = _Step.detail;
 
-  /// 화면이 그리는 거래. 열릴 때는 넘겨받은 것과 같지만, 환불을 찍거나 취소하면
-  /// 서버가 돌려준 것으로 갈아 끼운다 — 그래야 배너가 그 자리에서 바뀐다.
+  /// 화면이 그리는 거래 — 환불 · 환불 취소가 돌려준 거래로 갈아 끼운다.
   late Expense _e = widget.expense;
 
-  /// [_e] 를 바꾸고 footer 에도 알린다 — [수정] 이 환불 여부를 따라 숨고 나타난다.
-  void _setExpense(Expense e) {
-    setState(() => _e = e);
-    widget.current.value = e;
+  /// 환불일(날짜만) — 처음은 오늘.
+  late DateTime _refundDate = _today();
+  bool _refundFailed = false;
+
+  bool _deleting = false;
+  bool _refunding = false;
+  bool _cancelling = false;
+
+  /// 지우기를 마치고 시트가 닫히는 중 — 닫히는 동안 버튼을 다시 열지 않는다.
+  bool _closing = false;
+  bool _leaving = false;
+
+  static DateTime _today() {
+    final n = calendarNow();
+    return DateTime(n.year, n.month, n.day);
   }
+
+  bool get _busy => _deleting || _refunding || _cancelling || _closing;
 
   @override
   void initState() {
     super.initState();
-    // 삭제는 그 거래의 자산을 봐야 한다(카드면 환급 안내를 띄운다) — build 에서
-    // 고른 자산을 여기 담아 두고 콜백이 읽는다.
-    widget.controller.onDelete = () => _delete(_assetForDelete);
+    final h = widget.hooks;
+    h.isForm = () => mounted && _step != _Step.detail;
+    h.isDirty = () =>
+        mounted &&
+        ((_step == _Step.refund && _refundDirty) ||
+            (_step == _Step.edit && h.form.dirty()));
+    h.interceptClose = _intercept;
   }
 
-  /// 마지막 build 가 고른 자산 — 삭제 확인창이 카드인지 가르는 데 쓴다.
-  Asset? _assetForDelete;
-
-  void _setDeleting(bool v) {
-    setState(() => _deleting = v);
-    widget.controller.setSubmitting(v);
+  @override
+  void dispose() {
+    final h = widget.hooks;
+    h.isForm = () => false;
+    h.isDirty = () => false;
+    h.interceptClose = () => false;
+    super.dispose();
   }
 
-  /// 삭제는 [expenseActions] 가 한다 — 목록 행(스와이프)도 같은 것을 부른다.
-  /// 여기서 다시 짜면 무효화 하나만 어긋나도 경로에 따라 화면이 달라진다.
-  ///
-  /// 확인은 이 화면 몫이다. 지운 뒤 시트를 닫는 것도 여기서만 필요하다 —
-  /// 목록에서 지울 땐 닫을 시트가 없다. 확인창 본문은 스와이프와 같다 — 결제가 끝난
-  /// 회차의 카드 거래면 한 문구가 붙는다(D1). 서버에 묻지 않는다.
-  Future<void> _delete(Asset? asset) async {
+  bool get _refundDirty => _refundDate != _today();
+
+  // ── 단계 ────────────────────────────────────────────────
+  /// 뒤로 가기 · `Esc` 한 번 = 한 단계 뒤(환불 → 상세). 시트의 닫는 길이 먼저 묻는다.
+  bool _intercept() {
+    if (!mounted || _step == _Step.detail) return false;
+    if (_step == _Step.edit) {
+      // 폼 안 한 단계가 열려 있으면 그 단계만 — 아니면 상세로
+      if (!widget.hooks.form.interceptClose()) _leaveEdit();
+      return true;
+    }
+    _leaveRefund();
+    return true;
+  }
+
+  void _openRefund() {
+    setState(() {
+      _refundDate = _today();
+      _refundFailed = false;
+      _step = _Step.refund;
+    });
+  }
+
+  /// 환불 → 상세. 바뀐 값이 있으면 먼저 "작성한 내용이 사라져요".
+  Future<void> _leaveRefund() async {
+    if (_leaving || _refunding) return;
+    if (!_refundDirty) {
+      _goDetail();
+      return;
+    }
+    _leaving = true;
+    final l = AppLocalizations.of(context);
+    final leave = await PAlertDialog.confirmLeave(
+      context,
+      PLeaveConfirmCopy(
+        title: l.sheetLeaveTitle,
+        description: l.sheetLeaveDescription,
+        stayLabel: l.sheetLeaveStay,
+        leaveLabel: l.sheetLeaveLeave,
+      ),
+    );
+    _leaving = false;
+    if (leave && mounted) _goDetail();
+  }
+
+  void _goDetail() => setState(() {
+    _step = _Step.detail;
+    _refundFailed = false;
+  });
+
+  // ── 동작 ────────────────────────────────────────────────
+  Asset? _assetOf(Expense e) {
+    final id = e.assetRowId;
+    if (id == null) return null;
+    return ref.read(assetsProvider).value?.byRowId(id);
+  }
+
+  /// 삭제 — 확인창 → 요청. **확인창 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]** 다(스낵바 호스트는 길잡이 바깥이라 시트 ·
+  /// 확인창 위에 뜬다 — 웹과 같다). 다시 시도는 묻지 않고 바로 지운다(이미 한 번 확정한 삭제). 요청은 **컨테이너로** 나가 시트 수명과
+  /// 무관하다 — 시트를 닫은 뒤 스낵바의 [다시 시도] 도 요청을 보낸다. 요청이 끝날 때까지 확정 버튼이 로딩이고 지운 뒤에는 목록을 다시
+  /// 받고 시트를 닫으며 그동안 버튼은 다시 열리지 않는다. 폼 저장 실패(환불 처리 단계)만 시트 안 Callout 이다.
+  Future<void> _delete() async {
+    if (_busy) return;
+    final l = AppLocalizations.of(context);
+    final snack = PSnackbar.of(context);
+    final container = ProviderScope.containerOf(context);
+    final asset = _assetOf(_e);
+    Object? failure;
     final ok = await PAlertDialog.show(
       context,
       title: expenseActions.deleteConfirmTitle(context, _e),
       description: expenseActions.deleteConfirmMessageWith(context, _e, asset),
-      actionLabel: AppLocalizations.of(context).actionDelete,
+      actionLabel: l.actionDelete,
       destructive: true,
-      cancelLabel: AppLocalizations.of(context).actionCancel,
+      cancelLabel: l.actionCancel,
+      onAction: () async => failure = await _requestDelete(container, asset),
     );
     if (!ok || !mounted) return;
-
-    _setDeleting(true);
-    try {
-      final deleted = await expenseActions.delete(
-        context,
-        ref,
-        _e,
-        asset: asset,
-      );
-      if (deleted && mounted) Navigator.of(context).pop();
-    } finally {
-      if (mounted) _setDeleting(false);
+    if (failure != null) {
+      _deleteFailed(snack, l, container, asset);
+    } else {
+      _finishDelete();
     }
   }
 
-  /// 환불 처리 — 원거래에 표식을 찍는다. 거래는 지워지지 않는다.
-  ///
-  /// 환불일을 받는 것이 핵심이다. 카드사 환급은 며칠 걸려서 "언제 돌려받았나" 는
-  /// 사용자만 안다. 시각은 **정오**로 보낸다 — 자정이면 같은 날 앞서 찍힌 거래보다
-  /// 과거가 되어 카드 회차 판정이 하루 밀린다.
-  Future<void> _refund(Asset? asset) async {
-    final picked = await showRefundConfirmDialog(
-      context,
-      expense: _e,
-      asset: asset,
-    );
-    if (picked == null || !mounted) return;
+  /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null). 화면이 없어도(`mounted` 아님) 요청은 나간다.
+  Future<Object?> _requestDelete(
+    ProviderContainer container,
+    Asset? asset,
+  ) async {
+    if (mounted) setState(() => _deleting = true);
+    try {
+      await deleteExpenseRequest(container, widget.host, _e, asset: asset);
+      return null;
+    } on ApiException catch (e) {
+      return e;
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
+  }
 
-    setState(() => _refunding = true);
+  /// 지운 뒤 — 시트가 아직 열려 있으면 닫는다(없으면 이미 닫힌 것).
+  void _finishDelete() {
+    if (!mounted) return;
+    setState(() => _closing = true);
+    PBottomSheet.of(context).close();
+  }
+
+  void _deleteFailed(
+    PSnackbarApi snack,
+    AppLocalizations l,
+    ProviderContainer container,
+    Asset? asset,
+  ) {
+    snack.show(
+      message: l.expTxDeleteFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          if (mounted && _busy) return;
+          final err = await _requestDelete(container, asset);
+          if (err == null) {
+            _finishDelete();
+          } else {
+            _deleteFailed(snack, l, container, asset);
+          }
+        },
+      ),
+    );
+  }
+
+  /// 환불 처리 — 요청이 끝나고 목록을 다시 받은 뒤에 상세로 돌아온다("환불됨" Callout 이 바로 보인다).
+  Future<void> _refund() async {
+    if (_busy) return;
+    setState(() {
+      _refunding = true;
+      _refundFailed = false;
+    });
     try {
       final updated = await expenseActions.refund(
         context,
         ref,
         _e,
-        refundedAt: picked,
-        asset: asset,
+        refundedAt: refundedAtIso(_refundDate),
+        asset: _assetOf(_e),
+        silent: true,
+        throwOnError: true,
       );
-      if (updated != null && mounted) _setExpense(updated);
+      if (!mounted) return;
+      setState(() {
+        if (updated != null) _e = updated;
+        _step = _Step.detail;
+      });
+    } on ApiException {
+      if (mounted) setState(() => _refundFailed = true);
     } finally {
       if (mounted) setState(() => _refunding = false);
     }
   }
 
-  /// 환불 취소 — 표식을 걷는다. 이 거래가 합계에 다시 들어간다.
-  ///
-  /// 옛 환급 이체가 묶인 거래만 그 이체까지 되돌아간다(통장에서 다시 빠진다) — 그때만
-  /// "환급된 금액도 되돌아가요" 를 말한다. 나머지는 표식만 풀리므로, 결제가 끝난
-  /// 회차의 카드 거래면 기록만 바뀐다는 한 문구를 붙인다(D1).
-  Future<void> _cancelRefund(Asset? asset) async {
+  /// 환불 취소 — 표식을 걷는다. 이 거래가 합계에 다시 들어간다. 옛 환급 이체가 묶인 거래만 그 이체까지 되돌아간다.
+  Future<void> _cancelRefund() async {
+    if (_busy) return;
     final l = AppLocalizations.of(context);
     final message = _e.refundTransferRowId != null
         ? l.expRefundCancelConfirm
         : withClosedCycleNote(
             l,
             l.expRefundCancelConfirmPlain,
-            closedCycleSpanOfExpense(_e, asset),
+            closedCycleSpanOfExpense(_e, _assetOf(_e)),
           );
+    final snack = PSnackbar.of(context);
+    final container = ProviderScope.containerOf(context);
+    Object? failure;
     final ok = await PAlertDialog.show(
       context,
       title: l.expRefundCancel,
       description: message,
       actionLabel: l.expRefundCancel,
       cancelLabel: l.actionCancel,
+      onAction: () async => failure = await _requestCancelRefund(container),
     );
     if (!ok || !mounted) return;
+    if (failure != null) _cancelRefundFailed(snack, l, container);
+  }
 
-    setState(() => _refunding = true);
+  /// 환불 취소 요청 — 성공하면 응답으로 상세를 다시 그리고(화면이 있을 때) null, 실패하면 그 오류. 화면이 없어도 요청은 나간다.
+  Future<Object?> _requestCancelRefund(ProviderContainer container) async {
+    if (mounted) setState(() => _cancelling = true);
     try {
-      final updated = await expenseActions.cancelRefund(ref, _e);
-      if (updated != null && mounted) _setExpense(updated);
+      final updated = await cancelRefundRequest(container, _e);
+      if (mounted) setState(() => _e = updated);
+      return null;
+    } on ApiException catch (e) {
+      return e;
     } finally {
-      if (mounted) setState(() => _refunding = false);
+      if (mounted) setState(() => _cancelling = false);
+    }
+  }
+
+  void _cancelRefundFailed(
+    PSnackbarApi snack,
+    AppLocalizations l,
+    ProviderContainer container,
+  ) {
+    snack.show(
+      message: l.expRefundCancelFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          if (mounted && _busy) return;
+          final err = await _requestCancelRefund(container);
+          if (err != null) _cancelRefundFailed(snack, l, container);
+        },
+      ),
+    );
+  }
+
+  /// [수정] — 같은 시트 안 한 단계다(2-2A · 7a). 저장하면 목록을 다시 받은 뒤 새 값의 상세로, ← 는 상세로 돌아간다.
+  double _detailScroll = 0;
+
+  void _edit() {
+    if (_busy) return;
+    _detailScroll = currentSheetScroll(context);
+    setState(() => _step = _Step.edit);
+  }
+
+  /// 수정 → 상세. 바뀐 값이 있으면 먼저 "작성한 내용이 사라져요".
+  Future<void> _leaveEdit() async {
+    if (_leaving) return;
+    if (!widget.hooks.form.dirty()) {
+      setState(() => _step = _Step.detail);
+      restoreSheetScroll(context, _detailScroll);
+      return;
+    }
+    _leaving = true;
+    final l = AppLocalizations.of(context);
+    final leave = await PAlertDialog.confirmLeave(
+      context,
+      PLeaveConfirmCopy(
+        title: l.sheetLeaveTitle,
+        description: l.sheetLeaveDescription,
+        stayLabel: l.sheetLeaveStay,
+        leaveLabel: l.sheetLeaveLeave,
+      ),
+    );
+    _leaving = false;
+    if (leave && mounted) {
+      setState(() => _step = _Step.detail);
+      restoreSheetScroll(context, _detailScroll);
     }
   }
 
   /// [잔액 고치기] — 이 시트를 닫고 결제계좌의 수정 폼으로 간다(D9).
-  ///
-  /// 시트가 닫히면 이 context 가 풀리므로 오래 사는 자리를 먼저 짚어 둔다.
   void _openFixBalance(int paymentAssetRowId) {
-    final host = hostContextOf(context);
-    Navigator.of(context).pop();
+    final host = widget.host;
+    PBottomSheet.of(context).close();
     pushAssetEdit(host, paymentAssetRowId);
   }
 
-  String _paymentMethodLabel(AppLocalizations l, String? m) => switch (m) {
-    'CASH' => l.expPayCash,
-    'CARD' => l.expPayCard,
-    'TRANSFER' => l.expPayTransfer,
-    'OTHER' => l.expPayOther,
-    _ => '',
-  };
+  /// 21-3 이 단계로 옮길 표면들 — 그때까지 지금처럼 시트를 닫고 옛 표면을 연다.
+  void _openLegacy(void Function(BuildContext host) open) {
+    final host = widget.host;
+    PBottomSheet.of(context).close();
+    open(host);
+  }
 
+  // ── 그리기 ──────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
-    // 이 거래의 종류로 판정한다 — 화면 카드('거래 상세')가 켜졌거나 그 종류 카드가
-    // 켜졌으면 가린다. 부호가 아니라 타입으로 가른다(환불이 음수 지출이라 부호로는 샌다).
+    final isIncome = _e.expenseType == 'INCOME';
+    if (_step == _Step.refund) return _buildRefund(l);
+    if (_step == _Step.edit) {
+      return TxFormFlow(
+        // 같은 시트 안이라 키를 거래로 — 같은 제목의 다른 거래에서 폼이 이어지지 않게
+        key: ValueKey('tx-edit-${_e.rowId}'),
+        edit: _e,
+        probe: widget.hooks.form,
+        onBack: _leaveEdit,
+        onSaved: (saved) async {
+          if (!mounted) return;
+          setState(() {
+            _e = saved;
+            _step = _Step.detail;
+          });
+        },
+      );
+    }
+    return PBottomSheetContent(
+      // 단계마다 다른 시트 내용이다 — 키가 없으면 스크롤 위치가 다음 단계에 따라온다
+      key: const ValueKey('tx-detail'),
+      title: isIncome ? l.expIncomeDetail : l.expExpenseDetail,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      scrollFog: true,
+      body: _buildDetailBody(l),
+      footerRow: _footerRow(l),
+    );
+  }
+
+  /// 바닥 — 자동 거래는 없음 · 환불된 거래는 [삭제] 만 · 그 밖은 [삭제][수정].
+  Widget? _footerRow(AppLocalizations l) {
+    final auto = _e.autoSource != null;
+    if (auto) return null;
+    final delete = PButton(
+      label: l.actionDelete,
+      variant: PButtonVariant.ghost,
+      ghostColor: PButtonGhostColor.critical,
+      size: PButtonSize.large,
+      loading: _deleting,
+      onPressed: _busy ? null : _delete,
+    );
+    if (!expenseActions.canEdit(_e)) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [delete],
+      );
+    }
+    return PFormDeleteFooter(
+      deleteLabel: l.actionDelete,
+      onDelete: _busy ? null : _delete,
+      save: PButton(
+        label: l.actionEdit,
+        size: PButtonSize.large,
+        onPressed: _busy ? null : _edit,
+      ),
+    );
+  }
+
+  Widget _buildRefund(AppLocalizations l) {
     final masked = ref
         .watch(maskFlagsProvider('ledger.txDetail'))
         .ofType(_e.expenseType);
+    return PBottomSheetContent(
+      key: const ValueKey('tx-detail-refund-step'),
+      title: l.expRefundConfirmTitle,
+      closeLabel: l.actionClose,
+      // 닫기 원은 한 단계가 아니라 시트 전체(← · 뒤로 가기가 한 단계)
+      onClose: () => PBottomSheet.of(context).requestClose(wholeSheet: true),
+      onBack: _leaveRefund,
+      backLabel: l.actionBack,
+      flushBody: true,
+      scrollFog: true,
+      body: RefundStepBody(
+        expense: _e,
+        asset: _assetOf(_e),
+        value: _refundDate,
+        masked: masked,
+        failureMessage: _refundFailed ? l.expRefundFailed : null,
+        onChanged: (d) => setState(() {
+          _refundDate = DateTime(d.year, d.month, d.day);
+          _refundFailed = false;
+        }),
+      ),
+      footer: [
+        PButton(
+          label: l.expRefundConfirm,
+          size: PButtonSize.large,
+          loading: _refunding,
+          onPressed: _refunding ? null : _refund,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailBody(AppLocalizations l) {
+    final c = context.colors;
     final e = _e;
     final isIncome = e.expenseType == 'INCOME';
-    // 분할 내역 — 퀵액션 배지 개수 + 요약 카드(내역·비율) 표시용.
-    final splits =
-        ref.watch(expenseSplitsProvider(e.rowId)).value ??
-        const <ExpenseSplit>[];
-    final splitCount = splits.length;
-    final categories =
-        ref.watch(categoriesProvider).value ?? const <ExpenseCategory>[];
+    final masked = ref
+        .watch(maskFlagsProvider('ledger.txDetail'))
+        .ofType(e.expenseType);
+    final flags = ref.watch(maskFlagsProvider('ledger.txDetail'));
+    final categoriesAsync = ref.watch(categoriesProvider);
+    final assetsAsync = ref.watch(assetsProvider);
+    final loading =
+        (categoriesAsync.isLoading && !categoriesAsync.hasValue) ||
+        (assetsAsync.isLoading && !assetsAsync.hasValue);
+    if (loading) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: const [TxDetailSkeleton()],
+      );
+    }
 
-    // 카테고리 색은 다크에서 light variant 로 swap(웹 getPaletteByColor 정합) — parseColor(raw) 금지.
-    final fg = resolveChartColor(context, e.categoryColor, fallback: t.fgBrand);
-    final icon = lucideByName(e.categoryIcon, fallback: LucideIcons.tag);
-
-    final assets = ref.watch(assetsProvider).value ?? const [];
-    final asset = assets.where((a) => a.rowId == e.assetRowId).firstOrNull;
-    _assetForDelete = asset;
-    // 결제가 끝난 회차에 걸린 카드 거래면 결제계좌 — 환불됨 배너의 [잔액 고치기].
-    final fixBalance = fixBalanceTargetOf(e, asset);
-    final assetLabel = asset == null
+    final categories = categoriesAsync.value ?? const <ExpenseCategory>[];
+    final assets = assetsAsync.value ?? const <Asset>[];
+    final asset = e.assetRowId == null ? null : assets.byRowId(e.assetRowId!);
+    final category = e.categoryRowId == null
         ? null
-        : (asset.institution != null && asset.institution!.isNotEmpty
-              ? '${asset.institution} · ${asset.assetName}'
-              : asset.assetName);
+        : categories.byRowId(e.categoryRowId!);
 
-    final dayStr = (e.expenseDate ?? '').length >= 10
-        ? e.expenseDate!.substring(0, 10)
+    // 카테고리 색은 다크에서 light variant 로 swap — parseColor(raw) 금지.
+    final tileFg = resolveChartColor(
+      context,
+      category?.color ?? e.categoryColor,
+      fallback: c.fgBrand,
+    );
+    final tileIcon = lucideByName(
+      category?.icon ?? e.categoryIcon,
+      fallback: LucideIcons.tag,
+    );
+    final amountText = krwSigned(
+      e.amount.abs(),
+      masked,
+      sign: isIncome ? '+' : kMinus,
+      unit: true,
+    );
+    final displayName = expenseActions.displayNameOf(context, e);
+
+    // 상태 Callout — 결제가 끝난 회차의 카드 거래면 결제계좌 수정 폼으로 가는 [잔액 고치기] 를 단다(D9)
+    final fixBalance = fixBalanceTargetOf(e, asset);
+    final refundedDay = (e.refundedAt ?? '').length >= 10
+        ? DateTime.tryParse(e.refundedAt!.substring(0, 10))
         : null;
-    final timeStr = (e.expenseDate ?? '').length >= 16
-        ? e.expenseDate!.substring(11, 16)
-        : null;
-    final timeLabel = (timeStr != null && timeStr != '00:00') ? timeStr : null;
 
-    final paymentLabel = _paymentMethodLabel(l, e.paymentMethod);
-    // 삭제 확인창이 부르는 이름과 같은 규칙 — 한 군데서만 정한다.
-    final displayMerchant = expenseActions.displayNameOf(context, e);
-    // 웹 TxDetailDialog 매칭: 수입=fg-brand (초록), 지출=fg-primary (검정)
-    final amountColor = t.fgPrimary;
-    final amountText = masked
-        ? '••••••'
-        : '${isIncome ? '+' : '−'}${krw(e.amount, abs: true)}';
+    final splitsAsync = ref.watch(expenseSplitsProvider(e.rowId));
+    final splits = splitsAsync.value ?? const [];
+    final recurring = ref.watch(recurringListProvider).value;
+    final dutch = ref.watch(dutchPayListProvider).value;
+    final recurringCount = linkedRecurringCount(recurring, e.rowId);
+    final dutchCount = linkedDutchPayCount(dutch, e.rowId);
+    final auto = e.autoSource != null;
 
-    return ListView(
-      controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      children: [
-        // Hero — 플랫 좌측 정렬(design 신판 토스 톤, PDetailHero)
-        PDetailHero(
-          icon: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: softBg(context, fg),
-              borderRadius: PRadius.tile(32),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 16, color: fg),
-          ),
-          title: displayMerchant,
-          meta: dayStr == null
+    final moreRows = [
+      if (expenseActions.canRefund(e))
+        TxMoreRow(
+          key: 'refund',
+          icon: LucideIcons.undo2,
+          label: l.expRefund,
+          onTap: _busy ? null : _openRefund,
+        ),
+      // 분할도 환불된 거래 · 시스템이 만든 거래에는 안 띄운다 — 서버가 막는다(EXP_043)
+      if (!e.isRefunded && !auto)
+        TxMoreRow(
+          key: 'split',
+          icon: LucideIcons.scissors,
+          label: l.expSplit,
+          value: splits.isNotEmpty ? l.expSplitValue(splits.length) : null,
+          onTap: _busy
               ? null
-              : (timeLabel != null ? '$dayStr · $timeLabel' : dayStr),
-          amount: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: amountText,
-                  style: TextStyle(
-                    fontFamily: PTypo.sans,
-                    color: amountColor,
-                    fontSize: PFontSize.displayMd,
-                    fontWeight: PFontWeight.bold,
-                    letterSpacing: -0.96,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                if (!masked)
-                  TextSpan(
-                    text: wonUnit(),
-                    style: TextStyle(
-                      fontFamily: PTypo.sans,
-                      color: amountColor,
-                      fontSize: PFontSize.h4,
-                      fontWeight: PFontWeight.bold,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+              : () => _openLegacy((host) => showSplitTxDialog(host, e)),
         ),
-        // Fields — 카드 없는 플랫 행(PDetailField, 웹 body-sm=앱 body 정합)
-        PDetailFieldGroup(
-          children: [
-            PDetailField(
-              label: l.expCategory,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: fg,
-                      borderRadius: PRadius.brXs,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    e.categoryName ?? l.expUncategorized,
-                    style: PTypo.body.copyWith(
-                      color: t.fgPrimary,
-                      fontWeight: PFontWeight.semi,
-                    ),
-                  ),
-                ],
+      // 자동으로 만들어진 거래는 반복 · 더치페이의 원본이 될 수 없다 — 숨기지 않고 막힌 줄로(서버도 EXP_050)
+      TxMoreRow(
+        key: 'recurring',
+        icon: LucideIcons.repeat,
+        label: l.expConvertRecurring,
+        value: recurringCount > 0 ? l.expLinked : null,
+        disabled: auto,
+        onTap: _busy
+            ? null
+            : () => _openLegacy(
+                (host) => showRecurringSettingsDialog(host, expense: e),
               ),
-            ),
-            PDetailField(
-              label: l.expAmount,
-              child: Text(
-                '$amountText${masked ? '' : wonUnit()}',
-                style: PTypo.body.copyWith(
-                  color: t.fgPrimary,
-                  fontWeight: PFontWeight.bold,
-                ),
-              ),
-            ),
-            if (e.originalCurrency != null && e.originalAmount != null)
-              PDetailField(
-                label: l.expForeignPayment,
-                child: Text(
-                  e.exchangeRate != null
-                      ? '${formatOriginalAmount(e.originalAmount!, e.originalCurrency!, Localizations.localeOf(context).toString())} × ${_trimRate(e.exchangeRate!)}'
-                      : formatOriginalAmount(
-                          e.originalAmount!,
-                          e.originalCurrency!,
-                          Localizations.localeOf(context).toString(),
-                        ),
-                  style: PTypo.body.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.medium,
-                  ),
-                ),
-              ),
-            if (assetLabel != null)
-              PDetailField(
-                label: l.expAccountCard,
-                child: Text(
-                  assetLabel,
-                  style: PTypo.body.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.medium,
-                  ),
-                ),
-              ),
-            if (paymentLabel.isNotEmpty)
-              PDetailField(
-                label: l.expPaymentMethod,
-                child: Text(
-                  paymentLabel,
-                  style: PTypo.body.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.medium,
-                  ),
-                ),
-              ),
-            if (dayStr != null)
-              PDetailField(
-                label: l.expDateTime,
-                child: Text(
-                  timeLabel != null ? '$dayStr $timeLabel' : dayStr,
-                  style: PTypo.body.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.medium,
-                  ),
-                ),
-              ),
-            PDetailField(
-              label: l.expDescription,
-              child: Text(
-                (e.description ?? '').isEmpty ? l.expValueNone : e.description!,
-                style: PTypo.body.copyWith(
-                  color: (e.description ?? '').isEmpty
-                      ? t.fgTertiary
-                      : t.fgPrimary,
-                  fontWeight: PFontWeight.medium,
-                ),
-              ),
-            ),
-          ],
-        ),
-        // 시스템이 만든 거래 — 왜 못 고치는지 알려 준다. 버튼만 없으면 고장으로 보인다.
-        if (e.autoSource != null)
-          PDetailSection(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpace.x12,
-                vertical: PSpace.x8,
-              ),
-              decoration: BoxDecoration(
-                color: t.bgMuted,
-                borderRadius: PRadius.brMd,
-              ),
-              child: Row(
-                children: [
-                  Icon(LucideIcons.lock, size: 14, color: t.fgTertiary),
-                  const SizedBox(width: PSpace.x8),
-                  Expanded(
-                    child: Text(switch (e.autoSource) {
-                      'TRADE_REALIZED' => l.expAutoSourceTradeRealized,
-                      'TRANSFER_INTEREST' => l.expAutoSourceTransferInterest,
-                      // 카드 이월 — "원래 거래를 지우면…" 은 틀린 말이다. 원래
-                      // 거래가 없다(23차 10).
-                      'CARD_CARRYOVER' ||
-                      'CARD_CARRYOVER_DUE' => l.expAutoSourceCardCarryover,
-                      _ => l.expAutoSourceDefault,
-                    }, style: PTypo.caption.copyWith(color: t.fgTertiary)),
-                  ),
-                ],
-              ),
-            ),
-          ),
+      ),
+      TxMoreRow(
+        key: 'dutch',
+        icon: LucideIcons.users,
+        label: l.dutchTitle,
+        value: dutchCount > 0 ? l.expTxCount(dutchCount) : null,
+        disabled: auto,
+        onTap: _busy
+            ? null
+            : () => _openLegacy((host) => showDutchPayFromTxDialog(host, e)),
+      ),
+    ];
 
-        // 환불됨 — 이 거래는 합계에서 빠져 있다. 되돌릴 자리를 함께 준다.
-        // 웹도 같은 자리·같은 문구다(설계서 7절). 결제가 끝난 회차의 카드 거래면
-        // 통장은 그대로라 결제계좌 수정 폼으로 가는 [잔액 고치기] 를 단다(D9).
+    final merchant = (e.merchant ?? '').trim();
+    final day = e.expenseDateOnly;
+    final dayParsed = day == null ? null : DateTime.tryParse(day);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TxDetailHead(
+          tileBackground: softBg(context, tileFg),
+          tileColor: tileFg,
+          tileIcon: tileIcon,
+          name: displayName,
+          amountText: amountText,
+          amountColor: isIncome ? c.fgBrand : c.fgNeutral,
+          dateTime: txDetailDateTimeLabel(e.expenseDate),
+        ),
         if (e.isRefunded)
-          PDetailSection(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpace.x12,
-                vertical: PSpace.x8,
-              ),
-              decoration: BoxDecoration(
-                color: t.bgMuted,
-                borderRadius: PRadius.brMd,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Icon(LucideIcons.undo2, size: 15, color: t.fgTertiary),
-                      const SizedBox(width: PSpace.x8),
-                      Expanded(
-                        child: Text(
-                          l.expRefundedAt(e.refundedAt!.substring(0, 10)),
-                          style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-                        ),
-                      ),
-                      const SizedBox(width: PSpace.x8),
-                      PButton(
-                        label: l.expRefundCancel,
-                        variant: PButtonVariant.outline,
-                        size: PButtonSize.sm,
-                        loading: _refunding,
-                        onPressed: _deleting || _refunding
-                            ? null
-                            : () => _cancelRefund(asset),
-                      ),
-                    ],
-                  ),
-                  if (fixBalance != null) ...[
-                    const SizedBox(height: PSpace.x8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: PButton(
-                        label: l.expFixBalance,
-                        variant: PButtonVariant.outline,
-                        size: PButtonSize.sm,
-                        onPressed: _deleting || _refunding
-                            ? null
-                            : () => _openFixBalance(fixBalance),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+          TxNoticeCallout(
+            icon: LucideIcons.undo2,
+            text: l.expRefundedAt(
+              refundedDay == null ? '' : monthDay(refundedDay),
             ),
-          ),
-        // 기록만 — 결제가 끝난 회차에 뒤늦게 적은 카드 지출(닫힌 회차 R2). 계좌에서는
-        // 안 빠졌다는 것을 상세에서 한 번 더 말한다. 할부는 지난 회차분만 기록용이라
-        // 금액이 거래보다 작으면 "이 중 N원" 으로 말한다(행 배지는 통째일 때만, D10).
-        // 웹도 같은 자리·같은 문구다.
-        if (e.hasRecordOnlyPart)
-          PDetailSection(
-            child: Container(
-              key: const ValueKey('record-only-note'),
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpace.x12,
-                vertical: PSpace.x8,
-              ),
-              decoration: BoxDecoration(
-                color: t.bgMuted,
-                borderRadius: PRadius.brMd,
-              ),
-              child: Text(
-                e.isRecordOnly
-                    ? l.expRecordOnlyNote
-                    : l.expRecordOnlyPartNote(
-                        krwSigned(e.recordOnlyShare, masked, unit: true),
-                      ),
-                style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-              ),
-            ),
-          ),
-        // Quick actions — 원형 아이콘(PDetailQuickAction, 연결 시 active)
-        PDetailSection(
-          child: Row(
-            children: [
-              // 환불 — 누르면 확인 다이얼로그(환불일)이고, 확인하면 원거래에 표식이
-              // 찍혀 합계에서 빠진다. 시트를 닫지 않는다 — 표식이 찍힌 모습(배너)을 그
-              // 자리에서 보여 준다. 띄울지는 [ExpenseActions.canRefund] 하나가 정한다
-              // (지출·환불 전·사람이 쓴 거래·거래일이 오늘 이전).
-              if (expenseActions.canRefund(e))
-                Expanded(
-                  child: PDetailQuickAction(
-                    icon: LucideIcons.undo2,
-                    label: l.expRefund,
-                    onTap: _deleting || _refunding
-                        ? null
-                        : () => _refund(asset),
-                  ),
+            actions: [
+              if (fixBalance != null)
+                PButton(
+                  label: l.expFixBalance,
+                  variant: PButtonVariant.neutralOutline,
+                  size: PButtonSize.small,
+                  onPressed: _busy ? null : () => _openFixBalance(fixBalance),
                 ),
-              // 분할도 환불된 거래·시스템이 만든 거래에는 안 띄운다 — 서버가 막으므로
-              // 눌러 봐야 토스트만 뜬다(EXP_043 · 23차 10).
-              if (!e.isRefunded && e.autoSource == null)
-                Expanded(
-                  child: PDetailQuickAction(
-                    icon: LucideIcons.scissors,
-                    label: l.expSplit,
-                    active: splitCount > 0,
-                    badge: splitCount > 0 ? l.expItemsCount(splitCount) : null,
-                    onTap: _deleting
-                        ? null
-                        : () {
-                            Navigator.of(context).pop();
-                            showSplitTxDialog(context, e);
-                          },
-                  ),
-                ),
-              // 자동으로 만들어진 거래(이월 · 매도 손익 · 이체 이자)는 반복·더치페이의 원본이
-              // 될 수 없다 — 이월로 반복을 만들면 매달 "이전 미결제 사용액" 이라는 일반
-              // 지출이 생겼다. 숨기지 않고 끈다(사용자 결정 2026-09-22). 서버도 EXP_050 으로
-              // 거절한다.
-              Expanded(
-                child: PDetailQuickAction(
-                  icon: LucideIcons.repeat,
-                  label: l.expConvertRecurring,
-                  onTap: _deleting || e.autoSource != null
-                      ? null
-                      : () {
-                          Navigator.of(context).pop();
-                          showRecurringSettingsDialog(context, expense: e);
-                        },
-                ),
-              ),
-              Expanded(
-                child: PDetailQuickAction(
-                  icon: LucideIcons.users,
-                  label: l.dutchTitle,
-                  onTap: _deleting || e.autoSource != null
-                      ? null
-                      : () {
-                          Navigator.of(context).pop();
-                          showDutchPayFromTxDialog(context, e);
-                        },
-                ),
+              PButton(
+                label: l.expRefundCancel,
+                variant: PButtonVariant.neutralOutline,
+                size: PButtonSize.small,
+                loading: _cancelling,
+                onPressed: _busy ? null : _cancelRefund,
               ),
             ],
           ),
-        ),
-        // 분할 내역 요약 — 분할이 있으면 접을 수 있는 카드로 항목·비율 표시(쉬운 확인)
-        if (splits.isNotEmpty)
-          _SplitSummaryCard(
-            splits: splits,
-            isIncome: isIncome,
-            total: e.amount.abs(),
-            categories: categories,
-            expanded: _splitExpanded,
-            onToggle: () => setState(() => _splitExpanded = !_splitExpanded),
-            masked: masked,
-            tokens: t,
+        // 기록만 — 결제가 끝난 회차에 뒤늦게 적은 카드 지출. 할부는 지난 회차분만이라 금액이 거래보다 작으면 "이 중 N원" 으로 말한다
+        if (e.hasRecordOnlyPart)
+          TxNoticeCallout(
+            icon: LucideIcons.info,
+            text: e.isRecordOnly
+                ? l.expRecordOnlyNote
+                : l.expRecordOnlyPartNote(
+                    krwSigned(e.recordOnlyShare, masked, unit: true),
+                  ),
           ),
-        // Merchant history — 같은 가맹점·같은 달 이전 거래
-        if ((e.merchant ?? '').isNotEmpty && dayStr != null)
-          _MerchantHistorySection(
-            merchant: e.merchant!,
-            year: int.parse(dayStr.substring(0, 4)),
-            month: int.parse(dayStr.substring(5, 7)),
-            excludeRowId: e.rowId,
+        // 시스템이 만든 거래 — 왜 못 고치는지 알려 준다. 버튼만 없으면 고장으로 보인다
+        if (auto)
+          TxNoticeCallout(
+            icon: LucideIcons.lock,
+            text: switch (e.autoSource) {
+              'TRADE_REALIZED' => l.expAutoSourceTradeRealized,
+              'TRANSFER_INTEREST' => l.expAutoSourceTransferInterest,
+              // 카드 이월 — "원래 거래를 지우면…" 은 틀린 말이다. 원래 거래가 없다
+              'CARD_CARRYOVER' ||
+              'CARD_CARRYOVER_DUE' => l.expAutoSourceCardCarryover,
+              _ => l.expAutoSourceDefault,
+            },
+          ),
+        TxKvList(
+          semanticLabel: l.expExpenseDetail,
+          rows: [
+            TxKvRow(
+              label: l.expCategory,
+              value: txCategoryLabel(e, categories, l.expUncategorized),
+            ),
+            if (e.originalCurrency != null && e.originalAmount != null)
+              TxKvRow(label: l.expForeignPayment, value: _foreignText(e)),
+            TxKvRow(
+              label: l.expAccountCard,
+              value: txAssetLabel(
+                institution: asset?.institution,
+                assetName: asset?.assetName,
+                fallbackName: e.assetName,
+              ),
+            ),
+            TxKvRow(
+              label: l.expPaymentMethod,
+              value: txPaymentMethodLabel(l, e.paymentMethod),
+            ),
+            TxKvRow(label: l.expDescription, value: e.description),
+          ],
+        ),
+        TxMoreSection(rows: moreRows),
+        if (splitsAsync.hasError && splits.isEmpty)
+          TxSplitFailure(
+            onRetry: () => ref.invalidate(expenseSplitsProvider(e.rowId)),
+          )
+        else if (splitsAsync.isLoading && splits.isEmpty)
+          const TxSplitSkeleton()
+        else if (splits.isNotEmpty)
+          TxSplitSection(
+            splits: splits,
+            categories: categories,
+            total: e.amount.abs(),
+            isIncome: isIncome,
             masked: masked,
-            tokens: t,
+          ),
+        if (merchant.isNotEmpty && dayParsed != null)
+          _HistoryHost(
+            expense: e,
+            merchant: merchant,
+            year: dayParsed.year,
+            month: dayParsed.month,
+            categories: categories,
+            flags: flags,
+            masked: masked,
           ),
       ],
     );
   }
+
+  String _foreignText(Expense e) {
+    final locale = Localizations.localeOf(context).toString();
+    final base = formatOriginalAmount(
+      e.originalAmount!,
+      e.originalCurrency!,
+      locale,
+    );
+    return e.exchangeRate != null
+        ? '$base × ${txTrimRate(e.exchangeRate!)}'
+        : base;
+  }
 }
 
-/// "이마트에서의 이전 거래" 섹션 — 같은 가맹점·같은 달 거래 리스트.
-class _MerchantHistorySection extends ConsumerWidget {
-  const _MerchantHistorySection({
+/// "이 가맹점 이번 달" — 같은 가맹점 · 같은 달 거래를 받아 와 묶음을 그린다. 이 거래만 있으면 묶음이 없다.
+class _HistoryHost extends ConsumerWidget {
+  const _HistoryHost({
+    required this.expense,
     required this.merchant,
     required this.year,
     required this.month,
-    required this.excludeRowId,
+    required this.categories,
+    required this.flags,
     required this.masked,
-    required this.tokens,
   });
+
+  final Expense expense;
   final String merchant;
   final int year;
   final int month;
-  final int excludeRowId;
+  final List<ExpenseCategory> categories;
+  final MaskFlags flags;
   final bool masked;
-  final GrooTokens tokens;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final async = ref.watch(
-      merchantMonthExpensesProvider((
-        merchant: merchant,
-        year: year,
-        month: month,
-      )),
-    );
-    final all = async.value ?? const <Expense>[];
-    final history = all.where((x) => x.rowId != excludeRowId).take(5).toList();
-    if (history.isEmpty) return const SizedBox.shrink();
-
-    final monthCount = all.length;
-    final monthTotal = all.fold<int>(0, (s, x) => s + x.amount.abs());
-    final categories = ref.watch(categoriesProvider).value ?? const [];
-
-    // 가계부 메인 리스트 미러 — 날짜별 그룹(provider 최신순 유지).
-    // 일 합계는 상단 스탯이 대신하므로 헤더는 날짜(요일)만.
-    final dayGroups = <String, List<Expense>>{};
-    for (final h in history) {
-      final k = h.expenseDateOnly ?? '';
-      dayGroups.putIfAbsent(k, () => <Expense>[]).add(h);
-    }
-
-    // 섹션 제목 + 2열 스플릿 통계(이번 달 거래/총 금액) + 플랫 리스트 —
-    // design 신판(카드 제거), 마스킹 시 '원' 미노출(web MaskAmount 컨벤션).
-    return PDetailSection(
-      title: Text(l.expPrevTxAt(merchant)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: PSpace.x4, bottom: PSpace.x4),
-            child: PDetailStatSplit(
-              items: [
-                PDetailStat(
-                  label: l.expThisMonth,
-                  value: l.expTimesCount(monthCount),
-                ),
-                PDetailStat(
-                  label: l.expTotal,
-                  value: masked
-                      ? '••••••'
-                      : krwSigned(monthTotal, false, unit: true),
-                ),
-              ],
-            ),
-          ),
-          for (final entry in dayGroups.entries) ...[
-            // 웹 DateGroupHeader 미러 — "7월 8일"(primary/bold) + "수"(tertiary).
-            // 이번 달 내역이므로 연도 없이 날짜만(사용자 결정).
-            Padding(
-              padding: const EdgeInsets.only(top: PSpace.x12, bottom: 6),
-              child: Builder(
-                builder: (context) {
-                  final d = DateTime.tryParse(entry.key);
-                  if (d == null) {
-                    return Text(
-                      entry.key,
-                      style: PTypo.bodySm.copyWith(color: tokens.fgSecondary),
-                    );
-                  }
-                  final label = formatDay(d);
-                  return Row(
-                    children: [
-                      Text(
-                        label.md,
-                        style: PTypo.bodySm.copyWith(
-                          color: tokens.fgPrimary,
-                          fontWeight: PFontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: PSpace.x8),
-                      Text(
-                        label.dow,
-                        style: PTypo.bodySm.copyWith(color: tokens.fgTertiary),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            for (final h in entry.value)
-              ExpenseRow(
-                gutter: 0,
-                expense: h,
-                category: h.categoryRowId == null
-                    ? null
-                    : categories.byRowId(h.categoryRowId!),
-                flags: ref.watch(maskFlagsProvider('ledger.txDetail')),
-                interactive: false,
-              ),
-          ],
-        ],
-      ),
+    final all =
+        ref
+            .watch(
+              merchantMonthExpensesProvider((
+                merchant: merchant,
+                year: year,
+                month: month,
+              )),
+            )
+            .value ??
+        const <Expense>[];
+    final history = txHistoryOf(all, expense.rowId);
+    if (history.rows.isEmpty) return const SizedBox.shrink();
+    return TxHistorySection(
+      history: history,
+      categories: categories,
+      flags: flags,
+      isIncome: expense.expenseType == 'INCOME',
+      masked: masked,
     );
   }
-}
-
-/// 분할 내역 요약 카드 — 헤더(개수·합계·펼침) + 비율 바 + 항목별(이름·카테고리·비율·금액).
-/// 거래에 분할이 있을 때 거래 상세에서 한눈에 확인용(웹 TxDetailDialog 분할 요약 정합).
-class _SplitSummaryCard extends StatelessWidget {
-  const _SplitSummaryCard({
-    required this.splits,
-    required this.isIncome,
-    required this.total,
-    required this.categories,
-    required this.expanded,
-    required this.onToggle,
-    required this.masked,
-    required this.tokens,
-  });
-  final List<ExpenseSplit> splits;
-  final bool isIncome;
-  final int total;
-  final List<ExpenseCategory> categories;
-  final bool expanded;
-  final VoidCallback onToggle;
-
-  /// 히어로 금액과 **같은 값**이라 같이 가려야 한다 — 안 그러면 위를 가려도 여기서 보인다.
-  final bool masked;
-  final GrooTokens tokens;
-
-  Color _colorFor(BuildContext context, int categoryRowId) => resolveChartColor(
-    context,
-    categories.byRowId(categoryRowId)?.color,
-    fallback: tokens.fgBrand,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final l = AppLocalizations.of(context);
-    return PDetailSection(
-      title: Text('${l.expSplit} ${l.expItemsCount(splits.length)}'),
-      // 접기 토글 — 합계 우측 chevron (사용자 결정, 웹 정합)
-      trailing: InkWell(
-        onTap: onToggle,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${l.expTotal} ${krwSigned(total, masked, unit: true)}',
-              style: PTypo.caption.copyWith(color: t.fgTertiary),
-            ),
-            const SizedBox(width: 6),
-            Icon(
-              expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
-              size: 16,
-              color: t.fgTertiary,
-            ),
-          ],
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ClipRRect(
-            borderRadius: PRadius.brFull,
-            child: SizedBox(
-              height: 8,
-              child: Row(
-                children: [
-                  for (final s in splits)
-                    if (total > 0 && s.amount > 0)
-                      Flexible(
-                        flex: s.amount,
-                        child: Container(
-                          color: _colorFor(context, s.categoryRowId),
-                        ),
-                      ),
-                ],
-              ),
-            ),
-          ),
-          if (expanded)
-            for (int i = 0; i < splits.length; i++)
-              Padding(
-                padding: EdgeInsets.only(
-                  top: 10,
-                  bottom: i == splits.length - 1 ? 0 : 0,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _colorFor(context, splits[i].categoryRowId),
-                        borderRadius: PRadius.brXs,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (splits[i].label?.trim().isNotEmpty ?? false)
-                                ? splits[i].label!
-                                : (splits[i].categoryName ?? l.expItem),
-                            style: PTypo.bodySm.copyWith(
-                              color: t.fgPrimary,
-                              fontWeight: PFontWeight.semi,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            '${splits[i].categoryName ?? '-'} · '
-                            '${total > 0 ? ((splits[i].amount / total) * 100).round() : 0}%',
-                            style: PTypo.caption.copyWith(color: t.fgTertiary),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      krwSigned(
-                        splits[i].amount,
-                        masked,
-                        sign: isIncome ? '+' : '−',
-                        unit: true,
-                      ),
-                      // 행 금액 중립색 — 가계부 리스트 정합(사용자 결정)
-                      style: PTypo.bodySm.copyWith(
-                        color: t.fgPrimary,
-                        fontWeight: PFontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 1400.000000 을 1400 으로 — 상세에 소수 6자리를 그대로 보여 주면 지저분하다.
-String _trimRate(double rate) {
-  final s = rate.toStringAsFixed(6);
-  return s.contains('.')
-      ? s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '')
-      : s;
 }

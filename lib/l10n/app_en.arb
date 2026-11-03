@@ -1137,7 +1137,7 @@
   "expInstallment": "Installment",
   "expRefund": "Refund",
   "expRefundConfirmTitle": "Mark as refunded",
-  "expRefundConfirmBody": "Marks this transaction as refunded and returns {amount} to {asset}. It leaves your totals.",
+  "expRefundConfirmBody": "Marks this transaction as refunded. It leaves your totals, and {amount} returns to {asset}.",
   "@expRefundConfirmBody": {
     "placeholders": {
       "amount": {
@@ -1152,7 +1152,7 @@
   "expRefundConfirmBodyCardNoAccount": "No payment account is linked, so only the card balance is adjusted.",
   "expRefundDate": "Refund date",
   "expRefundConfirm": "Mark refunded",
-  "expRefundedAt": "Refunded · {date}",
+  "expRefundedAt": "Refunded · {date} — left out of your totals.",
   "@expRefundedAt": {
     "placeholders": {
       "date": {
@@ -1199,7 +1199,7 @@
   "transferPrincipal": "Principal",
   "transferWithdrawn": "Total withdrawn",
   "transferDeleted": "Transfer deleted",
-  "transferDeleteConfirm": "Delete this transfer? Both assets' balances will be restored. A deleted transfer cannot be restored.",
+  "transferDeleteConfirm": "Delete this transfer? Both accounts' balances go back to before the transfer. A deleted transfer can't be restored.",
   "transferDeleteTitle": "Delete transfer",
   "transferAutoTradeSettlement": "Created automatically to cover a shortfall when buying. It disappears when the purchase is cancelled.",
   "transferAutoCardPayment": "Created by a card auto-payment. It is tied to the billing cycle and cannot be edited separately.",
@@ -1862,7 +1862,6 @@
     }
   },
   "expDeleted": "Transaction deleted",
-  "expDeleteFailed": "Delete failed",
   "expSplitMismatch": "Split doesn't match the amount",
   "expSplitDiff": "New total {total}원 · Split sum {sum}원 · {diff}원 diff",
   "@expSplitDiff": {
@@ -1919,8 +1918,8 @@
   },
   "expIncomeSource": "Income source",
   "expPayee": "Merchant",
-  "expIncomeSourcePlaceholder": "e.g. Forest Inc.",
-  "expPayeePlaceholder": "e.g. Starbucks Gangnam",
+  "expIncomeSourcePlaceholder": "e.g. Salary",
+  "expPayeePlaceholder": "e.g. Lunch near the office",
   "expIncomeMethod": "Income method",
   "expNone": "None",
   "expDepositAccount": "Deposit account",
@@ -1949,24 +1948,7 @@
   "expExpenseDetail": "Expense details",
   "expTxFallback": "Transaction",
   "expUncategorized": "Uncategorized",
-  "expValueNone": "None",
-  "expItemsCount": "{count} items",
-  "@expItemsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "expNotSelected": "Not selected",
-  "expPrevTxAt": "Previous at {merchant}",
-  "@expPrevTxAt": {
-    "placeholders": {
-      "merchant": {
-        "type": "String"
-      }
-    }
-  },
   "expThisMonth": "This month",
   "expTimesCount": "{count}×",
   "@expTimesCount": {
@@ -4117,8 +4099,8 @@
     }
   },
   "expRecordOnlyBadge": "Record only",
-  "expRecordOnlyNote": "This was added to a cycle that was already paid, so it is kept as a record only. It was not taken from your account",
-  "expRecordOnlyPartNote": "{amount} of this belongs to cycles that were already paid, so it is kept as a record only. The remaining installments are billed as usual",
+  "expRecordOnlyNote": "This was added to a cycle that was already paid, so it is kept as a record only. It was not taken from your account.",
+  "expRecordOnlyPartNote": "{amount} of this belongs to cycles that were already paid, so it is kept as a record only. The remaining installments are billed as usual.",
   "@expRecordOnlyPartNote": {
     "placeholders": {
       "amount": {
@@ -4179,8 +4161,8 @@
   "dsInputClear": "Clear",
   "fixedSwitchExpense": "Fixed expense",
   "fixedSwitchIncome": "Fixed income",
-  "fixedHintExpense": "Money that goes out every month like rent or phone bills. You can view it separately in statistics",
-  "fixedHintIncome": "Money that comes in every month like a salary. You can view it separately in statistics",
+  "fixedHintExpense": "Money that goes out every month like rent or phone bills. You can view it separately in statistics.",
+  "fixedHintIncome": "Money that comes in every month like a salary. You can view it separately in statistics.",
   "fixedBadge": "Fixed",
   "recurringFixedSub": "Transactions this schedule creates from now on are recorded as fixed",
   "presetFixedTitleExpense": "Record as fixed expense",
@@ -4656,5 +4638,195 @@
   "stocksFailQuote": "Couldn't load the price",
   "stocksFailToday": "Couldn't load today's quotes",
   "stocksFailInvestor": "Couldn't load investor trading",
-  "namuFxUnavailableShort": "No FX rate"
+  "namuFxUnavailableShort": "No FX rate",
+  "expDetailMore": "More",
+  "expSplitValue": "Split into {count}",
+  "@expSplitValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expSplitHeader": "Split into {count}",
+  "@expSplitHeader": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expMerchantMonth": "This month at this merchant",
+  "expRecentOnly": "Showing the latest 5 only",
+  "expLinked": "Linked",
+  "expSplitLoadFailed": "Could not load the split items",
+  "expSplitLoadFailedDesc": "Please try again in a moment.",
+  "expRefundDateToday": "{date} · Today",
+  "@expRefundDateToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expRefundDateHint": "You can pick a day from the transaction day ({date}) to today.",
+  "@expRefundDateHint": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expRefundFailed": "Couldn't mark it as refunded. Please try again in a moment.",
+  "expRefundCancelFailed": "Couldn't undo the refund.",
+  "expTxDeleteFailed": "Couldn't delete the transaction.",
+  "transferDeleteFailed": "Couldn't delete the transfer.",
+  "transferDetailTitle": "Transfer details",
+  "transferFromLabel": "From account",
+  "transferToLabel": "To account",
+  "txfStepMeta": "Step {current} of {total}",
+  "@txfStepMeta": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "txfTypeGroup": "Transaction type",
+  "txfEntryRequired": "Enter an amount.",
+  "txfAmountTooLarge": "Amount can be up to 10 billion won.",
+  "txfCurrencyChip": "Currency, {code}",
+  "@txfCurrencyChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetsTitle": "Presets",
+  "txfPresetApplied": "{name} applied",
+  "@txfPresetApplied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfNoPresets": "No saved presets yet. Enter values and tap “Save current input” to create one.",
+  "txfPresetLoadFailed": "Couldn't load presets.",
+  "txfEmptyPresetHint": "The “{name}” preset has no amount. Enter one and press Next.",
+  "@txfEmptyPresetHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetAllTitle": "Choose a preset",
+  "txfShowAll": "See all",
+  "txfNone": "None",
+  "txfNoAccountOption": "No account or card",
+  "txfNoMethodOption": "No payment method",
+  "txfErrCategory": "Choose a category.",
+  "txfErrFrom": "Choose the account to send from.",
+  "txfErrTo": "Choose the account to send to.",
+  "txfErrFx": "Enter the exchange rate or the amount in won.",
+  "txfErrInterest": "Interest can't be more than the amount.",
+  "txfSplitsLoading": "Loading the split items. Try again in a moment.",
+  "txfSaveFailed": "Couldn't save. Please try again in a moment.",
+  "txfCategoryLoadFailed": "Couldn't load categories",
+  "txfAssetLoadFailed": "Couldn't load accounts and cards",
+  "txfNoCategoryOfType": "There are no categories of this kind.",
+  "txfNoPickableAsset": "No account or card fits this payment method.",
+  "txfFxHint": "{local} {code} × {rate} = {krw}",
+  "@txfFxHint": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "krw": {
+        "type": "String"
+      }
+    }
+  },
+  "txfKrwAmount": "Amount in won",
+  "txfInstallmentValue": "{months} months · about {amount} a month",
+  "@txfInstallmentValue": {
+    "placeholders": {
+      "months": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitMismatchTitle": "The split items don't match the amount",
+  "txfSplitMismatchBody": "New total {total} · split total {sum} — {diffText}",
+  "@txfSplitMismatchBody": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "sum": {
+        "type": "String"
+      },
+      "diffText": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitOver": "{diff} over.",
+  "@txfSplitOver": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitShort": "{diff} short.",
+  "@txfSplitShort": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfMatchSplits": "Adjust split items",
+  "txfSaveSplitAndSave": "Adjust split items & save",
+  "txfSmsStepTitle": "Paste a payment text",
+  "txfSmsHelp": "Paste the payment text from your card company as it is. The amount, merchant and time it finds are filled in.",
+  "txfPresetAmountEmpty": "Left empty",
+  "txfPresetAmountHint": "If left empty, you enter the amount each time you use it.",
+  "txfPresetNameRequired": "Enter a preset name.",
+  "txfPresetNeedParties": "Choose the sending and receiving accounts first.",
+  "txfPresetNeedCategory": "Choose a category first.",
+  "txfPresetNoMerchant": "No details",
+  "txfPresetSaved": "Saved the {name} preset",
+  "@txfPresetSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetNameTooLong": "Keep the name within 12 characters.",
+  "txfMemoStepTitle": "Memo",
+  "txfTimeTitle": "Time",
+  "txfNoCategory": "No category",
+  "txfNoDepositAccount": "No deposit account",
+  "txfNoIncomeMethod": "No income method",
+  "txfSelectFrom": "Select the sending account",
+  "txfSelectTo": "Select the receiving account",
+  "txfDeletedAsset": "Deleted account",
+  "txfDeletedCategory": "Deleted category"
 }

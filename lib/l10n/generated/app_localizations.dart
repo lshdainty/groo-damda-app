@@ -3743,7 +3743,7 @@ abstract class AppLocalizations {
   /// No description provided for @expRefundConfirmBody.
   ///
   /// In ko, this message translates to:
-  /// **'이 거래를 환불로 표시하고 {amount}을 {asset}(으)로 되돌려요. 합계에서 빠져요.'**
+  /// **'이 거래를 환불로 표시해요. 합계에서 빠지고 {amount}이 {asset}에 돌아가요.'**
   String expRefundConfirmBody(String amount, String asset);
 
   /// No description provided for @expRefundConfirmBodyRecordOnly.
@@ -3773,7 +3773,7 @@ abstract class AppLocalizations {
   /// No description provided for @expRefundedAt.
   ///
   /// In ko, this message translates to:
-  /// **'환불됨 · {date}'**
+  /// **'환불됨 · {date} — 합계에서 빠져 있어요.'**
   String expRefundedAt(String date);
 
   /// No description provided for @expRefundCancel.
@@ -3869,7 +3869,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferDeleteConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'이 이체를 삭제할까요? 양쪽 자산의 잔액이 되돌아가요. 삭제한 이체는 되돌릴 수 없어요.'**
+  /// **'이 이체를 삭제할까요? 양쪽 계좌 잔액이 이체 전으로 돌아가요. 삭제한 이체는 되돌릴 수 없어요.'**
   String get transferDeleteConfirm;
 
   /// No description provided for @transferDeleteTitle.
@@ -3881,25 +3881,25 @@ abstract class AppLocalizations {
   /// No description provided for @transferAutoTradeSettlement.
   ///
   /// In ko, this message translates to:
-  /// **'주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라집니다.'**
+  /// **'주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라져요.'**
   String get transferAutoTradeSettlement;
 
   /// No description provided for @transferAutoCardPayment.
   ///
   /// In ko, this message translates to:
-  /// **'카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없습니다.'**
+  /// **'카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없어요.'**
   String get transferAutoCardPayment;
 
   /// No description provided for @transferAutoCardRefund.
   ///
   /// In ko, this message translates to:
-  /// **'카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰집니다.'**
+  /// **'카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰져요.'**
   String get transferAutoCardRefund;
 
   /// No description provided for @transferAutoDefault.
   ///
   /// In ko, this message translates to:
-  /// **'자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라집니다.'**
+  /// **'자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라져요.'**
   String get transferAutoDefault;
 
   /// No description provided for @updateAvailable.
@@ -5642,12 +5642,6 @@ abstract class AppLocalizations {
   /// **'거래가 삭제되었습니다'**
   String get expDeleted;
 
-  /// No description provided for @expDeleteFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'삭제 실패'**
-  String get expDeleteFailed;
-
   /// No description provided for @expSplitMismatch.
   ///
   /// In ko, this message translates to:
@@ -5765,13 +5759,13 @@ abstract class AppLocalizations {
   /// No description provided for @expAutoSourceTradeRealized.
   ///
   /// In ko, this message translates to:
-  /// **'주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산됩니다.'**
+  /// **'주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산돼요.'**
   String get expAutoSourceTradeRealized;
 
   /// No description provided for @expAutoSourceTransferInterest.
   ///
   /// In ko, this message translates to:
-  /// **'이체에 붙은 이자예요. 금액은 이체 내역에서 계산됩니다.'**
+  /// **'이체에 붙은 이자예요. 금액은 이체 내역에서 계산돼요.'**
   String get expAutoSourceTransferInterest;
 
   /// No description provided for @expAutoSourceCardCarryover.
@@ -5783,7 +5777,7 @@ abstract class AppLocalizations {
   /// No description provided for @expAutoSourceDefault.
   ///
   /// In ko, this message translates to:
-  /// **'자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라집니다.'**
+  /// **'자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라져요.'**
   String get expAutoSourceDefault;
 
   /// No description provided for @expPresetLock.
@@ -5825,13 +5819,13 @@ abstract class AppLocalizations {
   /// No description provided for @expIncomeSourcePlaceholder.
   ///
   /// In ko, this message translates to:
-  /// **'예: (주)포레스트'**
+  /// **'예: 월급'**
   String get expIncomeSourcePlaceholder;
 
   /// No description provided for @expPayeePlaceholder.
   ///
   /// In ko, this message translates to:
-  /// **'예: 스타벅스 강남점'**
+  /// **'예: 회사 앞 도시락'**
   String get expPayeePlaceholder;
 
   /// No description provided for @expIncomeMethod.
@@ -5942,29 +5936,11 @@ abstract class AppLocalizations {
   /// **'미분류'**
   String get expUncategorized;
 
-  /// No description provided for @expValueNone.
-  ///
-  /// In ko, this message translates to:
-  /// **'없음'**
-  String get expValueNone;
-
-  /// No description provided for @expItemsCount.
-  ///
-  /// In ko, this message translates to:
-  /// **'{count}개'**
-  String expItemsCount(int count);
-
   /// No description provided for @expNotSelected.
   ///
   /// In ko, this message translates to:
   /// **'미선택'**
   String get expNotSelected;
-
-  /// No description provided for @expPrevTxAt.
-  ///
-  /// In ko, this message translates to:
-  /// **'{merchant}에서의 이전 거래'**
-  String expPrevTxAt(String merchant);
 
   /// No description provided for @expThisMonth.
   ///
@@ -12995,13 +12971,13 @@ abstract class AppLocalizations {
   /// No description provided for @expRecordOnlyNote.
   ///
   /// In ko, this message translates to:
-  /// **'결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요'**
+  /// **'결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요.'**
   String get expRecordOnlyNote;
 
   /// No description provided for @expRecordOnlyPartNote.
   ///
   /// In ko, this message translates to:
-  /// **'이 중 {amount}은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요'**
+  /// **'이 중 {amount}은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요.'**
   String expRecordOnlyPartNote(String amount);
 
   /// No description provided for @expClosedCycleLine.
@@ -13163,13 +13139,13 @@ abstract class AppLocalizations {
   /// No description provided for @fixedHintExpense.
   ///
   /// In ko, this message translates to:
-  /// **'월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요'**
+  /// **'월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.'**
   String get fixedHintExpense;
 
   /// No description provided for @fixedHintIncome.
   ///
   /// In ko, this message translates to:
-  /// **'월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요'**
+  /// **'월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.'**
   String get fixedHintIncome;
 
   /// No description provided for @fixedBadge.
@@ -14123,7 +14099,7 @@ abstract class AppLocalizations {
   /// No description provided for @expLoadErrorDesc.
   ///
   /// In ko, this message translates to:
-  /// **'잠시 뒤에 다시 시도해주세요.'**
+  /// **'잠시 뒤 다시 시도해주세요.'**
   String get expLoadErrorDesc;
 
   /// No description provided for @statsNoMonthlyData.
@@ -15061,6 +15037,432 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'환율 없음'**
   String get namuFxUnavailableShort;
+
+  /// No description provided for @expDetailMore.
+  ///
+  /// In ko, this message translates to:
+  /// **'더 하기'**
+  String get expDetailMore;
+
+  /// No description provided for @expSplitValue.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개로 나눔'**
+  String expSplitValue(int count);
+
+  /// No description provided for @expSplitHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역 분할 {count}개'**
+  String expSplitHeader(int count);
+
+  /// No description provided for @expMerchantMonth.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 가맹점 이번 달'**
+  String get expMerchantMonth;
+
+  /// No description provided for @expRecentOnly.
+  ///
+  /// In ko, this message translates to:
+  /// **'최근 5건만 보여요'**
+  String get expRecentOnly;
+
+  /// No description provided for @expLinked.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결됨'**
+  String get expLinked;
+
+  /// No description provided for @expSplitLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 내역을 불러오지 못했어요'**
+  String get expSplitLoadFailed;
+
+  /// No description provided for @expSplitLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get expSplitLoadFailedDesc;
+
+  /// No description provided for @expRefundDateToday.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} · 오늘'**
+  String expRefundDateToday(String date);
+
+  /// No description provided for @expRefundDateHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래한 날({date})부터 오늘까지 고를 수 있어요.'**
+  String expRefundDateHint(String date);
+
+  /// No description provided for @expRefundFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  String get expRefundFailed;
+
+  /// No description provided for @expRefundCancelFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불을 취소하지 못했어요.'**
+  String get expRefundCancelFailed;
+
+  /// No description provided for @expTxDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래를 삭제하지 못했어요.'**
+  String get expTxDeleteFailed;
+
+  /// No description provided for @transferDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'이체를 삭제하지 못했어요.'**
+  String get transferDeleteFailed;
+
+  /// No description provided for @transferDetailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'이체 상세'**
+  String get transferDetailTitle;
+
+  /// No description provided for @transferFromLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌'**
+  String get transferFromLabel;
+
+  /// No description provided for @transferToLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌'**
+  String get transferToLabel;
+
+  /// No description provided for @txfStepMeta.
+  ///
+  /// In ko, this message translates to:
+  /// **'{current} / {total}단계'**
+  String txfStepMeta(String current, String total);
+
+  /// No description provided for @txfTypeGroup.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 종류'**
+  String get txfTypeGroup;
+
+  /// No description provided for @txfEntryRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액을 입력해주세요.'**
+  String get txfEntryRequired;
+
+  /// No description provided for @txfAmountTooLarge.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액은 100억원까지 입력할 수 있어요.'**
+  String get txfAmountTooLarge;
+
+  /// No description provided for @txfCurrencyChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'통화, {code}'**
+  String txfCurrencyChip(String code);
+
+  /// No description provided for @txfPresetsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋'**
+  String get txfPresetsTitle;
+
+  /// No description provided for @txfPresetApplied.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 적용됨'**
+  String txfPresetApplied(String name);
+
+  /// No description provided for @txfNoPresets.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 프리셋이 없어요. 값을 넣고 “현재 입력값 저장” 을 누르면 만들어져요.'**
+  String get txfNoPresets;
+
+  /// No description provided for @txfPresetLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋을 불러오지 못했어요.'**
+  String get txfPresetLoadFailed;
+
+  /// No description provided for @txfEmptyPresetHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'“{name}” 프리셋은 금액이 비어 있어요. 금액을 넣고 [다음]을 눌러주세요.'**
+  String txfEmptyPresetHint(String name);
+
+  /// No description provided for @txfPresetAllTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 고르기'**
+  String get txfPresetAllTitle;
+
+  /// No description provided for @txfShowAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 보기'**
+  String get txfShowAll;
+
+  /// No description provided for @txfNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'없음'**
+  String get txfNone;
+
+  /// No description provided for @txfNoAccountOption.
+  ///
+  /// In ko, this message translates to:
+  /// **'계좌·카드 없음'**
+  String get txfNoAccountOption;
+
+  /// No description provided for @txfNoMethodOption.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 수단 없음'**
+  String get txfNoMethodOption;
+
+  /// No description provided for @txfErrCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 골라주세요.'**
+  String get txfErrCategory;
+
+  /// No description provided for @txfErrFrom.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌를 골라주세요.'**
+  String get txfErrFrom;
+
+  /// No description provided for @txfErrTo.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌를 골라주세요.'**
+  String get txfErrTo;
+
+  /// No description provided for @txfErrFx.
+  ///
+  /// In ko, this message translates to:
+  /// **'환율을 입력하거나 원화 금액을 넣어주세요.'**
+  String get txfErrFx;
+
+  /// No description provided for @txfErrInterest.
+  ///
+  /// In ko, this message translates to:
+  /// **'이자는 금액보다 클 수 없어요.'**
+  String get txfErrInterest;
+
+  /// No description provided for @txfSplitsLoading.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.'**
+  String get txfSplitsLoading;
+
+  /// No description provided for @txfSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get txfSaveFailed;
+
+  /// No description provided for @txfCategoryLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 불러오지 못했어요'**
+  String get txfCategoryLoadFailed;
+
+  /// No description provided for @txfAssetLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'계좌·카드를 불러오지 못했어요'**
+  String get txfAssetLoadFailed;
+
+  /// No description provided for @txfNoCategoryOfType.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 종류의 카테고리가 없어요.'**
+  String get txfNoCategoryOfType;
+
+  /// No description provided for @txfNoPickableAsset.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 결제 수단에 맞는 계좌·카드가 없어요.'**
+  String get txfNoPickableAsset;
+
+  /// No description provided for @txfFxHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'{local} {code} × {rate} = {krw}원'**
+  String txfFxHint(String local, String code, String rate, String krw);
+
+  /// No description provided for @txfKrwAmount.
+  ///
+  /// In ko, this message translates to:
+  /// **'원화 금액'**
+  String get txfKrwAmount;
+
+  /// No description provided for @txfInstallmentValue.
+  ///
+  /// In ko, this message translates to:
+  /// **'{months}개월 · 매달 약 {amount}원'**
+  String txfInstallmentValue(String months, String amount);
+
+  /// No description provided for @txfSplitMismatchTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 내역과 금액이 달라요'**
+  String get txfSplitMismatchTitle;
+
+  /// No description provided for @txfSplitMismatchBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 총액 {total}원 · 나눈 합계 {sum}원 — {diffText}'**
+  String txfSplitMismatchBody(String total, String sum, String diffText);
+
+  /// No description provided for @txfSplitOver.
+  ///
+  /// In ko, this message translates to:
+  /// **'{diff}원 넘쳐요.'**
+  String txfSplitOver(String diff);
+
+  /// No description provided for @txfSplitShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'{diff}원 모자라요.'**
+  String txfSplitShort(String diff);
+
+  /// No description provided for @txfMatchSplits.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 내역 맞추기'**
+  String get txfMatchSplits;
+
+  /// No description provided for @txfSaveSplitAndSave.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 내역 맞추고 저장'**
+  String get txfSaveSplitAndSave;
+
+  /// No description provided for @txfSmsStepTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 문자 붙여넣기'**
+  String get txfSmsStepTitle;
+
+  /// No description provided for @txfSmsHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'카드사에서 온 결제 문자를 그대로 붙여넣어주세요. 읽은 금액 · 가맹점 · 시각이 칸에 채워져요.'**
+  String get txfSmsHelp;
+
+  /// No description provided for @txfPresetAmountEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'비워 둠'**
+  String get txfPresetAmountEmpty;
+
+  /// No description provided for @txfPresetAmountHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'비워 두면 불러올 때 금액을 직접 넣어요.'**
+  String get txfPresetAmountHint;
+
+  /// No description provided for @txfPresetNameRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 이름을 입력해주세요.'**
+  String get txfPresetNameRequired;
+
+  /// No description provided for @txfPresetNeedParties.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌와 받는 계좌를 먼저 골라주세요.'**
+  String get txfPresetNeedParties;
+
+  /// No description provided for @txfPresetNeedCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 먼저 골라주세요.'**
+  String get txfPresetNeedCategory;
+
+  /// No description provided for @txfPresetNoMerchant.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역 없음'**
+  String get txfPresetNoMerchant;
+
+  /// No description provided for @txfPresetSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 프리셋을 저장했어요'**
+  String txfPresetSaved(String name);
+
+  /// No description provided for @txfPresetNameTooLong.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름은 12자 이내로 입력해주세요.'**
+  String get txfPresetNameTooLong;
+
+  /// No description provided for @txfMemoStepTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모'**
+  String get txfMemoStepTitle;
+
+  /// No description provided for @txfTimeTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'시각'**
+  String get txfTimeTitle;
+
+  /// No description provided for @txfNoCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리 없음'**
+  String get txfNoCategory;
+
+  /// No description provided for @txfNoDepositAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'입금 계좌 없음'**
+  String get txfNoDepositAccount;
+
+  /// No description provided for @txfNoIncomeMethod.
+  ///
+  /// In ko, this message translates to:
+  /// **'수입 방식 없음'**
+  String get txfNoIncomeMethod;
+
+  /// No description provided for @txfSelectFrom.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌 선택'**
+  String get txfSelectFrom;
+
+  /// No description provided for @txfSelectTo.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌 선택'**
+  String get txfSelectTo;
+
+  /// No description provided for @txfDeletedAsset.
+  ///
+  /// In ko, this message translates to:
+  /// **'지운 계좌'**
+  String get txfDeletedAsset;
+
+  /// No description provided for @txfDeletedCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'지운 카테고리'**
+  String get txfDeletedCategory;
 }
 
 class _AppLocalizationsDelegate

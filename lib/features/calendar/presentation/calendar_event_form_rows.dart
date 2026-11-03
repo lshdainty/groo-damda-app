@@ -389,32 +389,47 @@ class _DateRow extends StatelessWidget {
       title: title,
       prefix: const Icon(LucideIcons.clock, size: _rowIcon),
       // 조각 묶음도 값이다(웹: 글 값이면 후손 버튼이 있어도 값으로 본다) — 좁은 줄에서 제목 아래로 내려가고 폭 제한은 ds 가 한다
-      suffix: PListValue(
+      suffix: FormPieceGroup(
+        children: [
+          FormPiece(label: '$dayName, $dayText', text: dayText, onTap: onDay),
+          if (!allDay)
+            FormPiece(
+              label: '$timeName, $timeText',
+              text: timeText,
+              onTap: onTime,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 줄의 값 자리에 서는 조각 묶음 — 조각이 한 줄에 안 들어가면 다음 줄로 간다(글은 자르지 않는다). 일정 폼의 시작 · 종료 줄과 거래 폼의
+/// 날짜 줄이 같은 부품을 쓴다(I-21 21-2 · 웹 `PieceGroup`). 조각 묶음도 값이다 — 좁은 줄에서 제목 아래로 내려가고 폭 제한은 ds 가 한다.
+class FormPieceGroup extends PListValue {
+  // PListValue 를 이어받아야 줄이 이 묶음을 "값" 으로 읽는다(StatelessWidget 으로 감싸면 조작 요소로 읽혀 200% 에서 넘친다)
+  FormPieceGroup({super.key, required List<Widget> children})
+    : super(
         child: Wrap(
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: PSpacing.x2,
           // 줄 사이 22 — 조각의 누르는 자리 44 가 위아래로 11 씩 줄 밖에 있어 두 줄의 누르는 자리가 맞닿는다(웹 gap-y 22)
           runSpacing: 22,
-          children: [
-            _Piece(label: '$dayName, $dayText', text: dayText, onTap: onDay),
-            if (!allDay)
-              _Piece(
-                label: '$timeName, $timeText',
-                text: timeText,
-                onTap: onTime,
-              ),
-          ],
+          children: children,
         ),
-      ),
-    );
-  }
+      );
 }
 
-/// 시작 · 종료 줄의 조각 — 누르는 자리는 44 이지만 줄 높이는 글 줄 하나(22)다(웹 Piece `-my-[11px] min-h-[44px]`). 위아래 11 은
+/// 날짜 · 시각 줄의 조각 — 누르는 자리는 44 이지만 줄 높이는 글 줄 하나(22)다(웹 Piece `-my-[11px] min-h-[44px]`). 위아래 11 은
 /// 줄 밖으로 나가 있고 [_BleedHit] 이 그 자리의 누름도 받는다(줄의 위아래 여백 12 안이라 다른 줄과 겹치지 않는다).
-class _Piece extends StatelessWidget {
-  const _Piece({required this.label, required this.text, required this.onTap});
+class FormPiece extends StatelessWidget {
+  const FormPiece({
+    super.key,
+    required this.label,
+    required this.text,
+    required this.onTap,
+  });
 
   final String label;
   final String text;

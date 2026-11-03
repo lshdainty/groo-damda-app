@@ -43,10 +43,13 @@ Future<ExpenseTemplate?> showPresetPickSheet(
 /// 본문은 **카테고리 조회를 스스로 지켜본다** — 시트를 연 뒤 [다시 시도] 로 받아 와도 화면이 바뀐다(예전엔 열 때 찍은 값을 들고 있어 실패
 /// 화면이 그대로였다). 받는 중에는 Skeleton, 못 받으면 실패 Result Section + 다시 시도, 받으면 줄(회색 "없는 카테고리" 로 읽히지 않는다).
 class PresetPickBody extends ConsumerStatefulWidget {
-  const PresetPickBody({super.key, required this.presets});
+  const PresetPickBody({super.key, required this.presets, this.onPick});
 
   /// 지금 종류의 프리셋 전부.
   final List<ExpenseTemplate> presets;
+
+  /// 고르면 부른다 — 주면 시트를 닫지 않는다(거래 시트 안 한 단계, I-21 21-2). 안 주면 고르기 시트가 그 프리셋을 들고 닫힌다.
+  final ValueChanged<ExpenseTemplate>? onPick;
 
   @override
   ConsumerState<PresetPickBody> createState() => _PresetPickBodyState();
@@ -169,7 +172,9 @@ class _PresetPickBodyState extends ConsumerState<PresetPickBody> {
                             .where((x) => x.rowId == p.categoryRowId)
                             .firstOrNull,
                   masked: masked,
-                  onTap: () => PBottomSheet.of(context).close(p),
+                  onTap: () => widget.onPick != null
+                      ? widget.onPick!(p)
+                      : PBottomSheet.of(context).close(p),
                 ),
             ],
           ),
