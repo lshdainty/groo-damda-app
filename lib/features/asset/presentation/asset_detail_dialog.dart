@@ -2034,6 +2034,18 @@ class _CardDetailBody extends ConsumerStatefulWidget {
 
 enum _UsageSort { recent, amount, category }
 
+/// 할부 정리가 실제로 청구하는 금액 — 원금에서 **앞 회차(정상 분할)에 이미 나눠 낸 몫**을 뺀 남은 원금.
+/// 서버 `Expense.installmentAmountAt`(상환 회차) 와 같은 셈이다: 정상 분할은 원금÷N 이고 나머지는 1회차에 몰리므로
+/// 앞 (sequence-1) 회차 합 = (sequence-1)×(원금÷N) + (sequence ≥ 2 ? 원금%N : 0). `InstallmentDue.amount` 는 이번 회차의
+/// **정상 분할 몫**이라 이 자리에 쓰면 틀린다. 정리는 다가오는 회차에 걸리고 그 회차의 `sequence` 가 상환 회차다.
+int installmentPayoffAmount(InstallmentDue due) {
+  final n = due.installmentMonths <= 0 ? 1 : due.installmentMonths;
+  final base = due.principalAmount ~/ n;
+  final rem = due.principalAmount % n;
+  final paidBefore = (due.sequence - 1) * base + (due.sequence >= 2 ? rem : 0);
+  return due.principalAmount - paidBefore;
+}
+
 class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
   // null = 아직 고르지 않음 → 다가오는 회차를 기본으로 잡는다. 다음 회차가 맨 위에
   // 오므로 0 을 기본으로 두면 아직 쌓이는 중인 회차가 먼저 열린다.
@@ -2417,7 +2429,9 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     final l = AppLocalizations.of(context);
     return _confirmThen(
       title: l.assetInstallmentPayoff,
-      description: l.assetInstallmentPayoffConfirm(krw(due.amount)),
+      description: l.assetInstallmentPayoffConfirm(
+        widget.masked ? '••••' : krw(installmentPayoffAmount(due)),
+      ),
       failedMessage: l.assetInstallmentPayoffFailed,
       call: (repo) => repo.payoffInstallment(
         widget.asset.rowId,
@@ -2449,7 +2463,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     return _confirmThen(
       title: l.assetCancelPayment,
       description: l.assetCancelPaymentConfirm(
-        krw(billing.billingAmount),
+        widget.masked ? '••••' : krw(billing.billingAmount),
         billing.paymentDate,
       ),
       failedMessage: l.assetCancelPaymentFailed,
