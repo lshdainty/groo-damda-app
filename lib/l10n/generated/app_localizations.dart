@@ -2335,6 +2335,30 @@ abstract class AppLocalizations {
   /// **'지금 결제'**
   String get assetPayNow;
 
+  /// No description provided for @assetPayFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 실패'**
+  String get assetPayFailed;
+
+  /// No description provided for @assetInstallmentPayoffFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'할부를 정리하지 못했어요.'**
+  String get assetInstallmentPayoffFailed;
+
+  /// No description provided for @assetInstallmentPayoffUndoFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'할부 정리를 되돌리지 못했어요.'**
+  String get assetInstallmentPayoffUndoFailed;
+
+  /// No description provided for @assetCancelPaymentFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 취소하지 못했어요.'**
+  String get assetCancelPaymentFailed;
+
   /// No description provided for @assetPayAction.
   ///
   /// In ko, this message translates to:
@@ -2370,12 +2394,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'결제가 기록되었습니다'**
   String get assetPaymentRecorded;
-
-  /// No description provided for @assetPayFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'결제 실패'**
-  String get assetPayFailed;
 
   /// No description provided for @assetBillingLoadError.
   ///

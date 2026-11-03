@@ -1221,6 +1221,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetPayNow => '지금 결제';
 
   @override
+  String get assetPayFailed => '결제 실패';
+
+  @override
+  String get assetInstallmentPayoffFailed => '할부를 정리하지 못했어요.';
+
+  @override
+  String get assetInstallmentPayoffUndoFailed => '할부 정리를 되돌리지 못했어요.';
+
+  @override
+  String get assetCancelPaymentFailed => '결제를 취소하지 못했어요.';
+
+  @override
   String get assetPayAction => '결제하기';
 
   @override
@@ -1241,9 +1253,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetPaymentRecorded => '결제가 기록되었습니다';
-
-  @override
-  String get assetPayFailed => '결제 실패';
 
   @override
   String get assetBillingLoadError => '청구 정보를 불러오지 못했어요';

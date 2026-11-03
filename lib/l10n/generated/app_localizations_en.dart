@@ -1237,6 +1237,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetPayNow => 'Pay now';
 
   @override
+  String get assetPayFailed => 'Payment failed';
+
+  @override
+  String get assetInstallmentPayoffFailed =>
+      'Couldn\'t pay off the installment.';
+
+  @override
+  String get assetInstallmentPayoffUndoFailed =>
+      'Couldn\'t undo the installment payoff.';
+
+  @override
+  String get assetCancelPaymentFailed => 'Couldn\'t cancel the payment.';
+
+  @override
   String get assetPayAction => 'Pay';
 
   @override
@@ -1258,9 +1272,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetPaymentRecorded => 'Payment recorded';
-
-  @override
-  String get assetPayFailed => 'Payment failed';
 
   @override
   String get assetBillingLoadError => 'Couldn\'t load billing info';

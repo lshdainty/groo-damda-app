@@ -14,7 +14,6 @@ import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
@@ -45,6 +44,7 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_aggregates.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
+import 'package:groo_damda_app/features/asset/data/asset_repository.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
@@ -516,7 +516,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               ),
               InkWell(
                 borderRadius: PRadius.brSm,
-                onTap: () => context.push('/expense?assetId=${asset.rowId}'),
+                onTap: () => context.go('/expense?assetId=${asset.rowId}'),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,
@@ -734,6 +734,14 @@ class _TradeHistory extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final trades = ref.watch(assetTradesProvider(assetRowId)).value ?? const [];
     if (trades.isEmpty) return const SizedBox.shrink();
+    final holdings =
+        ref
+            .watch(assetsProvider)
+            .value
+            ?.where((a) => a.rowId == assetRowId)
+            .firstOrNull
+            ?.holdings ??
+        const <AssetHolding>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -752,10 +760,12 @@ class _TradeHistory extends ConsumerWidget {
         for (final tr in trades)
           _TradeRow(
             trade: tr,
+            holdingName: tradeHoldingName(tr, holdings),
             masked: masked,
             onTap: () => showTradeDetailSheet(
               context,
               trade: tr,
+              holdingName: tradeHoldingName(tr, holdings),
               masked: masked,
               assetRowId: assetRowId,
             ),
@@ -770,10 +780,12 @@ class _TradeHistory extends ConsumerWidget {
 class _TradeRow extends StatelessWidget {
   const _TradeRow({
     required this.trade,
+    required this.holdingName,
     required this.masked,
     required this.onTap,
   });
   final AssetTrade trade;
+  final String holdingName;
   final bool masked;
   final VoidCallback onTap;
 
@@ -783,7 +795,7 @@ class _TradeRow extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final tr = trade;
     final title =
-        '${tradeKindLabel(l, tr)} · ${tr.holdingKey} ${tradeQtyText(l, tr)}';
+        '${tradeKindLabel(l, tr)} · $holdingName ${tradeQtyText(l, tr)}';
     final pl = tr.realizedPl;
     final desc = [
       tradeDateOnly(tr),
@@ -792,7 +804,7 @@ class _TradeRow extends StatelessWidget {
     ].join(' · ');
     return Semantics(
       button: true,
-      label: l.tradeOpenRow(tradeDateOnly(tr), tr.holdingKey),
+      label: l.tradeOpenRow(tradeDateOnly(tr), holdingName),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -852,6 +864,16 @@ String tradeDateTimeText(AssetTrade tr) {
       : raw;
   // 날짜 한가운데서 줄이 바뀌지 않게 — 하이픈 뒤 줄바꿈을 막는다(날짜 · 시각 사이 공백에서만 바뀐다).
   return text.replaceAll('-', '-\u2060');
+}
+
+/// 거래 기록에 보이는 종목 이름 — 연동 종목은 보유 목록의 이름(없으면 티커 코드), 직접 입력은 항목명(= holdingKey) 그대로.
+String tradeHoldingName(AssetTrade tr, List<AssetHolding> holdings) {
+  if (!tr.linked) return tr.holdingKey;
+  final name = holdings
+      .where((h) => h.tossSymbol == tr.holdingKey)
+      .map((h) => h.holdingName)
+      .firstWhere((n) => n != null && n.trim().isNotEmpty, orElse: () => null);
+  return name ?? tr.holdingKey;
 }
 
 String tradeQtyText(AppLocalizations l, AssetTrade tr) {
@@ -921,6 +943,7 @@ class KvRow extends StatelessWidget {
 Future<void> showTradeDetailSheet(
   BuildContext context, {
   required AssetTrade trade,
+  String? holdingName,
   required bool masked,
   required int assetRowId,
 }) async {
@@ -929,6 +952,7 @@ Future<void> showTradeDetailSheet(
     context,
     builder: (sheetContext) => TradeDetailBody(
       trade: trade,
+      holdingName: holdingName,
       masked: masked,
       onCancelTrade: () => PBottomSheet.of(sheetContext).close(true),
     ),
@@ -940,7 +964,7 @@ Future<void> showTradeDetailSheet(
     title: l.tradeDeleteTitle,
     description: l.tradeDeleteConfirmTarget(
       tradeDateOnly(trade),
-      trade.holdingKey,
+      holdingName ?? trade.holdingKey,
       tradeQtyText(l, trade),
       tradeKindLabel(l, trade),
     ),
@@ -984,10 +1008,12 @@ class TradeDetailBody extends StatelessWidget {
   const TradeDetailBody({
     super.key,
     required this.trade,
+    this.holdingName,
     required this.masked,
     required this.onCancelTrade,
   });
   final AssetTrade trade;
+  final String? holdingName;
   final bool masked;
   final VoidCallback onCancelTrade;
 
@@ -1011,7 +1037,10 @@ class TradeDetailBody extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           KvRow(label: l.tradeKind, value: tradeKindLabel(l, tr)),
-          KvRow(label: l.tradeHoldingLabel, value: tr.holdingKey),
+          KvRow(
+            label: l.tradeHoldingLabel,
+            value: holdingName ?? tr.holdingKey,
+          ),
           KvRow(label: l.tradeQuantity, value: tradeQtyText(l, tr)),
           KvRow(
             label: l.tradeUnitPrice,
@@ -2173,6 +2202,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     syncCanSubmit();
     int? picked;
     sheet.onSubmit = () async {
+      // 같은 제출이 두 번 들어와도(Enter 연타) 시트를 두 번 닫지 않고 요청도 한 번만.
+      if (picked != null) return;
       picked = parsed();
       if (mounted) Navigator.of(context, rootNavigator: true).pop();
     };
@@ -2270,22 +2301,34 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
   }
 
   Future<void> _pay(int amount, String paymentDate) async {
+    // 진입에서 바로 막는다 — 첫 줄과 setState 사이에 await 가 없어 두 번째 호출은 여기서 끝난다.
     if (_paying) return;
     setState(() => _paying = true);
+    final l = AppLocalizations.of(context);
+    final snack = PSnackbar.maybeOf(context);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       await repo.payCard(
         widget.asset.rowId,
         amount: amount,
         paymentDate: paymentDate,
+        silent: true,
       );
       ref.invalidate(cardBillingProvider(widget.asset.rowId));
       // 결제는 이체를 만든다 — 결제 계좌 잔액·홈 순자산·가계부까지 함께 바뀐다.
-      // 취소(_confirmAndCancelPayment)는 이미 이걸 불렀는데 결제만 빠져 있었다.
       invalidateAfterExpenseChange(ref);
-      if (!mounted) return;
     } on ApiException {
-      if (!mounted) return;
+      // 서버 원문 토스트 대신 한 문장 + [다시 시도](silent 요청이라 겹치지 않는다).
+      snack?.show(
+        message: l.assetPayFailed,
+        tone: PSnackbarTone.critical,
+        action: PSnackbarAction(
+          label: l.actionRetry,
+          onPressed: () {
+            if (mounted) _pay(amount, paymentDate);
+          },
+        ),
+      );
     } finally {
       if (mounted) setState(() => _paying = false);
     }
@@ -2329,79 +2372,91 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     );
   }
 
-  /// 할부 중도 전액 상환 — 남은 원금이 다가오는 결제 예정액에 한 번에 잡힌다.
-  Future<void> _confirmPayoff(InstallmentDue due) async {
+  /// 확인창 뒤 요청의 공통 모양 — 실패하면 확인창이 닫힌 뒤 critical 스낵바 + [다시 시도](묻지 않고 바로 요청).
+  /// 요청은 silent, 성공 뒷정리는 바로 성공(ok)과 다시 시도 성공([onRetried]) 두 길이 같다.
+  Future<void> _confirmThen({
+    required String title,
+    required String description,
+    required String failedMessage,
+    required Future<void> Function(AssetRepository repo) call,
+    bool destructive = false,
+    bool block = false,
+  }) async {
+    if (_paying) return;
     final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
-      context,
+    final container = ProviderScope.containerOf(context);
+    final id = widget.asset.rowId;
+    Future<void> request() async {
+      final repo = await container.read(assetRepositoryProvider.future);
+      await call(repo);
+      // 이체·잔액·청구가 함께 바뀐다 — 가계부도 비운다(이자 지출 등).
+      container.invalidate(cardBillingProvider(id));
+      invalidateAfterExpenseChangeIn(container);
+    }
+
+    if (block) setState(() => _paying = true);
+    try {
+      await askConfirmThenRequest(
+        context,
+        title: title,
+        description: description,
+        cancelLabel: l.actionCancel,
+        actionLabel: title,
+        destructive: destructive,
+        request: request,
+        failedMessage: failedMessage,
+        retryLabel: l.actionRetry,
+      );
+    } finally {
+      if (block && mounted) setState(() => _paying = false);
+    }
+  }
+
+  /// 할부 중도 전액 상환 — 남은 원금이 다가오는 결제 예정액에 한 번에 잡힌다.
+  Future<void> _confirmPayoff(InstallmentDue due) {
+    final l = AppLocalizations.of(context);
+    return _confirmThen(
       title: l.assetInstallmentPayoff,
       description: l.assetInstallmentPayoffConfirm(krw(due.amount)),
-      actionLabel: l.assetInstallmentPayoff,
-      cancelLabel: l.actionCancel,
+      failedMessage: l.assetInstallmentPayoffFailed,
+      call: (repo) => repo.payoffInstallment(
+        widget.asset.rowId,
+        due.expenseRowId,
+        silent: true,
+      ),
+      block: true,
     );
-    if (!ok || !mounted) return;
-
-    try {
-      final repo = await ref.read(assetRepositoryProvider.future);
-      await repo.payoffInstallment(widget.asset.rowId, due.expenseRowId);
-      // 남은 회차가 한 건으로 합쳐진다 — 가계부 목록·통계도 같이 달라진다.
-      ref.invalidate(cardBillingProvider(widget.asset.rowId));
-      invalidateAfterExpenseChange(ref);
-    } on ApiException {
-      // 서버 메시지는 전역 인터셉터가 띄운다.
-    }
   }
 
   /// 상환 취소 — 정상 분할로 되돌린다. 잘못 누른 상환을 무르는 경로.
-  Future<void> _undoPayoff(InstallmentDue due) async {
+  Future<void> _undoPayoff(InstallmentDue due) {
     final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
-      context,
+    return _confirmThen(
       title: l.assetInstallmentPayoffUndo,
       description: l.assetInstallmentPayoffUndoConfirm,
-      actionLabel: l.assetInstallmentPayoffUndo,
-      cancelLabel: l.actionCancel,
+      failedMessage: l.assetInstallmentPayoffUndoFailed,
+      call: (repo) => repo.cancelInstallmentPayoff(
+        widget.asset.rowId,
+        due.expenseRowId,
+        silent: true,
+      ),
+      block: true,
     );
-    if (!ok || !mounted) return;
-
-    try {
-      final repo = await ref.read(assetRepositoryProvider.future);
-      await repo.cancelInstallmentPayoff(widget.asset.rowId, due.expenseRowId);
-      ref.invalidate(cardBillingProvider(widget.asset.rowId));
-      invalidateAfterExpenseChange(ref);
-    } on ApiException {
-      // 서버 메시지는 전역 인터셉터가 띄운다.
-    }
   }
 
-  Future<void> _confirmAndCancelPayment(BillingItem billing) async {
+  Future<void> _confirmAndCancelPayment(BillingItem billing) {
     final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
-      context,
+    return _confirmThen(
       title: l.assetCancelPayment,
       description: l.assetCancelPaymentConfirm(
         krw(billing.billingAmount),
         billing.paymentDate,
       ),
-      actionLabel: l.assetCancelPayment,
+      failedMessage: l.assetCancelPaymentFailed,
+      call: (repo) => repo.cancelCardPayment(billing.rowId, silent: true),
       destructive: true,
-      cancelLabel: l.actionCancel,
+      block: true,
     );
-    if (!ok || !mounted) return;
-
-    setState(() => _paying = true);
-    try {
-      final repo = await ref.read(assetRepositoryProvider.future);
-      await repo.cancelCardPayment(billing.rowId);
-      // 이체·잔액·청구가 함께 되돌아간다 — 가계부도 비운다(이자 지출 등).
-      ref.invalidate(cardBillingProvider(widget.asset.rowId));
-      invalidateAfterExpenseChange(ref);
-      if (!mounted) return;
-    } on ApiException {
-      if (!mounted) return;
-    } finally {
-      if (mounted) setState(() => _paying = false);
-    }
   }
 
   /// 페이지 위에서 수정 폼 2단계를 연다(39) — 화면을 옮기지 않는다.
@@ -3258,8 +3313,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                   const Spacer(),
                   InkWell(
                     borderRadius: PRadius.brSm,
-                    onTap: () =>
-                        context.push('/expense?assetId=${asset.rowId}'),
+                    onTap: () => context.go('/expense?assetId=${asset.rowId}'),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,

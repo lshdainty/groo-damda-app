@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
@@ -29,6 +30,8 @@ const _sell = AssetTrade(
 
 Widget _host(Widget child, {List<Override> overrides = const []}) =>
     ProviderScope(
+      // 실패 시험이 Riverpod 기본 재시도(10회) 동안 Skeleton 에 머물지 않게 한다.
+      retry: (_, _) => null,
       overrides: overrides,
       child: MaterialApp(
         theme: GrooTheme.light(),
@@ -61,6 +64,8 @@ void main() {
     expect(find.text('+250,000원'), findsOneWidget);
     expect(plainOf('2026-10-09 10:00'), '2026-10-09 10:00');
     expect(find.byIcon(Icons.more_vert), findsNothing);
+    expect(find.byIcon(LucideIcons.ellipsisVertical), findsNothing);
+    expect(find.byIcon(LucideIcons.ellipsis), findsNothing);
     await tester.tap(find.text('거래 취소'));
     expect(cancelled, isTrue);
   });
