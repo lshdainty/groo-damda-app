@@ -3254,16 +3254,7 @@
   "subDisconnectFailed": "해제에 실패했어요",
   "memoNew": "메모 추가",
   "memoEditTitle": "메모 수정",
-  "memoAdd": "추가",
-  "memoLoadError": "메모 로드 실패",
-  "memoTagAll": "전체 {count}",
-  "@memoTagAll": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "memoLoadError": "메모를 불러오지 못했어요",
   "memoSectionPinned": "고정 · {count}",
   "@memoSectionPinned": {
     "placeholders": {
@@ -3280,15 +3271,7 @@
       }
     }
   },
-  "memoActionFailed": "실패: {message}",
-  "@memoActionFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "memoEmptyDesc": "생각이 떠오를 때, 새 메모를 만들어보세요.",
+  "memoEmptyDesc": "오른쪽 아래 + 버튼으로 첫 메모를 써보세요.",
   "memoSearchEmptyDesc": "다른 검색어를 입력해보세요.",
   "memoUntitled": "제목 없음",
   "memoDeleteTitle": "메모 삭제",
@@ -3300,20 +3283,29 @@
       }
     }
   },
-  "memoDeleteFailed": "삭제 실패: {message}",
-  "@memoDeleteFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
   "memoFieldTitle": "제목",
-  "memoTitleRequired": "제목을 입력해주세요",
+  "memoTitleRequired": "제목을 입력해주세요.",
   "memoFieldContent": "내용",
   "memoContentPlaceholder": "여기에 메모를 작성해주세요",
   "memoFieldTag": "태그",
   "memoTagNone": "태그 없음",
+  "memoTagEmptyHint": "태그는 설정 › 메모 태그에서 만들어요.",
+  "memoAllChip": "전체",
+  "memoLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "memoTagFilter": "태그로 거르기",
+  "memoSaved": "저장했어요.",
+  "memoSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "memoDeleteFailed": "삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "memoPinFailed": "고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "memoModifiedAt": "{time} 수정",
+  "@memoModifiedAt": {"placeholders": {"time": {"type": "String"}}},
+  "memoMoreOf": "{name} 더보기",
+  "@memoMoreOf": {"placeholders": {"name": {"type": "String"}}},
+  "memoSwipeUnpin": "해제",
+  "mtagSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "mtagDeleteFailed": "삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "ttagSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "ttagDeleteFailed": "삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "memoNewTag": "태그 추가",
   "memoTagNamePlaceholder": "예: 아이디어",
   "memoDeleteTagTitle": "태그 삭제",
@@ -3328,9 +3320,9 @@
       }
     }
   },
-  "memoTagLoadError": "태그 로드 실패",
+  "memoTagLoadError": "태그를 불러오지 못했어요",
   "mtagTitle": "메모 태그",
-  "mtagDesc": "메모에 붙이는 태그예요. 목록 필터와 태그별 묶음에 사용돼요.",
+  "mtagDesc": "메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 '태그 없음' 으로 남아요.",
   "mtagEmpty": "태그가 없어요",
   "mtagEditTitle": "태그 수정",
   "mtagNameLabel": "이름",
@@ -3512,8 +3504,6 @@
   "todoStatusPending": "대기",
   "todoDetailCompletedAt": "완료 일시",
   "todoDetailContent": "메모",
-  "memoDetailTitle": "메모 상세",
-  "memoDetailPinned": "고정됨",
   "memoDetailNoContent": "내용 없음",
   "calEventDetailTitle": "일정 상세",
   "calDetailNone": "없음",

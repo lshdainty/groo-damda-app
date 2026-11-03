@@ -5804,15 +5804,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memoEditTitle => 'Edit memo';
 
   @override
-  String get memoAdd => 'Add';
-
-  @override
-  String get memoLoadError => 'Failed to load memos';
-
-  @override
-  String memoTagAll(int count) {
-    return 'All $count';
-  }
+  String get memoLoadError => 'Could not load memos';
 
   @override
   String memoSectionPinned(int count) {
@@ -5825,13 +5817,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String memoActionFailed(String message) {
-    return 'Failed: $message';
-  }
-
-  @override
   String get memoEmptyDesc =>
-      'When something comes to mind, create a new memo.';
+      'Tap the + button at the bottom right to write your first memo.';
 
   @override
   String get memoSearchEmptyDesc => 'Try a different search term.';
@@ -5848,15 +5835,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String memoDeleteFailed(String message) {
-    return 'Delete failed: $message';
-  }
-
-  @override
   String get memoFieldTitle => 'Title';
 
   @override
-  String get memoTitleRequired => 'Please enter a title';
+  String get memoTitleRequired => 'Please enter a title.';
 
   @override
   String get memoFieldContent => 'Content';
@@ -5869,6 +5851,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memoTagNone => 'No tag';
+
+  @override
+  String get memoTagEmptyHint => 'Create tags in Settings › Memo tags.';
+
+  @override
+  String get memoAllChip => 'All';
+
+  @override
+  String get memoLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get memoTagFilter => 'Filter by tag';
+
+  @override
+  String get memoSaved => 'Saved.';
+
+  @override
+  String get memoSaveFailed => 'Could not save. Please try again in a moment.';
+
+  @override
+  String get memoDeleteFailed =>
+      'Could not delete. Please try again in a moment.';
+
+  @override
+  String get memoPinFailed =>
+      'Could not change the pin. Please try again in a moment.';
+
+  @override
+  String memoModifiedAt(String time) {
+    return 'Edited $time';
+  }
+
+  @override
+  String memoMoreOf(String name) {
+    return 'More for $name';
+  }
+
+  @override
+  String get memoSwipeUnpin => 'Unpin';
+
+  @override
+  String get mtagSaveFailed => 'Could not save. Please try again in a moment.';
+
+  @override
+  String get mtagDeleteFailed =>
+      'Could not delete. Please try again in a moment.';
+
+  @override
+  String get ttagSaveFailed => 'Could not save. Please try again in a moment.';
+
+  @override
+  String get ttagDeleteFailed =>
+      'Could not delete. Please try again in a moment.';
 
   @override
   String get memoNewTag => 'Add tag';
@@ -5885,14 +5920,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get memoTagLoadError => 'Failed to load tags';
+  String get memoTagLoadError => 'Could not load tags';
 
   @override
   String get mtagTitle => 'Memo tags';
 
   @override
   String get mtagDesc =>
-      'Tags you attach to memos. Used for list filters and tag grouping.';
+      'Tags you attach to memos. They are used to filter the memo screen. If you delete a tag, its memos stay as \'No tag\'.';
 
   @override
   String get mtagEmpty => 'No tags yet';
@@ -6069,12 +6104,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todoDetailContent => 'Note';
-
-  @override
-  String get memoDetailTitle => 'Memo details';
-
-  @override
-  String get memoDetailPinned => 'Pinned';
 
   @override
   String get memoDetailNoContent => 'No content';

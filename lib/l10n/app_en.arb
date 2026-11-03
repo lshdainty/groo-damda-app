@@ -3182,16 +3182,7 @@
   "subDisconnectFailed": "Couldn't disconnect",
   "memoNew": "Add memo",
   "memoEditTitle": "Edit memo",
-  "memoAdd": "Add",
-  "memoLoadError": "Failed to load memos",
-  "memoTagAll": "All {count}",
-  "@memoTagAll": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "memoLoadError": "Could not load memos",
   "memoSectionPinned": "Pinned · {count}",
   "@memoSectionPinned": {
     "placeholders": {
@@ -3208,15 +3199,7 @@
       }
     }
   },
-  "memoActionFailed": "Failed: {message}",
-  "@memoActionFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "memoEmptyDesc": "When something comes to mind, create a new memo.",
+  "memoEmptyDesc": "Tap the + button at the bottom right to write your first memo.",
   "memoSearchEmptyDesc": "Try a different search term.",
   "memoUntitled": "Untitled",
   "memoDeleteTitle": "Delete memo",
@@ -3228,20 +3211,29 @@
       }
     }
   },
-  "memoDeleteFailed": "Delete failed: {message}",
-  "@memoDeleteFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
   "memoFieldTitle": "Title",
-  "memoTitleRequired": "Please enter a title",
+  "memoTitleRequired": "Please enter a title.",
   "memoFieldContent": "Content",
   "memoContentPlaceholder": "Write your memo here",
   "memoFieldTag": "Tag",
   "memoTagNone": "No tag",
+  "memoTagEmptyHint": "Create tags in Settings › Memo tags.",
+  "memoAllChip": "All",
+  "memoLoadFailedDesc": "Please try again in a moment.",
+  "memoTagFilter": "Filter by tag",
+  "memoSaved": "Saved.",
+  "memoSaveFailed": "Could not save. Please try again in a moment.",
+  "memoDeleteFailed": "Could not delete. Please try again in a moment.",
+  "memoPinFailed": "Could not change the pin. Please try again in a moment.",
+  "memoModifiedAt": "Edited {time}",
+  "@memoModifiedAt": {"placeholders": {"time": {"type": "String"}}},
+  "memoMoreOf": "More for {name}",
+  "@memoMoreOf": {"placeholders": {"name": {"type": "String"}}},
+  "memoSwipeUnpin": "Unpin",
+  "mtagSaveFailed": "Could not save. Please try again in a moment.",
+  "mtagDeleteFailed": "Could not delete. Please try again in a moment.",
+  "ttagSaveFailed": "Could not save. Please try again in a moment.",
+  "ttagDeleteFailed": "Could not delete. Please try again in a moment.",
   "memoNewTag": "Add tag",
   "memoTagNamePlaceholder": "e.g. Ideas",
   "memoDeleteTagTitle": "Delete tag",
@@ -3256,9 +3248,9 @@
       }
     }
   },
-  "memoTagLoadError": "Failed to load tags",
+  "memoTagLoadError": "Could not load tags",
   "mtagTitle": "Memo tags",
-  "mtagDesc": "Tags you attach to memos. Used for list filters and tag grouping.",
+  "mtagDesc": "Tags you attach to memos. They are used to filter the memo screen. If you delete a tag, its memos stay as 'No tag'.",
   "mtagEmpty": "No tags yet",
   "mtagEditTitle": "Edit tag",
   "mtagNameLabel": "Name",
@@ -3440,8 +3432,6 @@
   "todoStatusPending": "Pending",
   "todoDetailCompletedAt": "Completed at",
   "todoDetailContent": "Note",
-  "memoDetailTitle": "Memo details",
-  "memoDetailPinned": "Pinned",
   "memoDetailNoContent": "No content",
   "calEventDetailTitle": "Event details",
   "calDetailNone": "None",
