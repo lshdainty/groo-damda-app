@@ -19,6 +19,7 @@ import 'package:groo_damda_app/features/todo/data/todo_repository.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/features/todo/domain/todo_tag.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 실제 글꼴(Pretendard) — 시험 기본 글꼴(Ahem)은 글자마다 폭이 같아 줄바꿈 · 폭 시험이 틀어진다.
 Future<void> loadRealFonts() async {
@@ -142,6 +143,7 @@ Future<void> pumpApp(
   Size size = const Size(360, 780),
   bool disableAnimations = false,
   bool settle = true,
+  bool snackbarHost = false,
 }) async {
   tester.view.physicalSize = Size(size.width * 2, size.height * 2);
   tester.view.devicePixelRatio = 2;
@@ -162,7 +164,13 @@ Future<void> pumpApp(
             textScaler: TextScaler.linear(textScale),
             disableAnimations: disableAnimations,
           ),
-          child: child!,
+          // 스낵바 호스트 — 앱 맨 위(app.dart)와 같은 자리(길잡이 바깥). 실패 알림 시험이 쓴다
+          child: snackbarHost
+              ? Material(
+                  type: MaterialType.transparency,
+                  child: PSnackbarHost(closeLabel: '닫기', child: child!),
+                )
+              : child!,
         ),
         home: home,
       ),

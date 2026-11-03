@@ -16,14 +16,14 @@ abstract final class Env {
   /// Desk 백엔드 base URL (dio 가 뒤에 `/api/v1` 부착). 기본 = dev 게이트웨이.
   static const String apiBase = String.fromEnvironment(
     'API_BASE',
-    defaultValue: 'https://desk-dev.porest.cloud:10443',
+    defaultValue: 'https://damda-dev.hangroo.io',
   );
 
   /// SSO **프론트** URL (React 로그인 페이지, WebView 가 띄우는 ID/PW 폼). 기본 = dev.
   /// SSO 백엔드가 아님.
   static const String ssoUrl = String.fromEnvironment(
     'SSO_URL',
-    defaultValue: 'https://sso-dev.porest.cloud:10443',
+    defaultValue: 'https://sso-dev.hangroo.io',
   );
 
   /// desk-front (React 웹) URL — 차트 WebView 가 띄우는 임베드 페이지(`/embed/stocks/:symbol`)의 origin.
@@ -31,7 +31,7 @@ abstract final class Env {
   /// 로컬은 vite dev 가 별도 포트(`:3002`)에서 SPA 만 띄운다.
   static const String webBaseUrl = String.fromEnvironment(
     'WEB_BASE_URL',
-    defaultValue: 'https://desk-dev.porest.cloud:10443',
+    defaultValue: 'https://damda-dev.hangroo.io',
   );
 
   /// OAuth2 콜백 커스텀 스킴 — OS 딥링크(Android intent-filter / iOS CFBundleURLTypes)로

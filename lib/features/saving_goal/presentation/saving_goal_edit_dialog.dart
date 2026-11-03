@@ -31,9 +31,12 @@ const _kNameMax = 12;
 void showSavingGoalEditDialog(BuildContext context, {SavingGoal? edit}) {
   final l = AppLocalizations.of(context);
   final probe = _DirtyProbe();
+  // 새 폼은 이름 칸에 초점(시트가 처음 초점을 컨테이너에 두므로 첫 초점 노드를 넘긴다), 수정 폼은 키보드 없이 표면
+  final titleFocus = FocusNode(debugLabel: 'SavingGoal title');
   PBottomSheet.show<void>(
     context,
     form: true,
+    initialFocus: edit == null ? titleFocus : null,
     isDirty: () => probe.dirty(),
     leaveCopy: PLeaveConfirmCopy(
       title: l.sheetLeaveTitle,
@@ -41,7 +44,7 @@ void showSavingGoalEditDialog(BuildContext context, {SavingGoal? edit}) {
       stayLabel: l.sheetLeaveStay,
       leaveLabel: l.sheetLeaveLeave,
     ),
-    builder: (_) => _GoalForm(edit: edit, probe: probe),
+    builder: (_) => _GoalForm(edit: edit, probe: probe, titleFocus: titleFocus),
   );
 }
 
@@ -50,9 +53,12 @@ class _DirtyProbe {
 }
 
 class _GoalForm extends ConsumerStatefulWidget {
-  const _GoalForm({this.edit, required this.probe});
+  const _GoalForm({this.edit, required this.probe, required this.titleFocus});
   final SavingGoal? edit;
   final _DirtyProbe probe;
+
+  /// 이름 칸 초점 노드 — 호출처가 시트의 첫 초점으로 넘기고 폼 State 가 버린다.
+  final FocusNode titleFocus;
 
   @override
   ConsumerState<_GoalForm> createState() => _GoalFormState();
@@ -62,7 +68,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   late final TextEditingController _titleCtrl;
   late final TextEditingController _amountCtrl;
   late final TextEditingController _currentCtrl;
-  final _titleFocus = FocusNode();
+  late final FocusNode _titleFocus = widget.titleFocus;
   final _amountFocus = FocusNode();
   final _currentFocus = FocusNode();
 
@@ -337,7 +343,6 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
               child: PInput(
                 controller: _titleCtrl,
                 focusNode: _titleFocus,
-                autofocus: true,
                 placeholder: l.savingGoalNameHint,
                 onChanged: (_) {
                   if (_nameError != null) setState(() => _nameError = null);

@@ -1,12 +1,12 @@
-# porest-desk-app 잔여 작업 리스트
+# groo-damda-app 잔여 작업 리스트
 
 > Claude Code 세션에서 추적 중인 task. 다른 컴퓨터에서 작업 이어갈 때 이 파일 보고 ID 기준으로 진행.
 > 완료한 항목은 체크박스 켜고 commit 메시지에 task ID 적기 (예: `feat: ... (#114)`).
 
 ## 진행 가이드
-- **참조 자료 (front)**: `git clone https://github.com/lshdainty/porest-desk-front.git` 후 `src/` 참조 — Claude Code on the Web 컨테이너에서도 git clone 가능
-- **참조 자료 (back)**: `git clone https://github.com/lshdainty/porest-desk-back.git` — API/스케줄러 시그니처 확인용
-- **캡쳐 PNG**: `/tmp/groo-screens/` (필요 시 `python3 scripts/capture_screens.py`, porest-desk-front `localhost:3002` 띄운 상태)
+- **참조 자료 (front)**: `git clone https://github.com/lshdainty/groo-damda-front.git` 후 `src/` 참조 — Claude Code on the Web 컨테이너에서도 git clone 가능
+- **참조 자료 (back)**: `git clone https://github.com/lshdainty/groo-damda-back.git` — API/스케줄러 시그니처 확인용
+- **캡쳐 PNG**: `/tmp/groo-screens/` (필요 시 `python3 scripts/capture_screens.py`, groo-damda-front `localhost:3002` 띄운 상태)
 - **백엔드 실행/DB 수정은 사용자가 직접** — 코드 수정만 자동
 - **mock·임시 구현 금지** — API 있으면 무조건 연결
 - **N+1 쿼리 사전 점검** — 집계/추이 API 추가 시
@@ -147,7 +147,7 @@
 
 # 신규 발견 항목 — front 전수 비교 결과 (2026-05-06)
 
-> 3개 분석 agent (core / auxiliary / cross-cutting) 가 front `porest-desk-front` 와 Flutter app 을 전수 비교해 도출. 누락 기능 / 미러 안 된 다이얼로그 / 미사용 endpoint 위주, 픽셀 폴리시는 제외.
+> 3개 분석 agent (core / auxiliary / cross-cutting) 가 front `groo-damda-front` 와 Flutter app 을 전수 비교해 도출. 누락 기능 / 미러 안 된 다이얼로그 / 미사용 endpoint 위주, 픽셀 폴리시는 제외.
 > ID 체계: #200~ 신규 부여. 작업량 S(<1h) / M(1~3h) / L(>3h).
 
 ## A. 다국어 / i18n (인프라 0%)

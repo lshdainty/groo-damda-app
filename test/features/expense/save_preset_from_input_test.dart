@@ -61,6 +61,7 @@ class _Presets extends PresetRepository {
     int? sortOrder,
     bool lockAmount = false,
     bool isFixed = false,
+    bool silent = false,
   }) async {
     created = {'templateName': templateName, 'assetRowId': assetRowId};
     return ExpenseTemplate(
