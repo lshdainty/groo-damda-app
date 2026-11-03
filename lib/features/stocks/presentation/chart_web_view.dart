@@ -30,6 +30,10 @@ import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/stocks/presentation/chart_bridge.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
+/// 증권 차트 WebView 높이 — 그래프 168 + 범례(O·H·L·C·VOL) 두 줄 44.
+/// 임베드 페이지(height 100%)가 범례 줄을 이 안에서 나눠 쓰므로, 범례가 두 줄이면 그래프는 168 이다.
+const double kStockChartWebViewHeight = 212;
+
 /// 차트 임베드 페이지를 띄우는 WebView 위젯.
 /// 현재 _StockChart 와 동일한 props(symbol/isUs/range/height) 를 받는다.
 class ChartWebView extends ConsumerStatefulWidget {
