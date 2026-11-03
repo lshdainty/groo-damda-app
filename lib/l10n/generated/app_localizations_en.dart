@@ -8619,6 +8619,373 @@ class AppLocalizationsEn extends AppLocalizations {
   String get namuFxUnavailableShort => 'No FX rate';
 
   @override
+  String get recDefaultTitle => 'Recurring';
+
+  @override
+  String recGroupTitle(String kind, int count) {
+    return '$kind $count';
+  }
+
+  @override
+  String get recMonthLead => 'This month';
+
+  @override
+  String recRowNext(String date) {
+    return 'Next $date';
+  }
+
+  @override
+  String get recRowPaused => 'Paused';
+
+  @override
+  String get recRowFinished => 'Ended';
+
+  @override
+  String get recCycleDaily => 'Every day';
+
+  @override
+  String recCycleWeekly(String day) {
+    return 'Every $day';
+  }
+
+  @override
+  String recCycleMonthly(int day) {
+    return 'Monthly on day $day';
+  }
+
+  @override
+  String recCycleYearly(int month, int day) {
+    return 'Yearly on $month/$day';
+  }
+
+  @override
+  String recCountOf(int total, int done) {
+    return '$done of $total';
+  }
+
+  @override
+  String recUntilMonth(int year, int month) {
+    return 'Until $month/$year';
+  }
+
+  @override
+  String get recDowShort0 => 'Sun';
+
+  @override
+  String get recDowShort1 => 'Mon';
+
+  @override
+  String get recDowShort2 => 'Tue';
+
+  @override
+  String get recDowShort3 => 'Wed';
+
+  @override
+  String get recDowShort4 => 'Thu';
+
+  @override
+  String get recDowShort5 => 'Fri';
+
+  @override
+  String get recDowShort6 => 'Sat';
+
+  @override
+  String get recDowLong0 => 'Sunday';
+
+  @override
+  String get recDowLong1 => 'Monday';
+
+  @override
+  String get recDowLong2 => 'Tuesday';
+
+  @override
+  String get recDowLong3 => 'Wednesday';
+
+  @override
+  String get recDowLong4 => 'Thursday';
+
+  @override
+  String get recDowLong5 => 'Friday';
+
+  @override
+  String get recDowLong6 => 'Saturday';
+
+  @override
+  String get recDetailTitle => 'Recurring detail';
+
+  @override
+  String get recEndSentenceNone => 'repeats with no end date';
+
+  @override
+  String recEndSentenceDate(String date) {
+    return 'repeats until $date';
+  }
+
+  @override
+  String recEndSentenceCount(int total, int done) {
+    return 'repeats $total times ($done done)';
+  }
+
+  @override
+  String recSentenceLead(String cycle, String end) {
+    return '$cycle, $end.';
+  }
+
+  @override
+  String get recSentenceNextPre => 'Next is ';
+
+  @override
+  String get recSentenceNextPost => '.';
+
+  @override
+  String get recSentencePausedPre =>
+      'It is paused. When you turn it back on, it skips the dates it missed and records ';
+
+  @override
+  String get recSentencePausedBold => 'from the next date';
+
+  @override
+  String get recSentencePausedPost => '.';
+
+  @override
+  String get recSentenceFinished => 'All the planned dates have been recorded.';
+
+  @override
+  String get recOn => 'On';
+
+  @override
+  String get recOff => 'Off';
+
+  @override
+  String recOnWithCount(int count) {
+    return 'On · $count recorded';
+  }
+
+  @override
+  String get recAutoLog => 'Auto-record';
+
+  @override
+  String get recAutoLogSub => 'Adds the transaction on its own that day.';
+
+  @override
+  String get recNotifyDayBefore => 'Day-before alert';
+
+  @override
+  String get recNotifyDayBeforeSub => 'Lets you know the day before.';
+
+  @override
+  String get recNextDatesTitle => 'Upcoming dates';
+
+  @override
+  String recNextDatesLine(String dates) {
+    return 'Next dates — $dates';
+  }
+
+  @override
+  String get recPause => 'Pause';
+
+  @override
+  String get recResume => 'Turn back on';
+
+  @override
+  String get recPausedBadge => 'Paused';
+
+  @override
+  String recMoreOf(String name) {
+    return 'More actions for $name';
+  }
+
+  @override
+  String recToastPaused(String name) {
+    return 'Paused $name';
+  }
+
+  @override
+  String recToastResumed(String name) {
+    return 'Turned $name back on';
+  }
+
+  @override
+  String recToastDeleted(String name) {
+    return 'Deleted the $name recurring setting';
+  }
+
+  @override
+  String get recPauseFailed => 'Couldn\'t pause the recurrence.';
+
+  @override
+  String get recResumeFailed => 'Couldn\'t turn the recurrence back on.';
+
+  @override
+  String get recDeleteFailed => 'Couldn\'t delete the recurring setting.';
+
+  @override
+  String get recLoadFailed => 'Could not load recurring transactions';
+
+  @override
+  String get recAssetLoadFailed => 'Could not load accounts';
+
+  @override
+  String get recEmptyTitle => 'No recurring transactions';
+
+  @override
+  String get recEmptyDesc =>
+      'Register money that moves on set days, like subscriptions or rent, and it records itself that day.';
+
+  @override
+  String get recAddButton => 'Add recurring transaction';
+
+  @override
+  String get recTypeLabel => 'Type';
+
+  @override
+  String get recMerchantPlaceholderExpense => 'e.g. Maintenance fee';
+
+  @override
+  String get recMerchantPlaceholderIncome => 'e.g. Salary';
+
+  @override
+  String get recMemoPlaceholder => 'Write a note';
+
+  @override
+  String get recRepeatRow => 'Repeat';
+
+  @override
+  String get recStartDay => 'Start date';
+
+  @override
+  String get recEndRow => 'End';
+
+  @override
+  String get recEndDay => 'End date';
+
+  @override
+  String get recNoneValue => 'None';
+
+  @override
+  String get recEndNoneRadio => 'No end';
+
+  @override
+  String get recEndUntilDate => 'Until a date';
+
+  @override
+  String get recEndCountTimes => 'A number of times';
+
+  @override
+  String get recEndCountLabel => 'Times';
+
+  @override
+  String get recTimesUnit => 'times';
+
+  @override
+  String recEndValueDate(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String recEndValueCount(int count) {
+    return '$count times';
+  }
+
+  @override
+  String get recOnWhichDay => 'On which day';
+
+  @override
+  String get recOnWhichWeekday => 'On which weekday';
+
+  @override
+  String get recAtWhatTime => 'At what time';
+
+  @override
+  String get recYearlyHint =>
+      'Records on the same date as the start date every year.';
+
+  @override
+  String recMonthDayNote(int day) {
+    return 'In months without day $day, it records on the last day of the month.';
+  }
+
+  @override
+  String recDayN(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get recFreqDaily => 'Daily';
+
+  @override
+  String get recFreqWeekly => 'Weekly';
+
+  @override
+  String get recFreqMonthly => 'Monthly';
+
+  @override
+  String get recFreqYearly => 'Yearly';
+
+  @override
+  String get recErrAmount => 'Enter an amount.';
+
+  @override
+  String get recErrCategory => 'Choose a category.';
+
+  @override
+  String get recErrFrom => 'Choose the account to send from.';
+
+  @override
+  String get recErrTo => 'Choose the account to receive.';
+
+  @override
+  String get recErrEndBeforeStart => 'The end date is before the start date.';
+
+  @override
+  String recErrCountMax(int max) {
+    return 'You can enter up to $max times.';
+  }
+
+  @override
+  String get recErrInterestTooBig => 'Interest can\'t be more than the amount.';
+
+  @override
+  String recSelectOf(String field) {
+    return 'Select $field';
+  }
+
+  @override
+  String recNoneOf(String field) {
+    return 'No $field';
+  }
+
+  @override
+  String get recTransferFrom => 'Sending account';
+
+  @override
+  String get recTransferTo => 'Receiving account';
+
+  @override
+  String get recErrCountMin => 'Enter 1 or more.';
+
+  @override
+  String get recSaveFailed => 'Could not save. Please try again in a moment.';
+
+  @override
+  String get recNoAssets => 'There is no account to choose.';
+
+  @override
+  String get recNoCategoryOfKind => 'There are no categories of this type.';
+
+  @override
+  String get recFromAccount => 'From account';
+
+  @override
+  String get recDepositAccount => 'Deposit account';
+
+  @override
+  String get recIncomeMethod => 'Income method';
+
+  @override
+  String get recClearValue => 'Clear value';
+
+  @override
   String get expDetailMore => 'More';
 
   @override
