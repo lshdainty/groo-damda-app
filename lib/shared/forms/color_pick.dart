@@ -52,7 +52,9 @@ Future<String?> showColorPickSheet(
         title: title,
         closeLabel: l.actionClose,
         body: Padding(
-          padding: const EdgeInsets.only(bottom: PSpacing.x4),
+          // 위 4 — 고른 고리가 칸 바깥 4 까지 나오므로 머리 아래에 닿지 않게(웹 `ColorPickerRow` 의 pt-x1). 아래는 바닥 없는 시트의
+          // 본문 아래 16 뿐이다 — 여기서 더 두면 웹보다 16 낮아진다
+          padding: const EdgeInsets.only(top: PSpacing.x1),
           child: PColorSwatchGroup(
             value: current == null
                 ? const PColorSwatchValue.current()

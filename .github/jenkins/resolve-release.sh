@@ -29,7 +29,7 @@ set -euo pipefail
 CHANNEL="${1:?channel(dev|prod) 이 필요합니다}"
 REQUESTED="${2-}"
 
-REPO="${APK_REPO:-lshdainty/porest-desk-app}"
+REPO="${APK_REPO:-lshdainty/groo-damda-app}"
 
 log() { printf '%s\n' "$*" >&2; }
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }

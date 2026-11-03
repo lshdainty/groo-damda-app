@@ -721,7 +721,7 @@ void main() {
     await _pump(tester, expenses: (_) => Future.error(Exception('x')));
     expect(
       tester.widget<PResultSection>(find.byType(PResultSection)).description,
-      '잠시 뒤에 다시 시도해주세요.',
+      '잠시 뒤 다시 시도해주세요.',
     );
   });
 

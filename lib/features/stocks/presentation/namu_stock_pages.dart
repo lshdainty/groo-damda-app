@@ -302,13 +302,13 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
                         ref.invalidate(stockSearchResultProvider(symbol)),
                   )
                 else if (!marketKnown)
-                  const PSkeleton(height: 168)
+                  const PSkeleton(height: kStockChartWebViewHeight)
                 else
                   ChartWebView(
                     symbol: symbol,
                     isUs: isUs,
                     range: _range,
-                    height: 168,
+                    height: kStockChartWebViewHeight,
                     broker: 'namu',
                   ),
                 const SizedBox(height: PSpacing.x3),

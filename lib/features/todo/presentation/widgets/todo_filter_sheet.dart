@@ -55,7 +55,6 @@ class _TodoFilterSheetState extends State<_TodoFilterSheet> {
       title: l.expFilter,
       closeLabel: l.actionClose,
       flushBody: true,
-      scrollFog: true,
       body: TodoFilterBody(
         filter: _f,
         allTags: widget.allTags,

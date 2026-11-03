@@ -31,7 +31,7 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_select.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
 /// 테스트가 손으로 미는 기본 통화 — 늦게 도착하는 상황을 그대로 만든다.
 class _DefaultCurrencyStub extends Notifier<String> {
@@ -140,38 +140,50 @@ Future<AppLocalizations> _open(
   return AppLocalizations.delegate.load(const Locale('ko'));
 }
 
+const _chipKey = ValueKey('tx-currency-chip');
+
+/// 1단계 금액을 치고 [다음] — 외화면 2단계에 환율 칸 · 원화 금액 줄이 열린다.
+Future<void> _toStepTwo(WidgetTester tester, String amount) async {
+  await tester.enterText(find.byType(EditableText).first, amount);
+  await tester.tap(find.text('다음'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('새 거래는 설정의 기본 통화로 열린다', (tester) async {
     final l = await _open(tester, showAddTxSheet, defaultCurrency: 'USD');
 
     expect(find.text('\$ USD'), findsOneWidget);
+    await _toStepTwo(tester, '5.5');
     expect(
-      find.text(l.expOriginalAmount),
+      find.text(l.expExchangeRate),
       findsOneWidget,
-      reason: '외화면 현지 금액·환율 칸이 함께 열려야 원 통화 기록이 남는다',
+      reason: '외화면 환율 칸 · 원화 금액 줄이 열려야 원 통화 기록이 남는다',
     );
-    expect(find.text(l.expExchangeRate), findsOneWidget);
+    expect(find.byKey(const ValueKey('tx-row-krw')), findsOneWidget);
   });
 
   testWidgets('설정이 원화면 종전 그대로 원화다', (tester) async {
     final l = await _open(tester, showAddTxSheet);
 
     expect(find.text('₩ KRW'), findsOneWidget);
-    expect(find.text(l.expOriginalAmount), findsNothing);
+    await _toStepTwo(tester, '5500');
+    expect(find.text(l.expExchangeRate), findsNothing);
+    expect(find.byKey(const ValueKey('tx-row-krw')), findsNothing);
   });
 
   testWidgets('원화로 적어 둔 거래는 기본 통화가 USD 여도 원화로 열린다', (tester) async {
     // 여기가 자산보다 위험하다 — 원화 거래는 `originalCurrency` 가 `null` 이라
     // 막지 않으면 열기만 해도 해외 결제 입력이 펼쳐지고, 그대로 저장하면
-    // 원화 거래에 없던 원 통화 기록이 붙는다.
+    // 원화 거래에 없던 원 통화 기록이 붙는다. 수정은 2단계로 바로 열린다.
     final l = await _open(
       tester,
       (ctx) => showAddTxSheet(ctx, edit: _krwTx),
       defaultCurrency: 'USD',
     );
 
-    expect(find.text('₩ KRW'), findsOneWidget);
-    expect(find.text(l.expOriginalAmount), findsNothing);
+    expect(find.text(l.expExchangeRate), findsNothing);
+    expect(find.byKey(const ValueKey('tx-row-krw')), findsNothing);
   });
 
   testWidgets('외화가 안 실린 결제 문자는 원화로 열린다', (tester) async {
@@ -182,12 +194,12 @@ void main() {
       defaultCurrency: 'USD',
     );
 
-    expect(find.text('₩ KRW'), findsOneWidget);
-    expect(find.text(l.expOriginalAmount), findsNothing);
+    expect(find.text(l.expExchangeRate), findsNothing);
+    expect(find.byKey(const ValueKey('tx-row-krw')), findsNothing);
   });
 
   testWidgets('기본 통화가 시트보다 늦게 와도 반영된다', (tester) async {
-    final l = await _open(tester, showAddTxSheet);
+    await _open(tester, showAddTxSheet);
     expect(find.text('₩ KRW'), findsOneWidget);
 
     ProviderScope.containerOf(
@@ -200,23 +212,18 @@ void main() {
       findsOneWidget,
       reason: '열 때 한 번만 읽어 굳히면 첫 렌더의 원화에 잠긴다',
     );
-    expect(find.text(l.expOriginalAmount), findsOneWidget);
   });
 
   testWidgets('고른 값이 기본 통화를 이긴다', (tester) async {
     await _open(tester, showAddTxSheet, defaultCurrency: 'USD');
 
-    // 시트에는 `PSelect<String>` 이 여럿이다(결제수단 등) — 지금 통화를 보여
-    // 주는 그 select 를 집는다. 통화 칸은 시트 아래쪽이라 스크롤부터 한다.
-    final currencySelect = find.ancestor(
-      of: find.text('\$ USD'),
-      matching: find.byType(PSelect<String>),
+    await tester.tap(find.byKey(_chipKey));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PListButtonItem && w.title.contains('JPY'),
+      ),
     );
-    await tester.ensureVisible(currencySelect);
-    await tester.pumpAndSettle();
-    await tester.tap(currencySelect);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('¥ JPY').last);
     await tester.pumpAndSettle();
 
     expect(find.text('¥ JPY'), findsOneWidget);

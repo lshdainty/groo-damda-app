@@ -70,7 +70,10 @@ class _SlowPrefsRepo extends UserPreferencesRepository {
   Future<UserPreferences> get() async => _prefs(threshold);
 
   @override
-  Future<UserPreferences> update(Map<String, dynamic> fields) async {
+  Future<UserPreferences> update(
+    Map<String, dynamic> fields, {
+    bool silent = false,
+  }) async {
     patches.add(fields);
     await inflight.future;
     if (fail) throw Exception('저장 실패');

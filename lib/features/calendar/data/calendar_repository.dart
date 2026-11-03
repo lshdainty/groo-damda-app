@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
@@ -29,6 +30,9 @@ String eventTypeOrDefault(String? eventType) {
 class CalendarRepository {
   CalendarRepository(this._dio);
   final Dio _dio;
+
+  /// 일정 쓰기(추가 · 수정 · 삭제)는 전역 오류 스낵바를 끈다 — 시트 · 폼이 자기 자리의 Callout 으로 알린다(스낵바는 시트 뒤 화면에 떠서 가려진다).
+  static final Options _silent = Options(extra: {kSilentErrorToast: true});
 
   // ─── Events ────────────────────────────────────
 
@@ -66,6 +70,7 @@ class CalendarRepository {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/calendar/event',
+        options: _silent,
         data: {
           'title': title,
           'description': ?description,
@@ -132,6 +137,7 @@ class CalendarRepository {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/calendar/event/$id',
+        options: _silent,
         data: {
           'title': title,
           if (description.present) 'description': description.value,
@@ -156,7 +162,7 @@ class CalendarRepository {
 
   Future<void> deleteEvent(int id) async {
     try {
-      await _dio.delete<void>('/calendar/event/$id');
+      await _dio.delete<void>('/calendar/event/$id', options: _silent);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

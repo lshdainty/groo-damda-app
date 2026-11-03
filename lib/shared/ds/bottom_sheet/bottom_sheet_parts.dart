@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 시트 최대 폭 — 그보다 좁은 화면은 화면 폭 전체, 넓으면 가운데(bottom-sheet.yaml root.maxWidth).
@@ -35,8 +36,9 @@ const double kBottomSheetBackGap = 4;
 /// 시트 안에서 시트를 닫는 길 — 바닥 버튼 · 닫기 버튼이 부른다(`PBottomSheet.of(context)`).
 abstract interface class PBottomSheetController {
   /// 닫기를 청한다 — 입력 폼에 바뀐 값이 있으면 먼저 "작성한 내용이 사라져요" 를 묻고, 계속 작성하면 그대로 둔다.
-  /// 닫기 버튼 · 뒤로 가기 · `Esc` · 바깥 누르기 · 끌기가 모두 이 길이다.
-  Future<void> requestClose();
+  /// 닫기 버튼 · 뒤로 가기 · `Esc` · 바깥 누르기 · 끌기가 모두 이 길이다. 시트 안에 한 단계가 열려 있으면(interceptClose) 청은
+  /// 그 단계를 닫는 데 쓰인다 — [wholeSheet] 면 그 단계를 건너뛰고 시트 전체를 닫는다(닫기 원 · 바깥 누르기 · 끌기).
+  Future<void> requestClose({bool wholeSheet = false});
 
   /// 묻지 않고 닫는다 — 저장을 마친 뒤처럼 바뀐 값이 이미 처리된 때. [result] 가 `PBottomSheet.show` 의 결과다.
   void close([Object? result]);
@@ -189,6 +191,7 @@ class PBottomSheetContent extends StatelessWidget {
     super.key,
     required this.title,
     this.description,
+    this.eyebrow,
     this.showCloseButton = true,
     this.closeLabel,
     this.onClose,
@@ -224,6 +227,9 @@ class PBottomSheetContent extends StatelessWidget {
 
   /// 덧붙일 말이 있을 때만 한 문장(해요체 · 마침표).
   final String? description;
+
+  /// 제목 위 작은 글("1 / 2단계") — t3 13/18 · fg-neutral-subtle, 제목과 사이 2. 단계가 있는 폼 시트에만 둔다.
+  final String? eyebrow;
 
   /// 오른쪽 위 닫기 버튼(기본 켬).
   final bool showCloseButton;
@@ -281,6 +287,21 @@ class PBottomSheetContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x2,
         children: [
+          if (eyebrow != null)
+            Padding(
+              padding: EdgeInsets.only(
+                left: onBack == null
+                    ? 0
+                    : kBottomSheetBackSize +
+                          kBottomSheetBackGap -
+                          (kBottomSheetBackSize - kBottomSheetBackIcon) / 2,
+              ),
+              child: Text(
+                eyebrow!,
+                key: const ValueKey('p-bottom-sheet-eyebrow'),
+                style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+              ),
+            ),
           Padding(
             // 닫기 버튼 자리 — 24 + 원 28 + 12 = 64 중 화면 여백 24 를 뺀 40
             padding: EdgeInsets.only(
@@ -330,6 +351,10 @@ class PBottomSheetContent extends StatelessWidget {
             // 누르는 영역은 사방 2 넓은 44 — 제목 첫 줄은 글자 배율을 따라 커지므로 가운데도 따라간다
             top:
                 PSpacing.x6 +
+                (eyebrow == null
+                    ? 0
+                    : MediaQuery.textScalerOf(context).scale(18) +
+                          PSpacing.x2) +
                 MediaQuery.textScalerOf(context).scale(30) / 2 -
                 PTouch.min / 2,
             left:
@@ -435,19 +460,23 @@ class PBottomSheetContent extends StatelessWidget {
                     PSpacing.x4,
                   ),
                   // 둘이면 짝 버튼 — 라벨이 반 폭을 넘으면 세로로 쌓는다(주 버튼이 위, 03A-013)
-                  child: footerRow != null
-                      ? footerRow!
-                      : footer.length == 2
-                      ? PResponsivePair(
-                          secondary: footer.first,
-                          primary: footer.last,
-                        )
-                      : Row(
-                          spacing: PSpacing.x2,
-                          children: [
-                            for (final b in footer) Expanded(child: b),
-                          ],
-                        ),
+                  // 바닥 버튼은 스낵바가 피할 자리다(snackbar.md — 바닥 버튼 위 8). 여백이 아니라 버튼 줄을 감싸 띠가 [삭제] ·
+                  // [수정] 을 덮지 않고 버튼 윗변 위 8 에 선다
+                  child: PSnackbarAvoidOverlap(
+                    child: footerRow != null
+                        ? footerRow!
+                        : footer.length == 2
+                        ? PResponsivePair(
+                            secondary: footer.first,
+                            primary: footer.last,
+                          )
+                        : Row(
+                            spacing: PSpacing.x2,
+                            children: [
+                              for (final b in footer) Expanded(child: b),
+                            ],
+                          ),
+                  ),
                 ),
             ],
           );

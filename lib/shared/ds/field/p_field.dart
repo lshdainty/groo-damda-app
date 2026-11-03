@@ -617,7 +617,7 @@ class _CharacterCount extends StatelessWidget {
             TextSpan(
               children: [
                 TextSpan(
-                  text: '$n',
+                  text: _groupThousands(n),
                   style: style.copyWith(
                     color: invalid
                         ? c.fgCritical
@@ -627,7 +627,7 @@ class _CharacterCount extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: '/$max',
+                  text: '/${_groupThousands(max)}',
                   style: style.copyWith(
                     color: invalid ? c.fgCritical : c.fgNeutralSubtle,
                   ),
@@ -640,6 +640,19 @@ class _CharacterCount extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 천 단위 쉼표 — 글자 수 칸이 "10,000/10,000" 으로 읽힌다(1,000 미만은 그대로 "4/200").
+String _groupThousands(int n) {
+  final digits = n.abs().toString();
+  final out = StringBuffer(n < 0 ? '-' : '');
+  for (var i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 == 0) {
+      out.write(',');
+    }
+    out.write(digits[i]);
+  }
+  return out.toString();
 }
 
 enum _FieldSlot { label, control, footer, action }

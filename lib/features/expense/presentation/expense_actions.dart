@@ -138,12 +138,18 @@ class ExpenseActions implements ItemActions<Expense> {
   ///
   /// [asset] 은 부르는 쪽이 이미 들고 있는 그 거래의 자산이다(목록·상세 둘 다 자산
   /// 목록을 보고 있다). 안 주면 자산 목록 캐시에서 찾는다.
+  ///
+  /// [silent] 면 실패를 전역 스낵바로 띄우지 않는다(시트 안에서 따로 말하는 상세). [throwOnError] 면 실패를 null 이
+  /// 아니라 예외로 돌려준다 — 상세가 "실패" 와 "취소" 를 가른다. 지운 뒤에는 그 달 목록을 다시 받은 다음 돌아온다(상세가
+  /// 닫히며 옛 줄이 비치지 않게).
   @override
   Future<bool> delete(
     BuildContext context,
     WidgetRef ref,
     Expense e, {
     Asset? asset,
+    bool silent = false,
+    bool throwOnError = false,
   }) async {
     // 행은 지워지며 사라지고 상세 시트는 닫힌다 — 토스트는 그보다 오래 사는 자리에.
     final host = hostContextOf(context);
@@ -151,8 +157,9 @@ class ExpenseActions implements ItemActions<Expense> {
     final fixBalance = fixBalanceTargetOf(e, asset ?? assetOfExpense(ref, e));
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
-      final refunded = await repo.delete(e.rowId);
+      final refunded = await repo.delete(e.rowId, silent: silent);
       _invalidateAfterDelete(ref, e);
+      await _refetchMonthOf(ref, e);
       if (host.mounted) {
         showChangeResultToast(
           host,
@@ -162,6 +169,7 @@ class ExpenseActions implements ItemActions<Expense> {
       }
       return true;
     } on ApiException {
+      if (throwOnError) rethrow;
       return false;
     }
   }
@@ -181,19 +189,29 @@ class ExpenseActions implements ItemActions<Expense> {
   /// 성공하면 서버가 돌려준 거래를 준다 — 상세가 그걸로 다시 그려 배너가 뜬다.
   /// 미리 낸 돈이 계좌로 돌아갔으면 토스트로 알리고(D4), 결제가 끝난 회차였으면
   /// [잔액 고치기] 를 단다(D9). 실패는 null 이다(토스트는 인터셉터가 이미 띄웠다).
+  ///
+  /// [silent] · [throwOnError] 는 [delete] 와 같다. 응답은 목록을 다시 받은 뒤에 돌려준다 — 상세가 응답으로 단계를 옮길
+  /// 때 옛 값이 먼저 비치지 않는다.
   Future<Expense?> refund(
     BuildContext context,
     WidgetRef ref,
     Expense e, {
     String? refundedAt,
     Asset? asset,
+    bool silent = false,
+    bool throwOnError = false,
   }) async {
     final host = hostContextOf(context);
     final fixBalance = fixBalanceTargetOf(e, asset ?? assetOfExpense(ref, e));
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
-      final updated = await repo.refund(e.rowId, refundedAt: refundedAt);
+      final updated = await repo.refund(
+        e.rowId,
+        refundedAt: refundedAt,
+        silent: silent,
+      );
       _invalidateAfterRefund(ref);
+      await _refetchMonthOf(ref, e);
       if (host.mounted) {
         showChangeResultToast(
           host,
@@ -203,19 +221,42 @@ class ExpenseActions implements ItemActions<Expense> {
       }
       return updated;
     } on ApiException {
+      if (throwOnError) rethrow;
       return null;
     }
   }
 
   /// 환불 표식을 걷는다 — 옛 환급 이체가 묶인 거래면 서버가 그 이체까지 되돌린다.
-  Future<Expense?> cancelRefund(WidgetRef ref, Expense e) async {
+  Future<Expense?> cancelRefund(
+    WidgetRef ref,
+    Expense e, {
+    bool silent = false,
+    bool throwOnError = false,
+  }) async {
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
-      final updated = await repo.cancelRefund(e.rowId);
+      final updated = await repo.cancelRefund(e.rowId, silent: silent);
       _invalidateAfterRefund(ref);
+      await _refetchMonthOf(ref, e);
       return updated;
     } on ApiException {
+      if (throwOnError) rethrow;
       return null;
+    }
+  }
+
+  /// 바뀐 거래가 속한 달 목록을 다시 받는다 — 무효화만 하고 돌아가면 상세가 새 값을 그리는 순간 목록은 옛 값이다.
+  /// 받지 못해도 단계는 옮긴다(실패 알림은 그 조회가 말한다).
+  Future<void> _refetchMonthOf(WidgetRef ref, Expense e) async {
+    final date = e.expenseDate;
+    if (date == null || date.length < 7) return;
+    final y = int.tryParse(date.substring(0, 4));
+    final m = int.tryParse(date.substring(5, 7));
+    if (y == null || m == null) return;
+    try {
+      await ref.read(monthExpensesProvider((year: y, month: m)).future);
+    } catch (_) {
+      // 받지 못해도 단계는 옮긴다
     }
   }
 
@@ -251,4 +292,65 @@ Asset? assetOfExpense(WidgetRef ref, Expense e) {
   final id = e.assetRowId;
   if (id == null) return null;
   return ref.read(assetsProvider).value?.byRowId(id);
+}
+
+/// 거래 삭제 요청 — **컨테이너로** 한다(화면 State 와 무관하게 나간다 — 시트를 닫은 뒤 스낵바의 [다시 시도] 도 이걸 부른다).
+/// 실패(`ApiException`)는 던진다 — 알리는 일은 부른 쪽 몫. 지운 뒤 바뀐 달 목록을 다시 받고, 결과 토스트는 오래 사는 [host] 에 띄운다.
+Future<void> deleteExpenseRequest(
+  ProviderContainer container,
+  BuildContext host,
+  Expense e, {
+  Asset? asset,
+}) async {
+  final target =
+      asset ??
+      (e.assetRowId == null
+          ? null
+          : container.read(assetsProvider).value?.byRowId(e.assetRowId!));
+  final fixBalance = fixBalanceTargetOf(e, target);
+  final repo = await container.read(expenseRepositoryProvider.future);
+  final refunded = await repo.delete(e.rowId, silent: true);
+  final date = e.expenseDate;
+  if (date != null && date.length >= 10) {
+    final y = int.tryParse(date.substring(0, 4));
+    final m = int.tryParse(date.substring(5, 7));
+    if (y != null && m != null) {
+      container.invalidate(monthExpensesProvider((year: y, month: m)));
+    }
+  }
+  invalidateAfterExpenseChangeIn(container);
+  await _refetchMonthIn(container, e);
+  if (host.mounted) {
+    showChangeResultToast(
+      host,
+      refundedAmount: refunded,
+      fixBalanceAssetId: fixBalance,
+    );
+  }
+}
+
+/// 환불 취소 요청 — 컨테이너판([deleteExpenseRequest] 와 같은 이유). 서버가 돌려준 거래를 돌려준다. 실패는 던진다.
+Future<Expense> cancelRefundRequest(
+  ProviderContainer container,
+  Expense e,
+) async {
+  final repo = await container.read(expenseRepositoryProvider.future);
+  final updated = await repo.cancelRefund(e.rowId, silent: true);
+  container.invalidate(monthExpensesProvider);
+  invalidateAfterExpenseChangeIn(container);
+  await _refetchMonthIn(container, e);
+  return updated;
+}
+
+Future<void> _refetchMonthIn(ProviderContainer container, Expense e) async {
+  final date = e.expenseDate;
+  if (date == null || date.length < 7) return;
+  final y = int.tryParse(date.substring(0, 4));
+  final m = int.tryParse(date.substring(5, 7));
+  if (y == null || m == null) return;
+  try {
+    await container.read(monthExpensesProvider((year: y, month: m)).future);
+  } catch (_) {
+    // 받지 못해도 돌아간다
+  }
 }

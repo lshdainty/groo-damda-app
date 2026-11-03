@@ -29,7 +29,7 @@ import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart'
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 const _lockedNote = '결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요';
 const _paidOffNote = '결제가 끝난 거래예요. 중도 정리한 할부라 금액·날짜를 바꿀 수 없어요.';
@@ -92,6 +92,7 @@ class _FakeRepo extends ExpenseRepository {
     double? exchangeRate,
     List<SplitInput>? splits,
     bool? isFixed,
+    bool silent = false,
   }) async {
     replaced++;
     final err = replaceError;
@@ -239,6 +240,8 @@ void main() {
         isNotNull,
         reason: '다시 시도할 수 있다',
       );
+      // 서버 원문이 아니라 폼 맨 위 우리 글(웹과 같다) — 고친 값은 그대로다
+      expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
     });
   });
 
@@ -248,7 +251,11 @@ void main() {
       await _open(tester, _locked, splits: () => pending.future);
       await _openRewrite(tester);
 
-      expect(tester.widget<PButton>(_submit('저장')).onPressed, isNull);
+      // 저장은 켜 둔다 — 누르면 요청 없이 "불러오는 중" 안내만 낸다
+      await tester.tap(_submit('저장'));
+      await tester.pumpAndSettle();
+      expect(find.text('나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.'), findsOneWidget);
+      expect(find.textContaining('원래 거래는 지워지고'), findsNothing);
 
       pending.complete(const [
         ExpenseSplit(
@@ -261,18 +268,28 @@ void main() {
       ]);
       await tester.pumpAndSettle();
 
-      expect(tester.widget<PButton>(_submit('저장')).onPressed, isNotNull);
+      await tester.tap(_submit('저장'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('원래 거래는 지워지고'), findsOneWidget);
     });
 
-    testWidgets('못 불러왔으면 막지 않는다 — 서버가 옛 분할로 판정한다', (tester) async {
+    testWidgets('못 불러왔으면 저장 · 고쳐 쓰기를 막는다 — 분할을 모르는 채 보내지 않는다(N5)', (
+      tester,
+    ) async {
+      final repo = _FakeRepo();
       await _open(
         tester,
         _locked,
+        repo: repo,
         splits: () => Future.error(Exception('network')),
       );
       await _openRewrite(tester);
 
-      expect(tester.widget<PButton>(_submit('저장')).onPressed, isNotNull);
+      await tester.tap(_submit('저장'));
+      await tester.pumpAndSettle();
+      expect(find.text('나눈 내역을 불러오지 못했어요'), findsOneWidget);
+      expect(find.textContaining('원래 거래는 지워지고'), findsNothing);
+      expect(repo.replaced, 0);
     });
   });
 }

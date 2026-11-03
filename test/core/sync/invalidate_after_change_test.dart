@@ -21,6 +21,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/auth/user.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
@@ -40,7 +42,7 @@ import 'package:groo_damda_app/features/calendar/application/calendar_providers.
 import 'package:groo_damda_app/features/calendar/data/calendar_repository.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
-import 'package:groo_damda_app/features/calendar/presentation/calendar_event_detail_dialog.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_day_sheet.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/memo/application/memo_providers.dart';
@@ -53,7 +55,7 @@ import 'package:groo_damda_app/features/todo/application/todo_providers.dart';
 import 'package:groo_damda_app/features/todo/data/todo_repository.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/features/todo/presentation/todo_actions.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import '../../support/plain_text.dart';
 
 /// 이번 달 1일 (`_DashboardScreenState._ymdStart` 와 같은 규칙).
@@ -260,8 +262,15 @@ void main() {
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
     final h = await _pumpDeleteProbe(tester);
 
-    // 상세 시트 → 삭제 → 확인. 삭제는 확인 다이얼로그 뒤에 있어 시트를 실제로 몰아야 한다.
-    showCalendarEventDetailDialog(h.context, _event);
+    // 그날 시트 → 일정 줄 → (같은 시트가 상세로) → 삭제 → 확인. 삭제는 확인 다이얼로그 뒤에 있어 시트를 실제로 몰아야 한다(I-09b 5 · 8).
+    showCalendarDaySheet(
+      h.context,
+      day: DateTime(2026, 9, 10),
+      monthKey: _eventMonth,
+      onAdd: () {},
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(findPlain(_event.title));
     await tester.pumpAndSettle();
     await tester.tap(_pButton(l.actionDelete));
     await tester.pumpAndSettle();
@@ -433,6 +442,7 @@ const _todoFilter = (status: null, priority: null);
 
 final _event = CalendarEvent.fromJson(const <String, dynamic>{
   'rowId': 42,
+  'userRowId': 1,
   'title': '주간 회의',
   'eventType': 'WORK',
   'startDate': '2026-09-10T09:00:00',
@@ -441,7 +451,7 @@ final _event = CalendarEvent.fromJson(const <String, dynamic>{
 });
 
 Finder _pButton(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton));
+    find.byWidgetPredicate((w) => w is PButton && w.label == label);
 
 class _FakeTodoRepo extends TodoRepository {
   _FakeTodoRepo() : super(Dio());
@@ -455,6 +465,17 @@ class _FakeMemoRepo extends MemoRepository {
 
   @override
   Future<void> delete(int id) async {}
+}
+
+/// 일정을 만든 사람으로 로그인한 계정 — 상세의 [삭제] 는 만든 사람 · 편집 권한에게만 보인다(I-09b 7).
+class _Me extends AuthNotifier {
+  @override
+  Future<User?> build() async => const User(
+    rowId: 1,
+    userId: 'me',
+    userName: '나',
+    userEmail: 'me@example.com',
+  );
 }
 
 class _FakeCalendarRepo extends CalendarRepository {
@@ -516,8 +537,9 @@ Future<_DeleteHarness> _pumpDeleteProbe(WidgetTester tester) async {
         }),
         monthEventsProvider.overrideWith((ref, key) async {
           bump('monthEvents');
-          return const <CalendarEvent>[];
+          return <CalendarEvent>[_event];
         }),
+        authProvider.overrideWith(_Me.new),
         todoRepositoryProvider.overrideWith((ref) async => _FakeTodoRepo()),
         memoRepositoryProvider.overrideWith((ref) async => _FakeMemoRepo()),
         calendarRepositoryProvider.overrideWith(

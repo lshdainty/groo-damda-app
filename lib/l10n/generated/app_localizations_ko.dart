@@ -1548,10 +1548,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calFormRowsMore => '반복 · 알림 · 장소 · 설명';
 
   @override
-  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calFormDeleteFailed => '일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormDeleteFailed => '일정을 삭제하지 못했어요.';
 
   @override
   String calReminderMinutesBefore(int n) {
@@ -1567,6 +1567,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String calEventDeleteConfirm(String title) {
     return '\"$title\" 일정을 삭제할까요? 삭제한 일정은 되돌릴 수 없어요.';
+  }
+
+  @override
+  String calEventDeleteConfirmRecurring(String title) {
+    return '\"$title\" 은 반복 일정이라 모든 회차가 함께 삭제돼요. 삭제한 일정은 되돌릴 수 없어요.';
   }
 
   @override
@@ -2037,7 +2042,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expRefundConfirmBody(String amount, String asset) {
-    return '이 거래를 환불로 표시하고 $amount을 $asset(으)로 되돌려요. 합계에서 빠져요.';
+    return '이 거래를 환불로 표시해요. 합계에서 빠지고 $amount이 $asset에 돌아가요.';
   }
 
   @override
@@ -2054,7 +2059,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expRefundedAt(String date) {
-    return '환불됨 · $date';
+    return '환불됨 · $date — 합계에서 빠져 있어요.';
   }
 
   @override
@@ -2111,25 +2116,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get transferDeleteConfirm =>
-      '이 이체를 삭제할까요? 양쪽 자산의 잔액이 되돌아가요. 삭제한 이체는 되돌릴 수 없어요.';
+      '이 이체를 삭제할까요? 양쪽 계좌 잔액이 이체 전으로 돌아가요. 삭제한 이체는 되돌릴 수 없어요.';
 
   @override
   String get transferDeleteTitle => '이체 삭제';
 
   @override
   String get transferAutoTradeSettlement =>
-      '주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라집니다.';
+      '주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라져요.';
 
   @override
   String get transferAutoCardPayment =>
-      '카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없습니다.';
+      '카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없어요.';
 
   @override
   String get transferAutoCardRefund =>
-      '카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰집니다.';
+      '카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰져요.';
 
   @override
-  String get transferAutoDefault => '자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라집니다.';
+  String get transferAutoDefault => '자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라져요.';
 
   @override
   String updateAvailable(String version) {
@@ -3113,9 +3118,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expDeleted => '거래가 삭제되었습니다';
 
   @override
-  String get expDeleteFailed => '삭제 실패';
-
-  @override
   String get expSplitMismatch => '분할 내역과 금액이 달라요';
 
   @override
@@ -3144,9 +3146,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expClear => '해제';
-
-  @override
-  String get expPresetManageHint => '설정 → 프리셋 관리';
 
   @override
   String get expSaveFailed => '저장 실패';
@@ -3182,17 +3181,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expAutoSourceTradeRealized =>
-      '주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산됩니다.';
+      '주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산돼요.';
 
   @override
-  String get expAutoSourceTransferInterest => '이체에 붙은 이자예요. 금액은 이체 내역에서 계산됩니다.';
+  String get expAutoSourceTransferInterest => '이체에 붙은 이자예요. 금액은 이체 내역에서 계산돼요.';
 
   @override
   String get expAutoSourceCardCarryover =>
       '카드를 등록할 때 적은 이전 미결제 사용액이에요. 금액은 카드 수정에서 바꿔요.';
 
   @override
-  String get expAutoSourceDefault => '자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라집니다.';
+  String get expAutoSourceDefault => '자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라져요.';
 
   @override
   String get expPresetLock => '프리셋 잠금';
@@ -3215,10 +3214,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expPayee => '거래처';
 
   @override
-  String get expIncomeSourcePlaceholder => '예: (주)포레스트';
+  String get expIncomeSourcePlaceholder => '예: 월급';
 
   @override
-  String get expPayeePlaceholder => '예: 스타벅스 강남점';
+  String get expPayeePlaceholder => '예: 회사 앞 도시락';
 
   @override
   String get expIncomeMethod => '수입 방식';
@@ -3277,20 +3276,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expUncategorized => '미분류';
 
   @override
-  String get expValueNone => '없음';
-
-  @override
-  String expItemsCount(int count) {
-    return '$count개';
-  }
-
-  @override
   String get expNotSelected => '미선택';
-
-  @override
-  String expPrevTxAt(String merchant) {
-    return '$merchant에서의 이전 거래';
-  }
 
   @override
   String get expThisMonth => '이번 달';
@@ -3737,7 +3723,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceThemeSystem => '시스템';
 
   @override
-  String get appearanceThemeSystemDesc => '자동 전환';
+  String get appearanceThemeSystemDesc => 'OS 설정 따라가기';
 
   @override
   String hideAmountsLockAllDesc(int total, int count) {
@@ -3940,11 +3926,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceRegion => '기준 지역';
 
   @override
-  String get appearanceRegionPlaceholder => '지역 선택';
-
-  @override
   String get appearanceRegionDesc =>
-      '\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요';
+      '\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요.';
 
   @override
   String get appearanceCurrency => '기본 통화';
@@ -3962,31 +3945,43 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceCurrencyJpy => '일본 엔';
 
   @override
-  String get passwordChanged => '비밀번호가 변경되었습니다';
+  String get appearanceCurrencyDesc => '새 자산·거래를 만들 때 이 통화가 먼저 골라져요.';
 
   @override
-  String get passwordChangeFailed => '비밀번호 변경에 실패했습니다.';
+  String get appearanceRegionLoadError => '기준 지역을 불러오지 못했어요';
+
+  @override
+  String get appearanceCurrencyLoadError => '기본 통화를 불러오지 못했어요';
+
+  @override
+  String get appearanceSaveFailed => '설정을 바꾸지 못했어요.';
+
+  @override
+  String get passwordChanged => '비밀번호를 바꿨어요';
+
+  @override
+  String get passwordChangeFailed => '비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get passwordCurrent => '현재 비밀번호';
 
   @override
-  String get passwordNew => '새 비밀번호';
+  String get passwordChangeDescription => '현재 비밀번호를 확인한 뒤 새 비밀번호로 바꿔요';
 
   @override
-  String get passwordNewPlaceholder => '8자 이상, 특수문자 포함';
+  String get passwordCurrentInvalid => '현재 비밀번호가 맞지 않아요';
+
+  @override
+  String get passwordNew => '새 비밀번호';
 
   @override
   String get passwordNewConfirm => '새 비밀번호 확인';
 
   @override
-  String get passwordConfirmPlaceholder => '한 번 더 입력';
+  String get passwordMismatch => '새 비밀번호가 일치하지 않아요';
 
   @override
-  String get passwordMismatch => '새 비밀번호가 일치하지 않습니다';
-
-  @override
-  String get passwordMatched => '새 비밀번호가 일치합니다';
+  String get passwordMatched => '새 비밀번호가 일치해요';
 
   @override
   String get passwordRuleLength => '8자 이상';
@@ -3998,7 +3993,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get passwordSameAsCurrent => '현재 비밀번호와 다른 비밀번호를 입력해주세요';
 
   @override
-  String get passwordChangeAction => '변경';
+  String get passwordChangeAction => '저장';
 
   @override
   String get accountTitle => '계정';
@@ -4012,34 +4007,22 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get accountEditComingSoon => '프로필 수정은 준비중입니다';
+  String get accountEditComingSoon => '프로필 수정은 곧 열려요.';
 
   @override
   String get accountSecurity => '보안';
 
   @override
-  String get accountPasswordDesc => '최근 변경 없음';
+  String get accountPasswordDesc => '주기적으로 바꾸면 안전해요';
 
   @override
   String get accountTwoFa => '2단계 인증';
-
-  @override
-  String get accountOn => '사용 중';
-
-  @override
-  String get accountOff => '사용 안 함';
 
   @override
   String get accountDevices => '로그인된 기기';
 
   @override
   String get accountCurrentDevice => '현재 기기';
-
-  @override
-  String get accountLoginHistory => '로그인 기록';
-
-  @override
-  String get accountLast30Days => '최근 30일';
 
   @override
   String get devicesTitle => '로그인된 기기';
@@ -4105,9 +4088,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountConnect => '연결';
 
   @override
-  String accountSocialComingSoon(String name) {
-    return '$name 연결은 준비중입니다';
+  String get accountLinked => '연결됨';
+
+  @override
+  String get accountDisconnect => '해제';
+
+  @override
+  String get accountProvidersError => '연결 상태를 불러오지 못했어요';
+
+  @override
+  String get accountLinkError => '계정을 연결하지 못했어요.';
+
+  @override
+  String get accountUnlinkError => '연결을 해제하지 못했어요.';
+
+  @override
+  String accountLinkedToast(String name) {
+    return '$name 계정이 연결되었어요';
   }
+
+  @override
+  String get accountUnlinkedToast => 'Google 연결을 해제했어요';
+
+  @override
+  String get accountSecuritiesDesc => '토스·나무 등 증권사 API 키를 연결해요';
 
   @override
   String get accountBilling => '구독·결제';
@@ -4155,7 +4159,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get accountLogoutConfirm => '정말 로그아웃 하시겠어요?';
+  String get accountLogoutConfirm => '이 기기에서 로그아웃할까요?';
 
   @override
   String get accountWithdrawTitle => '그루 담다 이용 해지';
@@ -4447,57 +4451,140 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetManageTitle => '프리셋 관리';
 
   @override
-  String get presetLoadError => '프리셋 로드 실패';
-
-  @override
-  String get presetDeleteTitle => '프리셋 삭제';
-
-  @override
   String get presetDetailTitle => '프리셋 상세';
 
   @override
-  String get presetTypeLabel => '유형';
+  String get presetTypeLabel => '종류';
 
   @override
-  String presetDeleteConfirm(String name) {
-    return '\"$name\" 프리셋을 삭제할까요? 이미 저장된 거래 내역에는 영향이 없어요. 삭제한 프리셋은 되돌릴 수 없어요.';
-  }
+  String get presetDeleteConfirm => '이미 기록된 거래는 그대로 남아요. 삭제한 프리셋은 되돌릴 수 없어요.';
 
   @override
-  String get presetDeleted => '프리셋이 삭제되었습니다';
+  String get presetDeleteFailed => '프리셋을 삭제하지 못했어요';
 
   @override
-  String get presetDeleteFailed => '삭제 실패';
-
-  @override
-  String get presetIntroTitle => '프리셋이란?';
-
-  @override
-  String get presetIntroBody =>
-      '자주 쓰는 내역(점심·커피·교통비 등)을 미리 저장해두면, 내역 추가 화면에서 한 번 탭으로 카테고리·결제수단·내역을 모두 채워넣어요. 금액만 바꿔서 단건으로 저장하기 좋습니다.';
-
-  @override
-  String get presetStatSaved => '저장된 프리셋';
-
-  @override
-  String get presetStatUses => '누적 사용';
-
-  @override
-  String presetUsesCount(int count) {
-    return '$count회';
-  }
-
-  @override
-  String get presetStatType => '지출 / 수입';
-
-  @override
-  String get presetSortUsed => '사용 많은 순';
+  String get presetSortUsed => '많이 쓴 순';
 
   @override
   String get presetSortRecent => '최근 사용';
 
   @override
   String get presetSortName => '이름순';
+
+  @override
+  String presetListTitle(int count) {
+    return '프리셋 $count개';
+  }
+
+  @override
+  String presetUses(int count) {
+    return '$count번';
+  }
+
+  @override
+  String get presetSortLabel => '정렬';
+
+  @override
+  String get presetLoadFailed => '프리셋을 불러오지 못했어요';
+
+  @override
+  String get presetCategoryLoadFailed => '카테고리를 불러오지 못했어요';
+
+  @override
+  String presetDeleteConfirmTitle(String name) {
+    return '\"$name\" 프리셋을 삭제할까요?';
+  }
+
+  @override
+  String get presetNoteFixed => '고정 금액';
+
+  @override
+  String presetNoteUses(int count) {
+    return '$count번 썼어요';
+  }
+
+  @override
+  String get presetNoteUnused => '아직 쓰지 않았어요';
+
+  @override
+  String presetNoteLast(int month, int day) {
+    return '마지막 $month월 $day일';
+  }
+
+  @override
+  String get presetFixedOn => '켬';
+
+  @override
+  String get presetFixedOff => '끔';
+
+  @override
+  String get presetNameRequired => '이름을 입력해주세요.';
+
+  @override
+  String get presetNameTooLong => '프리셋 이름은 12자 이내로 입력해주세요.';
+
+  @override
+  String get presetCategoryRequired => '카테고리를 골라주세요.';
+
+  @override
+  String get presetFromRequired => '보내는 계좌를 골라주세요.';
+
+  @override
+  String get presetToRequired => '받는 계좌를 골라주세요.';
+
+  @override
+  String get presetSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get presetAmountLabel => '금액';
+
+  @override
+  String get presetFeeLabel => '수수료';
+
+  @override
+  String get presetAmountBlank => '비워 둠';
+
+  @override
+  String get presetAmountHint => '비워 두면 불러올 때 금액을 직접 넣어요.';
+
+  @override
+  String get presetMemoPlaceholder => '선택 사항';
+
+  @override
+  String get presetInterestTooLarge => '이자는 금액보다 클 수 없어요.';
+
+  @override
+  String get presetNoneValue => '없음';
+
+  @override
+  String get presetMemoNone => '메모 없음';
+
+  @override
+  String get presetNoAccount => '계좌·카드 없음';
+
+  @override
+  String get presetNoPayment => '결제 수단 없음';
+
+  @override
+  String get presetNoCategoryOfKind => '이 종류의 카테고리가 없어요.';
+
+  @override
+  String get presetFromAccount => '보내는 계좌';
+
+  @override
+  String get presetToAccount => '받는 계좌';
+
+  @override
+  String get presetShowAll => '모두 보기';
+
+  @override
+  String get presetPickTitle => '프리셋 고르기';
+
+  @override
+  String get presetSearch => '프리셋 검색';
+
+  @override
+  String get presetNoResult => '찾는 프리셋이 없어요.';
 
   @override
   String get presetAdd => '프리셋 추가';
@@ -4512,7 +4599,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetEmptyTitle => '저장된 프리셋이 없어요';
 
   @override
-  String get presetEmptyDesc => '자주 쓰는 내역을 추가해 매번 입력하는 수고를 줄여보세요.';
+  String get presetEmptyDesc =>
+      '자주 쓰는 내역(점심 · 교통비 등)을 저장해 두면 내역을 추가할 때 한 번 눌러 카테고리 · 계좌 · 내역을 채워요.';
 
   @override
   String get presetEditTitle => '프리셋 수정';
@@ -4527,31 +4615,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetMerchant => '기본 내역';
 
   @override
-  String get presetMerchantPlaceholder => '예: 한솥 도시락';
-
-  @override
-  String get presetSelectNone => '선택 안 함';
+  String get presetMerchantPlaceholder => '예: 회사 앞 도시락';
 
   @override
   String get presetAssetCard => '계좌·카드';
-
-  @override
-  String get presetAssetLoadError => '자산 로드 실패';
-
-  @override
-  String get presetLockToggle => '고정 금액 사용';
-
-  @override
-  String get presetLockDesc => '꺼두면 불러올 때 금액이 비어있어요. 매번 다른 금액일 때 편해요.';
-
-  @override
-  String get presetLockAmountLabel => '고정 금액';
-
-  @override
-  String get presetUpdated => '프리셋이 수정되었습니다';
-
-  @override
-  String get presetCreated => '프리셋이 추가되었습니다';
 
   @override
   String get recurringToggleFailed => '변경 실패';
@@ -5760,15 +5827,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get memoEditTitle => '메모 수정';
 
   @override
-  String get memoAdd => '추가';
-
-  @override
-  String get memoLoadError => '메모 로드 실패';
-
-  @override
-  String memoTagAll(int count) {
-    return '전체 $count';
-  }
+  String get memoLoadError => '메모를 불러오지 못했어요';
 
   @override
   String memoSectionPinned(int count) {
@@ -5781,12 +5840,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String memoActionFailed(String message) {
-    return '실패: $message';
-  }
-
-  @override
-  String get memoEmptyDesc => '생각이 떠오를 때, 새 메모를 만들어보세요.';
+  String get memoEmptyDesc => '오른쪽 아래 + 버튼으로 첫 메모를 써보세요.';
 
   @override
   String get memoSearchEmptyDesc => '다른 검색어를 입력해보세요.';
@@ -5803,15 +5857,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String memoDeleteFailed(String message) {
-    return '삭제 실패: $message';
-  }
-
-  @override
   String get memoFieldTitle => '제목';
 
   @override
-  String get memoTitleRequired => '제목을 입력해주세요';
+  String get memoTitleRequired => '제목을 입력해주세요.';
 
   @override
   String get memoFieldContent => '내용';
@@ -5824,6 +5873,55 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get memoTagNone => '태그 없음';
+
+  @override
+  String get memoTagEmptyHint => '태그는 설정 › 메모 태그에서 만들어요.';
+
+  @override
+  String get memoAllChip => '전체';
+
+  @override
+  String get memoLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get memoTagFilter => '태그로 거르기';
+
+  @override
+  String get memoSaved => '저장했어요.';
+
+  @override
+  String get memoSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get memoDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get memoPinFailed => '고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String memoModifiedAt(String time) {
+    return '$time 수정';
+  }
+
+  @override
+  String memoMoreOf(String name) {
+    return '$name 더보기';
+  }
+
+  @override
+  String get memoSwipeUnpin => '해제';
+
+  @override
+  String get mtagSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get mtagDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get ttagSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get ttagDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get memoNewTag => '태그 추가';
@@ -5840,13 +5938,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get memoTagLoadError => '태그 로드 실패';
+  String get memoTagLoadError => '태그를 불러오지 못했어요';
 
   @override
   String get mtagTitle => '메모 태그';
 
   @override
-  String get mtagDesc => '메모에 붙이는 태그예요. 목록 필터와 태그별 묶음에 사용돼요.';
+  String get mtagDesc =>
+      '메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 \'태그 없음\' 으로 남아요.';
 
   @override
   String get mtagEmpty => '태그가 없어요';
@@ -6021,12 +6120,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get todoDetailContent => '메모';
-
-  @override
-  String get memoDetailTitle => '메모 상세';
-
-  @override
-  String get memoDetailPinned => '고정됨';
 
   @override
   String get memoDetailNoContent => '내용 없음';
@@ -6485,12 +6578,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String calDetailDurationM(int m) {
     return '$m분';
   }
-
-  @override
-  String get calDetailMemo => '메모';
-
-  @override
-  String get calDetailRepeat => '반복';
 
   @override
   String get categoryReorderEdit => '순서 바꾸기';
@@ -7145,11 +7232,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expRecordOnlyBadge => '기록만';
 
   @override
-  String get expRecordOnlyNote => '결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요';
+  String get expRecordOnlyNote => '결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요.';
 
   @override
   String expRecordOnlyPartNote(String amount) {
-    return '이 중 $amount은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요';
+    return '이 중 $amount은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요.';
   }
 
   @override
@@ -7244,10 +7331,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fixedSwitchIncome => '고정 수입';
 
   @override
-  String get fixedHintExpense => '월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요';
+  String get fixedHintExpense => '월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.';
 
   @override
-  String get fixedHintIncome => '월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요';
+  String get fixedHintIncome => '월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.';
 
   @override
   String get fixedBadge => '고정';
@@ -7262,8 +7349,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetFixedTitleIncome => '고정 수입으로 기록';
 
   @override
-  String get presetFixedDesc =>
-      '이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요. 위의 고정 금액과는 별개예요.';
+  String get presetFixedDesc => '이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요.';
 
   @override
   String get hideCardStatsFixed => '고정·변동 탭';
@@ -7782,7 +7868,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get expLoadErrorDesc => '잠시 뒤에 다시 시도해주세요.';
+  String get expLoadErrorDesc => '잠시 뒤 다시 시도해주세요.';
 
   @override
   String get statsNoMonthlyData => '월별 데이터가 없어요.';
@@ -8317,4 +8403,246 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get namuFxUnavailableShort => '환율 없음';
+
+  @override
+  String get expDetailMore => '더 하기';
+
+  @override
+  String expSplitValue(int count) {
+    return '$count개로 나눔';
+  }
+
+  @override
+  String expSplitHeader(int count) {
+    return '내역 분할 $count개';
+  }
+
+  @override
+  String get expMerchantMonth => '이 가맹점 이번 달';
+
+  @override
+  String get expRecentOnly => '최근 5건만 보여요';
+
+  @override
+  String get expLinked => '연결됨';
+
+  @override
+  String get expSplitLoadFailed => '나눈 내역을 불러오지 못했어요';
+
+  @override
+  String get expSplitLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String expRefundDateToday(String date) {
+    return '$date · 오늘';
+  }
+
+  @override
+  String expRefundDateHint(String date) {
+    return '거래한 날($date)부터 오늘까지 고를 수 있어요.';
+  }
+
+  @override
+  String get expRefundFailed => '환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+
+  @override
+  String get expRefundCancelFailed => '환불을 취소하지 못했어요.';
+
+  @override
+  String get expTxDeleteFailed => '거래를 삭제하지 못했어요.';
+
+  @override
+  String get transferDeleteFailed => '이체를 삭제하지 못했어요.';
+
+  @override
+  String get transferDetailTitle => '이체 상세';
+
+  @override
+  String get transferFromLabel => '보내는 계좌';
+
+  @override
+  String get transferToLabel => '받는 계좌';
+
+  @override
+  String txfStepMeta(String current, String total) {
+    return '$current / $total단계';
+  }
+
+  @override
+  String get txfTypeGroup => '거래 종류';
+
+  @override
+  String get txfEntryRequired => '금액을 입력해주세요.';
+
+  @override
+  String get txfAmountTooLarge => '금액은 100억원까지 입력할 수 있어요.';
+
+  @override
+  String txfCurrencyChip(String code) {
+    return '통화, $code';
+  }
+
+  @override
+  String get txfPresetsTitle => '프리셋';
+
+  @override
+  String txfPresetApplied(String name) {
+    return '$name 적용됨';
+  }
+
+  @override
+  String get txfNoPresets => '저장된 프리셋이 없어요. 값을 넣고 “현재 입력값 저장” 을 누르면 만들어져요.';
+
+  @override
+  String get txfPresetLoadFailed => '프리셋을 불러오지 못했어요.';
+
+  @override
+  String txfEmptyPresetHint(String name) {
+    return '“$name” 프리셋은 금액이 비어 있어요. 금액을 넣고 [다음]을 눌러주세요.';
+  }
+
+  @override
+  String get txfPresetAllTitle => '프리셋 고르기';
+
+  @override
+  String get txfShowAll => '모두 보기';
+
+  @override
+  String get txfNone => '없음';
+
+  @override
+  String get txfNoAccountOption => '계좌·카드 없음';
+
+  @override
+  String get txfNoMethodOption => '결제 수단 없음';
+
+  @override
+  String get txfErrCategory => '카테고리를 골라주세요.';
+
+  @override
+  String get txfErrFrom => '보내는 계좌를 골라주세요.';
+
+  @override
+  String get txfErrTo => '받는 계좌를 골라주세요.';
+
+  @override
+  String get txfErrFx => '환율을 입력하거나 원화 금액을 넣어주세요.';
+
+  @override
+  String get txfErrInterest => '이자는 금액보다 클 수 없어요.';
+
+  @override
+  String get txfSplitsLoading => '나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.';
+
+  @override
+  String get txfSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get txfCategoryLoadFailed => '카테고리를 불러오지 못했어요';
+
+  @override
+  String get txfAssetLoadFailed => '계좌·카드를 불러오지 못했어요';
+
+  @override
+  String get txfNoCategoryOfType => '이 종류의 카테고리가 없어요.';
+
+  @override
+  String get txfNoPickableAsset => '이 결제 수단에 맞는 계좌·카드가 없어요.';
+
+  @override
+  String txfFxHint(String local, String code, String rate, String krw) {
+    return '$local $code × $rate = $krw원';
+  }
+
+  @override
+  String get txfKrwAmount => '원화 금액';
+
+  @override
+  String txfInstallmentValue(String months, String amount) {
+    return '$months개월 · 매달 약 $amount원';
+  }
+
+  @override
+  String get txfSplitMismatchTitle => '나눈 내역과 금액이 달라요';
+
+  @override
+  String txfSplitMismatchBody(String total, String sum, String diffText) {
+    return '새 총액 $total원 · 나눈 합계 $sum원 — $diffText';
+  }
+
+  @override
+  String txfSplitOver(String diff) {
+    return '$diff원 넘쳐요.';
+  }
+
+  @override
+  String txfSplitShort(String diff) {
+    return '$diff원 모자라요.';
+  }
+
+  @override
+  String get txfMatchSplits => '나눈 내역 맞추기';
+
+  @override
+  String get txfSaveSplitAndSave => '나눈 내역 맞추고 저장';
+
+  @override
+  String get txfSmsStepTitle => '결제 문자 붙여넣기';
+
+  @override
+  String get txfSmsHelp =>
+      '카드사에서 온 결제 문자를 그대로 붙여넣어주세요. 읽은 금액 · 가맹점 · 시각이 칸에 채워져요.';
+
+  @override
+  String get txfPresetAmountEmpty => '비워 둠';
+
+  @override
+  String get txfPresetAmountHint => '비워 두면 불러올 때 금액을 직접 넣어요.';
+
+  @override
+  String get txfPresetNameRequired => '프리셋 이름을 입력해주세요.';
+
+  @override
+  String get txfPresetNeedParties => '보내는 계좌와 받는 계좌를 먼저 골라주세요.';
+
+  @override
+  String get txfPresetNeedCategory => '카테고리를 먼저 골라주세요.';
+
+  @override
+  String get txfPresetNoMerchant => '내역 없음';
+
+  @override
+  String txfPresetSaved(String name) {
+    return '$name 프리셋을 저장했어요';
+  }
+
+  @override
+  String get txfPresetNameTooLong => '이름은 12자 이내로 입력해주세요.';
+
+  @override
+  String get txfMemoStepTitle => '메모';
+
+  @override
+  String get txfTimeTitle => '시각';
+
+  @override
+  String get txfNoCategory => '카테고리 없음';
+
+  @override
+  String get txfNoDepositAccount => '입금 계좌 없음';
+
+  @override
+  String get txfNoIncomeMethod => '수입 방식 없음';
+
+  @override
+  String get txfSelectFrom => '보내는 계좌 선택';
+
+  @override
+  String get txfSelectTo => '받는 계좌 선택';
+
+  @override
+  String get txfDeletedAsset => '지운 계좌';
+
+  @override
+  String get txfDeletedCategory => '지운 카테고리';
 }

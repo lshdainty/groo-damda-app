@@ -85,13 +85,32 @@ class PScrollFog extends StatelessWidget {
         child: scroll,
       );
     }
+    // 안쪽 요소를 보이는 자리로 올리는 함수(revealBelowFog)가 흐림 깊이를 알도록 알린다
     return PScrollFogMask(
       axis: direction,
       start: m.fogStart,
       end: m.fogEnd,
-      child: scroll,
+      child: PScrollFogInset(
+        top: direction == Axis.vertical ? m.fogStart : 0,
+        child: scroll,
+      ),
     );
   }
+}
+
+/// 이 아래 스크롤 상자 위쪽이 흐림으로 덮여 있다는 것을 알린다 — [top] 은 위 흐림 깊이(px).
+/// `revealBelowFog` 가 읽어, 올린 요소가 흐림 아래에 놓이게 한다.
+class PScrollFogInset extends InheritedWidget {
+  const PScrollFogInset({super.key, required this.top, required super.child});
+
+  final double top;
+
+  /// 가장 가까운 흐림의 위 깊이 — 없으면 0.
+  static double topOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PScrollFogInset>()?.top ?? 0;
+
+  @override
+  bool updateShouldNotify(PScrollFogInset old) => old.top != top;
 }
 
 /// 흐림만 — 다른 부품의 스크롤 상자에 같은 마스크를 건다(웹의 useScrollFog). 여백은 그 부품이 둔다.
