@@ -3146,9 +3146,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expClear => 'Clear';
 
   @override
-  String get expPresetManageHint => 'Settings → Manage presets';
-
-  @override
   String get expSaveFailed => 'Save failed';
 
   @override
@@ -4474,57 +4471,145 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presetManageTitle => 'Manage presets';
 
   @override
-  String get presetLoadError => 'Failed to load presets';
-
-  @override
-  String get presetDeleteTitle => 'Delete preset';
-
-  @override
   String get presetDetailTitle => 'Preset detail';
 
   @override
   String get presetTypeLabel => 'Type';
 
   @override
-  String presetDeleteConfirm(String name) {
-    return 'Delete the \"$name\" preset? Already-saved transactions are unaffected. A deleted preset cannot be restored.';
-  }
+  String get presetDeleteConfirm =>
+      'Transactions already recorded stay as they are. A deleted preset cannot be restored.';
 
   @override
-  String get presetDeleted => 'Preset deleted';
+  String get presetDeleteFailed => 'Could not delete the preset';
 
   @override
-  String get presetDeleteFailed => 'Delete failed';
+  String get presetSortUsed => 'Frequent';
 
   @override
-  String get presetIntroTitle => 'What is a preset?';
-
-  @override
-  String get presetIntroBody =>
-      'Save frequently used entries (lunch, coffee, transit, etc.) so you can fill in category, payment method, and details with one tap on the add screen. Handy for saving single entries by just changing the amount.';
-
-  @override
-  String get presetStatSaved => 'Saved presets';
-
-  @override
-  String get presetStatUses => 'Total uses';
-
-  @override
-  String presetUsesCount(int count) {
-    return '$count×';
-  }
-
-  @override
-  String get presetStatType => 'Expense / Income';
-
-  @override
-  String get presetSortUsed => 'Most used';
-
-  @override
-  String get presetSortRecent => 'Recently used';
+  String get presetSortRecent => 'Recent';
 
   @override
   String get presetSortName => 'By name';
+
+  @override
+  String presetListTitle(int count) {
+    return '$count presets';
+  }
+
+  @override
+  String presetUses(int count) {
+    return '$count uses';
+  }
+
+  @override
+  String get presetSortLabel => 'Sort';
+
+  @override
+  String get presetLoadFailed => 'Could not load presets';
+
+  @override
+  String get presetCategoryLoadFailed => 'Could not load categories';
+
+  @override
+  String presetDeleteConfirmTitle(String name) {
+    return 'Delete the \"$name\" preset?';
+  }
+
+  @override
+  String get presetNoteFixed => 'Fixed amount';
+
+  @override
+  String presetNoteUses(int count) {
+    return 'Used $count times';
+  }
+
+  @override
+  String get presetNoteUnused => 'Not used yet';
+
+  @override
+  String presetNoteLast(int month, int day) {
+    return 'Last used $month/$day';
+  }
+
+  @override
+  String get presetFixedOn => 'On';
+
+  @override
+  String get presetFixedOff => 'Off';
+
+  @override
+  String get presetNameRequired => 'Enter a name.';
+
+  @override
+  String get presetNameTooLong =>
+      'Keep the preset name to 12 characters or fewer.';
+
+  @override
+  String get presetCategoryRequired => 'Choose a category.';
+
+  @override
+  String get presetFromRequired => 'Choose the sending account.';
+
+  @override
+  String get presetToRequired => 'Choose the receiving account.';
+
+  @override
+  String get presetSaveFailed =>
+      'Could not save. Please try again in a moment.';
+
+  @override
+  String get presetAmountLabel => 'Amount';
+
+  @override
+  String get presetFeeLabel => 'Fee';
+
+  @override
+  String get presetAmountBlank => 'Left blank';
+
+  @override
+  String get presetAmountHint =>
+      'If left blank, you enter the amount when you load it.';
+
+  @override
+  String get presetMemoPlaceholder => 'Optional';
+
+  @override
+  String get presetInterestTooLarge =>
+      'Interest can\'t be more than the amount.';
+
+  @override
+  String get presetNoneValue => 'None';
+
+  @override
+  String get presetMemoNone => 'No memo';
+
+  @override
+  String get presetNoAccount => 'No account or card';
+
+  @override
+  String get presetNoPayment => 'No payment method';
+
+  @override
+  String get presetNoCategoryOfKind => 'There are no categories of this type.';
+
+  @override
+  String get presetFromAccount => 'Sending account';
+
+  @override
+  String get presetToAccount => 'Receiving account';
+
+  @override
+  String get presetShowAll => 'Show all';
+
+  @override
+  String get presetPickTitle => 'Choose a preset';
+
+  @override
+  String get presetSearch => 'Search presets';
+
+  @override
+  String get presetNoResult => 'No presets found.';
 
   @override
   String get presetAdd => 'Add preset';
@@ -4540,7 +4625,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get presetEmptyDesc =>
-      'Add frequently used entries to save yourself repetitive input.';
+      'Save frequent entries (lunch, transit, etc.) and fill the category, account, and details with one tap when adding an entry.';
 
   @override
   String get presetEditTitle => 'Edit preset';
@@ -4555,32 +4640,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presetMerchant => 'Default details';
 
   @override
-  String get presetMerchantPlaceholder => 'e.g. Hansot lunchbox';
-
-  @override
-  String get presetSelectNone => 'None';
+  String get presetMerchantPlaceholder => 'e.g. Office lunch box';
 
   @override
   String get presetAssetCard => 'Account / Card';
-
-  @override
-  String get presetAssetLoadError => 'Failed to load assets';
-
-  @override
-  String get presetLockToggle => 'Use fixed amount';
-
-  @override
-  String get presetLockDesc =>
-      'When off, the amount is empty on load. Handy when the amount varies each time.';
-
-  @override
-  String get presetLockAmountLabel => 'Fixed amount';
-
-  @override
-  String get presetUpdated => 'Preset updated';
-
-  @override
-  String get presetCreated => 'Preset added';
 
   @override
   String get recurringToggleFailed => 'Change failed';
@@ -7369,7 +7432,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get presetFixedDesc =>
-      'Transactions made from this preset count as fixed in statistics. This is separate from the fixed amount above.';
+      'Transactions made from this preset count as fixed in statistics.';
 
   @override
   String get hideCardStatsFixed => 'Fixed vs. variable tab';

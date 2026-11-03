@@ -5702,12 +5702,6 @@ abstract class AppLocalizations {
   /// **'해제'**
   String get expClear;
 
-  /// No description provided for @expPresetManageHint.
-  ///
-  /// In ko, this message translates to:
-  /// **'설정 → 프리셋 관리'**
-  String get expPresetManageHint;
-
   /// No description provided for @expSaveFailed.
   ///
   /// In ko, this message translates to:
@@ -8162,18 +8156,6 @@ abstract class AppLocalizations {
   /// **'프리셋 관리'**
   String get presetManageTitle;
 
-  /// No description provided for @presetLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋 로드 실패'**
-  String get presetLoadError;
-
-  /// No description provided for @presetDeleteTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋 삭제'**
-  String get presetDeleteTitle;
-
   /// No description provided for @presetDetailTitle.
   ///
   /// In ko, this message translates to:
@@ -8183,67 +8165,25 @@ abstract class AppLocalizations {
   /// No description provided for @presetTypeLabel.
   ///
   /// In ko, this message translates to:
-  /// **'유형'**
+  /// **'종류'**
   String get presetTypeLabel;
 
   /// No description provided for @presetDeleteConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 프리셋을 삭제할까요? 이미 저장된 거래 내역에는 영향이 없어요. 삭제한 프리셋은 되돌릴 수 없어요.'**
-  String presetDeleteConfirm(String name);
-
-  /// No description provided for @presetDeleted.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이 삭제되었습니다'**
-  String get presetDeleted;
+  /// **'이미 기록된 거래는 그대로 남아요. 삭제한 프리셋은 되돌릴 수 없어요.'**
+  String get presetDeleteConfirm;
 
   /// No description provided for @presetDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'프리셋을 삭제하지 못했어요'**
   String get presetDeleteFailed;
-
-  /// No description provided for @presetIntroTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이란?'**
-  String get presetIntroTitle;
-
-  /// No description provided for @presetIntroBody.
-  ///
-  /// In ko, this message translates to:
-  /// **'자주 쓰는 내역(점심·커피·교통비 등)을 미리 저장해두면, 내역 추가 화면에서 한 번 탭으로 카테고리·결제수단·내역을 모두 채워넣어요. 금액만 바꿔서 단건으로 저장하기 좋습니다.'**
-  String get presetIntroBody;
-
-  /// No description provided for @presetStatSaved.
-  ///
-  /// In ko, this message translates to:
-  /// **'저장된 프리셋'**
-  String get presetStatSaved;
-
-  /// No description provided for @presetStatUses.
-  ///
-  /// In ko, this message translates to:
-  /// **'누적 사용'**
-  String get presetStatUses;
-
-  /// No description provided for @presetUsesCount.
-  ///
-  /// In ko, this message translates to:
-  /// **'{count}회'**
-  String presetUsesCount(int count);
-
-  /// No description provided for @presetStatType.
-  ///
-  /// In ko, this message translates to:
-  /// **'지출 / 수입'**
-  String get presetStatType;
 
   /// No description provided for @presetSortUsed.
   ///
   /// In ko, this message translates to:
-  /// **'사용 많은 순'**
+  /// **'많이 쓴 순'**
   String get presetSortUsed;
 
   /// No description provided for @presetSortRecent.
@@ -8257,6 +8197,216 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이름순'**
   String get presetSortName;
+
+  /// No description provided for @presetListTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 {count}개'**
+  String presetListTitle(int count);
+
+  /// No description provided for @presetUses.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}번'**
+  String presetUses(int count);
+
+  /// No description provided for @presetSortLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'정렬'**
+  String get presetSortLabel;
+
+  /// No description provided for @presetLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋을 불러오지 못했어요'**
+  String get presetLoadFailed;
+
+  /// No description provided for @presetCategoryLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 불러오지 못했어요'**
+  String get presetCategoryLoadFailed;
+
+  /// No description provided for @presetDeleteConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'\"{name}\" 프리셋을 삭제할까요?'**
+  String presetDeleteConfirmTitle(String name);
+
+  /// No description provided for @presetNoteFixed.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정 금액'**
+  String get presetNoteFixed;
+
+  /// No description provided for @presetNoteUses.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}번 썼어요'**
+  String presetNoteUses(int count);
+
+  /// No description provided for @presetNoteUnused.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 쓰지 않았어요'**
+  String get presetNoteUnused;
+
+  /// No description provided for @presetNoteLast.
+  ///
+  /// In ko, this message translates to:
+  /// **'마지막 {month}월 {day}일'**
+  String presetNoteLast(int month, int day);
+
+  /// No description provided for @presetFixedOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'켬'**
+  String get presetFixedOn;
+
+  /// No description provided for @presetFixedOff.
+  ///
+  /// In ko, this message translates to:
+  /// **'끔'**
+  String get presetFixedOff;
+
+  /// No description provided for @presetNameRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 입력해주세요.'**
+  String get presetNameRequired;
+
+  /// No description provided for @presetNameTooLong.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 이름은 12자 이내로 입력해주세요.'**
+  String get presetNameTooLong;
+
+  /// No description provided for @presetCategoryRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 골라주세요.'**
+  String get presetCategoryRequired;
+
+  /// No description provided for @presetFromRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌를 골라주세요.'**
+  String get presetFromRequired;
+
+  /// No description provided for @presetToRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌를 골라주세요.'**
+  String get presetToRequired;
+
+  /// No description provided for @presetSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get presetSaveFailed;
+
+  /// No description provided for @presetAmountLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액'**
+  String get presetAmountLabel;
+
+  /// No description provided for @presetFeeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'수수료'**
+  String get presetFeeLabel;
+
+  /// No description provided for @presetAmountBlank.
+  ///
+  /// In ko, this message translates to:
+  /// **'비워 둠'**
+  String get presetAmountBlank;
+
+  /// No description provided for @presetAmountHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'비워 두면 불러올 때 금액을 직접 넣어요.'**
+  String get presetAmountHint;
+
+  /// No description provided for @presetMemoPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택 사항'**
+  String get presetMemoPlaceholder;
+
+  /// No description provided for @presetInterestTooLarge.
+  ///
+  /// In ko, this message translates to:
+  /// **'이자는 금액보다 클 수 없어요.'**
+  String get presetInterestTooLarge;
+
+  /// No description provided for @presetNoneValue.
+  ///
+  /// In ko, this message translates to:
+  /// **'없음'**
+  String get presetNoneValue;
+
+  /// No description provided for @presetMemoNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 없음'**
+  String get presetMemoNone;
+
+  /// No description provided for @presetNoAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'계좌·카드 없음'**
+  String get presetNoAccount;
+
+  /// No description provided for @presetNoPayment.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 수단 없음'**
+  String get presetNoPayment;
+
+  /// No description provided for @presetNoCategoryOfKind.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 종류의 카테고리가 없어요.'**
+  String get presetNoCategoryOfKind;
+
+  /// No description provided for @presetFromAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌'**
+  String get presetFromAccount;
+
+  /// No description provided for @presetToAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌'**
+  String get presetToAccount;
+
+  /// No description provided for @presetShowAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 보기'**
+  String get presetShowAll;
+
+  /// No description provided for @presetPickTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 고르기'**
+  String get presetPickTitle;
+
+  /// No description provided for @presetSearch.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 검색'**
+  String get presetSearch;
+
+  /// No description provided for @presetNoResult.
+  ///
+  /// In ko, this message translates to:
+  /// **'찾는 프리셋이 없어요.'**
+  String get presetNoResult;
 
   /// No description provided for @presetAdd.
   ///
@@ -8285,7 +8435,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetEmptyDesc.
   ///
   /// In ko, this message translates to:
-  /// **'자주 쓰는 내역을 추가해 매번 입력하는 수고를 줄여보세요.'**
+  /// **'자주 쓰는 내역(점심 · 교통비 등)을 저장해 두면 내역을 추가할 때 한 번 눌러 카테고리 · 계좌 · 내역을 채워요.'**
   String get presetEmptyDesc;
 
   /// No description provided for @presetEditTitle.
@@ -8315,56 +8465,14 @@ abstract class AppLocalizations {
   /// No description provided for @presetMerchantPlaceholder.
   ///
   /// In ko, this message translates to:
-  /// **'예: 한솥 도시락'**
+  /// **'예: 회사 앞 도시락'**
   String get presetMerchantPlaceholder;
-
-  /// No description provided for @presetSelectNone.
-  ///
-  /// In ko, this message translates to:
-  /// **'선택 안 함'**
-  String get presetSelectNone;
 
   /// No description provided for @presetAssetCard.
   ///
   /// In ko, this message translates to:
   /// **'계좌·카드'**
   String get presetAssetCard;
-
-  /// No description provided for @presetAssetLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'자산 로드 실패'**
-  String get presetAssetLoadError;
-
-  /// No description provided for @presetLockToggle.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정 금액 사용'**
-  String get presetLockToggle;
-
-  /// No description provided for @presetLockDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'꺼두면 불러올 때 금액이 비어있어요. 매번 다른 금액일 때 편해요.'**
-  String get presetLockDesc;
-
-  /// No description provided for @presetLockAmountLabel.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정 금액'**
-  String get presetLockAmountLabel;
-
-  /// No description provided for @presetUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이 수정되었습니다'**
-  String get presetUpdated;
-
-  /// No description provided for @presetCreated.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이 추가되었습니다'**
-  String get presetCreated;
 
   /// No description provided for @recurringToggleFailed.
   ///
@@ -13055,7 +13163,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetFixedDesc.
   ///
   /// In ko, this message translates to:
-  /// **'이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요. 위의 고정 금액과는 별개예요.'**
+  /// **'이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요.'**
   String get presetFixedDesc;
 
   /// No description provided for @hideCardStatsFixed.
