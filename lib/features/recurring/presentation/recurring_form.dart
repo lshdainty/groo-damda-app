@@ -616,7 +616,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                     if (withNone)
                       PickItem<int>(
                         value: _kNoAsset,
-                        title: l.recurringSelectNone,
+                        title: l.recNoneOf(title),
                       ),
                     for (final a in pool) _assetItem(a),
                   ],
@@ -702,7 +702,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
             label: title,
             selected: _paymentMethod,
             items: [
-              PickItem(value: '', title: l.recurringSelectNone),
+              PickItem(value: '', title: l.recNoneOf(title)),
               for (final v in _kPaymentMethodValues)
                 PickItem(value: v, title: _payLabel(l, v)!),
             ],
@@ -1390,7 +1390,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               title: l.recFromAccount,
               prefix: const Icon(LucideIcons.wallet),
               value: from?.assetName,
-              placeholder: l.expSelect,
+              placeholder: l.recSelectOf(l.recFromAccount),
               errorMessage: _attempted ? _errFrom(l) : null,
               onTap: _pickFrom,
             ),
@@ -1398,7 +1398,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               title: l.recDepositAccount,
               prefix: const Icon(LucideIcons.wallet),
               value: to?.assetName,
-              placeholder: l.expSelect,
+              placeholder: l.recSelectOf(l.recDepositAccount),
               errorMessage: _attempted ? _errTo(l) : null,
               onTap: _pickTo,
             ),
@@ -1423,7 +1423,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               title: l.expCategory,
               prefix: const Icon(LucideIcons.tags),
               value: cat?.categoryName,
-              placeholder: l.expSelect,
+              placeholder: l.recSelectOf(l.expCategory),
               leading: cat == null
                   ? null
                   : PickerDot(
@@ -1449,14 +1449,18 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               title: income ? l.recDepositAccount : l.recurringAssetCard,
               prefix: const Icon(LucideIcons.wallet),
               value: from?.assetName,
-              placeholder: l.recurringSelectNone,
+              placeholder: l.recNoneOf(
+                income ? l.recDepositAccount : l.recurringAssetCard,
+              ),
               onTap: _pickAssetRow,
             ),
             PickerRow(
               title: income ? l.recIncomeMethod : l.expPaymentMethod,
               prefix: const Icon(LucideIcons.creditCard),
               value: _payLabel(l, _paymentMethod),
-              placeholder: l.recurringSelectNone,
+              placeholder: l.recNoneOf(
+                income ? l.recIncomeMethod : l.expPaymentMethod,
+              ),
               onTap: _pickPayment,
             ),
           ],

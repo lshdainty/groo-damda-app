@@ -8946,6 +8946,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recErrInterestTooBig => 'Interest can\'t be more than the amount.';
 
   @override
+  String recSelectOf(String field) {
+    return 'Select $field';
+  }
+
+  @override
+  String recNoneOf(String field) {
+    return 'No $field';
+  }
+
+  @override
   String get recErrCountMin => 'Enter 1 or more.';
 
   @override

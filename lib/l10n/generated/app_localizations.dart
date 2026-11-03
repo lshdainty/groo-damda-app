@@ -15727,6 +15727,18 @@ abstract class AppLocalizations {
   /// **'이자는 금액보다 클 수 없어요.'**
   String get recErrInterestTooBig;
 
+  /// No description provided for @recSelectOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{field} 선택'**
+  String recSelectOf(String field);
+
+  /// No description provided for @recNoneOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{field} 없음'**
+  String recNoneOf(String field);
+
   /// No description provided for @recErrCountMin.
   ///
   /// In ko, this message translates to:

@@ -106,11 +106,13 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
                       context,
                     ).close(RecurringDetailAction.edit),
                   ),
-                  PMenuSheetItem(
-                    label: active ? l.recPause : l.recResume,
-                    icon: active ? LucideIcons.pause : LucideIcons.play,
-                    onSelect: () => _toggle(it),
-                  ),
+                  // 끝난 반복은 다시 켜도 만들 회차가 없다 — 켜기 · 멈추기를 숨긴다(웹과 같다)
+                  if (!isFinished(it))
+                    PMenuSheetItem(
+                      label: active ? l.recPause : l.recResume,
+                      icon: active ? LucideIcons.pause : LucideIcons.play,
+                      onSelect: () => _toggle(it),
+                    ),
                 ]),
                 PMenuSheetGroup([
                   PMenuSheetItem(
@@ -409,24 +411,34 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
       ),
       // 알림(스낵바)이 바닥 버튼을 덮지 않고 그 위 8 에 선다(웹 `SnackbarAvoidOverlap` 과 같다)
       footerRow: PSnackbarAvoidOverlap(
-        child: PResponsivePair(
-          secondary: PButton(
-            label: active ? l.recPause : l.recResume,
-            variant: PButtonVariant.neutralWeak,
-            size: PButtonSize.large,
-            prefixIcon: active ? LucideIcons.pause : LucideIcons.play,
-            onPressed: _busy ? null : () => _toggle(it),
-          ),
-          primary: PButton(
-            label: l.actionEdit,
-            size: PButtonSize.large,
-            onPressed: _busy
-                ? null
-                : () => PBottomSheet.of(
-                    context,
-                  ).close(RecurringDetailAction.edit),
-          ),
-        ),
+        child: isFinished(it)
+            ? PButton(
+                label: l.actionEdit,
+                size: PButtonSize.large,
+                onPressed: _busy
+                    ? null
+                    : () => PBottomSheet.of(
+                        context,
+                      ).close(RecurringDetailAction.edit),
+              )
+            : PResponsivePair(
+                secondary: PButton(
+                  label: active ? l.recPause : l.recResume,
+                  variant: PButtonVariant.neutralWeak,
+                  size: PButtonSize.large,
+                  prefixIcon: active ? LucideIcons.pause : LucideIcons.play,
+                  onPressed: _busy ? null : () => _toggle(it),
+                ),
+                primary: PButton(
+                  label: l.actionEdit,
+                  size: PButtonSize.large,
+                  onPressed: _busy
+                      ? null
+                      : () => PBottomSheet.of(
+                          context,
+                        ).close(RecurringDetailAction.edit),
+                ),
+              ),
       ),
     );
   }

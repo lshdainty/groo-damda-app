@@ -8738,6 +8738,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recErrInterestTooBig => '이자는 금액보다 클 수 없어요.';
 
   @override
+  String recSelectOf(String field) {
+    return '$field 선택';
+  }
+
+  @override
+  String recNoneOf(String field) {
+    return '$field 없음';
+  }
+
+  @override
   String get recErrCountMin => '1번 이상 입력해주세요.';
 
   @override
