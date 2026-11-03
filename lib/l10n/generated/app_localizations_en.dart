@@ -8587,16 +8587,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t mark it as refunded. Please try again in a moment.';
 
   @override
-  String get expRefundCancelFailed =>
-      'Couldn\'t undo the refund. Please try again in a moment.';
+  String get expRefundCancelFailed => 'Couldn\'t undo the refund.';
 
   @override
-  String get expTxDeleteFailed =>
-      'Couldn\'t delete the transaction. Please try again in a moment.';
+  String get expTxDeleteFailed => 'Couldn\'t delete the transaction.';
 
   @override
-  String get transferDeleteFailed =>
-      'Couldn\'t delete the transfer. Please try again in a moment.';
+  String get transferDeleteFailed => 'Couldn\'t delete the transfer.';
 
   @override
   String get transferDetailTitle => 'Transfer details';

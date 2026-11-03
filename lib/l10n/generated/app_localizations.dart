@@ -15107,19 +15107,19 @@ abstract class AppLocalizations {
   /// No description provided for @expRefundCancelFailed.
   ///
   /// In ko, this message translates to:
-  /// **'환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'환불을 취소하지 못했어요.'**
   String get expRefundCancelFailed;
 
   /// No description provided for @expTxDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'거래를 삭제하지 못했어요.'**
   String get expTxDeleteFailed;
 
   /// No description provided for @transferDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'**
+  /// **'이체를 삭제하지 못했어요.'**
   String get transferDeleteFailed;
 
   /// No description provided for @transferDetailTitle.

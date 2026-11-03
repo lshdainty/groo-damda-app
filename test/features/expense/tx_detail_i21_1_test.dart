@@ -593,7 +593,7 @@ void main() {
       expect(repo.silentFlags, [true], reason: '전역 오류 알림은 끄고 화면이 말한다');
       expect(find.byType(AlertDialog), findsNothing, reason: '확인창은 닫혔다');
       expect(find.byKey(const ValueKey('tx-detail-failure')), findsNothing);
-      expect(find.text('거래를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
+      expect(find.text('거래를 삭제하지 못했어요.'), findsOneWidget);
       expect(find.text('다시 시도'), findsOneWidget);
       // 시트는 그대로 열려 있고 버튼은 풀려 있다
       expect(
@@ -675,7 +675,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('환불 취소').last);
       await tester.pumpAndSettle();
-      expect(find.text('환불을 취소하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
+      expect(find.text('환불을 취소하지 못했어요.'), findsOneWidget);
 
       Navigator.of(
         tester.element(find.byType(PBottomSheetContent)),
@@ -797,7 +797,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsNothing);
-      expect(find.text('이체를 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
+      expect(find.text('이체를 삭제하지 못했어요.'), findsOneWidget);
       expect(assetRepo.deleted, isEmpty);
 
       assetRepo.fail = false;
