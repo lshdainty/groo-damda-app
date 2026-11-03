@@ -1237,7 +1237,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetPayNow => 'Pay now';
 
   @override
-  String get assetPayFailed => 'Payment failed';
+  String get assetPayFailed => 'Couldn\'t pay the card bill.';
 
   @override
   String get assetInstallmentPayoffFailed =>

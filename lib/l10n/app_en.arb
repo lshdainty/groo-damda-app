@@ -690,7 +690,6 @@
   },
   "assetPayNoAccountNote": "No payment account is linked, so the usage is settled without a transfer.",
   "assetPaymentRecorded": "Payment recorded",
-  "assetPayFailed": "Payment failed",
   "assetBillingLoadError": "Couldn't load billing info",
   "assetUpcomingPayment": "Upcoming payment",
   "assetScheduledTag": "Upcoming",

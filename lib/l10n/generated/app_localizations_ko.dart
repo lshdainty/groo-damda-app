@@ -1221,7 +1221,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetPayNow => '지금 결제';
 
   @override
-  String get assetPayFailed => '결제 실패';
+  String get assetPayFailed => '카드값을 결제하지 못했어요.';
 
   @override
   String get assetInstallmentPayoffFailed => '할부를 정리하지 못했어요.';

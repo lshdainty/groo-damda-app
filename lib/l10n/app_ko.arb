@@ -727,7 +727,6 @@
   },
   "assetPayNoAccountNote": "연결된 결제 계좌가 없어 이체 없이 사용액만 정리돼요.",
   "assetPaymentRecorded": "결제가 기록되었습니다",
-  "assetPayFailed": "결제 실패",
   "assetBillingLoadError": "청구 정보를 불러오지 못했어요",
   "assetUpcomingPayment": "결제 예정",
   "assetScheduledTag": "예정",
