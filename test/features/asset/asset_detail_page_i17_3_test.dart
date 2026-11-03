@@ -2,6 +2,7 @@
 // (작성만 — 이 묶음은 시험 실행을 하지 않는다. 렌더 하네스는 ~/qa/design-work/impl-audit/harness-i17-3-app.)
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';

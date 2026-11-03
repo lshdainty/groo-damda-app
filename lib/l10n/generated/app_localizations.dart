@@ -1751,7 +1751,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetDetailDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'자산을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'자산을 삭제하지 못했어요.'**
   String get assetDetailDeleteFailed;
 
   /// No description provided for @assetNotFoundDesc.
@@ -1840,7 +1840,7 @@ abstract class AppLocalizations {
   /// No description provided for @tradeCancelFailed.
   ///
   /// In ko, this message translates to:
-  /// **'거래를 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'거래를 취소하지 못했어요.'**
   String get tradeCancelFailed;
 
   /// No description provided for @holdingTypeStock.

@@ -271,9 +271,12 @@ class AssetRepository {
     'totalCost': ?h.totalCost,
   };
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/asset/$id');
+      await _dio.delete<void>(
+        '/asset/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -530,9 +533,12 @@ class AssetRepository {
   }
 
   /// 거래 취소 — 예수금·수량·원가가 그 거래 직전으로 돌아간다.
-  Future<void> deleteTrade(int id) async {
+  Future<void> deleteTrade(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/asset-trade/$id');
+      await _dio.delete<void>(
+        '/asset-trade/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

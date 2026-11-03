@@ -875,7 +875,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetNotFoundTitle => '자산을 찾을 수 없어요';
 
   @override
-  String get assetDetailDeleteFailed => '자산을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get assetDetailDeleteFailed => '자산을 삭제하지 못했어요.';
 
   @override
   String get assetNotFoundDesc => '지웠거나 없는 자산이에요.';
@@ -928,7 +928,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get tradeCancelFailed => '거래를 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get tradeCancelFailed => '거래를 취소하지 못했어요.';
 
   @override
   String get holdingTypeStock => '주식';

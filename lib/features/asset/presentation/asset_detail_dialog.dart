@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsk;
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showAssetEditForm;
@@ -127,34 +128,19 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
 
   Future<void> _delete(Asset asset) async {
     if (_deleting || !mounted) return;
-    final l = AppLocalizations.of(context);
-    // ds Alert Dialog — 밀기 삭제와 같은 부품 · 같은 글(I-17 32). 지우면 되돌릴 수 없으니 destructive.
-    final ok = await PAlertDialog.show(
-      context,
-      title: assetActions.deleteConfirmTitle(context, asset),
-      description: assetActions.deleteConfirmMessage(context, asset),
-      cancelLabel: l.actionCancel,
-      actionLabel: l.actionDelete,
-      destructive: true,
-    );
-    if (!ok || !mounted) return;
     setState(() => _deleting = true);
     try {
-      final deleted = await assetActions.delete(context, ref, asset);
-      if (!mounted) return;
-      if (deleted) {
-        // 지워진 자산의 상세를 열어 둘 수 없다 — ← 와 같은 길. 목록은 delete 가 이미 다시 받는다(8).
-        _back();
-        return;
-      }
-      // 확인창은 닫혔다 — 실패는 이 화면 안에서 보인다(전역 스낵바와 겹치지 않게 화면 스낵바 하나).
-      PSnackbar.maybeOf(context)?.show(
-        message: l.assetDetailDeleteFailed,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () => _delete(asset),
-        ),
+      // 확인창(밀기 삭제와 같은 부품 · 같은 글, I-17 32) → 삭제. 실패는 확인창이 닫힌 뒤
+      // critical 스낵바 + [다시 시도] — 다시 시도가 성공해도 같은 길로 나간다.
+      final deleted = await assetActions.confirmAndDelete(
+        context,
+        asset,
+        onRetried: () {
+          if (mounted) _back();
+        },
       );
+      // 지워진 자산의 상세를 열어 둘 수 없다 — ← 와 같은 길. 목록은 지우는 쪽이 이미 다시 받는다(8).
+      if (deleted && mounted) _back();
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
@@ -948,7 +934,8 @@ Future<void> showTradeDetailSheet(
     ),
   );
   if (cancel != true || !context.mounted) return;
-  final ok = await PAlertDialog.show(
+  final container = ProviderScope.containerOf(context);
+  final ok = await askConfirmThenRequest(
     context,
     title: l.tradeDeleteTitle,
     description: l.tradeDeleteConfirmTarget(
@@ -959,51 +946,37 @@ Future<void> showTradeDetailSheet(
     ),
     cancelLabel: l.actionCancel,
     actionLabel: l.tradeDeleteTitle,
-    destructive: true,
+    request: () => _cancelTradeRequest(container, trade, assetRowId),
+    failedMessage: l.tradeCancelFailed,
+    retryLabel: l.actionRetry,
+    onRetried: () => PSnackbar.maybeOf(context)?.show(message: l.tradeDeleted),
   );
-  if (!ok || !context.mounted) return;
-  await cancelTrade(context, trade: trade, assetRowId: assetRowId);
+  if (ok && context.mounted) {
+    PSnackbar.maybeOf(context)?.show(message: l.tradeDeleted);
+  }
 }
 
-/// 거래 취소 요청 — 취소 뒤 목록을 다시 받는다(8). 실패는 화면 스낵바 + [다시 시도](확인창은 이미 닫혔다).
-Future<void> cancelTrade(
-  BuildContext context, {
-  required AssetTrade trade,
-  required int assetRowId,
-}) async {
-  final l = AppLocalizations.of(context);
-  final container = ProviderScope.containerOf(context);
-  final snack = PSnackbar.maybeOf(context);
-  try {
-    final repo = await container.read(assetRepositoryProvider.future);
-    await repo.deleteTrade(trade.rowId);
-    // 예수금·평가액이 되돌아간다 — 순자산·추이까지 다시 받는다.
-    for (final p in <ProviderOrFamily>[
-      assetsProvider,
-      assetSummaryProvider,
-      netWorthTrendProvider,
-      assetByIdProvider,
-      cardBillingProvider,
-      cardPerformanceProvider,
-      investmentValuationMapProvider,
-    ]) {
-      container.invalidate(p);
-    }
-    container.invalidate(assetTradesProvider(assetRowId));
-    snack?.show(message: l.tradeDeleted);
-  } on ApiException {
-    snack?.show(
-      message: l.tradeCancelFailed,
-      action: PSnackbarAction(
-        label: l.actionRetry,
-        onPressed: () {
-          if (context.mounted) {
-            cancelTrade(context, trade: trade, assetRowId: assetRowId);
-          }
-        },
-      ),
-    );
+/// 거래 취소 요청(silent) + 뒷정리 — 취소 뒤 목록을 다시 받는다(8). 던지면 호출처가 실패 스낵바를 띄운다.
+Future<void> _cancelTradeRequest(
+  ProviderContainer container,
+  AssetTrade trade,
+  int assetRowId,
+) async {
+  final repo = await container.read(assetRepositoryProvider.future);
+  await repo.deleteTrade(trade.rowId, silent: true);
+  // 예수금·평가액이 되돌아간다 — 순자산·추이까지 다시 받는다.
+  for (final p in <ProviderOrFamily>[
+    assetsProvider,
+    assetSummaryProvider,
+    netWorthTrendProvider,
+    assetByIdProvider,
+    cardBillingProvider,
+    cardPerformanceProvider,
+    investmentValuationMapProvider,
+  ]) {
+    container.invalidate(p);
   }
+  container.invalidate(assetTradesProvider(assetRowId));
 }
 
 /// 거래 기록 상세 본문 — 시트가 감싼다(카탈로그 · 렌더도 이것을 직접 부른다).

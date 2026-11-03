@@ -890,8 +890,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetNotFoundTitle => 'Asset not found';
 
   @override
-  String get assetDetailDeleteFailed =>
-      'Couldn\'t delete the asset. Please try again in a moment.';
+  String get assetDetailDeleteFailed => 'Couldn\'t delete the asset.';
 
   @override
   String get assetNotFoundDesc => 'It was deleted or doesn\'t exist.';
@@ -944,8 +943,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get tradeCancelFailed =>
-      'Couldn\'t cancel the trade. Please try again in a moment.';
+  String get tradeCancelFailed => 'Couldn\'t cancel the trade.';
 
   @override
   String get holdingTypeStock => 'Stock';

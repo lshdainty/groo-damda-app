@@ -412,7 +412,7 @@
   "tradeDeleteConfirm": "이 거래를 취소하시겠어요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
   "assetDetailTitle": "자산 상세",
   "assetNotFoundTitle": "자산을 찾을 수 없어요",
-  "assetDetailDeleteFailed": "자산을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "assetDetailDeleteFailed": "자산을 삭제하지 못했어요.",
   "assetNotFoundDesc": "지웠거나 없는 자산이에요.",
   "assetNotFoundAction": "자산으로",
   "assetLoadFailTitle": "자산을 불러오지 못했어요",
@@ -459,7 +459,7 @@
       }
     }
   },
-  "tradeCancelFailed": "거래를 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "tradeCancelFailed": "거래를 취소하지 못했어요.",
   "holdingTypeStock": "주식",
   "holdingTypeGold": "금",
   "holdingTypeCrypto": "코인",
