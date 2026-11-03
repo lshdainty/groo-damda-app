@@ -469,7 +469,6 @@ class _TagEditSheetState extends State<_TagEditSheet> {
     return PBottomSheetContent(
       title: _isEdit ? l.ttagEditTitle : l.todoNewTag,
       closeLabel: l.actionClose,
-      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x4,

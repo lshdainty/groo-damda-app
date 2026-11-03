@@ -113,7 +113,7 @@ class _CapturingRepo extends PresetRepository {
   Future<ExpenseTemplate> update({
     required int id,
     required String templateName,
-    int? categoryRowId,
+    Patch<int> categoryRowId = const Patch.keep(),
     Patch<int> assetRowId = const Patch.keep(),
     Patch<int> toAssetRowId = const Patch.keep(),
     Patch<int> fee = const Patch.keep(),
@@ -129,7 +129,7 @@ class _CapturingRepo extends PresetRepository {
     called = true;
     this.toAssetRowId = toAssetRowId;
     this.fee = fee;
-    updatedCategoryRowId = categoryRowId;
+    updatedCategoryRowId = categoryRowId.value;
     updatedType = expenseType;
     return _transferPreset;
   }
