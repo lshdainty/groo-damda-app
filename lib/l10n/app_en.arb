@@ -666,7 +666,7 @@
   "assetLumpSumLabel": "One-time",
   "assetAlreadyPaidLabel": "Prepaid",
   "assetPayNow": "Pay now",
-  "assetPayFailed": "Couldn't pay the card bill.",
+  "assetPayFailed": "Couldn't pay. Please try again in a moment.",
   "assetInstallmentPayoffFailed": "Couldn't pay off the installment.",
   "assetInstallmentPayoffUndoFailed": "Couldn't undo the installment payoff.",
   "assetCancelPaymentFailed": "Couldn't cancel the payment.",

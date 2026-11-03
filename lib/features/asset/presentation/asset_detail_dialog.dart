@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsk;
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
@@ -2212,12 +2213,21 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     // 채워 둔 금액으로 한 번 판정한다 — 리스너는 입력이 바뀔 때만 돌아, 안 부르면
     // [결제하기] 가 기본값(꺼짐)으로 남는다. 금액 칸을 한 번 눌러야 켜졌다(2026-09-22 iOS).
     syncCanSubmit();
-    int? picked;
+    // 폼 저장 실패 = 시트 안 맨 위 Callout(입력 금액 유지 · 시트 유지 · 스낵바 없음). 시트를 다시 열면 새 값이라 지워진다.
+    final failed = ValueNotifier<bool>(false);
+    final errorKey = GlobalKey();
     sheet.onSubmit = () async {
-      // 같은 제출이 두 번 들어와도(Enter 연타) 시트를 두 번 닫지 않고 요청도 한 번만.
-      if (picked != null) return;
-      picked = parsed();
-      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      // 같은 제출이 두 번 들어와도(Enter 연타) 요청은 한 번만 — 진행 중 제출은 컨트롤러가, 이중 진입은 _paying 이 막는다.
+      failed.value = false;
+      sheet.setSubmitting(true);
+      final ok = await _pay(parsed(), st.paymentDate);
+      sheet.setSubmitting(false);
+      if (ok) {
+        if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      } else if (mounted) {
+        failed.value = true;
+        revealFormError(errorKey);
+      }
     };
 
     await showPSheet<void>(
@@ -2254,6 +2264,15 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  ValueListenableBuilder<bool>(
+                    valueListenable: failed,
+                    builder: (_, f, _) => f
+                        ? FormErrorCallout(
+                            key: errorKey,
+                            message: l.assetPayFailed,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                   Text(
                     '${l.assetPayConfirmMessage(krw(upcoming))}$dateSuffix',
                     style: PTypo.body.copyWith(
@@ -2308,16 +2327,14 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
 
     ctrl.dispose();
     sheet.dispose();
-    if (picked == null || !mounted) return;
-    await _pay(picked!, st.paymentDate);
+    failed.dispose();
   }
 
-  Future<void> _pay(int amount, String paymentDate) async {
+  /// 결제 요청(silent) — 성공이면 true. 실패는 호출한 시트가 맨 위 Callout 으로 보인다.
+  Future<bool> _pay(int amount, String paymentDate) async {
     // 진입에서 바로 막는다 — 첫 줄과 setState 사이에 await 가 없어 두 번째 호출은 여기서 끝난다.
-    if (_paying) return;
+    if (_paying) return false;
     setState(() => _paying = true);
-    final l = AppLocalizations.of(context);
-    final snack = PSnackbar.maybeOf(context);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       await repo.payCard(
@@ -2329,18 +2346,9 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
       ref.invalidate(cardBillingProvider(widget.asset.rowId));
       // 결제는 이체를 만든다 — 결제 계좌 잔액·홈 순자산·가계부까지 함께 바뀐다.
       invalidateAfterExpenseChange(ref);
+      return true;
     } on ApiException {
-      // 서버 원문 토스트 대신 한 문장 + [다시 시도](silent 요청이라 겹치지 않는다).
-      snack?.show(
-        message: l.assetPayFailed,
-        tone: PSnackbarTone.critical,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () {
-            if (mounted) _pay(amount, paymentDate);
-          },
-        ),
-      );
+      return false;
     } finally {
       if (mounted) setState(() => _paying = false);
     }

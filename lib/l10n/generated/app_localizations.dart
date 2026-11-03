@@ -2338,7 +2338,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetPayFailed.
   ///
   /// In ko, this message translates to:
-  /// **'카드값을 결제하지 못했어요.'**
+  /// **'결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get assetPayFailed;
 
   /// No description provided for @assetInstallmentPayoffFailed.
