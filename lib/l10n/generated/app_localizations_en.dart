@@ -1508,8 +1508,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save the event. Please try again in a moment.';
 
   @override
-  String get calFormDeleteFailed =>
-      'Couldn\'t delete the event. Please try again in a moment.';
+  String get calFormDeleteFailed => 'Couldn\'t delete the event.';
 
   @override
   String calReminderMinutesBefore(int n) {

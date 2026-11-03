@@ -1486,10 +1486,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calFormRowsMore => '반복 · 알림 · 장소 · 설명';
 
   @override
-  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calFormDeleteFailed => '일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormDeleteFailed => '일정을 삭제하지 못했어요.';
 
   @override
   String calReminderMinutesBefore(int n) {

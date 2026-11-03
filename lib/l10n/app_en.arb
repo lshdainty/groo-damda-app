@@ -822,7 +822,7 @@
   "calFormRows": "Event details",
   "calFormRowsMore": "Repeat, reminder, location and description",
   "calFormSaveFailed": "Couldn't save the event. Please try again in a moment.",
-  "calFormDeleteFailed": "Couldn't delete the event. Please try again in a moment.",
+  "calFormDeleteFailed": "Couldn't delete the event.",
   "calReminderMinutesBefore": "{n} min before",
   "@calReminderMinutesBefore": {
     "placeholders": {
