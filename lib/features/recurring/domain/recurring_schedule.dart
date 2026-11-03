@@ -187,11 +187,13 @@ List<String> previewNextDateKeys(
   int count, {
   String? endDate,
   int? maxOccurrences,
+  int intervalValue = 1,
+  DateTime? today,
 }) {
   final rule = ScheduleRule(
     startDate: startIso,
     frequency: frequency,
-    intervalValue: 1,
+    intervalValue: intervalValue,
     dayOfWeek: dayOfWeekUi == 0 ? 7 : dayOfWeekUi,
     dayOfMonth: frequency == 'MONTHLY' ? dayOfMonth : null,
     endDate: endDate,
@@ -199,6 +201,13 @@ List<String> previewNextDateKeys(
   );
   var cur = firstOccurrence(rule);
   if (cur == null) return const [];
+  // 서버는 오늘 이후 첫 회차(firstOccurrenceOnOrAfter)부터 만든다 — 지난 회차를 채우지 않는다
+  if (today != null) {
+    final t = DateTime(today.year, today.month, today.day);
+    for (var i = 0; cur!.isBefore(t) && i < _maxSteps * 4; i++) {
+      cur = stepOccurrence(cur, rule);
+    }
+  }
   final out = <String>[];
   final end = _endKey(rule);
   for (var n = 1; out.length < count && n <= _maxSteps; n++) {
@@ -211,9 +220,9 @@ List<String> previewNextDateKeys(
   return out;
 }
 
-/// 끝남 — 쉬지 않았는데 다음 날짜가 끝 날짜 뒤이거나 실행 수가 최대 횟수에 닿았다.
+/// 끝남 — 실행 수가 최대 횟수에 닿았거나 다음 날짜가 끝 날짜 뒤다. isActive 와 상관없다 — 서버 markExecuted 가
+/// 횟수를 채우면 isActive 를 N 으로 바꾸므로 끝난 반복은 N 이 정상 상태다.
 bool isFinished(RecurringTransaction it) {
-  if (it.isActive != 'Y') return false;
   if (it.maxOccurrences != null && it.executedCount >= it.maxOccurrences!) {
     return true;
   }
@@ -224,6 +233,10 @@ bool isFinished(RecurringTransaction it) {
   }
   return false;
 }
+
+/// 쉬는 중 — 꺼져 있고(isActive N) 끝나지 않았다.
+bool isPausedRec(RecurringTransaction it) =>
+    it.isActive != 'Y' && !isFinished(it);
 
 /// 이번 달 합 — 켜진 반복의 이 달(1일 ~ 말일) 회차 금액을 모두 더한다. 이미 기록된 회차도 포함(규칙으로 센다).
 /// 쉬는 반복은 뺀다. [type] 은 'EXPENSE' | 'INCOME'.
@@ -239,7 +252,7 @@ int monthTotal(
       '$year-$mm-${_lengthOfMonth(year, month).toString().padLeft(2, '0')}';
   var sum = 0;
   for (final it in items) {
-    if (it.isActive != 'Y' || it.expenseType != type) continue;
+    if (isPausedRec(it) || it.expenseType != type) continue;
     final n = occurrencesBetween(ScheduleRule.of(it), from, to).length;
     sum += it.amount.abs() * n;
   }

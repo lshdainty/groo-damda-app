@@ -136,11 +136,15 @@ void main() {
   });
 
   group('isFinished', () {
-    test('쉬는 반복은 끝남이 아니다', () {
-      expect(
-        isFinished(rec(1, 'a', 1, max: 3, executed: 3, active: 'N')),
-        isFalse,
-      );
+    test('횟수를 채워 서버가 N 으로 바꾼 반복도 끝남이다(쉬는 중 아님)', () {
+      final it = rec(1, 'a', 1, max: 3, executed: 3, active: 'N');
+      expect(isFinished(it), isTrue);
+      expect(isPausedRec(it), isFalse);
+    });
+    test('끝나지 않고 꺼진 반복은 쉬는 중', () {
+      final it = rec(1, 'a', 1, max: 3, executed: 1, active: 'N');
+      expect(isFinished(it), isFalse);
+      expect(isPausedRec(it), isTrue);
     });
     test('실행 수가 최대 횟수에 닿으면 끝남', () {
       expect(isFinished(rec(1, 'a', 1, max: 3, executed: 3)), isTrue);

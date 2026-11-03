@@ -8943,6 +8943,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get recErrInterestTooBig => 'Interest can\'t be more than the amount.';
+
+  @override
   String get recErrCountMin => 'Enter 1 or more.';
 
   @override

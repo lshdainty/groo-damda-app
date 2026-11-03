@@ -4773,6 +4773,7 @@
   "recErrEndBeforeStart": "The end date is before the start date.",
   "recErrCountMax": "You can enter up to {max} times.",
   "@recErrCountMax": {"placeholders": {"max": {"type": "int"}}},
+  "recErrInterestTooBig": "Interest can't be more than the amount.",
   "recErrCountMin": "Enter 1 or more.",
   "recSaveFailed": "Could not save. Please try again in a moment.",
   "recNoAssets": "There is no account to choose.",

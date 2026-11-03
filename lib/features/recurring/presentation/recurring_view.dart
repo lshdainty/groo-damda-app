@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/features/recurring/domain/recurring_schedule.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -94,7 +95,7 @@ Widget recurringValueColumn(
             fontFeatures: _tabular,
           ),
         ),
-        if (it.isActive != 'Y') PBadge(label: l.recPausedBadge),
+        if (isPausedRec(it)) PBadge(label: l.recPausedBadge),
       ],
     ),
   );

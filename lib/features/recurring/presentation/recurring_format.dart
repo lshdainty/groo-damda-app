@@ -130,10 +130,10 @@ String recClockText(String hhmm) {
 /// 줄 설명 조각 — 켜짐 "다음 10월 25일 · 매월 25일" · 쉬는 중 "쉬는 중 · …" · 끝남 "끝남 · …"(끝 조각이 있으면 이어 붙인다).
 /// 항목 안 공백은 줄이 안 바뀌는 공백으로 — 줄이 모자라면 **항목 통째로** 다음 줄로 간다(말줄임 없음).
 List<String> recRowDetailParts(AppLocalizations l, RecurringTransaction it) {
-  final lead = it.isActive != 'Y'
-      ? l.recRowPaused
-      : isFinished(it)
+  final lead = isFinished(it)
       ? l.recRowFinished
+      : it.isActive != 'Y'
+      ? l.recRowPaused
       : l.recRowNext(recDateKeyText(it.nextExecutionDate ?? ''));
   final end = recEndPiece(l, it);
   return [lead, recCycleOf(l, it), ?end];

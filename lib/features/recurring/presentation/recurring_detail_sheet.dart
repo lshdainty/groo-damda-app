@@ -203,7 +203,7 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
     final base = PTypography.t5.copyWith(color: c.fgNeutral);
     final bold = base.copyWith(fontWeight: FontWeight.w700);
     final List<InlineSpan> spans;
-    if (it.isActive != 'Y') {
+    if (isPausedRec(it)) {
       spans = [
         TextSpan(
           text: keepAll(l.recSentencePausedPre),

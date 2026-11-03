@@ -15721,6 +15721,12 @@ abstract class AppLocalizations {
   /// **'{max}번까지 입력할 수 있어요.'**
   String recErrCountMax(int max);
 
+  /// No description provided for @recErrInterestTooBig.
+  ///
+  /// In ko, this message translates to:
+  /// **'이자는 금액보다 클 수 없어요.'**
+  String get recErrInterestTooBig;
+
   /// No description provided for @recErrCountMin.
   ///
   /// In ko, this message translates to:

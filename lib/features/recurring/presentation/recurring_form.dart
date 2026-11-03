@@ -26,6 +26,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart'
@@ -184,6 +185,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
 
   bool _attempted = false;
   bool _saveError = false;
+  final _saveErrorKey = GlobalKey();
   bool _submitting = false;
   _Step _step = _Step.none;
   String _stepOrigin = '';
@@ -359,6 +361,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     3,
     endDate: _endMode == _EndMode.date ? dayKey(_endDate) : null,
     maxOccurrences: _endMode == _EndMode.count ? int.tryParse(_endCount) : null,
+    intervalValue: widget.recurring?.intervalValue ?? 1,
+    today: _today(),
   );
 
   // ── 검증(누를 때 보인다) ──────────────────────────────────
@@ -368,8 +372,50 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       ? l.amountTooLarge
       : null;
 
-  String? _errCategory(AppLocalizations l) =>
-      !_isTransfer && _selectedCategory == null ? l.recErrCategory : null;
+  // 목록을 아직 못 받았으면 저장된 id 를 그대로 인정한다(수정으로 열 때 막지 않게 — 20-2 와 같음)
+  String? _errCategory(AppLocalizations l) {
+    if (_isTransfer || _selectedCategory != null) return null;
+    final loaded = ref.read(categoriesProvider).value != null;
+    if (!loaded && _categoryRowId != null) return null;
+    return l.recErrCategory;
+  }
+
+  String? _errInterest(AppLocalizations l) =>
+      _showInterest && (int.tryParse(_interest) ?? 0) > _amountValue
+      ? l.recErrInterestTooBig
+      : null;
+
+  /// 목록이 온 뒤 규칙 밖 값(지운 계좌 · 카드가 된 이체 계좌 · 상위가 된 카테고리)을 비운다 — 칸 오류가 알린다.
+  void _clearOutOfRule() {
+    final assets = ref.read(assetsProvider).value;
+    final cats = ref.read(categoriesProvider).value;
+    var changed = false;
+    if (assets != null) {
+      final ids = {for (final a in assets) a.rowId};
+      if (_assetRowId != null && !ids.contains(_assetRowId)) {
+        _assetRowId = null;
+        changed = true;
+      }
+      if (_isTransfer && _toAssetRowId != null) {
+        final ok = transferEligibleAssets(
+          assets,
+        ).any((a) => a.rowId == _toAssetRowId);
+        if (!ok) {
+          _toAssetRowId = null;
+          changed = true;
+        }
+      }
+    }
+    if (cats != null && !_isTransfer && _categoryRowId != null) {
+      final c = cats.byRowId(_categoryRowId!);
+      // 목록에 없거나 하위가 생겨 상위가 된 카테고리 — 말단만 고른다
+      if (c == null || c.hasChildren) {
+        _categoryRowId = null;
+        changed = true;
+      }
+    }
+    if (changed) _normalize();
+  }
 
   String? _errFrom(AppLocalizations l) =>
       _isTransfer && _assetRowId == null ? l.recErrFrom : null;
@@ -738,6 +784,16 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   }
 
   // ── 저장 ──────────────────────────────────────────────────
+  /// 저장 실패 Callout 을 켜고 보이는 자리로 끌어온다(본문 맨 위라 아래로 내린 뒤엔 가려진다).
+  void _showSaveError() {
+    setState(() => _saveError = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _saveErrorKey.currentContext;
+      if (ctx == null || !ctx.mounted) return;
+      revealBelowFog(ctx);
+    });
+  }
+
   Future<void> _submit() async {
     if (_submitting) return;
     final l = AppLocalizations.of(context);
@@ -748,6 +804,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     final bad =
         _errAmount(l) != null ||
         _errCategory(l) != null ||
+        _errInterest(l) != null ||
         (_isTransfer && !transferPartiesReady(_assetRowId, _toAssetRowId)) ||
         (_isTransfer && _toAssetRowId == _assetRowId) ||
         _errEnd(l) != null;
@@ -757,6 +814,24 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     }
     setState(() => _submitting = true);
     try {
+      // 이자 판정은 받는 계좌의 종류를 봐야 한다 — 목록이 없으면 받아 온 뒤 정한다. 못 받으면 요청 없이 알린다
+      // (이자 키가 빠지면 서버가 지워 버린다)
+      if (_isTransfer &&
+          _toAssetRowId != null &&
+          ref.read(assetsProvider).value == null) {
+        try {
+          await ref.read(assetsProvider.future);
+        } catch (_) {
+          if (!mounted) return;
+          _showSaveError();
+          return;
+        }
+        if (!mounted) return;
+        if (_errInterest(l) != null) {
+          setState(() {});
+          return;
+        }
+      }
       final repo = await ref.read(recurringRepositoryProvider.future);
       final isWeekly = _frequency == 'WEEKLY';
       final isMonthlyish = _frequency == 'MONTHLY' || _frequency == 'YEARLY';
@@ -764,10 +839,10 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       final dom = isMonthlyish ? _dom : null;
       final merchant = _merchant.trim();
       final desc = _description.trim();
-      final fee = _isTransfer && _fee.isNotEmpty ? int.parse(_fee) : null;
-      final interest = _showInterest && _interest.isNotEmpty
-          ? int.parse(_interest)
-          : null;
+      final feeN = int.tryParse(_fee) ?? 0;
+      final fee = _isTransfer && feeN > 0 ? feeN : null;
+      final interestN = int.tryParse(_interest) ?? 0;
+      final interest = _showInterest && interestN > 0 ? interestN : null;
       final r = widget.recurring;
       final categoryRowId = _isTransfer ? null : _categoryRowId;
       final toAsset = _isTransfer ? _toAssetRowId : null;
@@ -842,7 +917,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     } on ApiException {
       // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글, 서버 원문 없음)
       if (!mounted) return;
-      setState(() => _saveError = true);
+      _showSaveError();
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -866,6 +941,13 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     // 카테고리 · 자산이 늦게 와도 줄이 새로 그려진다
     ref.watch(categoriesProvider);
     ref.watch(assetsProvider);
+    // 목록이 온 뒤 규칙 밖 값을 비운다
+    ref.listen(assetsProvider, (_, n) {
+      if (n.hasValue && mounted) setState(_clearOutOfRule);
+    });
+    ref.listen(categoriesProvider, (_, n) {
+      if (n.hasValue && mounted) setState(_clearOutOfRule);
+    });
     if (_step != _Step.none) return _buildStep(l);
     return _buildForm(l);
   }
@@ -1241,6 +1323,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                 PSpacing.x3,
               ),
               child: PCallout(
+                key: _saveErrorKey,
                 tone: PCalloutTone.critical,
                 alert: true,
                 description: l.recSaveFailed,
@@ -1332,6 +1415,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                 icon: LucideIcons.percent,
                 value: _interest.isEmpty ? '' : _won(_interest),
                 placeholder: l.recNoneValue,
+                error: _attempted ? _errInterest(l) : null,
                 onTap: () => _enterText(_Step.interest),
               ),
           ] else ...[

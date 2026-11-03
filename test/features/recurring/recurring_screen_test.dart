@@ -26,7 +26,7 @@ class _Repo extends RecurringRepository {
   @override
   Future<void> toggle(int id, {bool silent = false}) async {
     calls.add('toggle $id silent=$silent');
-    if (fail) throw ApiException(code: 'X', message: '서버 원문');
+    if (fail) throw ApiException(code: 'X', message: '이자는 금액보다 클 수 없습니다.');
     items = [
       for (final r in items)
         r.rowId == id ? r.copyWith(isActive: r.isActive == 'Y' ? 'N' : 'Y') : r,
@@ -36,7 +36,7 @@ class _Repo extends RecurringRepository {
   @override
   Future<void> delete(int id, {bool silent = false}) async {
     calls.add('delete $id silent=$silent');
-    if (fail) throw ApiException(code: 'X', message: '서버 원문');
+    if (fail) throw ApiException(code: 'X', message: '이자는 금액보다 클 수 없습니다.');
     items = [
       for (final r in items)
         if (r.rowId != id) r,
@@ -140,7 +140,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(plain('반복 설정을 삭제하지 못했어요'), findsOneWidget);
     expect(plain('다시 시도'), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(find.text('이자는 금액보다 클 수 없습니다.'), findsNothing);
   });
 
   testWidgets('비면 Result Section — 머리 "추가" 는 없고 본문 버튼이 하나', (tester) async {

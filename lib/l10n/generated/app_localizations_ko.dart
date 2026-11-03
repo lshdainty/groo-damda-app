@@ -8735,6 +8735,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get recErrInterestTooBig => '이자는 금액보다 클 수 없어요.';
+
+  @override
   String get recErrCountMin => '1번 이상 입력해주세요.';
 
   @override

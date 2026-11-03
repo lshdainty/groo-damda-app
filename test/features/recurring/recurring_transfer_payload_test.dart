@@ -72,7 +72,7 @@ class _CapturingRepo extends RecurringRepository {
   }) async {
     called = true;
     this.silent = silent;
-    if (fail) throw ApiException(code: 'X', message: '서버 원문');
+    if (fail) throw ApiException(code: 'X', message: '이자는 금액보다 클 수 없습니다.');
     created = {
       'categoryRowId': categoryRowId,
       'assetRowId': assetRowId,
@@ -181,7 +181,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(plain('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(find.text('이자는 금액보다 클 수 없습니다.'), findsNothing);
     expect(plain('반복 거래 추가'), findsOneWidget);
   });
 
