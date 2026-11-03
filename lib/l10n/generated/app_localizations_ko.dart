@@ -869,6 +869,68 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tradeDeleteConfirm => '이 거래를 취소하시겠어요? 예수금과 보유 수량이 거래 전으로 돌아가요.';
 
   @override
+  String get assetDetailTitle => '자산 상세';
+
+  @override
+  String get assetNotFoundTitle => '자산을 찾을 수 없어요';
+
+  @override
+  String get assetDetailDeleteFailed => '자산을 삭제하지 못했어요.';
+
+  @override
+  String get assetNotFoundDesc => '지웠거나 없는 자산이에요.';
+
+  @override
+  String get assetNotFoundAction => '자산으로';
+
+  @override
+  String get assetLoadFailTitle => '자산을 불러오지 못했어요';
+
+  @override
+  String assetMoreOf(String name) {
+    return '$name 더보기';
+  }
+
+  @override
+  String get tradeDetailTitle => '거래 기록';
+
+  @override
+  String get tradeKind => '종류';
+
+  @override
+  String get tradeHoldingLabel => '종목';
+
+  @override
+  String get tradeUnitPrice => '단가';
+
+  @override
+  String get tradeAmountLabel => '거래대금';
+
+  @override
+  String get tradeFeeLabel => '수수료 · 세금';
+
+  @override
+  String get tradeDateTime => '거래 일시';
+
+  @override
+  String tradeOpenRow(String date, String name) {
+    return '$date $name 거래 기록';
+  }
+
+  @override
+  String tradeDeleteConfirmTarget(
+    String date,
+    String name,
+    String qty,
+    String kind,
+  ) {
+    return '$date $name $qty $kind 거래를 취소할까요? 예수금과 보유 수량이 거래 전으로 돌아가요.';
+  }
+
+  @override
+  String get tradeCancelFailed => '거래를 취소하지 못했어요.';
+
+  @override
   String get holdingTypeStock => '주식';
 
   @override
@@ -1159,6 +1221,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetPayNow => '지금 결제';
 
   @override
+  String get assetPayFailed => '결제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get assetInstallmentPayoffFailed => '할부를 정리하지 못했어요.';
+
+  @override
+  String get assetInstallmentPayoffUndoFailed => '할부 정리를 되돌리지 못했어요.';
+
+  @override
+  String get assetCancelPaymentFailed => '결제를 취소하지 못했어요.';
+
+  @override
   String get assetPayAction => '결제하기';
 
   @override
@@ -1179,9 +1253,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetPaymentRecorded => '결제가 기록되었습니다';
-
-  @override
-  String get assetPayFailed => '결제 실패';
 
   @override
   String get assetBillingLoadError => '청구 정보를 불러오지 못했어요';

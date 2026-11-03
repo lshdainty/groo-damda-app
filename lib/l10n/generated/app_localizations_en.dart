@@ -884,6 +884,68 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cancel this trade? Cash and quantity return to their pre-trade state.';
 
   @override
+  String get assetDetailTitle => 'Asset details';
+
+  @override
+  String get assetNotFoundTitle => 'Asset not found';
+
+  @override
+  String get assetDetailDeleteFailed => 'Couldn\'t delete the asset.';
+
+  @override
+  String get assetNotFoundDesc => 'It was deleted or doesn\'t exist.';
+
+  @override
+  String get assetNotFoundAction => 'Go to assets';
+
+  @override
+  String get assetLoadFailTitle => 'Couldn\'t load the asset';
+
+  @override
+  String assetMoreOf(String name) {
+    return 'More for $name';
+  }
+
+  @override
+  String get tradeDetailTitle => 'Trade record';
+
+  @override
+  String get tradeKind => 'Type';
+
+  @override
+  String get tradeHoldingLabel => 'Holding';
+
+  @override
+  String get tradeUnitPrice => 'Unit price';
+
+  @override
+  String get tradeAmountLabel => 'Trade amount';
+
+  @override
+  String get tradeFeeLabel => 'Fees & tax';
+
+  @override
+  String get tradeDateTime => 'Trade date';
+
+  @override
+  String tradeOpenRow(String date, String name) {
+    return '$name trade record on $date';
+  }
+
+  @override
+  String tradeDeleteConfirmTarget(
+    String date,
+    String name,
+    String qty,
+    String kind,
+  ) {
+    return 'Cancel the $kind of $qty $name on $date? Cash and quantity return to their pre-trade state.';
+  }
+
+  @override
+  String get tradeCancelFailed => 'Couldn\'t cancel the trade.';
+
+  @override
   String get holdingTypeStock => 'Stock';
 
   @override
@@ -1175,6 +1237,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetPayNow => 'Pay now';
 
   @override
+  String get assetPayFailed =>
+      'Couldn\'t process the payment. Please try again in a moment.';
+
+  @override
+  String get assetInstallmentPayoffFailed =>
+      'Couldn\'t pay off the installment.';
+
+  @override
+  String get assetInstallmentPayoffUndoFailed =>
+      'Couldn\'t undo the installment payoff.';
+
+  @override
+  String get assetCancelPaymentFailed => 'Couldn\'t cancel the payment.';
+
+  @override
   String get assetPayAction => 'Pay';
 
   @override
@@ -1196,9 +1273,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetPaymentRecorded => 'Payment recorded';
-
-  @override
-  String get assetPayFailed => 'Payment failed';
 
   @override
   String get assetBillingLoadError => 'Couldn\'t load billing info';

@@ -410,6 +410,56 @@
   "tradeDeleted": "거래를 취소했어요",
   "tradeDeleteTitle": "거래 취소",
   "tradeDeleteConfirm": "이 거래를 취소하시겠어요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
+  "assetDetailTitle": "자산 상세",
+  "assetNotFoundTitle": "자산을 찾을 수 없어요",
+  "assetDetailDeleteFailed": "자산을 삭제하지 못했어요.",
+  "assetNotFoundDesc": "지웠거나 없는 자산이에요.",
+  "assetNotFoundAction": "자산으로",
+  "assetLoadFailTitle": "자산을 불러오지 못했어요",
+  "assetMoreOf": "{name} 더보기",
+  "@assetMoreOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeDetailTitle": "거래 기록",
+  "tradeKind": "종류",
+  "tradeHoldingLabel": "종목",
+  "tradeUnitPrice": "단가",
+  "tradeAmountLabel": "거래대금",
+  "tradeFeeLabel": "수수료 · 세금",
+  "tradeDateTime": "거래 일시",
+  "tradeOpenRow": "{date} {name} 거래 기록",
+  "@tradeOpenRow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeDeleteConfirmTarget": "{date} {name} {qty} {kind} 거래를 취소할까요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
+  "@tradeDeleteConfirmTarget": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeCancelFailed": "거래를 취소하지 못했어요.",
   "holdingTypeStock": "주식",
   "holdingTypeGold": "금",
   "holdingTypeCrypto": "코인",
@@ -653,6 +703,10 @@
   "assetLumpSumLabel": "일시불",
   "assetAlreadyPaidLabel": "선결제 차감",
   "assetPayNow": "지금 결제",
+  "assetPayFailed": "결제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "assetInstallmentPayoffFailed": "할부를 정리하지 못했어요.",
+  "assetInstallmentPayoffUndoFailed": "할부 정리를 되돌리지 못했어요.",
+  "assetCancelPaymentFailed": "결제를 취소하지 못했어요.",
   "assetPayAction": "결제하기",
   "assetPayAmount": "결제 금액",
   "assetPayRemainder": "남은 {amount}은 결제일에 빠져요",
@@ -673,7 +727,6 @@
   },
   "assetPayNoAccountNote": "연결된 결제 계좌가 없어 이체 없이 사용액만 정리돼요.",
   "assetPaymentRecorded": "결제가 기록되었습니다",
-  "assetPayFailed": "결제 실패",
   "assetBillingLoadError": "청구 정보를 불러오지 못했어요",
   "assetUpcomingPayment": "결제 예정",
   "assetScheduledTag": "예정",

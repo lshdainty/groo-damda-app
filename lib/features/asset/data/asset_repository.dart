@@ -271,9 +271,12 @@ class AssetRepository {
     'totalCost': ?h.totalCost,
   };
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/asset/$id');
+      await _dio.delete<void>(
+        '/asset/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -302,6 +305,7 @@ class AssetRepository {
     int id, {
     int? amount,
     String? paymentDate,
+    bool silent = false,
   }) async {
     try {
       final query = <String, dynamic>{
@@ -311,6 +315,7 @@ class AssetRepository {
       final res = await _dio.post<Map<String, dynamic>>(
         '/asset/$id/pay',
         queryParameters: query.isEmpty ? null : query,
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, BillingItem.fromJson);
     } on DioException catch (e) {
@@ -320,9 +325,15 @@ class AssetRepository {
 
   /// 카드 결제 취소 — 결제로 만든 이체를 무르면 잔액·청구가 그 연쇄로 되돌아간다.
   /// DELETE /card-billing/{billingRowId}.
-  Future<void> cancelCardPayment(int billingRowId) async {
+  Future<void> cancelCardPayment(
+    int billingRowId, {
+    bool silent = false,
+  }) async {
     try {
-      await _dio.delete<dynamic>('/card-billing/$billingRowId');
+      await _dio.delete<dynamic>(
+        '/card-billing/$billingRowId',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -330,19 +341,31 @@ class AssetRepository {
 
   /// 할부 중도 전액 상환 — 남은 원금을 다가오는 청구 회차에 몰아 청구한다.
   /// POST /asset/{cardId}/installments/{expenseId}/payoff.
-  Future<void> payoffInstallment(int cardId, int expenseId) async {
+  Future<void> payoffInstallment(
+    int cardId,
+    int expenseId, {
+    bool silent = false,
+  }) async {
     try {
-      await _dio.post<dynamic>('/asset/$cardId/installments/$expenseId/payoff');
+      await _dio.post<dynamic>(
+        '/asset/$cardId/installments/$expenseId/payoff',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
   /// 할부 상환 취소 — 정상 분할로 되돌린다.
-  Future<void> cancelInstallmentPayoff(int cardId, int expenseId) async {
+  Future<void> cancelInstallmentPayoff(
+    int cardId,
+    int expenseId, {
+    bool silent = false,
+  }) async {
     try {
       await _dio.delete<dynamic>(
         '/asset/$cardId/installments/$expenseId/payoff',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -530,9 +553,12 @@ class AssetRepository {
   }
 
   /// 거래 취소 — 예수금·수량·원가가 그 거래 직전으로 돌아간다.
-  Future<void> deleteTrade(int id) async {
+  Future<void> deleteTrade(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/asset-trade/$id');
+      await _dio.delete<void>(
+        '/asset-trade/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
