@@ -825,8 +825,8 @@
   "calFormTitleRequired": "제목을 입력해주세요",
   "calFormRows": "일정 정보",
   "calFormRowsMore": "반복 · 알림 · 장소 · 설명",
-  "calFormSaveFailed": "일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
-  "calFormDeleteFailed": "일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
+  "calFormSaveFailed": "일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "calFormDeleteFailed": "일정을 삭제하지 못했어요.",
   "calReminderMinutesBefore": "{n}분 전",
   "@calReminderMinutesBefore": {
     "placeholders": {

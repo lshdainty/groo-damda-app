@@ -50,9 +50,12 @@ Future<CategoryEditAction?> showCategoryEditDialog(
 }) {
   final l = AppLocalizations.of(context);
   final probe = _DirtyProbe();
+  // 새 폼은 이름 칸에 초점(시트가 처음 초점을 컨테이너에 두므로 첫 초점 노드를 넘긴다), 수정 폼은 키보드 없이 표면
+  final nameFocus = FocusNode(debugLabel: 'Category name');
   return PBottomSheet.show<CategoryEditAction>(
     context,
     form: true,
+    initialFocus: edit == null ? nameFocus : null,
     isDirty: () => probe.dirty(),
     leaveCopy: _leaveCopy(l),
     builder: (_) => _CategoryForm(
@@ -60,6 +63,7 @@ Future<CategoryEditAction?> showCategoryEditDialog(
       defaultExpenseType: defaultExpenseType,
       defaultParentRowId: defaultParentRowId,
       probe: probe,
+      nameFocus: nameFocus,
     ),
   );
 }
@@ -81,11 +85,15 @@ class _CategoryForm extends ConsumerStatefulWidget {
     required this.defaultExpenseType,
     this.defaultParentRowId,
     required this.probe,
+    required this.nameFocus,
   });
   final ExpenseCategory? edit;
   final String defaultExpenseType;
   final int? defaultParentRowId;
   final _DirtyProbe probe;
+
+  /// 이름 칸 초점 노드 — 호출처가 시트의 첫 초점으로 넘기고 폼 State 가 버린다.
+  final FocusNode nameFocus;
 
   @override
   ConsumerState<_CategoryForm> createState() => _CategoryFormState();
@@ -93,7 +101,7 @@ class _CategoryForm extends ConsumerStatefulWidget {
 
 class _CategoryFormState extends ConsumerState<_CategoryForm> {
   late final TextEditingController _nameCtrl;
-  final _nameFocus = FocusNode();
+  late final FocusNode _nameFocus = widget.nameFocus;
 
   late final String _initialName;
   late final String _initialKind;
@@ -405,6 +413,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           title: l.categoryParent,
           closeLabel: l.actionClose,
           flushBody: true,
+          scrollFog: true,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -546,7 +555,6 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     child: PInput(
                       controller: _nameCtrl,
                       focusNode: _nameFocus,
-                      autofocus: !_isEdit,
                       semanticLabel: l.calFieldName,
                       placeholder: l.categoryNamePlaceholder,
                       onChanged: (_) => setState(() => _nameError = null),
