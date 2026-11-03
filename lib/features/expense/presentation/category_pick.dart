@@ -62,7 +62,7 @@ class CategoryPickBody extends ConsumerWidget {
           child: PResultSection(
             kind: PResultKind.failure,
             size: PResultSize.medium,
-            title: l.categoryLoadFailed,
+            title: l.presetCategoryLoadFailed,
             description: l.dashFailDesc,
             primaryAction: PResultAction(
               label: l.actionRetry,
@@ -110,7 +110,7 @@ class CategoryPickBody extends ConsumerWidget {
           vertical: PSpacing.x3,
         ),
         child: Text(
-          l.recNoCategoryOfKind,
+          l.presetNoCategoryOfKind,
           textAlign: TextAlign.center,
           style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
         ),

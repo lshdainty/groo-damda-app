@@ -68,7 +68,12 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
     if (_busy) return;
     final sheet = PBottomSheet.of(context);
     setState(() => _busy = true);
-    final ok = await deleteRecurringWithNotice(context, ref, it);
+    final ok = await deleteRecurringWithNotice(
+      context,
+      ref,
+      it,
+      onRetried: sheet.close,
+    );
     if (!mounted) return;
     if (ok) {
       // 지운 뒤 닫히기 전에는 두 버튼을 막은 채 둔다
@@ -302,11 +307,12 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 머리 — 타일 48 + 이름(t7 · 700 · 줄바꿈), 사이 12 · 위 4 · 아래 8
+          // 머리 — 타일 48 + 이름(t7 · 700 · 줄바꿈), 사이 12 · 위 0 · 아래 8.
+          // 시트 머리 아래 16 + (끝 흐림 켬이면 본문 안 여백 위 20) = 첫 칸 간격 36 / 끔 16 — 여기서 더 얹지 않는다.
           Padding(
             padding: const EdgeInsets.fromLTRB(
               PSpacing.globalGutter,
-              PSpacing.x1,
+              0,
               PSpacing.globalGutter,
               PSpacing.x2,
             ),

@@ -88,9 +88,9 @@ void main() {
   testWidgets('지출 탭 — 지출 프리셋만', (tester) async {
     await _open(tester);
 
-    expect(find.text('점심'), findsOneWidget);
-    expect(find.text('월급'), findsNothing);
-    expect(find.text('적금이체'), findsNothing);
+    expect(find.textContaining('점심'), findsOneWidget);
+    expect(find.textContaining('월급'), findsNothing);
+    expect(find.textContaining('적금이체'), findsNothing);
   });
 
   testWidgets('수입 탭 — 수입 프리셋만', (tester) async {
@@ -98,9 +98,9 @@ void main() {
     await tester.tap(find.text(l.expTypeIncome));
     await tester.pumpAndSettle();
 
-    expect(find.text('월급'), findsOneWidget);
-    expect(find.text('점심'), findsNothing);
-    expect(find.text('적금이체'), findsNothing);
+    expect(find.textContaining('월급'), findsOneWidget);
+    expect(find.textContaining('점심'), findsNothing);
+    expect(find.textContaining('적금이체'), findsNothing);
   });
 
   testWidgets('이체 탭 — 이체 프리셋만. 칩 줄 자체는 뜬다', (tester) async {
@@ -108,8 +108,8 @@ void main() {
     await tester.tap(find.text(l.expTypeTransfer));
     await tester.pumpAndSettle();
 
-    expect(find.text('적금이체'), findsOneWidget);
-    expect(find.text('점심'), findsNothing);
-    expect(find.text('월급'), findsNothing);
+    expect(find.textContaining('적금이체'), findsOneWidget);
+    expect(find.textContaining('점심'), findsNothing);
+    expect(find.textContaining('월급'), findsNothing);
   });
 }

@@ -342,14 +342,8 @@ class _GroupSection extends ConsumerWidget {
                     asset: a,
                     cardMasked: masked,
                     manage: true,
-                    onTap: () => showAssetDetailRich(
-                      context,
-                      originals[a.rowId] ?? a,
-                      onEdit: () =>
-                          showAssetEditForm(context, originals[a.rowId] ?? a),
-                      // 관리 화면이라 상세에서 지울 수 있다.
-                      allowDelete: true,
-                    ),
+                    // 어디서 열어도 같은 페이지다(I-17 36) — 삭제는 머리 더보기에 늘 있다.
+                    onTap: () => openAssetDetail(context, a.rowId),
                   ),
                 ),
             ],

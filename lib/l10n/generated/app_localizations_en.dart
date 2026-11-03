@@ -884,6 +884,68 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cancel this trade? Cash and quantity return to their pre-trade state.';
 
   @override
+  String get assetDetailTitle => 'Asset details';
+
+  @override
+  String get assetNotFoundTitle => 'Asset not found';
+
+  @override
+  String get assetDetailDeleteFailed => 'Couldn\'t delete the asset.';
+
+  @override
+  String get assetNotFoundDesc => 'It was deleted or doesn\'t exist.';
+
+  @override
+  String get assetNotFoundAction => 'Go to assets';
+
+  @override
+  String get assetLoadFailTitle => 'Couldn\'t load the asset';
+
+  @override
+  String assetMoreOf(String name) {
+    return 'More for $name';
+  }
+
+  @override
+  String get tradeDetailTitle => 'Trade record';
+
+  @override
+  String get tradeKind => 'Type';
+
+  @override
+  String get tradeHoldingLabel => 'Holding';
+
+  @override
+  String get tradeUnitPrice => 'Unit price';
+
+  @override
+  String get tradeAmountLabel => 'Trade amount';
+
+  @override
+  String get tradeFeeLabel => 'Fees & tax';
+
+  @override
+  String get tradeDateTime => 'Trade date';
+
+  @override
+  String tradeOpenRow(String date, String name) {
+    return '$name trade record on $date';
+  }
+
+  @override
+  String tradeDeleteConfirmTarget(
+    String date,
+    String name,
+    String qty,
+    String kind,
+  ) {
+    return 'Cancel the $kind of $qty $name on $date? Cash and quantity return to their pre-trade state.';
+  }
+
+  @override
+  String get tradeCancelFailed => 'Couldn\'t cancel the trade.';
+
+  @override
   String get holdingTypeStock => 'Stock';
 
   @override
@@ -1175,6 +1237,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetPayNow => 'Pay now';
 
   @override
+  String get assetPayFailed =>
+      'Couldn\'t process the payment. Please try again in a moment.';
+
+  @override
+  String get assetInstallmentPayoffFailed =>
+      'Couldn\'t pay off the installment.';
+
+  @override
+  String get assetInstallmentPayoffUndoFailed =>
+      'Couldn\'t undo the installment payoff.';
+
+  @override
+  String get assetCancelPaymentFailed => 'Couldn\'t cancel the payment.';
+
+  @override
   String get assetPayAction => 'Pay';
 
   @override
@@ -1196,9 +1273,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetPaymentRecorded => 'Payment recorded';
-
-  @override
-  String get assetPayFailed => 'Payment failed';
 
   @override
   String get assetBillingLoadError => 'Couldn\'t load billing info';
@@ -1508,8 +1582,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save the event. Please try again in a moment.';
 
   @override
-  String get calFormDeleteFailed =>
-      'Couldn\'t delete the event. Please try again in a moment.';
+  String get calFormDeleteFailed => 'Couldn\'t delete the event.';
 
   @override
   String calReminderMinutesBefore(int n) {
@@ -2004,7 +2077,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expRefundConfirmBody(String amount, String asset) {
-    return 'Marks this transaction as refunded and returns $amount to $asset. It leaves your totals.';
+    return 'Marks this transaction as refunded. It leaves your totals, and $amount returns to $asset.';
   }
 
   @override
@@ -2023,7 +2096,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expRefundedAt(String date) {
-    return 'Refunded · $date';
+    return 'Refunded · $date — left out of your totals.';
   }
 
   @override
@@ -2081,7 +2154,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferDeleteConfirm =>
-      'Delete this transfer? Both assets\' balances will be restored. A deleted transfer cannot be restored.';
+      'Delete this transfer? Both accounts\' balances go back to before the transfer. A deleted transfer can\'t be restored.';
 
   @override
   String get transferDeleteTitle => 'Delete transfer';
@@ -3113,9 +3186,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expDeleted => 'Transaction deleted';
 
   @override
-  String get expDeleteFailed => 'Delete failed';
-
-  @override
   String get expSplitMismatch => 'Split doesn\'t match the amount';
 
   @override
@@ -3145,9 +3215,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expClear => 'Clear';
-
-  @override
-  String get expPresetManageHint => 'Settings → Manage presets';
 
   @override
   String get expSaveFailed => 'Save failed';
@@ -3218,10 +3285,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expPayee => 'Merchant';
 
   @override
-  String get expIncomeSourcePlaceholder => 'e.g. Forest Inc.';
+  String get expIncomeSourcePlaceholder => 'e.g. Salary';
 
   @override
-  String get expPayeePlaceholder => 'e.g. Starbucks Gangnam';
+  String get expPayeePlaceholder => 'e.g. Lunch near the office';
 
   @override
   String get expIncomeMethod => 'Income method';
@@ -3281,20 +3348,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expUncategorized => 'Uncategorized';
 
   @override
-  String get expValueNone => 'None';
-
-  @override
-  String expItemsCount(int count) {
-    return '$count items';
-  }
-
-  @override
   String get expNotSelected => 'Not selected';
-
-  @override
-  String expPrevTxAt(String merchant) {
-    return 'Previous at $merchant';
-  }
 
   @override
   String get expThisMonth => 'This month';
@@ -3745,7 +3799,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceThemeSystem => 'System';
 
   @override
-  String get appearanceThemeSystemDesc => 'Auto switch';
+  String get appearanceThemeSystemDesc => 'Follow OS setting';
 
   @override
   String hideAmountsLockAllDesc(int total, int count) {
@@ -3949,11 +4003,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceRegion => 'Region';
 
   @override
-  String get appearanceRegionPlaceholder => 'Select a region';
-
-  @override
   String get appearanceRegionDesc =>
-      'Days for \'today\' and statistics are calculated in this region. On-screen times follow your device\'s time zone';
+      'Days for \'today\' and statistics are calculated in this region. On-screen times follow your device\'s time zone.';
 
   @override
   String get appearanceCurrency => 'Default currency';
@@ -3971,26 +4022,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceCurrencyJpy => 'Japanese Yen';
 
   @override
+  String get appearanceCurrencyDesc =>
+      'New assets and transactions start with this currency.';
+
+  @override
+  String get appearanceRegionLoadError => 'Couldn\'t load the region';
+
+  @override
+  String get appearanceCurrencyLoadError =>
+      'Couldn\'t load the default currency';
+
+  @override
+  String get appearanceSaveFailed => 'Couldn\'t change the setting.';
+
+  @override
   String get passwordChanged => 'Password changed';
 
   @override
-  String get passwordChangeFailed => 'Failed to change password.';
+  String get passwordChangeFailed =>
+      'Couldn\'t change your password. Please try again shortly.';
 
   @override
   String get passwordCurrent => 'Current password';
 
   @override
+  String get passwordChangeDescription =>
+      'Verify your current password and set a new one';
+
+  @override
+  String get passwordCurrentInvalid => 'That current password doesn\'t match';
+
+  @override
   String get passwordNew => 'New password';
 
   @override
-  String get passwordNewPlaceholder =>
-      '8+ characters, incl. a special character';
-
-  @override
   String get passwordNewConfirm => 'Confirm new password';
-
-  @override
-  String get passwordConfirmPlaceholder => 'Enter once more';
 
   @override
   String get passwordMismatch => 'New passwords do not match';
@@ -4009,7 +4075,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'New password must be different from the current one';
 
   @override
-  String get passwordChangeAction => 'Change';
+  String get passwordChangeAction => 'Save';
 
   @override
   String get accountTitle => 'Account';
@@ -4023,34 +4089,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountEditComingSoon => 'Profile editing is coming soon';
+  String get accountEditComingSoon => 'Profile editing is coming soon.';
 
   @override
   String get accountSecurity => 'Security';
 
   @override
-  String get accountPasswordDesc => 'No recent changes';
+  String get accountPasswordDesc => 'Change it regularly to stay secure';
 
   @override
   String get accountTwoFa => 'Two-factor authentication';
-
-  @override
-  String get accountOn => 'On';
-
-  @override
-  String get accountOff => 'Off';
 
   @override
   String get accountDevices => 'Logged-in devices';
 
   @override
   String get accountCurrentDevice => 'Current device';
-
-  @override
-  String get accountLoginHistory => 'Login history';
-
-  @override
-  String get accountLast30Days => 'Last 30 days';
 
   @override
   String get devicesTitle => 'Logged-in devices';
@@ -4118,9 +4172,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountConnect => 'Connect';
 
   @override
-  String accountSocialComingSoon(String name) {
-    return '$name connection is coming soon';
+  String get accountLinked => 'Connected';
+
+  @override
+  String get accountDisconnect => 'Disconnect';
+
+  @override
+  String get accountProvidersError => 'Couldn\'t load the connection status';
+
+  @override
+  String get accountLinkError => 'Couldn\'t connect the account.';
+
+  @override
+  String get accountUnlinkError => 'Couldn\'t disconnect the account.';
+
+  @override
+  String accountLinkedToast(String name) {
+    return '$name account connected';
   }
+
+  @override
+  String get accountUnlinkedToast => 'Google account disconnected';
+
+  @override
+  String get accountSecuritiesDesc =>
+      'Connect API keys for Toss, Namu, and more';
 
   @override
   String get accountBilling => 'Subscription & Billing';
@@ -4168,7 +4244,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountLogoutConfirm => 'Are you sure you want to log out?';
+  String get accountLogoutConfirm => 'Log out of this device?';
 
   @override
   String get accountWithdrawTitle => 'Stop using 그루 담다';
@@ -4475,57 +4551,145 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presetManageTitle => 'Manage presets';
 
   @override
-  String get presetLoadError => 'Failed to load presets';
-
-  @override
-  String get presetDeleteTitle => 'Delete preset';
-
-  @override
   String get presetDetailTitle => 'Preset detail';
 
   @override
   String get presetTypeLabel => 'Type';
 
   @override
-  String presetDeleteConfirm(String name) {
-    return 'Delete the \"$name\" preset? Already-saved transactions are unaffected. A deleted preset cannot be restored.';
-  }
+  String get presetDeleteConfirm =>
+      'Transactions already recorded stay as they are. A deleted preset cannot be restored.';
 
   @override
-  String get presetDeleted => 'Preset deleted';
+  String get presetDeleteFailed => 'Could not delete the preset';
 
   @override
-  String get presetDeleteFailed => 'Delete failed';
+  String get presetSortUsed => 'Frequent';
 
   @override
-  String get presetIntroTitle => 'What is a preset?';
-
-  @override
-  String get presetIntroBody =>
-      'Save frequently used entries (lunch, coffee, transit, etc.) so you can fill in category, payment method, and details with one tap on the add screen. Handy for saving single entries by just changing the amount.';
-
-  @override
-  String get presetStatSaved => 'Saved presets';
-
-  @override
-  String get presetStatUses => 'Total uses';
-
-  @override
-  String presetUsesCount(int count) {
-    return '$count×';
-  }
-
-  @override
-  String get presetStatType => 'Expense / Income';
-
-  @override
-  String get presetSortUsed => 'Most used';
-
-  @override
-  String get presetSortRecent => 'Recently used';
+  String get presetSortRecent => 'Recent';
 
   @override
   String get presetSortName => 'By name';
+
+  @override
+  String presetListTitle(int count) {
+    return '$count presets';
+  }
+
+  @override
+  String presetUses(int count) {
+    return '$count uses';
+  }
+
+  @override
+  String get presetSortLabel => 'Sort';
+
+  @override
+  String get presetLoadFailed => 'Could not load presets';
+
+  @override
+  String get presetCategoryLoadFailed => 'Could not load categories';
+
+  @override
+  String presetDeleteConfirmTitle(String name) {
+    return 'Delete the \"$name\" preset?';
+  }
+
+  @override
+  String get presetNoteFixed => 'Fixed amount';
+
+  @override
+  String presetNoteUses(int count) {
+    return 'Used $count times';
+  }
+
+  @override
+  String get presetNoteUnused => 'Not used yet';
+
+  @override
+  String presetNoteLast(int month, int day) {
+    return 'Last used $month/$day';
+  }
+
+  @override
+  String get presetFixedOn => 'On';
+
+  @override
+  String get presetFixedOff => 'Off';
+
+  @override
+  String get presetNameRequired => 'Enter a name.';
+
+  @override
+  String get presetNameTooLong =>
+      'Keep the preset name to 12 characters or fewer.';
+
+  @override
+  String get presetCategoryRequired => 'Choose a category.';
+
+  @override
+  String get presetFromRequired => 'Choose the sending account.';
+
+  @override
+  String get presetToRequired => 'Choose the receiving account.';
+
+  @override
+  String get presetSaveFailed =>
+      'Could not save. Please try again in a moment.';
+
+  @override
+  String get presetAmountLabel => 'Amount';
+
+  @override
+  String get presetFeeLabel => 'Fee';
+
+  @override
+  String get presetAmountBlank => 'Left blank';
+
+  @override
+  String get presetAmountHint =>
+      'If left blank, you enter the amount when you load it.';
+
+  @override
+  String get presetMemoPlaceholder => 'Optional';
+
+  @override
+  String get presetInterestTooLarge =>
+      'Interest can\'t be more than the amount.';
+
+  @override
+  String get presetNoneValue => 'None';
+
+  @override
+  String get presetMemoNone => 'No memo';
+
+  @override
+  String get presetNoAccount => 'No account or card';
+
+  @override
+  String get presetNoPayment => 'No payment method';
+
+  @override
+  String get presetNoCategoryOfKind => 'There are no categories of this type.';
+
+  @override
+  String get presetFromAccount => 'Sending account';
+
+  @override
+  String get presetToAccount => 'Receiving account';
+
+  @override
+  String get presetShowAll => 'Show all';
+
+  @override
+  String get presetPickTitle => 'Choose a preset';
+
+  @override
+  String get presetSearch => 'Search presets';
+
+  @override
+  String get presetNoResult => 'No presets found.';
 
   @override
   String get presetAdd => 'Add preset';
@@ -4541,7 +4705,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get presetEmptyDesc =>
-      'Add frequently used entries to save yourself repetitive input.';
+      'Save frequent entries (lunch, transit, etc.) and fill the category, account, and details with one tap when adding an entry.';
 
   @override
   String get presetEditTitle => 'Edit preset';
@@ -4556,32 +4720,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presetMerchant => 'Default details';
 
   @override
-  String get presetMerchantPlaceholder => 'e.g. Hansot lunchbox';
-
-  @override
-  String get presetSelectNone => 'None';
+  String get presetMerchantPlaceholder => 'e.g. Office lunch box';
 
   @override
   String get presetAssetCard => 'Account / Card';
-
-  @override
-  String get presetAssetLoadError => 'Failed to load assets';
-
-  @override
-  String get presetLockToggle => 'Use fixed amount';
-
-  @override
-  String get presetLockDesc =>
-      'When off, the amount is empty on load. Handy when the amount varies each time.';
-
-  @override
-  String get presetLockAmountLabel => 'Fixed amount';
-
-  @override
-  String get presetUpdated => 'Preset updated';
-
-  @override
-  String get presetCreated => 'Preset added';
 
   @override
   String get recurringToggleFailed => 'Change failed';
@@ -5805,15 +5947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memoEditTitle => 'Edit memo';
 
   @override
-  String get memoAdd => 'Add';
-
-  @override
-  String get memoLoadError => 'Failed to load memos';
-
-  @override
-  String memoTagAll(int count) {
-    return 'All $count';
-  }
+  String get memoLoadError => 'Could not load memos';
 
   @override
   String memoSectionPinned(int count) {
@@ -5826,13 +5960,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String memoActionFailed(String message) {
-    return 'Failed: $message';
-  }
-
-  @override
   String get memoEmptyDesc =>
-      'When something comes to mind, create a new memo.';
+      'Tap the + button at the bottom right to write your first memo.';
 
   @override
   String get memoSearchEmptyDesc => 'Try a different search term.';
@@ -5849,15 +5978,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String memoDeleteFailed(String message) {
-    return 'Delete failed: $message';
-  }
-
-  @override
   String get memoFieldTitle => 'Title';
 
   @override
-  String get memoTitleRequired => 'Please enter a title';
+  String get memoTitleRequired => 'Please enter a title.';
 
   @override
   String get memoFieldContent => 'Content';
@@ -5870,6 +5994,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memoTagNone => 'No tag';
+
+  @override
+  String get memoTagEmptyHint => 'Create tags in Settings › Memo tags.';
+
+  @override
+  String get memoAllChip => 'All';
+
+  @override
+  String get memoLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get memoTagFilter => 'Filter by tag';
+
+  @override
+  String get memoSaved => 'Saved.';
+
+  @override
+  String get memoSaveFailed => 'Could not save. Please try again in a moment.';
+
+  @override
+  String get memoDeleteFailed =>
+      'Could not delete. Please try again in a moment.';
+
+  @override
+  String get memoPinFailed =>
+      'Could not change the pin. Please try again in a moment.';
+
+  @override
+  String memoModifiedAt(String time) {
+    return 'Edited $time';
+  }
+
+  @override
+  String memoMoreOf(String name) {
+    return 'More for $name';
+  }
+
+  @override
+  String get memoSwipeUnpin => 'Unpin';
+
+  @override
+  String get mtagSaveFailed => 'Could not save. Please try again in a moment.';
+
+  @override
+  String get mtagDeleteFailed =>
+      'Could not delete. Please try again in a moment.';
+
+  @override
+  String get ttagSaveFailed => 'Could not save. Please try again in a moment.';
+
+  @override
+  String get ttagDeleteFailed =>
+      'Could not delete. Please try again in a moment.';
 
   @override
   String get memoNewTag => 'Add tag';
@@ -5886,14 +6063,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get memoTagLoadError => 'Failed to load tags';
+  String get memoTagLoadError => 'Could not load tags';
 
   @override
   String get mtagTitle => 'Memo tags';
 
   @override
   String get mtagDesc =>
-      'Tags you attach to memos. Used for list filters and tag grouping.';
+      'Tags you attach to memos. They are used to filter the memo screen. If you delete a tag, its memos stay as \'No tag\'.';
 
   @override
   String get mtagEmpty => 'No tags yet';
@@ -6070,12 +6247,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todoDetailContent => 'Note';
-
-  @override
-  String get memoDetailTitle => 'Memo details';
-
-  @override
-  String get memoDetailPinned => 'Pinned';
 
   @override
   String get memoDetailNoContent => 'No content';
@@ -7214,11 +7385,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expRecordOnlyNote =>
-      'This was added to a cycle that was already paid, so it is kept as a record only. It was not taken from your account';
+      'This was added to a cycle that was already paid, so it is kept as a record only. It was not taken from your account.';
 
   @override
   String expRecordOnlyPartNote(String amount) {
-    return '$amount of this belongs to cycles that were already paid, so it is kept as a record only. The remaining installments are billed as usual';
+    return '$amount of this belongs to cycles that were already paid, so it is kept as a record only. The remaining installments are billed as usual.';
   }
 
   @override
@@ -7320,11 +7491,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fixedHintExpense =>
-      'Money that goes out every month like rent or phone bills. You can view it separately in statistics';
+      'Money that goes out every month like rent or phone bills. You can view it separately in statistics.';
 
   @override
   String get fixedHintIncome =>
-      'Money that comes in every month like a salary. You can view it separately in statistics';
+      'Money that comes in every month like a salary. You can view it separately in statistics.';
 
   @override
   String get fixedBadge => 'Fixed';
@@ -7341,7 +7512,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get presetFixedDesc =>
-      'Transactions made from this preset count as fixed in statistics. This is separate from the fixed amount above.';
+      'Transactions made from this preset count as fixed in statistics.';
 
   @override
   String get hideCardStatsFixed => 'Fixed vs. variable tab';
@@ -8640,16 +8811,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get recPauseFailed => 'Could not pause the recurrence';
+  String get recPauseFailed => 'Couldn\'t pause the recurrence.';
 
   @override
-  String get recResumeFailed => 'Could not turn the recurrence back on';
+  String get recResumeFailed => 'Couldn\'t turn the recurrence back on.';
 
   @override
-  String get recDeleteFailed => 'Could not delete the recurring setting';
+  String get recDeleteFailed => 'Couldn\'t delete the recurring setting.';
 
   @override
   String get recLoadFailed => 'Could not load recurring transactions';
+
+  @override
+  String get recAssetLoadFailed => 'Could not load accounts';
 
   @override
   String get recEmptyTitle => 'No recurring transactions';
@@ -8791,4 +8965,252 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recClearValue => 'Clear value';
+
+  @override
+  String get expDetailMore => 'More';
+
+  @override
+  String expSplitValue(int count) {
+    return 'Split into $count';
+  }
+
+  @override
+  String expSplitHeader(int count) {
+    return 'Split into $count';
+  }
+
+  @override
+  String get expMerchantMonth => 'This month at this merchant';
+
+  @override
+  String get expRecentOnly => 'Showing the latest 5 only';
+
+  @override
+  String get expLinked => 'Linked';
+
+  @override
+  String get expSplitLoadFailed => 'Could not load the split items';
+
+  @override
+  String get expSplitLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String expRefundDateToday(String date) {
+    return '$date · Today';
+  }
+
+  @override
+  String expRefundDateHint(String date) {
+    return 'You can pick a day from the transaction day ($date) to today.';
+  }
+
+  @override
+  String get expRefundFailed =>
+      'Couldn\'t mark it as refunded. Please try again in a moment.';
+
+  @override
+  String get expRefundCancelFailed => 'Couldn\'t undo the refund.';
+
+  @override
+  String get expTxDeleteFailed => 'Couldn\'t delete the transaction.';
+
+  @override
+  String get transferDeleteFailed => 'Couldn\'t delete the transfer.';
+
+  @override
+  String get transferDetailTitle => 'Transfer details';
+
+  @override
+  String get transferFromLabel => 'From account';
+
+  @override
+  String get transferToLabel => 'To account';
+
+  @override
+  String txfStepMeta(String current, String total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get txfTypeGroup => 'Transaction type';
+
+  @override
+  String get txfEntryRequired => 'Enter an amount.';
+
+  @override
+  String get txfAmountTooLarge => 'Amount can be up to 10 billion won.';
+
+  @override
+  String txfCurrencyChip(String code) {
+    return 'Currency, $code';
+  }
+
+  @override
+  String get txfPresetsTitle => 'Presets';
+
+  @override
+  String txfPresetApplied(String name) {
+    return '$name applied';
+  }
+
+  @override
+  String get txfNoPresets =>
+      'No saved presets yet. Enter values and tap “Save current input” to create one.';
+
+  @override
+  String get txfPresetLoadFailed => 'Couldn\'t load presets.';
+
+  @override
+  String txfEmptyPresetHint(String name) {
+    return 'The “$name” preset has no amount. Enter one and press Next.';
+  }
+
+  @override
+  String get txfPresetAllTitle => 'Choose a preset';
+
+  @override
+  String get txfShowAll => 'See all';
+
+  @override
+  String get txfNone => 'None';
+
+  @override
+  String get txfNoAccountOption => 'No account or card';
+
+  @override
+  String get txfNoMethodOption => 'No payment method';
+
+  @override
+  String get txfErrCategory => 'Choose a category.';
+
+  @override
+  String get txfErrFrom => 'Choose the account to send from.';
+
+  @override
+  String get txfErrTo => 'Choose the account to send to.';
+
+  @override
+  String get txfErrFx => 'Enter the exchange rate or the amount in won.';
+
+  @override
+  String get txfErrInterest => 'Interest can\'t be more than the amount.';
+
+  @override
+  String get txfSplitsLoading =>
+      'Loading the split items. Try again in a moment.';
+
+  @override
+  String get txfSaveFailed => 'Couldn\'t save. Please try again in a moment.';
+
+  @override
+  String get txfCategoryLoadFailed => 'Couldn\'t load categories';
+
+  @override
+  String get txfAssetLoadFailed => 'Couldn\'t load accounts and cards';
+
+  @override
+  String get txfNoCategoryOfType => 'There are no categories of this kind.';
+
+  @override
+  String get txfNoPickableAsset =>
+      'No account or card fits this payment method.';
+
+  @override
+  String txfFxHint(String local, String code, String rate, String krw) {
+    return '$local $code × $rate = $krw';
+  }
+
+  @override
+  String get txfKrwAmount => 'Amount in won';
+
+  @override
+  String txfInstallmentValue(String months, String amount) {
+    return '$months months · about $amount a month';
+  }
+
+  @override
+  String get txfSplitMismatchTitle => 'The split items don\'t match the amount';
+
+  @override
+  String txfSplitMismatchBody(String total, String sum, String diffText) {
+    return 'New total $total · split total $sum — $diffText';
+  }
+
+  @override
+  String txfSplitOver(String diff) {
+    return '$diff over.';
+  }
+
+  @override
+  String txfSplitShort(String diff) {
+    return '$diff short.';
+  }
+
+  @override
+  String get txfMatchSplits => 'Adjust split items';
+
+  @override
+  String get txfSaveSplitAndSave => 'Adjust split items & save';
+
+  @override
+  String get txfSmsStepTitle => 'Paste a payment text';
+
+  @override
+  String get txfSmsHelp =>
+      'Paste the payment text from your card company as it is. The amount, merchant and time it finds are filled in.';
+
+  @override
+  String get txfPresetAmountEmpty => 'Left empty';
+
+  @override
+  String get txfPresetAmountHint =>
+      'If left empty, you enter the amount each time you use it.';
+
+  @override
+  String get txfPresetNameRequired => 'Enter a preset name.';
+
+  @override
+  String get txfPresetNeedParties =>
+      'Choose the sending and receiving accounts first.';
+
+  @override
+  String get txfPresetNeedCategory => 'Choose a category first.';
+
+  @override
+  String get txfPresetNoMerchant => 'No details';
+
+  @override
+  String txfPresetSaved(String name) {
+    return 'Saved the $name preset';
+  }
+
+  @override
+  String get txfPresetNameTooLong => 'Keep the name within 12 characters.';
+
+  @override
+  String get txfMemoStepTitle => 'Memo';
+
+  @override
+  String get txfTimeTitle => 'Time';
+
+  @override
+  String get txfNoCategory => 'No category';
+
+  @override
+  String get txfNoDepositAccount => 'No deposit account';
+
+  @override
+  String get txfNoIncomeMethod => 'No income method';
+
+  @override
+  String get txfSelectFrom => 'Select the sending account';
+
+  @override
+  String get txfSelectTo => 'Select the receiving account';
+
+  @override
+  String get txfDeletedAsset => 'Deleted account';
+
+  @override
+  String get txfDeletedCategory => 'Deleted category';
 }

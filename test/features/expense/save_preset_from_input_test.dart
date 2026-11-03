@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/add_tx_drive.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
@@ -22,7 +23,7 @@ import 'package:groo_damda_app/features/preset/data/preset_repository.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 const _category = ExpenseCategory(
   rowId: 5,
@@ -61,6 +62,7 @@ class _Presets extends PresetRepository {
     int? sortOrder,
     bool lockAmount = false,
     bool isFixed = false,
+    bool silent = false,
   }) async {
     created = {'templateName': templateName, 'assetRowId': assetRowId};
     return ExpenseTemplate(
@@ -110,51 +112,33 @@ Future<(_Presets, AppLocalizations)> _openSaveDialog(
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
   final l = await AppLocalizations.delegate.load(const Locale('ko'));
-  // 저장은 금액과 카테고리가 있어야 켜진다 — 계좌는 비워 둔다.
-  await tester.enterText(find.byType(TextField).first, '13000');
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('식비').last);
+  // 프리셋 저장은 카테고리가 있어야 한다 — 금액 → 2단계 카테고리, 계좌는 비워 둔다. 1단계로 돌아와 "현재 입력값 저장" 을 누른다.
+  await fillNewTx(tester, amount: '13000');
+  await tester.tap(find.bySemanticsLabel(l.actionBack).first);
   await tester.pumpAndSettle();
   await tester.tap(find.text(l.expPresetSaveCurrent));
   await tester.pumpAndSettle();
   return (presets, l);
 }
 
-Finder _saveButton(AppLocalizations l) => find.descendant(
-  of: find.byType(AlertDialog),
-  matching: find.widgetWithText(PButton, l.actionSave),
-);
+Finder _saveButton(AppLocalizations l) =>
+    find.widgetWithText(PButton, l.actionSave);
 
 void main() {
-  testWidgets('이름을 치면 [저장] 이 바로 켜진다', (tester) async {
-    final (_, l) = await _openSaveDialog(tester);
-    expect(tester.widget<PButton>(_saveButton(l)).onPressed, isNull);
+  testWidgets('이름이 비면 [저장] 은 눌려도 요청 없이 이름 칸 오류를 낸다', (tester) async {
+    final (presets, l) = await _openSaveDialog(tester);
+    // 버튼은 꺼 두지 않는다 — 누를 때 검증한다
+    expect(tester.widget<PButton>(_saveButton(l)).onPressed, isNotNull);
+    await tester.tap(_saveButton(l));
+    await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(TextField),
-      ),
-      '점심 정식',
-    );
-    await tester.pump();
-
-    expect(
-      tester.widget<PButton>(_saveButton(l)).onPressed,
-      isNotNull,
-      reason: '종전엔 금액 고정 체크를 건드려야 켜졌다',
-    );
+    expect(find.text(l.txfPresetNameRequired), findsOneWidget);
+    expect(presets.created, isNull);
   });
 
   testWidgets('계좌를 비워 둬도 저장한다 — 안내 없이 끝나지 않는다', (tester) async {
     final (presets, l) = await _openSaveDialog(tester);
-    await tester.enterText(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(TextField),
-      ),
-      '점심 정식',
-    );
+    await tester.enterText(find.byType(EditableText).first, '점심 정식');
     await tester.pump();
     await tester.tap(_saveButton(l));
     await tester.pumpAndSettle();

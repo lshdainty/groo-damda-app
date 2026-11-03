@@ -22,9 +22,11 @@ import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
 import 'package:groo_damda_app/features/calendar/domain/holiday.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_screen.dart';
+import 'package:groo_damda_app/features/dashboard/application/dashboard_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 import '../../support/plain_text.dart';
 import 'support/event_form_support.dart' show rowTitle;
@@ -68,6 +70,7 @@ class _Repo extends CalendarRepository {
 
   @override
   Future<void> deleteEvent(int id) async {
+    world.deleteCalls++;
     if (world.failDelete)
       throw ApiException(code: 'X', message: 'Server error');
     world.deleted.add(id);
@@ -85,6 +88,10 @@ class _World {
 
   /// 삭제 요청이 실패한다.
   bool failDelete = false;
+  int deleteCalls = 0;
+
+  /// 홈 위젯 원본(dashboardSummaryProvider)을 받은 횟수 — 삭제 뒤 무효화되면 늘어난다.
+  int dashboardBuilds = 0;
 
   /// 있으면 월 일정 조회가 이 신호를 기다린다 — 삭제 · 저장 뒤 "다시 받는 동안" 을 붙잡아 둔다.
   Completer<void>? gate;
@@ -209,6 +216,10 @@ void main() {
           userCalendarListProvider.overrideWith((ref) async => _cals),
           eventLabelsProvider.overrideWith((ref) async => const <EventLabel>[]),
           holidayListProvider.overrideWith((ref, k) async => <Holiday>[]),
+          dashboardSummaryProvider.overrideWith((ref) async {
+            world.dashboardBuilds++;
+            throw StateError('home summary stub');
+          }),
           monthEventsProvider.overrideWith((ref, k) async {
             world.builds[k] = (world.builds[k] ?? 0) + 1;
             await world.gate?.future;
@@ -220,6 +231,14 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('ko'),
+          // 앱 맨 위 스낵바 호스트(app.dart) — 삭제 실패 띠가 시트 · 확인창 위에 뜨고, 시트를 닫아도 남는다
+          builder: (context, child) => Material(
+            type: MaterialType.transparency,
+            child: PSnackbarHost(
+              closeLabel: AppLocalizations.of(context).actionClose,
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
           home: Scaffold(
             body: Column(
               children: [
@@ -227,6 +246,9 @@ void main() {
                 Consumer(
                   builder: (context, ref, _) {
                     ref.watch(monthEventsProvider((year: 2026, month: 11)));
+                    ref.watch(
+                      dashboardSummaryProvider,
+                    ); // 홈 위젯 원본 — 상주 화면처럼 들고 있는다
                     return const SizedBox.shrink();
                   },
                 ),
@@ -644,7 +666,67 @@ void main() {
       expect(findPlain('10월 22일 (목)'), findsWidgets);
     });
 
-    testWidgets('A2 상세 삭제가 실패하면 상세 맨 위 Callout 으로 알리고 [삭제] 로 다시 시도할 수 있다', (
+    /// 확인창에서 [삭제] 를 확정한다.
+    Future<void> confirmDelete(WidgetTester tester) async {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(PAlertDialogView),
+          matching: find.text(l.actionDelete),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    Future<void> tapRetry(WidgetTester tester) async {
+      await tester.tap(find.text(l.actionRetry));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'A2 상세 삭제가 실패하면 확인창을 닫고 critical 스낵바 + [다시 시도] — 묻지 않고 바로 다시 지운다',
+      (tester) async {
+        final world = await pump(tester);
+        world.failDelete = true;
+        await tapEvent(tester, '내 일정');
+        await tester.tap(button(l.actionDelete));
+        await tester.pumpAndSettle();
+        await confirmDelete(tester);
+        expect(find.byType(PAlertDialogView), findsNothing, reason: '확인창은 닫혔다');
+        expect(detailTitle(), findsOneWidget, reason: '상세에 머문다');
+        expect(
+          findPlainContaining(l.calFormDeleteFailed),
+          findsOneWidget,
+          reason: '시트 안 Callout 이 아니라 스낵바 한 곳',
+        );
+        expect(find.text(l.actionRetry), findsOneWidget);
+        expect(
+          tester.widget<PButton>(button(l.actionDelete)).onPressed,
+          isNotNull,
+          reason: '스피너가 멈추고 다시 누를 수 있다',
+        );
+
+        world.failDelete = false;
+        final octBefore = world.builds[(year: 2026, month: 10)]!;
+        await tapRetry(tester);
+        expect(
+          find.byType(PAlertDialogView),
+          findsNothing,
+          reason: '다시 묻지 않는다',
+        );
+        expect(world.deleted, {1}, reason: '요청은 한 번 더 나가 지워졌다');
+        expect(
+          world.builds[(year: 2026, month: 10)],
+          greaterThan(octBefore),
+          reason: '월을 다시 받는다',
+        );
+        expect(detailTitle(), findsNothing, reason: '목록 단계로');
+      },
+    );
+
+    testWidgets('A2c 상세 삭제 실패 뒤 시트를 닫아도 띠가 남고 [다시 시도] 가 지운다(요청 한 번 · 월 재조회)', (
       tester,
     ) async {
       final world = await pump(tester);
@@ -652,35 +734,78 @@ void main() {
       await tapEvent(tester, '내 일정');
       await tester.tap(button(l.actionDelete));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(PAlertDialogView), findsNothing, reason: '확인창은 닫혔다');
-      expect(detailTitle(), findsOneWidget, reason: '상세에 머문다');
-      expect(findPlainContaining(l.calFormDeleteFailed), findsOneWidget);
-      expect(
-        tester.widget<PButton>(button(l.actionDelete)).onPressed,
-        isNotNull,
-        reason: '스피너가 멈추고 다시 누를 수 있다',
-      );
+      await confirmDelete(tester);
+      expect(find.text(l.actionRetry), findsOneWidget);
+
+      await tester.tap(close());
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(root(), findsNothing, reason: '시트는 닫혔다');
+      expect(find.text(l.actionRetry), findsOneWidget, reason: '띠는 남는다');
 
       world.failDelete = false;
+      final octBefore = world.builds[(year: 2026, month: 10)]!;
+      final dashBefore = world.dashboardBuilds;
+      await tapRetry(tester);
+      expect(world.deleted, {1});
+      expect(world.deleteCalls, 2, reason: '실패 한 번 + 다시 시도 한 번');
+      expect(
+        world.dashboardBuilds,
+        greaterThan(dashBefore),
+        reason: '시트가 없어도 홈 위젯 원본(dashboardSummaryProvider)을 무효화한다',
+      );
+      expect(
+        world.builds[(year: 2026, month: 10)],
+        greaterThan(octBefore),
+        reason: '시트가 없어도 시작 달을 다시 받는다',
+      );
+    });
+
+    testWidgets('A2b 폼 [삭제] 가 실패하면 스낵바 + [다시 시도] — 폼은 열린 채, 다시 시도는 묻지 않는다', (
+      tester,
+    ) async {
+      final world = await pump(tester);
+      await tapEvent(tester, '내 일정');
+      await tester.tap(button(l.actionEdit));
+      await tester.pumpAndSettle();
+      world.failDelete = true;
       await tester.tap(button(l.actionDelete));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await confirmDelete(tester);
+      expect(find.byType(PAlertDialogView), findsNothing);
+      expect(find.text(l.actionRetry), findsOneWidget);
+      expect(findPlainContaining(l.calFormDeleteFailed), findsOneWidget);
+
+      world.failDelete = false;
+      await tapRetry(tester);
+      expect(find.byType(PAlertDialogView), findsNothing, reason: '다시 묻지 않는다');
       expect(world.deleted, {1});
-      expect(findPlainContaining(l.calFormDeleteFailed), findsNothing);
-      expect(detailTitle(), findsNothing);
+    });
+
+    testWidgets('A2d 폼 [삭제] 실패 뒤 시트를 닫아도 [다시 시도] 가 지운다(요청 한 번 · 월 재조회)', (
+      tester,
+    ) async {
+      final world = await pump(tester);
+      await tapEvent(tester, '내 일정');
+      await tester.tap(button(l.actionEdit));
+      await tester.pumpAndSettle();
+      world.failDelete = true;
+      await tester.tap(button(l.actionDelete));
+      await tester.pumpAndSettle();
+      await confirmDelete(tester);
+
+      await tester.tap(close());
+      await tester.pumpAndSettle();
+      // 바뀐 값이 없으면 바로 닫히고, 있으면 버리기 확인이 뜬다 — 값을 안 만졌으므로 바로 닫힌다
+      expect(root(), findsNothing);
+      expect(find.text(l.actionRetry), findsOneWidget, reason: '띠는 남는다');
+
+      world.failDelete = false;
+      final octBefore = world.builds[(year: 2026, month: 10)]!;
+      await tapRetry(tester);
+      expect(world.deleted, {1});
+      expect(world.deleteCalls, 2);
+      expect(world.builds[(year: 2026, month: 10)], greaterThan(octBefore));
     });
 
     // 타이밍에 민감할 수 있다 — 다시 받기를 gate 로 붙잡아 두고 pump 로만 시간을 보낸다(pumpAndSettle 은 gate 가 열릴 때까지 안 끝난다).

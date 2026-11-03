@@ -49,6 +49,7 @@ class UserPreferencesNotifier extends AsyncNotifier<UserPreferences> {
   Future<bool> patch(
     Map<String, dynamic> fields, {
     required UserPreferences Function(UserPreferences prev) optimistic,
+    bool silent = false,
   }) async {
     final prev = state.value;
     if (prev == null) return false;
@@ -57,7 +58,7 @@ class UserPreferencesNotifier extends AsyncNotifier<UserPreferences> {
     state = AsyncData(optimistic(prev));
     try {
       final repo = await ref.read(userPreferencesRepositoryProvider.future);
-      final updated = await repo.update(fields);
+      final updated = await repo.update(fields, silent: silent);
       // 서버엔 들어갔다 — 화면이 사라졌어도 `true` 다. 이 값을 밖에서 읽는
       // 화면(예산 경고선)은 컨테이너로 비우므로 여기 수명과 무관하다.
       if (ref.mounted) state = AsyncData(updated);

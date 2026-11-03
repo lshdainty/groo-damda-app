@@ -7,7 +7,7 @@ import 'package:groo_damda_app/features/recurring/application/recurring_provider
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/features/recurring/presentation/recurring_format.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 반복 하나를 켜고 끈다 — 전역 오류 스낵바는 끈다(화면이 고정 글로 알린다). 다시 켤 때 오늘이 회차면 서버가 그 거래를 바로
@@ -68,73 +68,31 @@ Future<bool> toggleRecurringWithNotice(
   return true;
 }
 
-/// 삭제 확인창(PAlertDialog destructive) → 확정하면 지운다. [confirmed] 가 true 이고 [failure] 가 있으면 지우기가 실패한 것이다
-/// (확인창은 닫혔다 — 알리는 자리는 부른 쪽이 정한다: 스낵바 + 다시 시도).
-Future<({bool confirmed, Object? failure})> askDeleteRecurring(
-  BuildContext context,
-  WidgetRef ref,
-  RecurringTransaction it,
-) async {
-  final l = AppLocalizations.of(context);
-  Object? failure;
-  final ok = await PAlertDialog.show(
-    context,
-    title: l.recurringDeleteTitle,
-    description: l.recurringDeleteConfirm(recDisplayTitle(l, it)),
-    cancelLabel: l.actionCancel,
-    actionLabel: l.actionDelete,
-    destructive: true,
-    // 확정이 끝날 때까지 확정 버튼이 로딩이고 다음 누름을 버린다
-    onAction: () async {
-      try {
-        await deleteRecurringRequest(ref, it.rowId);
-      } catch (e) {
-        failure = e;
-      }
-    },
-  );
-  return (confirmed: ok, failure: failure);
-}
-
-/// 삭제 확인 → 지움 → 알림. 실패하면 스낵바("반복 설정을 삭제하지 못했어요" + 다시 시도 — 서버 글 없음). 지웠으면 true.
+/// 삭제 확인 → 지움 → 알림. 확인창 뒤 실패는 공용 [askConfirmThenRequest] — critical 스낵바 + [다시 시도](묻지 않고 바로 지움,
+/// 요청 silent). 지웠으면 true. 다시 시도로 지워도 같은 알림 · 목록 갱신을 한다(시트는 목록에서 사라진 항목을 알아서 닫는다).
 Future<bool> deleteRecurringWithNotice(
   BuildContext context,
   WidgetRef ref,
-  RecurringTransaction it,
-) async {
+  RecurringTransaction it, {
+  VoidCallback? onRetried,
+}) async {
   final l = AppLocalizations.of(context);
-  final snack = PSnackbar.of(context);
+  final snack = PSnackbar.maybeOf(context);
   final name = recDisplayTitle(l, it);
-  final r = await askDeleteRecurring(context, ref, it);
-  if (!r.confirmed) return false;
-  if (r.failure != null) {
-    _deleteFailed(snack, l, ref, it);
-    return false;
-  }
-  snack.show(message: l.recToastDeleted(name));
-  return true;
-}
-
-void _deleteFailed(
-  PSnackbarApi snack,
-  AppLocalizations l,
-  WidgetRef ref,
-  RecurringTransaction it,
-) {
-  snack.show(
-    message: l.recDeleteFailed,
-    tone: PSnackbarTone.critical,
-    action: PSnackbarAction(
-      label: l.actionRetry,
-      // 이미 확인창에서 한 번 확정한 삭제 — 묻지 않고 바로 지운다
-      onPressed: () async {
-        try {
-          await deleteRecurringRequest(ref, it.rowId);
-          snack.show(message: l.recToastDeleted(recDisplayTitle(l, it)));
-        } catch (_) {
-          _deleteFailed(snack, l, ref, it);
-        }
-      },
-    ),
+  final ok = await askConfirmThenRequest(
+    context,
+    title: l.recurringDeleteTitle,
+    description: l.recurringDeleteConfirm(name),
+    cancelLabel: l.actionCancel,
+    actionLabel: l.actionDelete,
+    request: () => deleteRecurringRequest(ref, it.rowId),
+    failedMessage: l.recDeleteFailed,
+    retryLabel: l.actionRetry,
+    onRetried: () {
+      snack?.show(message: l.recToastDeleted(name));
+      onRetried?.call();
+    },
   );
+  if (ok) snack?.show(message: l.recToastDeleted(name));
+  return ok;
 }

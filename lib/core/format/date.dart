@@ -199,19 +199,13 @@ String? localDateTime(String? iso) {
   return '$yyyy-$mm-$dd $hh:$mi';
 }
 
-/// 서버 `[UTC]` 시각을 로컬 `MM/DD · 오후 3:07` 으로 찍는다 (메모 수정시각 라벨).
+/// 메모 수정 시각(I-15 9) — 올해는 줄임 날짜 + 시각 "10월 22일 오후 5:10", 다른 해는 표준 날짜 "2025년 12월 3일"(웹 `formatMemoStamp` 와 한 벌).
 ///
-/// 원래는 문자열을 `raw.substring(5, 16)` 으로 잘라 썼다 — 파싱을 안 하니 서버가 준
-/// UTC 벽시계가 그대로 화면에 나왔고, KST(+9)에서는 방금 고친 메모가 9시간 전으로,
-/// 자정 근처면 날짜까지 하루 어긋나 보였다. 그래서 실제로 파싱해 로컬로 옮긴 뒤 찍는다.
-///
-/// 모양은 웹(porest-desk-front)과 같게 유지한다 — 로케일별 포맷을 태우지 않는다.
-/// 못 읽는 값은 빈 문자열 — 라벨이 `'$tag · '` 처럼 다른 문자열에 이어 붙는 자리라
-/// null 을 돌려주면 호출부가 전부 분기해야 한다.
-String monthDayTime(String? iso) {
+/// 서버 `[UTC]` 시각을 파싱해 로컬로 옮긴 뒤 찍는다 — 문자열을 자르면 UTC 벽시계가 그대로 나와 KST(+9)에서 9시간 · 자정 근처엔 하루가 어긋난다.
+/// 못 읽는 값은 빈 문자열이다(틀린 시각을 그리지 않는다 — 메타 줄이 빈 조각을 빼므로 끝에 " ·" 만 남지 않는다). [now] 는 시험용(올해를 고정한다).
+String formatMemoStamp(String? iso, {DateTime? now}) {
   final dt = parseServerUtc(iso);
   if (dt == null) return '';
-  final mm = dt.month.toString().padLeft(2, '0');
-  final dd = dt.day.toString().padLeft(2, '0');
-  return '$mm/$dd · ${timeOfDay12(dt)}';
+  if (dt.year != (now ?? DateTime.now()).year) return fullDate(dt);
+  return '${monthDay(dt)} ${timeOfDay12(dt)}';
 }

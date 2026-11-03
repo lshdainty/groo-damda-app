@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/widgets/p_section_label.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
 import 'package:groo_damda_app/shared/widgets/p_switch.dart';
 import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
 import 'package:groo_damda_app/features/asset/presentation/transfer_account_fields.dart';
@@ -1173,9 +1174,11 @@ class _TxFields extends ConsumerWidget {
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Center(child: PCircularProgressIndicator()),
             ),
-            error: (e, _) => Text(
-              '${l.categoryLoadError}: $e',
-              style: PTypo.caption.copyWith(color: t.statusDangerFg),
+            error: (e, _) => _LoadFailedRow(
+              message: l.presetCategoryLoadFailed,
+              retryLabel: l.actionRetry,
+              // 조회는 silent — 다시 받기만 한다
+              onRetry: () => ref.invalidate(categoriesProvider),
             ),
             data: (categories) {
               final topCategories =
@@ -1342,9 +1345,10 @@ class _TxFields extends ConsumerWidget {
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Center(child: PCircularProgressIndicator()),
             ),
-            error: (e, _) => Text(
-              '${l.recurringAssetLoadError}: $e',
-              style: PTypo.caption.copyWith(color: t.statusDangerFg),
+            error: (e, _) => _LoadFailedRow(
+              message: l.recAssetLoadFailed,
+              retryLabel: l.actionRetry,
+              onRetry: () => ref.invalidate(assetsProvider),
             ),
             data: (assets) {
               final filtered = assets
@@ -1451,4 +1455,39 @@ class _TimeField extends StatelessWidget {
       if (t != null) onChanged(_fmt(t));
     },
   );
+}
+
+/// 조회 실패 한 줄 — 서버 글 없이 고정 글 + 작은 [다시 시도].
+class _LoadFailedRow extends StatelessWidget {
+  const _LoadFailedRow({
+    required this.message,
+    required this.retryLabel,
+    required this.onRetry,
+  });
+
+  final String message;
+  final String retryLabel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            message,
+            style: PTypo.caption.copyWith(color: t.statusDangerFg),
+          ),
+        ),
+        PButton(
+          label: retryLabel,
+          size: PButtonSize.small,
+          variant: PButtonVariant.ghost,
+          ghostColor: PButtonGhostColor.neutralSubtle,
+          onPressed: onRetry,
+        ),
+      ],
+    );
+  }
 }

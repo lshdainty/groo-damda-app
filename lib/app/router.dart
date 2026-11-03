@@ -7,6 +7,8 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/update/app_update.dart';
 import 'package:groo_damda_app/features/update/presentation/update_gate_screen.dart';
 import 'package:groo_damda_app/features/asset/presentation/account_card_manage_screen.dart';
+import 'package:groo_damda_app/features/asset/presentation/asset_detail_dialog.dart'
+    show AssetDetailScreen;
 import 'package:groo_damda_app/features/asset/presentation/asset_screen.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_screen.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_settings_screen.dart';
@@ -127,6 +129,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
       // `?edit=<자산 id>` 면 그 자산의 수정 폼을 바로 연다(D9 — [잔액 고치기]·자산 상세
       // [수정]). 없거나 못 찾으면 목록으로 들어온다.
+      // 자산(계좌) 상세 — 최상위 화면(하단 탭 바 없음). ← = pop. 옛 `/assets` 와 겹치지 않는다(I-17 35).
+      GoRoute(
+        path: '/asset/:assetId',
+        builder: (_, state) => AssetDetailScreen(
+          assetId: int.tryParse(state.pathParameters['assetId'] ?? '') ?? -1,
+        ),
+      ),
       GoRoute(
         path: '/account-card-manage',
         builder: (_, state) => AccountCardManageScreen(

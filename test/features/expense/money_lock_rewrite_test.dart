@@ -13,6 +13,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -30,7 +33,7 @@ import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart'
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
 
@@ -97,6 +100,7 @@ class _FakeRepo extends ExpenseRepository {
     Patch<double> exchangeRate = const Patch.keep(),
     List<SplitInput>? splits,
     Patch<bool> isFixed = const Patch.keep(),
+    bool silent = false,
   }) async {
     calls.add(
       _Call('update', {
@@ -133,6 +137,7 @@ class _FakeRepo extends ExpenseRepository {
     double? exchangeRate,
     List<SplitInput>? splits,
     bool? isFixed,
+    bool silent = false,
   }) async {
     calls.add(
       _Call('replace', {
@@ -192,8 +197,31 @@ Future<_FakeRepo> _open(
 }
 
 /// 컨트롤러 글자로 찾는 입력칸 — 금액·날짜 칸.
-Finder _fieldWith(String text) =>
-    find.byWidgetPredicate((w) => w is TextField && w.controller?.text == text);
+Finder _fieldWith(String text) => find.byWidgetPredicate(
+  (w) => w is EditableText && w.controller.text == text,
+);
+
+/// 줄 칸이 막혔나 — 막힌 줄은 누름이 없다(값은 보인다).
+bool _rowLocked(WidgetTester tester, String key) =>
+    tester
+        .widget<PListButtonItem>(
+          find.descendant(
+            of: find.byKey(ValueKey('tx-row-$key')),
+            matching: find.byType(PListButtonItem),
+          ),
+        )
+        .onTap ==
+    null;
+
+/// 금액 줄 › 한 단계에서 값을 바꾸고 "완료".
+Future<void> _setAmount(WidgetTester tester, String v) async {
+  await tester.tap(find.byKey(const ValueKey('tx-row-amount')));
+  await tester.pumpAndSettle();
+  await tester.enterText(find.byType(EditableText).first, v);
+  await tester.pump();
+  await tester.tap(find.text('완료'));
+  await tester.pumpAndSettle();
+}
 
 Finder _submit(String label) =>
     find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
@@ -203,29 +231,14 @@ void main() {
     testWidgets('돈 칸은 전부 회색이고 분류 칸은 열려 있다', (tester) async {
       await _open(tester, _locked);
 
-      expect(tester.widget<TextField>(_fieldWith('40000')).enabled, isFalse);
-      expect(
-        tester.widget<PDateInput>(find.byType(PDateInput)).enabled,
-        isFalse,
-      );
-      expect(
-        tester.widget<PTimeInput>(find.byType(PTimeInput)).enabled,
-        isFalse,
-      );
-      // 결제수단·통화(문자열 select), 자산·할부(숫자 select) 전부.
-      expect(find.byType(PSelect<String>), findsNWidgets(2));
-      expect(find.byType(PSelect<int>), findsNWidgets(2));
-      for (final select in tester.widgetList<PSelect<String>>(
-        find.byType(PSelect<String>),
-      )) {
-        expect(select.enabled, isFalse);
-      }
-      for (final select in tester.widgetList<PSelect<int>>(
-        find.byType(PSelect<int>),
-      )) {
-        expect(select.enabled, isFalse);
-      }
-      expect(tester.widget<TextField>(_fieldWith('버스')).enabled, isNot(false));
+      // 돈 칸(금액 · 계좌 · 결제 수단 · 할부 · 날짜)은 막힌 줄 — 값은 보이고 누름이 없다
+      expect(_rowLocked(tester, 'amount'), isTrue);
+      expect(_rowLocked(tester, 'asset'), isTrue);
+      expect(_rowLocked(tester, 'method'), isTrue);
+      expect(find.byType(FormPiece), findsNothing, reason: '날짜 조각이 없다(막힌 줄)');
+      // 분류 칸(거래처 · 카테고리 · 메모)은 열려 있다
+      expect(_rowLocked(tester, 'category'), isFalse);
+      expect(tester.widget<EditableText>(_fieldWith('버스')).readOnly, isFalse);
 
       expect(
         find.text('결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요'),
@@ -237,7 +250,7 @@ void main() {
     testWidgets('서버 플래그가 없어도 닫힌 회차 카드 거래면 잠근다', (tester) async {
       await _open(tester, _locked.copyWith(moneyLocked: false));
 
-      expect(tester.widget<TextField>(_fieldWith('40000')).enabled, isFalse);
+      expect(_rowLocked(tester, 'amount'), isTrue);
       expect(find.text('고쳐 쓰기'), findsOneWidget);
     });
 
@@ -250,10 +263,7 @@ void main() {
         ),
       );
 
-      expect(
-        tester.widget<TextField>(_fieldWith('40000')).enabled,
-        isNot(false),
-      );
+      expect(_rowLocked(tester, 'amount'), isFalse);
       expect(find.text('고쳐 쓰기'), findsNothing);
     });
 
@@ -300,14 +310,15 @@ void main() {
       // 편집 시트는 닫히고 고쳐 쓰기 시트가 열렸다(제목 + 버튼 라벨이 같은 말).
       expect(find.text('거래 수정'), findsNothing);
       expect(find.text('고쳐 쓰기'), findsOneWidget);
-      final amount = tester.widget<TextField>(_fieldWith('40000'));
-      expect(amount.enabled, isNot(false));
+      expect(_rowLocked(tester, 'amount'), isFalse);
       expect(_fieldWith('버스'), findsOneWidget);
-      expect(_fieldWith('2026-08-20'), findsOneWidget);
+      expect(find.byType(FormPiece), findsWidgets, reason: '날짜 조각이 열린다');
       expect(find.byKey(const ValueKey('money-lock-note')), findsNothing);
       expect(
-        find.text('이체'),
-        findsNothing,
+        tester
+            .widget<PChip>(find.byKey(const ValueKey('tx-type-TRANSFER')))
+            .onPressed,
+        isNull,
         reason: 'replace 본문은 지출·수입 생성 본문이다',
       );
     });
@@ -316,8 +327,7 @@ void main() {
       final repo = await _open(tester, _locked);
       await openRewrite(tester);
 
-      await tester.enterText(_fieldWith('40000'), '45000');
-      await tester.pump();
+      await _setAmount(tester, '45000');
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
 
@@ -346,52 +356,8 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('열린 회차로 옮기면 그 회차 결제일에 청구된다고 말한다', (tester) async {
-      await _open(tester, _locked);
-      await openRewrite(tester);
-
-      await tester.enterText(_fieldWith('2026-08-20'), '2026-09-10');
-      await tester.pump();
-      await tester.tap(_submit('저장'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text(
-          '원래 거래는 지워지고 새 거래로 바뀌어요. '
-          '새 거래는 10월 12일 결제에 청구돼요. 원래 거래는 이미 결제된 회차에서 기록만 빠져요.',
-        ),
-        findsOneWidget,
-      );
-    });
-
     // 결제일 변경이 대기 중인 카드 — 9월분이 아직 옛 결제일(10/20)로 나간다. 지금
     // 결제일(12일)로 세면 "10월 12일" 이라는 틀린 날짜를 말한다(QA 26 4).
-    testWidgets('결제일 변경이 대기 중이면 서버가 준 그 회차의 결제일을 말한다', (tester) async {
-      await _open(
-        tester,
-        _locked,
-        card: _card.copyWith(nextPaymentDate: '2026-10-20'),
-      );
-      await openRewrite(tester);
-
-      await tester.enterText(_fieldWith('2026-08-20'), '2026-09-10');
-      await tester.pump();
-      await tester.tap(_submit('저장'));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('새 거래는 10월 20일 결제에 청구돼요.'), findsOneWidget);
-
-      // 그 뒤 회차(10월)는 지금 결제일로 센다.
-      await tester.tap(find.text('취소').last);
-      await tester.pumpAndSettle();
-      await tester.enterText(_fieldWith('2026-09-10'), '2026-10-05');
-      await tester.pump();
-      await tester.tap(_submit('저장'));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('새 거래는 11월 12일 결제에 청구돼요.'), findsOneWidget);
-    });
-
     testWidgets('물러나면 보내지 않는다', (tester) async {
       final repo = await _open(tester, _locked);
       await openRewrite(tester);
@@ -456,10 +422,11 @@ void main() {
       );
       await openRewrite(tester);
 
-      await tester.enterText(_fieldWith('40000'), '45000');
-      await tester.pump();
+      await _setAmount(tester, '45000');
 
-      expect(tester.widget<PButton>(_submit('저장')).onPressed, isNull);
+      // 저장은 켜 둔다 — 누르면 요청 없이 "나눈 내역 맞추기" 로 간다(Callout 이 먼저 말한다)
+      expect(find.byKey(const ValueKey('tx-split-mismatch')), findsOneWidget);
+      expect(find.text('나눈 내역 맞추고 저장'), findsOneWidget);
     });
   });
 

@@ -410,6 +410,56 @@
   "tradeDeleted": "거래를 취소했어요",
   "tradeDeleteTitle": "거래 취소",
   "tradeDeleteConfirm": "이 거래를 취소하시겠어요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
+  "assetDetailTitle": "자산 상세",
+  "assetNotFoundTitle": "자산을 찾을 수 없어요",
+  "assetDetailDeleteFailed": "자산을 삭제하지 못했어요.",
+  "assetNotFoundDesc": "지웠거나 없는 자산이에요.",
+  "assetNotFoundAction": "자산으로",
+  "assetLoadFailTitle": "자산을 불러오지 못했어요",
+  "assetMoreOf": "{name} 더보기",
+  "@assetMoreOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeDetailTitle": "거래 기록",
+  "tradeKind": "종류",
+  "tradeHoldingLabel": "종목",
+  "tradeUnitPrice": "단가",
+  "tradeAmountLabel": "거래대금",
+  "tradeFeeLabel": "수수료 · 세금",
+  "tradeDateTime": "거래 일시",
+  "tradeOpenRow": "{date} {name} 거래 기록",
+  "@tradeOpenRow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeDeleteConfirmTarget": "{date} {name} {qty} {kind} 거래를 취소할까요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
+  "@tradeDeleteConfirmTarget": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "tradeCancelFailed": "거래를 취소하지 못했어요.",
   "holdingTypeStock": "주식",
   "holdingTypeGold": "금",
   "holdingTypeCrypto": "코인",
@@ -653,6 +703,10 @@
   "assetLumpSumLabel": "일시불",
   "assetAlreadyPaidLabel": "선결제 차감",
   "assetPayNow": "지금 결제",
+  "assetPayFailed": "결제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "assetInstallmentPayoffFailed": "할부를 정리하지 못했어요.",
+  "assetInstallmentPayoffUndoFailed": "할부 정리를 되돌리지 못했어요.",
+  "assetCancelPaymentFailed": "결제를 취소하지 못했어요.",
   "assetPayAction": "결제하기",
   "assetPayAmount": "결제 금액",
   "assetPayRemainder": "남은 {amount}은 결제일에 빠져요",
@@ -673,7 +727,6 @@
   },
   "assetPayNoAccountNote": "연결된 결제 계좌가 없어 이체 없이 사용액만 정리돼요.",
   "assetPaymentRecorded": "결제가 기록되었습니다",
-  "assetPayFailed": "결제 실패",
   "assetBillingLoadError": "청구 정보를 불러오지 못했어요",
   "assetUpcomingPayment": "결제 예정",
   "assetScheduledTag": "예정",
@@ -825,8 +878,8 @@
   "calFormTitleRequired": "제목을 입력해주세요",
   "calFormRows": "일정 정보",
   "calFormRowsMore": "반복 · 알림 · 장소 · 설명",
-  "calFormSaveFailed": "일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
-  "calFormDeleteFailed": "일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
+  "calFormSaveFailed": "일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "calFormDeleteFailed": "일정을 삭제하지 못했어요.",
   "calReminderMinutesBefore": "{n}분 전",
   "@calReminderMinutesBefore": {
     "placeholders": {
@@ -1141,7 +1194,7 @@
   "expInstallment": "할부",
   "expRefund": "환불",
   "expRefundConfirmTitle": "환불 처리",
-  "expRefundConfirmBody": "이 거래를 환불로 표시하고 {amount}을 {asset}(으)로 되돌려요. 합계에서 빠져요.",
+  "expRefundConfirmBody": "이 거래를 환불로 표시해요. 합계에서 빠지고 {amount}이 {asset}에 돌아가요.",
   "@expRefundConfirmBody": {
     "placeholders": {
       "amount": {
@@ -1156,7 +1209,7 @@
   "expRefundConfirmBodyCardNoAccount": "결제계좌가 없어 카드 잔액만 정리돼요.",
   "expRefundDate": "환불일",
   "expRefundConfirm": "환불 처리",
-  "expRefundedAt": "환불됨 · {date}",
+  "expRefundedAt": "환불됨 · {date} — 합계에서 빠져 있어요.",
   "@expRefundedAt": {
     "placeholders": {
       "date": {
@@ -1203,12 +1256,12 @@
   "transferPrincipal": "원금",
   "transferWithdrawn": "출금 합계",
   "transferDeleted": "이체를 삭제했어요",
-  "transferDeleteConfirm": "이 이체를 삭제할까요? 양쪽 자산의 잔액이 되돌아가요. 삭제한 이체는 되돌릴 수 없어요.",
+  "transferDeleteConfirm": "이 이체를 삭제할까요? 양쪽 계좌 잔액이 이체 전으로 돌아가요. 삭제한 이체는 되돌릴 수 없어요.",
   "transferDeleteTitle": "이체 삭제",
-  "transferAutoTradeSettlement": "주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라집니다.",
-  "transferAutoCardPayment": "카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없습니다.",
-  "transferAutoCardRefund": "카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰집니다.",
-  "transferAutoDefault": "자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라집니다.",
+  "transferAutoTradeSettlement": "주식을 살 때 예수금이 모자라 자동으로 만들어진 이체예요. 매수를 취소하면 함께 사라져요.",
+  "transferAutoCardPayment": "카드 자동결제로 만들어진 이체예요. 청구 회차와 묶여 있어 따로 고칠 수 없어요.",
+  "transferAutoCardRefund": "카드에 남은 과납금을 결제계좌로 돌려준 이체예요. 카드 잔액을 직접 보정하면 다음 날 자동으로 다시 맞춰져요.",
+  "transferAutoDefault": "자동으로 만들어진 이체예요. 원래 거래를 지우면 함께 사라져요.",
   "updateAvailable": "{version} 버전이 나왔어요",
   "@updateAvailable": {
     "placeholders": {
@@ -1879,7 +1932,6 @@
     }
   },
   "expDeleted": "거래가 삭제되었습니다",
-  "expDeleteFailed": "삭제 실패",
   "expSplitMismatch": "분할 내역과 금액이 달라요",
   "expSplitDiff": "새 총액 {total}원 · 분할 합계 {sum}원 · {diff}원 차이",
   "@expSplitDiff": {
@@ -1902,7 +1954,6 @@
   "expPresetEmpty": "저장된 프리셋이 없어요. 자주 쓰는 내역을 입력 후 “현재 입력값 저장”을 눌러보세요.",
   "expPresetFilled": "프리셋 값이 채워졌어요. 금액·내역만 수정해서 저장하세요.",
   "expClear": "해제",
-  "expPresetManageHint": "설정 → 프리셋 관리",
   "expSaveFailed": "저장 실패",
   "expPresetSaveTitle": "프리셋으로 저장",
   "expPresetNamePlaceholder": "예: 점심 도시락",
@@ -1920,10 +1971,10 @@
   "expPayTransfer": "계좌이체",
   "expPayOther": "기타",
   "expAutoLock": "자동 생성",
-  "expAutoSourceTradeRealized": "주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산됩니다.",
-  "expAutoSourceTransferInterest": "이체에 붙은 이자예요. 금액은 이체 내역에서 계산됩니다.",
+  "expAutoSourceTradeRealized": "주식을 팔아 생긴 실현손익이에요. 금액은 매매 내역에서 계산돼요.",
+  "expAutoSourceTransferInterest": "이체에 붙은 이자예요. 금액은 이체 내역에서 계산돼요.",
   "expAutoSourceCardCarryover": "카드를 등록할 때 적은 이전 미결제 사용액이에요. 금액은 카드 수정에서 바꿔요.",
-  "expAutoSourceDefault": "자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라집니다.",
+  "expAutoSourceDefault": "자동으로 만들어진 거래예요. 원래 거래를 지우면 함께 사라져요.",
   "expPresetLock": "프리셋 잠금",
   "expNoCategoryForType": "이 타입에 해당하는 카테고리가 없습니다",
   "expSubcategory": "세부 카테고리",
@@ -1937,8 +1988,8 @@
   },
   "expIncomeSource": "수입처",
   "expPayee": "거래처",
-  "expIncomeSourcePlaceholder": "예: (주)포레스트",
-  "expPayeePlaceholder": "예: 스타벅스 강남점",
+  "expIncomeSourcePlaceholder": "예: 월급",
+  "expPayeePlaceholder": "예: 회사 앞 도시락",
   "expIncomeMethod": "수입 방식",
   "expNone": "선택 안 함",
   "expDepositAccount": "입금 계좌",
@@ -1967,24 +2018,7 @@
   "expExpenseDetail": "지출 상세",
   "expTxFallback": "거래",
   "expUncategorized": "미분류",
-  "expValueNone": "없음",
-  "expItemsCount": "{count}개",
-  "@expItemsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "expNotSelected": "미선택",
-  "expPrevTxAt": "{merchant}에서의 이전 거래",
-  "@expPrevTxAt": {
-    "placeholders": {
-      "merchant": {
-        "type": "String"
-      }
-    }
-  },
   "expThisMonth": "이번 달",
   "expTimesCount": "{count}회",
   "@expTimesCount": {
@@ -2186,7 +2220,7 @@
   "appearanceThemeDark": "다크",
   "appearanceThemeDarkDesc": "어두운 배경",
   "appearanceThemeSystem": "시스템",
-  "appearanceThemeSystemDesc": "자동 전환",
+  "appearanceThemeSystemDesc": "OS 설정 따라가기",
   "hideAmountsLockAllDesc": "{total}개 중 {count}개 카드를 가리는 중",
   "@hideAmountsLockAllDesc": {
     "placeholders": {
@@ -2269,26 +2303,29 @@
   "appearanceHideAmount": "금액 가리기",
   "appearanceHideAmountDesc": "모든 화면의 금액을 ••••로 표시합니다",
   "appearanceRegion": "기준 지역",
-  "appearanceRegionPlaceholder": "지역 선택",
-  "appearanceRegionDesc": "'오늘'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요",
+  "appearanceRegionDesc": "'오늘'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요.",
   "appearanceCurrency": "기본 통화",
   "appearanceCurrencyKrw": "대한민국 원",
   "appearanceCurrencyUsd": "미국 달러",
   "appearanceCurrencyEur": "유로",
   "appearanceCurrencyJpy": "일본 엔",
-  "passwordChanged": "비밀번호가 변경되었습니다",
-  "passwordChangeFailed": "비밀번호 변경에 실패했습니다.",
+  "appearanceCurrencyDesc": "새 자산·거래를 만들 때 이 통화가 먼저 골라져요.",
+  "appearanceRegionLoadError": "기준 지역을 불러오지 못했어요",
+  "appearanceCurrencyLoadError": "기본 통화를 불러오지 못했어요",
+  "appearanceSaveFailed": "설정을 바꾸지 못했어요.",
+  "passwordChanged": "비밀번호를 바꿨어요",
+  "passwordChangeFailed": "비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "passwordCurrent": "현재 비밀번호",
+  "passwordChangeDescription": "현재 비밀번호를 확인한 뒤 새 비밀번호로 바꿔요",
+  "passwordCurrentInvalid": "현재 비밀번호가 맞지 않아요",
   "passwordNew": "새 비밀번호",
-  "passwordNewPlaceholder": "8자 이상, 특수문자 포함",
   "passwordNewConfirm": "새 비밀번호 확인",
-  "passwordConfirmPlaceholder": "한 번 더 입력",
-  "passwordMismatch": "새 비밀번호가 일치하지 않습니다",
-  "passwordMatched": "새 비밀번호가 일치합니다",
+  "passwordMismatch": "새 비밀번호가 일치하지 않아요",
+  "passwordMatched": "새 비밀번호가 일치해요",
   "passwordRuleLength": "8자 이상",
   "passwordRuleSpecial": "특수문자 1자 이상",
   "passwordSameAsCurrent": "현재 비밀번호와 다른 비밀번호를 입력해주세요",
-  "passwordChangeAction": "변경",
+  "passwordChangeAction": "저장",
   "accountTitle": "계정",
   "accountDefaultName": "사용자",
   "accountJoined": "가입 {date}",
@@ -2299,16 +2336,12 @@
       }
     }
   },
-  "accountEditComingSoon": "프로필 수정은 준비중입니다",
+  "accountEditComingSoon": "프로필 수정은 곧 열려요.",
   "accountSecurity": "보안",
-  "accountPasswordDesc": "최근 변경 없음",
+  "accountPasswordDesc": "주기적으로 바꾸면 안전해요",
   "accountTwoFa": "2단계 인증",
-  "accountOn": "사용 중",
-  "accountOff": "사용 안 함",
   "accountDevices": "로그인된 기기",
   "accountCurrentDevice": "현재 기기",
-  "accountLoginHistory": "로그인 기록",
-  "accountLast30Days": "최근 30일",
   "devicesTitle": "로그인된 기기",
   "devicesIntro": "이 계정으로 로그인된 기기예요. 낯선 기기가 있으면 로그아웃해주세요.",
   "devicesCurrent": "현재 기기",
@@ -2349,14 +2382,21 @@
   "accountConnected": "연결된 계정",
   "accountNotConnected": "연결 안 됨",
   "accountConnect": "연결",
-  "accountSocialComingSoon": "{name} 연결은 준비중입니다",
-  "@accountSocialComingSoon": {
+  "accountLinked": "연결됨",
+  "accountDisconnect": "해제",
+  "accountProvidersError": "연결 상태를 불러오지 못했어요",
+  "accountLinkError": "계정을 연결하지 못했어요.",
+  "accountUnlinkError": "연결을 해제하지 못했어요.",
+  "accountLinkedToast": "{name} 계정이 연결되었어요",
+  "@accountLinkedToast": {
     "placeholders": {
       "name": {
         "type": "String"
       }
     }
   },
+  "accountUnlinkedToast": "Google 연결을 해제했어요",
+  "accountSecuritiesDesc": "토스·나무 등 증권사 API 키를 연결해요",
   "accountBilling": "구독·결제",
   "accountNextBilling": "다음 결제 {date} · ",
   "@accountNextBilling": {
@@ -2391,7 +2431,7 @@
       }
     }
   },
-  "accountLogoutConfirm": "정말 로그아웃 하시겠어요?",
+  "accountLogoutConfirm": "이 기기에서 로그아웃할까요?",
   "accountWithdrawTitle": "그루 담다 이용 해지",
   "withdrawIntro": "이용을 해지하면 바로 로그인이 막히고 되돌릴 수 없어요.",
   "withdrawImpactCalendarsOwned": "내가 만든 공유 캘린더 {count}개가 삭제되고 멤버도 볼 수 없어요",
@@ -2526,54 +2566,97 @@
   "notiEmailWeekly": "매주",
   "notiEmailMonthly": "매월",
   "presetManageTitle": "프리셋 관리",
-  "presetLoadError": "프리셋 로드 실패",
-  "presetDeleteTitle": "프리셋 삭제",
   "presetDetailTitle": "프리셋 상세",
-  "presetTypeLabel": "유형",
-  "presetDeleteConfirm": "\"{name}\" 프리셋을 삭제할까요? 이미 저장된 거래 내역에는 영향이 없어요. 삭제한 프리셋은 되돌릴 수 없어요.",
-  "@presetDeleteConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "presetDeleted": "프리셋이 삭제되었습니다",
-  "presetDeleteFailed": "삭제 실패",
-  "presetIntroTitle": "프리셋이란?",
-  "presetIntroBody": "자주 쓰는 내역(점심·커피·교통비 등)을 미리 저장해두면, 내역 추가 화면에서 한 번 탭으로 카테고리·결제수단·내역을 모두 채워넣어요. 금액만 바꿔서 단건으로 저장하기 좋습니다.",
-  "presetStatSaved": "저장된 프리셋",
-  "presetStatUses": "누적 사용",
-  "presetUsesCount": "{count}회",
-  "@presetUsesCount": {
+  "presetTypeLabel": "종류",
+  "presetDeleteConfirm": "이미 기록된 거래는 그대로 남아요. 삭제한 프리셋은 되돌릴 수 없어요.",
+  "presetDeleteFailed": "프리셋을 삭제하지 못했어요",
+  "presetSortUsed": "많이 쓴 순",
+  "presetSortRecent": "최근 사용",
+  "presetSortName": "이름순",
+  "presetListTitle": "프리셋 {count}개",
+  "@presetListTitle": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "presetStatType": "지출 / 수입",
-  "presetSortUsed": "사용 많은 순",
-  "presetSortRecent": "최근 사용",
-  "presetSortName": "이름순",
+  "presetUses": "{count}번",
+  "@presetUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "presetSortLabel": "정렬",
+  "presetLoadFailed": "프리셋을 불러오지 못했어요",
+  "presetCategoryLoadFailed": "카테고리를 불러오지 못했어요",
+  "presetDeleteConfirmTitle": "\"{name}\" 프리셋을 삭제할까요?",
+  "@presetDeleteConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "presetNoteFixed": "고정 금액",
+  "presetNoteUses": "{count}번 썼어요",
+  "@presetNoteUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "presetNoteUnused": "아직 쓰지 않았어요",
+  "presetNoteLast": "마지막 {month}월 {day}일",
+  "@presetNoteLast": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "presetFixedOn": "켬",
+  "presetFixedOff": "끔",
+  "presetNameRequired": "이름을 입력해주세요.",
+  "presetNameTooLong": "프리셋 이름은 12자 이내로 입력해주세요.",
+  "presetCategoryRequired": "카테고리를 골라주세요.",
+  "presetFromRequired": "보내는 계좌를 골라주세요.",
+  "presetToRequired": "받는 계좌를 골라주세요.",
+  "presetSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "presetAmountLabel": "금액",
+  "presetFeeLabel": "수수료",
+  "presetAmountBlank": "비워 둠",
+  "presetAmountHint": "비워 두면 불러올 때 금액을 직접 넣어요.",
+  "presetMemoPlaceholder": "선택 사항",
+  "presetInterestTooLarge": "이자는 금액보다 클 수 없어요.",
+  "presetNoneValue": "없음",
+  "presetMemoNone": "메모 없음",
+  "presetNoAccount": "계좌·카드 없음",
+  "presetNoPayment": "결제 수단 없음",
+  "presetNoCategoryOfKind": "이 종류의 카테고리가 없어요.",
+  "presetFromAccount": "보내는 계좌",
+  "presetToAccount": "받는 계좌",
+  "presetShowAll": "모두 보기",
+  "presetPickTitle": "프리셋 고르기",
+  "presetSearch": "프리셋 검색",
+  "presetNoResult": "찾는 프리셋이 없어요.",
   "presetAdd": "프리셋 추가",
   "presetAmountEmpty": "금액 비움",
   "presetNoCategory": "카테고리 없음",
   "presetEmptyTitle": "저장된 프리셋이 없어요",
-  "presetEmptyDesc": "자주 쓰는 내역을 추가해 매번 입력하는 수고를 줄여보세요.",
+  "presetEmptyDesc": "자주 쓰는 내역(점심 · 교통비 등)을 저장해 두면 내역을 추가할 때 한 번 눌러 카테고리 · 계좌 · 내역을 채워요.",
   "presetEditTitle": "프리셋 수정",
   "presetSubmitAdd": "추가",
   "presetName": "프리셋 이름",
   "presetMerchant": "기본 내역",
-  "presetMerchantPlaceholder": "예: 한솥 도시락",
-  "presetSelectNone": "선택 안 함",
+  "presetMerchantPlaceholder": "예: 회사 앞 도시락",
   "presetAssetCard": "계좌·카드",
-  "presetAssetLoadError": "자산 로드 실패",
-  "presetLockToggle": "고정 금액 사용",
-  "presetLockDesc": "꺼두면 불러올 때 금액이 비어있어요. 매번 다른 금액일 때 편해요.",
-  "presetLockAmountLabel": "고정 금액",
-  "presetUpdated": "프리셋이 수정되었습니다",
-  "presetCreated": "프리셋이 추가되었습니다",
   "recurringToggleFailed": "변경 실패",
   "recurringDeleteTitle": "반복 거래 삭제",
   "recurringDeleteConfirm": "\"{name}\" 반복 설정을 삭제할까요? 이미 기록된 거래는 그대로 남아요. 삭제한 반복 설정은 되돌릴 수 없어요.",
@@ -3254,16 +3337,7 @@
   "subDisconnectFailed": "해제에 실패했어요",
   "memoNew": "메모 추가",
   "memoEditTitle": "메모 수정",
-  "memoAdd": "추가",
-  "memoLoadError": "메모 로드 실패",
-  "memoTagAll": "전체 {count}",
-  "@memoTagAll": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "memoLoadError": "메모를 불러오지 못했어요",
   "memoSectionPinned": "고정 · {count}",
   "@memoSectionPinned": {
     "placeholders": {
@@ -3280,15 +3354,7 @@
       }
     }
   },
-  "memoActionFailed": "실패: {message}",
-  "@memoActionFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "memoEmptyDesc": "생각이 떠오를 때, 새 메모를 만들어보세요.",
+  "memoEmptyDesc": "오른쪽 아래 + 버튼으로 첫 메모를 써보세요.",
   "memoSearchEmptyDesc": "다른 검색어를 입력해보세요.",
   "memoUntitled": "제목 없음",
   "memoDeleteTitle": "메모 삭제",
@@ -3300,20 +3366,29 @@
       }
     }
   },
-  "memoDeleteFailed": "삭제 실패: {message}",
-  "@memoDeleteFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
   "memoFieldTitle": "제목",
-  "memoTitleRequired": "제목을 입력해주세요",
+  "memoTitleRequired": "제목을 입력해주세요.",
   "memoFieldContent": "내용",
   "memoContentPlaceholder": "여기에 메모를 작성해주세요",
   "memoFieldTag": "태그",
   "memoTagNone": "태그 없음",
+  "memoTagEmptyHint": "태그는 설정 › 메모 태그에서 만들어요.",
+  "memoAllChip": "전체",
+  "memoLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "memoTagFilter": "태그로 거르기",
+  "memoSaved": "저장했어요.",
+  "memoSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "memoDeleteFailed": "삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "memoPinFailed": "고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "memoModifiedAt": "{time} 수정",
+  "@memoModifiedAt": {"placeholders": {"time": {"type": "String"}}},
+  "memoMoreOf": "{name} 더보기",
+  "@memoMoreOf": {"placeholders": {"name": {"type": "String"}}},
+  "memoSwipeUnpin": "해제",
+  "mtagSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "mtagDeleteFailed": "삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "ttagSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "ttagDeleteFailed": "삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "memoNewTag": "태그 추가",
   "memoTagNamePlaceholder": "예: 아이디어",
   "memoDeleteTagTitle": "태그 삭제",
@@ -3328,9 +3403,9 @@
       }
     }
   },
-  "memoTagLoadError": "태그 로드 실패",
+  "memoTagLoadError": "태그를 불러오지 못했어요",
   "mtagTitle": "메모 태그",
-  "mtagDesc": "메모에 붙이는 태그예요. 목록 필터와 태그별 묶음에 사용돼요.",
+  "mtagDesc": "메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 '태그 없음' 으로 남아요.",
   "mtagEmpty": "태그가 없어요",
   "mtagEditTitle": "태그 수정",
   "mtagNameLabel": "이름",
@@ -3512,8 +3587,6 @@
   "todoStatusPending": "대기",
   "todoDetailCompletedAt": "완료 일시",
   "todoDetailContent": "메모",
-  "memoDetailTitle": "메모 상세",
-  "memoDetailPinned": "고정됨",
   "memoDetailNoContent": "내용 없음",
   "calEventDetailTitle": "일정 상세",
   "calDetailNone": "없음",
@@ -4237,8 +4310,8 @@
     }
   },
   "expRecordOnlyBadge": "기록만",
-  "expRecordOnlyNote": "결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요",
-  "expRecordOnlyPartNote": "이 중 {amount}은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요",
+  "expRecordOnlyNote": "결제가 끝난 회차에 적은 거래라 기록만 남았어요. 계좌에서는 빠지지 않았어요.",
+  "expRecordOnlyPartNote": "이 중 {amount}은 결제가 끝난 회차분이라 기록만 남았어요. 남은 회차는 정상 청구돼요.",
   "@expRecordOnlyPartNote": {
     "placeholders": {
       "amount": {
@@ -4350,13 +4423,13 @@
   },
   "fixedSwitchExpense": "고정 지출",
   "fixedSwitchIncome": "고정 수입",
-  "fixedHintExpense": "월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요",
-  "fixedHintIncome": "월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요",
+  "fixedHintExpense": "월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.",
+  "fixedHintIncome": "월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.",
   "fixedBadge": "고정",
   "recurringFixedSub": "이 반복이 앞으로 만드는 거래가 고정으로 기록돼요",
   "presetFixedTitleExpense": "고정 지출로 기록",
   "presetFixedTitleIncome": "고정 수입으로 기록",
-  "presetFixedDesc": "이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요. 위의 고정 금액과는 별개예요.",
+  "presetFixedDesc": "이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요.",
   "hideCardStatsFixed": "고정·변동 탭",
   "statsTabFixed": "고정·변동",
   "statsFixedViewAria": "보기 방식",
@@ -4565,7 +4638,7 @@
   "expFilterClearOne": "{name} 지우기",
   "@expFilterClearOne": {"placeholders": {"name": {"type": "String"}}},
   "expFilterModeGroup": "{name} 고르는 방식",
-  "expLoadErrorDesc": "잠시 뒤에 다시 시도해주세요.",
+  "expLoadErrorDesc": "잠시 뒤 다시 시도해주세요.",
   "@expFilterModeGroup": {"placeholders": {"name": {"type": "String"}}},
   "statsNoMonthlyData": "월별 데이터가 없어요.",
   "statsLoadFailedCategory": "카테고리별 지출을 불러오지 못했어요",
@@ -4951,10 +5024,11 @@
   "@recToastResumed": {"placeholders": {"name": {"type": "String"}}},
   "recToastDeleted": "{name} 반복 설정을 삭제했어요",
   "@recToastDeleted": {"placeholders": {"name": {"type": "String"}}},
-  "recPauseFailed": "반복을 멈추지 못했어요",
-  "recResumeFailed": "반복을 다시 켜지 못했어요",
-  "recDeleteFailed": "반복 설정을 삭제하지 못했어요",
+  "recPauseFailed": "반복을 멈추지 못했어요.",
+  "recResumeFailed": "반복을 다시 켜지 못했어요.",
+  "recDeleteFailed": "반복 설정을 삭제하지 못했어요.",
   "recLoadFailed": "반복 거래를 불러오지 못했어요",
+  "recAssetLoadFailed": "계좌를 불러오지 못했어요",
   "recEmptyTitle": "반복 거래가 없어요",
   "recEmptyDesc": "구독 · 월세처럼 정해진 날 오가는 돈을 등록해 두면 그날 저절로 기록해요.",
   "recAddButton": "반복 거래 추가",
@@ -5002,5 +5076,195 @@
   "recFromAccount": "출금 계좌",
   "recDepositAccount": "입금 계좌",
   "recIncomeMethod": "수입 방식",
-  "recClearValue": "값 지우기"
+  "recClearValue": "값 지우기",
+  "expDetailMore": "더 하기",
+  "expSplitValue": "{count}개로 나눔",
+  "@expSplitValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expSplitHeader": "내역 분할 {count}개",
+  "@expSplitHeader": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expMerchantMonth": "이 가맹점 이번 달",
+  "expRecentOnly": "최근 5건만 보여요",
+  "expLinked": "연결됨",
+  "expSplitLoadFailed": "나눈 내역을 불러오지 못했어요",
+  "expSplitLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "expRefundDateToday": "{date} · 오늘",
+  "@expRefundDateToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expRefundDateHint": "거래한 날({date})부터 오늘까지 고를 수 있어요.",
+  "@expRefundDateHint": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expRefundFailed": "환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
+  "expRefundCancelFailed": "환불을 취소하지 못했어요.",
+  "expTxDeleteFailed": "거래를 삭제하지 못했어요.",
+  "transferDeleteFailed": "이체를 삭제하지 못했어요.",
+  "transferDetailTitle": "이체 상세",
+  "transferFromLabel": "보내는 계좌",
+  "transferToLabel": "받는 계좌",
+  "txfStepMeta": "{current} / {total}단계",
+  "@txfStepMeta": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "txfTypeGroup": "거래 종류",
+  "txfEntryRequired": "금액을 입력해주세요.",
+  "txfAmountTooLarge": "금액은 100억원까지 입력할 수 있어요.",
+  "txfCurrencyChip": "통화, {code}",
+  "@txfCurrencyChip": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetsTitle": "프리셋",
+  "txfPresetApplied": "{name} 적용됨",
+  "@txfPresetApplied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfNoPresets": "저장된 프리셋이 없어요. 값을 넣고 “현재 입력값 저장” 을 누르면 만들어져요.",
+  "txfPresetLoadFailed": "프리셋을 불러오지 못했어요.",
+  "txfEmptyPresetHint": "“{name}” 프리셋은 금액이 비어 있어요. 금액을 넣고 [다음]을 눌러주세요.",
+  "@txfEmptyPresetHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetAllTitle": "프리셋 고르기",
+  "txfShowAll": "모두 보기",
+  "txfNone": "없음",
+  "txfNoAccountOption": "계좌·카드 없음",
+  "txfNoMethodOption": "결제 수단 없음",
+  "txfErrCategory": "카테고리를 골라주세요.",
+  "txfErrFrom": "보내는 계좌를 골라주세요.",
+  "txfErrTo": "받는 계좌를 골라주세요.",
+  "txfErrFx": "환율을 입력하거나 원화 금액을 넣어주세요.",
+  "txfErrInterest": "이자는 금액보다 클 수 없어요.",
+  "txfSplitsLoading": "나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.",
+  "txfSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "txfCategoryLoadFailed": "카테고리를 불러오지 못했어요",
+  "txfAssetLoadFailed": "계좌·카드를 불러오지 못했어요",
+  "txfNoCategoryOfType": "이 종류의 카테고리가 없어요.",
+  "txfNoPickableAsset": "이 결제 수단에 맞는 계좌·카드가 없어요.",
+  "txfFxHint": "{local} {code} × {rate} = {krw}원",
+  "@txfFxHint": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "krw": {
+        "type": "String"
+      }
+    }
+  },
+  "txfKrwAmount": "원화 금액",
+  "txfInstallmentValue": "{months}개월 · 매달 약 {amount}원",
+  "@txfInstallmentValue": {
+    "placeholders": {
+      "months": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitMismatchTitle": "나눈 내역과 금액이 달라요",
+  "txfSplitMismatchBody": "새 총액 {total}원 · 나눈 합계 {sum}원 — {diffText}",
+  "@txfSplitMismatchBody": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "sum": {
+        "type": "String"
+      },
+      "diffText": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitOver": "{diff}원 넘쳐요.",
+  "@txfSplitOver": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfSplitShort": "{diff}원 모자라요.",
+  "@txfSplitShort": {
+    "placeholders": {
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "txfMatchSplits": "나눈 내역 맞추기",
+  "txfSaveSplitAndSave": "나눈 내역 맞추고 저장",
+  "txfSmsStepTitle": "결제 문자 붙여넣기",
+  "txfSmsHelp": "카드사에서 온 결제 문자를 그대로 붙여넣어주세요. 읽은 금액 · 가맹점 · 시각이 칸에 채워져요.",
+  "txfPresetAmountEmpty": "비워 둠",
+  "txfPresetAmountHint": "비워 두면 불러올 때 금액을 직접 넣어요.",
+  "txfPresetNameRequired": "프리셋 이름을 입력해주세요.",
+  "txfPresetNeedParties": "보내는 계좌와 받는 계좌를 먼저 골라주세요.",
+  "txfPresetNeedCategory": "카테고리를 먼저 골라주세요.",
+  "txfPresetNoMerchant": "내역 없음",
+  "txfPresetSaved": "{name} 프리셋을 저장했어요",
+  "@txfPresetSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfPresetNameTooLong": "이름은 12자 이내로 입력해주세요.",
+  "txfMemoStepTitle": "메모",
+  "txfTimeTitle": "시각",
+  "txfNoCategory": "카테고리 없음",
+  "txfNoDepositAccount": "입금 계좌 없음",
+  "txfNoIncomeMethod": "수입 방식 없음",
+  "txfSelectFrom": "보내는 계좌 선택",
+  "txfSelectTo": "받는 계좌 선택",
+  "txfDeletedAsset": "지운 계좌",
+  "txfDeletedCategory": "지운 카테고리"
 }
