@@ -4659,6 +4659,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Interest can\'t be more than the amount.';
 
   @override
+  String presetSelectOf(String field) {
+    return 'Select $field';
+  }
+
+  @override
+  String presetNoneOf(String field) {
+    return 'No $field';
+  }
+
+  @override
   String get presetNoneValue => 'None';
 
   @override

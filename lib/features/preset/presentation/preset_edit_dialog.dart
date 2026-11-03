@@ -835,7 +835,6 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
 
   Widget _buildForm(AppLocalizations l) {
     final c = context.colors;
-    final none = l.presetNoneValue;
     final cat = _selectedCategory;
     final from = _assets.where((a) => a.rowId == _assetRowId).firstOrNull;
     final to = _assets.where((a) => a.rowId == _toAssetRowId).firstOrNull;
@@ -963,7 +962,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               title: l.presetFromAccount,
               prefix: const Icon(LucideIcons.wallet),
               value: from?.assetName,
-              placeholder: l.expSelect,
+              placeholder: l.presetSelectOf(l.presetFromAccount),
               errorMessage: fromError,
               onTap: _pickFrom,
             ),
@@ -971,7 +970,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               title: l.presetToAccount,
               prefix: const Icon(LucideIcons.wallet),
               value: to?.assetName,
-              placeholder: l.expSelect,
+              placeholder: l.presetSelectOf(l.presetToAccount),
               errorMessage: toError,
               onTap: _pickTo,
             ),
@@ -985,14 +984,18 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
             _stepRow(
               title: l.presetFeeLabel,
               icon: LucideIcons.percent,
-              value: _fee.isEmpty ? none : won(_fee),
+              value: _fee.isEmpty
+                  ? l.presetNoneOf(l.presetFeeLabel)
+                  : won(_fee),
               step: _Step.fee,
             ),
             if (_showInterest)
               _stepRow(
                 title: l.expInterest,
                 icon: LucideIcons.percent,
-                value: _interest.isEmpty ? none : won(_interest),
+                value: _interest.isEmpty
+                    ? l.presetNoneOf(l.expInterest)
+                    : won(_interest),
                 step: _Step.interest,
                 errorMessage: interestError,
               ),
@@ -1001,7 +1004,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               title: l.expCategory,
               prefix: const Icon(LucideIcons.tags),
               value: cat?.categoryName,
-              placeholder: none,
+              placeholder: l.presetSelectOf(l.expCategory),
               leading: cat == null
                   ? null
                   : PickerDot(
@@ -1017,7 +1020,9 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
             _stepRow(
               title: l.presetMerchant,
               icon: LucideIcons.fileText,
-              value: _merchant.isEmpty ? none : _merchant,
+              value: _merchant.isEmpty
+                  ? l.presetNoneOf(l.presetMerchant)
+                  : _merchant,
               step: _Step.merchant,
             ),
             PickerRow(
