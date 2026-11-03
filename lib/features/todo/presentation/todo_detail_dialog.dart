@@ -90,7 +90,6 @@ class _TodoDetailSheetState extends ConsumerState<_TodoDetailSheet> {
       title: l.todoDetailTitle,
       closeLabel: l.actionClose,
       flushBody: true,
-      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

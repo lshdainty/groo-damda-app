@@ -130,8 +130,9 @@ class ExpenseRow extends StatelessWidget {
       size: PTagGroupSize.t3,
       overflow: PTagGroupOverflow.truncate,
       items: [
-        // 줄어드는 정도는 스펙 예 그대로(tag-group.md "줄어드는 정도", 03-E 5 B) — 카테고리 0 · 자산 2 · 할부 0
-        PTag(cName, shrink: 0),
+        // 줄어드는 것은 이름 항목이다 — 카테고리 1 · 자산 2, 할부 · 시각은 줄지 않는다(tag-group.md "줄어드는 정도" — 긴 카테고리에서 시각이
+        // 잘리거나 겹치지 않게. 웹 ExpenseRow 와 같은 값)
+        PTag(cName, shrink: 1),
         PTag(expense.assetName ?? '-', shrink: 2),
         if (showInstallment && (expense.installmentMonths ?? 1) > 1)
           PTag(l.assetInstallmentBadge(expense.installmentMonths!), shrink: 0),
