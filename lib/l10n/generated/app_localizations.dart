@@ -2855,7 +2855,7 @@ abstract class AppLocalizations {
   /// No description provided for @calFormDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'일정을 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'일정을 삭제하지 못했어요.'**
   String get calFormDeleteFailed;
 
   /// No description provided for @calReminderMinutesBefore.
@@ -5696,12 +5696,6 @@ abstract class AppLocalizations {
   /// **'해제'**
   String get expClear;
 
-  /// No description provided for @expPresetManageHint.
-  ///
-  /// In ko, this message translates to:
-  /// **'설정 → 프리셋 관리'**
-  String get expPresetManageHint;
-
   /// No description provided for @expSaveFailed.
   ///
   /// In ko, this message translates to:
@@ -6797,7 +6791,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceThemeSystemDesc.
   ///
   /// In ko, this message translates to:
-  /// **'자동 전환'**
+  /// **'OS 설정 따라가기'**
   String get appearanceThemeSystemDesc;
 
   /// No description provided for @hideAmountsLockAllDesc.
@@ -7190,16 +7184,10 @@ abstract class AppLocalizations {
   /// **'기준 지역'**
   String get appearanceRegion;
 
-  /// No description provided for @appearanceRegionPlaceholder.
-  ///
-  /// In ko, this message translates to:
-  /// **'지역 선택'**
-  String get appearanceRegionPlaceholder;
-
   /// No description provided for @appearanceRegionDesc.
   ///
   /// In ko, this message translates to:
-  /// **'\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요'**
+  /// **'\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요.'**
   String get appearanceRegionDesc;
 
   /// No description provided for @appearanceCurrency.
@@ -7232,16 +7220,40 @@ abstract class AppLocalizations {
   /// **'일본 엔'**
   String get appearanceCurrencyJpy;
 
+  /// No description provided for @appearanceCurrencyDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 자산·거래를 만들 때 이 통화가 먼저 골라져요.'**
+  String get appearanceCurrencyDesc;
+
+  /// No description provided for @appearanceRegionLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'기준 지역을 불러오지 못했어요'**
+  String get appearanceRegionLoadError;
+
+  /// No description provided for @appearanceCurrencyLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 통화를 불러오지 못했어요'**
+  String get appearanceCurrencyLoadError;
+
+  /// No description provided for @appearanceSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 바꾸지 못했어요.'**
+  String get appearanceSaveFailed;
+
   /// No description provided for @passwordChanged.
   ///
   /// In ko, this message translates to:
-  /// **'비밀번호가 변경되었습니다'**
+  /// **'비밀번호를 바꿨어요'**
   String get passwordChanged;
 
   /// No description provided for @passwordChangeFailed.
   ///
   /// In ko, this message translates to:
-  /// **'비밀번호 변경에 실패했습니다.'**
+  /// **'비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get passwordChangeFailed;
 
   /// No description provided for @passwordCurrent.
@@ -7250,17 +7262,23 @@ abstract class AppLocalizations {
   /// **'현재 비밀번호'**
   String get passwordCurrent;
 
+  /// No description provided for @passwordChangeDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 비밀번호를 확인한 뒤 새 비밀번호로 바꿔요'**
+  String get passwordChangeDescription;
+
+  /// No description provided for @passwordCurrentInvalid.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 비밀번호가 맞지 않아요'**
+  String get passwordCurrentInvalid;
+
   /// No description provided for @passwordNew.
   ///
   /// In ko, this message translates to:
   /// **'새 비밀번호'**
   String get passwordNew;
-
-  /// No description provided for @passwordNewPlaceholder.
-  ///
-  /// In ko, this message translates to:
-  /// **'8자 이상, 특수문자 포함'**
-  String get passwordNewPlaceholder;
 
   /// No description provided for @passwordNewConfirm.
   ///
@@ -7268,22 +7286,16 @@ abstract class AppLocalizations {
   /// **'새 비밀번호 확인'**
   String get passwordNewConfirm;
 
-  /// No description provided for @passwordConfirmPlaceholder.
-  ///
-  /// In ko, this message translates to:
-  /// **'한 번 더 입력'**
-  String get passwordConfirmPlaceholder;
-
   /// No description provided for @passwordMismatch.
   ///
   /// In ko, this message translates to:
-  /// **'새 비밀번호가 일치하지 않습니다'**
+  /// **'새 비밀번호가 일치하지 않아요'**
   String get passwordMismatch;
 
   /// No description provided for @passwordMatched.
   ///
   /// In ko, this message translates to:
-  /// **'새 비밀번호가 일치합니다'**
+  /// **'새 비밀번호가 일치해요'**
   String get passwordMatched;
 
   /// No description provided for @passwordRuleLength.
@@ -7307,7 +7319,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordChangeAction.
   ///
   /// In ko, this message translates to:
-  /// **'변경'**
+  /// **'저장'**
   String get passwordChangeAction;
 
   /// No description provided for @accountTitle.
@@ -7331,7 +7343,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountEditComingSoon.
   ///
   /// In ko, this message translates to:
-  /// **'프로필 수정은 준비중입니다'**
+  /// **'프로필 수정은 곧 열려요.'**
   String get accountEditComingSoon;
 
   /// No description provided for @accountSecurity.
@@ -7343,7 +7355,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountPasswordDesc.
   ///
   /// In ko, this message translates to:
-  /// **'최근 변경 없음'**
+  /// **'주기적으로 바꾸면 안전해요'**
   String get accountPasswordDesc;
 
   /// No description provided for @accountTwoFa.
@@ -7351,18 +7363,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'2단계 인증'**
   String get accountTwoFa;
-
-  /// No description provided for @accountOn.
-  ///
-  /// In ko, this message translates to:
-  /// **'사용 중'**
-  String get accountOn;
-
-  /// No description provided for @accountOff.
-  ///
-  /// In ko, this message translates to:
-  /// **'사용 안 함'**
-  String get accountOff;
 
   /// No description provided for @accountDevices.
   ///
@@ -7375,18 +7375,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'현재 기기'**
   String get accountCurrentDevice;
-
-  /// No description provided for @accountLoginHistory.
-  ///
-  /// In ko, this message translates to:
-  /// **'로그인 기록'**
-  String get accountLoginHistory;
-
-  /// No description provided for @accountLast30Days.
-  ///
-  /// In ko, this message translates to:
-  /// **'최근 30일'**
-  String get accountLast30Days;
 
   /// No description provided for @devicesTitle.
   ///
@@ -7502,11 +7490,53 @@ abstract class AppLocalizations {
   /// **'연결'**
   String get accountConnect;
 
-  /// No description provided for @accountSocialComingSoon.
+  /// No description provided for @accountLinked.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 연결은 준비중입니다'**
-  String accountSocialComingSoon(String name);
+  /// **'연결됨'**
+  String get accountLinked;
+
+  /// No description provided for @accountDisconnect.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제'**
+  String get accountDisconnect;
+
+  /// No description provided for @accountProvidersError.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 상태를 불러오지 못했어요'**
+  String get accountProvidersError;
+
+  /// No description provided for @accountLinkError.
+  ///
+  /// In ko, this message translates to:
+  /// **'계정을 연결하지 못했어요.'**
+  String get accountLinkError;
+
+  /// No description provided for @accountUnlinkError.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결을 해제하지 못했어요.'**
+  String get accountUnlinkError;
+
+  /// No description provided for @accountLinkedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 계정이 연결되었어요'**
+  String accountLinkedToast(String name);
+
+  /// No description provided for @accountUnlinkedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'Google 연결을 해제했어요'**
+  String get accountUnlinkedToast;
+
+  /// No description provided for @accountSecuritiesDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'토스·나무 등 증권사 API 키를 연결해요'**
+  String get accountSecuritiesDesc;
 
   /// No description provided for @accountBilling.
   ///
@@ -7589,7 +7619,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountLogoutConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'정말 로그아웃 하시겠어요?'**
+  /// **'이 기기에서 로그아웃할까요?'**
   String get accountLogoutConfirm;
 
   /// No description provided for @accountWithdrawTitle.
@@ -8138,18 +8168,6 @@ abstract class AppLocalizations {
   /// **'프리셋 관리'**
   String get presetManageTitle;
 
-  /// No description provided for @presetLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋 로드 실패'**
-  String get presetLoadError;
-
-  /// No description provided for @presetDeleteTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋 삭제'**
-  String get presetDeleteTitle;
-
   /// No description provided for @presetDetailTitle.
   ///
   /// In ko, this message translates to:
@@ -8159,67 +8177,25 @@ abstract class AppLocalizations {
   /// No description provided for @presetTypeLabel.
   ///
   /// In ko, this message translates to:
-  /// **'유형'**
+  /// **'종류'**
   String get presetTypeLabel;
 
   /// No description provided for @presetDeleteConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 프리셋을 삭제할까요? 이미 저장된 거래 내역에는 영향이 없어요. 삭제한 프리셋은 되돌릴 수 없어요.'**
-  String presetDeleteConfirm(String name);
-
-  /// No description provided for @presetDeleted.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이 삭제되었습니다'**
-  String get presetDeleted;
+  /// **'이미 기록된 거래는 그대로 남아요. 삭제한 프리셋은 되돌릴 수 없어요.'**
+  String get presetDeleteConfirm;
 
   /// No description provided for @presetDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'프리셋을 삭제하지 못했어요'**
   String get presetDeleteFailed;
-
-  /// No description provided for @presetIntroTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이란?'**
-  String get presetIntroTitle;
-
-  /// No description provided for @presetIntroBody.
-  ///
-  /// In ko, this message translates to:
-  /// **'자주 쓰는 내역(점심·커피·교통비 등)을 미리 저장해두면, 내역 추가 화면에서 한 번 탭으로 카테고리·결제수단·내역을 모두 채워넣어요. 금액만 바꿔서 단건으로 저장하기 좋습니다.'**
-  String get presetIntroBody;
-
-  /// No description provided for @presetStatSaved.
-  ///
-  /// In ko, this message translates to:
-  /// **'저장된 프리셋'**
-  String get presetStatSaved;
-
-  /// No description provided for @presetStatUses.
-  ///
-  /// In ko, this message translates to:
-  /// **'누적 사용'**
-  String get presetStatUses;
-
-  /// No description provided for @presetUsesCount.
-  ///
-  /// In ko, this message translates to:
-  /// **'{count}회'**
-  String presetUsesCount(int count);
-
-  /// No description provided for @presetStatType.
-  ///
-  /// In ko, this message translates to:
-  /// **'지출 / 수입'**
-  String get presetStatType;
 
   /// No description provided for @presetSortUsed.
   ///
   /// In ko, this message translates to:
-  /// **'사용 많은 순'**
+  /// **'많이 쓴 순'**
   String get presetSortUsed;
 
   /// No description provided for @presetSortRecent.
@@ -8233,6 +8209,216 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이름순'**
   String get presetSortName;
+
+  /// No description provided for @presetListTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 {count}개'**
+  String presetListTitle(int count);
+
+  /// No description provided for @presetUses.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}번'**
+  String presetUses(int count);
+
+  /// No description provided for @presetSortLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'정렬'**
+  String get presetSortLabel;
+
+  /// No description provided for @presetLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋을 불러오지 못했어요'**
+  String get presetLoadFailed;
+
+  /// No description provided for @presetCategoryLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 불러오지 못했어요'**
+  String get presetCategoryLoadFailed;
+
+  /// No description provided for @presetDeleteConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'\"{name}\" 프리셋을 삭제할까요?'**
+  String presetDeleteConfirmTitle(String name);
+
+  /// No description provided for @presetNoteFixed.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정 금액'**
+  String get presetNoteFixed;
+
+  /// No description provided for @presetNoteUses.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}번 썼어요'**
+  String presetNoteUses(int count);
+
+  /// No description provided for @presetNoteUnused.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 쓰지 않았어요'**
+  String get presetNoteUnused;
+
+  /// No description provided for @presetNoteLast.
+  ///
+  /// In ko, this message translates to:
+  /// **'마지막 {month}월 {day}일'**
+  String presetNoteLast(int month, int day);
+
+  /// No description provided for @presetFixedOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'켬'**
+  String get presetFixedOn;
+
+  /// No description provided for @presetFixedOff.
+  ///
+  /// In ko, this message translates to:
+  /// **'끔'**
+  String get presetFixedOff;
+
+  /// No description provided for @presetNameRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 입력해주세요.'**
+  String get presetNameRequired;
+
+  /// No description provided for @presetNameTooLong.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 이름은 12자 이내로 입력해주세요.'**
+  String get presetNameTooLong;
+
+  /// No description provided for @presetCategoryRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 골라주세요.'**
+  String get presetCategoryRequired;
+
+  /// No description provided for @presetFromRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌를 골라주세요.'**
+  String get presetFromRequired;
+
+  /// No description provided for @presetToRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌를 골라주세요.'**
+  String get presetToRequired;
+
+  /// No description provided for @presetSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get presetSaveFailed;
+
+  /// No description provided for @presetAmountLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액'**
+  String get presetAmountLabel;
+
+  /// No description provided for @presetFeeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'수수료'**
+  String get presetFeeLabel;
+
+  /// No description provided for @presetAmountBlank.
+  ///
+  /// In ko, this message translates to:
+  /// **'비워 둠'**
+  String get presetAmountBlank;
+
+  /// No description provided for @presetAmountHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'비워 두면 불러올 때 금액을 직접 넣어요.'**
+  String get presetAmountHint;
+
+  /// No description provided for @presetMemoPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택 사항'**
+  String get presetMemoPlaceholder;
+
+  /// No description provided for @presetInterestTooLarge.
+  ///
+  /// In ko, this message translates to:
+  /// **'이자는 금액보다 클 수 없어요.'**
+  String get presetInterestTooLarge;
+
+  /// No description provided for @presetNoneValue.
+  ///
+  /// In ko, this message translates to:
+  /// **'없음'**
+  String get presetNoneValue;
+
+  /// No description provided for @presetMemoNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 없음'**
+  String get presetMemoNone;
+
+  /// No description provided for @presetNoAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'계좌·카드 없음'**
+  String get presetNoAccount;
+
+  /// No description provided for @presetNoPayment.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 수단 없음'**
+  String get presetNoPayment;
+
+  /// No description provided for @presetNoCategoryOfKind.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 종류의 카테고리가 없어요.'**
+  String get presetNoCategoryOfKind;
+
+  /// No description provided for @presetFromAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내는 계좌'**
+  String get presetFromAccount;
+
+  /// No description provided for @presetToAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌'**
+  String get presetToAccount;
+
+  /// No description provided for @presetShowAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 보기'**
+  String get presetShowAll;
+
+  /// No description provided for @presetPickTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 고르기'**
+  String get presetPickTitle;
+
+  /// No description provided for @presetSearch.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리셋 검색'**
+  String get presetSearch;
+
+  /// No description provided for @presetNoResult.
+  ///
+  /// In ko, this message translates to:
+  /// **'찾는 프리셋이 없어요.'**
+  String get presetNoResult;
 
   /// No description provided for @presetAdd.
   ///
@@ -8261,7 +8447,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetEmptyDesc.
   ///
   /// In ko, this message translates to:
-  /// **'자주 쓰는 내역을 추가해 매번 입력하는 수고를 줄여보세요.'**
+  /// **'자주 쓰는 내역(점심 · 교통비 등)을 저장해 두면 내역을 추가할 때 한 번 눌러 카테고리 · 계좌 · 내역을 채워요.'**
   String get presetEmptyDesc;
 
   /// No description provided for @presetEditTitle.
@@ -8291,56 +8477,14 @@ abstract class AppLocalizations {
   /// No description provided for @presetMerchantPlaceholder.
   ///
   /// In ko, this message translates to:
-  /// **'예: 한솥 도시락'**
+  /// **'예: 회사 앞 도시락'**
   String get presetMerchantPlaceholder;
-
-  /// No description provided for @presetSelectNone.
-  ///
-  /// In ko, this message translates to:
-  /// **'선택 안 함'**
-  String get presetSelectNone;
 
   /// No description provided for @presetAssetCard.
   ///
   /// In ko, this message translates to:
   /// **'계좌·카드'**
   String get presetAssetCard;
-
-  /// No description provided for @presetAssetLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'자산 로드 실패'**
-  String get presetAssetLoadError;
-
-  /// No description provided for @presetLockToggle.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정 금액 사용'**
-  String get presetLockToggle;
-
-  /// No description provided for @presetLockDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'꺼두면 불러올 때 금액이 비어있어요. 매번 다른 금액일 때 편해요.'**
-  String get presetLockDesc;
-
-  /// No description provided for @presetLockAmountLabel.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정 금액'**
-  String get presetLockAmountLabel;
-
-  /// No description provided for @presetUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이 수정되었습니다'**
-  String get presetUpdated;
-
-  /// No description provided for @presetCreated.
-  ///
-  /// In ko, this message translates to:
-  /// **'프리셋이 추가되었습니다'**
-  String get presetCreated;
 
   /// No description provided for @recurringToggleFailed.
   ///
@@ -10568,23 +10712,11 @@ abstract class AppLocalizations {
   /// **'메모 수정'**
   String get memoEditTitle;
 
-  /// No description provided for @memoAdd.
-  ///
-  /// In ko, this message translates to:
-  /// **'추가'**
-  String get memoAdd;
-
   /// No description provided for @memoLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'메모 로드 실패'**
+  /// **'메모를 불러오지 못했어요'**
   String get memoLoadError;
-
-  /// No description provided for @memoTagAll.
-  ///
-  /// In ko, this message translates to:
-  /// **'전체 {count}'**
-  String memoTagAll(int count);
 
   /// No description provided for @memoSectionPinned.
   ///
@@ -10598,16 +10730,10 @@ abstract class AppLocalizations {
   /// **'모든 메모 · {count}'**
   String memoSectionAll(int count);
 
-  /// No description provided for @memoActionFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'실패: {message}'**
-  String memoActionFailed(String message);
-
   /// No description provided for @memoEmptyDesc.
   ///
   /// In ko, this message translates to:
-  /// **'생각이 떠오를 때, 새 메모를 만들어보세요.'**
+  /// **'오른쪽 아래 + 버튼으로 첫 메모를 써보세요.'**
   String get memoEmptyDesc;
 
   /// No description provided for @memoSearchEmptyDesc.
@@ -10634,12 +10760,6 @@ abstract class AppLocalizations {
   /// **'\"{name}\" 메모를 삭제할까요? 삭제한 메모는 되돌릴 수 없어요.'**
   String memoDeleteConfirm(String name);
 
-  /// No description provided for @memoDeleteFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'삭제 실패: {message}'**
-  String memoDeleteFailed(String message);
-
   /// No description provided for @memoFieldTitle.
   ///
   /// In ko, this message translates to:
@@ -10649,7 +10769,7 @@ abstract class AppLocalizations {
   /// No description provided for @memoTitleRequired.
   ///
   /// In ko, this message translates to:
-  /// **'제목을 입력해주세요'**
+  /// **'제목을 입력해주세요.'**
   String get memoTitleRequired;
 
   /// No description provided for @memoFieldContent.
@@ -10675,6 +10795,96 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'태그 없음'**
   String get memoTagNone;
+
+  /// No description provided for @memoTagEmptyHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그는 설정 › 메모 태그에서 만들어요.'**
+  String get memoTagEmptyHint;
+
+  /// No description provided for @memoAllChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체'**
+  String get memoAllChip;
+
+  /// No description provided for @memoLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get memoLoadFailedDesc;
+
+  /// No description provided for @memoTagFilter.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그로 거르기'**
+  String get memoTagFilter;
+
+  /// No description provided for @memoSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장했어요.'**
+  String get memoSaved;
+
+  /// No description provided for @memoSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get memoSaveFailed;
+
+  /// No description provided for @memoDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get memoDeleteFailed;
+
+  /// No description provided for @memoPinFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get memoPinFailed;
+
+  /// No description provided for @memoModifiedAt.
+  ///
+  /// In ko, this message translates to:
+  /// **'{time} 수정'**
+  String memoModifiedAt(String time);
+
+  /// No description provided for @memoMoreOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 더보기'**
+  String memoMoreOf(String name);
+
+  /// No description provided for @memoSwipeUnpin.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제'**
+  String get memoSwipeUnpin;
+
+  /// No description provided for @mtagSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get mtagSaveFailed;
+
+  /// No description provided for @mtagDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get mtagDeleteFailed;
+
+  /// No description provided for @ttagSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get ttagSaveFailed;
+
+  /// No description provided for @ttagDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get ttagDeleteFailed;
 
   /// No description provided for @memoNewTag.
   ///
@@ -10703,7 +10913,7 @@ abstract class AppLocalizations {
   /// No description provided for @memoTagLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'태그 로드 실패'**
+  /// **'태그를 불러오지 못했어요'**
   String get memoTagLoadError;
 
   /// No description provided for @mtagTitle.
@@ -10715,7 +10925,7 @@ abstract class AppLocalizations {
   /// No description provided for @mtagDesc.
   ///
   /// In ko, this message translates to:
-  /// **'메모에 붙이는 태그예요. 목록 필터와 태그별 묶음에 사용돼요.'**
+  /// **'메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 \'태그 없음\' 으로 남아요.'**
   String get mtagDesc;
 
   /// No description provided for @mtagEmpty.
@@ -10993,18 +11203,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'메모'**
   String get todoDetailContent;
-
-  /// No description provided for @memoDetailTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'메모 상세'**
-  String get memoDetailTitle;
-
-  /// No description provided for @memoDetailPinned.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정됨'**
-  String get memoDetailPinned;
 
   /// No description provided for @memoDetailNoContent.
   ///
@@ -12977,7 +13175,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetFixedDesc.
   ///
   /// In ko, this message translates to:
-  /// **'이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요. 위의 고정 금액과는 별개예요.'**
+  /// **'이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요.'**
   String get presetFixedDesc;
 
   /// No description provided for @hideCardStatsFixed.

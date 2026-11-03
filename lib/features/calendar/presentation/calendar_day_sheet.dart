@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -5,7 +7,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/date.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
@@ -16,8 +17,6 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_actions.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_detail_body.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_dialog.dart';
-import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart'
-    show CalendarSaveErrorCallout;
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_text.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_grid.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_tone.dart';
@@ -98,7 +97,6 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
   String? _openDay;
 
   /// 상세에서 [삭제] 가 실패했다 — 상세 본문 맨 위 Callout 으로 알린다(전역 스낵바는 시트 뒤에 가려진다).
-  bool _deleteFailed = false;
 
   /// 목록 단계를 떠날 때 보던 스크롤 · 연 줄 — 돌아오면 그대로(I-09b 5).
   double _listOffset = 0;
@@ -139,7 +137,6 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
     setState(() {
       _openRowId = e.rowId;
       _openDay = calendarDateKey(e.start);
-      _deleteFailed = false;
       _step = _DayStep.detail;
     });
   }
@@ -151,7 +148,6 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
       _step = _DayStep.list;
       _openRowId = null;
       _openDay = null;
-      _deleteFailed = false;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _step != _DayStep.list) return;
@@ -224,27 +220,33 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
     if (mounted) _goList();
   }
 
+  /// 삭제 — 확인창 · 요청 · 실패 스낵바 + [다시 시도] 는 공용 [askDeleteCalendarEvent]. 시트를 닫아도 띠가 남고 [다시 시도] 가
+  /// 동작하도록 요청 · 무효화 · 재조회는 컨테이너로 한다.
   Future<void> _delete(CalendarEvent e) async {
     if (_busy) return;
-    final ok = await confirmDeleteCalendarEvent(context, e);
+    final container = ProviderScope.containerOf(context);
+    final key = widget.monthKey;
+    final ok = await askDeleteCalendarEvent(
+      context,
+      container,
+      e,
+      onRetried: () => unawaited(_afterRetried(container, key)),
+    );
     if (!ok || !mounted) return;
-    setState(() {
-      _busy = true;
-      _deleteFailed = false;
-    });
+    setState(() => _busy = true);
     try {
-      final repo = await ref.read(calendarRepositoryProvider.future);
-      await repo.deleteEvent(e.rowId);
-      invalidateAfterCalendarEventDelete(ref, e);
       await _refreshMonth();
       if (!mounted) return;
       _goList();
-    } on ApiException {
-      // 확인창은 이미 닫혔다 — 시트 안 보이는 자리(상세 맨 위 Callout)에 알리고 [삭제] 로 다시 시도한다
-      if (mounted) setState(() => _deleteFailed = true);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// 확인창 실패 뒤 [다시 시도] 가 성공했을 때 — 달을 다시 받고, 시트가 아직 열려 있으면 목록으로.
+  Future<void> _afterRetried(ProviderContainer container, MonthYM key) async {
+    await refetchCalendarMonthIn(container, key);
+    if (mounted) _goList();
   }
 
   // ── 그리기 ──────────────────────────────────────────────
@@ -367,11 +369,6 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_deleteFailed) ...[
-            CalendarSaveErrorCallout(message: l.calFormDeleteFailed),
-            // 알림과 제목 사이 여백(폼은 아래에 입력칸 여백이 있다)
-            const SizedBox(height: PSpacing.x4),
-          ],
           CalendarEventDetailBody(
             event: e,
             calendars: calendarsAsync.value ?? const <UserCalendar>[],

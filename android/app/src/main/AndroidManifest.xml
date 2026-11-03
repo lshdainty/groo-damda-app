@@ -47,6 +47,12 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Flutter 기본 딥링크(주소를 go_router 로도 보낸다)를 끈다. porestdesk://oauth/* 는 app_links 가 받는다
+                 (oauth_link_listener.dart). 켜 두면 로그인 상태에서 /linked 복귀가 "Page Not Found" 로 들어간다. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
+              />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

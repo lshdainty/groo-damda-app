@@ -26,7 +26,9 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/card_cycle.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
+import 'package:groo_damda_app/features/expense/presentation/category_pick.dart';
 import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
+import 'package:groo_damda_app/features/preset/presentation/preset_pick_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_input.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
@@ -50,7 +52,6 @@ import 'package:groo_damda_app/shared/ds/date_picker/date_picker_dates.dart'
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
-import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
@@ -730,7 +731,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     FocusScope.of(context).unfocus();
     final v = await _sheet<int>(
       l.expCategory,
-      _CategoryPickBody(kind: _input.type, selected: _input.categoryRowId),
+      CategoryPickBody(kind: _input.type, selectedRowId: _input.categoryRowId),
     );
     if (v == null || !mounted) return;
     setState(() {
@@ -2505,32 +2506,11 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           in ref.watch(presetListProvider).value ?? const <ExpenseTemplate>[])
         if (p.expenseType == c.type) p,
     ]..sort((a, b) => (b.useCount ?? 0).compareTo(a.useCount ?? 0));
-    final cats =
-        ref.watch(categoriesProvider).value ?? const <ExpenseCategory>[];
     return _frame(
       key: const ValueKey('tx-sub-preset-all'),
-      title: l.txfPresetAllTitle,
+      title: l.presetPickTitle,
       onBack: _requestLeaveSub,
-      body: PList(
-        semanticLabel: l.txfPresetAllTitle,
-        children: [
-          for (final p in presets)
-            PListButtonItem(
-              key: ValueKey('tx-preset-row-${p.rowId}'),
-              title: p.templateName,
-              detail: p.merchant,
-              prefix:
-                  p.categoryRowId == null ||
-                      cats.byRowId(p.categoryRowId!) == null
-                  ? null
-                  : categoryTile(context, cats.byRowId(p.categoryRowId!)!),
-              suffix: (p.lockAmount ?? 'N') == 'Y' && (p.amount ?? 0) > 0
-                  ? Text(krwSigned(p.amount!, false, unit: true))
-                  : null,
-              onTap: () => _applyPreset(p),
-            ),
-        ],
-      ),
+      body: PresetPickBody(presets: presets, onPick: _applyPreset),
     );
   }
 
@@ -2643,92 +2623,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   }
 }
 
-// ─── 고르기 본문 ────────────────────────────────────────────
-
-/// 카테고리 고르기 — 지금 종류의 말단만. 하위가 있는 상위는 고를 수 없는 목록 제목이고 그 아래가 하위 줄이다.
-/// 20-2 앱이 먼저 머지되면 rebase 때 그쪽 `CategoryPickBody` 로 교체한다.
-class _CategoryPickBody extends ConsumerWidget {
-  const _CategoryPickBody({required this.kind, required this.selected});
-  final String kind;
-  final int? selected;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final c = context.colors;
-    final async = ref.watch(categoriesProvider);
-    if (!async.hasValue) {
-      return Padding(
-        padding: const EdgeInsets.all(PSpacing.globalGutter),
-        child: Text(
-          async.hasError ? l.txfCategoryLoadFailed : l.actionLoading,
-          style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
-        ),
-      );
-    }
-    final inKind = [
-      for (final cat in async.requireValue)
-        if (cat.expenseType == kind) cat,
-    ]..sort((a, b) => (a.sortOrder ?? 0).compareTo(b.sortOrder ?? 0));
-    final tops = [
-      for (final cat in inKind)
-        if (cat.parentRowId == null || cat.parentRowId == 0) cat,
-    ];
-    if (tops.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(PSpacing.globalGutter),
-        child: Text(
-          l.txfNoCategoryOfType,
-          textAlign: TextAlign.center,
-          style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
-        ),
-      );
-    }
-    PickItem<int> item(ExpenseCategory cat) => PickItem<int>(
-      value: cat.rowId,
-      title: cat.categoryName,
-      prefix: categoryTile(context, cat),
-    );
-    final blocks = <Widget>[];
-    var run = <ExpenseCategory>[];
-    void flush() {
-      if (run.isEmpty) return;
-      blocks.add(
-        PickList<int>(
-          label: l.expCategory,
-          selected: selected,
-          items: [for (final cat in run) item(cat)],
-        ),
-      );
-      run = [];
-    }
-
-    for (final top in tops) {
-      final kids = [
-        for (final cat in inKind)
-          if (cat.parentRowId == top.rowId) cat,
-      ];
-      if (kids.isEmpty) {
-        run.add(top);
-        continue;
-      }
-      flush();
-      blocks.add(PListHeader(title: top.categoryName, headingLevel: 3));
-      blocks.add(
-        PickList<int>(
-          label: top.categoryName,
-          selected: selected,
-          items: [for (final k in kids) item(k)],
-        ),
-      );
-    }
-    flush();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: blocks,
-    );
-  }
-}
+// ─── 고르기 본문 — 카테고리 · 프리셋은 20-2 의 부품(CategoryPickBody · PresetPickBody)이다 ───
 
 /// 계좌 · 카드 고르기 — 줄 = Logo Tile 40 + 이름 + 설명 기관. 맨 앞 "계좌·카드 없음"(지출 · 수입).
 class _AssetPickBody extends StatelessWidget {

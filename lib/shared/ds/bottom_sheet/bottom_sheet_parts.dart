@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 시트 최대 폭 — 그보다 좁은 화면은 화면 폭 전체, 넓으면 가운데(bottom-sheet.yaml root.maxWidth).
@@ -459,19 +460,23 @@ class PBottomSheetContent extends StatelessWidget {
                     PSpacing.x4,
                   ),
                   // 둘이면 짝 버튼 — 라벨이 반 폭을 넘으면 세로로 쌓는다(주 버튼이 위, 03A-013)
-                  child: footerRow != null
-                      ? footerRow!
-                      : footer.length == 2
-                      ? PResponsivePair(
-                          secondary: footer.first,
-                          primary: footer.last,
-                        )
-                      : Row(
-                          spacing: PSpacing.x2,
-                          children: [
-                            for (final b in footer) Expanded(child: b),
-                          ],
-                        ),
+                  // 바닥 버튼은 스낵바가 피할 자리다(snackbar.md — 바닥 버튼 위 8). 여백이 아니라 버튼 줄을 감싸 띠가 [삭제] ·
+                  // [수정] 을 덮지 않고 버튼 윗변 위 8 에 선다
+                  child: PSnackbarAvoidOverlap(
+                    child: footerRow != null
+                        ? footerRow!
+                        : footer.length == 2
+                        ? PResponsivePair(
+                            secondary: footer.first,
+                            primary: footer.last,
+                          )
+                        : Row(
+                            spacing: PSpacing.x2,
+                            children: [
+                              for (final b in footer) Expanded(child: b),
+                            ],
+                          ),
+                  ),
                 ),
             ],
           );

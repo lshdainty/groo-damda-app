@@ -822,7 +822,7 @@
   "calFormRows": "Event details",
   "calFormRowsMore": "Repeat, reminder, location and description",
   "calFormSaveFailed": "Couldn't save the event. Please try again in a moment.",
-  "calFormDeleteFailed": "Couldn't delete the event. Please try again in a moment.",
+  "calFormDeleteFailed": "Couldn't delete the event.",
   "calReminderMinutesBefore": "{n} min before",
   "@calReminderMinutesBefore": {
     "placeholders": {
@@ -1884,7 +1884,6 @@
   "expPresetEmpty": "No saved presets yet. Enter a transaction you use often, then tap “Save current input”.",
   "expPresetFilled": "Preset values filled in. Adjust the amount and note, then save.",
   "expClear": "Clear",
-  "expPresetManageHint": "Settings → Manage presets",
   "expSaveFailed": "Save failed",
   "expPresetSaveTitle": "Save as preset",
   "expPresetNamePlaceholder": "e.g. Lunch box",
@@ -2151,7 +2150,7 @@
   "appearanceThemeDark": "Dark",
   "appearanceThemeDarkDesc": "Dark background",
   "appearanceThemeSystem": "System",
-  "appearanceThemeSystemDesc": "Auto switch",
+  "appearanceThemeSystemDesc": "Follow OS setting",
   "hideAmountsTitle": "Hide amounts",
   "hideAmountsSectionDesc": "Pick the cards to hide. You'll verify once when you save.",
   "hideAmountsLockAll": "Lock everything",
@@ -2234,26 +2233,29 @@
   "appearanceHideAmount": "Hide amounts",
   "appearanceHideAmountDesc": "Display all amounts as ••••",
   "appearanceRegion": "Region",
-  "appearanceRegionPlaceholder": "Select a region",
-  "appearanceRegionDesc": "Days for 'today' and statistics are calculated in this region. On-screen times follow your device's time zone",
+  "appearanceRegionDesc": "Days for 'today' and statistics are calculated in this region. On-screen times follow your device's time zone.",
   "appearanceCurrency": "Default currency",
   "appearanceCurrencyKrw": "South Korean Won",
   "appearanceCurrencyUsd": "US Dollar",
   "appearanceCurrencyEur": "Euro",
   "appearanceCurrencyJpy": "Japanese Yen",
+  "appearanceCurrencyDesc": "New assets and transactions start with this currency.",
+  "appearanceRegionLoadError": "Couldn't load the region",
+  "appearanceCurrencyLoadError": "Couldn't load the default currency",
+  "appearanceSaveFailed": "Couldn't change the setting.",
   "passwordChanged": "Password changed",
-  "passwordChangeFailed": "Failed to change password.",
+  "passwordChangeFailed": "Couldn't change your password. Please try again shortly.",
   "passwordCurrent": "Current password",
+  "passwordChangeDescription": "Verify your current password and set a new one",
+  "passwordCurrentInvalid": "That current password doesn't match",
   "passwordNew": "New password",
-  "passwordNewPlaceholder": "8+ characters, incl. a special character",
   "passwordNewConfirm": "Confirm new password",
-  "passwordConfirmPlaceholder": "Enter once more",
   "passwordMismatch": "New passwords do not match",
   "passwordMatched": "New passwords match",
   "passwordRuleLength": "At least 8 characters",
   "passwordRuleSpecial": "At least 1 special character",
   "passwordSameAsCurrent": "New password must be different from the current one",
-  "passwordChangeAction": "Change",
+  "passwordChangeAction": "Save",
   "accountTitle": "Account",
   "accountDefaultName": "User",
   "accountJoined": "Joined {date}",
@@ -2264,16 +2266,12 @@
       }
     }
   },
-  "accountEditComingSoon": "Profile editing is coming soon",
+  "accountEditComingSoon": "Profile editing is coming soon.",
   "accountSecurity": "Security",
-  "accountPasswordDesc": "No recent changes",
+  "accountPasswordDesc": "Change it regularly to stay secure",
   "accountTwoFa": "Two-factor authentication",
-  "accountOn": "On",
-  "accountOff": "Off",
   "accountDevices": "Logged-in devices",
   "accountCurrentDevice": "Current device",
-  "accountLoginHistory": "Login history",
-  "accountLast30Days": "Last 30 days",
   "devicesTitle": "Logged-in devices",
   "devicesIntro": "These devices are signed in to your account. Log out any you don't recognize.",
   "devicesCurrent": "Current device",
@@ -2314,14 +2312,21 @@
   "accountConnected": "Connected accounts",
   "accountNotConnected": "Not connected",
   "accountConnect": "Connect",
-  "accountSocialComingSoon": "{name} connection is coming soon",
-  "@accountSocialComingSoon": {
+  "accountLinked": "Connected",
+  "accountDisconnect": "Disconnect",
+  "accountProvidersError": "Couldn't load the connection status",
+  "accountLinkError": "Couldn't connect the account.",
+  "accountUnlinkError": "Couldn't disconnect the account.",
+  "accountLinkedToast": "{name} account connected",
+  "@accountLinkedToast": {
     "placeholders": {
       "name": {
         "type": "String"
       }
     }
   },
+  "accountUnlinkedToast": "Google account disconnected",
+  "accountSecuritiesDesc": "Connect API keys for Toss, Namu, and more",
   "accountBilling": "Subscription & Billing",
   "accountNextBilling": "Next billing {date} · ",
   "@accountNextBilling": {
@@ -2356,7 +2361,7 @@
       }
     }
   },
-  "accountLogoutConfirm": "Are you sure you want to log out?",
+  "accountLogoutConfirm": "Log out of this device?",
   "accountWithdrawTitle": "Stop using 그루 담다",
   "withdrawIntro": "Stopping 그루 담다 signs you out immediately and cannot be undone.",
   "withdrawImpactCalendarsOwned": "{count} shared calendar(s) you created will be deleted — members lose access too",
@@ -2491,54 +2496,97 @@
   "notiEmailWeekly": "Weekly",
   "notiEmailMonthly": "Monthly",
   "presetManageTitle": "Manage presets",
-  "presetLoadError": "Failed to load presets",
-  "presetDeleteTitle": "Delete preset",
   "presetDetailTitle": "Preset detail",
   "presetTypeLabel": "Type",
-  "presetDeleteConfirm": "Delete the \"{name}\" preset? Already-saved transactions are unaffected. A deleted preset cannot be restored.",
-  "@presetDeleteConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "presetDeleted": "Preset deleted",
-  "presetDeleteFailed": "Delete failed",
-  "presetIntroTitle": "What is a preset?",
-  "presetIntroBody": "Save frequently used entries (lunch, coffee, transit, etc.) so you can fill in category, payment method, and details with one tap on the add screen. Handy for saving single entries by just changing the amount.",
-  "presetStatSaved": "Saved presets",
-  "presetStatUses": "Total uses",
-  "presetUsesCount": "{count}×",
-  "@presetUsesCount": {
+  "presetDeleteConfirm": "Transactions already recorded stay as they are. A deleted preset cannot be restored.",
+  "presetDeleteFailed": "Could not delete the preset",
+  "presetSortUsed": "Frequent",
+  "presetSortRecent": "Recent",
+  "presetSortName": "By name",
+  "presetListTitle": "{count} presets",
+  "@presetListTitle": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "presetStatType": "Expense / Income",
-  "presetSortUsed": "Most used",
-  "presetSortRecent": "Recently used",
-  "presetSortName": "By name",
+  "presetUses": "{count} uses",
+  "@presetUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "presetSortLabel": "Sort",
+  "presetLoadFailed": "Could not load presets",
+  "presetCategoryLoadFailed": "Could not load categories",
+  "presetDeleteConfirmTitle": "Delete the \"{name}\" preset?",
+  "@presetDeleteConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "presetNoteFixed": "Fixed amount",
+  "presetNoteUses": "Used {count} times",
+  "@presetNoteUses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "presetNoteUnused": "Not used yet",
+  "presetNoteLast": "Last used {month}/{day}",
+  "@presetNoteLast": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "presetFixedOn": "On",
+  "presetFixedOff": "Off",
+  "presetNameRequired": "Enter a name.",
+  "presetNameTooLong": "Keep the preset name to 12 characters or fewer.",
+  "presetCategoryRequired": "Choose a category.",
+  "presetFromRequired": "Choose the sending account.",
+  "presetToRequired": "Choose the receiving account.",
+  "presetSaveFailed": "Could not save. Please try again in a moment.",
+  "presetAmountLabel": "Amount",
+  "presetFeeLabel": "Fee",
+  "presetAmountBlank": "Left blank",
+  "presetAmountHint": "If left blank, you enter the amount when you load it.",
+  "presetMemoPlaceholder": "Optional",
+  "presetInterestTooLarge": "Interest can't be more than the amount.",
+  "presetNoneValue": "None",
+  "presetMemoNone": "No memo",
+  "presetNoAccount": "No account or card",
+  "presetNoPayment": "No payment method",
+  "presetNoCategoryOfKind": "There are no categories of this type.",
+  "presetFromAccount": "Sending account",
+  "presetToAccount": "Receiving account",
+  "presetShowAll": "Show all",
+  "presetPickTitle": "Choose a preset",
+  "presetSearch": "Search presets",
+  "presetNoResult": "No presets found.",
   "presetAdd": "Add preset",
   "presetAmountEmpty": "No amount",
   "presetNoCategory": "No category",
   "presetEmptyTitle": "No saved presets",
-  "presetEmptyDesc": "Add frequently used entries to save yourself repetitive input.",
+  "presetEmptyDesc": "Save frequent entries (lunch, transit, etc.) and fill the category, account, and details with one tap when adding an entry.",
   "presetEditTitle": "Edit preset",
   "presetSubmitAdd": "Add",
   "presetName": "Preset name",
   "presetMerchant": "Default details",
-  "presetMerchantPlaceholder": "e.g. Hansot lunchbox",
-  "presetSelectNone": "None",
+  "presetMerchantPlaceholder": "e.g. Office lunch box",
   "presetAssetCard": "Account / Card",
-  "presetAssetLoadError": "Failed to load assets",
-  "presetLockToggle": "Use fixed amount",
-  "presetLockDesc": "When off, the amount is empty on load. Handy when the amount varies each time.",
-  "presetLockAmountLabel": "Fixed amount",
-  "presetUpdated": "Preset updated",
-  "presetCreated": "Preset added",
   "recurringToggleFailed": "Change failed",
   "recurringDeleteTitle": "Delete recurring transaction",
   "recurringDeleteConfirm": "Delete the \"{name}\" recurring setting? Already-recorded transactions remain. A deleted recurring setting cannot be restored.",
@@ -3164,16 +3212,7 @@
   "subDisconnectFailed": "Couldn't disconnect",
   "memoNew": "Add memo",
   "memoEditTitle": "Edit memo",
-  "memoAdd": "Add",
-  "memoLoadError": "Failed to load memos",
-  "memoTagAll": "All {count}",
-  "@memoTagAll": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "memoLoadError": "Could not load memos",
   "memoSectionPinned": "Pinned · {count}",
   "@memoSectionPinned": {
     "placeholders": {
@@ -3190,15 +3229,7 @@
       }
     }
   },
-  "memoActionFailed": "Failed: {message}",
-  "@memoActionFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "memoEmptyDesc": "When something comes to mind, create a new memo.",
+  "memoEmptyDesc": "Tap the + button at the bottom right to write your first memo.",
   "memoSearchEmptyDesc": "Try a different search term.",
   "memoUntitled": "Untitled",
   "memoDeleteTitle": "Delete memo",
@@ -3210,20 +3241,29 @@
       }
     }
   },
-  "memoDeleteFailed": "Delete failed: {message}",
-  "@memoDeleteFailed": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
   "memoFieldTitle": "Title",
-  "memoTitleRequired": "Please enter a title",
+  "memoTitleRequired": "Please enter a title.",
   "memoFieldContent": "Content",
   "memoContentPlaceholder": "Write your memo here",
   "memoFieldTag": "Tag",
   "memoTagNone": "No tag",
+  "memoTagEmptyHint": "Create tags in Settings › Memo tags.",
+  "memoAllChip": "All",
+  "memoLoadFailedDesc": "Please try again in a moment.",
+  "memoTagFilter": "Filter by tag",
+  "memoSaved": "Saved.",
+  "memoSaveFailed": "Could not save. Please try again in a moment.",
+  "memoDeleteFailed": "Could not delete. Please try again in a moment.",
+  "memoPinFailed": "Could not change the pin. Please try again in a moment.",
+  "memoModifiedAt": "Edited {time}",
+  "@memoModifiedAt": {"placeholders": {"time": {"type": "String"}}},
+  "memoMoreOf": "More for {name}",
+  "@memoMoreOf": {"placeholders": {"name": {"type": "String"}}},
+  "memoSwipeUnpin": "Unpin",
+  "mtagSaveFailed": "Could not save. Please try again in a moment.",
+  "mtagDeleteFailed": "Could not delete. Please try again in a moment.",
+  "ttagSaveFailed": "Could not save. Please try again in a moment.",
+  "ttagDeleteFailed": "Could not delete. Please try again in a moment.",
   "memoNewTag": "Add tag",
   "memoTagNamePlaceholder": "e.g. Ideas",
   "memoDeleteTagTitle": "Delete tag",
@@ -3238,9 +3278,9 @@
       }
     }
   },
-  "memoTagLoadError": "Failed to load tags",
+  "memoTagLoadError": "Could not load tags",
   "mtagTitle": "Memo tags",
-  "mtagDesc": "Tags you attach to memos. Used for list filters and tag grouping.",
+  "mtagDesc": "Tags you attach to memos. They are used to filter the memo screen. If you delete a tag, its memos stay as 'No tag'.",
   "mtagEmpty": "No tags yet",
   "mtagEditTitle": "Edit tag",
   "mtagNameLabel": "Name",
@@ -3422,8 +3462,6 @@
   "todoStatusPending": "Pending",
   "todoDetailCompletedAt": "Completed at",
   "todoDetailContent": "Note",
-  "memoDetailTitle": "Memo details",
-  "memoDetailPinned": "Pinned",
   "memoDetailNoContent": "No content",
   "calEventDetailTitle": "Event details",
   "calDetailNone": "None",
@@ -4129,7 +4167,7 @@
   "recurringFixedSub": "Transactions this schedule creates from now on are recorded as fixed",
   "presetFixedTitleExpense": "Record as fixed expense",
   "presetFixedTitleIncome": "Record as fixed income",
-  "presetFixedDesc": "Transactions made from this preset count as fixed in statistics. This is separate from the fixed amount above.",
+  "presetFixedDesc": "Transactions made from this preset count as fixed in statistics.",
   "hideCardStatsFixed": "Fixed vs. variable tab",
   "statsTabFixed": "Fixed vs. variable",
   "statsFixedViewAria": "View",
