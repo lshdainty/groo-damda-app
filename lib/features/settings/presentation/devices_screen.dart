@@ -1,7 +1,4 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -23,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// "로그인된 기기" — 계정 > 보안에서 들어온다. 흰 화면 하나(I-12 3-A).
@@ -328,7 +326,7 @@ class _DeviceRow extends StatelessWidget {
           // 보이는 36 · 블리드 14 밖(위아래 4 · 오른쪽 14)까지 누르는 영역을 넓힌다. 블리드로 부모 줄 상자 밖에
           // 나간 자리는 부모가 거절하므로 줄 위에서 PTouchTargetScope 가 이어 준다(Card 머리 동작과 같은 짝).
           // 임시 — ds List 차례에 PButton 누르는 영역 · PListRowFrame 스코프로 걷는다(spec-cleanup-pending).
-          child: _BleedTarget(
+          child: ListBleedTarget(
             bleed: kTextButtonPaddingX,
             child: Semantics(
               container: true,
@@ -348,65 +346,6 @@ class _DeviceRow extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// 버튼을 오른쪽으로 [bleed] 내어 그리고(레이아웃 자리는 그대로), 보이는 36 상자 밖 위아래 4 · 블리드까지 누르는 영역을
-/// 44 로 넓힌다. [PTouchTargetScope] 가 찾는 [PTouchExtendable] 이다 — PTouchTarget 은 정사각 minSize 라 가로 블리드를
-/// 못 받는다.
-class _BleedTarget extends SingleChildRenderObjectWidget {
-  const _BleedTarget({required this.bleed, required super.child});
-
-  final double bleed;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderBleedTarget(bleed);
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _RenderBleedTarget renderObject,
-  ) {
-    renderObject.bleed = bleed;
-  }
-}
-
-class _RenderBleedTarget extends RenderProxyBox implements PTouchExtendable {
-  _RenderBleedTarget(this.bleed);
-
-  double bleed;
-
-  @override
-  Rect get touchArea {
-    final dy = math.max(0.0, (PTouch.min - size.height) / 2);
-    // 보이는 상자(bleed 오른쪽)에서 모자란 만큼만 — 왼쪽은 보이는 버튼 왼쪽에서 시작한다
-    return Rect.fromLTRB(bleed, -dy, size.width + bleed, size.height + dy);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null) context.paintChild(child!, offset + Offset(bleed, 0));
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    if (!touchArea.contains(position)) return false;
-    // 보이는 상자는 레이아웃 상자보다 bleed 오른쪽 — 밖의 점은 상자 가운데를 누른 것으로 친다
-    final visible = Rect.fromLTWH(bleed, 0, size.width, size.height);
-    final inside = visible.contains(position) ? position : visible.center;
-    final hit = result.addWithPaintOffset(
-      offset: Offset(bleed, 0),
-      position: inside,
-      hitTest: (r, p) => child?.hitTest(r, position: p) ?? false,
-    );
-    if (hit) result.add(BoxHitTestEntry(this, position));
-    return hit;
-  }
-
-  @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    transform.translateByDouble(bleed, 0, 0, 1);
   }
 }
 

@@ -91,7 +91,10 @@ class _FakePrefsRepo extends UserPreferencesRepository {
   Future<UserPreferences> get() async => _prefs(serverThreshold);
 
   @override
-  Future<UserPreferences> update(Map<String, dynamic> fields) async {
+  Future<UserPreferences> update(
+    Map<String, dynamic> fields, {
+    bool silent = false,
+  }) async {
     patches.add(fields);
     if (failNext) throw Exception('저장 실패');
     serverThreshold = fields['budgetAlertThreshold'] as int? ?? serverThreshold;

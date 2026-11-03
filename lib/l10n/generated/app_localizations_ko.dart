@@ -3677,7 +3677,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceThemeSystem => '시스템';
 
   @override
-  String get appearanceThemeSystemDesc => '자동 전환';
+  String get appearanceThemeSystemDesc => 'OS 설정 따라가기';
 
   @override
   String hideAmountsLockAllDesc(int total, int count) {
@@ -3880,11 +3880,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceRegion => '기준 지역';
 
   @override
-  String get appearanceRegionPlaceholder => '지역 선택';
-
-  @override
   String get appearanceRegionDesc =>
-      '\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요';
+      '\'오늘\'과 통계의 하루를 이 지역 기준으로 계산해요. 화면의 시간은 기기 시간대로 보여요.';
 
   @override
   String get appearanceCurrency => '기본 통화';
@@ -3902,31 +3899,43 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceCurrencyJpy => '일본 엔';
 
   @override
-  String get passwordChanged => '비밀번호가 변경되었습니다';
+  String get appearanceCurrencyDesc => '새 자산·거래를 만들 때 이 통화가 먼저 골라져요.';
 
   @override
-  String get passwordChangeFailed => '비밀번호 변경에 실패했습니다.';
+  String get appearanceRegionLoadError => '기준 지역을 불러오지 못했어요';
+
+  @override
+  String get appearanceCurrencyLoadError => '기본 통화를 불러오지 못했어요';
+
+  @override
+  String get appearanceSaveFailed => '설정을 바꾸지 못했어요.';
+
+  @override
+  String get passwordChanged => '비밀번호를 바꿨어요';
+
+  @override
+  String get passwordChangeFailed => '비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get passwordCurrent => '현재 비밀번호';
 
   @override
-  String get passwordNew => '새 비밀번호';
+  String get passwordChangeDescription => '현재 비밀번호를 확인한 뒤 새 비밀번호로 바꿔요';
 
   @override
-  String get passwordNewPlaceholder => '8자 이상, 특수문자 포함';
+  String get passwordCurrentInvalid => '현재 비밀번호가 맞지 않아요';
+
+  @override
+  String get passwordNew => '새 비밀번호';
 
   @override
   String get passwordNewConfirm => '새 비밀번호 확인';
 
   @override
-  String get passwordConfirmPlaceholder => '한 번 더 입력';
+  String get passwordMismatch => '새 비밀번호가 일치하지 않아요';
 
   @override
-  String get passwordMismatch => '새 비밀번호가 일치하지 않습니다';
-
-  @override
-  String get passwordMatched => '새 비밀번호가 일치합니다';
+  String get passwordMatched => '새 비밀번호가 일치해요';
 
   @override
   String get passwordRuleLength => '8자 이상';
@@ -3938,7 +3947,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get passwordSameAsCurrent => '현재 비밀번호와 다른 비밀번호를 입력해주세요';
 
   @override
-  String get passwordChangeAction => '변경';
+  String get passwordChangeAction => '저장';
 
   @override
   String get accountTitle => '계정';
@@ -3952,34 +3961,22 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get accountEditComingSoon => '프로필 수정은 준비중입니다';
+  String get accountEditComingSoon => '프로필 수정은 곧 열려요.';
 
   @override
   String get accountSecurity => '보안';
 
   @override
-  String get accountPasswordDesc => '최근 변경 없음';
+  String get accountPasswordDesc => '주기적으로 바꾸면 안전해요';
 
   @override
   String get accountTwoFa => '2단계 인증';
-
-  @override
-  String get accountOn => '사용 중';
-
-  @override
-  String get accountOff => '사용 안 함';
 
   @override
   String get accountDevices => '로그인된 기기';
 
   @override
   String get accountCurrentDevice => '현재 기기';
-
-  @override
-  String get accountLoginHistory => '로그인 기록';
-
-  @override
-  String get accountLast30Days => '최근 30일';
 
   @override
   String get devicesTitle => '로그인된 기기';
@@ -4045,9 +4042,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountConnect => '연결';
 
   @override
-  String accountSocialComingSoon(String name) {
-    return '$name 연결은 준비중입니다';
+  String get accountLinked => '연결됨';
+
+  @override
+  String get accountDisconnect => '해제';
+
+  @override
+  String get accountProvidersError => '연결 상태를 불러오지 못했어요';
+
+  @override
+  String get accountLinkError => '계정을 연결하지 못했어요.';
+
+  @override
+  String get accountUnlinkError => '연결을 해제하지 못했어요.';
+
+  @override
+  String accountLinkedToast(String name) {
+    return '$name 계정이 연결되었어요';
   }
+
+  @override
+  String get accountUnlinkedToast => 'Google 연결을 해제했어요';
+
+  @override
+  String get accountSecuritiesDesc => '토스·나무 등 증권사 API 키를 연결해요';
 
   @override
   String get accountBilling => '구독·결제';
@@ -4095,7 +4113,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get accountLogoutConfirm => '정말 로그아웃 하시겠어요?';
+  String get accountLogoutConfirm => '이 기기에서 로그아웃할까요?';
 
   @override
   String get accountWithdrawTitle => '그루 담다 이용 해지';

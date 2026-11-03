@@ -3741,7 +3741,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceThemeSystem => 'System';
 
   @override
-  String get appearanceThemeSystemDesc => 'Auto switch';
+  String get appearanceThemeSystemDesc => 'Follow OS setting';
 
   @override
   String hideAmountsLockAllDesc(int total, int count) {
@@ -3945,11 +3945,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceRegion => 'Region';
 
   @override
-  String get appearanceRegionPlaceholder => 'Select a region';
-
-  @override
   String get appearanceRegionDesc =>
-      'Days for \'today\' and statistics are calculated in this region. On-screen times follow your device\'s time zone';
+      'Days for \'today\' and statistics are calculated in this region. On-screen times follow your device\'s time zone.';
 
   @override
   String get appearanceCurrency => 'Default currency';
@@ -3967,26 +3964,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceCurrencyJpy => 'Japanese Yen';
 
   @override
+  String get appearanceCurrencyDesc =>
+      'New assets and transactions start with this currency.';
+
+  @override
+  String get appearanceRegionLoadError => 'Couldn\'t load the region';
+
+  @override
+  String get appearanceCurrencyLoadError =>
+      'Couldn\'t load the default currency';
+
+  @override
+  String get appearanceSaveFailed => 'Couldn\'t change the setting.';
+
+  @override
   String get passwordChanged => 'Password changed';
 
   @override
-  String get passwordChangeFailed => 'Failed to change password.';
+  String get passwordChangeFailed =>
+      'Couldn\'t change your password. Please try again shortly.';
 
   @override
   String get passwordCurrent => 'Current password';
 
   @override
+  String get passwordChangeDescription =>
+      'Verify your current password and set a new one';
+
+  @override
+  String get passwordCurrentInvalid => 'That current password doesn\'t match';
+
+  @override
   String get passwordNew => 'New password';
 
   @override
-  String get passwordNewPlaceholder =>
-      '8+ characters, incl. a special character';
-
-  @override
   String get passwordNewConfirm => 'Confirm new password';
-
-  @override
-  String get passwordConfirmPlaceholder => 'Enter once more';
 
   @override
   String get passwordMismatch => 'New passwords do not match';
@@ -4005,7 +4017,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'New password must be different from the current one';
 
   @override
-  String get passwordChangeAction => 'Change';
+  String get passwordChangeAction => 'Save';
 
   @override
   String get accountTitle => 'Account';
@@ -4019,34 +4031,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountEditComingSoon => 'Profile editing is coming soon';
+  String get accountEditComingSoon => 'Profile editing is coming soon.';
 
   @override
   String get accountSecurity => 'Security';
 
   @override
-  String get accountPasswordDesc => 'No recent changes';
+  String get accountPasswordDesc => 'Change it regularly to stay secure';
 
   @override
   String get accountTwoFa => 'Two-factor authentication';
-
-  @override
-  String get accountOn => 'On';
-
-  @override
-  String get accountOff => 'Off';
 
   @override
   String get accountDevices => 'Logged-in devices';
 
   @override
   String get accountCurrentDevice => 'Current device';
-
-  @override
-  String get accountLoginHistory => 'Login history';
-
-  @override
-  String get accountLast30Days => 'Last 30 days';
 
   @override
   String get devicesTitle => 'Logged-in devices';
@@ -4114,9 +4114,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountConnect => 'Connect';
 
   @override
-  String accountSocialComingSoon(String name) {
-    return '$name connection is coming soon';
+  String get accountLinked => 'Connected';
+
+  @override
+  String get accountDisconnect => 'Disconnect';
+
+  @override
+  String get accountProvidersError => 'Couldn\'t load the connection status';
+
+  @override
+  String get accountLinkError => 'Couldn\'t connect the account.';
+
+  @override
+  String get accountUnlinkError => 'Couldn\'t disconnect the account.';
+
+  @override
+  String accountLinkedToast(String name) {
+    return '$name account connected';
   }
+
+  @override
+  String get accountUnlinkedToast => 'Google account disconnected';
+
+  @override
+  String get accountSecuritiesDesc =>
+      'Connect API keys for Toss, Namu, and more';
 
   @override
   String get accountBilling => 'Subscription & Billing';
@@ -4164,7 +4186,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountLogoutConfirm => 'Are you sure you want to log out?';
+  String get accountLogoutConfirm => 'Log out of this device?';
 
   @override
   String get accountWithdrawTitle => 'Stop using 그루 담다';

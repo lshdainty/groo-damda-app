@@ -43,6 +43,12 @@ abstract final class Env {
   /// SSO 의 client_redirect_uris 에 동일 값으로 등록되어 있어야 한다.
   static const String oauthRedirectUri = '$authCallbackScheme://oauth/callback';
 
+  /// 소셜 계정 연동(계정 > 연결된 계정)의 복귀 경로. 스킴 · 호스트는 로그인 콜백과 같아서 그루 계정이
+  /// 복귀 주소의 origin(`porestdesk://oauth`)만 등록된 redirect_uri 와 비교해 받아 준다.
+  static const String oauthLinkReturnPath = '/linked';
+  static const String oauthLinkReturnUri =
+      '$authCallbackScheme://oauth$oauthLinkReturnPath';
+
   /// OAuth2 client_id (SSO clients.client_code).
   static const String oauthClientId = 'desk';
 }
