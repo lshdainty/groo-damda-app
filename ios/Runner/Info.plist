@@ -56,6 +56,9 @@
 			</array>
 		</dict>
 	</dict>
+	<!-- Flutter 기본 딥링크를 끈다 — porestdesk://oauth/* 는 app_links 가 받는다(안 끄면 go_router 가 /linked 를 Page Not Found 로 받는다) -->
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 	<!-- OAuth 콜백 딥링크 — 시스템 브라우저 로그인이 porestdesk://oauth/callback 302 로 복귀 -->
 	<key>CFBundleURLTypes</key>
 	<array>

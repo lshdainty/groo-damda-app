@@ -1,4 +1,4 @@
-// porest-desk-app 배포 — 다른 groo 레포와 같이 Jenkinsfile 을 레포에 둔다.
+// groo-damda-app 배포 — 다른 groo 레포와 같이 Jenkinsfile 을 레포에 둔다.
 //
 // 다른 레포와 다른 점이 하나 있다. 앱은 여기서 빌드하지 않는다.
 // APK 는 안드로이드 SDK, IPA 는 macOS 러너가 필요해서 GitHub Actions 가 빌드하고
@@ -86,7 +86,7 @@ pipeline {
     environment {
         // 다른 레포와 같은 전역변수를 쓴다. Jenkins 전역 설정에서 한 번만 정한다.
         APK_BASE_PATH = "${env.POREST_BASE_DIR}/apk"
-        APK_REPO = 'lshdainty/porest-desk-app'
+        APK_REPO = 'lshdainty/groo-damda-app'
     }
 
     stages {

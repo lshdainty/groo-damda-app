@@ -27,6 +27,12 @@ String memoTagKey(Memo memo) {
   return (v == null || v.isEmpty) ? kMemoNoTagKey : v;
 }
 
+/// 목록 줄 본문 미리보기(I-15 9 · 웹 `MemoRow.tsx:43-48` 의 `block truncate`) — 줄바꿈 · 연속 공백을 공백 하나로 잇고 앞뒤를 정리해 한 줄로 만든다.
+/// 웹은 본문 글을 그대로 `white-space: nowrap` 한 줄에 그리므로 브라우저가 공백 · 줄바꿈 덩어리를 공백 하나로 접는다 — 같은 규칙이다.
+/// 비었는지(공백뿐)도 이 결과로 본다. 첫 줄만 보이거나 첫 줄이 비면 빈 줄이 되는 것을 막는다.
+String memoPreview(String? content) =>
+    (content ?? '').replaceAll(RegExp(r'\s+'), ' ').trim();
+
 /// 묶음 키 → 화면 라벨. sentinel 은 번역 문구로 바꿔 그린다 — U+FFFF 를 그대로
 /// 그리면 안 보이는 글자 하나가 태그 이름 자리에 남는다.
 String memoTagLabel(AppLocalizations l, String key) =>

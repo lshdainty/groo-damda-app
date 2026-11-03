@@ -10,6 +10,10 @@ class PresetRepository {
   PresetRepository(this._dio);
   final Dio _dio;
 
+  /// 화면이 실패를 자기 자리에서 알릴 때 전역 오류 토스트(서버 원문)를 끈다 — 둘이 겹치지 않게.
+  Options? _opts(bool silent) =>
+      silent ? Options(extra: {kSilentErrorToast: true}) : null;
+
   Future<List<ExpenseTemplate>> list() async {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/expense-templates');
@@ -40,6 +44,7 @@ class PresetRepository {
 
     /// 고정 수입·지출 기본값 — 이체에는 싣지 않는다(서버도 무시한다).
     bool isFixed = false,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -60,6 +65,7 @@ class PresetRepository {
           'lockAmount': lockAmount ? 'Y' : 'N',
           'isFixed': isFixed,
         },
+        options: _opts(silent),
       );
       return _unwrap(res, ExpenseTemplate.fromJson);
     } on DioException catch (e) {
@@ -78,7 +84,7 @@ class PresetRepository {
   /// 읽어 온 값을 그대로 되돌려 보냈는데(#326), 이제 시트에 칸이 생겼으므로(D2)
   /// **비운 상태 그대로 실어야 지워진다.**
   ///
-  /// [categoryRowId] 는 폼이 필수로 강제한다(비면 저장 버튼이 안 눌린다) — 늘 값이 실린다.
+  /// [categoryRowId] 는 지출 · 수입에서 폼이 필수로 강제하고, 이체는 명시적 null 로 지운다(아래 매개변수 설명).
   ///
   /// [amount] 는 [lockAmount] 가 정한다. 서버 `resolveAmount` 가 `lockAmount != 'Y'` 면
   /// 실린 금액과 상관없이 null 로 접으므로, 고정을 끄면 키가 빠져도 금액이 지워진다.
@@ -86,7 +92,10 @@ class PresetRepository {
   Future<ExpenseTemplate> update({
     required int id,
     required String templateName,
-    int? categoryRowId,
+
+    /// 이 시트가 가진 칸이라 **늘 싣는다** — 이체로 바꿔 저장하면 명시적 null 로 옛 카테고리를 지운다. 서버는 키가 없으면 유지로 읽어
+    /// (`ExpenseTemplateServiceImpl`) 옛 카테고리와 TRANSFER 가 짝이 안 맞아 400 이 된다.
+    Patch<int> categoryRowId = const Patch.keep(),
     Patch<int> assetRowId = const Patch.keep(),
 
     /// 이체 칸도 이 시트의 칸이다 — 지출·수입으로 바꿔 저장하면 null 을 실어 지운다.
@@ -102,13 +111,14 @@ class PresetRepository {
 
     /// 고정 수입·지출 기본값 — 이 시트가 그리는 칸이라 늘 싣는다. 이체는 호출처가 false 를 준다.
     bool isFixed = false,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/expense-template/$id',
         data: {
           'templateName': templateName,
-          'categoryRowId': ?categoryRowId,
+          if (categoryRowId.present) 'categoryRowId': categoryRowId.value,
           if (assetRowId.present) 'assetRowId': assetRowId.value,
           if (toAssetRowId.present) 'toAssetRowId': toAssetRowId.value,
           if (fee.present) 'fee': fee.value,
@@ -121,6 +131,7 @@ class PresetRepository {
           'lockAmount': lockAmount ? 'Y' : 'N',
           'isFixed': isFixed,
         },
+        options: _opts(silent),
       );
       return _unwrap(res, ExpenseTemplate.fromJson);
     } on DioException catch (e) {
@@ -128,9 +139,9 @@ class PresetRepository {
     }
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/expense-template/$id');
+      await _dio.delete<void>('/expense-template/$id', options: _opts(silent));
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

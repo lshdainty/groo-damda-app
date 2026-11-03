@@ -38,9 +38,12 @@ const int kTodoContentMax = 10000;
 void showTodoEditDialog(BuildContext context, {Todo? edit}) {
   final l = AppLocalizations.of(context);
   final probe = _DirtyProbe();
+  // 새 폼은 제목 칸에 초점(시트가 처음 초점을 컨테이너에 두므로 첫 초점 노드를 넘긴다), 수정 폼은 키보드 없이 표면
+  final titleFocus = FocusNode(debugLabel: 'Todo title');
   PBottomSheet.show<void>(
     context,
     form: true,
+    initialFocus: edit == null ? titleFocus : null,
     isDirty: () => probe.dirty(),
     leaveCopy: PLeaveConfirmCopy(
       title: l.sheetLeaveTitle,
@@ -48,7 +51,8 @@ void showTodoEditDialog(BuildContext context, {Todo? edit}) {
       stayLabel: l.sheetLeaveStay,
       leaveLabel: l.sheetLeaveLeave,
     ),
-    builder: (_) => TodoFormSheet(edit: edit, probe: probe),
+    builder: (_) =>
+        TodoFormSheet(edit: edit, probe: probe, titleFocus: titleFocus),
   );
 }
 
@@ -58,10 +62,13 @@ class _DirtyProbe {
 }
 
 class TodoFormSheet extends ConsumerStatefulWidget {
-  const TodoFormSheet({super.key, this.edit, this.probe});
+  const TodoFormSheet({super.key, this.edit, this.probe, this.titleFocus});
 
   final Todo? edit;
   final Object? probe;
+
+  /// 제목 칸 초점 노드 — 호출처가 시트의 첫 초점으로 넘기면 폼 State 가 버린다. 없으면 자기 것.
+  final FocusNode? titleFocus;
 
   @override
   ConsumerState<TodoFormSheet> createState() => _TodoFormSheetState();
@@ -70,7 +77,7 @@ class TodoFormSheet extends ConsumerStatefulWidget {
 class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
   late final TextEditingController _titleCtrl;
   late final TextEditingController _contentCtrl;
-  final _titleFocus = FocusNode();
+  late final FocusNode _titleFocus = widget.titleFocus ?? FocusNode();
 
   late final String _initialTitle;
   late final String _initialContent;
@@ -235,7 +242,6 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       title: _isEdit ? l.todoEditTitle : l.todoAdd,
       closeLabel: l.actionClose,
       flushBody: true,
-      scrollFog: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x4,
@@ -250,7 +256,6 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
               child: PInput(
                 controller: _titleCtrl,
                 focusNode: _titleFocus,
-                autofocus: true,
                 placeholder: l.todoTitlePlaceholder,
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(kTodoTitleMax),

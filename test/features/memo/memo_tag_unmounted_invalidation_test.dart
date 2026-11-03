@@ -1,5 +1,7 @@
 // 메모 태그를 저장·삭제하는 도중에 화면을 닫아도 **터지지 않고, 목록은 걷힌다**.
 //
+// 할 일 태그 화면(`todo_tag_unmounted_invalidation_test.dart`)과 같은 자리다 — 두 화면이 한 부품([TagSettings])을 쓴다.
+//
 // 두 가지가 한꺼번에 걸린 자리다.
 //
 // 1) `flutter_riverpod` 의 `WidgetRef` 는 unmount 뒤에 쓰면 `StateError` 를 **던진다**
@@ -10,7 +12,7 @@
 //    `memoListProvider` 도 autoDispose 가 아니라, 둘 다 화면보다 오래 살기 때문이다.
 //    포그라운드 복귀 전까지 아무도 안 걷는다.
 //
-// 그래서 화면이 아니라 `ProviderContainer` 로 비운다(#348 와 같은 방식). 컨테이너는
+// 그래서 화면이 아니라 `ProviderContainer` 로 비운다(#348·#351 과 같은 방식). 컨테이너는
 // `ProviderScope` 의 것이라 화면 수명과 무관하다.
 //
 // 여기서 잠그는 것은 **화면이 사라진 뒤에도 목록이 새 값이 된다**는 것 하나다.
@@ -23,7 +25,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/memo/application/memo_providers.dart';
 import 'package:groo_damda_app/features/memo/data/memo_tag_repository.dart';
@@ -31,8 +32,9 @@ import 'package:groo_damda_app/features/memo/domain/memo.dart';
 import 'package:groo_damda_app/features/memo/domain/memo_tag.dart';
 import 'package:groo_damda_app/features/memo/presentation/memo_tag_management_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 MemoTag _tag(int rowId, String name) =>
     MemoTag(rowId: rowId, tagName: name, userRowId: 1, usageCount: 0);
@@ -64,12 +66,10 @@ class _SlowRepo extends MemoTagRepository {
   }
 }
 
-Finder _field(String hint) => find.byWidgetPredicate(
-  (w) => w is TextField && w.decoration?.hintText == hint,
-);
+Finder _field() => find.byType(PInput).first;
 
 Finder _button(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.byWidgetPredicate((w) => w is PButton && w.label == label);
 
 void main() {
   late AppLocalizations l;
@@ -138,13 +138,14 @@ void main() {
   testWidgets('저장이 끝나기 전에 화면을 닫아도 목록이 새 이름으로 걷힌다', (tester) async {
     await open(tester);
 
-    await tester.tap(_button(l.memoNewTag));
+    // 목록 제목의 글 버튼 "태그 추가" — 새 태그 폼이 시트로 뜬다.
+    await tester.tap(find.text(l.memoNewTag));
     await tester.pumpAndSettle();
-    await tester.enterText(_field(l.memoTagNamePlaceholder), '아이디어');
+    await tester.enterText(_field(), '아이디어');
     await tester.pumpAndSettle();
     await tester.tap(_button(l.actionSave));
-    // 저장이 나갔고 서버는 아직 대답하지 않았다.
-    await tester.pumpAndSettle();
+    // 저장이 나갔고 서버는 아직 대답하지 않았다 — 저장 버튼이 로딩이라 가라앉지 않는다.
+    await tester.pump(const Duration(milliseconds: 100));
 
     await closeScreen(tester);
 
@@ -179,13 +180,9 @@ void main() {
     actions.last.onSelect();
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.descendant(
-        of: find.byType(PAlertDialogView),
-        matching: find.text(l.actionDelete),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await tester.tap(_button(l.actionDelete).last);
+    // 확정 버튼이 끝날 때까지 로딩이라 가라앉지 않는다.
+    await tester.pump(const Duration(milliseconds: 100));
 
     await closeScreen(tester);
 

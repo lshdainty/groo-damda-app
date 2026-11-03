@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/features/memo/domain/memo_tag.dart';
 
 /// 메모 태그 마스터 — `TodoTagRepository` 미러.
@@ -13,9 +14,15 @@ class MemoTagRepository {
   MemoTagRepository(this._dio);
   final Dio _dio;
 
+  /// 서버 원문을 띄우는 전역 오류 알림을 끈다 — 화면이 고정 글로 알린다(I-15 12 · 13 · 21: 저장 실패는 시트 안 Callout, 삭제 · 고정 실패는 스낵바 + 다시 시도).
+  static final Options _silent = Options(extra: {kSilentErrorToast: true});
+
   Future<List<MemoTag>> list() async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>('/memo-tags');
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/memo-tags',
+        options: _silent,
+      );
       return _unwrapList(res, 'tags', MemoTag.fromJson);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -26,6 +33,7 @@ class MemoTagRepository {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/memo-tag',
+        options: _silent,
         data: {'tagName': tagName, 'color': ?color},
       );
       return _unwrap(res, MemoTag.fromJson);
@@ -42,6 +50,7 @@ class MemoTagRepository {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/memo-tag/$id',
+        options: _silent,
         data: {'tagName': tagName, 'color': ?color},
       );
       return _unwrap(res, MemoTag.fromJson);
@@ -54,7 +63,7 @@ class MemoTagRepository {
   /// 비운다 — 그 메모들은 '태그 없음' 으로 남는다(삭제 확인창이 약속하는 것).
   Future<void> delete(int id) async {
     try {
-      await _dio.delete<void>('/memo-tag/$id');
+      await _dio.delete<void>('/memo-tag/$id', options: _silent);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

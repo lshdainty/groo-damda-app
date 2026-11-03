@@ -29,6 +29,7 @@ class PListHeader extends StatelessWidget {
     this.topInset,
     this.inset = PSpacing.globalGutter,
     this.trailing,
+    this.titleSuffix,
   }) : assert(action == null || trailing == null, '오른쪽은 글 버튼과 값 글 중 하나');
 
   final String title;
@@ -49,6 +50,9 @@ class PListHeader extends StatelessWidget {
 
   /// 오른쪽 값 글(묶음 합계) — 버튼이 아니라 값이라 줄과 같은 위아래 8 을 지킨다. 머리 폭의 절반을 넘으면 제목 아래 오른쪽 끝으로 간다.
   final Widget? trailing;
+
+  /// 제목 글 바로 뒤에 놓는 것 — 아직 모르는 개수 자리의 [PSkeleton] 처럼("메모 태그 · ▭"). 읽는 이름은 [title] 이다.
+  final Widget? titleSuffix;
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +85,17 @@ class PListHeader extends StatelessWidget {
             container: true,
             label: title,
             child: ExcludeSemantics(
-              child: Text(
-                keepAll(title),
+              child: Text.rich(
+                TextSpan(
+                  text: keepAll(title),
+                  children: [
+                    if (titleSuffix != null)
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: titleSuffix!,
+                      ),
+                  ],
+                ),
                 key: const ValueKey('plist-header-title'),
                 style: style,
               ),

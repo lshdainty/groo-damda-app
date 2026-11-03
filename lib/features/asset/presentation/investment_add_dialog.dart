@@ -118,6 +118,13 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   void initState() {
     super.initState();
     final e = widget.edit;
+    // 새 자산은 2단계 첫 칸에 초점(웹 focusFirstField) — 시트 컨테이너가 처음 초점을 가져가므로 그려진 뒤 직접 준다.
+    // 수정은 키보드 없이 표면
+    if (widget.edit == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _nameFocus.requestFocus();
+      });
+    }
     // 기관이 없는 자산은 비워 둔다 — 첫 기관으로 채우면 고치기만 해도 엉뚱한 기관이 저장된다. 새 자산만 첫 항목이 기본이다.
     // 저장된 기관 이름은 목록에 없어도 그대로 둔다(웹과 같다) — 첫 기관으로 바꾸면 고치기만 해도 기관이 바뀐다.
     // 기관이 없는 자산은 빈 칸이다. 새 자산만 첫 항목이 기본이다.
