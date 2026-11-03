@@ -1879,15 +1879,16 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           ? cat.categoryName
           : '${parent.categoryName} · ${cat.categoryName}';
       catDot = chartToneOf(context, cat.color).solid;
-    } else if (c.categoryRowId != null && catsLoaded) {
-      catValue = l.txfDeletedCategory;
+    } else if (c.categoryRowId != null) {
+      catValue = catsLoaded ? l.txfDeletedCategory : '…';
     }
     String assetName(int? id) {
       if (id == null) return '';
       final a = assets.byRowId(id);
       // 목록에 없는 값 — 거래에서 읽어 온 기록은 유지하고 "지운 계좌" 로 보인다(본문은 지금 id 그대로, N4)
       return a == null
-          ? (assetsAsync.hasValue ? l.txfDeletedAsset : '')
+          // 목록을 받기 전 · 못 받은 동안은 "없음" 이 아니라 "…"(값이 있는데 없다고 말하지 않는다)
+          ? (assetsAsync.hasValue ? l.txfDeletedAsset : '…')
           // 수정 폼의 계좌·카드 값은 이름만(기관은 고르기 시트 줄의 설명에 있다)
           : a.assetName;
     }
