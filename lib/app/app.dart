@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -200,19 +201,28 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
       //
       // 스낵바(ds PSnackbar)의 호스트도 여기 한 번 둔다 — 잠금 화면 아래(AppLockGate 안쪽), 길잡이(Navigator) 바깥이라
       // 시트 · 확인창 위에 뜨고 탭 바(PSnackbarAvoidOverlap) 위 8 에 선다. 호스트 State 는 잠깐 뜨는 띠 하나뿐이다.
-      builder: (context, child) => SlidableAutoCloseBehavior(
-        child: AppLockGate(
-          // 투명 Material — 호스트가 Navigator 바깥이라 Material 조상이 없으면 띠 글에 노란 이중 밑줄(기본 글 스타일 없음)이 간다.
-          child: Material(
-            type: MaterialType.transparency,
-            child: PSnackbarHost(
-              closeLabel: AppLocalizations.of(context).actionClose,
-              child: child ?? const SizedBox.shrink(),
-            ),
-          ),
-        ),
-      ),
+      builder: (context, child) {
+        // 설정이 "시스템 따름" 이어도 글이 영어면 돈 · 날짜도 영어로 — 전역 포맷 로케일을 화면 로케일에 맞춘다
+        syncIntlLocale(Localizations.localeOf(context));
+        return _shell(context, child);
+      },
       routerConfig: router,
     );
   }
+
+  Widget _shell(
+    BuildContext context,
+    Widget? child,
+  ) => SlidableAutoCloseBehavior(
+    child: AppLockGate(
+      // 투명 Material — 호스트가 Navigator 바깥이라 Material 조상이 없으면 띠 글에 노란 이중 밑줄(기본 글 스타일 없음)이 간다.
+      child: Material(
+        type: MaterialType.transparency,
+        child: PSnackbarHost(
+          closeLabel: AppLocalizations.of(context).actionClose,
+          child: child ?? const SizedBox.shrink(),
+        ),
+      ),
+    ),
+  );
 }
