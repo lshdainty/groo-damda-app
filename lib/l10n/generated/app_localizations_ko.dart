@@ -1486,10 +1486,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calFormRowsMore => '반복 · 알림 · 장소 · 설명';
 
   @override
-  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calFormDeleteFailed => '일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormDeleteFailed => '일정을 삭제하지 못했어요.';
 
   @override
   String calReminderMinutesBefore(int n) {
@@ -5763,15 +5763,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get memoEditTitle => '메모 수정';
 
   @override
-  String get memoAdd => '추가';
-
-  @override
-  String get memoLoadError => '메모 로드 실패';
-
-  @override
-  String memoTagAll(int count) {
-    return '전체 $count';
-  }
+  String get memoLoadError => '메모를 불러오지 못했어요';
 
   @override
   String memoSectionPinned(int count) {
@@ -5784,12 +5776,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String memoActionFailed(String message) {
-    return '실패: $message';
-  }
-
-  @override
-  String get memoEmptyDesc => '생각이 떠오를 때, 새 메모를 만들어보세요.';
+  String get memoEmptyDesc => '오른쪽 아래 + 버튼으로 첫 메모를 써보세요.';
 
   @override
   String get memoSearchEmptyDesc => '다른 검색어를 입력해보세요.';
@@ -5806,15 +5793,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String memoDeleteFailed(String message) {
-    return '삭제 실패: $message';
-  }
-
-  @override
   String get memoFieldTitle => '제목';
 
   @override
-  String get memoTitleRequired => '제목을 입력해주세요';
+  String get memoTitleRequired => '제목을 입력해주세요.';
 
   @override
   String get memoFieldContent => '내용';
@@ -5827,6 +5809,55 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get memoTagNone => '태그 없음';
+
+  @override
+  String get memoTagEmptyHint => '태그는 설정 › 메모 태그에서 만들어요.';
+
+  @override
+  String get memoAllChip => '전체';
+
+  @override
+  String get memoLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get memoTagFilter => '태그로 거르기';
+
+  @override
+  String get memoSaved => '저장했어요.';
+
+  @override
+  String get memoSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get memoDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get memoPinFailed => '고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String memoModifiedAt(String time) {
+    return '$time 수정';
+  }
+
+  @override
+  String memoMoreOf(String name) {
+    return '$name 더보기';
+  }
+
+  @override
+  String get memoSwipeUnpin => '해제';
+
+  @override
+  String get mtagSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get mtagDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get ttagSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get ttagDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get memoNewTag => '태그 추가';
@@ -5843,13 +5874,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get memoTagLoadError => '태그 로드 실패';
+  String get memoTagLoadError => '태그를 불러오지 못했어요';
 
   @override
   String get mtagTitle => '메모 태그';
 
   @override
-  String get mtagDesc => '메모에 붙이는 태그예요. 목록 필터와 태그별 묶음에 사용돼요.';
+  String get mtagDesc =>
+      '메모에 붙이는 태그예요. 메모 화면의 거르기에 쓰여요. 태그를 지우면 그 메모는 \'태그 없음\' 으로 남아요.';
 
   @override
   String get mtagEmpty => '태그가 없어요';
@@ -6024,12 +6056,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get todoDetailContent => '메모';
-
-  @override
-  String get memoDetailTitle => '메모 상세';
-
-  @override
-  String get memoDetailPinned => '고정됨';
 
   @override
   String get memoDetailNoContent => '내용 없음';

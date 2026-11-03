@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -532,33 +534,50 @@ class _CalendarEventFormSheetState
     }
   }
 
+  /// 삭제 — 확인창 · 요청 · 실패 스낵바 + [다시 시도] 는 공용 [askDeleteCalendarEvent]. 폼 저장 실패(Callout)와 달리 확인창 뒤 요청이다.
+  /// 시트를 닫아도 띠가 남고 [다시 시도] 가 동작하도록 요청 · 무효화 · 재조회는 컨테이너로 한다.
   Future<void> _delete() async {
     if (_submitting) return;
-    final l = AppLocalizations.of(context);
     final e = widget.edit!;
-    final ok = await confirmDeleteCalendarEvent(context, e);
+    final container = ProviderScope.containerOf(context);
+    final deleted = widget.onDeleted;
+    final sheet = PBottomSheet.of(context);
+    final ok = await askDeleteCalendarEvent(
+      context,
+      container,
+      e,
+      onRetried: () => unawaited(_afterRetried(container, e, deleted, sheet)),
+    );
     if (!ok || !mounted) return;
-    setState(() {
-      _submitting = true;
-      _saveError = null;
-    });
+    setState(() => _submitting = true);
     try {
-      final repo = await ref.read(calendarRepositoryProvider.future);
-      await repo.deleteEvent(e.rowId);
-      _invalidateAfterWrite(recurring: e.rrule != null, orig: e);
-      if (!mounted) return;
-      final deleted = widget.onDeleted;
       if (deleted != null) {
         // 부모가 새 값을 받아 단계를 옮길 때까지 [삭제] · [저장] 은 기다림 모양으로 남는다
         await deleted();
         return;
       }
-      PBottomSheet.of(context).close();
-    } on ApiException {
-      if (!mounted) return;
-      setState(() => _saveError = l.calFormDeleteFailed);
+      sheet.close();
     } finally {
       if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  /// 확인창 실패 뒤 [다시 시도] 가 성공했을 때 — 시작 달을 다시 받고, 폼이 아직 열려 있으면 첫 삭제와 같은 마무리를 한다.
+  Future<void> _afterRetried(
+    ProviderContainer container,
+    CalendarEvent e,
+    Future<void> Function()? deleted,
+    PBottomSheetController sheet,
+  ) async {
+    await refetchCalendarMonthIn(container, (
+      year: e.start.year,
+      month: e.start.month,
+    ));
+    if (!mounted) return;
+    if (deleted != null) {
+      await deleted();
+    } else {
+      sheet.close();
     }
   }
 

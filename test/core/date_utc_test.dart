@@ -60,7 +60,7 @@ void main() {
     test('파생 함수도 같이 닫힌다 — 조용히 다른 날짜를 내지 않는다', () {
       expect(localDateKey('2026-08-24'), isNull);
       expect(localDateTime('2026-08-24'), isNull);
-      expect(monthDayTime('2026-08-24'), '');
+      expect(formatMemoStamp('2026-08-24'), '');
     });
 
     test('시각이 붙으면 그대로 받는다 — 자정도 날짜만 있는 값이 아니다', () {
@@ -185,50 +185,58 @@ void main() {
     });
   });
 
-  group('monthDayTime — 메모 수정시각 MM/DD · 오전/오후 h:mm', () {
-    // 테스트가 도는 기기 시간대를 모르므로(로컬 CI 는 KST, GitHub 러너는 UTC)
-    // 기대값을 문자열로 못 박지 않고 "UTC 로 읽었다면 나와야 할 로컬 시각" 과 맞춘다.
-    String expected(DateTime utc) {
-      final d = utc.toLocal();
-      String p2(int n) => n.toString().padLeft(2, '0');
-      final h12 = d.hour % 12 == 0 ? 12 : d.hour % 12;
-      final ap = d.hour < 12 ? '오전' : '오후';
-      return '${p2(d.month)}/${p2(d.day)} · $ap $h12:${p2(d.minute)}';
-    }
+  group(
+    'formatMemoStamp — 메모 수정 시각 (올해 "10월 22일 오후 5:10" · 다른 해 "2025년 12월 3일")',
+    () {
+      // 테스트가 도는 기기 시간대를 모르므로(로컬 CI 는 KST, GitHub 러너는 UTC)
+      // 기대값을 문자열로 못 박지 않고 "UTC 로 읽었다면 나와야 할 로컬 시각" 과 맞춘다.
+      String sameYear(DateTime utc) {
+        final d = utc.toLocal();
+        final h12 = d.hour % 12 == 0 ? 12 : d.hour % 12;
+        final ap = d.hour < 12 ? '오전' : '오후';
+        final mm = d.minute.toString().padLeft(2, '0');
+        return '${d.month}월 ${d.day}일 $ap $h12:$mm';
+      }
 
-    test('시간대 표시가 없는 값은 UTC 로 읽어 로컬로 찍는다', () {
-      expect(
-        monthDayTime('2026-08-24T10:30:00'),
-        expected(DateTime.utc(2026, 8, 24, 10, 30)),
-      );
-    });
+      test('올해는 줄임 날짜 + 시각 — UTC 로 읽어 로컬로 찍는다', () {
+        final utc = DateTime.utc(2026, 8, 24, 10, 30);
+        expect(
+          formatMemoStamp('2026-08-24T10:30:00', now: utc.toLocal()),
+          sameYear(utc),
+        );
+      });
 
-    test('자정 근처는 날짜까지 넘어간다 — 잘라 쓰던 시절의 하루 오차', () {
-      // KST 라면 09-01 06:00 — 잘라 쓰던 시절엔 08/31 21:00 으로 하루 앞이 찍혔다.
-      expect(
-        monthDayTime('2026-08-31T21:00:00'),
-        expected(DateTime.utc(2026, 8, 31, 21, 0)),
-      );
-    });
+      test('다른 해는 시각 없이 표준 날짜', () {
+        final d = DateTime.utc(2025, 12, 3, 3, 0).toLocal();
+        expect(
+          formatMemoStamp('2025-12-03T03:00:00', now: DateTime(2026, 6, 1)),
+          '${d.year}년 ${d.month}월 ${d.day}일',
+        );
+      });
 
-    test('Z 가 붙은 값과 안 붙은 값이 같은 시각으로 나온다', () {
-      expect(
-        monthDayTime('2026-08-24T10:30:00'),
-        monthDayTime('2026-08-24T10:30:00Z'),
-      );
-    });
+      test('자정 근처는 날짜까지 넘어간다 — 잘라 쓰던 시절의 하루 오차', () {
+        // KST 라면 09-01 06:00 — 잘라 쓰던 시절엔 08/31 21:00 으로 하루 앞이 찍혔다.
+        final utc = DateTime.utc(2026, 8, 31, 21, 0);
+        expect(
+          formatMemoStamp('2026-08-31T21:00:00', now: utc.toLocal()),
+          sameYear(utc),
+        );
+      });
 
-    test('초·밀리초가 붙어도 분까지만 찍는다', () {
-      expect(
-        monthDayTime('2026-08-24T10:30:45.123'),
-        expected(DateTime.utc(2026, 8, 24, 10, 30)),
-      );
-    });
+      test('Z 가 붙은 값과 안 붙은 값이 같은 시각으로 나온다', () {
+        final now = DateTime.utc(2026, 8, 24).toLocal();
+        expect(
+          formatMemoStamp('2026-08-24T10:30:00', now: now),
+          formatMemoStamp('2026-08-24T10:30:00Z', now: now),
+        );
+      });
 
-    test('없거나 못 읽는 값은 빈 문자열 — 라벨이 다른 문자열에 이어 붙는다', () {
-      expect(monthDayTime(null), '');
-      expect(monthDayTime(''), '');
-      expect(monthDayTime('알 수 없음'), '');
-    });
-  });
+      test('없거나 못 읽는 값은 빈 문자열 — 메타 줄이 빈 조각을 뺀다', () {
+        expect(formatMemoStamp(null), '');
+        expect(formatMemoStamp(''), '');
+        expect(formatMemoStamp('알 수 없음'), '');
+        expect(formatMemoStamp('2026-08-24'), '');
+      });
+    },
+  );
 }
