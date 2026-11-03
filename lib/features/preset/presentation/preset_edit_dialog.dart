@@ -317,6 +317,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
 
   void _onType(String next) {
     setState(() {
+      // 종류가 바뀌면 카테고리는 늘 비운다 — 다른 종류의 카테고리는 틀리다(목록을 받기 전이라 종류를 못 읽어도)
+      if (next != _type) _categoryRowId = null;
       _type = next;
       _normalize();
     });

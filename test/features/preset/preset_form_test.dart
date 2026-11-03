@@ -379,6 +379,19 @@ void main() {
     expect(repo.categorySent, 1);
   });
 
+  testWidgets('지출 ↔ 수입을 바꾸면 카테고리를 받기 전이어도 비운다(다른 종류 카테고리는 늘 틀리다)', (
+    tester,
+  ) async {
+    final late = Completer<List<ExpenseCategory>>();
+    final repo = await _open(tester, _filled, categoriesFuture: late.future);
+    await tester.tap(_t('수입').first);
+    await tester.pumpAndSettle();
+    await tester.tap(_btn(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(_t(l.presetCategoryRequired), findsOneWidget);
+    expect(repo.sent, isNull, reason: '옛 카테고리를 실어 보내지 않는다');
+  });
+
   testWidgets('카테고리를 받았는데 목록에 없으면(지운 카테고리) 비우고 저장은 막힌다', (tester) async {
     final repo = await _open(
       tester,
