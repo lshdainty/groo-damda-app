@@ -162,19 +162,34 @@ class _BodyState extends ConsumerState<_Body> {
       // 이체는 카테고리가 없는 대신 양쪽 계좌가 있어야 성립한다 — 서버도 같은 규칙.
       (_isTransfer
           ? transferPartiesReady(_assetRowId, _toAssetRowId)
-          : _categoryRowId != null) &&
+          : _effectiveCategoryRowId != null) &&
       (!_lockAmount || _amountValue > 0);
 
   bool get _isTransfer => _type == 'TRANSFER';
+
+  /// 저장에 쓰는 카테고리 — **받기 전에는 읽어 온 값을 그대로 둔다**, 받았는데 목록에 없으면(지운 카테고리) 없는 것이다. 지운
+  /// 카테고리 id 가 저장 본문으로 나가면 서버가 거절한다(저장하려면 다시 골라야 한다).
+  int? get _effectiveCategoryRowId {
+    final id = _categoryRowId;
+    if (id == null) return null;
+    final cats = ref.read(categoriesProvider).value;
+    if (cats == null) return id;
+    return cats.any((c) => c.rowId == id) ? id : null;
+  }
 
   /// 이자 칸을 보이는가 — 규칙은 거래 시트와 한 벌이다(`transfer_rules.dart`).
   /// 이자는 **금액을 고정했을 때만** 받는다(사용자 결정 2026-09-15). 금액이 매달
   /// 다르면 이자도 매달 다르니, 박아 둔 이자는 불러올 때마다 틀린 값이 된다.
   /// 수수료는 그대로 둔다 — 계좌 짝의 성질이라 매번 같을 수 있다.
-  bool get _showInterest =>
-      _lockAmount &&
-      _isTransfer &&
-      isLoanTarget(ref.read(assetsProvider).value, _toAssetRowId);
+  ///
+  /// 자산을 아직 못 받았으면 "받는 계좌가 대출인가" 를 모른다 — 읽어 온 이자가 있는 한 있는 것으로 본다. 모르는 채로 false 면 저장 본문이
+  /// 이자를 null 로 실어 서버에 저장된 이자가 지워진다(자산이 오기 전에 저장을 누르면).
+  bool get _showInterest {
+    if (!_lockAmount || !_isTransfer) return false;
+    final assets = ref.read(assetsProvider).value;
+    if (assets == null) return _interestCtrl.text.isNotEmpty;
+    return isLoanTarget(assets, _toAssetRowId);
+  }
 
   int? _numOrNull(TextEditingController c) {
     final v = int.tryParse(c.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
@@ -230,7 +245,9 @@ class _BodyState extends ConsumerState<_Body> {
         await repo.update(
           id: widget.edit!.rowId,
           templateName: name,
-          categoryRowId: _isTransfer ? null : _categoryRowId,
+          categoryRowId: Patch.set(
+            _isTransfer ? null : _effectiveCategoryRowId,
+          ),
           assetRowId: Patch.set(_assetRowId),
           // 이체 칸도 이 시트의 칸이다 — 지출·수입으로 바꿔 저장하면 null 로 지워진다.
           toAssetRowId: Patch.set(_isTransfer ? _toAssetRowId : null),
@@ -254,7 +271,7 @@ class _BodyState extends ConsumerState<_Body> {
       } else {
         await repo.create(
           templateName: name,
-          categoryRowId: _isTransfer ? null : _categoryRowId,
+          categoryRowId: _isTransfer ? null : _effectiveCategoryRowId,
           assetRowId: _assetRowId,
           toAssetRowId: _isTransfer ? _toAssetRowId : null,
           fee: _isTransfer ? _numOrNull(_feeCtrl) : null,

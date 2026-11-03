@@ -1226,7 +1226,7 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                   symbol: symbol,
                   isUs: isUs,
                   range: _range,
-                  height: 168,
+                  height: kStockChartWebViewHeight,
                   broker: 'toss',
                 ),
                 const SizedBox(height: PSpacing.x3),
@@ -1895,6 +1895,10 @@ class _InfoBand extends StatelessWidget {
 
 // ---- 호가창 (토스 orderbook · 실데이터 전용) ----------------------------------
 
+/// 시험 · 렌더 하네스용 — 호가 표는 private 이라 이름만 열어 둔다.
+@visibleForTesting
+typedef OrderBookForTest = _OrderBook;
+
 class _OrderBook extends StatelessWidget {
   const _OrderBook({
     required this.currency,
@@ -1936,13 +1940,13 @@ class _OrderBook extends StatelessWidget {
       // 바는 항상 중심축(가격) 쪽에 붙어 바깥으로 자란다 — 매수=중심(오른쪽)에서 왼쪽으로,
       // 매도=중심(왼쪽)에서 오른쪽으로. FractionallySizedBox+Stack 은 좌측 고정 버그가 있어 Positioned 로 명시.
       // 높이는 글자를 따라 늘어난다(큰 글자에서 줄이 겹치지 않게) — 28 은 최소 높이. 잔량 글이 칸보다 넓으면
-      // 잔량 쪽이 줄어든다(FittedBox) — 가격 칸은 줄이지 않는다.
+      // 글자를 줄이지 않고 쉼표 뒤에서만 줄을 바꾼다(DESIGN.md "금액은 쉼표 뒤에서만") — 바는 칸 높이를 따라간다.
       return LayoutBuilder(
         builder: (context, c) => Stack(
           children: [
             Positioned(
-              top: 0,
-              bottom: 0,
+              top: 4,
+              bottom: 4,
               left: alignRight ? null : 0,
               right: alignRight ? 0 : null,
               width: c.maxWidth * f,
@@ -1962,20 +1966,18 @@ class _OrderBook extends StatelessWidget {
                     ? Alignment.centerRight
                     : Alignment.centerLeft,
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    right: alignRight ? 6 : 0,
-                    left: alignRight ? 0 : 6,
+                  padding: EdgeInsets.fromLTRB(
+                    alignRight ? 0 : 4,
+                    4,
+                    alignRight ? 4 : 0,
+                    4,
                   ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      krw(q),
-                      maxLines: 1,
-                      softWrap: false,
-                      style: PTypography.t3.copyWith(
-                        color: context.colors.fgNeutralSubtle,
-                        fontFeatures: kStocksTnum,
-                      ),
+                  child: Text(
+                    keepAllAmount(krw(q)),
+                    textAlign: alignRight ? TextAlign.end : TextAlign.start,
+                    style: PTypography.t3.copyWith(
+                      color: context.colors.fgNeutralSubtle,
+                      fontFeatures: kStocksTnum,
                     ),
                   ),
                 ),
@@ -2011,7 +2013,7 @@ class _OrderBook extends StatelessWidget {
                         alignRight: true,
                       ),
               ),
-              // 가격 칸은 줄지 않는다 — 최소 92, 큰 글자에서는 글자 폭만큼 넓어지고 잔량 칸이 먼저 줄어든다.
+              // 가격 칸은 줄지 않는다 — 최소 92, 큰 글자에서는 글자 폭만큼 넓어지고 잔량 칸이 먼저 줄어든다(잔량은 쉼표 뒤에서 줄바꿈).
               ConstrainedBox(
                 constraints: const BoxConstraints(minWidth: 92),
                 child: Center(
