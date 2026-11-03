@@ -4940,10 +4940,10 @@
       }
     }
   },
-  "expRefundFailed": "환불하지 못했어요. 잠시 뒤 다시 시도해주세요.",
-  "expRefundCancelFailed": "환불을 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.",
-  "expTxDeleteFailed": "거래를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
-  "transferDeleteFailed": "이체를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "expRefundFailed": "환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.",
+  "expRefundCancelFailed": "환불을 취소하지 못했어요.",
+  "expTxDeleteFailed": "거래를 삭제하지 못했어요.",
+  "transferDeleteFailed": "이체를 삭제하지 못했어요.",
   "transferDetailTitle": "이체 상세",
   "transferFromLabel": "보내는 계좌",
   "transferToLabel": "받는 계좌",

@@ -4678,9 +4678,9 @@
     }
   },
   "expRefundFailed": "Couldn't mark it as refunded. Please try again in a moment.",
-  "expRefundCancelFailed": "Couldn't undo the refund. Please try again in a moment.",
-  "expTxDeleteFailed": "Couldn't delete the transaction. Please try again in a moment.",
-  "transferDeleteFailed": "Couldn't delete the transfer. Please try again in a moment.",
+  "expRefundCancelFailed": "Couldn't undo the refund.",
+  "expTxDeleteFailed": "Couldn't delete the transaction.",
+  "transferDeleteFailed": "Couldn't delete the transfer.",
   "transferDetailTitle": "Transfer details",
   "transferFromLabel": "From account",
   "transferToLabel": "To account",

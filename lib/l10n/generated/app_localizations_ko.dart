@@ -8381,16 +8381,16 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get expRefundFailed => '환불하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get expRefundFailed => '환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
 
   @override
-  String get expRefundCancelFailed => '환불을 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get expRefundCancelFailed => '환불을 취소하지 못했어요.';
 
   @override
-  String get expTxDeleteFailed => '거래를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get expTxDeleteFailed => '거래를 삭제하지 못했어요.';
 
   @override
-  String get transferDeleteFailed => '이체를 삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get transferDeleteFailed => '이체를 삭제하지 못했어요.';
 
   @override
   String get transferDetailTitle => '이체 상세';
