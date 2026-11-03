@@ -1,7 +1,8 @@
 // I-09 09-2 앱 — 일정 폼 시트의 흐름: 칸 오류 · 닫기 물음 · 한 단계 · 고르기 · 저장 실패 · 삭제 · 달 비우기 · 200% (줄 21 ~ 30).
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RenderBox;
+import 'package:flutter/gestures.dart' show HitTestResult;
+import 'package:flutter/rendering.dart' show RenderBox, RenderPointerListener;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -168,6 +169,7 @@ void main() {
       await tapRow(tester, l.calAllDay);
       expect(find.text('오전 9:00'), findsOneWidget);
       expect(find.text('오전 10:00'), findsOneWidget);
+      // 줄 높이는 글 줄 하나(22)지만 누르는 자리는 위아래 11 씩 줄 밖으로 넓어 44 다(웹 Piece -my-[11px] min-h-[44px])
       for (final t in ['10월 29일 (목)', '오전 9:00']) {
         final box = tester.getRect(
           find
@@ -177,8 +179,34 @@ void main() {
               )
               .first,
         );
-        expect(box.height, greaterThanOrEqualTo(44), reason: t);
+        expect(box.height, closeTo(22, 0.6), reason: '$t 줄 높이');
+        final x = box.center.dx;
+        for (final dy in [-21.0, 21.0]) {
+          final r = HitTestResult();
+          tester.binding.hitTestInView(
+            r,
+            Offset(x, box.center.dy + dy),
+            tester.view.viewId,
+          );
+          expect(
+            r.path.any((e) => e.target is RenderPointerListener),
+            isTrue,
+            reason: '$t 위아래 21 에서도 눌린다(누르는 자리 44)',
+          );
+        }
       }
+      // 시작 · 종료 줄은 다른 줄과 같은 46 이다(위아래 여백 12 + 글 줄 22)
+      final rowH = tester
+          .getSize(
+            find
+                .ancestor(
+                  of: rowTitle(l.calStartDate),
+                  matching: find.byKey(const ValueKey('plist-item')),
+                )
+                .first,
+          )
+          .height;
+      expect(rowH, closeTo(46, 0.6));
     });
 
     testWidgets('조각의 이름은 "시작 날짜, 10월 29일 (목)" 꼴이다', (tester) async {
@@ -388,7 +416,7 @@ void main() {
       expect(button(l.actionDone), findsOneWidget);
     });
 
-    testWidgets('"완료" 는 친 글을 넣고, ← 는 버린다', (tester) async {
+    testWidgets('"완료" 는 친 글을 넣고, ← 는 바뀐 글이 있으면 묻고 나가면 버린다', (tester) async {
       await openEventForm(tester, repo: _Repo());
       await writeStep(
         tester,
@@ -402,8 +430,33 @@ void main() {
       await tester.enterText(find.byType(TextField).last, '버려질 글');
       await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-back-slot')));
       await tester.pumpAndSettle();
+      // 들어올 때와 글이 달라 먼저 묻는다(웹 M-7 과 같다) — 계속 작성은 그 단계에 머문다
+      expect(find.byType(PAlertDialogView), findsOneWidget);
+      await tester.tap(find.text(l.sheetLeaveStay));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('p-bottom-sheet-back-slot')),
+        findsOneWidget,
+        reason: '계속 작성 — 안 단계 그대로',
+      );
+      await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-back-slot')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l.sheetLeaveLeave));
+      await tester.pumpAndSettle();
       expect(valueText('치과 3층'), findsOneWidget);
       expect(valueText('버려질 글'), findsNothing);
+    });
+
+    testWidgets('글을 안 바꿨으면 ← 가 묻지 않고 바로 줄 칸으로 간다', (tester) async {
+      await openEventForm(tester, repo: _Repo());
+      await tapRow(tester, l.calLocation);
+      await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-back-slot')));
+      await tester.pumpAndSettle();
+      expect(find.byType(PAlertDialogView), findsNothing);
+      expect(
+        find.byKey(const ValueKey('p-bottom-sheet-back-slot')),
+        findsNothing,
+      );
     });
 
     testWidgets('뒤로 가기 · Esc 는 단계만 닫고, 그다음에야 시트가 닫힌다', (tester) async {
@@ -411,6 +464,10 @@ void main() {
       await tapRow(tester, l.calFieldDescription);
       await tester.enterText(find.byType(TextField).last, '버려질 글');
       await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      // 바뀐 글이 있어 먼저 묻는다 — 나가면 그 단계만 닫힌다
+      expect(find.byType(PAlertDialogView), findsOneWidget);
+      await tester.tap(find.text(l.sheetLeaveLeave));
       await tester.pumpAndSettle();
       expect(sheetContent(), findsOneWidget);
       expect(

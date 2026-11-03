@@ -48,6 +48,9 @@ export 'package:groo_damda_app/shared/ds/bottom_sheet/bottom_sheet_route.dart'
 ///
 /// 안의 한 단계 — 시트 안에서 한 단계 들어가 있는 동안([interceptClose])은 닫기 청이 시트를 닫지 않고 그 단계를 닫는 쪽으로 쓰인다.
 ///
+/// 단계마다 규칙이 갈릴 때 — [isForm] 이 있으면 바깥 누르기 · 끌기를 그 순간의 단계로 가른다(일정 목록 · 상세 = 조회, 수정 폼 = 입력).
+/// 바깥 누르기 · 끌기 · 닫기 원은 한 단계가 아니라 시트 전체를 닫고, 뒤로 가기 · `Esc` 만 한 단계 뒤로 간다.
+///
 /// 높이 — 내용만큼, 화면 높이의 90% 를 넘지 않는다(그보다 긴 내용은 페이지로). 키보드가 올라오면 그 위에 서고, 안전
 /// 영역은 키보드가 없을 때만 더한다. 손잡이는 [snapPoints] 가 있을 때만 — 누르면 다음(더 높은) 스냅 높이로, 가장 높은
 /// 높이에서 누르면 닫는다.
@@ -63,6 +66,7 @@ abstract final class PBottomSheet {
     bool Function()? isDirty,
     PLeaveConfirmCopy? leaveCopy,
     bool Function()? interceptClose,
+    bool Function()? isForm,
     List<double>? snapPoints,
     FocusNode? initialFocus,
     bool useRootNavigator = true,
@@ -89,6 +93,7 @@ abstract final class PBottomSheet {
         isDirty: isDirty,
         leaveCopy: leaveCopy,
         interceptClose: interceptClose,
+        isForm: isForm,
         snapPoints: form ? null : snapPoints,
         initialFocus: initialFocus,
       ),

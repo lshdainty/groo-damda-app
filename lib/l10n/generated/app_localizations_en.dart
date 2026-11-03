@@ -1508,8 +1508,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save the event. Please try again in a moment.';
 
   @override
-  String get calFormDeleteFailed =>
-      'Couldn\'t delete the event. Please try again in a moment.';
+  String get calFormDeleteFailed => 'Couldn\'t delete the event.';
 
   @override
   String calReminderMinutesBefore(int n) {
@@ -1525,6 +1524,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String calEventDeleteConfirm(String title) {
     return 'Delete the \"$title\" event? A deleted event cannot be restored.';
+  }
+
+  @override
+  String calEventDeleteConfirmRecurring(String title) {
+    return '\"$title\" is a repeating event, so every occurrence will be deleted. This action cannot be undone.';
   }
 
   @override
@@ -6539,12 +6543,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String calDetailDurationM(int m) {
     return '${m}m';
   }
-
-  @override
-  String get calDetailMemo => 'Memo';
-
-  @override
-  String get calDetailRepeat => 'Repeat';
 
   @override
   String get categoryReorderEdit => 'Reorder';

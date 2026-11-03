@@ -27,6 +27,7 @@ class PBottomSheetRoute<T> extends PopupRoute<T> {
     required this.leaveCopy,
     required this.snapPoints,
     this.interceptClose,
+    this.isForm,
     this.alwaysHandle = false,
     this.topRadius = PRounded.r6,
     this.initialFocus,
@@ -50,6 +51,13 @@ class PBottomSheetRoute<T> extends PopupRoute<T> {
   /// 않는다). 시트 안에서 한 단계 들어가 있을 때 뒤로 가기 · `Esc` 가 시트 전체가 아니라 그 단계만 닫는 길이다(웹
   /// `onOpenChange(false)` 를 안에서 가로채는 것과 같다).
   final bool Function()? interceptClose;
+
+  /// 단계마다 닫힘 규칙이 갈릴 때(목록 · 상세 = 조회, 폼 = 입력) [form] 대신 누르는 · 끄는 순간에 읽는 판정. 있으면 [form] 은
+  /// 스냅 높이 · 손잡이 판단에만 쓰이고(입력 폼이 아니라고 둔다) 바깥 누르기 · 끌기는 이 값을 따른다.
+  final bool Function()? isForm;
+
+  /// 지금 바깥 누르기 · 끌기를 무시하는 입력 폼 단계인가.
+  bool get formNow => isForm?.call() ?? form;
 
   /// 손잡이를 늘 단다 — 스냅 높이가 없어도(Menu Sheet). 누르면 닫는다.
   final bool alwaysHandle;
@@ -296,9 +304,9 @@ class _SheetHostState extends State<_SheetHost>
 
   // ── 닫는 길 ──────────────────────────────────────────────────
   @override
-  Future<void> requestClose() async {
+  Future<void> requestClose({bool wholeSheet = false}) async {
     if (_asking) return;
-    if (_route.interceptClose?.call() ?? false) return;
+    if (!wholeSheet && (_route.interceptClose?.call() ?? false)) return;
     final dirty = _route.isDirty?.call() ?? false;
     final copy = _route.leaveCopy;
     if (!dirty || copy == null) {
@@ -324,7 +332,7 @@ class _SheetHostState extends State<_SheetHost>
   }
 
   // ── 끌기 ─────────────────────────────────────────────────────
-  bool get _canDrag => !_route.form && _dragReady && !_asking;
+  bool get _canDrag => !_route.formNow && _dragReady && !_asking;
 
   bool get _bodyScrolled =>
       bodyController.hasClients && bodyController.position.pixels > 0.5;
@@ -382,8 +390,8 @@ class _SheetHostState extends State<_SheetHost>
           velocity >= kSheetCloseVelocity ||
           (_sheetHeight > 0 && _pos / _sheetHeight >= kSheetCloseFraction);
       if (closing) {
-        // 닫았으면 끌던 자리에서 내려가고, 계속 작성하면 제자리로 돌아온다(requestClose 가 한다)
-        requestClose();
+        // 닫았으면 끌던 자리에서 내려가고, 계속 작성하면 제자리로 돌아온다(requestClose 가 한다). 끌기는 한 단계가 아니라 시트 전체다
+        requestClose(wholeSheet: true);
       } else {
         _settleBack();
       }
@@ -417,7 +425,7 @@ class _SheetHostState extends State<_SheetHost>
       target = best.toInt();
     }
     if (closing) {
-      requestClose();
+      requestClose(wholeSheet: true);
       return;
     }
     _snapIndex = target;
@@ -427,7 +435,7 @@ class _SheetHostState extends State<_SheetHost>
   /// 손잡이 — 다음(더 높은) 스냅 높이로, 가장 높은 높이에서 누르면 닫는다.
   void _handleTap() {
     if (_snapIndex + 1 >= _snaps.length) {
-      requestClose();
+      requestClose(wholeSheet: true);
       return;
     }
     final from = _pos;
@@ -443,7 +451,6 @@ class _SheetHostState extends State<_SheetHost>
   // ── 그리기 ───────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final form = _route.form;
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
 
     Widget sheet = PBottomSheetScope(
@@ -476,7 +483,10 @@ class _SheetHostState extends State<_SheetHost>
         PDimLayer(
           repaint: Listenable.merge([_slide, _dim, _repaint]),
           opacityOf: _dimOpacity,
-          onTap: form ? null : requestClose,
+          // 누르는 순간의 단계로 가른다 — 입력 폼 단계는 무시하고, 조회 · 고르기 단계는 시트 전체를 닫는다
+          onTap: () {
+            if (!_route.formNow) requestClose(wholeSheet: true);
+          },
         ),
         CustomSingleChildLayout(
           delegate: _SheetLayoutDelegate(

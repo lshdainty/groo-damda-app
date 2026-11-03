@@ -86,7 +86,10 @@ class PresetRepository {
   Future<ExpenseTemplate> update({
     required int id,
     required String templateName,
-    int? categoryRowId,
+
+    /// 이 시트가 가진 칸이라 **늘 싣는다** — 이체로 바꿔 저장하면 명시적 null 로 옛 카테고리를 지운다. 서버는 키가 없으면 유지로
+    /// 읽어(`ExpenseTemplateServiceImpl`) 옛 카테고리와 TRANSFER 가 짝이 안 맞아 400 이 된다.
+    Patch<int> categoryRowId = const Patch.keep(),
     Patch<int> assetRowId = const Patch.keep(),
 
     /// 이체 칸도 이 시트의 칸이다 — 지출·수입으로 바꿔 저장하면 null 을 실어 지운다.
@@ -108,7 +111,7 @@ class PresetRepository {
         '/expense-template/$id',
         data: {
           'templateName': templateName,
-          'categoryRowId': ?categoryRowId,
+          if (categoryRowId.present) 'categoryRowId': categoryRowId.value,
           if (assetRowId.present) 'assetRowId': assetRowId.value,
           if (toAssetRowId.present) 'toAssetRowId': toAssetRowId.value,
           if (fee.present) 'fee': fee.value,

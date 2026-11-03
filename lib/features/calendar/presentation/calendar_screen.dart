@@ -12,7 +12,6 @@ import 'package:groo_damda_app/features/calendar/domain/holiday.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_day_sheet.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_dialog.dart';
-import 'package:groo_damda_app/features/calendar/presentation/calendar_event_detail_dialog.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_filter_sheet.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_grid.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_month_row.dart';
@@ -165,40 +164,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   void _openDayEventsSheet(DateTime day) {
-    // 그리드와 같은 규칙 — 표시를 끈 캘린더의 일정은 시트에도 올리지 않는다.
-    final events = visibleCalendarEvents(
-      ref.read(monthEventsProvider(_key)).value ?? const <CalendarEvent>[],
-      ref.read(userCalendarListProvider).value ?? const <UserCalendar>[],
-    );
-    final dayEvents = eventsOnDay(events, day);
-    // 공휴일 — 그리드와 동일하게 holidayVisible 게이트 + 월 범위에서 해당일 필터.
-    // 웹 상세처럼 종일 항목으로 함께 노출.
-    final holidayVisible = ref.read(holidayVisibleProvider);
-    final lastDay = DateTime(_key.year, _key.month + 1, 0).day;
-    final hStart =
-        '${_key.year.toString().padLeft(4, '0')}-${_key.month.toString().padLeft(2, '0')}-01';
-    final hEnd =
-        '${_key.year.toString().padLeft(4, '0')}-${_key.month.toString().padLeft(2, '0')}-${lastDay.toString().padLeft(2, '0')}';
-    final dayKey = calendarDateKey(day);
-    final dayHolidays = holidayVisible
-        ? (ref
-                      .read(
-                        holidayListProvider((startDate: hStart, endDate: hEnd)),
-                      )
-                      .value ??
-                  const <Holiday>[])
-              .where((h) => h.holidayDate == dayKey)
-              .toList()
-        : const <Holiday>[];
+    // 그날 시트는 이 달의 일정 · 공휴일을 스스로 읽는다 — 시트 안에서 상세 · 수정 · 삭제가 일어나도 목록이 새 값을 따른다(I-09b 5)
     showCalendarDaySheet(
       context,
       day: day,
-      events: dayEvents,
-      holidays: dayHolidays,
-      calendars:
-          ref.read(userCalendarListProvider).value ?? const <UserCalendar>[],
+      monthKey: _key,
       onAdd: () => showCalendarEventDialog(context, defaultDate: day),
-      onTapEvent: (e) => showCalendarEventDetailDialog(context, e),
     );
   }
 }

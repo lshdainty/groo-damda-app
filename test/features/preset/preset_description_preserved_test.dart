@@ -70,7 +70,7 @@ class _CapturingRepo extends PresetRepository {
   Future<ExpenseTemplate> update({
     required int id,
     required String templateName,
-    int? categoryRowId,
+    Patch<int> categoryRowId = const Patch.keep(),
     Patch<int> assetRowId = const Patch.keep(),
     Patch<int> toAssetRowId = const Patch.keep(),
     Patch<int> fee = const Patch.keep(),

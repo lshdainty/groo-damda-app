@@ -822,7 +822,7 @@
   "calFormRows": "Event details",
   "calFormRowsMore": "Repeat, reminder, location and description",
   "calFormSaveFailed": "Couldn't save the event. Please try again in a moment.",
-  "calFormDeleteFailed": "Couldn't delete the event. Please try again in a moment.",
+  "calFormDeleteFailed": "Couldn't delete the event.",
   "calReminderMinutesBefore": "{n} min before",
   "@calReminderMinutesBefore": {
     "placeholders": {
@@ -835,6 +835,14 @@
   "calReminderDayBefore": "1 day before",
   "calEventDeleteConfirm": "Delete the \"{title}\" event? A deleted event cannot be restored.",
   "@calEventDeleteConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "calEventDeleteConfirmRecurring": "\"{title}\" is a repeating event, so every occurrence will be deleted. This action cannot be undone.",
+  "@calEventDeleteConfirmRecurring": {
     "placeholders": {
       "title": {
         "type": "String"
@@ -3586,8 +3594,6 @@
   "calDetailDurationH": "{h}h",
   "calDetailDurationHM": "{h}h {m}m",
   "calDetailDurationM": "{m}m",
-  "calDetailMemo": "Memo",
-  "calDetailRepeat": "Repeat",
   "categoryReorderEdit": "Reorder",
   "categoryReorderHint": "Drag the handle to reorder. Parents move among parents; subcategories move within their parent.",
   "txmSpendSummary": "Spending summary",

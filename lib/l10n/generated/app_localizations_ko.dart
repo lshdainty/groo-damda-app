@@ -1486,10 +1486,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calFormRowsMore => '반복 · 알림 · 장소 · 설명';
 
   @override
-  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormSaveFailed => '일정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calFormDeleteFailed => '일정을 삭제하지 못했어요. 잠시 뒤에 다시 시도해주세요.';
+  String get calFormDeleteFailed => '일정을 삭제하지 못했어요.';
 
   @override
   String calReminderMinutesBefore(int n) {
@@ -1505,6 +1505,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String calEventDeleteConfirm(String title) {
     return '\"$title\" 일정을 삭제할까요? 삭제한 일정은 되돌릴 수 없어요.';
+  }
+
+  @override
+  String calEventDeleteConfirmRecurring(String title) {
+    return '\"$title\" 은 반복 일정이라 모든 회차가 함께 삭제돼요. 삭제한 일정은 되돌릴 수 없어요.';
   }
 
   @override
@@ -6423,12 +6428,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String calDetailDurationM(int m) {
     return '$m분';
   }
-
-  @override
-  String get calDetailMemo => '메모';
-
-  @override
-  String get calDetailRepeat => '반복';
 
   @override
   String get categoryReorderEdit => '순서 바꾸기';
