@@ -14,7 +14,7 @@ import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_edit_route.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
 import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
-import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_from_tx_dialog.dart';
+import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_step.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -27,9 +27,10 @@ import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart'
     show currentSheetScroll, restoreSheetScroll;
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
-import 'package:groo_damda_app/features/expense_split/presentation/split_tx_dialog.dart';
+import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
-import 'package:groo_damda_app/features/recurring/presentation/recurring_settings_drawer.dart';
+import 'package:groo_damda_app/features/recurring/presentation/recurring_form.dart';
+import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
@@ -47,7 +48,7 @@ import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 ///   닫기 원 · 바깥 · 끌기 = 시트 전체. 바뀐 값(환불일)이 있으면 먼저 "작성한 내용이 사라져요" 를 묻는다.
 /// - [수정] 은 21-2 가 폼을 단계로 옮기기 전까지 지금 방식이다 — 상세를 내리고 옛 [showAddTxSheet] 를 연다. 저장하면 응답 값으로 상세를
 ///   다시 열고, 저장 없이 닫혀도 상세로 돌아온다. 고쳐 쓰기 저장은 돌아갈 상세가 없어 모두 닫는다.
-/// - 나누기 · 반복 · 더치페이는 21-3 이 단계로 옮긴다 — 그때까지 지금처럼 시트를 닫고 옛 표면을 연다.
+/// - 나누기 · 반복으로 만들기 · 더치페이도 같은 시트 안 한 단계다(21-3). 저장하거나 풀면 상세로 돌아온다.
 Future<void> showTxDetailDialog(BuildContext context, Expense expense) {
   final l = AppLocalizations.of(context);
   final hooks = _TxFlowHooks();
@@ -71,12 +72,15 @@ Future<void> showTxDetailDialog(BuildContext context, Expense expense) {
 class _TxFlowHooks {
   /// 수정 단계의 폼 — 바뀐 값 · 한 단계 닫기를 시트의 닫는 길에 알린다.
   final TxFormProbe form = TxFormProbe();
+
+  /// 나누기 · 더치페이 · 반복 단계 — 한 번에 하나만 열려 있다.
+  final StepProbe step = StepProbe();
   bool Function() isForm = () => false;
   bool Function() isDirty = () => false;
   bool Function() interceptClose = () => false;
 }
 
-enum _Step { detail, refund, edit }
+enum _Step { detail, refund, edit, split, dutch, recurring }
 
 class _TxDetailFlow extends ConsumerStatefulWidget {
   const _TxDetailFlow({
@@ -128,7 +132,8 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     h.isDirty = () =>
         mounted &&
         ((_step == _Step.refund && _refundDirty) ||
-            (_step == _Step.edit && h.form.dirty()));
+            (_step == _Step.edit && h.form.dirty()) ||
+            (_isEmbedded && h.step.dirty()));
     h.interceptClose = _intercept;
   }
 
@@ -141,12 +146,20 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     super.dispose();
   }
 
+  bool get _isEmbedded =>
+      _step == _Step.split || _step == _Step.dutch || _step == _Step.recurring;
+
   bool get _refundDirty => _refundDate != _today();
 
   // ── 단계 ────────────────────────────────────────────────
   /// 뒤로 가기 · `Esc` 한 번 = 한 단계 뒤(환불 → 상세). 시트의 닫는 길이 먼저 묻는다.
   bool _intercept() {
     if (!mounted || _step == _Step.detail) return false;
+    if (_isEmbedded) {
+      // 단계가 스스로 한 단계 뒤(또는 떠나기 확인)를 처리한다
+      widget.hooks.step.interceptClose();
+      return true;
+    }
     if (_step == _Step.edit) {
       // 폼 안 한 단계가 열려 있으면 그 단계만 — 아니면 상세로
       if (!widget.hooks.form.interceptClose()) _leaveEdit();
@@ -403,11 +416,19 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     pushAssetEdit(host, paymentAssetRowId);
   }
 
-  /// 21-3 이 단계로 옮길 표면들 — 그때까지 지금처럼 시트를 닫고 옛 표면을 연다.
-  void _openLegacy(void Function(BuildContext host) open) {
-    final host = widget.host;
-    PBottomSheet.of(context).close();
-    open(host);
+  /// 나누기 · 더치페이 · 반복으로 만들기 — 같은 시트 안 한 단계(21-3). 끝나면(저장 · 풀기) 상세로, ← 도 상세로.
+  double _embedScroll = 0;
+
+  void _openEmbedded(_Step step) {
+    if (_busy) return;
+    _embedScroll = currentSheetScroll(context);
+    setState(() => _step = step);
+  }
+
+  void _backToDetail() {
+    if (!mounted) return;
+    setState(() => _step = _Step.detail);
+    restoreSheetScroll(context, _embedScroll);
   }
 
   // ── 그리기 ──────────────────────────────────────────────
@@ -416,6 +437,37 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     final l = AppLocalizations.of(context);
     final isIncome = _e.expenseType == 'INCOME';
     if (_step == _Step.refund) return _buildRefund(l);
+    if (_step == _Step.split) {
+      return SplitStepFlow(
+        key: ValueKey('tx-split-${_e.rowId}'),
+        expense: _e,
+        probe: widget.hooks.step,
+        onBack: _backToDetail,
+        onFinished: _backToDetail,
+      );
+    }
+    if (_step == _Step.dutch) {
+      return DutchStepFlow(
+        key: ValueKey('tx-dutch-${_e.rowId}'),
+        expense: _e,
+        probe: widget.hooks.step,
+        onBack: _backToDetail,
+        onFinished: _backToDetail,
+      );
+    }
+    if (_step == _Step.recurring) {
+      return RecurringFormFlow(
+        key: ValueKey('tx-recurring-${_e.rowId}'),
+        expenseSeed: _e,
+        recurring: linkedRecurringOf(
+          ref.read(recurringListProvider).value,
+          _e.rowId,
+        ),
+        probe: widget.hooks.step,
+        onBack: _backToDetail,
+        onSaved: _backToDetail,
+      );
+    }
     if (_step == _Step.edit) {
       return TxFormFlow(
         // 같은 시트 안이라 키를 거래로 — 같은 제목의 다른 거래에서 폼이 이어지지 않게
@@ -583,9 +635,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
           icon: LucideIcons.scissors,
           label: l.expSplit,
           value: splits.isNotEmpty ? l.expSplitValue(splits.length) : null,
-          onTap: _busy
-              ? null
-              : () => _openLegacy((host) => showSplitTxDialog(host, e)),
+          onTap: _busy ? null : () => _openEmbedded(_Step.split),
         ),
       // 자동으로 만들어진 거래는 반복 · 더치페이의 원본이 될 수 없다 — 숨기지 않고 막힌 줄로(서버도 EXP_050)
       TxMoreRow(
@@ -594,11 +644,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         label: l.expConvertRecurring,
         value: recurringCount > 0 ? l.expLinked : null,
         disabled: auto,
-        onTap: _busy
-            ? null
-            : () => _openLegacy(
-                (host) => showRecurringSettingsDialog(host, expense: e),
-              ),
+        onTap: _busy ? null : () => _openEmbedded(_Step.recurring),
       ),
       TxMoreRow(
         key: 'dutch',
@@ -606,9 +652,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         label: l.dutchTitle,
         value: dutchCount > 0 ? l.expTxCount(dutchCount) : null,
         disabled: auto,
-        onTap: _busy
-            ? null
-            : () => _openLegacy((host) => showDutchPayFromTxDialog(host, e)),
+        onTap: _busy ? null : () => _openEmbedded(_Step.dutch),
       ),
     ];
 

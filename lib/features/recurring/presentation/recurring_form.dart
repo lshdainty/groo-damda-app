@@ -24,6 +24,9 @@ import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.d
 import 'package:groo_damda_app/features/recurring/presentation/recurring_format.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/forms/step_probe.dart';
+import 'package:groo_damda_app/features/expense/domain/expense.dart'
+    show Expense;
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -74,11 +77,9 @@ PLeaveConfirmCopy _leaveCopy(AppLocalizations l) => PLeaveConfirmCopy(
   leaveLabel: l.sheetLeaveLeave,
 );
 
-class _Probe {
+class _Probe extends StepProbe {
   /// 새 폼의 첫 초점(금액 칸) — 시트가 열릴 때 내용에 넘겨 준다(일정 폼과 같은 길: `PBottomSheet.show(initialFocus:)`).
   final FocusNode amountFocus = FocusNode();
-  bool Function() dirty = () => false;
-  bool Function() interceptClose = () => false;
 }
 
 /// 횟수 칸 — 숫자만, [kRecurringEndCountMax] 를 넘으면 그 값으로 줄인다(웹과 같다: 999999 → 999).
@@ -130,15 +131,36 @@ Future<void> showRecurringFormSheet(
   ).whenComplete(probe.amountFocus.dispose);
 }
 
+/// 반복 거래 폼 — 상세 시트 안 한 단계로도 쓴다(I-21 H 44 · 45). [expenseSeed] 가 있으면 그 거래 값으로 채워 새로 만들고(종류는
+/// 거래 그대로 막힘 · 저장 본문에 `sourceExpenseRowId` 를 싣는다), [recurring] 이 있으면 그 반복의 수정 폼이다. [onBack] 이 있으면 머리에
+/// ← 가 서고 저장이 끝나도 시트를 닫지 않고 [onSaved] 를 부른다.
+class RecurringFormFlow extends _RecurringForm {
+  const RecurringFormFlow({
+    super.key,
+    super.recurring,
+    required super.expenseSeed,
+    required super.probe,
+    required VoidCallback super.onBack,
+    required VoidCallback super.onSaved,
+  });
+}
+
 class _RecurringForm extends ConsumerStatefulWidget {
   const _RecurringForm({
+    super.key,
     this.recurring,
     this.transferSeed,
+    this.expenseSeed,
     required this.probe,
+    this.onBack,
+    this.onSaved,
   });
   final RecurringTransaction? recurring;
   final AssetTransfer? transferSeed;
-  final _Probe probe;
+  final Expense? expenseSeed;
+  final StepProbe probe;
+  final VoidCallback? onBack;
+  final VoidCallback? onSaved;
 
   @override
   ConsumerState<_RecurringForm> createState() => _RecurringFormState();
@@ -146,7 +168,10 @@ class _RecurringForm extends ConsumerStatefulWidget {
 
 class _RecurringFormState extends ConsumerState<_RecurringForm> {
   final _amountCtrl = TextEditingController();
-  FocusNode get _amountFocus => widget.probe.amountFocus;
+  late final FocusNode _amountFocus = widget.probe is _Probe
+      ? (widget.probe as _Probe).amountFocus
+      : FocusNode();
+  bool get _embedded => widget.onBack != null;
   final _draftCtrl = TextEditingController();
   final _draftFocus = FocusNode();
   final _countCtrl = TextEditingController();
@@ -211,23 +236,34 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     super.initState();
     final r = widget.recurring;
     final seed = widget.transferSeed;
+    final x = widget.expenseSeed;
     DateTime start = _today();
     if (r?.startDate != null) {
       start = parseDayKey(r!.startDate) ?? start;
+    } else if (x != null && (x.expenseDate ?? '').length >= 10) {
+      // 거래한 날이 시작일이다
+      start = parseDayKey(x.expenseDate!.substring(0, 10)) ?? start;
     } else if (seed != null) {
       start = parseDayKey((seed.transferDate ?? '').padRight(10)) ?? start;
     }
     _startDate = start;
-    _type = r?.expenseType ?? (seed != null ? 'TRANSFER' : 'EXPENSE');
-    final amount = r != null ? r.amount.abs() : (seed?.amount.abs() ?? 0);
+    _type =
+        r?.expenseType ??
+        x?.expenseType ??
+        (seed != null ? 'TRANSFER' : 'EXPENSE');
+    final amount = r != null
+        ? r.amount.abs()
+        : (x?.amount.abs() ?? seed?.amount.abs() ?? 0);
     _amountCtrl.text = amount > 0 ? formatAmountInput(amount) : '';
-    _merchant = r?.merchant ?? '';
-    _paymentMethod = r?.paymentMethod ?? '';
-    _categoryRowId = (r?.categoryRowId ?? 0) > 0 ? r!.categoryRowId : null;
+    _merchant = r?.merchant ?? x?.merchant ?? '';
+    _paymentMethod = r?.paymentMethod ?? x?.paymentMethod ?? '';
+    _categoryRowId = (r?.categoryRowId ?? 0) > 0
+        ? r!.categoryRowId
+        : x?.categoryRowId;
     _assetRowId = (r?.assetRowId ?? 0) > 0
         ? r!.assetRowId
-        : seed?.fromAssetRowId;
-    _description = r?.description ?? seed?.description ?? '';
+        : (x?.assetRowId ?? seed?.fromAssetRowId);
+    _description = r?.description ?? x?.description ?? seed?.description ?? '';
     _toAssetRowId = r?.toAssetRowId ?? seed?.toAssetRowId;
     final fee = r?.fee ?? seed?.fee;
     _fee = (fee ?? 0) > 0 ? '$fee' : '';
@@ -255,10 +291,31 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     _dEndDate = _endDate;
     _autoLog = r?.autoLog ?? true;
     _notify = r?.notifyDayBefore ?? true;
-    _fixed = r?.isFixed ?? false;
+    _fixed = r?.isFixed ?? x?.isFixed ?? false;
     _initial = _snapshot();
     widget.probe.dirty = () => _dirty && _step == _Step.none;
     widget.probe.interceptClose = _interceptClose;
+    // 상세 안 새 폼은 첫 칸(금액)에 초점 — 시트 틀이 초점을 못 주므로 여기서 건다
+    if (_embedded && r == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _step == _Step.none) _amountFocus.requestFocus();
+      });
+    }
+  }
+
+  /// 상세 안 단계에서 ← — 바뀐 값이 있으면 먼저 "작성한 내용이 사라져요".
+  Future<void> _leaveForm() async {
+    if (_leaving || _submitting) return;
+    if (_dirty) {
+      _leaving = true;
+      final leave = await PAlertDialog.confirmLeave(
+        context,
+        _leaveCopy(AppLocalizations.of(context)),
+      );
+      _leaving = false;
+      if (!leave || !mounted) return;
+    }
+    widget.onBack!();
   }
 
   Map<String, Object?> _snapshot() => {
@@ -297,6 +354,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   void dispose() {
     widget.probe.dirty = () => false;
     widget.probe.interceptClose = () => false;
+    if (widget.probe is! _Probe) _amountFocus.dispose();
     _amountCtrl.dispose();
     _draftCtrl.dispose();
     _draftFocus.dispose();
@@ -556,7 +614,12 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   }
 
   bool _interceptClose() {
-    if (_step == _Step.none || !mounted) return false;
+    if (!mounted) return false;
+    if (_step == _Step.none) {
+      if (!_embedded) return false;
+      _leaveForm();
+      return true;
+    }
     _requestLeaveStep();
     return true;
   }
@@ -878,6 +941,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
         // 폼 값 전부를 보낸다 — 다음 실행분부터 이 값으로 만들어진다
         await repo.update(
           id: r.rowId,
+          sourceExpenseRowId: r.sourceExpenseRowId,
           categoryRowId: categoryRowId,
           assetRowId: _assetRowId,
           toAssetRowId: toAsset,
@@ -904,6 +968,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
         );
       } else {
         await repo.create(
+          sourceExpenseRowId: widget.expenseSeed?.rowId,
           categoryRowId: categoryRowId,
           assetRowId: _assetRowId,
           toAssetRowId: toAsset,
@@ -937,7 +1002,11 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
         await ref.read(recurringListProvider.future);
       } catch (_) {}
       if (!mounted) return;
-      PBottomSheet.of(context).close();
+      if (_embedded) {
+        widget.onSaved?.call();
+      } else {
+        PBottomSheet.of(context).close();
+      }
     } on ApiException {
       // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글, 서버 원문 없음)
       if (!mounted) return;
@@ -1322,6 +1391,11 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     return PBottomSheetContent(
       title: _isEdit ? l.recurringEditTitle : l.recurringAddTitle,
       closeLabel: l.actionClose,
+      onClose: _embedded
+          ? () => PBottomSheet.of(context).requestClose(wholeSheet: true)
+          : null,
+      onBack: _embedded ? _leaveForm : null,
+      backLabel: _embedded ? l.actionBack : null,
       flushBody: true,
       scrollFog: true,
       body: Column(
@@ -1357,16 +1431,19 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               children: [
                 PChipRadio<String>(
                   value: 'EXPENSE',
+                  enabled: widget.expenseSeed == null || _type == 'EXPENSE',
                   label: l.expTypeExpense,
                   variant: PChipVariant.outlineStrong,
                 ),
                 PChipRadio<String>(
                   value: 'INCOME',
+                  enabled: widget.expenseSeed == null || _type == 'INCOME',
                   label: l.expTypeIncome,
                   variant: PChipVariant.outlineStrong,
                 ),
                 PChipRadio<String>(
                   value: 'TRANSFER',
+                  enabled: widget.expenseSeed == null || _type == 'TRANSFER',
                   label: l.expTypeTransfer,
                   variant: PChipVariant.outlineStrong,
                 ),

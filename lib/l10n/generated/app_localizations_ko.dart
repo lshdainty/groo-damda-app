@@ -9054,4 +9054,172 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get txfDeletedCategory => '지운 카테고리';
+
+  @override
+  String get expSplitSourceNote => '원 거래';
+
+  @override
+  String expSplitOldTotal(String amount) {
+    return '옛 총액 $amount';
+  }
+
+  @override
+  String expSplitItemsHeader(int count) {
+    return '나눈 내역 $count개';
+  }
+
+  @override
+  String expSplitItemTitle(int n) {
+    return '항목 $n';
+  }
+
+  @override
+  String get expSplitAddItem => '항목 추가';
+
+  @override
+  String get expSplitDropItem => '이 항목 지우기';
+
+  @override
+  String get expSplitItemName => '이름';
+
+  @override
+  String get expSplitItemNamePh => '항목 이름';
+
+  @override
+  String expSplitItemHelp(String rest, String total) {
+    return '나머지 항목 합 $rest · 총액 $total';
+  }
+
+  @override
+  String get expSplitRemaining => '남은 금액';
+
+  @override
+  String expSplitShortBy(String amount) {
+    return '$amount 모자라요';
+  }
+
+  @override
+  String expSplitOverBy(String amount) {
+    return '$amount 넘쳐요';
+  }
+
+  @override
+  String get expSplitReconcileTitle => '총액이 바뀌어 나눈 금액을 맞춰야 해요';
+
+  @override
+  String expSplitReconcileShort(String sum, String total, String diff) {
+    return '나눈 합계 $sum · 새 총액 $total — $diff 모자라요.';
+  }
+
+  @override
+  String expSplitReconcileOver(String sum, String total, String diff) {
+    return '나눈 합계 $sum · 새 총액 $total — $diff 넘쳐요.';
+  }
+
+  @override
+  String get expSplitActProportional => '비례 배분';
+
+  @override
+  String get expSplitActLargest => '큰 항목 반영';
+
+  @override
+  String get expSplitActAdjust => '조정 항목';
+
+  @override
+  String get expSplitErrRemain => '남은 금액을 0원으로 맞춰주세요.';
+
+  @override
+  String get expSplitErrCount => '항목을 둘 이상 넣어주세요.';
+
+  @override
+  String get expSplitRemoveAll => '내역 분할 풀기';
+
+  @override
+  String get expSplitRemoveTitle => '내역 분할을 풀까요?';
+
+  @override
+  String get expSplitRemoveBody => '나눈 항목이 모두 지워지고 거래 하나로 돌아가요.';
+
+  @override
+  String get expSplitRemoveAction => '풀기';
+
+  @override
+  String get expSplitRemoveFailed => '내역 분할을 풀지 못했어요.';
+
+  @override
+  String get expSplitSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get dutchMeIncludeTitle => '나도 포함해서 나누기';
+
+  @override
+  String get dutchMeIncludeOn => '내 몫도 계산돼요';
+
+  @override
+  String dutchParticipantsLabel(int count) {
+    return '참여자 $count명';
+  }
+
+  @override
+  String dutchChipRemove(String name) {
+    return '$name 빼기';
+  }
+
+  @override
+  String get dutchNameEmptyErr => '이름을 입력해주세요.';
+
+  @override
+  String get dutchMethodHeader => '나누는 법';
+
+  @override
+  String get dutchEqualSub => '똑같이';
+
+  @override
+  String get dutchRatioSub => '사람마다 몫 수';
+
+  @override
+  String get dutchSharesHeader => '몫';
+
+  @override
+  String dutchSharesTotal(String amount) {
+    return '합계 $amount';
+  }
+
+  @override
+  String get dutchPayerShort => '결제';
+
+  @override
+  String dutchRemainIncluded(String amount) {
+    return '남는 $amount 포함';
+  }
+
+  @override
+  String get dutchShareUnit => '몫';
+
+  @override
+  String get dutchNoteTitle => '메모';
+
+  @override
+  String get dutchNotePh => '정산에 같이 남길 한마디';
+
+  @override
+  String dutchPerPersonMe(String amount, String rest) {
+    return '$amount · $rest은 나';
+  }
+
+  @override
+  String get dutchErrNoOthers => '함께 나눌 사람을 넣어주세요.';
+
+  @override
+  String dutchSharesShortErr(String amount) {
+    return '몫을 합하면 $amount 모자라요.';
+  }
+
+  @override
+  String dutchSharesOverErr(String amount) {
+    return '몫을 합하면 $amount 넘쳐요.';
+  }
+
+  @override
+  String get dutchSaveFailed => '정산을 만들지 못했어요. 잠시 뒤 다시 시도해주세요.';
 }

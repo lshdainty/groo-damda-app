@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay.dart';
 
 class DutchPayRepository {
@@ -26,10 +27,12 @@ class DutchPayRepository {
     int? sourceExpenseRowId,
     required List<({String? name, int? userRowId, int amount, bool isPayer})>
     participants,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/dutch-pay',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
         data: {
           'title': title,
           'description': ?description,

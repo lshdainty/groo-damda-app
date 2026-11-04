@@ -33,7 +33,8 @@ import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart'
 import 'package:groo_damda_app/features/expense/presentation/tx_input.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
-import 'package:groo_damda_app/features/expense_split/presentation/split_tx_dialog.dart';
+import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
+import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
@@ -160,6 +161,7 @@ enum _S {
   presetAll,
   presetSave,
   presetAmount,
+  reconcile,
 }
 
 class _Errs {
@@ -298,6 +300,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   /// 나눈 내역 조회가 실패했다 — 저장 · 고쳐 쓰기를 막는다(N5). 분할을 모르는 채 보내면 서버가 옛 분할로 판정해 어긋난다.
   bool _splitsFailed = false;
   List<SplitInput>? _reconciledSplits;
+  final StepProbe _splitProbe = StepProbe();
   List<SplitInput> get _effectiveSplits => _reconciledSplits ?? _serverSplits;
   int get _splitSum => _effectiveSplits.fold<int>(0, (s, x) => s + x.amount);
   Expense? get _splitSource => _edit ?? _replaceOf;
@@ -448,6 +451,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   /// 기기 뒤로 가기 · Esc — 한 단계 안이면 그 단계만, 2단계면 1단계로(값은 버리지 않는다). 처음 단계면 시트의 닫는 길이 이어받는다.
   bool _intercept() {
     if (!mounted || _submitting) return _submitting;
+    if (_step == _S.reconcile) {
+      _splitProbe.interceptClose();
+      return true;
+    }
     if (_isSub || _step == _S.presetAll) {
       _requestLeaveSub();
       return true;
@@ -1563,19 +1570,34 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     );
   }
 
-  /// "나눈 내역 맞추기" — 21-3 까지 폼 위 대화상자(시트)로 둔다.
+  /// "나눈 내역 맞추기" — 폼 안 한 단계(D 25). 서버에 보내지 않고 맞춘 분할을 폼으로 돌려준다.
   void _openReconcile() {
-    final edited = _splitSource;
-    if (edited == null) return;
-    showSplitTxDialog(
-      context,
-      edited,
+    if (_splitSource == null) return;
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _returnTo = _step;
+      _step = _S.reconcile;
+    });
+  }
+
+  Widget _buildReconcile() {
+    final edited = _splitSource!;
+    return SplitStepFlow(
+      key: ValueKey('tx-reconcile-${edited.rowId}'),
+      expense: edited,
+      probe: _splitProbe,
       overrideTotal: _input.amountInt,
       recordedTotal: edited.amount.abs(),
       initialSplits: _effectiveSplits,
+      onBack: () {
+        if (mounted) setState(() => _step = _returnTo);
+      },
       onReconciled: (splits) {
         if (!mounted) return;
-        setState(() => _reconciledSplits = splits);
+        setState(() {
+          _reconciledSplits = splits;
+          _step = _returnTo;
+        });
       },
     );
   }
@@ -1616,6 +1638,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           : [
               for (final s in sp)
                 SplitInput(
+                  rowId: s.rowId,
                   categoryRowId: s.categoryRowId,
                   amount: s.amount,
                   label: s.label,
@@ -1633,6 +1656,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _S.sms => _buildSms(l),
       _S.presetAll => _buildPresetAll(l),
       _S.presetSave => _buildPresetSave(l),
+      _S.reconcile => _buildReconcile(),
     };
   }
 
