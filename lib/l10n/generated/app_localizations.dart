@@ -16560,6 +16560,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'정산을 만들지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get dutchSaveFailed;
+
+  /// No description provided for @expSplitErrRow.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 항목에 카테고리와 0원보다 큰 금액을 넣어주세요.'**
+  String get expSplitErrRow;
+
+  /// No description provided for @dutchErrRatio.
+  ///
+  /// In ko, this message translates to:
+  /// **'몫은 0보다 큰 수로 넣어주세요.'**
+  String get dutchErrRatio;
+
+  /// No description provided for @dutchErrCustomEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'몫을 넣어주세요.'**
+  String get dutchErrCustomEmpty;
+
+  /// No description provided for @expRecurringOpenFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 설정을 열지 못했어요.'**
+  String get expRecurringOpenFailed;
 }
 
 class _AppLocalizationsDelegate

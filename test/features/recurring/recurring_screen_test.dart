@@ -20,8 +20,11 @@ class _Repo extends RecurringRepository {
   final calls = <String>[];
 
   @override
-  Future<List<RecurringTransaction>> list({bool? upcoming, int? limit}) async =>
-      [...items];
+  Future<List<RecurringTransaction>> list({
+    bool? upcoming,
+    int? limit,
+    bool silent = false,
+  }) async => [...items];
 
   @override
   Future<void> toggle(int id, {bool silent = false}) async {

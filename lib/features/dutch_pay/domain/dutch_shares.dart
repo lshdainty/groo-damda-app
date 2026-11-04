@@ -70,7 +70,9 @@ DutchShares computeDutchShares({
       if (tw <= 0) return DutchShares(shares, 0);
       var assigned = 0;
       for (var i = 0; i < count; i++) {
-        shares[i] = (total * w[i]) ~/ tw;
+        // 100억 원 × 가중치도 64비트를 넘지 않게 BigInt 로 곱한다
+        shares[i] = (BigInt.from(total) * BigInt.from(w[i]) ~/ BigInt.from(tw))
+            .toInt();
         assigned += shares[i];
       }
       rest = total - assigned;

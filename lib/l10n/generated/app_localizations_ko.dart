@@ -9222,4 +9222,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dutchSaveFailed => '정산을 만들지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get expSplitErrRow => '모든 항목에 카테고리와 0원보다 큰 금액을 넣어주세요.';
+
+  @override
+  String get dutchErrRatio => '몫은 0보다 큰 수로 넣어주세요.';
+
+  @override
+  String get dutchErrCustomEmpty => '몫을 넣어주세요.';
+
+  @override
+  String get expRecurringOpenFailed => '반복 설정을 열지 못했어요.';
 }

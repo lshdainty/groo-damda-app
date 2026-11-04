@@ -29,6 +29,7 @@ import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dar
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
+import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/features/recurring/presentation/recurring_form.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -425,6 +426,41 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     setState(() => _step = step);
   }
 
+  /// 이 거래에 연결된 반복 — "반복 설정" 을 연 순간 정한다(있으면 그 반복의 수정 폼, 없으면 새로 만들기).
+  RecurringTransaction? _linkedRecurring;
+  bool _openingRecurring = false;
+
+  /// "반복 설정" — 반복 목록을 받은 뒤에 연다. 아직 못 받았으면 받아 오고, 못 받으면 열지 않고 실패 스낵바 + [다시 시도]
+  /// (목록 없이 열면 연결된 반복이 있어도 새로 만들기가 열려 반복이 하나 더 생긴다). 조회 요청은 silent.
+  Future<void> _openRecurring() async {
+    if (_busy || _openingRecurring) return;
+    _openingRecurring = true;
+    final l = AppLocalizations.of(context);
+    final snack = PSnackbar.of(context);
+    try {
+      var list = ref.read(recurringListProvider).value;
+      if (list == null) {
+        final repo = await ref.read(recurringRepositoryProvider.future);
+        list = await repo.list(silent: true);
+      }
+      if (!mounted) return;
+      _linkedRecurring = linkedRecurringOf(list, _e.rowId);
+      _openEmbedded(_Step.recurring);
+    } catch (_) {
+      if (!mounted) return;
+      snack.show(
+        message: l.expRecurringOpenFailed,
+        tone: PSnackbarTone.critical,
+        action: PSnackbarAction(
+          label: l.actionRetry,
+          onPressed: _openRecurring,
+        ),
+      );
+    } finally {
+      _openingRecurring = false;
+    }
+  }
+
   void _backToDetail() {
     if (!mounted) return;
     setState(() => _step = _Step.detail);
@@ -459,10 +495,8 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       return RecurringFormFlow(
         key: ValueKey('tx-recurring-${_e.rowId}'),
         expenseSeed: _e,
-        recurring: linkedRecurringOf(
-          ref.read(recurringListProvider).value,
-          _e.rowId,
-        ),
+        // 여는 순간 정한 연결 — 열린 뒤 목록이 바뀌어도 폼 값과 어긋나지 않게
+        recurring: _linkedRecurring,
         probe: widget.hooks.step,
         onBack: _backToDetail,
         onSaved: _backToDetail,
@@ -644,7 +678,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         label: l.expConvertRecurring,
         value: recurringCount > 0 ? l.expLinked : null,
         disabled: auto,
-        onTap: _busy ? null : () => _openEmbedded(_Step.recurring),
+        onTap: _busy ? null : _openRecurring,
       ),
       TxMoreRow(
         key: 'dutch',

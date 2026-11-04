@@ -430,7 +430,11 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
       },
       failedMessage: l.expSplitRemoveFailed,
       retryLabel: l.actionRetry,
-      onRetried: () => container.invalidate(expenseSplitsProvider(e.rowId)),
+      // 다시 시도가 성공하면 풀린 것이다 — 지운 항목이 남은 채 저장되지 않게 상세로 돌아간다
+      onRetried: () {
+        container.invalidate(expenseSplitsProvider(e.rowId));
+        if (mounted) widget.onFinished?.call();
+      },
     );
     if (ok && mounted) widget.onFinished?.call();
   }
@@ -522,6 +526,12 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
     final srcName = expenseActions.displayNameOf(context, _e);
     final remainErr = _attempted && !_submitting && remainder != 0
         ? l.expSplitErrRemain
+        : null;
+    final rowErr =
+        _attempted &&
+            !_submitting &&
+            rows.any((r) => r.categoryRowId == null || r.amount <= 0)
+        ? l.expSplitErrRow
         : null;
     final countErr = _attempted && !_submitting && rows.length < 2
         ? l.expSplitErrCount
@@ -672,11 +682,11 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _remainRow(l, remainder, masked),
-          if (remainErr != null || countErr != null)
+          if (remainErr != null || countErr != null || rowErr != null)
             Padding(
               padding: const EdgeInsets.only(bottom: PSpacing.x2),
               child: Text(
-                keepAll(remainErr ?? countErr!),
+                keepAll(remainErr ?? countErr ?? rowErr!),
                 key: const ValueKey('split-error'),
                 textAlign: TextAlign.end,
                 style: PTypography.t3.copyWith(color: c.fgCritical),

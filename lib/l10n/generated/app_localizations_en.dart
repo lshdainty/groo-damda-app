@@ -9440,4 +9440,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dutchSaveFailed =>
       'Couldn\'t create the split. Please try again in a moment.';
+
+  @override
+  String get expSplitErrRow =>
+      'Give every item a category and an amount above 0.';
+
+  @override
+  String get dutchErrRatio => 'Shares must be numbers above 0.';
+
+  @override
+  String get dutchErrCustomEmpty => 'Enter an amount for everyone.';
+
+  @override
+  String get expRecurringOpenFailed => 'Couldn\'t open the repeat settings.';
 }

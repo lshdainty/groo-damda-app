@@ -250,6 +250,7 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
     int? maxLines = 1,
     bool expands = false,
     TextInputType? keyboardType,
+    TextAlign textAlign = TextAlign.start,
     TextInputAction? textInputAction,
     bool obscureText = false,
     ValueChanged<String>? onSubmitted,
@@ -282,6 +283,7 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
           maxLines: maxLines,
           expands: expands,
           keyboardType: keyboardType,
+          textAlign: textAlign,
           textInputAction: textInputAction,
           obscureText: obscureText,
           // 가린 칸(비밀번호)은 자격증명 — 키보드 사전 · 추천 · 학습에 남기지 않는다

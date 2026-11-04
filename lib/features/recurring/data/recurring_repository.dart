@@ -13,11 +13,16 @@ class RecurringRepository {
   static Options? _opts(bool silent) =>
       silent ? Options(extra: {kSilentErrorToast: true}) : null;
 
-  Future<List<RecurringTransaction>> list({bool? upcoming, int? limit}) async {
+  Future<List<RecurringTransaction>> list({
+    bool? upcoming,
+    int? limit,
+    bool silent = false,
+  }) async {
     try {
       final res = await _dio.get<Map<String, dynamic>>(
         '/recurring-transactions',
         queryParameters: {'upcoming': ?upcoming, 'limit': ?limit},
+        options: _opts(silent),
       );
       final body = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data ?? const {},

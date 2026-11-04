@@ -220,7 +220,11 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       setState(() => _nameErr = l.dutchNameEmptyErr);
       return;
     }
-    if (_others.any((p) => p.name == name)) {
+    final me = ref.read(authProvider).value?.userName ?? l.dutchMe;
+    // 같은 이름 둘 · 내 이름과 같은 참여자는 막는다(서버는 이름을 소문자로 견준다)
+    final lower = name.toLowerCase();
+    if (lower == me.trim().toLowerCase() ||
+        _others.any((p) => p.name.toLowerCase() == lower)) {
       setState(() => _nameErr = l.dutchNameAlreadyAdded);
       return;
     }
@@ -240,7 +244,25 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
   }
 
   // ── 저장 ────────────────────────────────────────────────
+  /// 몫 칸이 못 쓰는 값인가 — 비율은 0 보다 큰 수, 개별 금액은 다른 사람 칸이 0 보다 커야 한다.
+  bool _rowBad(_Person p) {
+    switch (_method) {
+      case DutchSplitMethod.equal:
+        return false;
+      case DutchSplitMethod.ratio:
+        final d = double.tryParse(p.ratio.trim());
+        return d == null || d <= 0;
+      case DutchSplitMethod.custom:
+        return p != _me && (int.tryParse(p.custom) ?? 0) <= 0;
+    }
+  }
+
   String? _sumError(AppLocalizations l, bool masked) {
+    if (_list.any(_rowBad)) {
+      return _method == DutchSplitMethod.ratio
+          ? l.dutchErrRatio
+          : l.dutchErrCustomEmpty;
+    }
     if (_method != DutchSplitMethod.custom) return null;
     final diff = _total - _shares(_list).sum;
     if (diff == 0) return null;
@@ -577,12 +599,14 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
                         PChip(
                           key: const ValueKey('dutch-chip-me'),
                           label: meName,
+                          leading: PAvatar(name: meName, size: PAvatarSize.s24),
                           onPressed: null,
                         ),
                       for (final p in _others)
                         PInputChip(
                           key: ValueKey('dutch-chip-${p.id}'),
                           label: p.name,
+                          leading: PAvatar(name: p.name, size: PAvatarSize.s24),
                           removeLabel: l.dutchChipRemove(p.name),
                           onRemove: _submitting ? null : () => _removePerson(p),
                         ),
@@ -669,6 +693,8 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
             controller: p.ratioCtrl,
             semanticLabel: '$name ${l.dutchShareUnit}',
             suffixText: l.dutchShareUnit,
+            textAlign: TextAlign.end,
+            invalid: _attempted && _rowBad(p),
             tabularFigures: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
@@ -687,6 +713,8 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
                   semanticLabel: name,
                   placeholder: '0',
                   suffixText: wonUnit(),
+                  textAlign: TextAlign.end,
+                  invalid: _attempted && _rowBad(p),
                   tabularFigures: true,
                   keyboardType: TextInputType.number,
                   inputFormatters: kWonFormatters,

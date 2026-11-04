@@ -27,9 +27,12 @@ List<int> settleRemainder(List<int> amts, int target) {
 /// 비례 배분 — 지금 비중대로 새 총액에 맞춘다(잔차까지 정확히 흡수).
 List<int> proportionalAmounts(List<int> amts, int target) {
   final base = amts.fold<int>(0, (s, v) => s + v);
-  final b = base == 0 ? 1 : base;
+  final b = BigInt.from(base == 0 ? 1 : base);
+  final t = BigInt.from(target);
+  // 100억 원 × 항목도 64비트를 넘지 않게 BigInt 로 곱하고, 반올림(반은 올림)은 정수로 한다
   return settleRemainder([
-    for (final v in amts) ((v * target) / b).round(),
+    for (final v in amts)
+      ((BigInt.from(v) * t * BigInt.two + b) ~/ (b * BigInt.two)).toInt(),
   ], target);
 }
 

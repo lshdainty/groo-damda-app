@@ -25,4 +25,11 @@ void main() {
     expect(out.fold<int>(0, (s, v) => s + v), 20000);
     expect(out.every((v) => v >= 1), isTrue);
   });
+
+  test('비례 배분: 100억 → 90억 맞추기가 넘치지 않는다', () {
+    expect(proportionalAmounts([5000000000, 5000000000], 9000000000), [
+      4500000000,
+      4500000000,
+    ]);
+  });
 }

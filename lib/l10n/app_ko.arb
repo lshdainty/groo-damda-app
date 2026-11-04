@@ -5353,5 +5353,9 @@
   "@dutchSharesShortErr": {"placeholders": {"amount": {"type": "String"}}},
   "dutchSharesOverErr": "몫을 합하면 {amount} 넘쳐요.",
   "@dutchSharesOverErr": {"placeholders": {"amount": {"type": "String"}}},
-  "dutchSaveFailed": "정산을 만들지 못했어요. 잠시 뒤 다시 시도해주세요."
+  "dutchSaveFailed": "정산을 만들지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "expSplitErrRow": "모든 항목에 카테고리와 0원보다 큰 금액을 넣어주세요.",
+  "dutchErrRatio": "몫은 0보다 큰 수로 넣어주세요.",
+  "dutchErrCustomEmpty": "몫을 넣어주세요.",
+  "expRecurringOpenFailed": "반복 설정을 열지 못했어요."
 }

@@ -236,7 +236,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     super.initState();
     final r = widget.recurring;
     final seed = widget.transferSeed;
-    final x = widget.expenseSeed;
+    // 거래 씨앗은 새로 만들 때만 — 수정은 그 반복의 값 그대로(빈 칸을 거래 값으로 채워 덮지 않는다)
+    final x = r == null ? widget.expenseSeed : null;
     DateTime start = _today();
     if (r?.startDate != null) {
       start = parseDayKey(r!.startDate) ?? start;
@@ -1431,19 +1432,28 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               children: [
                 PChipRadio<String>(
                   value: 'EXPENSE',
-                  enabled: widget.expenseSeed == null || _type == 'EXPENSE',
+                  enabled:
+                      widget.expenseSeed == null ||
+                      widget.recurring != null ||
+                      _type == 'EXPENSE',
                   label: l.expTypeExpense,
                   variant: PChipVariant.outlineStrong,
                 ),
                 PChipRadio<String>(
                   value: 'INCOME',
-                  enabled: widget.expenseSeed == null || _type == 'INCOME',
+                  enabled:
+                      widget.expenseSeed == null ||
+                      widget.recurring != null ||
+                      _type == 'INCOME',
                   label: l.expTypeIncome,
                   variant: PChipVariant.outlineStrong,
                 ),
                 PChipRadio<String>(
                   value: 'TRANSFER',
-                  enabled: widget.expenseSeed == null || _type == 'TRANSFER',
+                  enabled:
+                      widget.expenseSeed == null ||
+                      widget.recurring != null ||
+                      _type == 'TRANSFER',
                   label: l.expTypeTransfer,
                   variant: PChipVariant.outlineStrong,
                 ),
