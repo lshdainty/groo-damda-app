@@ -4589,6 +4589,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetInterestTooLarge => '이자는 금액보다 클 수 없어요.';
 
   @override
+  String presetSelectOf(String field) {
+    return '$field 선택';
+  }
+
+  @override
+  String presetNoneOf(String field) {
+    return '$field 없음';
+  }
+
+  @override
   String get presetNoneValue => '없음';
 
   @override
