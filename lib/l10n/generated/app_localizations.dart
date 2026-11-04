@@ -8479,6 +8479,18 @@ abstract class AppLocalizations {
   /// **'이자는 금액보다 클 수 없어요.'**
   String get presetInterestTooLarge;
 
+  /// No description provided for @presetSelectOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{field} 선택'**
+  String presetSelectOf(String field);
+
+  /// No description provided for @presetNoneOf.
+  ///
+  /// In ko, this message translates to:
+  /// **'{field} 없음'**
+  String presetNoneOf(String field);
+
   /// No description provided for @presetNoneValue.
   ///
   /// In ko, this message translates to:
