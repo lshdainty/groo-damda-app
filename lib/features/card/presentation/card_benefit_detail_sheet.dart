@@ -48,6 +48,8 @@ class CardDetailContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final async = ref.watch(cardCatalogDetailProvider(rowId));
+    // 다시 시도(invalidate) 중에도 옛 오류가 남지 않게 — 받는 중이면 늘 Skeleton
+    if (async.isLoading) return const _DetailSkeleton();
     return async.when(
       loading: () => const _DetailSkeleton(),
       error: (_, _) => PResultSection(

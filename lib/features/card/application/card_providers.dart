@@ -62,12 +62,11 @@ final cardCatalogSearchProvider =
       return p.content;
     });
 
-final cardCatalogDetailProvider = FutureProvider.family<CardCatalogDetail, int>(
-  (ref, id) async {
-    final repo = await ref.watch(cardRepositoryProvider.future);
-    return repo.detail(id);
-  },
-);
+final cardCatalogDetailProvider = FutureProvider.autoDispose
+    .family<CardCatalogDetail, int>((ref, id) async {
+      final repo = await ref.watch(cardRepositoryProvider.future);
+      return repo.detail(id);
+    });
 
 /// 카드 월 실적 조회 (#371).
 typedef CardPerformanceKey = ({int assetRowId, String yearMonth});

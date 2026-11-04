@@ -90,15 +90,37 @@ class _AmountLine extends StatelessWidget {
             items: [for (final x in items) PTag(x)],
           );
         }
+        final color = context.colors.fgNeutralSubtle;
+        double widthOf(String x) {
+          final p = TextPainter(
+            text: TextSpan(text: x, style: PTypography.t3),
+            textDirection: TextDirection.ltr,
+            textScaler: scaler,
+            maxLines: 1,
+          )..layout();
+          final w = p.width;
+          p.dispose();
+          return w;
+        }
+
+        // 항목째 다음 줄 — 그래도 한 줄보다 길면 쉼표 뒤에서만 끊고, 줄이지(말줄임) 않는다. 구분점은 남기지 않는다.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final x in items)
-              PTagGroup(
-                size: PTagGroupSize.t3,
-                overflow: PTagGroupOverflow.truncate,
-                items: [PTag(x)],
-              ),
+              if (widthOf(x) <= box.maxWidth)
+                PTagGroup(
+                  size: PTagGroupSize.t3,
+                  overflow: PTagGroupOverflow.truncate,
+                  items: [PTag(x)],
+                )
+              else
+                for (final part in x.split(RegExp(r'(?<=,)\s+')))
+                  Text(
+                    part,
+                    style: PTypography.t3.copyWith(color: color),
+                    semanticsLabel: part,
+                  ),
           ],
         );
       },

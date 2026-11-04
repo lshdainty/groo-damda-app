@@ -75,4 +75,52 @@ void main() {
     expect(_text('옛 조건 카드'), findsNothing);
     expect(_text('총 1장'), findsOneWidget);
   });
+
+  testWidgets('다음 쪽을 받는 중 조건을 바꾸면 새 조건 첫 쪽이 나가고 옛 다음 쪽은 붙지 않는다', (t) async {
+    final keys = <CardSearchKey>[];
+    final waits = <Completer<CardCatalogPage>>[];
+    t.view.physicalSize = const Size(390, 844);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+    await t.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          cardCatalogPageProvider.overrideWith((ref, key) {
+            keys.add(key);
+            final c = Completer<CardCatalogPage>();
+            waits.add(c);
+            return c.future;
+          }),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: const CardBenefitsScreen(),
+        ),
+      ),
+    );
+    await t.pump();
+    waits[0].complete(_page('첫 쪽 카드', total: 90));
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 50));
+    // 끝까지 내려 다음 쪽 요청을 낸다
+    await t.drag(find.byType(Scrollable).first, const Offset(0, -3000));
+    await t.pump(const Duration(milliseconds: 100));
+    expect(keys.length, 2);
+    expect(keys.last.page, 1);
+    // 받는 중 조건을 바꾼다 — 새 조건의 첫 쪽이 나간다
+    await t.tap(_text('단종 카드 포함'));
+    await t.pump(const Duration(milliseconds: 100));
+    expect(keys.last.page, 0);
+    expect(keys.last.includeDiscontinued, isTrue);
+    waits.last.complete(_page('새 조건 카드', total: 1));
+    await t.pump(const Duration(milliseconds: 50));
+    waits[1].complete(_page('옛 다음 쪽 카드', total: 90));
+    await t.pump(const Duration(milliseconds: 50));
+    expect(_text('새 조건 카드'), findsOneWidget);
+    expect(_text('옛 다음 쪽 카드'), findsNothing);
+  });
 }

@@ -69,7 +69,7 @@ String annualFeeRowText(AppLocalizations l, CardAnnualFee? fee) {
   if (amount > 0) return l.cardRowFeeAmount(_won(amount));
   final label = fee.label;
   if (label != null && label.isNotEmpty) {
-    return l.cardRowFeeLabel(commaDigits(label));
+    return l.cardRowFeeLabel(commaDigits(decodeHtml(label)));
   }
   return l.cardRowFeeNone;
 }
@@ -80,7 +80,7 @@ String performanceRowText(AppLocalizations l, CardPerformance? perf) {
     final amount = perf.requiredAmount ?? 0;
     if (amount > 0) return l.cardPerfMonthly(_won(amount));
     final text = perf.requiredText;
-    if (text != null && text.isNotEmpty) return text;
+    if (text != null && text.isNotEmpty) return decodeHtml(text);
   }
   return l.cardPerfNone;
 }
@@ -91,7 +91,9 @@ String annualFeeDetailText(AppLocalizations l, CardAnnualFee? fee) {
   final amount = fee.amount ?? 0;
   if (amount > 0) return l.cardFeeDomesticOnly(_won(amount));
   final label = fee.label;
-  return label != null && label.isNotEmpty ? commaDigits(label) : l.cardFeeFree;
+  return label != null && label.isNotEmpty
+      ? commaDigits(decodeHtml(label))
+      : l.cardFeeFree;
 }
 
 /// 상세 키-값의 전월 실적 — "{n}원 이상" · "실적 없음".
@@ -100,7 +102,7 @@ String performanceDetailText(AppLocalizations l, CardPerformance? perf) {
     final amount = perf.requiredAmount ?? 0;
     if (amount > 0) return l.cardPerfMin(_won(amount));
     final text = perf.requiredText;
-    if (text != null && text.isNotEmpty) return text;
+    if (text != null && text.isNotEmpty) return decodeHtml(text);
   }
   return l.cardPerfNone;
 }

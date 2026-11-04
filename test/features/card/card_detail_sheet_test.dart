@@ -120,7 +120,7 @@ void main() {
     );
     await _open(t);
     expect(find.byType(PCallout), findsOneWidget);
-    final a = t.getRect(_text('첫째 유의예요.'));
+    final a = t.getRect(find.byKey(const ValueKey('callout-text')));
     final b = t.getRect(_text('둘째 유의예요.'));
     expect(b.top - a.bottom, closeTo(8, 1.0));
   });
