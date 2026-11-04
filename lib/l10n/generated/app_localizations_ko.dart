@@ -8424,6 +8424,370 @@ class AppLocalizationsKo extends AppLocalizations {
   String get namuFxUnavailableShort => '환율 없음';
 
   @override
+  String get recDefaultTitle => '반복 거래';
+
+  @override
+  String recGroupTitle(String kind, int count) {
+    return '$kind $count개';
+  }
+
+  @override
+  String get recMonthLead => '이번 달';
+
+  @override
+  String recRowNext(String date) {
+    return '다음 $date';
+  }
+
+  @override
+  String get recRowPaused => '쉬는 중';
+
+  @override
+  String get recRowFinished => '끝남';
+
+  @override
+  String get recCycleDaily => '매일';
+
+  @override
+  String recCycleWeekly(String day) {
+    return '매주 $day요일';
+  }
+
+  @override
+  String recCycleMonthly(int day) {
+    return '매월 $day일';
+  }
+
+  @override
+  String recCycleYearly(int month, int day) {
+    return '매년 $month월 $day일';
+  }
+
+  @override
+  String recCountOf(int total, int done) {
+    return '$total번 중 $done번';
+  }
+
+  @override
+  String recUntilMonth(int year, int month) {
+    return '$year년 $month월까지';
+  }
+
+  @override
+  String get recDowShort0 => '일';
+
+  @override
+  String get recDowShort1 => '월';
+
+  @override
+  String get recDowShort2 => '화';
+
+  @override
+  String get recDowShort3 => '수';
+
+  @override
+  String get recDowShort4 => '목';
+
+  @override
+  String get recDowShort5 => '금';
+
+  @override
+  String get recDowShort6 => '토';
+
+  @override
+  String get recDowLong0 => '일요일';
+
+  @override
+  String get recDowLong1 => '월요일';
+
+  @override
+  String get recDowLong2 => '화요일';
+
+  @override
+  String get recDowLong3 => '수요일';
+
+  @override
+  String get recDowLong4 => '목요일';
+
+  @override
+  String get recDowLong5 => '금요일';
+
+  @override
+  String get recDowLong6 => '토요일';
+
+  @override
+  String get recDetailTitle => '반복 거래 상세';
+
+  @override
+  String get recEndSentenceNone => '끝나는 날 없이 반복해요';
+
+  @override
+  String recEndSentenceDate(String date) {
+    return '$date까지 반복해요';
+  }
+
+  @override
+  String recEndSentenceCount(int total, int done) {
+    return '$total번 반복해요($done번 했어요)';
+  }
+
+  @override
+  String recSentenceLead(String cycle, String end) {
+    return '$cycle, $end.';
+  }
+
+  @override
+  String get recSentenceNextPre => '다음은 ';
+
+  @override
+  String get recSentenceNextPost => '예요.';
+
+  @override
+  String get recSentencePausedPre => '지금은 쉬고 있어요. 다시 켜면 쉬는 동안 지난 회차는 건너뛰고 ';
+
+  @override
+  String get recSentencePausedBold => '다음 회차부터';
+
+  @override
+  String get recSentencePausedPost => ' 기록해요.';
+
+  @override
+  String get recSentenceFinished => '정한 회차를 모두 기록했어요.';
+
+  @override
+  String get recOn => '켬';
+
+  @override
+  String get recOff => '끔';
+
+  @override
+  String recOnWithCount(int count) {
+    return '켬 · $count번 기록';
+  }
+
+  @override
+  String get recAutoLog => '자동 기록';
+
+  @override
+  String get recAutoLogSub => '그날 거래를 저절로 추가해요.';
+
+  @override
+  String get recNotifyDayBefore => '하루 전 알림';
+
+  @override
+  String get recNotifyDayBeforeSub => '예정일 전날 알려 드려요.';
+
+  @override
+  String get recNextDatesTitle => '다음 예정일';
+
+  @override
+  String recNextDatesLine(String dates) {
+    return '다음 예정일 — $dates';
+  }
+
+  @override
+  String get recPause => '일시정지';
+
+  @override
+  String get recResume => '다시 켜기';
+
+  @override
+  String get recPausedBadge => '일시정지';
+
+  @override
+  String recMoreOf(String name) {
+    return '$name 더보기';
+  }
+
+  @override
+  String recToastPaused(String name) {
+    return '$name 반복을 멈췄어요';
+  }
+
+  @override
+  String recToastResumed(String name) {
+    return '$name 반복을 다시 켰어요';
+  }
+
+  @override
+  String recToastDeleted(String name) {
+    return '$name 반복 설정을 삭제했어요';
+  }
+
+  @override
+  String get recPauseFailed => '반복을 멈추지 못했어요.';
+
+  @override
+  String get recResumeFailed => '반복을 다시 켜지 못했어요.';
+
+  @override
+  String get recDeleteFailed => '반복 설정을 삭제하지 못했어요.';
+
+  @override
+  String get recLoadFailed => '반복 거래를 불러오지 못했어요';
+
+  @override
+  String get recAssetLoadFailed => '계좌를 불러오지 못했어요';
+
+  @override
+  String get recEmptyTitle => '반복 거래가 없어요';
+
+  @override
+  String get recEmptyDesc => '구독 · 월세처럼 정해진 날 오가는 돈을 등록해 두면 그날 저절로 기록해요.';
+
+  @override
+  String get recAddButton => '반복 거래 추가';
+
+  @override
+  String get recTypeLabel => '유형';
+
+  @override
+  String get recMerchantPlaceholderExpense => '예: 관리비';
+
+  @override
+  String get recMerchantPlaceholderIncome => '예: 월급';
+
+  @override
+  String get recMemoPlaceholder => '메모를 적어 주세요';
+
+  @override
+  String get recRepeatRow => '반복';
+
+  @override
+  String get recStartDay => '시작일';
+
+  @override
+  String get recEndRow => '끝';
+
+  @override
+  String get recEndDay => '끝나는 날';
+
+  @override
+  String get recNoneValue => '없음';
+
+  @override
+  String get recEndNoneRadio => '끝 없음';
+
+  @override
+  String get recEndUntilDate => '날짜까지';
+
+  @override
+  String get recEndCountTimes => '횟수만큼';
+
+  @override
+  String get recEndCountLabel => '횟수';
+
+  @override
+  String get recTimesUnit => '번';
+
+  @override
+  String recEndValueDate(String date) {
+    return '$date까지';
+  }
+
+  @override
+  String recEndValueCount(int count) {
+    return '$count번';
+  }
+
+  @override
+  String get recOnWhichDay => '며칠에';
+
+  @override
+  String get recOnWhichWeekday => '무슨 요일에';
+
+  @override
+  String get recAtWhatTime => '몇 시에';
+
+  @override
+  String get recYearlyHint => '시작일과 같은 날에 해마다 기록해요.';
+
+  @override
+  String recMonthDayNote(int day) {
+    return '$day일이 없는 달은 그달 마지막 날에 기록해요.';
+  }
+
+  @override
+  String recDayN(int day) {
+    return '$day일';
+  }
+
+  @override
+  String get recFreqDaily => '매일';
+
+  @override
+  String get recFreqWeekly => '매주';
+
+  @override
+  String get recFreqMonthly => '매월';
+
+  @override
+  String get recFreqYearly => '매년';
+
+  @override
+  String get recErrAmount => '금액을 입력해주세요.';
+
+  @override
+  String get recErrCategory => '카테고리를 골라주세요.';
+
+  @override
+  String get recErrFrom => '보내는 계좌를 골라주세요.';
+
+  @override
+  String get recErrTo => '받는 계좌를 골라주세요.';
+
+  @override
+  String get recErrEndBeforeStart => '끝나는 날이 시작일보다 빨라요.';
+
+  @override
+  String recErrCountMax(int max) {
+    return '$max번까지 입력할 수 있어요.';
+  }
+
+  @override
+  String get recErrInterestTooBig => '이자는 금액보다 클 수 없어요.';
+
+  @override
+  String recSelectOf(String field) {
+    return '$field 선택';
+  }
+
+  @override
+  String recNoneOf(String field) {
+    return '$field 없음';
+  }
+
+  @override
+  String get recTransferFrom => '보내는 계좌';
+
+  @override
+  String get recTransferTo => '받는 계좌';
+
+  @override
+  String get recErrCountMin => '1번 이상 입력해주세요.';
+
+  @override
+  String get recSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get recNoAssets => '고를 수 있는 계좌가 없어요.';
+
+  @override
+  String get recNoCategoryOfKind => '이 종류의 카테고리가 없어요.';
+
+  @override
+  String get recFromAccount => '출금 계좌';
+
+  @override
+  String get recDepositAccount => '입금 계좌';
+
+  @override
+  String get recIncomeMethod => '수입 방식';
+
+  @override
+  String get recClearValue => '값 지우기';
+
+  @override
   String get expDetailMore => '더 하기';
 
   @override
