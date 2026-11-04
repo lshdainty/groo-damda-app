@@ -2978,7 +2978,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchAddNamePlaceholder => '이름 입력 후 추가';
 
   @override
-  String get dutchNameAlreadyAdded => '이미 추가된 이름이에요.';
+  String get dutchNameAlreadyAdded => '이미 넣은 이름이에요.';
 
   @override
   String get dutchAdd => '추가';
@@ -9230,7 +9230,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchErrRatio => '몫은 0보다 큰 수로 넣어주세요.';
 
   @override
-  String get dutchErrCustomEmpty => '몫을 넣어주세요.';
+  String get dutchErrCustomEmpty => '모든 참여자의 금액을 넣어주세요.';
 
   @override
   String get expRecurringOpenFailed => '반복 설정을 열지 못했어요.';

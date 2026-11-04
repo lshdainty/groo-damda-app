@@ -5506,7 +5506,7 @@ abstract class AppLocalizations {
   /// No description provided for @dutchNameAlreadyAdded.
   ///
   /// In ko, this message translates to:
-  /// **'이미 추가된 이름이에요.'**
+  /// **'이미 넣은 이름이에요.'**
   String get dutchNameAlreadyAdded;
 
   /// No description provided for @dutchAdd.
@@ -16576,7 +16576,7 @@ abstract class AppLocalizations {
   /// No description provided for @dutchErrCustomEmpty.
   ///
   /// In ko, this message translates to:
-  /// **'몫을 넣어주세요.'**
+  /// **'모든 참여자의 금액을 넣어주세요.'**
   String get dutchErrCustomEmpty;
 
   /// No description provided for @expRecurringOpenFailed.

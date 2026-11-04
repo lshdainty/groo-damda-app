@@ -5060,6 +5060,6 @@
   "dutchSaveFailed": "Couldn't create the split. Please try again in a moment.",
   "expSplitErrRow": "Give every item a category and an amount above 0.",
   "dutchErrRatio": "Shares must be numbers above 0.",
-  "dutchErrCustomEmpty": "Enter an amount for everyone.",
+  "dutchErrCustomEmpty": "Enter an amount for every participant.",
   "expRecurringOpenFailed": "Couldn't open the repeat settings."
 }

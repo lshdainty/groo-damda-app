@@ -9449,7 +9449,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchErrRatio => 'Shares must be numbers above 0.';
 
   @override
-  String get dutchErrCustomEmpty => 'Enter an amount for everyone.';
+  String get dutchErrCustomEmpty => 'Enter an amount for every participant.';
 
   @override
   String get expRecurringOpenFailed => 'Couldn\'t open the repeat settings.';
