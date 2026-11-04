@@ -1,697 +1,317 @@
-import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'dart:math' as math;
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/core/format/krw.dart';
-import 'package:groo_damda_app/shared/widgets/p_badge.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_card.dart';
-import 'package:groo_damda_app/shared/widgets/p_collapsible.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
 import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
-import 'package:groo_damda_app/features/card/presentation/card_fee_text.dart';
-import 'package:groo_damda_app/features/card/presentation/widgets/card_brand.dart';
+import 'package:groo_damda_app/features/card/presentation/card_format.dart';
+import 'package:groo_damda_app/features/card/presentation/widgets/card_row.dart'
+    show cardImageProvider;
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/accordion/p_accordion.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/image_frame/p_card_art.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
-/// 카드 혜택 상세 — front `CardBenefitDialog` 미러 (모바일 바텀시트).
+/// 카드 혜택 상세 — 조회 시트(I-20 E 34). 바깥 누름 · 끌어내림으로 닫히고 바닥 버튼은 없다(닫기 원 하나). 높이는 내용만큼 ·
+/// 최대 90%, 본문만 스크롤 + 끝 흐림.
 ///
-/// 구조:
-///   - 카드 hero (imgUrl 실제 이미지, errorBuilder fallback)
-///   - 연회비 / 전월 실적 2셀
-///   - 주요 혜택 태그 (PBadge)
-///   - 혜택 상세 (PCollapsible 아코디언 + 모두 펼치기/접기)
-void showCardBenefitDetailSheet(BuildContext context, int rowId) {
+/// 차례: 그림 312 가운데 → 카드 이름 → 설명 "{카드사} · {신용|체크} · {혜택 유형}" → 주요 혜택 태그 한 줄 →
+/// 키-값(연회비 · 전월 실적 · 브랜드) → "혜택 n개" + 모두 펼치기 → Accordion separated → 유의사항 Callout.
+Future<void> showCardBenefitDetailSheet(BuildContext context, int rowId) {
   final l = AppLocalizations.of(context);
-  showPSheet(
+  return PBottomSheet.show<void>(
     context,
-    title: l.assetCardDetail,
-    initialChildSize: 0.9,
-    minChildSize: 0.5,
-    maxChildSize: 0.95,
-    contentBuilder: (ctx, scrollCtrl) =>
-        _CardBenefitDetailContent(rowId: rowId, scrollController: scrollCtrl),
-    // 읽기전용 뷰 — 단일 닫기.
-    // ghost 는 배경이 없어 전체 폭 배치에서 버튼으로 안 보인다 — 테두리 없는
-    // 회색 채움(spec button.md Migration notes 2026-08).
-    footerBuilder: (ctx) => PViewFooter(
-      confirmLabel: l.actionClose,
-      confirmVariant: PButtonVariant.secondary,
+    builder: (_) => PBottomSheetContent(
+      title: l.assetCardDetail,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      scrollFog: true,
+      body: CardDetailContent(rowId: rowId),
     ),
   );
 }
 
-class _CardBenefitDetailContent extends ConsumerStatefulWidget {
-  const _CardBenefitDetailContent({
-    required this.rowId,
-    required this.scrollController,
-  });
+/// 시트 안 본문 — 불러오는 중 Skeleton · 실패 Result Section · 내용.
+class CardDetailContent extends ConsumerWidget {
+  const CardDetailContent({super.key, required this.rowId});
   final int rowId;
-  final ScrollController scrollController;
 
   @override
-  ConsumerState<_CardBenefitDetailContent> createState() =>
-      _CardBenefitDetailContentState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final async = ref.watch(cardCatalogDetailProvider(rowId));
+    // 다시 시도(invalidate) 중에도 옛 오류가 남지 않게 — 받는 중이면 늘 Skeleton
+    if (async.isLoading) return const _DetailSkeleton();
+    return async.when(
+      loading: () => const _DetailSkeleton(),
+      error: (_, _) => PResultSection(
+        kind: PResultKind.failure,
+        size: PResultSize.medium,
+        title: l.cardDetailLoadError,
+        description: l.cardFailDesc,
+        primaryAction: PResultAction(
+          label: l.dsCommonRetry,
+          onPressed: () => ref.invalidate(cardCatalogDetailProvider(rowId)),
+        ),
+      ),
+      data: (d) => _DetailBody(detail: d),
+    );
+  }
 }
 
-class _CardBenefitDetailContentState
-    extends ConsumerState<_CardBenefitDetailContent> {
-  /// 펼친 혜택 index 집합.
-  final Set<int> _expanded = {};
+/// topBenefits[].tags 를 펴서 중복 없이.
+List<String> flattenTopTags(CardCatalogDetail d) {
+  final seen = <String>{};
+  return [
+    for (final g in d.topBenefits)
+      for (final tag in g.tags)
+        if (decodeHtml(tag).isNotEmpty && seen.add(decodeHtml(tag)))
+          decodeHtml(tag),
+  ];
+}
+
+class _DetailBody extends StatefulWidget {
+  const _DetailBody({required this.detail});
+  final CardCatalogDetail detail;
+
+  @override
+  State<_DetailBody> createState() => _DetailBodyState();
+}
+
+class _DetailBodyState extends State<_DetailBody> {
+  List<String> _values = const [];
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
-    final detailAsync = ref.watch(cardCatalogDetailProvider(widget.rowId));
+    final d = widget.detail;
+    final s = d.summary;
+    final tags = flattenTopTags(d);
+    final brands = d.brands
+        .map(decodeHtml)
+        .where((b) => b.trim().isNotEmpty)
+        .toList();
+    final benefits = d.benefits;
+    final ids = [for (var i = 0; i < benefits.length; i++) 'b$i'];
+    final expandable = [
+      for (var i = 0; i < benefits.length; i++)
+        if ((benefits[i].detail ?? '').trim().isNotEmpty) ids[i],
+    ];
+    final cautions = [
+      for (final x in d.cautions)
+        (x.detail ?? x.summary ?? x.title ?? x.category ?? '').trim(),
+    ].where((x) => x.isNotEmpty).toList();
+    const gutter = EdgeInsets.symmetric(horizontal: PSpacing.globalGutter);
 
-    return detailAsync.when(
-      loading: () =>
-          _DetailSkeleton(tokens: t, scrollController: widget.scrollController),
-      error: (e, _) => ListView(
-        controller: widget.scrollController,
-        padding: const EdgeInsets.fromLTRB(
-          PSpace.xl,
-          PSpace.x4,
-          PSpace.xl,
-          PSpace.x24,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: gutter.copyWith(bottom: PSpacing.x3),
+          child: LayoutBuilder(
+            builder: (context, box) => Center(
+              child: PCardArt(
+                width: math.min(312, box.maxWidth),
+                issuer: decodeHtml(s.company?.name),
+                name: decodeHtml(s.cardName),
+                image: cardImageProvider(s.imgUrl),
+              ),
+            ),
+          ),
         ),
-        children: [
-          Text(
-            '${l.cardDetailLoadError}\n$e',
-            style: PTypo.bodySm.copyWith(color: t.statusDangerFg),
+        Padding(
+          padding: gutter.copyWith(bottom: PSpacing.x2),
+          child: Text(
+            keepAll(decodeHtml(s.cardName)),
+            semanticsLabel: decodeHtml(s.cardName),
+            style: PTypography.t6.copyWith(
+              color: c.fgNeutral,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ],
-      ),
-      data: (d) {
-        final s = d.summary;
-        final benefits = d.benefits;
-        final allOpen =
-            benefits.isNotEmpty && _expanded.length == benefits.length;
-        // front flattenTopTags 정합 — topBenefits[].tags flatten + 중복 제거.
-        // (그룹마다 '10%'·'청구할인' 같은 공통 태그가 들어 있어 dedup 안 하면 중복 노출)
-        final topTags = <String>[];
-        final seenTags = <String>{};
-        for (final g in d.topBenefits) {
-          for (final tag in g.tags) {
-            if (tag.isNotEmpty && seenTags.add(tag)) topTags.add(tag);
-          }
-        }
-        // front 상세 조건 badge — 카드 전월 실적(requiredText ?? '실적 무관'). 모든 혜택 공통.
-        final benefitCondition = _benefitCondition(l, s.performance);
-
-        return ListView(
-          controller: widget.scrollController,
-          padding: const EdgeInsets.fromLTRB(
-            PSpace.xl,
-            PSpace.x4,
-            PSpace.xl,
-            PSpace.x24,
+        ),
+        Padding(
+          padding: gutter.copyWith(bottom: PSpacing.x2),
+          child: Text(
+            keepAll(cardMetaParts(l, s).join(' · ')),
+            semanticsLabel: cardMetaParts(l, s).join(' · '),
+            style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
           ),
+        ),
+        if (tags.isNotEmpty)
+          Padding(
+            padding: gutter.copyWith(bottom: PSpacing.x2),
+            child: Semantics(
+              label: l.cardKeyBenefitTags,
+              child: PTagGroup(
+                size: PTagGroupSize.t3,
+                items: [for (final t in tags) PTag(t)],
+              ),
+            ),
+          ),
+        PList(
+          semanticLabel: l.assetCardDetail,
           children: [
-            // 카드 hero
-            _CardHero(summary: s, tokens: t),
-            const SizedBox(height: PSpace.x16),
-
-            // 연회비 / 전월 실적 2셀
-            Row(
+            PListItem(
+              title: l.assetAnnualFee,
+              suffix: Text(annualFeeDetailText(l, s.annualFee)),
+            ),
+            PListItem(
+              title: l.cardLastMonthPerf,
+              suffix: Text(performanceDetailText(l, s.performance)),
+            ),
+            if (brands.isNotEmpty)
+              PListItem(title: l.cardBrands, suffix: Text(brands.join(' · '))),
+          ],
+        ),
+        Padding(
+          padding: gutter.copyWith(top: PSpacing.x2),
+          child: PAccordionHeader(
+            title: l.cardBenefitDetailCount(benefits.length),
+            trailing: expandable.isEmpty
+                ? null
+                : PAccordionExpandAll(
+                    values: _values,
+                    expandable: expandable,
+                    onValuesChange: (v) => setState(() => _values = v),
+                    expandLabel: l.cardExpandAll,
+                    collapseLabel: l.cardCollapseAll,
+                  ),
+          ),
+        ),
+        if (benefits.isEmpty)
+          Padding(
+            padding: gutter.copyWith(top: PSpacing.x6, bottom: PSpacing.x6),
+            child: Text(
+              keepAll(l.cardNoBenefits),
+              semanticsLabel: l.cardNoBenefits,
+              textAlign: TextAlign.center,
+              style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+            ),
+          )
+        else
+          Padding(
+            padding: gutter,
+            child: PAccordion(
+              variant: PAccordionVariant.separated,
+              values: _values,
+              onValuesChange: (v) => setState(() => _values = v),
               children: [
-                Expanded(
-                  child: _InfoCell(
-                    label: l.assetAnnualFee,
-                    value: _feeText(l, s.annualFee),
-                    tokens: t,
-                  ),
-                ),
-                const SizedBox(width: PSpace.x8),
-                Expanded(
-                  child: _InfoCell(
-                    label: l.cardLastMonthPerf,
-                    value: _performanceText(l, s.performance),
-                    tokens: t,
-                  ),
-                ),
+                for (var i = 0; i < benefits.length; i++)
+                  _benefitItem(ids[i], benefits[i]),
               ],
             ),
-            const SizedBox(height: PSpace.x20),
-
-            // 주요 혜택 태그 (중복 제거)
-            if (topTags.isNotEmpty) ...[
-              Text(
-                l.cardKeyBenefitTags,
-                style: PTypo.bodySm.copyWith(
-                  color: t.fgPrimary,
-                  fontWeight: PFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: PSpace.x8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final tag in topTags)
-                    PBadge(label: tag, variant: PBadgeVariant.softBrand),
-                ],
-              ),
-              const SizedBox(height: PSpace.x20),
-            ],
-
-            // 혜택 상세 — 아코디언
-            if (benefits.isNotEmpty) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.cardBenefitDetailCount(benefits.length),
-                      style: PTypo.bodySm.copyWith(
-                        color: t.fgPrimary,
-                        fontWeight: PFontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  PButton(
-                    label: allOpen ? l.cardCollapseAll : l.cardExpandAll,
-                    icon: allOpen
-                        ? LucideIcons.chevronsDownUp
-                        : LucideIcons.chevronsUpDown,
-                    // front: accent(brand 강조) — 텍스트 fgBrand(다크 primary-light)
-                    variant: PButtonVariant.accent,
-                    size: PButtonSize.sm,
-                    onPressed: () => setState(() {
-                      if (allOpen) {
-                        _expanded.clear();
-                      } else {
-                        _expanded
-                          ..clear()
-                          ..addAll(List.generate(benefits.length, (i) => i));
-                      }
-                    }),
-                  ),
-                ],
-              ),
-              const SizedBox(height: PSpace.x8),
-              for (int i = 0; i < benefits.length; i++) ...[
-                if (i > 0) const SizedBox(height: PSpace.x8),
-                _BenefitAccordion(
-                  benefit: benefits[i],
-                  condition: benefitCondition,
-                  open: _expanded.contains(i),
-                  onToggle: () => setState(() {
-                    _expanded.contains(i)
-                        ? _expanded.remove(i)
-                        : _expanded.add(i);
-                  }),
-                  tokens: t,
-                ),
-              ],
-            ],
-
-            // 유의사항
-            if (d.cautions.isNotEmpty) ...[
-              const SizedBox(height: PSpace.x20),
-              Text(
-                l.cardCautions,
-                style: PTypo.bodySm.copyWith(
-                  color: t.fgPrimary,
-                  fontWeight: PFontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: PSpace.x8),
-              PCard(
-                variant: PCardVariant.muted,
-                color: t.statusWarningSubtle,
-                padding: const EdgeInsets.all(PSpace.x12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final c in d.cautions)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              LucideIcons.alertTriangle,
-                              size: 12,
-                              color: t.statusWarningFg,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                c.summary ?? c.title ?? '',
-                                style: PTypo.caption.copyWith(
-                                  color: t.statusWarningFg,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        );
-      },
-    );
-  }
-}
-
-/// 연회비 라벨 — front `card.fee === 0 ? '없음' : '국내전용 N원'` 정합.
-String _feeText(AppLocalizations l, CardAnnualFee? fee) =>
-    // label 우선 + 금액만 있으면 "국내전용 N원". fee 가 null 이면 "정보 없음",
-    // 0원이면 "무료" 로 갈린다.
-    cardFeeValue(l, fee, domesticPrefix: true);
-
-/// 전월 실적 라벨 — front `perf === 0 ? '실적 무관' : 'N원 이상'` 정합.
-String _performanceText(AppLocalizations l, CardPerformance? perf) {
-  if (perf == null) return l.cardPerfNone;
-  if (perf.requiredText != null && perf.requiredText!.isNotEmpty) {
-    return perf.requiredText!;
-  }
-  final amount = perf.requiredAmount;
-  if (amount == null || amount == 0) return l.cardPerfNone;
-  return l.cardPerfMin(krwSigned(amount, false, unit: true));
-}
-
-/// 혜택 상세 항목 조건 badge — front CardBenefitDialog 정합.
-/// requiredText 있으면 그대로, 없으면 (필수=Y → badge 숨김 / 미필수 → '실적 무관').
-String? _benefitCondition(AppLocalizations l, CardPerformance? perf) {
-  if (perf == null) return l.cardPerfNone;
-  if (perf.requiredText != null && perf.requiredText!.isNotEmpty) {
-    return perf.requiredText;
-  }
-  if (perf.isRequired == 'Y') return null;
-  return l.cardPerfNone;
-}
-
-class _CardHero extends StatelessWidget {
-  const _CardHero({required this.summary, required this.tokens});
-  final CardCatalogSummary summary;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final l = AppLocalizations.of(context);
-    final discontinued = summary.isDiscontinued == 'Y';
-    return Opacity(
-      opacity: discontinued ? 0.7 : 1,
-      child: ClipRRect(
-        borderRadius: PRadius.brLg,
-        child: AspectRatio(
-          aspectRatio: 1.586,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (summary.imgUrl != null && summary.imgUrl!.isNotEmpty)
-                Image.network(
-                  summary.imgUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => _HeroFallback(
-                    company: summary.company?.name,
-                    cardName: summary.cardName,
-                    tokens: t,
-                  ),
-                )
-              else
-                _HeroFallback(
-                  company: summary.company?.name,
-                  cardName: summary.cardName,
-                  tokens: t,
-                ),
-              if (discontinued)
-                Positioned(
-                  top: PSpace.x12,
-                  right: PSpace.x12,
-                  child: PBadge(
-                    label: l.assetDiscontinued,
-                    variant: PBadgeVariant.secondary,
-                  ),
-                ),
-            ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 상세 hero fallback — 3단계 중 2·3단계.
-/// 브랜드 매칭 → 카드사 색 그라데이션 + 브랜드명/카드명 오버레이.
-/// 미상 → 중립 그라데이션(bgMuted~bgSunken) + 카드 아이콘.
-class _HeroFallback extends StatelessWidget {
-  const _HeroFallback({
-    required this.company,
-    required this.cardName,
-    required this.tokens,
-  });
-  final String? company;
-  final String? cardName;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final brand = getCardBrand(company);
-
-    if (!brand.known) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [t.bgMuted, t.bgSunken],
-          ),
-        ),
-        child: Center(
-          child: Icon(LucideIcons.creditCard, size: 48, color: t.fgTertiary),
-        ),
-      );
-    }
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [brand.bg1, brand.bg2],
-        ),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 135deg 광택 — 그라데이션 위 부드러운 하이라이트.
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  PColors.light.staticWhite.withValues(alpha: 0.15),
-                  PColors.light.staticWhite.withValues(alpha: 0),
-                ],
+        if (cautions.isNotEmpty) ...[
+          Padding(
+            padding: gutter.copyWith(top: PSpacing.x6, bottom: PSpacing.x2),
+            child: Text(
+              l.cardCautions,
+              style: PTypography.t4.copyWith(
+                color: c.fgNeutral,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(PSpace.x20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if ((company ?? '').trim().isNotEmpty)
-                  Text(
-                    company!.trim(),
-                    style: PTypo.bodySm.copyWith(
-                      color: brand.fgOf(context),
-                      fontWeight: PFontWeight.semi,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                if ((cardName ?? '').trim().isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    cardName!.trim(),
-                    style: PTypo.body.copyWith(
-                      color: brand.fgOf(context),
-                      fontWeight: PFontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
+            padding: gutter,
+            child: PCallout(
+              tone: PCalloutTone.informative,
+              description: cautions.first,
+              moreDescriptions: cautions.skip(1).toList(),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoCell extends StatelessWidget {
-  const _InfoCell({
-    required this.label,
-    required this.value,
-    required this.tokens,
-  });
-  final String label;
-  final String value;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    return PCard(
-      variant: PCardVariant.muted,
-      padding: const EdgeInsets.symmetric(
-        horizontal: PSpace.x12,
-        vertical: PSpace.x12,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: PTypo.caption.copyWith(
-              color: tokens.fgTertiary,
-              fontWeight: PFontWeight.semi,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: PTypo.body.copyWith(
-              color: tokens.fgPrimary,
-              fontWeight: PFontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 혜택 상세 1건 — PCollapsible 기반 아코디언 (헤더 항상 보임 + 본문 토글).
-class _BenefitAccordion extends StatelessWidget {
-  const _BenefitAccordion({
-    required this.benefit,
-    required this.condition,
-    required this.open,
-    required this.onToggle,
-    required this.tokens,
-  });
-  final CardBenefit benefit;
-
-  /// 카드 전월 실적 조건 라벨(예: "300,000원 이상" / "실적 무관"). null이면 badge 숨김.
-  final String? condition;
-  final bool open;
-  final VoidCallback onToggle;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    return PCard(
-      variant: PCardVariant.bordered,
-      padding: EdgeInsets.zero,
-      child: PCollapsible(
-        open: open,
-        onOpenChanged: (_) => onToggle(),
-        trigger: (ctx, isOpen, toggle) => Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: toggle,
-            borderRadius: PRadius.brLg,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpace.x16,
-                vertical: 14,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // front: 제목 = 혜택 카테고리(예: "온라인쇼핑")
-                        if ((benefit.category ?? '').isNotEmpty)
-                          Text(
-                            benefit.category!,
-                            style: PTypo.body.copyWith(
-                              color: t.fgPrimary,
-                              fontWeight: PFontWeight.bold,
-                            ),
-                          ),
-                        if ((benefit.summary ?? benefit.title ?? '')
-                            .isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            benefit.summary ?? benefit.title ?? '',
-                            style: PTypo.bodySm.copyWith(
-                              color: t.fgBrand,
-                              fontWeight: PFontWeight.bold,
-                            ),
-                          ),
-                        ],
-                        // front: badge = 카드 전월 실적 조건 — 요약 아래 별도 줄(좌측 정렬)
-                        if (condition != null && condition!.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: t.bgSunken,
-                                borderRadius: PRadius.brFull,
-                              ),
-                              child: Text(
-                                condition!,
-                                style: PTypo.micro.copyWith(
-                                  color: t.fgTertiary,
-                                  fontWeight: PFontWeight.semi,
-                                  letterSpacing: 0,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: PSpace.x8),
-                  AnimatedRotation(
-                    duration: const Duration(milliseconds: 150),
-                    turns: isOpen ? 0.5 : 0,
-                    child: Icon(
-                      LucideIcons.chevronDown,
-                      size: 16,
-                      color: t.fgTertiary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        content: (benefit.detail ?? '').isEmpty
-            ? const SizedBox.shrink()
-            : Container(
-                decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: t.borderSubtle)),
-                ),
-                padding: const EdgeInsets.fromLTRB(
-                  PSpace.xl,
-                  14,
-                  PSpace.xl,
-                  PSpace.x16,
-                ),
-                child: Text(
-                  benefit.detail!,
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgSecondary,
-                    height: PLineHeight.loose,
-                  ),
-                ),
-              ),
-      ),
-    );
-  }
-}
-
-class _DetailSkeleton extends StatelessWidget {
-  const _DetailSkeleton({required this.tokens, required this.scrollController});
-  final GrooTokens tokens;
-  final ScrollController scrollController;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(
-        PSpace.xl,
-        PSpace.x4,
-        PSpace.xl,
-        PSpace.x24,
-      ),
-      children: [
-        AspectRatio(
-          aspectRatio: 1.586,
-          child: PSkeleton(width: double.infinity, borderRadius: PRadius.brLg),
-        ),
-        const SizedBox(height: PSpace.x16),
-        Row(
-          children: [
-            Expanded(
-              child: PCard(
-                variant: PCardVariant.muted,
-                padding: const EdgeInsets.all(PSpace.x12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PSkeleton.line(width: 40, height: 12),
-                    const SizedBox(height: 4),
-                    const PSkeleton.line(width: 60),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: PSpace.x8),
-            Expanded(
-              child: PCard(
-                variant: PCardVariant.muted,
-                padding: const EdgeInsets.all(PSpace.x12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PSkeleton.line(width: 48, height: 12),
-                    const SizedBox(height: 4),
-                    const PSkeleton.line(width: 56),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: PSpace.x20),
-        const PSkeleton.line(width: 88),
-        const SizedBox(height: PSpace.x8),
-        for (int i = 0; i < 3; i++) ...[
-          if (i > 0) const SizedBox(height: PSpace.x8),
-          PCard(
-            variant: PCardVariant.bordered,
-            padding: const EdgeInsets.symmetric(
-              horizontal: PSpace.x16,
-              vertical: 14,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PSkeleton.line(width: i.isEven ? 110 : 90),
-                      const SizedBox(height: 6),
-                      PSkeleton.line(width: 70, height: 12),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        const SizedBox(height: PSpacing.x6),
       ],
+    );
+  }
+
+  Widget _benefitItem(String id, CardBenefit b) {
+    final title = (b.category ?? '').trim();
+    final description = (b.summary ?? b.title ?? '').trim();
+    final body = (b.detail ?? '').trim();
+    return body.isNotEmpty
+        ? PAccordionItem(
+            value: id,
+            title: title,
+            description: description.isEmpty ? null : description,
+            child: Text(keepAll(body), semanticsLabel: body),
+          )
+        : PAccordionPlainItem(
+            title: title,
+            description: description.isEmpty ? null : description,
+          );
+  }
+}
+
+/// 불러오는 동안 — 그림 312 · 이름 · 설명 · 키-값 셋 · 혜택 머리 + 항목 셋(실제 차례와 같다).
+class _DetailSkeleton extends StatelessWidget {
+  const _DetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    const gutter = EdgeInsets.symmetric(horizontal: PSpacing.globalGutter);
+    return Padding(
+      padding: gutter.copyWith(bottom: PSpacing.x6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: LayoutBuilder(
+              builder: (context, box) => PSkeleton(
+                width: math.min(312, box.maxWidth),
+                height: math.min(312, box.maxWidth) / 1.586,
+                radius: PSkeletonRadius.r8,
+              ),
+            ),
+          ),
+          const SizedBox(height: PSpacing.x3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: 2 / 3,
+              child: PSkeleton.text(PTypography.t6),
+            ),
+          ),
+          const SizedBox(height: PSpacing.x2),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              child: PSkeleton.text(PTypography.t4),
+            ),
+          ),
+          const SizedBox(height: PSpacing.x4),
+          for (var i = 0; i < 3; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: PSpacing.x3),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  PSkeleton.text(PTypography.t5, width: 64),
+                  PSkeleton.text(PTypography.t5, width: 96),
+                ],
+              ),
+            ),
+          const SizedBox(height: PSpacing.x4),
+          PSkeleton.text(PTypography.t4, width: 96),
+          const SizedBox(height: PSpacing.x4),
+          for (var i = 0; i < 3; i++) ...[
+            const PSkeleton(height: 74, radius: PSkeletonRadius.r16),
+            const SizedBox(height: PSpacing.x2),
+          ],
+        ],
+      ),
     );
   }
 }

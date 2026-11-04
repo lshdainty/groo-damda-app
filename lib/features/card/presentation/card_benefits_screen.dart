@@ -3,56 +3,33 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/shared/ds/infinite_list/p_infinite_list.dart';
-import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
-import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
-import 'package:groo_damda_app/shared/widgets/p_back_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_checkbox.dart';
-import 'package:groo_damda_app/shared/widgets/p_empty_state.dart';
-import 'package:groo_damda_app/shared/widgets/p_search_field.dart';
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
-import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
 import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
-import 'package:groo_damda_app/features/card/presentation/card_fee_text.dart';
 import 'package:groo_damda_app/features/card/presentation/card_benefit_detail_sheet.dart';
-import 'package:groo_damda_app/features/card/presentation/widgets/card_brand.dart';
+import 'package:groo_damda_app/features/card/presentation/widgets/card_filter_bar.dart';
+import 'package:groo_damda_app/features/card/presentation/widgets/card_row.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/checkbox/p_checkbox.dart';
+import 'package:groo_damda_app/shared/ds/infinite_list/p_infinite_list.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
-/// 종류 필터 값 — index 0=전체(null)/1=신용/2=체크. 라벨은 [_typeLabel].
-const _typeValues = <String?>[null, 'CREDIT', 'CHECK'];
-
-/// 혜택 필터 값 — index 0=전체(null)/1=할인/2=적립/3=캐시백/4=마일리지. 라벨은 [_benefitLabel].
-/// 매핑: 할인=DISCOUNT, 적립=POINT, 캐시백=POINT, 마일리지=MILEAGE.
-const _benefitValues = <String?>[null, 'DISCOUNT', 'POINT', 'POINT', 'MILEAGE'];
-
-/// 종류 필터 라벨 — index → 로케일 문자열.
-String _typeLabel(AppLocalizations l, int i) => switch (i) {
-  0 => l.expFilterAll,
-  1 => l.assetCardShortCredit,
-  _ => l.assetCardShortCheck,
-};
-
-/// 혜택 필터 라벨 — index → 로케일 문자열.
-String _benefitLabel(AppLocalizations l, int i) => switch (i) {
-  0 => l.cardBenefitTypeAll,
-  1 => l.cardBenefitTypeDiscount,
-  2 => l.cardBenefitTypePoint,
-  3 => l.cardBenefitTypeCashback,
-  _ => l.cardBenefitTypeMileage,
-};
-
-/// 카드 혜택 라이브러리 — front `CardBenefitsScreen` 미러 (모바일 list 레이아웃).
+/// 카드 혜택 라이브러리 — 웹 `CardBenefitPage` 폰 갈래 미러(I-20 E 30 ~ 34).
+///
+/// 폰은 흰 면 하나다: 머리(← "카드 혜택") → 밑줄 검색칸 → 거르기 칩 줄 → "총 n장" + 단종 카드 포함 → 카드 줄 → 끝 줄.
+/// 줄을 누르면 조회 시트가 열린다. 요청 실패는 전역 스낵바가 아니라 이 화면 안 Result Section 으로 알린다(조회는 전역
+/// 스낵바를 띄우지 않는다 — error_toast_interceptor).
 class CardBenefitsScreen extends ConsumerStatefulWidget {
   const CardBenefitsScreen({super.key});
 
@@ -63,8 +40,9 @@ class CardBenefitsScreen extends ConsumerStatefulWidget {
 class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   final _kwCtrl = TextEditingController();
   final _scroll = ScrollController();
-  int _typeIndex = 0;
-  int _benefitIndex = 0;
+  // null = 전체
+  String? _type;
+  String? _benefit;
   bool _includeDiscontinued = false;
   Timer? _debounce;
   CardSearchKey _searchKey = defaultCardSearchKey();
@@ -78,13 +56,13 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   Object? _error;
   int _totalElements = 0;
 
+  /// 조건(검색 · 칩 · 체크 · 당겨 새로 고침)이 바뀔 때마다 올리는 세대 번호 — 옛 조건의 응답 · 실패가 새 목록에 붙지 않게 한다.
+  int _gen = 0;
+
   @override
   void initState() {
     super.initState();
     // ref(Provider)·inherited widget 접근은 initState 완료 후로 미룸.
-    // initState 안에서 동기 호출하면 _loadMore 의 ref.invalidate/ref.read 가
-    // dependOnInheritedWidgetOfExactType<_UncontrolledProviderScope> 를 initState 완료 전에
-    // 호출해 "카드 로드 실패" 에러가 발생함.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _loadMore(initial: true);
     });
@@ -94,8 +72,8 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   void _rebuildKey() {
     _searchKey = defaultCardSearchKey(
       keyword: _kwCtrl.text.trim().isEmpty ? null : _kwCtrl.text.trim(),
-      cardType: _typeValues[_typeIndex],
-      benefitType: _benefitValues[_benefitIndex],
+      cardType: _type,
+      benefitType: _benefit,
       includeDiscontinued: _includeDiscontinued ? true : null,
     );
   }
@@ -118,19 +96,24 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
       _hasMore = true;
       _initialLoading = true;
       _error = null;
+      _totalElements = 0;
+      // 받던 요청이 있어도 새 조건의 요청은 막지 않는다 — 옛 응답은 세대가 달라 버려진다
+      _gen++;
+      _loadingMore = false;
     });
     return _loadMore(initial: true);
   }
 
   Future<void> _loadMore({bool initial = false}) async {
     if (_loadingMore || (!initial && !_hasMore)) return;
+    final gen = _gen;
     setState(() => _loadingMore = true);
     final key = _keyForPage(_page);
     try {
       // 새 페이지는 항상 최신 데이터를 받도록 캐시 무효화.
       ref.invalidate(cardCatalogPageProvider(key));
       final p = await ref.read(cardCatalogPageProvider(key).future);
-      if (!mounted) return;
+      if (!mounted || gen != _gen) return;
       setState(() {
         _cards.addAll(p.content);
         _totalElements = p.totalElements;
@@ -139,13 +122,13 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
         _initialLoading = false;
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || gen != _gen) return;
       setState(() {
         _error = e;
         _initialLoading = false;
       });
     } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      if (mounted && gen == _gen) setState(() => _loadingMore = false);
     }
   }
 
@@ -163,20 +146,17 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
     });
   }
 
-  void _setType(int i) {
-    setState(() => _typeIndex = i);
+  void _setFilters({String? type, String? benefit}) {
+    setState(() {
+      _type = type;
+      _benefit = benefit;
+    });
     _rebuildKey();
     _reset();
   }
 
-  void _setBenefit(int i) {
-    setState(() => _benefitIndex = i);
-    _rebuildKey();
-    _reset();
-  }
-
-  void _toggleDiscontinued(bool? v) {
-    setState(() => _includeDiscontinued = v ?? false);
+  void _toggleDiscontinued(bool v) {
+    setState(() => _includeDiscontinued = v);
     _rebuildKey();
     _reset();
   }
@@ -191,19 +171,20 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: context.colors.bgLayerBasement,
-      appBar: AppBar(
-        leadingWidth: PBackButton.leadingWidth,
-        titleSpacing: 0,
-        leading: PBackButton(onPressed: () => context.pop()),
-        title: Text(l.cardBenefitsTitle),
-        backgroundColor: t.bgSurface,
-        foregroundColor: t.fgPrimary,
-        elevation: 0,
+      backgroundColor: c.bgLayerBasement,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(PTopNavigation.heightOf(context)),
+        child: PTopNavigation(
+          title: l.cardBenefitsTitle,
+          leading: PTopNavigationIconButton.back(
+            label: l.actionBack,
+            onPressed: () => context.pop(),
+          ),
+        ),
       ),
       body: PScreenBandBody(
         child: PPullToRefresh(
@@ -214,78 +195,51 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
             scrollCacheExtent: const ScrollCacheExtent.pixels(
               kPInfiniteListReach,
             ),
-            padding: const EdgeInsets.fromLTRB(
-              PSpace.x24,
-              PSpace.x16,
-              PSpace.x24,
-              PSpace.x40,
-            ),
+            padding: const EdgeInsets.only(bottom: PSpacing.screenBottom),
             children: [
-              // 검색
-              PSearchField(
-                hint: l.cardSearchHintFull,
-                controller: _kwCtrl,
-                onChanged: _onSearchChanged,
-              ),
-              const SizedBox(height: PSpace.x12),
-
-              // 종류 필터 (전체/신용/체크) — 1행 (front 정합: 타입·혜택 별도 행)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: PTabs<int>(
-                  value: _typeIndex,
-                  onChanged: _setType,
-                  variant: PTabsVariant.pills,
-                  size: PTabsSize.sm,
-                  items: [
-                    for (int i = 0; i < _typeValues.length; i++)
-                      PTabItem(value: i, label: _typeLabel(l, i)),
-                  ],
+              // 밑줄 검색칸 — 머리 아래 8
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  PSpacing.globalGutter,
+                  PSpacing.x2,
+                  PSpacing.globalGutter,
+                  0,
+                ),
+                child: PInput(
+                  variant: PInputVariant.underline,
+                  controller: _kwCtrl,
+                  placeholder: l.cardSearchHintFull,
+                  semanticLabel: l.cardSearchHintFull,
+                  prefixIcon: LucideIcons.search,
+                  clearable: true,
+                  textInputAction: TextInputAction.search,
+                  onChanged: _onSearchChanged,
                 ),
               ),
-              const SizedBox(height: PSpace.x8),
-
-              // 혜택 필터 (혜택 전체/할인/적립/캐시백/마일리지) — 2행
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: PTabs<int>(
-                  value: _benefitIndex,
-                  onChanged: _setBenefit,
-                  variant: PTabsVariant.pills,
-                  size: PTabsSize.sm,
-                  items: [
-                    for (int i = 0; i < _benefitValues.length; i++)
-                      PTabItem(value: i, label: _benefitLabel(l, i)),
-                  ],
+              // 거르기 칩 줄 — 검색칸 아래 12, 화면 끝까지
+              Padding(
+                padding: const EdgeInsets.only(top: PSpacing.x3),
+                child: CardFilterBar(
+                  type: _type,
+                  benefit: _benefit,
+                  onType: (v) => _setFilters(type: v, benefit: _benefit),
+                  onBenefit: (v) => _setFilters(type: _type, benefit: v),
                 ),
               ),
-              const SizedBox(height: PSpace.x8),
-
-              // 총 N건(좌) + 단종 카드 포함(우) — 한 줄 (front 정합, 줄 절약)
-              Row(
-                children: [
-                  Expanded(
-                    child: _initialLoading
-                        ? const PSkeleton.line(width: 56, height: 12)
-                        : _cards.isNotEmpty
-                        ? Text(
-                            l.cardTotalCount(_totalElements),
-                            style: PTypo.caption.copyWith(color: t.fgTertiary),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  PCheckbox(
-                    value: _includeDiscontinued,
-                    onChanged: _toggleDiscontinued,
-                    size: PCheckboxSize.sm,
-                    label: l.cardIncludeDiscontinued,
-                  ),
-                ],
+              // 개수 줄 — "총 n장" + 오른쪽 단종 카드 포함
+              PListHeader(
+                // 불러오는 중 · 첫 쪽 실패에서는 개수를 모른다(앞 조건의 숫자를 말하지 않는다)
+                title: _initialLoading || (_error != null && _cards.isEmpty)
+                    ? ''
+                    : l.cardTotalCount(krw(_totalElements)),
+                trailing: PCheckbox(
+                  size: PCheckboxSize.large,
+                  checked: _includeDiscontinued,
+                  onChanged: _toggleDiscontinued,
+                  label: l.cardIncludeDiscontinued,
+                ),
               ),
-              const SizedBox(height: PSpace.x8),
-
-              // 결과 리스트 (누적식 인피니티 스크롤). 총 N건은 위 Row 로 이동.
-              ..._buildResults(t, l),
+              ..._buildResults(l),
             ],
           ),
         ),
@@ -293,22 +247,20 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
     );
   }
 
-  /// 결과 영역 — 초기로딩 / 에러 / 빈상태 / 누적 리스트 + 하단 인디케이터.
-  List<Widget> _buildResults(GrooTokens t, AppLocalizations l) {
-    // 초기 로딩 (첫 페이지 fetch 중, 누적 없음) — _CardTile 카드 스켈레톤만.
+  /// 결과 영역 — 첫 쪽 Skeleton / 실패 / 0건 / 누적 목록 + 끝 줄.
+  List<Widget> _buildResults(AppLocalizations l) {
     if (_initialLoading) {
-      return [
-        for (int i = 0; i < 6; i++) ...[const _CardTileSkeleton()],
-      ];
+      return [const _RowsSkeleton(count: 6)];
     }
 
-    // 첫 쪽을 못 불러왔다 — 목록 자리가 Result Section 의 실패다(예외 · 서버 글은 설명에 쓰지 않는다)
+    // 첫 쪽을 못 불러왔다 — 목록 자리가 Result Section 의 실패다(예외 · 서버 글은 쓰지 않는다)
     if (_error != null && _cards.isEmpty) {
       return [
         PResultSection(
           kind: PResultKind.failure,
-          size: PResultSize.medium,
+          size: PResultSize.large,
           title: l.cardListLoadFailed,
+          description: l.cardFailDesc,
           primaryAction: PResultAction(
             label: l.dsCommonRetry,
             onPressed: _reset,
@@ -317,28 +269,28 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
       ];
     }
 
-    // 빈 상태
     if (_cards.isEmpty) {
       return [
-        Padding(
-          padding: const EdgeInsets.only(top: PSpace.x32),
-          child: PEmptyState(
-            icon: LucideIcons.searchX,
-            message: l.cardNoResults,
-            subMessage: l.cardNoResultsHint,
-          ),
+        PResultSection(
+          size: PResultSize.large,
+          icon: LucideIcons.searchX,
+          title: l.cardNoResults,
+          description: l.cardNoResultsHint,
         ),
       ];
     }
 
     return [
-      for (int i = 0; i < _cards.length; i++) ...[
-        _CardTile(
-          card: _cards[i],
-          onTap: () => showCardBenefitDetailSheet(context, _cards[i].rowId),
-          tokens: t,
-        ),
-      ],
+      PList(
+        semanticLabel: l.cardBenefitsTitle,
+        children: [
+          for (final card in _cards)
+            CardRow(
+              card: card,
+              onTap: () => showCardBenefitDetailSheet(context, card.rowId),
+            ),
+        ],
+      ),
       // 목록 끝 자리 — 받는 중(곧 받는다) · 못 불러옴 · 끝. 한 쪽으로 끝나는 짧은 목록에는 끝 글을 두지 않는다
       if (_error != null)
         PInfiniteListEnd(status: PInfiniteListStatus.error, onRetry: _retryMore)
@@ -356,278 +308,54 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   }
 }
 
-/// `_CardTile` 로딩 placeholder — 실제 타일과 1:1 구조 정합.
-/// 플랫 행(12/10) + 56×36 비주얼(brSm) + 이름/메타/실적 3줄 + chevron 자리.
-class _CardTileSkeleton extends StatelessWidget {
-  const _CardTileSkeleton();
+/// 불러오는 동안의 줄 — 카드 그림 56 · 세 줄(실제 줄과 같은 차례).
+class _RowsSkeleton extends StatelessWidget {
+  const _RowsSkeleton({required this.count});
+  final int count;
+
   @override
   Widget build(BuildContext context) {
-    // 카드 다이어트 — 실제 _CardTile 과 동일 플랫 리듬.
-    return Padding(
-      // 실렌더 _CardTile 과 같은 여백 — 좌우는 페이지가 쥔다(24).
-      padding: const EdgeInsets.symmetric(vertical: PSpace.x12),
-      child: Row(
-        children: const [
-          PSkeleton(width: 56, height: 36, borderRadius: PRadius.brSm),
-          SizedBox(width: 14),
-          Expanded(
-            child: Column(
+    return Column(
+      children: [
+        for (var i = 0; i < count; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: PSpacing.globalGutter,
+              vertical: PSpacing.x3,
+            ),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              spacing: PSpacing.x4,
               children: [
-                FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: 0.55,
-                  child: PSkeleton.line(height: 14),
+                const PSkeleton(
+                  width: 56,
+                  height: 56 / 1.586,
+                  radius: PSkeletonRadius.r6,
                 ),
-                SizedBox(height: 6),
-                FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: 0.85,
-                  child: PSkeleton.line(height: 12),
-                ),
-                SizedBox(height: 5),
-                FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: 0.4,
-                  child: PSkeleton.line(height: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: PSpacing.x0_5,
+                    children: [
+                      FractionallySizedBox(
+                        widthFactor: 0.75,
+                        child: PSkeleton.text(PTypography.t5),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: 0.5,
+                        child: PSkeleton.text(PTypography.t3),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: 0.4,
+                        child: PSkeleton.text(PTypography.t3),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: PSpace.x8),
-          PSkeleton(width: 14, height: 14, borderRadius: PRadius.brSm),
-        ],
-      ),
+      ],
     );
   }
-}
-
-/// 가로형 카드 타일 — front 모바일 list 타일 미러.
-/// 좌측 카드 비주얼(imgUrl, fallback 그라데이션) + 이름/메타 + chevron.
-class _CardTile extends StatelessWidget {
-  const _CardTile({
-    required this.card,
-    required this.onTap,
-    required this.tokens,
-  });
-  final CardCatalogSummary card;
-  final VoidCallback onTap;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final l = AppLocalizations.of(context);
-    final discontinued = card.isDiscontinued == 'Y';
-    // 카드 다이어트 — 자산 acc-card 리듬 유추 적용: 카드 그림자/배경 없이
-    // 플랫 행(12/10, radius 10, 탭 hover). 56×36 브랜드 비주얼 구조는 유지.
-    return Opacity(
-      opacity: discontinued ? 0.6 : 1,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          // 좌우는 페이지가 쥔다(24). 행은 상하만 갖는다.
-          padding: const EdgeInsets.symmetric(vertical: PSpace.x12),
-          child: Row(
-            children: [
-              _CardVisual(
-                imgUrl: card.imgUrl,
-                company: card.company?.name,
-                tokens: t,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            card.cardName,
-                            style: PTypo.bodySm.copyWith(
-                              color: t.fgPrimary,
-                              fontWeight: PFontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (discontinued) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: t.bgSunken,
-                              borderRadius: PRadius.brXs,
-                            ),
-                            child: Text(
-                              l.assetDiscontinued,
-                              style: PTypo.micro.copyWith(
-                                color: t.fgTertiary,
-                                fontWeight: PFontWeight.bold,
-                                letterSpacing: 0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      [
-                        card.company?.name,
-                        card.cardType == 'CHECK'
-                            ? l.assetCardShortCheck
-                            : l.assetCardShortCredit,
-                        l.cardAnnualFeeValue(_feeLabel(l, card.annualFee)),
-                      ].whereType<String>().join(' · '),
-                      style: PTypo.caption.copyWith(color: t.fgTertiary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      _performanceLabel(l, card.performance),
-                      style: PTypo.caption.copyWith(color: t.fgTertiary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: PSpace.x8),
-              Icon(LucideIcons.chevronRight, size: 14, color: t.fgTertiary),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 56×36 카드 비주얼 — 3단계 fallback.
-/// 1) imgUrl 로드 성공 → 실제 이미지.
-/// 2) imgUrl 없음/로드 실패 + 브랜드 매칭 → 카드사 색 그라데이션 + 브랜드 약자.
-/// 3) 브랜드 미상 → 중립 그라데이션(bgMuted~bgSunken) + 카드 아이콘.
-class _CardVisual extends StatelessWidget {
-  const _CardVisual({
-    required this.imgUrl,
-    required this.company,
-    required this.tokens,
-  });
-  final String? imgUrl;
-  final String? company;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final brand = getCardBrand(company);
-
-    Widget neutralFallback() => DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [t.bgMuted, t.bgSunken],
-        ),
-      ),
-      child: Center(
-        child: Icon(LucideIcons.creditCard, size: 16, color: t.fgTertiary),
-      ),
-    );
-
-    // 브랜드명 약자 — company.name 첫 글자.
-    Widget brandFallback() => DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [brand.bg1, brand.bg2],
-        ),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 135deg 광택 — 기존 그라데이션 위 부드러운 하이라이트.
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  PColors.light.staticWhite.withValues(alpha: 0.15),
-                  PColors.light.staticWhite.withValues(alpha: 0),
-                ],
-              ),
-            ),
-          ),
-          Center(
-            child: Text(
-              _brandInitial(company),
-              style: PTypo.caption.copyWith(
-                color: brand.fgOf(context),
-                fontWeight: PFontWeight.bold,
-                letterSpacing: 0,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    Widget fallback() => brand.known ? brandFallback() : neutralFallback();
-
-    return ClipRRect(
-      borderRadius: PRadius.brSm,
-      child: SizedBox(
-        width: 56,
-        height: 36,
-        child: (imgUrl != null && imgUrl!.isNotEmpty)
-            ? Image.network(
-                imgUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => fallback(),
-              )
-            : fallback(),
-      ),
-    );
-  }
-}
-
-/// 브랜드명 약자 — company.name 첫 글자(공백 제거). 비면 'C'.
-String _brandInitial(String? company) {
-  final n = (company ?? '').trim();
-  if (n.isEmpty) return 'C';
-  return n.characters.first;
-}
-
-/// 연회비 라벨 — label 우선, 없으면 amount 0=없음 / N원.
-String _feeLabel(AppLocalizations l, CardAnnualFee? fee) =>
-    // front annualFeeText 정합: amount>0 → "N원" 우선, 아니면 label.
-    // fee 가 null 이면 "정보 없음", 0원이면 "무료" — 둘을 뭉뚱그리지 않는다.
-    cardFeeValue(l, fee, preferLabel: false);
-
-/// 전월 실적 라벨 — requiredText 우선, 없으면 amount 0=실적 무관 / N원/월.
-String _performanceLabel(AppLocalizations l, CardPerformance? perf) {
-  if (perf == null) return l.cardPerfNone;
-  // front performanceText 정합: isRequired='Y'일 때만, amount>0 → "실적 N원/월" 우선,
-  // 없으면 requiredText. 그 외(미필수)는 항상 "실적 무관".
-  final required = perf.isRequired == 'Y';
-  if (!required) return l.cardPerfNone;
-  final amount = perf.requiredAmount;
-  if (amount != null && amount > 0) {
-    return l.cardPerfMonthly(krwSigned(amount, false, unit: true));
-  }
-  if (perf.requiredText != null && perf.requiredText!.isNotEmpty) {
-    return perf.requiredText!;
-  }
-  return l.cardPerfNone;
 }

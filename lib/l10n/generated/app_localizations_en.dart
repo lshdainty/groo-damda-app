@@ -2596,16 +2596,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetNoCategorySet => 'No category budgets set';
 
   @override
-  String get cardBenefitTypeAll => 'All benefits';
-
-  @override
   String get cardBenefitTypeDiscount => 'Discount';
 
   @override
   String get cardBenefitTypePoint => 'Points';
-
-  @override
-  String get cardBenefitTypeCashback => 'Cashback';
 
   @override
   String get cardBenefitTypeMileage => 'Mileage';
@@ -2617,13 +2611,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardSelectTitle => 'Select card';
 
   @override
-  String get cardSearchHintFull => 'Search by name, brand, or benefit';
+  String get cardSearchHintFull => 'Search by card name or issuer';
 
   @override
   String get cardSearchHintNameCompany => 'Search card / issuer';
 
   @override
-  String get cardDetailLoadError => 'Failed to load card details';
+  String get cardDetailLoadError => 'Couldn\'t load card information';
 
   @override
   String get cardSearchError => 'Card search failed';
@@ -2642,7 +2636,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cardBenefitDetailCount(int count) {
-    return 'Benefit details · $count';
+    return '$count benefits';
   }
 
   @override
@@ -2664,7 +2658,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardFeeFree => 'Free';
 
   @override
-  String get cardPerfNone => 'No spend requirement';
+  String get cardPerfNone => 'No spending requirement';
 
   @override
   String cardFeeDomesticOnly(String amount) {
@@ -2678,12 +2672,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cardPerfMonthly(String amount) {
-    return 'Spend $amount/mo';
-  }
-
-  @override
-  String cardAnnualFeeValue(String fee) {
-    return 'Annual fee $fee';
+    return 'Spending $amount';
   }
 
   @override
@@ -2703,15 +2692,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardIncludeDiscontinued => 'Include discontinued cards';
 
   @override
-  String cardTotalCount(int count) {
-    return '$count total';
+  String cardTotalCount(String count) {
+    return '$count cards';
   }
 
   @override
-  String get cardNoResults => 'No results';
+  String get cardNoResults => 'No cards found';
 
   @override
-  String get cardNoResultsHint => 'Try a different search term';
+  String get cardNoResultsHint => 'Try a different search term or filter.';
+
+  @override
+  String cardRowFeeAmount(String amount) {
+    return 'Annual fee $amount';
+  }
+
+  @override
+  String cardRowFeeLabel(String label) {
+    return 'Annual fee $label';
+  }
+
+  @override
+  String get cardRowFeeNone => 'No annual fee';
+
+  @override
+  String get cardRowFeeUnknown => 'Annual fee unknown';
+
+  @override
+  String get cardTypeChip => 'Card type';
+
+  @override
+  String get cardBenefitChip => 'Benefit';
+
+  @override
+  String get cardFilterBar => 'Card filters';
+
+  @override
+  String get cardFilterClear => 'Clear all filters';
+
+  @override
+  String get cardFailDesc => 'Please try again in a moment.';
+
+  @override
+  String get cardBrands => 'Brands';
+
+  @override
+  String get cardNoBenefits => 'No registered benefits.';
 
   @override
   String get cardPickerNoMatch => 'No matching cards';

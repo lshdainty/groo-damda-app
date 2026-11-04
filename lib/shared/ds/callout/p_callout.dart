@@ -111,6 +111,7 @@ class PCallout extends StatefulWidget {
     this.onDismiss,
     this.dismissLabel,
     this.alert = false,
+    this.moreDescriptions = const [],
     this.actions = const [],
   }) : assert(
          interaction != PCalloutInteraction.actionable || onPressed != null,
@@ -162,6 +163,9 @@ class PCallout extends StatefulWidget {
   /// 나중에 나타나는 경고 · 위험이면 보조 기술에 알린다.
   final bool alert;
 
+  /// [description] 다음 문단들 — 문단 사이 8(웹 Callout 안 문단 `mt-x2`). 글만 받는다(제목 · 링크는 첫 문단에만).
+  final List<String> moreDescriptions;
+
   /// 본문 아래 작은 버튼(웹 Callout 안 `Button small` 줄) — 글 칸 안, 본문 아래 8, 버튼 사이 가로 · 세로 8, 넘치면 줄을 바꾼다.
   /// 앞 아이콘 자리는 비우고 글 시작에 맞춘다. display 에만(상자 전체가 버튼이면 안에 버튼을 두지 않는다).
   final List<Widget> actions;
@@ -197,6 +201,27 @@ class _PCalloutState extends State<PCallout> {
     moveFocusAfterDismiss(_closeFocus);
     widget.onDismiss?.call();
     if (widget.open == null) setState(() => _selfOpen = false);
+  }
+
+  /// 첫 문단 + 다음 문단들(사이 8).
+  Widget _body(Color color) {
+    if (widget.moreDescriptions.isEmpty) return _paragraph(color);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: PSpacing.x2,
+      children: [
+        _paragraph(color),
+        for (final d in widget.moreDescriptions)
+          Text(
+            keepAll(d),
+            semanticsLabel: d,
+            style: PTypography.t4.copyWith(
+              color: color,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+      ],
+    );
   }
 
   /// 제목 · 본문 · 링크가 이어 흐르는 한 문단.
@@ -278,11 +303,11 @@ class _PCalloutState extends State<PCallout> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: _padding),
             child: widget.actions.isEmpty
-                ? _paragraph(look.foreground)
+                ? _body(look.foreground)
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _paragraph(look.foreground),
+                      _body(look.foreground),
                       const SizedBox(height: _actionsGap),
                       Wrap(
                         key: const ValueKey('callout-actions'),
