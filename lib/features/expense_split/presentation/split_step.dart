@@ -44,7 +44,7 @@ import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 
 /// 항목 이름 길이 상한 — 지금 그대로(서버 label 상한).
-const int kSplitLabelMax = 100;
+const int kSplitLabelMax = 50;
 
 class _Row {
   _Row({this.rowId, this.categoryRowId, required this.amount, this.label = ''});
