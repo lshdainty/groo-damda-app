@@ -2,11 +2,16 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 
 class RecurringRepository {
   RecurringRepository(this._dio);
   final Dio _dio;
+
+  /// [silent] 면 전역 오류 스낵바를 끈다 — 화면이 자기 자리에서 고정 글로 알린다(서버 글을 보이지 않고, 겹치지 않게).
+  static Options? _opts(bool silent) =>
+      silent ? Options(extra: {kSilentErrorToast: true}) : null;
 
   Future<List<RecurringTransaction>> list({bool? upcoming, int? limit}) async {
     try {
@@ -59,10 +64,12 @@ class RecurringRepository {
 
     /// 고정 수입·지출 — 이체에는 싣지 않는다(서버도 무시한다).
     bool isFixed = false,
+    bool silent = false,
   }) async {
     try {
       await _dio.post<dynamic>(
         '/recurring-transaction',
+        options: _opts(silent),
         data: {
           'categoryRowId': ?categoryRowId,
           'assetRowId': assetRowId,
@@ -119,10 +126,12 @@ class RecurringRepository {
 
     /// 고정 수입·지출 — 이체에는 싣지 않는다(서버도 무시한다).
     bool isFixed = false,
+    bool silent = false,
   }) async {
     try {
       await _dio.put<dynamic>(
         '/recurring-transaction/$id',
+        options: _opts(silent),
         data: {
           'categoryRowId': ?categoryRowId,
           'assetRowId': assetRowId,
@@ -152,18 +161,24 @@ class RecurringRepository {
     }
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/recurring-transaction/$id');
+      await _dio.delete<void>(
+        '/recurring-transaction/$id',
+        options: _opts(silent),
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
   /// isActive 토글 (PATCH).
-  Future<void> toggle(int id) async {
+  Future<void> toggle(int id, {bool silent = false}) async {
     try {
-      await _dio.patch<dynamic>('/recurring-transaction/$id/toggle');
+      await _dio.patch<dynamic>(
+        '/recurring-transaction/$id/toggle',
+        options: _opts(silent),
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

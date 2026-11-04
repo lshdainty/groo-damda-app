@@ -1,61 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:groo_damda_app/core/format/amount_limits.dart';
-import 'package:groo_damda_app/core/format/currency.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/amount_limits.dart';
+import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
+import 'package:groo_damda_app/core/settings/mask_flags.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
-import 'package:groo_damda_app/shared/widgets/p_badge.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_category_tile.dart';
-import 'package:groo_damda_app/shared/widgets/p_checkbox.dart';
-import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_progress.dart';
-import 'package:groo_damda_app/shared/widgets/p_section_label.dart';
-import 'package:groo_damda_app/shared/widgets/p_switch.dart';
-import 'package:groo_damda_app/shared/widgets/p_select.dart';
-import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
-import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
-import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
-import 'package:groo_damda_app/features/asset/presentation/transfer_account_fields.dart';
-import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
-import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
-import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
+import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
+import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
+import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_event_pickers.dart';
+import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/card_cycle.dart';
-import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
-import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
+import 'package:groo_damda_app/features/expense/presentation/category_pick.dart';
+import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
+import 'package:groo_damda_app/features/preset/presentation/preset_pick_sheet.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_input.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_tx_dialog.dart';
+import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
+import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
+import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/sms/data/sms_android.dart';
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
+import 'package:groo_damda_app/features/sms/domain/sms_prefilter.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
+import 'package:groo_damda_app/shared/ds/date_picker/date_picker_dates.dart'
+    show formatDateValue;
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
+import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
+import 'package:groo_damda_app/shared/forms/name_policy.dart';
+import 'package:groo_damda_app/shared/forms/pick_list.dart';
+import 'package:groo_damda_app/features/category/presentation/category_tile.dart';
 
 String _formatTime(TimeOfDay t) =>
     '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
-/// 거래 추가/편집 시트 (front `AddTxSheet` 미러).
+const int _kPresetNameMax = 12;
+
+/// 거래 추가/수정 시트(I-21 21-2 · D · E) — **금액을 먼저 받는 두 단계**. 새로 추가는 ① 종류 칩 · 밑줄 금액 · 프리셋 · 결제 문자 줄 → [다음] →
+/// ② 거래처 칸 · 줄 칸 · 고정 스위치 → [추가]. 수정 · 고쳐 쓰기 · 문자 초안은 ② 로 바로 열린다(금액은 줄 › 한 단계).
+/// 메모 · 수수료 · 이자 · 결제 문자 · 프리셋 고르기 · 프리셋 저장은 모두 **같은 시트 안 한 단계**다(폼 위 폼 · 폼 위 확인창 안 입력칸 없음).
+/// 고르기(카테고리 · 계좌 · 결제 수단 · 할부 · 통화 · 날짜 · 시각)만 이 시트 위의 고르기 시트다(고른 값은 줄에 그대로).
 ///
-/// [edit] 가 주어지면 편집 모드 (PUT /expense/{id}), 아니면 신규 (POST /expense).
-/// 성공 시 해당 월 expensesProvider invalidate.
+/// [edit] 이 있으면 수정(PUT /expense/{id}), [editTransfer] 는 이체 수정, [replaceOf] 는 고쳐 쓰기(POST /expense/{id}/replace),
+/// [smsDraft] 는 결제 문자 초안(저장은 문자 전용 경로). 아무것도 없으면 새 거래다.
 void showAddTxSheet(
   BuildContext context, {
   String? defaultDate,
@@ -64,77 +80,227 @@ void showAddTxSheet(
   /// 이체 편집 모드 — 서버가 이자 지출·잔액 이력을 되돌렸다 다시 만든다(rowId 유지).
   AssetTransfer? editTransfer,
 
-  /// 결제 문자 초안 — 파싱 결과로 폼을 채우고, 저장은 문자 전용 경로로 보낸다
-  /// (카드 연결 기억·취소 문자 차단이 그 경로에 있다).
+  /// 결제 문자 초안 — 파싱 결과로 폼을 채우고, 저장은 문자 전용 경로로 보낸다.
   SmsDraft? smsDraft,
 
-  /// 고쳐 쓰기(D13) — 결제가 끝나 돈 칸이 잠긴 거래. 그 값이 전부 채워진 **새 거래**
-  /// 시트로 열고, 저장은 `POST /expense/{id}/replace` 로 보낸다(옛 거래 삭제 + 새 거래
-  /// 생성 + 분할·연결 이전이 서버 한 트랜잭션). 문자 초안과 같은 자리의 시드다.
+  /// 고쳐 쓰기(D13) — 결제가 끝나 돈 칸이 잠긴 거래. 그 값이 전부 채워진 새 거래로 열고, 저장은 replace 로 보낸다.
   Expense? replaceOf,
+
+  /// 저장하면 응답 값(수정한 거래)을 넘기고, 저장 없이 닫히면 [onCancelled]. 시트가 닫힌 뒤에 부른다(목록을 다시 받은 다음).
+  ValueChanged<Expense>? onSaved,
+
+  /// 이체 수정 저장 — 저장한 값으로 만든 이체를 넘긴다.
+  ValueChanged<AssetTransfer>? onTransferSaved,
+
+  /// 저장하지 않고 닫혔다.
+  VoidCallback? onCancelled,
 }) {
-  final controller = PSheetController();
   final l = AppLocalizations.of(context);
-  final isEdit = edit != null || editTransfer != null;
-  final isReplace = replaceOf != null && !isEdit;
-  showPSheet<void>(
+  final probe = TxFormProbe();
+  var done = false;
+  PBottomSheet.show<void>(
     context,
-    title: isReplace ? l.expRewrite : (isEdit ? l.expEdit : l.expAdd),
-    contentBuilder: (ctx, scrollCtrl) => _AddTxBody(
+    form: true,
+    isDirty: () => probe.dirty(),
+    interceptClose: () => probe.interceptClose(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
+    ),
+    builder: (sheet) => TxFormFlow(
       defaultDate: defaultDate,
       edit: edit,
       editTransfer: editTransfer,
       smsDraft: smsDraft,
-      replaceOf: isReplace ? replaceOf : null,
-      scrollController: scrollCtrl,
-      controller: controller,
+      replaceOf: replaceOf,
+      probe: probe,
+      onSaved: onSaved == null
+          ? null
+          : (saved) async {
+              done = true;
+              final host = hostContextOf(sheet);
+              PBottomSheet.of(sheet).close();
+              if (host.mounted) onSaved(saved);
+            },
+      onTransferSaved: onTransferSaved == null
+          ? null
+          : (saved) async {
+              done = true;
+              final host = hostContextOf(sheet);
+              PBottomSheet.of(sheet).close();
+              if (host.mounted) onTransferSaved(saved);
+            },
+      onFinished: () => done = true,
     ),
-    footerBuilder: (ctx) => PSheetFooter(
-      controller: controller,
-      submitLabel: isEdit || isReplace ? l.actionSave : l.expAddShort,
-    ),
-  ).whenComplete(controller.dispose);
+  ).whenComplete(() {
+    if (!done) onCancelled?.call();
+  });
 }
 
-class _AddTxBody extends ConsumerStatefulWidget {
-  const _AddTxBody({
+/// 시트의 닫는 길이 이 폼의 그 순간 상태를 묻는 자리 — 폼의 주인은 [TxFormFlow] 라 시트 밖에서 이 줄로 닿는다.
+class TxFormProbe {
+  /// 바뀐 값이 있는가(처음 값과 견줘).
+  bool Function() dirty = () => false;
+
+  /// 한 단계가 열려 있으면 그 단계만 닫고(또는 묻고) 참 — 시트는 닫지 않는다.
+  bool Function() interceptClose = () => false;
+}
+
+enum _S {
+  one,
+  two,
+  amount,
+  krw,
+  memo,
+  fee,
+  interest,
+  sms,
+  presetAll,
+  presetSave,
+  presetAmount,
+}
+
+class _Errs {
+  String? amount;
+  String? category;
+  String? from;
+  String? to;
+  String? fx;
+  String? krw;
+  String? interest;
+  String? splits;
+  bool get any =>
+      amount != null ||
+      category != null ||
+      from != null ||
+      to != null ||
+      fx != null ||
+      krw != null ||
+      interest != null ||
+      splits != null;
+}
+
+/// 폼의 값을 한 줄로 — 처음 값과 견줘 바뀜을 본다.
+String _sig(TxInput c) => [
+  c.type,
+  c.amountCtrl.text,
+  c.origAmountCtrl.text,
+  c.fxRateCtrl.text,
+  c.currency,
+  c.merchantCtrl.text,
+  c.memoCtrl.text,
+  c.categoryRowId,
+  c.assetRowId,
+  c.toAssetRowId,
+  c.paymentMethod,
+  c.installmentMonths,
+  c.isoDate,
+  _formatTime(c.time),
+  c.feeCtrl.text,
+  c.interestCtrl.text,
+  c.isFixed,
+].join('|');
+
+class TxFormFlow extends ConsumerStatefulWidget {
+  const TxFormFlow({
+    super.key,
     this.defaultDate,
     this.edit,
     this.editTransfer,
     this.smsDraft,
     this.replaceOf,
-    required this.scrollController,
-    required this.controller,
+    required this.probe,
+    this.onBack,
+    this.onSaved,
+    this.onTransferSaved,
+    this.onFinished,
   });
+
   final String? defaultDate;
   final Expense? edit;
   final AssetTransfer? editTransfer;
   final SmsDraft? smsDraft;
   final Expense? replaceOf;
-  final ScrollController scrollController;
-  final PSheetController controller;
+  final TxFormProbe probe;
+
+  /// 상세 시트 안의 한 단계로 그릴 때 — 머리에 ← 를 달고(상세로) 저장이 끝나도 시트를 닫지 않는다.
+  final VoidCallback? onBack;
+
+  /// 수정 저장이 끝났다 — 부모가 새 값을 받아 단계를 옮길 때까지 [저장] 은 기다림 모양으로 남는다. 목록을 다시 받은 뒤 부른다.
+  final Future<void> Function(Expense saved)? onSaved;
+  final Future<void> Function(AssetTransfer saved)? onTransferSaved;
+
+  /// 저장 · 넘김이 끝나 닫힘이 "취소" 가 아니다.
+  final VoidCallback? onFinished;
 
   @override
-  ConsumerState<_AddTxBody> createState() => _AddTxBodyState();
+  ConsumerState<TxFormFlow> createState() => _TxFormFlowState();
 }
 
-class _AddTxBodyState extends ConsumerState<_AddTxBody> {
-  late final _TxInputController _input;
+class _TxFormFlowState extends ConsumerState<TxFormFlow> {
+  late TxInput _input;
+  _S _step = _S.one;
+  _S _returnTo = _S.one;
+
+  /// 프리셋 저장 단계를 연 단계 — 금액 단계가 끝나도 이 값은 그대로다(N2).
+  _S _presetOrigin = _S.one;
+
+  /// 한 단계가 끝날 때 돌아갈 곳 — 프리셋 금액 → 프리셋 저장 → 연 단계.
+  _S get _backTarget => switch (_step) {
+    _S.presetAmount => _S.presetSave,
+    _S.presetSave => _presetOrigin,
+    _S.presetAll => _S.one,
+    _ => _returnTo,
+  };
   bool _submitting = false;
+  bool _leaving = false;
 
-  /// 프리셋을 통해 폼이 초기화된 경우 해당 프리셋 ID — 저장 성공 후 /touch.
+  /// 지금 모드 — 고쳐 쓰기로 갈아 끼우면 [_edit] 가 비고 [_replaceOf] 가 선다.
+  Expense? _edit;
+  Expense? _replaceOf;
+  SmsDraft? _smsDraft;
+
+  /// 새로 추가로 열렸다 — 1단계가 있고, 2단계 ← 가 1단계로 간다.
+  late bool _startedAtOne;
+
   int? _appliedPresetId;
+  String? _emptyPresetName;
+  _Errs _errs = _Errs();
+  String? _saveError;
+  late String _initialSig;
+  String _subSig = '';
+  Map<String, String>? _snap;
 
-  // 편집 모드 분할 일치화: 서버 분할(build 에서 적재) + 이번 세션에서 맞춘 분할.
+  final _amountFocus = FocusNode();
+  final _merchantFocus = FocusNode();
+  final _subFocus = FocusNode();
+  final _smsFocus = FocusNode();
+  final _smsCtrl = TextEditingController();
+  final _presetNameCtrl = TextEditingController();
+  final _presetAmountCtrl = TextEditingController();
+  String? _smsError;
+  bool _smsBusy = false;
+  bool _smsLow = false;
+  String? _presetNameError;
+  String? _presetFormError;
+
+  /// 프리셋 저장 요청 실패 — 맨 위 Callout(웹 TxSubs 와 같다).
+  String? _presetSaveError;
+  bool _presetSaving = false;
+  int _presetNameGen = 0;
+
+  // 편집 모드 분할 일치화: 서버 분할 + 이번 세션에서 맞춘 분할.
   List<SplitInput> _serverSplits = const [];
-
-  /// 고쳐 쓰기 시트가 원거래의 분할을 아직 불러오는 중인가 — 그동안 저장을 막는다.
   bool _splitsPending = false;
+
+  /// 나눈 내역 조회가 실패했다 — 저장 · 고쳐 쓰기를 막는다(N5). 분할을 모르는 채 보내면 서버가 옛 분할로 판정해 어긋난다.
+  bool _splitsFailed = false;
   List<SplitInput>? _reconciledSplits;
   List<SplitInput> get _effectiveSplits => _reconciledSplits ?? _serverSplits;
   int get _splitSum => _effectiveSplits.fold<int>(0, (s, x) => s + x.amount);
-  // 금액을 바꿔 분할 합과 어긋남(편집·고쳐 쓰기, 지출/수입만). 이때 저장을 막고
-  // 일치화 유도 — 고쳐 쓰기도 서버가 분할 합을 새 금액과 견줘 400 을 낸다.
+  Expense? get _splitSource => _edit ?? _replaceOf;
   bool get _splitMismatch =>
       _splitSource != null &&
       _input.type != 'TRANSFER' &&
@@ -142,62 +308,65 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       _effectiveSplits.isNotEmpty &&
       _input.amountInt != _splitSum;
 
-  /// 분할을 적재할 원거래 — 지출·수입 편집이나 고쳐 쓰기의 옛 거래. 이체는 분할이 없다.
-  Expense? get _splitSource => widget.edit ?? widget.replaceOf;
-
-  /// 고쳐 쓰기 시트인가(D13) — 새 거래 모드로 열리고 저장은 replace API 다.
-  bool get _isReplace => widget.replaceOf != null;
-
-  /// 편집 모드인가 — **지출·수입 편집과 이체 수정 둘 다** 여기 든다.
-  ///
-  /// 그래서 이 값으로 `widget.edit!` 를 감싸면 안 된다. 이체 수정은 `editTransfer` 로
-  /// 오고 `edit` 은 **null** 이라 그 자리에서 죽는다. 릴리스 빌드의 기본 `ErrorWidget` 은
-  /// 아무 글자 없는 회색 사각형이라, 본문이 통째로 회색으로 나오고 무슨 일이 난 건지도
-  /// 안 보였다(2026-09-18). 지출·수입만 뜻할 때는 `widget.edit != null` 을 직접 본다.
-  bool get _isEdit => widget.edit != null || widget.editTransfer != null;
-
-  /// 결제 문자에서 온 초안인가 — 저장이 `/import/sms/commit` 으로 간다.
-  bool get _isSmsDraft => widget.smsDraft != null;
-
-  /// 종류 토글을 잠그는가 — 편집뿐이다.
-  ///
-  /// 결제 문자 초안도 한동안 잠겨 있었다(#326). 저장 경로인 `/import/sms/commit` 이
-  /// `expenseType` 을 안 받고 서버가 `EXPENSE` 를 박아 넣어서, 수입으로 바꿔 저장해도
-  /// 지출로 남았기 때문이다 — 화면만 수입이라 말하느니 못 고르게 두는 게 나았다.
-  /// **서버가 이제 그 값을 받으므로**(desk-back #326) 잠금을 푼다. 환불·입금 문자를
-  /// 수입으로 남길 수 있어야 그 달 지출이 부풀지 않는다.
+  bool get _isReplace => _replaceOf != null;
+  bool get _isEdit => _edit != null || widget.editTransfer != null;
+  bool get _isSms => _smsDraft != null;
+  bool get _embedded => widget.onBack != null;
   bool get _typeLocked => _isEdit;
+  bool get _isSub =>
+      _step != _S.one && _step != _S.two && _step != _S.presetAll;
+
+  bool get _hasStepOne => _startedAtOne;
 
   @override
   void initState() {
     super.initState();
-    // 고쳐 쓰기는 편집과 같은 값으로 채운다 — 원거래의 모든 칸이 시드다(D13).
-    final e = widget.edit ?? widget.replaceOf;
-    DateTime date;
-    TimeOfDay time = TimeOfDay.now();
+    _edit = widget.edit;
+    _replaceOf = widget.edit == null && widget.editTransfer == null
+        ? widget.replaceOf
+        : null;
+    _smsDraft = widget.smsDraft;
+    _startedAtOne =
+        _edit == null &&
+        widget.editTransfer == null &&
+        _replaceOf == null &&
+        _smsDraft == null;
+    _seed();
+    _step = _startedAtOne ? _S.one : _S.two;
+    widget.probe.dirty = _dirty;
+    widget.probe.interceptClose = _intercept;
+    // 새 거래는 1단계 금액 칸에 초점(숫자 키보드) — 시트가 그려진 뒤에 옮긴다
+    if (_startedAtOne) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _step == _S.one) _amountFocus.requestFocus();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.probe.dirty = () => false;
+    widget.probe.interceptClose = () => false;
+    _input.dispose();
+    _amountFocus.dispose();
+    _merchantFocus.dispose();
+    _subFocus.dispose();
+    _smsFocus.dispose();
+    _smsCtrl.dispose();
+    _presetNameCtrl.dispose();
+    _presetAmountCtrl.dispose();
+    super.dispose();
+  }
+
+  /// 값을 처음으로 채운다 — 모드마다 시드가 다르다(수정 · 고쳐 쓰기: 그 거래 · 문자 초안: 해석 결과).
+  void _seed() {
+    final e = _edit ?? _replaceOf;
     final tr = widget.editTransfer;
-    if (tr?.transferDate != null) {
-      date = parseIsoDate(tr!.transferDate!.substring(0, 10));
-      final m = RegExp(r'[T ](\d{2}):(\d{2})').firstMatch(tr.transferDate!);
-      if (m != null) {
-        time = TimeOfDay(
-          hour: int.parse(m.group(1)!),
-          minute: int.parse(m.group(2)!),
-        );
-      }
-    } else if (e?.expenseDate != null) {
-      date = parseIsoDate(e!.expenseDate!.substring(0, 10));
-      // 시간 추출 (T 또는 공백 뒤 HH:mm)
-      final raw = e.expenseDate!;
-      final m = RegExp(r'[T ](\d{2}):(\d{2})').firstMatch(raw);
-      if (m != null) {
-        time = TimeOfDay(
-          hour: int.parse(m.group(1)!),
-          minute: int.parse(m.group(2)!),
-        );
-      }
-    } else if (widget.smsDraft?.parsed.expenseDate != null) {
-      final raw = widget.smsDraft!.parsed.expenseDate!;
+    final sms = _smsDraft?.parsed;
+    DateTime date;
+    TimeOfDay time = TimeOfDay.fromDateTime(calendarNow());
+    String? raw = tr?.transferDate ?? e?.expenseDate ?? sms?.expenseDate;
+    if (raw != null && raw.length >= 10) {
       date = parseIsoDate(raw.substring(0, 10));
       final m = RegExp(r'[T ](\d{2}):(\d{2})').firstMatch(raw);
       if (m != null) {
@@ -209,11 +378,11 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
     } else if (widget.defaultDate != null) {
       date = parseIsoDate(widget.defaultDate!);
     } else {
-      date = DateTime.now();
+      date = calendarNow();
     }
-    // 결제 문자 초안 — 카드 결제라 유형·결제수단은 고정이고, 나머지는 파싱 값을 채운다.
-    final sms = widget.smsDraft?.parsed;
-    _input = _TxInputController(
+    final old = _inputOrNull;
+    old?.dispose();
+    final c = TxInput(
       type: tr != null ? 'TRANSFER' : (e?.expenseType ?? 'EXPENSE'),
       amount: tr != null
           ? tr.amount.toString()
@@ -224,110 +393,314 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       merchant: e?.merchant ?? sms?.merchant ?? '',
       paymentMethod: e?.paymentMethod ?? (sms != null ? 'CARD' : ''),
       categoryRowId: e?.categoryRowId ?? sms?.categoryRowId,
-      // 이체는 출금 자산이 assetRowId, 입금 자산이 toAssetRowId 다.
       assetRowId: tr?.fromAssetRowId ?? e?.assetRowId ?? sms?.assetRowId,
       date: date,
       time: time,
     );
     if (tr != null) {
-      _input.toAssetRowId = tr.toAssetRowId;
-      if ((tr.fee ?? 0) > 0) _input.feeCtrl.text = tr.fee.toString();
+      c.toAssetRowId = tr.toAssetRowId;
+      if ((tr.fee ?? 0) > 0) c.feeCtrl.text = groupWon(tr.fee!);
       if ((tr.interestAmount ?? 0) > 0) {
-        _input.interestCtrl.text = tr.interestAmount.toString();
+        c.interestCtrl.text = groupWon(tr.interestAmount!);
       }
     }
-    // 편집은 그 거래의 통화를 승계한다 — 해외 결제를 고치는데 원화로 되돌아가면
-    // 원 통화 기록이 조용히 지워진다.
-    final src = e;
-    if (src != null) {
-      // 원화 거래는 `originalCurrency` 가 `null` 로 온다 — 그때도 원화라고 못
-      // 박는다. 안 박으면 설정의 기본 통화가 흘러들어, 원화로 적어 둔 거래를
-      // 열기만 해도 해외 결제 입력이 펼쳐진다(D7).
-      _input.txCurrency = src.originalCurrency ?? kDefaultCurrency;
-      if (src.originalCurrency != null) {
-        _input.origAmountCtrl.text = _trimNum(src.originalAmount);
-        _input.fxRateCtrl.text = _trimNum(src.exchangeRate);
+    // 편집은 그 거래의 통화를 승계한다 — 원화 거래는 originalCurrency 가 null 이라 KRW 로 박는다(기본 통화가 흘러들지 않게).
+    if (e != null) {
+      c.txCurrency = e.originalCurrency ?? kDefaultCurrency;
+      if (e.originalCurrency != null) {
+        c.origAmountCtrl.text = groupDecimal(trimNum(e.originalAmount));
+        c.fxRateCtrl.text = groupDecimal(trimNum(e.exchangeRate));
       }
     }
     if (e?.installmentMonths != null) {
-      _input.installmentMonths = e!.installmentMonths!;
+      c.installmentMonths = e!.installmentMonths!;
     } else if (sms?.installmentMonths != null) {
-      _input.installmentMonths = sms!.installmentMonths!;
+      c.installmentMonths = sms!.installmentMonths!;
     }
     if (sms != null) {
-      // 문자에 외화가 안 실렸으면 원화 결제다 — 설정의 기본 통화가 외화여도
-      // 여기선 문자가 맞다. 안 막으면 원화 결제 문자가 해외 결제 입력으로 열린다.
-      _input.txCurrency = sms.originalCurrency ?? kDefaultCurrency;
+      // 문자에 외화가 안 실렸으면 원화 결제다 — 설정의 기본 통화가 외화여도 문자가 맞다.
+      c.txCurrency = sms.originalCurrency ?? kDefaultCurrency;
       if (sms.originalCurrency != null) {
-        _input.origAmountCtrl.text = _trimNum(sms.originalAmount?.toDouble());
+        c.origAmountCtrl.text = groupDecimal(
+          trimNum(sms.originalAmount?.toDouble()),
+        );
       }
     }
-    // 카드를 알아봤는데 아직 안 외운 경우에만 "이 카드로 기억" 을 물어본다.
-    _input.smsRememberAsk = widget.smsDraft?.canRememberCard ?? false;
-    _input.autoSource = e?.autoSource;
-    _input.isFixed = e?.isFixed ?? false;
-    widget.controller.onSubmit = _submit;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncController());
+    c.smsRememberAsk = _smsDraft?.canRememberCard ?? false;
+    c.autoSource = e?.autoSource;
+    c.isFixed = e?.isFixed ?? false;
+    _input = c;
+    _initialSig = _sig(c);
   }
 
-  void _syncController() {
-    widget.controller.setCanSubmit(_canSubmit);
-    widget.controller.setSubmitting(_submitting);
+  TxInput? get _inputOrNull {
+    try {
+      return _input;
+    } catch (_) {
+      return null;
+    }
   }
 
-  void _setSubmitting(bool v) {
-    setState(() => _submitting = v);
-    widget.controller.setSubmitting(v);
+  /// 저장 중에 닫으면 저장 결과(onSaved · 알림)를 잃는다 — 저장 중에는 바뀐 값으로 보아 닫기 전에 묻는다(L1).
+  bool _dirty() => _submitting || _sig(_input) != _initialSig;
+
+  // ── 단계 ────────────────────────────────────────────────
+  /// 기기 뒤로 가기 · Esc — 한 단계 안이면 그 단계만, 2단계면 1단계로(값은 버리지 않는다). 처음 단계면 시트의 닫는 길이 이어받는다.
+  bool _intercept() {
+    if (!mounted || _submitting) return _submitting;
+    if (_isSub || _step == _S.presetAll) {
+      _requestLeaveSub();
+      return true;
+    }
+    if (_step == _S.two && _hasStepOne) {
+      _goOne();
+      return true;
+    }
+    return false;
   }
 
-  @override
-  void dispose() {
-    _input.dispose();
-    super.dispose();
-  }
-
-  void _applyPreset(ExpenseTemplate p) {
-    final locked = (p.lockAmount ?? 'N') == 'Y';
+  void _goOne() {
+    FocusScope.of(context).unfocus();
     setState(() {
-      _appliedPresetId = p.rowId;
-      _input.type = p.expenseType;
-      // 웹과 동일: lockAmount === 'Y' 일 때만 금액 채움, 아니면 비워둠
-      _input.amountCtrl.text = locked ? (p.amount ?? 0).toString() : '';
-      _input.categoryRowId = p.categoryRowId;
-      _input.assetRowId = p.assetRowId;
-      _input.memoCtrl.text = p.description ?? '';
-      _input.merchantCtrl.text = p.merchant ?? '';
-      _input.paymentMethod = p.paymentMethod ?? '';
-      // 이체 프리셋은 받는 계좌·수수료·이자를 함께 들고 온다. 보내는 계좌는
-      // assetRowId 한 칸을 지출·수입과 같이 쓴다(서버도 같은 컬럼이다).
-      _input.toAssetRowId = p.toAssetRowId;
-      _input.feeCtrl.text = p.fee != null ? '${p.fee}' : '';
-      _input.interestCtrl.text = p.interestAmount != null
-          ? '${p.interestAmount}'
-          : '';
-      _input.amountLocked = locked;
-      // 프리셋의 고정 표식이 기본값이 된다 — 월세 프리셋을 불러오면 고정으로 켜져 있다. 이체는 해당 없음.
-      _input.isFixed = p.expenseType == 'TRANSFER' ? false : p.isFixed;
+      _step = _S.one;
+      _saveError = null;
     });
   }
 
+  void _openSub(_S step, {FocusNode? focus}) {
+    FocusScope.of(context).unfocus();
+    _returnTo = _step;
+    _snap = {
+      'amount': _input.amountCtrl.text,
+      'orig': _input.origAmountCtrl.text,
+      'fx': _input.fxRateCtrl.text,
+      'cur': _input.currencyPick ?? '',
+      'memo': _input.memoCtrl.text,
+      'fee': _input.feeCtrl.text,
+      'interest': _input.interestCtrl.text,
+      'presetAmount': _presetAmountCtrl.text,
+    };
+    _subSig = _snap!.values.join('|');
+    setState(() => _step = step);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _step == step) (focus ?? _subFocus).requestFocus();
+    });
+  }
+
+  bool _subDirty() => switch (_step) {
+    _S.amount || _S.krw || _S.memo || _S.fee || _S.interest =>
+      [
+            _input.amountCtrl.text,
+            _input.origAmountCtrl.text,
+            _input.fxRateCtrl.text,
+            _input.currencyPick ?? '',
+            _input.memoCtrl.text,
+            _input.feeCtrl.text,
+            _input.interestCtrl.text,
+            _presetAmountCtrl.text,
+          ].join('|') !=
+          _subSig,
+    _S.presetAmount => _presetAmountCtrl.text != (_snap?['presetAmount'] ?? ''),
+    _ => false,
+  };
+
+  /// "완료" — 친 값을 넣고 연 단계로 돌아간다.
+  void _doneSub() {
+    if (_submitting) return;
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _errs = _Errs();
+      _step = _backTarget;
+    });
+  }
+
+  /// ← · 뒤로 가기 — 친 값을 버리고 연 단계로. 바뀐 값이 있으면 먼저 "작성한 내용이 사라져요".
+  Future<void> _requestLeaveSub() async {
+    if (_leaving || _submitting) return;
+    if (!_subDirty()) {
+      _leaveSub();
+      return;
+    }
+    _leaving = true;
+    final l = AppLocalizations.of(context);
+    final leave = await PAlertDialog.confirmLeave(
+      context,
+      PLeaveConfirmCopy(
+        title: l.sheetLeaveTitle,
+        description: l.sheetLeaveDescription,
+        stayLabel: l.sheetLeaveStay,
+        leaveLabel: l.sheetLeaveLeave,
+      ),
+    );
+    _leaving = false;
+    if (leave && mounted) _leaveSub();
+  }
+
+  void _leaveSub() {
+    final s = _snap;
+    if (s != null) {
+      _input.amountCtrl.text = s['amount']!;
+      _input.origAmountCtrl.text = s['orig']!;
+      _input.fxRateCtrl.text = s['fx']!;
+      _input.currencyPick = s['cur']!.isEmpty ? null : s['cur'];
+      _input.memoCtrl.text = s['memo']!;
+      _input.feeCtrl.text = s['fee']!;
+      _input.interestCtrl.text = s['interest']!;
+      _presetAmountCtrl.text = s['presetAmount']!;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _step = _backTarget;
+      _errs = _Errs();
+    });
+  }
+
+  // ── 값 바꿈 ─────────────────────────────────────────────
+  /// 프리셋 · 문자로 채운 값이 지금 목록에 없으면 비우고 칸 오류로 안내한다(20-2 와 같은 규칙, N4). 거래에서 읽어 온 값(수정)은 기록이라 건드리지 않는다.
+  void _dropUnknownRefs() {
+    final c = _input;
+    final cats = ref.read(categoriesProvider).value;
+    if (cats != null &&
+        c.categoryRowId != null &&
+        cats.byRowId(c.categoryRowId!) == null) {
+      c.categoryRowId = null;
+      _errs.category = AppLocalizations.of(context).txfErrCategory;
+    }
+    final assets = ref.read(assetsProvider).value;
+    if (assets != null &&
+        c.assetRowId != null &&
+        assets.byRowId(c.assetRowId!) == null) {
+      c.assetRowId = null;
+    }
+    if (assets != null &&
+        c.toAssetRowId != null &&
+        assets.byRowId(c.toAssetRowId!) == null) {
+      c.toAssetRowId = null;
+    }
+  }
+
   void _clearPresetMark() {
-    if (_appliedPresetId == null) return;
-    setState(() => _appliedPresetId = null);
+    if (_appliedPresetId == null && _emptyPresetName == null) return;
+    _appliedPresetId = null;
+    _emptyPresetName = null;
   }
 
-  /// 프리셋으로 저장할 수 있는가 — 종류마다 있어야 하는 칸이 다르다.
-  /// 지출·수입은 카테고리가, 이체는 양쪽 계좌가 프리셋의 뼈대다.
-  bool get _canSavePreset {
-    if (_input.amountInt <= 0) return false;
-    return _input.type == 'TRANSFER'
-        ? transferPartiesReady(_input.assetRowId, _input.toAssetRowId)
-        : _input.categoryRowId != null;
+  void _setType(String v, List<ExpenseCategory>? cats) {
+    if (_typeLocked || _input.type == v) return;
+    setState(() {
+      _input.type = v;
+      // 종류를 바꾸면 안 맞는 카테고리는 놓는다(서버가 종류≠카테고리 종류를 400 으로 막는다)
+      if (cats != null) {
+        final cat = cats
+            .where((x) => x.rowId == _input.categoryRowId)
+            .firstOrNull;
+        if (cat == null || cat.expenseType != v) _input.categoryRowId = null;
+      }
+      // 종류를 바꿔 지금 계좌가 허용 밖이 되면(수입 예적금 → 지출) 비운다
+      final curAsset = _input.assetRowId == null
+          ? null
+          : ref
+                .read(assetsProvider)
+                .value
+                ?.where((a) => a.rowId == _input.assetRowId)
+                .firstOrNull;
+      if (curAsset != null &&
+          !allowTxAsset(curAsset, _input.paymentMethod, v)) {
+        _input.assetRowId = null;
+      }
+      if (v == 'TRANSFER') {
+        // 이체에는 통화 칩이 없다 — 원화 값으로
+        _toKrw();
+      }
+      _clearPresetMark();
+      _errs = _Errs();
+    });
   }
 
-  /// 프리셋으로 채운 뒤 저장한 경우 useCount/lastUsedAt 갱신.
-  ///
-  /// 지출·수입과 이체가 같이 쓴다 — 저장 경로가 갈려도 사용 기록 규칙은 하나다.
+  /// 원화로 — 외화 입력을 지우고 현지 금액이 있었으면 원화 금액으로 이어 받는다.
+  void _toKrw({bool keepEntry = true}) {
+    final c = _input;
+    final carried = c.origAmountCtrl.text.replaceAll(',', '');
+    c.currencyPick = kDefaultCurrency;
+    if (keepEntry && carried.isNotEmpty) {
+      final n = double.tryParse(carried);
+      if (n != null) c.amountCtrl.text = groupWon(n.round());
+    }
+    c.origAmountCtrl.clear();
+    c.fxRateCtrl.clear();
+  }
+
+  /// 통화 칩으로 통화를 바꾼다 — 원화 → 외화: 친 값이 현지 금액이 되고 원화 금액은 환율이 들어올 때 채운다 · 외화 → 원화: 친 값이 원화 금액이 된다.
+  void _pickCurrency(String code) {
+    final c = _input;
+    final wasForeign = c.isForeignTx;
+    setState(() {
+      if (!isForeignCurrency(code)) {
+        if (wasForeign) _toKrw();
+        c.currencyPick = code;
+      } else {
+        if (!wasForeign) {
+          c.origAmountCtrl.text = c.amountCtrl.text; // 쉼표 그대로(읽을 때 뗀다)
+          c.amountCtrl.clear();
+        }
+        c.currencyPick = code;
+        fillKrwFromForeign(c);
+      }
+      _clearPresetMark();
+      _errs = _Errs();
+    });
+  }
+
+  // ── 프리셋 ──────────────────────────────────────────────
+  /// 프리셋 칩 · 모두 보기 — 값을 채운다. 금액이 있는 프리셋은 2단계로, 금액이 빈 프리셋은 1단계에 남아 금액 칸에 초점(Q4 B).
+  /// 프리셋 금액은 채운 값일 뿐이다 — 금액 칸을 잠그지 않는다(Q7 A).
+  void _applyPreset(ExpenseTemplate p) {
+    final c = _input;
+    final fixed = (p.lockAmount ?? 'N') == 'Y' && (p.amount ?? 0) > 0;
+    setState(() {
+      _appliedPresetId = p.rowId;
+      c.type = p.expenseType;
+      // 프리셋에는 통화가 없다 — 칩은 ₩ KRW
+      c.currencyPick = kDefaultCurrency;
+      c.origAmountCtrl.clear();
+      c.fxRateCtrl.clear();
+      c.amountCtrl.text = fixed ? groupWon(p.amount ?? 0) : '';
+      c.categoryRowId = p.categoryRowId;
+      c.assetRowId = p.assetRowId;
+      c.memoCtrl.text = p.description ?? '';
+      c.merchantCtrl.text = p.merchant ?? '';
+      c.paymentMethod = p.paymentMethod ?? '';
+      c.toAssetRowId = p.toAssetRowId;
+      c.feeCtrl.text = p.fee != null ? groupWon(p.fee!) : '';
+      c.interestCtrl.text = p.interestAmount != null
+          ? '${p.interestAmount}'
+          : '';
+      c.isFixed = p.expenseType == 'TRANSFER' ? false : p.isFixed;
+      _emptyPresetName = fixed ? null : p.templateName;
+      _errs = _Errs();
+      _dropUnknownRefs();
+      _saveError = null;
+      _step = fixed ? _S.two : _S.one;
+    });
+    if (!fixed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _step == _S.one) _amountFocus.requestFocus();
+      });
+    }
+  }
+
+  /// 적용한 칩을 다시 누르면 표시만 지운다(값은 그대로 · 저장 때 사용 기록을 보내지 않는다).
+  void _onPresetTap(ExpenseTemplate p) {
+    if (_appliedPresetId == p.rowId) {
+      setState(() {
+        _appliedPresetId = null;
+        _emptyPresetName = null;
+      });
+      return;
+    }
+    _applyPreset(p);
+  }
+
   Future<void> _touchAppliedPreset() async {
     if (_isEdit || _appliedPresetId == null) return;
     try {
@@ -339,111 +712,484 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
     }
   }
 
-  Future<void> _showSavePresetDialog() async {
-    if (!_canSavePreset) return;
-    final isTransfer = _input.type == 'TRANSFER';
-    await showDialog<void>(
-      context: context,
-      builder: (_) => _SavePresetDialog(
-        seedExpenseType: _input.type,
-        seedAmount: _input.amountInt,
-        seedCategoryRowId: isTransfer ? null : _input.categoryRowId,
-        seedAssetRowId: _input.assetRowId,
-        seedToAssetRowId: isTransfer ? _input.toAssetRowId : null,
-        seedFee: isTransfer ? _input.feeOrNull : null,
-        seedInterest: isTransfer ? _input.interestOrNull : null,
-        seedMerchant: isTransfer ? '' : _input.merchantCtrl.text.trim(),
-        seedDescription: _input.memoCtrl.text.trim(),
-        seedPaymentMethod: isTransfer ? '' : _input.paymentMethod,
-        seedIsFixed: !isTransfer && _input.isFixed,
+  // ── 고르기 시트 ─────────────────────────────────────────
+  /// 고르기 시트의 틀 — 목록형(카테고리 · 계좌 · 할부 · 통화)은 끝 흐림을 켜고, 줄이 정해진 고정형(결제 수단)은 끈다.
+  Future<T?> _sheet<T>(String title, Widget body, {bool fog = true}) =>
+      PBottomSheet.show<T>(
+        context,
+        builder: (ctx) => PBottomSheetContent(
+          title: title,
+          closeLabel: AppLocalizations.of(ctx).actionClose,
+          flushBody: true,
+          scrollFog: fog,
+          body: body,
+        ),
+      );
+
+  Future<void> _pickCategory() async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final v = await _sheet<int>(
+      l.expCategory,
+      CategoryPickBody(kind: _input.type, selectedRowId: _input.categoryRowId),
+    );
+    if (v == null || !mounted) return;
+    setState(() {
+      _input.categoryRowId = v;
+      _errs.category = null;
+      _clearPresetMark();
+    });
+  }
+
+  Future<void> _pickAsset({required bool income, bool to = false}) async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final c = _input;
+    final assets = ref.read(assetsProvider).value ?? const <Asset>[];
+    final bool transfer = c.type == 'TRANSFER';
+    final List<Asset> list;
+    if (transfer) {
+      list = [
+        for (final a in transferEligibleAssets(assets))
+          if (!to ? true : a.rowId != c.assetRowId) a,
+      ];
+    } else {
+      list = [
+        for (final a in assets)
+          if (allowTxAsset(a, c.paymentMethod, c.type)) a,
+      ];
+    }
+    final title = transfer
+        ? (to ? l.transferToLabel : l.transferFromLabel)
+        : (income ? l.expDepositAccount : l.expAccountCard);
+    final selected = transfer
+        ? (to ? c.toAssetRowId : c.assetRowId)
+        : (c.assetRowId ?? -1);
+    final v = await _sheet<int>(
+      title,
+      _AssetPickBody(
+        assets: list,
+        selected: selected,
+        label: title,
+        withNone: !transfer,
+        noneLabel: l.txfNoAccountOption,
+        emptyText: !transfer && c.paymentMethod.isNotEmpty && list.isEmpty
+            ? l.txfNoPickableAsset
+            : null,
+        failed:
+            ref.read(assetsProvider).hasError &&
+            !ref.read(assetsProvider).hasValue,
+        failedText: l.txfAssetLoadFailed,
+        onRetry: () => ref.invalidate(assetsProvider),
       ),
+    );
+    if (v == null || !mounted) return;
+    setState(() {
+      if (transfer) {
+        if (to) {
+          c.toAssetRowId = v;
+          // 받는 자산이 대출이 아니게 되면 이자는 버린다
+          if (!isLoanTarget(assets, v)) c.interestCtrl.clear();
+          _errs.to = null;
+        } else {
+          c.assetRowId = v;
+          if (c.toAssetRowId == v) c.toAssetRowId = null;
+          _errs.from = null;
+        }
+      } else {
+        c.assetRowId = v == -1 ? null : v;
+      }
+      _clearPresetMark();
+    });
+  }
+
+  Future<void> _pickMethod() async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final c = _input;
+    final title = c.type == 'INCOME' ? l.expIncomeMethod : l.expPaymentMethod;
+    final v = await _sheet<String>(
+      title,
+      PickList<String>(
+        label: title,
+        selected: c.paymentMethod,
+        items: [
+          PickItem(value: '', title: l.txfNoMethodOption),
+          for (final code in kTxPaymentMethodCodes)
+            PickItem(value: code, title: txPaymentMethodLabel(l, code)),
+        ],
+      ),
+      fog: false,
+    );
+    if (v == null || !mounted) return;
+    final assets = ref.read(assetsProvider).value ?? const <Asset>[];
+    setState(() {
+      c.paymentMethod = v;
+      if (v.isNotEmpty && c.assetRowId != null) {
+        final cur = assets.where((a) => a.rowId == c.assetRowId).firstOrNull;
+        if (cur != null && !allowTxAsset(cur, v, c.type)) c.assetRowId = null;
+      }
+      _clearPresetMark();
+    });
+  }
+
+  Future<void> _pickInstallment() async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final v = await _sheet<int>(
+      l.expInstallment,
+      PickList<int>(
+        label: l.expInstallment,
+        selected: _input.installmentMonths,
+        items: [
+          PickItem(value: 0, title: l.expLumpSum),
+          for (final m in kTxInstallmentMonths)
+            PickItem(value: m, title: l.expInstallmentMonths(m)),
+        ],
+      ),
+    );
+    if (v == null || !mounted) return;
+    setState(() {
+      _input.installmentMonths = v;
+      _clearPresetMark();
+    });
+  }
+
+  Future<void> _pickCurrencyChip() async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final v = await _sheet<String>(
+      l.expCurrency,
+      PickList<String>(
+        label: l.expCurrency,
+        selected: _input.currency,
+        items: [
+          for (final cur in kCurrencies)
+            PickItem(value: cur.code, title: '${cur.symbol} ${cur.code}'),
+        ],
+      ),
+    );
+    if (v == null || !mounted) return;
+    _pickCurrency(v);
+  }
+
+  Future<void> _pickDay() async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final picked = await showCalendarDaySheet(
+      context,
+      title: l.expDate,
+      value: _input.date,
+      today: calendarNow(),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _input.date = DateTime(picked.year, picked.month, picked.day);
+    });
+  }
+
+  Future<void> _pickTime() async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final t = _input.time;
+    final picked = await showCalendarTimeSheet(
+      context,
+      title: l.txfTimeTitle,
+      value: roundTimeToStep(PTimeValue(t.hour, t.minute), 5),
+    );
+    if (picked == null || !mounted) return;
+    setState(
+      () => _input.time = TimeOfDay(hour: picked.hour, minute: picked.minute),
     );
   }
 
-  bool get _canSubmit {
-    final amount = _input.amountInt;
-    if (_submitting || amount <= 0) return false;
-    if (_input.type == 'TRANSFER') {
-      return _input.assetRowId != null &&
-          _input.toAssetRowId != null &&
-          _input.assetRowId != _input.toAssetRowId;
+  // ── 문자 단계 ───────────────────────────────────────────
+  Future<void> _readSms() async {
+    final text = _smsCtrl.text.trim();
+    if (_smsBusy) return;
+    final l = AppLocalizations.of(context);
+    if (text.isEmpty || !looksLikePaymentSms(text)) {
+      setState(() => _smsError = l.smsNotRecognized);
+      return;
     }
-    // 자산은 선택사항 — 자산까지 관리하지 않고 가계부로만 쓰는 사용법을 막지 않는다(웹 정합).
-    if (_input.categoryRowId == null) return false;
-    // 분할 합 불일치 시 저장 보류 — 배너의 '분할 내역 맞추기'로 먼저 일치화.
-    if (_splitMismatch) return false;
-    // 고쳐 쓰기는 분할을 본문에 싣는다 — 다 불러오기 전이면 빈 채로 나간다.
-    if (_splitsPending) return false;
-    return true;
+    setState(() {
+      _smsBusy = true;
+      _smsError = null;
+    });
+    try {
+      final repo = await ref.read(smsRepositoryProvider.future);
+      final parsed = await repo.parse(text, silent: true);
+      if (!mounted) return;
+      if (!parsed.matched) {
+        setState(() => _smsError = l.smsNotRecognized);
+        return;
+      }
+      if (parsed.cancel) {
+        setState(() => _smsError = l.smsCancelNotice);
+        return;
+      }
+      // 성공 — 같은 값으로 채우고 2단계로(금액은 늘 채워진다)
+      setState(() {
+        _smsDraft = SmsDraft(text: text, parsed: parsed);
+        _clearPresetMark();
+        _seed();
+        _smsLow = parsed.isLowConfidence;
+        _errs = _Errs();
+        _dropUnknownRefs();
+        _step = _S.two;
+      });
+    } on ApiException {
+      if (!mounted) return;
+      // 서버 글은 내지 않는다 — 우리 글만
+      setState(() => _smsError = l.smsParseFailed);
+    } finally {
+      if (mounted) setState(() => _smsBusy = false);
+    }
+  }
+
+  // ── 프리셋 저장 단계 ────────────────────────────────────
+  void _openPresetSave() {
+    final c = _input;
+    final merchant = c.type == 'TRANSFER' ? '' : c.merchantCtrl.text.trim();
+    final name = merchant.length > _kPresetNameMax
+        ? merchant.substring(0, _kPresetNameMax)
+        : merchant;
+    _presetNameCtrl.text = name;
+    _presetAmountCtrl.text = groupWon(c.amountInt);
+    _presetNameError = null;
+    _presetFormError = null;
+    _presetNameGen++;
+    _presetOrigin = _step;
+    _openSub(_S.presetSave, focus: _subFocus);
+  }
+
+  Future<void> _savePreset() async {
+    if (_presetSaving) return;
+    final l = AppLocalizations.of(context);
+    final c = _input;
+    final isTransfer = c.type == 'TRANSFER';
+    String? formError;
+    if (isTransfer) {
+      if (!transferPartiesReady(c.assetRowId, c.toAssetRowId)) {
+        formError = l.txfPresetNeedParties;
+      }
+    } else if (c.categoryRowId == null) {
+      formError = l.txfPresetNeedCategory;
+    }
+    final taken = [
+      for (final p
+          in ref.read(presetListProvider).value ?? const <ExpenseTemplate>[])
+        p.templateName,
+    ];
+    final issue = nameIssue(_presetNameCtrl.text, _kPresetNameMax, taken);
+    final nameError = switch (issue) {
+      NameIssue.required => l.txfPresetNameRequired,
+      NameIssue.tooLong => l.txfPresetNameTooLong,
+      NameIssue.duplicate => l.presetNameDuplicate,
+      null => null,
+    };
+    setState(() {
+      _presetFormError = formError;
+      _presetNameError = nameError;
+      _presetSaveError = null;
+    });
+    if (formError != null || nameError != null) return;
+    final amount = parseAmountInput(_presetAmountCtrl.text) ?? 0;
+    final lock = amount > 0;
+    setState(() {
+      _presetSaving = true;
+      _saveError = null;
+    });
+    final name = _presetNameCtrl.text.trim();
+    try {
+      final repo = await ref.read(presetRepositoryProvider.future);
+      await repo.create(
+        templateName: name,
+        categoryRowId: isTransfer ? null : c.categoryRowId,
+        assetRowId: c.assetRowId,
+        toAssetRowId: isTransfer ? c.toAssetRowId : null,
+        fee: isTransfer ? c.feeOrNull : null,
+        // 이자는 금액을 따라간다 — 금액을 안 저장하면 이자도 안 저장한다
+        interestAmount: isTransfer && lock ? c.interestOrNull : null,
+        expenseType: c.type,
+        amount: lock ? amount : 0,
+        description: c.memoCtrl.text.trim().isEmpty
+            ? null
+            : c.memoCtrl.text.trim(),
+        merchant: isTransfer || c.merchantCtrl.text.trim().isEmpty
+            ? null
+            : c.merchantCtrl.text.trim(),
+        paymentMethod: isTransfer || c.paymentMethod.isEmpty
+            ? null
+            : c.paymentMethod,
+        lockAmount: lock,
+        isFixed: !isTransfer && c.isFixed,
+        silent: true,
+      );
+      ref.invalidate(presetListProvider);
+      if (!mounted) return;
+      setState(() => _step = _presetOrigin);
+      showPSnackBar(
+        hostContextOf(context),
+        l.txfPresetSaved(name),
+        severity: PSnackSeverity.success,
+      );
+    } on ApiException {
+      if (!mounted) return;
+      // 고칠 수 있는 서버 거절(이름 중복 등)은 위에서 먼저 막았다 — 남는 건 우리 글
+      setState(() => _presetSaveError = l.txfSaveFailed);
+    } finally {
+      if (mounted) setState(() => _presetSaving = false);
+    }
+  }
+
+  // ── 검증 · 저장 ─────────────────────────────────────────
+  _Errs _validate() {
+    final l = AppLocalizations.of(context);
+    final c = _input;
+    final e = _Errs();
+    final isTransfer = c.type == 'TRANSFER';
+    final foreign = c.isForeignTx;
+    if (foreign) {
+      if ((c.origAmountOrNull ?? 0) <= 0) e.amount = l.txfEntryRequired;
+    } else if (c.amountInt <= 0) {
+      e.amount = l.txfEntryRequired;
+    }
+    if (foreign && e.amount == null && c.amountInt <= 0) {
+      e.fx = l.txfErrFx;
+    }
+    if (c.amountInt > kAmountMax) e.krw = l.txfAmountTooLarge;
+    if (isTransfer) {
+      if (c.assetRowId == null) e.from = l.txfErrFrom;
+      if (c.toAssetRowId == null || c.toAssetRowId == c.assetRowId) {
+        e.to = l.txfErrTo;
+      }
+      final interest = c.interestOrNull;
+      if (showTxInterest(c, _assetsAtSave) &&
+          interest != null &&
+          interest > c.amountInt) {
+        e.interest = l.txfErrInterest;
+      }
+    } else if (c.categoryRowId == null) {
+      e.category = l.txfErrCategory;
+    }
+    if (_splitsPending) e.splits = l.txfSplitsLoading;
+    if (_splitsFailed) e.splits = l.expSplitLoadFailed;
+    return e;
+  }
+
+  /// [다음] — 금액이 비면 칸 아래 오류, 아니면 2단계로.
+  void _next() {
+    final l = AppLocalizations.of(context);
+    final c = _input;
+    final foreign = c.isForeignTx;
+    final empty = foreign ? (c.origAmountOrNull ?? 0) <= 0 : c.amountInt <= 0;
+    if (empty) {
+      setState(() => _errs.amount = l.txfEntryRequired);
+      _amountFocus.requestFocus();
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _errs = _Errs();
+      _emptyPresetName = null;
+      _step = _S.two;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _step == _S.two && _startedAtOne && _smsDraft == null) {
+        _merchantFocus.requestFocus();
+      }
+    });
+  }
+
+  /// 저장 전에 자산 목록을 확보한다 — 목록이 없는 채로 판정하면 이자 · 할부가 조용히 지워진다(N1). 못 받으면 요청을 보내지 않는다.
+  List<Asset>? _assetsAtSave;
+
+  Future<bool> _ensureAssets() async {
+    final cur = ref.read(assetsProvider);
+    if (cur.hasValue) {
+      _assetsAtSave = cur.value;
+      return true;
+    }
+    try {
+      _assetsAtSave = await ref.read(assetsProvider.future);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// 저장 — 들어오는 순간 막는 표시를 켜고(자산 목록을 기다리는 동안 [추가] 를 또 눌러도 요청이 둘 나가지 않게) 어떤 길로 끝나도 푼다.
+  Future<void> _save() async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    try {
+      await _saveInner();
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _saveInner() async {
+    if (!await _ensureAssets()) {
+      if (!mounted) return;
+      setState(() => _saveError = AppLocalizations.of(context).txfSaveFailed);
+      scrollSheetBodyToTop(context);
+      return;
+    }
+    if (!mounted) return;
+    final errs = _validate();
+    if (errs.any) {
+      setState(() {
+        _errs = errs;
+        // 오류가 2단계 밖(1단계 금액)이면 그 단계로 돌아가 그 칸에 초점
+        if (errs.amount != null && _hasStepOne && _step == _S.two) {
+          _step = _S.one;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _amountFocus.requestFocus();
+          });
+        }
+      });
+      return;
+    }
+    // 분할이 금액과 어긋나면 먼저 맞추게 한다 — 맞추기 단계에서 저장
+    if (_splitMismatch) {
+      _openReconcile();
+      return;
+    }
+    setState(() => _errs = _Errs());
+    await _submit();
+  }
+
+  /// 저장 실패 — 웹과 같은 한 글(서버 원문 없음). 확인창을 거친 저장의 실패도 보이게 본문을 맨 위로 올린다.
+  void _failSave(ApiException e) {
+    if (!mounted) return;
+    final l = AppLocalizations.of(context);
+    setState(() => _saveError = l.txfSaveFailed);
+    scrollSheetBodyToTop(context);
   }
 
   Future<void> _submit() async {
-    final amount = _input.amountInt;
-    final isoDate = _input.isoDate;
-    final dateStr = '${isoDate}T${_formatTime(_input.time)}:00';
-    final desc = _input.memoOrNull;
-    final merchant = _input.merchantOrNull;
-    final payment = _input.paymentMethodOrNull;
-    // 할부는 신용카드 지출에만 — 그 밖의 조합에선 값을 흘리지 않는다.
-    final installment = _input.installmentMonths > 1
-        ? _input.installmentMonths
+    final c = _input;
+    final amount = c.amountInt;
+    final dateStr = '${c.isoDate}T${_formatTime(c.time)}:00';
+    final desc = c.memoOrNull;
+    final merchant = c.merchantOrNull;
+    final payment = c.paymentMethodOrNull;
+    // 할부는 신용카드 지출에만(웹과 같다) — 카드가 아니게 되었거나 수입이면 값을 싣지 않는다(N3)
+    final installment =
+        showTxInstallment(c, _assetsAtSave) && c.installmentMonths > 1
+        ? c.installmentMonths
         : null;
-    // 원 통화는 셋이 함께여야 의미가 있다 — 서버도 반쪽이면 전부 비운다.
-    final origAmount = _input.origAmountOrNull;
-    final origCurrency = origAmount != null ? _input.currency : null;
-    final fxRate = origAmount != null ? _input.fxRateOrNull : null;
-    final d = _input.date;
+    final origAmount = c.origAmountOrNull;
+    final origCurrency = origAmount != null ? c.currency : null;
+    final fxRate = origAmount != null ? c.fxRateOrNull : null;
+    final d = c.date;
 
-    if (_input.type == 'TRANSFER') {
-      _setSubmitting(true);
-      try {
-        final fee = int.tryParse(_input.feeCtrl.text.replaceAll(',', ''));
-        // 이자는 대출 상환에만 — 그 밖의 이체엔 값을 흘리지 않는다.
-        final interest = _showInterest(_input, ref.read(assetsProvider).value)
-            ? int.tryParse(_input.interestCtrl.text.replaceAll(',', ''))
-            : null;
-        final aRepo = await ref.read(assetRepositoryProvider.future);
-        final editing = widget.editTransfer;
-        if (editing != null) {
-          await aRepo.updateTransfer(
-            rowId: editing.rowId,
-            fromAssetRowId: _input.assetRowId!,
-            toAssetRowId: _input.toAssetRowId!,
-            amount: amount,
-            fee: fee,
-            interestAmount: interest,
-            description: desc,
-            transferDate: dateStr,
-          );
-        } else {
-          await aRepo.createTransfer(
-            fromAssetRowId: _input.assetRowId!,
-            toAssetRowId: _input.toAssetRowId!,
-            amount: amount,
-            fee: fee,
-            interestAmount: interest,
-            description: desc,
-            transferDate: dateStr,
-          );
-        }
-        ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
-        invalidateAfterExpenseChange(ref);
-        // 이체도 프리셋으로 채웠으면 사용 기록을 올린다 — 지출·수입(아래 공통 꼬리)과
-        // 같은 규칙. 이 분기가 여기서 return 해 그 꼬리에 못 닿는 바람에, 목록이
-        // "사용 많은 순" 정렬인데 이체 프리셋만 영영 0 이었다(#174).
-        // 시트를 닫기 전에 부른다 — 닫고 나면 이 State 가 사라진다.
-        await _touchAppliedPreset();
-        if (!mounted) return;
-        Navigator.of(context).pop();
-      } on ApiException {
-        if (!mounted) return;
-      } finally {
-        if (mounted) _setSubmitting(false);
-      }
+    if (c.type == 'TRANSFER') {
+      await _submitTransfer(amount: amount, dateStr: dateStr, desc: desc);
       return;
     }
-
-    // 고쳐 쓰기는 따로 묻고 따로 보낸다(D13) — 옛 거래를 지우고 새 거래를 만든다.
     if (_isReplace) {
       await _submitReplace(
         amount: amount,
@@ -458,33 +1204,25 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       );
       return;
     }
-
-    // 결제가 끝난 회차로 가는 저장이면 먼저 한 번 묻는다 — 기록만 바뀌고 계좌 잔액은
-    // 그대로다(D1). 서버에 묻지 않는다 — 판정은 카드의 cardClosedThrough 하나다.
-    // 물러나면 아무것도 보내지 않는다.
+    // 결제가 끝난 회차로 가는 저장이면 먼저 한 번 묻는다 — 기록만 바뀌고 계좌 잔액은 그대로다(D1)
     if (!await _confirmClosedCycleSave(installment: installment)) return;
     if (!mounted) return;
 
-    _setSubmitting(true);
+    setState(() {
+      _submitting = true;
+      _saveError = null;
+    });
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
-      final edited = widget.edit;
+      Expense? savedEdit;
+      final edited = _edit;
       if (edited != null) {
-        // 이 시트가 소유한 칸은 비운 상태 그대로 실어야 지워진다 — 키를 빼면
-        // 서버가 옛 값을 지킨다(QA #99). 환불 표식은 이 시트의 칸이 아니다 —
-        // 전용 경로(`POST/DELETE /expense/{id}/refund`)만 건드린다.
-        //
-        // 돈 칸이 잠긴 거래(D12)는 카테고리·가맹점·메모만 고친다. 돈 칸은 **원래 값
-        // 그대로** 돌려보낸다 — 폼을 거치며 초·환율 소수점이 깎이면 서버가 "바뀌었다"
-        // 고 보고 거절한다(EXP_045). 지울 수 있는 돈 칸은 키째 빼서 서버가 지키게 한다.
-        final locked = _input.moneyLocked;
+        final locked = c.moneyLocked;
         final saved = await repo.update(
           id: edited.rowId,
-          categoryRowId: _input.categoryRowId!,
-          assetRowId: locked
-              ? const Patch.keep()
-              : Patch.set(_input.assetRowId),
-          expenseType: locked ? edited.expenseType : _input.type,
+          categoryRowId: c.categoryRowId!,
+          assetRowId: locked ? const Patch.keep() : Patch.set(c.assetRowId),
+          expenseType: locked ? edited.expenseType : c.type,
           amount: locked ? edited.amount : amount,
           expenseDate: locked ? (edited.expenseDate ?? dateStr) : dateStr,
           description: Patch.set(desc),
@@ -498,32 +1236,25 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
               ? const Patch.keep()
               : Patch.set(origCurrency),
           exchangeRate: locked ? const Patch.keep() : Patch.set(fxRate),
-          // 고정 표식은 돈이 아니라 분류라서 잠긴 거래도 고칠 수 있다 — 늘 싣는다.
-          isFixed: Patch.set(_input.isFixed),
-          // 일치화한 분할이 있으면 금액과 함께 원자적으로 교체(백엔드가 합==금액 검증).
-          // 잠긴 거래는 금액이 안 바뀌니 맞출 분할도 없다.
+          isFixed: Patch.set(c.isFixed),
           splits: locked ? null : _reconciledSplits,
+          silent: true,
         );
-        // 열린 회차에서 미리 낸 돈이 남아 계좌로 돌아갔으면 사후에 알린다(D4).
+        savedEdit = saved;
         if (mounted) {
           showChangeResultToast(
             hostContextOf(context),
             refundedAmount: saved.refundedAmount,
           );
         }
-        // 분할이 교체됐을 수 있으니 분할 쿼리도 무효화.
         ref.invalidate(expenseSplitsProvider(edited.rowId));
-      } else if (widget.smsDraft != null) {
-        // 결제 문자는 전용 경로로 저장한다 — 서버가 원문을 다시 봐 취소 문자를 막고,
-        // 체크했다면 (카드 힌트 → 자산) 을 기억한다. 저장 자체는 같은 지출 생성이다.
+      } else if (_smsDraft != null) {
         final smsRepo = await ref.read(smsRepositoryProvider.future);
         final committed = await smsRepo.commit(
-          text: widget.smsDraft!.text,
-          assetRowId: _input.assetRowId,
-          categoryRowId: _input.categoryRowId,
-          // 종류를 안 실으면 서버가 지출로 본다 — 환불 문자를 수입으로 골라도
-          // 지출로 남아 그 달 지출이 부푼다(desk-back #326).
-          expenseType: _input.type,
+          text: _smsDraft!.text,
+          assetRowId: c.assetRowId,
+          categoryRowId: c.categoryRowId,
+          expenseType: c.type,
           amount: amount,
           merchant: merchant,
           description: desc,
@@ -533,12 +1264,11 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
           originalAmount: origAmount,
           originalCurrency: origCurrency,
           exchangeRate: fxRate,
-          rememberCard: _input.assetRowId != null && _input.smsRememberCard,
+          rememberCard: c.assetRowId != null && c.smsRememberCard,
+          silent: true,
         );
         _notifyCreated(refundedAmount: committed.refundedAmount);
-        // 수신 보관함에서 온 문자면 기록됐으니 목록에서 뺀다.
-        // 실패해도 본 저장에는 영향이 없다 — 목록에 한 줄 남을 뿐이다.
-        final inboxId = widget.smsDraft!.inboxId;
+        final inboxId = _smsDraft!.inboxId;
         if (inboxId != null) {
           try {
             await SmsAndroid.removeFromInbox(inboxId);
@@ -548,9 +1278,9 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
         }
       } else {
         final created = await repo.create(
-          categoryRowId: _input.categoryRowId!,
-          assetRowId: _input.assetRowId,
-          expenseType: _input.type,
+          categoryRowId: c.categoryRowId!,
+          assetRowId: c.assetRowId,
+          expenseType: c.type,
           amount: amount,
           expenseDate: dateStr,
           description: desc,
@@ -560,12 +1290,12 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
           originalAmount: origAmount,
           originalCurrency: origCurrency,
           exchangeRate: fxRate,
-          isFixed: _input.isFixed,
+          isFixed: c.isFixed,
+          silent: true,
         );
         _notifyCreated(refundedAmount: created.refundedAmount);
       }
       await _touchAppliedPreset();
-      // 원래 거래의 월 + 새 월 모두 invalidate (날짜 변경 가능성)
       if (edited?.expenseDate != null) {
         final orig = parseIsoDate(edited!.expenseDate!.substring(0, 10));
         if (orig.year != d.year || orig.month != d.month) {
@@ -576,23 +1306,112 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       }
       ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
       invalidateAfterExpenseChange(ref);
+      // 상세로 돌아가는 길이면 목록을 다시 받은 다음 단계를 옮긴다 — 돌아간 상세가 옛 값을 먼저 그리지 않게(I-21 ⑧)
+      if (savedEdit != null && widget.onSaved != null) {
+        await _refetchMonth(d.year, d.month);
+      }
       if (!mounted) return;
-      Navigator.of(context).pop();
-    } on ApiException {
-      if (!mounted) return;
+      if (savedEdit != null && widget.onSaved != null) {
+        await widget.onSaved!(savedEdit);
+        return;
+      }
+      widget.onFinished?.call();
+      PBottomSheet.of(context).close();
+    } on ApiException catch (e) {
+      _failSave(e);
     } finally {
-      if (mounted) _setSubmitting(false);
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
-  /// 새 거래를 저장한 뒤의 결과 토스트 — 웹 `notifyResult(created)` 와 같다.
-  ///
-  /// 생성 응답에도 선결제 환급액이 실린다 — 열린 회차에 카드 수입을 넣어 미리 낸 돈이
-  /// 청구보다 많아지면 서버가 그만큼 결제계좌로 돌려준다(D3). 통장이 움직였으니 그 금액만
-  /// 알린다(D4, QA 26 1). 닫힌 회차 새 입력의 [잔액 고치기](D9)는 달지 않는다 — D9 는 환불·
-  /// 삭제·고쳐 쓰기의 자리이고, 새 입력은 저장 전 확인창이 이미 "기록만" 을 말했다.
-  ///
-  /// 시트는 곧 닫힌다 — 토스트는 루트 쪽 context 에 띄워 페이지에 남긴다.
+  Future<void> _submitTransfer({
+    required int amount,
+    required String dateStr,
+    String? desc,
+  }) async {
+    final c = _input;
+    final d = c.date;
+    setState(() {
+      _submitting = true;
+      _saveError = null;
+    });
+    try {
+      final fee = int.tryParse(c.feeCtrl.text.replaceAll(',', ''));
+      final interest = showTxInterest(c, _assetsAtSave)
+          ? int.tryParse(c.interestCtrl.text.replaceAll(',', ''))
+          : null;
+      final aRepo = await ref.read(assetRepositoryProvider.future);
+      final editing = widget.editTransfer;
+      AssetTransfer? savedTransfer;
+      if (editing != null) {
+        await aRepo.updateTransfer(
+          rowId: editing.rowId,
+          fromAssetRowId: c.assetRowId!,
+          toAssetRowId: c.toAssetRowId!,
+          amount: amount,
+          fee: fee,
+          interestAmount: interest,
+          description: desc,
+          transferDate: dateStr,
+          silent: true,
+        );
+        if (widget.onTransferSaved != null) {
+          final assets = ref.read(assetsProvider).value;
+          savedTransfer = AssetTransfer(
+            rowId: editing.rowId,
+            userRowId: editing.userRowId,
+            fromAssetRowId: c.assetRowId!,
+            fromAssetName: assets?.byRowId(c.assetRowId!)?.assetName,
+            toAssetRowId: c.toAssetRowId!,
+            toAssetName: assets?.byRowId(c.toAssetRowId!)?.assetName,
+            amount: amount,
+            fee: fee,
+            interestAmount: interest,
+            autoSource: editing.autoSource,
+            principalAmount: amount - (interest ?? 0),
+            description: desc,
+            transferDate: dateStr,
+            createAt: editing.createAt,
+          );
+        }
+      } else {
+        await aRepo.createTransfer(
+          fromAssetRowId: c.assetRowId!,
+          toAssetRowId: c.toAssetRowId!,
+          amount: amount,
+          fee: fee,
+          interestAmount: interest,
+          description: desc,
+          transferDate: dateStr,
+          silent: true,
+        );
+      }
+      ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
+      invalidateAfterExpenseChange(ref);
+      await _touchAppliedPreset();
+      if (savedTransfer != null) await _refetchMonth(d.year, d.month);
+      if (!mounted) return;
+      if (savedTransfer != null && widget.onTransferSaved != null) {
+        await widget.onTransferSaved!(savedTransfer);
+        return;
+      }
+      widget.onFinished?.call();
+      PBottomSheet.of(context).close();
+    } on ApiException catch (e) {
+      _failSave(e);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _refetchMonth(int year, int month) async {
+    try {
+      await ref.read(monthExpensesProvider((year: year, month: month)).future);
+    } catch (_) {
+      // 받지 못해도 돌아간다
+    }
+  }
+
   void _notifyCreated({required int? refundedAmount}) {
     if (!mounted) return;
     showChangeResultToast(
@@ -602,12 +1421,6 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
     );
   }
 
-  /// 고쳐 쓰기 저장(D13) — 확인받고 `POST /expense/{id}/replace` 로 보낸다.
-  ///
-  /// 옛 거래는 이미 결제가 끝난 회차다. 새 거래가 닫힌 회차에 떨어지면 기록만 바뀌고,
-  /// 열린 회차면 그 회차 결제일에 정상 청구된다(D14 — 재청구 방지 표식은 없다). 어느
-  /// 쪽인지 확인창이 말한다. 성공하면 결제계좌가 있는 카드에 [잔액 고치기] 토스트(D9),
-  /// 미리 낸 돈이 돌아왔으면 그 금액(D4).
   Future<void> _submitReplace({
     required int amount,
     required String dateStr,
@@ -619,7 +1432,8 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
     String? origCurrency,
     double? fxRate,
   }) async {
-    final original = widget.replaceOf!;
+    final c = _input;
+    final original = _replaceOf!;
     final l = AppLocalizations.of(context);
     final assets = ref.read(assetsProvider).value ?? const <Asset>[];
     Asset? assetOf(int? id) => id == null ? null : assets.byRowId(id);
@@ -628,32 +1442,32 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       title: l.expRewrite,
       description: rewriteConfirmMessage(
         l,
-        newAsset: assetOf(_input.assetRowId),
-        dateKey: _input.isoDate,
+        newAsset: assetOf(c.assetRowId),
+        dateKey: c.isoDate,
         installmentMonths: installment,
       ),
       actionLabel: l.actionSave,
       cancelLabel: l.actionCancel,
     );
     if (!ok || !mounted) return;
-    // 시트가 닫혀도 토스트·[잔액 고치기] 는 남는다 — 오래 사는 자리를 먼저 짚는다.
     final host = hostContextOf(context);
     final fixBalance = fixBalanceTargetOf(
       original,
       assetOf(original.assetRowId),
     );
 
-    _setSubmitting(true);
+    setState(() {
+      _submitting = true;
+      _saveError = null;
+    });
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
-      // 분할은 시트가 적재·일치화한 값을 싣는다. 비었거나 아직 못 읽었으면 키를
-      // 빼고 서버가 옛 분할을 옮긴다 — 빈 리스트를 실으면 분할이 지워진다.
       final splits = _effectiveSplits.isEmpty ? null : _effectiveSplits;
       final saved = await repo.replace(
         original.rowId,
-        categoryRowId: _input.categoryRowId!,
-        assetRowId: _input.assetRowId,
-        expenseType: _input.type,
+        categoryRowId: c.categoryRowId!,
+        assetRowId: c.assetRowId,
+        expenseType: c.type,
         amount: amount,
         expenseDate: dateStr,
         description: desc,
@@ -663,21 +1477,23 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
         originalAmount: origAmount,
         originalCurrency: origCurrency,
         exchangeRate: fxRate,
-        isFixed: _input.isFixed,
+        isFixed: c.isFixed,
         splits: splits,
+        silent: true,
       );
-      // 옛 거래의 달·새 거래의 달이 함께 바뀐다. 분할도 옛 거래에서 새 거래로 옮겨졌다.
       final origDate = original.expenseDate;
       if (origDate != null && origDate.length >= 10) {
         final o = parseIsoDate(origDate.substring(0, 10));
         ref.invalidate(monthExpensesProvider((year: o.year, month: o.month)));
       }
-      final d = _input.date;
+      final d = c.date;
       ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
       ref.invalidate(expenseSplitsProvider(original.rowId));
       ref.invalidate(expenseSplitsProvider(saved.rowId));
       invalidateAfterExpenseChange(ref);
-      if (mounted) Navigator.of(context).pop();
+      // 옛 거래가 지워졌으니 돌아갈 상세가 없다 — 모두 닫는다
+      widget.onFinished?.call();
+      if (mounted) PBottomSheet.of(context).close();
       if (host.mounted) {
         showChangeResultToast(
           host,
@@ -686,55 +1502,44 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
         );
       }
     } on ApiException catch (e) {
-      // 서버 메시지는 전역 인터셉터가 띄운다.
-      //
-      // 404 = 옛 거래가 이미 없다 — 응답만 못 받은 채 다시 눌렀으면 교체는 앞선 요청에서
-      // 끝났다(다른 기기에서 지웠어도 같다). 붙들고 있으면 사라진 거래를 또 고치려 들고
-      // 목록엔 옛 행이 남아 보인다 — 가계부·자산을 다시 읽게 하고 시트를 닫는다(QA 26 5).
-      // 새 거래가 어느 달에 생겼는지 모르므로 달을 가리지 않는다.
-      //
-      // 그 밖의 실패(잠기지 않은 거래·중도 정리한 할부 등)는 시트를 둔다 — 고친 값을
-      // 잃지 않고 다시 시도할 수 있다.
+      // 404 = 옛 거래가 이미 없다 — 교체는 앞선 요청에서 끝났다. 목록을 다시 읽게 하고 닫는다(QA 26 5).
       if (e.statusCode == 404) {
         ref.invalidate(monthExpensesProvider);
         ref.invalidate(expenseSplitsProvider(original.rowId));
         invalidateAfterExpenseChange(ref);
-        if (mounted) Navigator.of(context).pop();
+        widget.onFinished?.call();
+        if (mounted) PBottomSheet.of(context).close();
+      } else {
+        _failSave(e);
       }
     } finally {
-      if (mounted) _setSubmitting(false);
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
-  /// [고쳐 쓰기] — 이 편집 시트를 닫고 같은 값이 채워진 새 거래 시트를 연다(D13).
+  /// [고쳐 쓰기] — 이 시트를 새 거래 모드로 갈아 끼운다(새 시트를 띄우지 않는다, D13).
   void _openRewrite() {
-    final e = widget.edit;
+    final e = _edit;
     if (e == null) return;
-    final host = hostContextOf(context);
-    Navigator.of(context).pop();
-    showAddTxSheet(host, replaceOf: e);
+    setState(() {
+      _replaceOf = e;
+      _edit = null;
+      _startedAtOne = false;
+      _seed();
+      _reconciledSplits = null;
+      _errs = _Errs();
+      _saveError = null; // 지난 저장 실패를 새 모드로 끌고 가지 않는다(N6)
+      _smsLow = false;
+      _presetSaveError = null;
+      _step = _S.two;
+    });
   }
 
-  /// 결제가 끝난 회차에 걸리는 카드 거래면 저장 전에 한 번 묻는다(D1·D2).
-  ///
-  /// 저장될 날짜·카드·할부가 그 카드의 `cardClosedThrough` 이하면 "이미 결제가 끝난
-  /// 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요", 할부가 걸치면 "지난 회차분은
-  /// 기록만 남아요". **서버에 묻지 않는다** — 예전의 저장 미리보기(3초 제한·실패
-  /// 폴백)는 걷었다.
-  ///
-  /// 확인창은 **돈과 기록이 갈리는 자리에만** 둔다(사용자 결정 2026-09-21).
-  ///   - 새 저장(문자 저장 포함) — 닫힌 회차로 들어가면 묻는다
-  ///   - 편집 저장 — 원래 거래가 **안 잠겼고** 새 날짜·새 카드가 닫힌 회차에 들면 묻는다
-  ///     (열린 회차 거래를 닫힌 회차로 옮기는 저장)
-  ///   - 잠긴 거래(D12)의 편집 저장 — 묻지 않는다. 돈 칸이 잠겨 카테고리·가맹점·메모만
-  ///     바뀌고, 돈 칸은 원래 값 그대로 나간다 — 통장에 일어나는 일이 없다
-  ///
-  /// 열린 회차는 묻지 않는다 — 평소대로 청구될 뿐이다. 돌려주는 값이 false 면 사용자가
-  /// 물러난 것이다.
   Future<bool> _confirmClosedCycleSave({int? installment}) async {
-    if (_input.type == 'TRANSFER') return true;
-    if (widget.edit != null && _input.moneyLocked) return true;
-    final id = _input.assetRowId;
+    final c = _input;
+    if (c.type == 'TRANSFER') return true;
+    if (_edit != null && c.moneyLocked) return true;
+    final id = c.assetRowId;
     if (id == null) return true;
     final asset = (ref.read(assetsProvider).value ?? const <Asset>[]).byRowId(
       id,
@@ -744,62 +1549,68 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
       l,
       closedCycleSpanFor(
         asset,
-        dateKey: _input.isoDate,
+        dateKey: c.isoDate,
         installmentMonths: installment,
       ),
     );
     if (note == null) return true;
     return PAlertDialog.show(
       context,
-      title: widget.edit != null ? l.expEdit : l.expSaveConfirmTitle,
+      title: _edit != null ? l.expEdit : l.expSaveConfirmTitle,
       description: note,
       actionLabel: l.actionSave,
       cancelLabel: l.actionCancel,
     );
   }
 
+  /// "나눈 내역 맞추기" — 21-3 까지 폼 위 대화상자(시트)로 둔다.
+  void _openReconcile() {
+    final edited = _splitSource;
+    if (edited == null) return;
+    showSplitTxDialog(
+      context,
+      edited,
+      overrideTotal: _input.amountInt,
+      recordedTotal: edited.amount.abs(),
+      initialSplits: _effectiveSplits,
+      onReconciled: (splits) {
+        if (!mounted) return;
+        setState(() => _reconciledSplits = splits);
+      },
+    );
+  }
+
+  // ── 그리기 ──────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-    // 설정의 기본 통화를 매 빌드 흘려 넣는다(D7 · QA #124) — `/me/preferences` 는
-    // 이 시트보다 늦게 도착할 수 있고, 열 때 한 번만 읽으면 첫 렌더의 원화에
-    // 잠긴다. 아직 안 고른 **새 거래**에만 닿는다(`_TxInputController.currency`).
-    _input.defaultCurrency = ref.watch(defaultCurrencyProvider);
-    // 고쳐 쓰기는 원거래 값으로 채운 시트다 — 프리셋이 그 값을 덮어쓰면 안 된다.
-    final presetsAsync = _isEdit || _isReplace
-        ? const AsyncValue<List<ExpenseTemplate>>.data(<ExpenseTemplate>[])
-        : ref.watch(presetListProvider);
-    final categoriesAsync = ref.watch(categoriesProvider);
+    final l = AppLocalizations.of(context);
+    final c = _input;
+    // 설정의 기본 통화를 매 빌드 흘려 넣는다(D7 · QA #124)
+    c.defaultCurrency = ref.watch(defaultCurrencyProvider);
 
-    // 돈 칸 잠금(D12) — 지출·수입 편집에서만. 서버 플래그가 먼저고, 카드의 닫힌 회차
-    // 경계로 한 번 더 본다(`moneyLockedOf`).
-    final editedForLock = widget.edit;
-    final lockAssetId = editedForLock?.assetRowId;
-    _input.moneyLocked =
-        editedForLock != null &&
+    // 돈 칸 잠금(D12)
+    final edited = _edit;
+    final lockAssetId = edited?.assetRowId;
+    c.moneyLocked =
+        edited != null &&
         moneyLockedOf(
-          editedForLock,
+          edited,
           lockAssetId == null
               ? null
               : ref.watch(assetsProvider).value?.byRowId(lockAssetId),
         );
 
-    // 지출·수입 편집·고쳐 쓰기: 기존 분할을 적재해 금액↔분할 합 불일치 판정(일치화
-    // 유도). 이체에는 분할이 없다 — `_isEdit` 로 묶으면 이체 수정에서 `edit` 이 null
-    // 이라 죽는다.
-    final editedExpense = _splitSource;
-    if (editedExpense != null) {
-      final spAsync = ref.watch(expenseSplitsProvider(editedExpense.rowId));
-      final sp = spAsync.value;
-      // 고쳐 쓰기는 이 분할을 새 거래의 분할로 싣는다. 다 불러오기 전에 저장하면 분할 없이
-      // 나가 서버가 옛 분할을 옮기고, 금액을 바꿨다면 합이 안 맞아 400 이다 — 처음 불러오는
-      // 동안 저장을 막는다. 한 번이라도 실패했으면 막지 않는다(뒤에서 다시 시도하는 동안
-      // 저장을 붙잡아 두지 않는다) — 그때는 서버가 옛 분할로 판정한다.
+    // 분할 적재 — 금액 ↔ 분할 합 어긋남 판정
+    final source = _splitSource;
+    if (source != null) {
+      final spAsync = ref.watch(expenseSplitsProvider(source.rowId));
       _splitsPending =
-          _isReplace &&
+          (_isReplace || _edit != null) &&
           spAsync.isLoading &&
           !spAsync.hasValue &&
           !spAsync.hasError;
+      _splitsFailed = spAsync.hasError && !spAsync.hasValue;
+      final sp = spAsync.value;
       _serverSplits = sp == null
           ? const []
           : [
@@ -813,1498 +1624,1070 @@ class _AddTxBodyState extends ConsumerState<_AddTxBody> {
             ];
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) widget.controller.setCanSubmit(_canSubmit);
-    });
-
-    return ListView(
-      controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      children: [
-        _TxInputForm(
-          controller: _input,
-          onChanged: () => setState(_syncController),
-          typeReadOnly: _typeLocked,
-          typeDisabledFor: _typeLocked ? _input.type : null,
-          // 문자 초안은 지출↔수입만 오간다. 이체를 고르면 저장이 일반 이체 경로로
-          // 새고(`_submit` 의 TRANSFER 분기가 먼저다) 취소 문자 차단·카드 기억이
-          // 조용히 빠진다 — 그 경로에만 있는 가드다. 고쳐 쓰기도 같다 — replace
-          // 본문은 지출·수입 생성 본문이다.
-          allowTransfer: !_isSmsDraft && !_isReplace,
-          // 문자 초안은 전용 저장 경로(`/import/sms/commit`)라 고정 표식을 못 싣는다 — 스위치를
-          // 두면 켜도 조용히 무시된다. 저장한 뒤 거래를 열어 켜거나 통계의 정리 화면에서 바꾼다.
-          showFixed: !_isSmsDraft,
-          // [고쳐 쓰기] 는 서버가 교체를 받는 거래에만 — 중도 정리한 할부는 잠겼어도 못
-          // 고쳐 쓴다(EXP_047). 판정이 없는 옛 서버면 잠금으로 본다(QA 26 3).
-          onRewrite:
-              editedForLock != null &&
-                  (editedForLock.replaceable ?? _input.moneyLocked)
-              ? _openRewrite
-              : null,
-          presetSlot: _isEdit || _isReplace
-              ? null
-              : _PresetSection(
-                  presets: presetsAsync.value ?? const [],
-                  type: _input.type,
-                  categories: categoriesAsync.value ?? const [],
-                  appliedId: _appliedPresetId,
-                  canSave: _canSavePreset,
-                  onTap: _applyPreset,
-                  onSave: _showSavePresetDialog,
-                  onClear: _clearPresetMark,
-                  tokens: t,
-                ),
-        ),
-        if (_splitMismatch) ...[
-          const SizedBox(height: PSpace.x16),
-          _splitMismatchBanner(t),
-        ],
-      ],
-    );
+    return switch (_step) {
+      _S.one => _buildOne(l),
+      _S.two => _buildTwo(l),
+      _S.amount || _S.krw || _S.presetAmount => _buildAmountSub(l),
+      _S.memo => _buildMemoSub(l),
+      _S.fee || _S.interest => _buildMoneySub(l),
+      _S.sms => _buildSms(l),
+      _S.presetAll => _buildPresetAll(l),
+      _S.presetSave => _buildPresetSave(l),
+    };
   }
 
-  /// 분할 합 불일치 경고 — 금액을 바꿔 기존 분할 합과 어긋날 때. '분할 내역 맞추기'로 일치화 진입.
-  Widget _splitMismatchBanner(GrooTokens t) {
+  String get _typeName {
     final l = AppLocalizations.of(context);
-    final amount = _input.amountInt;
-    final diff = amount - _splitSum;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-      decoration: BoxDecoration(
-        color: t.statusWarningSubtle,
-        borderRadius: PRadius.brMd,
-        border: Border.all(color: t.statusWarningBorder),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(LucideIcons.alertTriangle, size: 16, color: t.statusWarningFg),
-          const SizedBox(width: PSpace.x12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.expSplitMismatch,
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  l.expSplitDiff(
-                    krw(amount),
-                    krw(_splitSum),
-                    '${diff > 0 ? '+' : kMinus}${krw(diff.abs())}',
-                  ),
-                  style: PTypo.caption.copyWith(
-                    color: t.fgSecondary,
-                    height: PLineHeight.normal,
-                  ),
-                ),
-                const SizedBox(height: PSpace.x8),
-                PButton(
-                  label: l.expSplitReconcile,
-                  icon: LucideIcons.scissors,
-                  size: PButtonSize.sm,
-                  onPressed: _submitting ? null : _openReconcile,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return switch (_input.type) {
+      'INCOME' => l.expTypeIncome,
+      'TRANSFER' => l.expTypeTransfer,
+      _ => l.expTypeExpense,
+    };
   }
 
-  void _openReconcile() {
-    // 분할은 지출·수입만 갖는다 — 이체 수정에는 이 버튼이 뜨지 않는다(`_splitMismatch`).
-    // 고쳐 쓰기는 옛 거래의 분할을 새 금액에 맞춘다.
-    final edited = _splitSource;
-    if (edited == null) return;
-    showSplitTxDialog(
-      context,
-      edited,
-      overrideTotal: _input.amountInt,
-      recordedTotal: edited.amount.abs(),
-      initialSplits: _effectiveSplits,
-      onReconciled: (splits) {
-        if (!mounted) return;
-        setState(() => _reconciledSplits = splits);
-        _syncController();
-      },
-    );
-  }
-}
-
-/// 프리셋 섹션 — 헤더 (라벨 + 적용됨 뱃지 + 저장 버튼) + 칩 strip + 적용 배너.
-/// 웹 `AddTxSheet` 의 "프리셋 불러오기" 영역 1:1 미러.
-class _PresetSection extends StatelessWidget {
-  const _PresetSection({
-    required this.presets,
-    required this.type,
-    required this.categories,
-    required this.appliedId,
-    required this.canSave,
-    required this.onTap,
-    required this.onSave,
-    required this.onClear,
-    required this.tokens,
-  });
-
-  final List<ExpenseTemplate> presets;
-
-  /// 지금 탭의 종류 — 이 종류의 프리셋만 칩으로 띄운다.
-  final String type;
-  final List<ExpenseCategory> categories;
-  final int? appliedId;
-  final bool canSave;
-  final ValueChanged<ExpenseTemplate> onTap;
-  final VoidCallback onSave;
-  final VoidCallback onClear;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
+  /// 머리 제목 속 금액 — 외화면 "$5.50", 원화면 "10,000원".
+  String _titleAmount() {
     final l = AppLocalizations.of(context);
-    // **지금 탭의 종류만** 사용 빈도 desc 로 8개 (웹과 동일).
-    //
-    // 종전엔 종류와 무관하게 8개라, 지출 탭에서 수입 프리셋을 누르면 `_applyPreset` 이
-    // 탭을 통째로 바꿨다 — 누른 사람은 "지출 하나를 빨리 넣으려고" 누른 것이다.
-    final mine = presets.where((p) => p.expenseType == type).toList();
-    final sorted = [...mine]
-      ..sort((a, b) => (b.useCount ?? 0).compareTo(a.useCount ?? 0));
-    final top = sorted.take(8).toList();
-    final hasMore = mine.length > top.length;
+    final c = _input;
+    final masked = ref
+        .watch(maskFlagsProvider('ledger.txDetail'))
+        .ofType(c.type);
+    if (masked) return '••••${wonUnit()}';
+    if (c.isForeignTx) {
+      final a = c.origAmountOrNull;
+      if (a != null && a > 0) {
+        return formatOriginalAmount(
+          a,
+          c.currency,
+          Localizations.localeOf(context).toString(),
+        );
+      }
+    }
+    final v = c.amountInt;
+    if (v <= 0) return l.txfNone;
+    // 쉼표 뒤에서만 줄을 바꾼다 — 숫자 중간 · 쉼표 앞에서 자르지 않는다
+    return krwSigned(v, false, unit: true).replaceAll(',', '\u2060,\u200B');
+  }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.only(bottom: PSpace.x8),
-          child: Row(
-            children: [
-              Icon(LucideIcons.bookmark, size: 13, color: tokens.fgTertiary),
-              const SizedBox(width: 6),
-              Text(
-                l.expPresetLoad,
-                style: TextStyle(
-                  fontSize: PFontSize.micro,
-                  color: tokens.fgTertiary,
-                  fontWeight: PFontWeight.semi,
-                  letterSpacing: 0.44, // micro size × wide tracking
-                ),
-              ),
-              if (appliedId != null) ...[
-                const SizedBox(width: 6),
-                PBadge(
-                  label: l.expPresetApplied,
-                  variant: PBadgeVariant.softBrand,
-                ),
-              ],
-              const Spacer(),
-              GestureDetector(
-                onTap: canSave ? onSave : null,
-                behavior: HitTestBehavior.opaque,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      LucideIcons.plus,
-                      size: 12,
-                      color: canSave ? tokens.fgBrandStrong : tokens.fgTertiary,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      l.expPresetSaveCurrent,
-                      style: TextStyle(
-                        fontSize: PFontSize.caption,
-                        color: canSave
-                            ? tokens.fgBrandStrong
-                            : tokens.fgTertiary,
-                        fontWeight: PFontWeight.semi,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Strip
-        if (top.isNotEmpty)
-          SizedBox(
-            height: 36,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: top.length + (hasMore ? 1 : 0),
-              separatorBuilder: (_, _) => const SizedBox(width: 6),
-              itemBuilder: (_, i) {
-                if (i == top.length) return _MorePresetsHint(tokens: tokens);
-                final p = top[i];
-                final active = p.rowId == appliedId;
-                final showAmount =
-                    (p.lockAmount ?? 'N') == 'Y' && (p.amount ?? 0) > 0;
-                final cat = p.categoryRowId == null
-                    ? null
-                    : categories.byRowId(p.categoryRowId!);
-                return _PresetChip(
-                  preset: p,
-                  category: cat,
-                  active: active,
-                  showAmount: showAmount,
-                  onTap: () => onTap(p),
-                  tokens: tokens,
-                );
-              },
-            ),
-          )
-        else
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: tokens.bgMuted,
-              border: Border.all(color: tokens.borderDefault),
-              borderRadius: PRadius.brSm,
-            ),
-            child: Text(
-              l.expPresetEmpty,
-              style: TextStyle(
-                fontSize: PFontSize.caption,
-                color: tokens.fgTertiary,
-              ),
-            ),
-          ),
-
-        // Active preset banner
-        if (appliedId != null) ...[
-          const SizedBox(height: PSpace.x8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: tokens.bgBrandSubtle,
-              border: Border.all(color: tokens.borderBrand),
-              borderRadius: PRadius.brSm,
-            ),
-            child: Row(
-              children: [
-                Icon(LucideIcons.info, size: 13, color: tokens.fgBrandStrong),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l.expPresetFilled,
-                    style: TextStyle(
-                      fontSize: PFontSize.caption,
-                      color: tokens.fgBrandStrong,
-                      fontWeight: PFontWeight.semi,
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: onClear,
-                  child: Text(
-                    l.expClear,
-                    style: TextStyle(
-                      fontSize: PFontSize.micro,
-                      color: tokens.fgBrandStrong,
-                      fontWeight: PFontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
+  PBottomSheetContent _frame({
+    required String title,
+    required Widget body,
+    String? eyebrow,
+    VoidCallback? onBack,
+    Widget? headerAction,
+    bool showClose = true,
+    List<PButton> footer = const [],
+    Key? key,
+  }) {
+    final l = AppLocalizations.of(context);
+    return PBottomSheetContent(
+      key: key,
+      title: title,
+      eyebrow: eyebrow,
+      closeLabel: l.actionClose,
+      showCloseButton: showClose,
+      // 닫기 원은 한 단계가 아니라 시트 전체(← · 뒤로 가기가 한 단계)
+      onClose: () => PBottomSheet.of(context).requestClose(wholeSheet: true),
+      onBack: onBack,
+      backLabel: onBack == null ? null : l.actionBack,
+      headerAction: headerAction,
+      flushBody: true,
+      scrollFog: true,
+      body: body,
+      footer: footer,
     );
   }
-}
 
-class _PresetChip extends StatelessWidget {
-  const _PresetChip({
-    required this.preset,
-    required this.category,
-    required this.active,
-    required this.showAmount,
-    required this.onTap,
-    required this.tokens,
-  });
+  Widget _doneAction(AppLocalizations l) =>
+      CalendarStepDone(label: l.actionDone, onPressed: _doneSub);
 
-  final ExpenseTemplate preset;
-  final ExpenseCategory? category;
-  final bool active;
-  final bool showAmount;
-  final VoidCallback onTap;
-  final GrooTokens tokens;
+  /// 저장 실패 Callout — 폼 맨 위(우리 글).
+  /// 맨 위 저장 실패 Callout — 좌우 24 · 위 12 · **아래 20**(14-1 비밀번호와 같다, 아래 칩 · 칸에 닿지 않게).
+  Widget _failureCallout() => _saveError == null
+      ? const SizedBox.shrink()
+      : Padding(
+          padding: const EdgeInsets.only(bottom: PSpacing.x5),
+          child: CalendarSaveErrorCallout(message: _saveError!),
+        );
 
-  /// 칩에 붙는 금액 — 사용자가 프리셋을 만들 때 자유입력한 값이라 임의값이다.
-  /// 그래서 축약도 차트 축·도넛 중앙과 같은 함수 하나([formatChartAxis])를 쓴다.
-  ///
-  /// 예전엔 1만 위를 `${(n / 1000).floor()}k` 로 냈다. `k` 는 한국어 화면에서
-  /// 합의한 단위가 아니고(만·억·조), floor 라 19,900 이 `19k`(=19,000)로 900원을
-  /// 버렸다. 1만 아래(`9,900`)는 예전과 같은 글자다.
-  String _shortAmount(int n) => formatChartAxis(n.toDouble());
-
-  @override
-  Widget build(BuildContext context) {
-    final catColor = resolveChartColor(
-      context,
-      category?.color,
-      fallback: tokens.fgBrand,
+  Widget _currencyChip(AppLocalizations l) {
+    final c = _input;
+    final cur = kCurrencies.firstWhere(
+      (x) => x.code == c.currency,
+      orElse: () => CurrencyOption(c.currency, c.currency),
     );
-    final iconData = lucideByName(category?.icon, fallback: LucideIcons.tag);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-        decoration: BoxDecoration(
-          // border 사각형 제거 — 아이콘+글씨만 노출. active 만 subtle 채움으로 강조.
-          color: active ? tokens.bgBrandSubtle : Colors.transparent,
-          borderRadius: PRadius.brFull,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+    return PChip(
+      key: const ValueKey('tx-currency-chip'),
+      label: '${cur.symbol} ${cur.code}',
+      size: PChipSize.small,
+      variant: PChipVariant.solid,
+      suffixIcon: LucideIcons.chevronDown,
+      semanticLabel: l.txfCurrencyChip(cur.code),
+      onPressed: _pickCurrencyChip,
+    );
+  }
+
+  // ── 1단계 ───────────────────────────────────────────────
+  Widget _typeChips(AppLocalizations l, List<ExpenseCategory>? cats) {
+    final c = _input;
+    final types = <(String, String)>[
+      ('EXPENSE', l.expTypeExpense),
+      ('INCOME', l.expTypeIncome),
+      ('TRANSFER', l.expTypeTransfer),
+    ];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        PSpacing.globalGutter,
+        PSpacing.x1,
+        PSpacing.globalGutter,
+        PSpacing.x2,
+      ),
+      child: Semantics(
+        container: true,
+        label: l.txfTypeGroup,
+        child: Wrap(
+          spacing: PSpacing.x2,
+          runSpacing: PSpacing.x2,
           children: [
-            if (category != null) ...[
-              Container(
-                width: 18,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: softBg(context, catColor),
-                  borderRadius: PRadius.tile(18),
-                ),
-                alignment: Alignment.center,
-                child: Icon(iconData, size: 11, color: catColor),
+            for (final (code, label) in types)
+              // 막힌 칩은 보이되 비활성이다(웹과 같다) — 수정은 지금 종류만, 문자 초안 · 고쳐 쓰기는 이체가 막힌다
+              PChip(
+                key: ValueKey('tx-type-$code'),
+                label: label,
+                variant: PChipVariant.outlineStrong,
+                selected: c.type == code,
+                onPressed:
+                    (_typeLocked && code != c.type) ||
+                        ((_isSms || _isReplace) && code == 'TRANSFER')
+                    ? null
+                    : () => _setType(code, cats),
               ),
-              const SizedBox(width: 7),
-            ],
-            Text(
-              preset.templateName,
-              style: TextStyle(
-                fontSize: PFontSize.bodySm,
-                fontWeight: active ? PFontWeight.bold : PFontWeight.semi,
-                color: active ? tokens.fgBrandStrong : tokens.fgPrimary,
-              ),
-            ),
-            if (showAmount) ...[
-              const SizedBox(width: 7),
-              Text(
-                _shortAmount(preset.amount ?? 0),
-                style: TextStyle(
-                  fontSize: PFontSize.micro,
-                  color: active ? tokens.fgBrandStrong : tokens.fgTertiary,
-                  fontWeight: PFontWeight.semi,
-                ),
-              ),
-            ],
           ],
         ),
       ),
     );
   }
-}
 
-class _MorePresetsHint extends StatelessWidget {
-  const _MorePresetsHint({required this.tokens});
-  final GrooTokens tokens;
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: tokens.borderDefault,
-          style: BorderStyle.solid,
+  Widget _buildOne(AppLocalizations l) {
+    final c = _input;
+    final cats = ref.watch(categoriesProvider);
+    final presetsAsync = ref.watch(presetListProvider);
+    final mine = [
+      for (final p in presetsAsync.value ?? const <ExpenseTemplate>[])
+        if (p.expenseType == c.type) p,
+    ]..sort((a, b) => (b.useCount ?? 0).compareTo(a.useCount ?? 0));
+    final applied = mine.where((p) => p.rowId == _appliedPresetId).firstOrNull;
+    final foreign = c.isForeignTx;
+    return _frame(
+      key: const ValueKey('tx-step-one'),
+      title: l.expAdd,
+      eyebrow: l.txfStepMeta('1', '2'),
+      footer: [
+        PButton(
+          label: l.actionNext,
+          size: PButtonSize.large,
+          onPressed: _submitting ? null : _next,
         ),
-        borderRadius: PRadius.brFull,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(LucideIcons.moreHorizontal, size: 14, color: tokens.fgTertiary),
-          const SizedBox(width: 4),
-          Text(
-            l.expPresetManageHint,
-            style: TextStyle(
-              fontSize: PFontSize.caption,
-              fontWeight: PFontWeight.semi,
-              color: tokens.fgTertiary,
-            ),
+          _typeChips(l, cats.value),
+          TxUnderlineAmount(
+            controller: foreign ? c.origAmountCtrl : c.amountCtrl,
+            focusNode: _amountFocus,
+            semanticLabel: l.expAmount,
+            decimal: foreign,
+            formatters: foreign
+                ? const [DecimalFormatter(maxFrac: 2)]
+                : kWonFormatters,
+            suffixText: wonUnit(),
+            // 이체에는 통화 칩이 없다
+            chip: c.type == 'TRANSFER' ? null : _currencyChip(l),
+            invalid: _errs.amount != null,
+            errorMessage: _errs.amount,
+            hintMessage: _emptyPresetName == null
+                ? null
+                : l.txfEmptyPresetHint(_emptyPresetName!),
+            onChanged: (_) {
+              if (foreign) {
+                fillKrwFromForeign(c);
+                _clearPresetMark(); // 현지 금액을 고치면 프리셋 표시를 지운다(웹과 같다)
+              }
+              setState(() => _errs.amount = null);
+            },
+            onSubmitted: (_) => _next(),
           ),
+          TxPresetBlock(
+            title: applied == null
+                ? l.txfPresetsTitle
+                : l.txfPresetApplied(applied.templateName),
+            presets: mine,
+            categories: cats.value ?? const [],
+            appliedId: _appliedPresetId,
+            loadFailed: presetsAsync.hasError && !presetsAsync.hasValue,
+            onTap: _onPresetTap,
+            onSave: _openPresetSave,
+            onShowAll: () => _openSub(_S.presetAll),
+          ),
+          // 결제 문자 줄 — 지출 · 새로 추가에서만
+          if (_startedAtOne && c.type == 'EXPENSE')
+            PList(
+              children: [
+                PListButtonItem(
+                  key: const ValueKey('tx-sms-row'),
+                  title: l.txfSmsStepTitle,
+                  prefix: const Icon(LucideIcons.clipboardPaste, size: 22),
+                  suffix: const ExcludeSemantics(
+                    child: Icon(LucideIcons.chevronRight),
+                  ),
+                  onTap: () {
+                    _smsError = null;
+                    _openSub(_S.sms, focus: _smsFocus);
+                  },
+                ),
+              ],
+            ),
         ],
       ),
     );
   }
-}
 
-/// 현재 입력값을 프리셋으로 저장. 웹 `SavePresetDialog` 1:1 미러.
-class _SavePresetDialog extends ConsumerStatefulWidget {
-  const _SavePresetDialog({
-    required this.seedExpenseType,
-    required this.seedAmount,
-    required this.seedCategoryRowId,
-    required this.seedAssetRowId,
-    required this.seedToAssetRowId,
-    required this.seedFee,
-    required this.seedInterest,
-    required this.seedMerchant,
-    required this.seedDescription,
-    required this.seedPaymentMethod,
-    required this.seedIsFixed,
-  });
+  // ── 2단계 ───────────────────────────────────────────────
+  Widget _buildTwo(AppLocalizations l) {
+    final c = _input;
+    final assetsAsync = ref.watch(assetsProvider);
+    final assets = assetsAsync.value ?? const <Asset>[];
+    final catsAsync2 = ref.watch(categoriesProvider);
+    final catsLoaded = catsAsync2.hasValue;
+    final cats = catsAsync2.value ?? const <ExpenseCategory>[];
+    final isTransfer = c.type == 'TRANSFER';
+    final isIncome = c.type == 'INCOME';
+    final locked = c.moneyFieldsLocked;
+    final masked = ref
+        .watch(maskFlagsProvider('ledger.txDetail'))
+        .ofType(c.type);
 
-  final String seedExpenseType;
-  final int seedAmount;
-
-  /// 이체면 null — 이체에는 카테고리가 없다.
-  final int? seedCategoryRowId;
-
-  /// 이체면 **보내는** 자산.
-  final int? seedAssetRowId;
-  final int? seedToAssetRowId;
-  final int? seedFee;
-  final int? seedInterest;
-  final String seedMerchant;
-  final String seedDescription;
-  final String seedPaymentMethod;
-
-  /// 고정 수입·지출 기본값 — 프리셋으로 거래를 만들 때 스위치의 초기값이 된다.
-  final bool seedIsFixed;
-
-  @override
-  ConsumerState<_SavePresetDialog> createState() => _SavePresetDialogState();
-}
-
-class _SavePresetDialogState extends ConsumerState<_SavePresetDialog> {
-  late final TextEditingController _nameCtrl;
-  bool _lockAmount = false;
-  bool _submitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // 이름을 칠 때마다 다시 그린다 — [저장] 이 이름 칸을 보고 켜지는데, 듣는 쪽이 없어 이름을
-    // 쳐도 안 켜지다가 '금액 고정' 을 건드려야 켜졌다(QA 30 14).
-    _nameCtrl = TextEditingController(text: widget.seedMerchant)
-      ..addListener(_onNameChanged);
-  }
-
-  void _onNameChanged() => setState(() {});
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final name = _nameCtrl.text.trim();
-    // 계좌 없이도 저장한다 — 서버·리포지토리는 비운 계좌를 받는다. 종전엔 계좌가 비면 안내 없이
-    // 그냥 끝나 누른 게 아무 일도 안 한 것처럼 보였다(QA 30 14).
-    if (name.isEmpty || _submitting) return;
-    setState(() => _submitting = true);
-    try {
-      final repo = await ref.read(presetRepositoryProvider.future);
-      await repo.create(
-        templateName: name,
-        categoryRowId: widget.seedCategoryRowId,
-        assetRowId: widget.seedAssetRowId,
-        toAssetRowId: widget.seedToAssetRowId,
-        fee: widget.seedFee,
-        // 이자는 금액을 따라간다 — 금액을 안 저장하면 이자도 안 저장한다
-        // (사용자 결정 2026-09-15). 금액이 매달 다르면 이자도 매달 다르니, 박아 둔
-        // 이자는 불러올 때마다 틀린 값이 된다. 수수료는 계좌 짝의 성질이라 그대로 둔다.
-        interestAmount: _lockAmount ? widget.seedInterest : null,
-        expenseType: widget.seedExpenseType,
-        amount: _lockAmount ? widget.seedAmount : 0,
-        description: widget.seedDescription.isEmpty
-            ? null
-            : widget.seedDescription,
-        merchant: widget.seedMerchant.isEmpty ? null : widget.seedMerchant,
-        paymentMethod: widget.seedPaymentMethod.isEmpty
-            ? null
-            : widget.seedPaymentMethod,
-        lockAmount: _lockAmount,
-        isFixed: widget.seedIsFixed,
-      );
-      ref.invalidate(presetListProvider);
-      if (!mounted) return;
-      Navigator.of(context).pop();
-    } on ApiException {
-      if (!mounted) return;
-    } finally {
-      if (mounted) setState(() => _submitting = false);
+    final cat = c.categoryRowId == null ? null : cats.byRowId(c.categoryRowId!);
+    String? catValue;
+    Color? catDot;
+    if (cat != null) {
+      final parent = cat.parentRowId == null
+          ? null
+          : cats.byRowId(cat.parentRowId!);
+      catValue = parent == null
+          ? cat.categoryName
+          : '${parent.categoryName} · ${cat.categoryName}';
+      catDot = chartToneOf(context, cat.color).solid;
+    } else if (c.categoryRowId != null) {
+      catValue = catsLoaded ? l.txfDeletedCategory : '…';
     }
-  }
+    String assetName(int? id) {
+      if (id == null) return '';
+      final a = assets.byRowId(id);
+      // 목록에 없는 값 — 거래에서 읽어 온 기록은 유지하고 "지운 계좌" 로 보인다(본문은 지금 id 그대로, N4)
+      return a == null
+          // 목록을 받기 전 · 못 받은 동안은 "없음" 이 아니라 "…"(값이 있는데 없다고 말하지 않는다)
+          ? (assetsAsync.hasValue ? l.txfDeletedAsset : '…')
+          // 수정 폼의 계좌·카드 값은 이름만(기관은 고르기 시트 줄의 설명에 있다)
+          : a.assetName;
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    return PFormAlertDialog(
-      title: l.expPresetSaveTitle,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
+    final dayText = formatDateValue(c.date, calendarNow());
+    final timeText = formatTimeValue(
+      PTimeValue(c.time.hour, c.time.minute),
+      labels: PTimePickerLabels.of(context),
+    );
+    final memoValue = c.memoCtrl.text.trim();
+
+    // 제목 — 새로: "{종류} {금액}" · 수정: "거래 수정" · 고쳐 쓰기: "고쳐 쓰기"
+    final String title;
+    if (_isReplace) {
+      title = l.expRewrite;
+    } else if (_isEdit) {
+      title = l.expEdit;
+    } else {
+      title = '$_typeName ${_titleAmount()}';
+    }
+
+    final mismatch = _splitMismatch;
+    final saveLabel = mismatch
+        ? l.txfSaveSplitAndSave
+        : (_isEdit || _isReplace ? l.actionSave : l.expAddShort);
+
+    Widget section(List<Widget> rows) => PList(children: rows);
+
+    final fixedRows = <Widget>[];
+    if (!_isSms && !isTransfer) {
+      fixedRows.add(
+        PListSwitchItem(
+          key: const ValueKey('tx-fixed-switch'),
+          title: isIncome ? l.fixedSwitchIncome : l.fixedSwitchExpense,
+          detail: isIncome ? l.fixedHintIncome : l.fixedHintExpense,
+          checked: c.isFixed,
+          onChanged: (v) => setState(() {
+            c.isFixed = v;
+          }),
+        ),
+      );
+    }
+
+    final foreign = c.isForeignTx;
+    final fxHint =
+        foreign &&
+            (c.origAmountOrNull ?? 0) > 0 &&
+            (c.fxRateOrNull ?? 0) > 0 &&
+            c.amountInt > 0
+        // 웹과 같다 — 마지막 값은 계산값이 아니라 원화 금액 줄의 값이다(카드사 청구액으로 고친 값이 그대로 보인다)
+        ? l.txfFxHint(
+            groupDecimal(trimNum(c.origAmountOrNull)),
+            c.currency,
+            groupDecimal(trimNum(c.fxRateOrNull)),
+            krw(c.amountInt),
+          )
+        : null;
+
+    return _frame(
+      key: ValueKey(
+        'tx-step-two-${_isEdit
+            ? 'edit'
+            : _isReplace
+            ? 'replace'
+            : 'new'}',
+      ),
+      title: title,
+      eyebrow: _hasStepOne ? l.txfStepMeta('2', '2') : null,
+      onBack: _hasStepOne
+          ? _goOne
+          : (_embedded
+                ? () {
+                    if (!_submitting) widget.onBack!();
+                  }
+                : null),
+      footer: [
+        PButton(
+          label: saveLabel,
+          size: PButtonSize.large,
+          variant: !_isEdit && !_isReplace && !mismatch
+              ? PButtonVariant.brandSolid
+              : PButtonVariant.neutralSolid,
+          loading: _submitting,
+          onPressed: _submitting ? null : _save,
+        ),
+      ],
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PTextInput(
-            controller: _nameCtrl,
-            autofocus: true,
-            placeholder: l.expPresetNamePlaceholder,
-          ),
-          const SizedBox(height: PSpace.x12),
-          InkWell(
-            onTap: () => setState(() => _lockAmount = !_lockAmount),
-            borderRadius: PRadius.brSm,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
+          _failureCallout(),
+          // 낮은 확신 문자 — 칸 위 안내
+          if (_smsLow)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.globalGutter,
+                PSpacing.x3,
+                PSpacing.globalGutter,
+                0,
+              ),
+              child: PCallout(
+                tone: PCalloutTone.warning,
+                description: l.smsLowConfidence,
+              ),
+            ),
+          if (_isEdit || _isReplace || _isSms) _typeChips(l, cats),
+          // 금액 줄 — 수정 · 고쳐 쓰기, 그리고 1단계가 없는 문자 초안(앱 밖 길). 시트 안 문자 길은 ← 가 있어 금액 줄이 없다(웹과 같다)
+          if (_isEdit || _isReplace || (_isSms && !_hasStepOne))
+            ..._amountRows(l, masked),
+          if (!isTransfer) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.globalGutter,
+                PSpacing.x1,
+                PSpacing.globalGutter,
+                PSpacing.x4,
+              ),
+              child: PField(
+                label: isIncome ? l.expIncomeSource : l.expPayee,
+                child: PInput(
+                  controller: c.merchantCtrl,
+                  focusNode: _merchantFocus,
+                  semanticLabel: isIncome ? l.expIncomeSource : l.expPayee,
+                  placeholder: isIncome
+                      ? l.expIncomeSourcePlaceholder
+                      : l.expPayeePlaceholder,
+                  textInputAction: TextInputAction.done,
+                  inputFormatters: [LengthLimitingTextInputFormatter(100)],
+                  onChanged: (_) => setState(() {}),
+                  // 한글 조합 중 Enter 는 저장이 아니라 글자 확정이다(L2)
+                  onSubmitted: (_) {
+                    if (c.merchantCtrl.value.composing.isValid &&
+                        !c.merchantCtrl.value.composing.isCollapsed) {
+                      return;
+                    }
+                    _save();
+                  },
+                ),
+              ),
+            ),
+            if (foreign && !locked) ..._fxRows(l, fxHint),
+            if (foreign && locked)
+              PList(
                 children: [
-                  PCheckbox(
-                    value: _lockAmount,
-                    onChanged: (v) => setState(() => _lockAmount = v ?? false),
+                  TxRow(
+                    key: const ValueKey('tx-row-fx-locked'),
+                    title: l.expExchangeRate,
+                    icon: LucideIcons.percent,
+                    value: groupDecimal(trimNum(c.fxRateOrNull)),
+                    locked: true,
+                    onTap: null,
                   ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      l.expPresetLockAmount(krw(widget.seedAmount)),
-                      style: TextStyle(
-                        fontSize: PFontSize.caption,
-                        color: t.fgSecondary,
-                      ),
-                    ),
+                  TxRow(
+                    key: const ValueKey('tx-row-krw-locked'),
+                    title: l.txfKrwAmount,
+                    icon: LucideIcons.coins,
+                    value: krwSigned(c.amountInt, false, unit: true),
+                    locked: true,
+                    onTap: null,
                   ),
                 ],
               ),
+          ],
+          section([
+            if (!isTransfer) ...[
+              TxRow(
+                key: const ValueKey('tx-row-category'),
+                title: l.expCategory,
+                icon: LucideIcons.tags,
+                value: catValue,
+                placeholder: l.txfNoCategory,
+                dot: catDot,
+                onTap: _pickCategory,
+                errorMessage: _errs.category,
+              ),
+              TxRow(
+                key: const ValueKey('tx-row-asset'),
+                title: isIncome ? l.expDepositAccount : l.expAccountCard,
+                icon: LucideIcons.wallet,
+                value: assetName(c.assetRowId),
+                placeholder: isIncome
+                    ? l.txfNoDepositAccount
+                    : l.txfNoAccountOption,
+                locked: locked,
+                onTap: () => _pickAsset(income: isIncome),
+              ),
+              // 문자 카드 기억 — 계좌·카드 줄 바로 아래(지시서 D 22), 계좌를 고르기 전에는 막힌 줄
+              if (c.smsRememberAsk)
+                PListCheckItem(
+                  key: const ValueKey('tx-sms-remember'),
+                  title: l.smsRememberCard,
+                  checked: c.assetRowId != null && c.smsRememberCard,
+                  onChanged: c.assetRowId == null
+                      ? null
+                      : (v) => setState(() => c.smsRememberCard = v),
+                ),
+              TxRow(
+                key: const ValueKey('tx-row-method'),
+                title: isIncome ? l.expIncomeMethod : l.expPaymentMethod,
+                icon: LucideIcons.creditCard,
+                value: c.paymentMethod.isEmpty
+                    ? null
+                    : txPaymentMethodLabel(l, c.paymentMethod),
+                placeholder: isIncome
+                    ? l.txfNoIncomeMethod
+                    : l.txfNoMethodOption,
+                locked: locked,
+                onTap: _pickMethod,
+              ),
+              if (showTxInstallment(c, assets))
+                TxRow(
+                  key: const ValueKey('tx-row-installment'),
+                  title: l.expInstallment,
+                  icon: LucideIcons.calendarDays,
+                  value: c.installmentMonths > 1
+                      ? (c.amountInt > 0
+                            ? l.txfInstallmentValue(
+                                '${c.installmentMonths}',
+                                krw(c.amountInt ~/ c.installmentMonths),
+                              )
+                            : l.expInstallmentMonths(c.installmentMonths))
+                      : l.expLumpSum,
+                  locked: locked,
+                  onTap: _pickInstallment,
+                ),
+            ] else ...[
+              TxRow(
+                key: const ValueKey('tx-row-from'),
+                title: l.transferFromLabel,
+                icon: LucideIcons.wallet,
+                value: assetName(c.assetRowId),
+                placeholder: l.txfSelectFrom,
+                locked: locked,
+                onTap: () => _pickAsset(income: false),
+                errorMessage: _errs.from,
+              ),
+              TxRow(
+                key: const ValueKey('tx-row-to'),
+                title: l.transferToLabel,
+                icon: LucideIcons.wallet,
+                value: assetName(c.toAssetRowId),
+                placeholder: l.txfSelectTo,
+                locked: locked,
+                onTap: () => _pickAsset(income: false, to: true),
+                errorMessage: _errs.to,
+              ),
+              TxRow(
+                key: const ValueKey('tx-row-fee'),
+                title: l.expFee,
+                icon: LucideIcons.percent,
+                value: c.feeOrNull == null
+                    ? null
+                    : krwSigned(c.feeOrNull!, false, unit: true),
+                placeholder: l.txfNone,
+                chevron: true,
+                onTap: () => _openSub(_S.fee),
+              ),
+              if (showTxInterest(c, assets))
+                TxRow(
+                  key: const ValueKey('tx-row-interest'),
+                  title: l.expInterest,
+                  icon: LucideIcons.percent,
+                  value: c.interestOrNull == null
+                      ? null
+                      : krwSigned(c.interestOrNull!, false, unit: true),
+                  placeholder: l.txfNone,
+                  chevron: true,
+                  onTap: () => _openSub(_S.interest),
+                  errorMessage: _errs.interest,
+                ),
+            ],
+            TxDateRow(
+              key: const ValueKey('tx-row-date'),
+              title: l.expDate,
+              dayName: l.expDate,
+              timeName: l.txfTimeTitle,
+              dayText: dayText,
+              timeText: timeText,
+              locked: locked,
+              onDay: _pickDay,
+              onTime: _pickTime,
             ),
+            TxRow(
+              key: const ValueKey('tx-row-memo'),
+              title: l.expDescription,
+              icon: LucideIcons.stickyNote,
+              value: memoValue.isEmpty ? null : memoValue,
+              placeholder: l.txfNone,
+              maxLines: 2,
+              chevron: true,
+              onTap: () => _openSub(_S.memo),
+            ),
+          ]),
+          if (fixedRows.isNotEmpty) PList(children: fixedRows),
+          // 분할 어긋남 — 금액 줄 아래가 아니라 맨 아래에 두면 안 보인다. 금액 줄 바로 아래(위 _amountRows) 에서 그린다.
+          if (_errs.fx != null && !(foreign && !locked))
+            TxFieldError(message: _errs.fx!),
+          if (_errs.splits != null) TxFieldError(message: _errs.splits!),
+          if (mismatch) const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+
+  /// 수정 · 고쳐 쓰기 · 문자 초안의 금액 줄(+ 잠금 안내 · 분할 어긋남 Callout).
+  List<Widget> _amountRows(AppLocalizations l, bool masked) {
+    final c = _input;
+    final auto = c.isAutoGenerated;
+    final locked = c.moneyFieldsLocked;
+    final amountValue = masked
+        ? '••••${wonUnit()}'
+        : c.isForeignTx && (c.origAmountOrNull ?? 0) > 0
+        ? formatOriginalAmount(
+            c.origAmountOrNull!,
+            c.currency,
+            Localizations.localeOf(context).toString(),
+          )
+        : krwSigned(c.amountInt, false, unit: true);
+    final noteStyle = PTypography.t3.copyWith(
+      color: context.colors.fgNeutralSubtle,
+    );
+    final rewritable =
+        _edit != null &&
+        (_edit!.replaceable ?? c.moneyLocked) &&
+        !_splitsPending;
+    return [
+      PList(
+        children: [
+          TxRow(
+            key: const ValueKey('tx-row-amount'),
+            title: l.expAmount,
+            icon: LucideIcons.coins,
+            value: c.amountInt <= 0 && (c.origAmountOrNull ?? 0) <= 0
+                ? null
+                : amountValue,
+            placeholder: l.txfNone,
+            chevron: true,
+            locked: locked,
+            onTap: () => _openSub(_S.amount, focus: _amountFocus),
+            errorMessage: _errs.amount ?? _errs.krw,
           ),
         ],
       ),
-      actions: [
-        PButton(
-          label: l.actionCancel,
-          // ghost 는 배경이 없어 전체 폭 배치에서 버튼으로 안 보인다
-          // (spec button.md Migration notes 2026-08).
-          variant: PButtonVariant.secondary,
-          size: PButtonSize.lg,
-          fullWidth: true,
-          onPressed: _submitting ? null : Navigator.of(context).pop,
-        ),
-        PButton(
-          label: l.actionSave,
-          size: PButtonSize.lg,
-          fullWidth: true,
-          loading: _submitting,
-          onPressed: (_submitting || _nameCtrl.text.trim().isEmpty)
-              ? null
-              : _submit,
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-// 거래 입력 (inline) — recurring 과 독립. tx_input_form.dart 해체 후 add_tx 자체 보유.
-
-const _txPaymentMethodCodes = ['CASH', 'CARD', 'TRANSFER', 'OTHER'];
-
-String _txPaymentMethodLabel(AppLocalizations l, String code) => switch (code) {
-  'CASH' => l.expPayCash,
-  'CARD' => l.expPayCard,
-  'TRANSFER' => l.expPayTransfer,
-  'OTHER' => l.expPayOther,
-  _ => code,
-};
-
-const Map<String, List<String>?> _txPaymentAssetTypes = {
-  'CASH': ['CASH'],
-  'CARD': ['CREDIT_CARD', 'CHECK_CARD'],
-  'TRANSFER': ['BANK_ACCOUNT', 'SAVINGS'],
-  'OTHER': null,
-};
-
-/// 카드사 공통 할부 개월 — 2~12, 18, 24.
-const List<int> _installmentMonths = [
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
-  11,
-  12,
-  18,
-  24,
-];
-
-/// 해외 결제는 $5.50 을 보고 입력하지 원화 환산액을 모른다 — 원 통화 × 환율로 금액을 채운다.
-///
-/// 카드사 실제 청구액이 다르면 금액 칸을 직접 고치면 된다. 원 통화·환율을 다시 건드릴
-/// 때만 다시 계산하므로 손으로 고친 금액을 덮어쓰지 않는다.
-/// 1400.000000 을 1400 으로 — 서버가 소수로 주는 값을 그대로 넣으면 입력칸이 지저분하다.
-String _trimNum(double? v) {
-  if (v == null) return '';
-  final s = v.toStringAsFixed(6);
-  return s.contains('.')
-      ? s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '')
-      : s;
-}
-
-VoidCallback _syncKrwFromForeign(_TxInputController c) => () {
-  final a = c.origAmountOrNull;
-  final r = c.fxRateOrNull;
-  if (a == null || r == null || a <= 0 || r <= 0) return;
-  c.amountCtrl.text = (a * r).round().toString();
-};
-
-/// 이자 입력을 보일지 — 대출 상환일 때만.
-///
-/// 원금은 부채가 줄어드는 자산 이동이지만 이자는 은행으로 아예 나가는 비용이라,
-/// 입금 대상이 대출 자산일 때만 의미가 있다.
-bool _showInterest(_TxInputController c, List<Asset>? assets) =>
-    c.type == 'TRANSFER' && isLoanTarget(assets, c.toAssetRowId);
-
-/// 할부 입력을 보일지 — 신용카드 지출일 때만.
-bool _showInstallment(_TxInputController c, List<Asset>? assets) {
-  if (c.type != 'EXPENSE' || c.assetRowId == null || assets == null) {
-    return false;
-  }
-  final picked = assets.where((a) => a.rowId == c.assetRowId).firstOrNull;
-  return picked?.assetType == 'CREDIT_CARD';
-}
-
-/// 결제 수단 + 거래 타입으로 계좌·카드 후보를 고른다.
-///
-/// 지출에선 예·적금(SAVINGS: 청약·정기예금·정기적금)을 뺀다 — 만기 전까지 묶인 돈이라
-/// 거기서 직접 결제나 출금이 나가지 않는다(쓰려면 해지해서 입출금으로 옮긴다).
-/// 납입·해지는 이체로 처리하므로 이체 목록에는 그대로 남는다.
-/// 수입은 이자가 그 계좌로 직접 들어오므로 남긴다.
-bool _allowTxAsset(Asset a, String paymentMethod, String type) {
-  final allowed = paymentMethod.isNotEmpty
-      ? _txPaymentAssetTypes[paymentMethod]
-      : null;
-  if (allowed != null && !allowed.contains(a.assetType)) return false;
-  if (type == 'EXPENSE' && a.assetType == 'SAVINGS') return false;
-  return true;
-}
-
-/// 거래 입력 상태 (지출/수입/이체).
-class _TxInputController {
-  _TxInputController({
-    this.type = 'EXPENSE',
-    String amount = '',
-    String merchant = '',
-    String memo = '',
-    this.categoryRowId,
-    this.assetRowId,
-    this.paymentMethod = '',
-    DateTime? date,
-    TimeOfDay? time,
-  }) : date = date ?? DateTime.now(),
-       time = time ?? TimeOfDay.now(),
-       amountCtrl = TextEditingController(text: amount),
-       merchantCtrl = TextEditingController(text: merchant),
-       memoCtrl = TextEditingController(text: memo),
-       feeCtrl = TextEditingController(),
-       interestCtrl = TextEditingController(),
-       origAmountCtrl = TextEditingController(),
-       fxRateCtrl = TextEditingController();
-
-  final TextEditingController amountCtrl;
-  final TextEditingController merchantCtrl;
-  final TextEditingController memoCtrl;
-  final TextEditingController feeCtrl;
-
-  /// 대출 상환의 이자 — 상환액 중 이 금액은 부채를 줄이지 않고 지출로 잡힌다.
-  final TextEditingController interestCtrl;
-
-  /// 0·빈칸은 "없음" 이다 — 서버에 0 을 실어 보내도 뜻이 같아서 키를 뺀다.
-  int? get feeOrNull {
-    final v = int.tryParse(feeCtrl.text.replaceAll(',', '')) ?? 0;
-    return v > 0 ? v : null;
-  }
-
-  int? get interestOrNull {
-    final v = int.tryParse(interestCtrl.text.replaceAll(',', '')) ?? 0;
-    return v > 0 ? v : null;
-  }
-
-  /// 해외 결제의 원 통화 금액·환율 — 셋이 함께여야 카드사 청구 환율과 대사할 수 있다.
-  final TextEditingController origAmountCtrl;
-  final TextEditingController fxRateCtrl;
-
-  String type; // EXPENSE / INCOME / TRANSFER
-  int? categoryRowId;
-  int? assetRowId; // EXPENSE/INCOME 자산, TRANSFER 출금 자산
-  int? toAssetRowId; // TRANSFER 입금 자산 (이체 시 폼에서 set)
-  String paymentMethod;
-
-  /// 할부 개월 — 신용카드 지출에만 의미. 0 = 일시불.
-  int installmentMonths = 0;
-
-  /// 사용자가 고른 결제 통화. `null` 이면 아직 아무것도 안 골랐다.
-  String? currencyPick;
-
-  /// 이 거래에 이미 적혀 있던 통화 — 편집·환불·문자 초안이 채운다.
-  ///
-  /// 원화 거래는 서버에서 `originalCurrency` 가 `null` 로 오지만 여기엔 `KRW` 를
-  /// 넣는다. 비워 두면 아래 [currency] 가 설정의 기본 통화로 떨어져, 원화로 적어
-  /// 둔 거래를 열기만 해도 해외 결제 입력이 펼쳐진다.
-  String? txCurrency;
-
-  /// 설정의 기본 통화 — 폼이 매 빌드 흘려 넣는다(D7 · QA #124).
-  ///
-  /// `/me/preferences` 는 설정 화면을 안 들른 세션에서 이 시트보다 늦게 도착한다.
-  /// 열 때 한 번만 읽어 굳히면 첫 렌더의 원화에 잠기므로, 도착한 값을 매 빌드
-  /// 다시 흘려 넣어 아직 안 고른 새 거래에 반영한다.
-  String defaultCurrency = kDefaultCurrency;
-
-  /// 결제 통화 — KRW 면 원화 결제(원 통화 기록 없음).
-  ///
-  /// 우선순위는 **고른 값 > 이 거래의 값 > 설정의 기본 통화**다. 기본 통화는
-  /// 새 거래에만 닿는다 — 편집·환불·문자 초안은 [txCurrency] 에서 멈춘다.
-  String get currency => currencyPick ?? txCurrency ?? defaultCurrency;
-  DateTime date;
-  TimeOfDay time;
-  bool amountLocked = false; // 프리셋 금액 잠금 (applyPreset 에서 set)
-
-  /// 고정 수입·지출 — 월세·월급처럼 매달 정해진 거래. 통계가 따로 나눠 본다(돈에는 영향 없음).
-  /// 이체에는 없다.
-  bool isFixed = false;
-
-  /// 금액칸에 걸 상한 — 거래 상한(100억) 하나다.
-  int get amountMaxForInput => kAmountMax;
-
-  /// 시스템이 만든 거래의 출처 (TRADE_REALIZED / TRANSFER_INTEREST). null 이면 손으로 쓴 거래.
-  /// 값이 있으면 금액·날짜·자산이 잠긴다 — 서버도 같은 규칙으로 거른다.
-  String? autoSource;
-
-  /// 결제 문자 초안에서 "이 카드로 기억" 을 물어볼 상황인가 (카드는 알아봤는데 아직 안 외움).
-  bool smsRememberAsk = false;
-
-  /// 사용자가 그 체크를 켰는가 — 저장 시 (카드 힌트 → 자산) 을 서버가 적어 둔다.
-  bool smsRememberCard = false;
-
-  /// 금액·날짜·자산을 못 고치는가 — 계산 결과라서.
-  bool get isAutoGenerated => autoSource != null;
-
-  /// 결제가 끝난 카드 거래라 돈 칸을 못 고치는가(D12) — 시트가 매 빌드 흘려 넣는다.
-  bool moneyLocked = false;
-
-  /// 돈 칸 전부 — 금액·날짜·시간·자산·결제수단·할부·통화 3칸 — 을 잠그는가.
-  ///
-  /// 자동 생성 거래와 결제가 끝난 거래가 같은 잠금을 쓴다. 통화·환율·결제수단·할부도
-  /// 함께 잠근다 — 환율을 고치면 금액이 다시 계산돼 덮이고(`_syncKrwFromForeign`),
-  /// 결제수단을 바꾸면 안 맞는 자산이 풀린다. 한 칸만 열어 둬도 돈 칸이 새로 바뀐다.
-  bool get moneyFieldsLocked => isAutoGenerated || moneyLocked;
-
-  int get amountInt => int.tryParse(amountCtrl.text.replaceAll(',', '')) ?? 0;
-  String get isoDate =>
-      '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  String? get merchantOrNull =>
-      merchantCtrl.text.trim().isEmpty ? null : merchantCtrl.text.trim();
-  String? get memoOrNull =>
-      memoCtrl.text.trim().isEmpty ? null : memoCtrl.text.trim();
-  String? get paymentMethodOrNull =>
-      paymentMethod.isEmpty ? null : paymentMethod;
-
-  /// 외화 결제인가 — 이체는 두 자산 사이의 이동이라 통화가 자산에 달려 있어 제외.
-  bool get isForeignTx => type != 'TRANSFER' && isForeignCurrency(currency);
-  double? get origAmountOrNull => isForeignTx
-      ? double.tryParse(origAmountCtrl.text.replaceAll(',', ''))
-      : null;
-  double? get fxRateOrNull =>
-      isForeignTx ? double.tryParse(fxRateCtrl.text.replaceAll(',', '')) : null;
-
-  void dispose() {
-    amountCtrl.dispose();
-    merchantCtrl.dispose();
-    memoCtrl.dispose();
-    feeCtrl.dispose();
-    interestCtrl.dispose();
-    origAmountCtrl.dispose();
-    fxRateCtrl.dispose();
-  }
-}
-
-/// 거래 입력 폼 (지출/수입/이체) — add_tx_sheet 자체 보유.
-class _TxInputForm extends ConsumerWidget {
-  const _TxInputForm({
-    required this.controller,
-    required this.onChanged,
-    this.typeReadOnly = false,
-    this.typeDisabledFor,
-    this.allowTransfer = true,
-    this.presetSlot,
-    this.onRewrite,
-    this.showFixed = true,
-  });
-
-  /// 고정 스위치를 내놓는가 — 저장 경로가 고정 표식을 못 받는 화면(결제 문자 초안)은 false 다.
-  final bool showFixed;
-
-  final _TxInputController controller;
-  final VoidCallback onChanged;
-  final bool typeReadOnly;
-  final String? typeDisabledFor;
-
-  /// 이체 선택지를 내놓는가 — 저장 경로가 이체를 못 받는 화면은 false 다.
-  final bool allowTransfer;
-  final Widget? presetSlot;
-
-  /// 돈 칸이 잠긴 거래의 [고쳐 쓰기] — 잠금 안내 옆에 단다(D13).
-  final VoidCallback? onRewrite;
-
-  void _set(VoidCallback mutate) {
-    mutate();
-    onChanged();
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    final c = controller;
-    final categoriesAsync = ref.watch(categoriesProvider);
-    final assetsAsync = ref.watch(assetsProvider);
-
-    final amountInt = c.amountInt;
-    final amountColor = c.type == 'EXPENSE'
-        ? t.fgExpense
-        : (c.type == 'INCOME' ? t.fgIncome : t.fgTransfer);
-    final amountPrefix = c.type == 'EXPENSE'
-        ? '−'
-        : (c.type == 'INCOME' ? '+' : '');
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 타입 토글
-        PTabs<String>(
-          variant: PTabsVariant.container,
-          size: PTabsSize.sm,
-          expand: true,
-          value: c.type,
-          onChanged: typeReadOnly
-              ? (_) {}
-              : (v) => _set(() {
-                  c.type = v;
-                  // 종류를 바꾸면 안 맞는 카테고리는 놓는다(웹 `AddTxSheet` 정합).
-                  // 서버가 종류≠카테고리 종류를 400 으로 막으므로(`ExpenseServiceImpl`)
-                  // 들고 있어 봐야 저장이 실패한다 — 문자 초안은 지출 카테고리를
-                  // 미리 채워 오므로 수입으로 바꾸는 순간 바로 걸린다.
-                  final cats = categoriesAsync.value;
-                  if (cats != null) {
-                    final cat = cats
-                        .where((x) => x.rowId == c.categoryRowId)
-                        .firstOrNull;
-                    if (cat == null || cat.expenseType != v) {
-                      c.categoryRowId = null;
-                    }
-                  }
-                }),
-          items: [
-            PTabItem(
-              value: 'EXPENSE',
-              label: l.expTypeExpense,
-              disabled: typeReadOnly && typeDisabledFor != 'EXPENSE',
-            ),
-            PTabItem(
-              value: 'INCOME',
-              label: l.expTypeIncome,
-              disabled: typeReadOnly && typeDisabledFor != 'INCOME',
-            ),
-            if (allowTransfer && (!typeReadOnly || c.type == 'TRANSFER'))
-              PTabItem(
-                value: 'TRANSFER',
-                label: l.expTypeTransfer,
-                disabled: typeReadOnly && typeDisabledFor != 'TRANSFER',
-              ),
-          ],
-        ),
-        const SizedBox(height: PSpace.x12),
-
-        if (presetSlot != null) ...[
-          presetSlot!,
-          const SizedBox(height: PSpace.x20),
-        ],
-
-        // 금액
-        Row(
-          children: [
-            Expanded(child: PSectionLabel(l.expAmount)),
-            if (c.amountLocked || c.isAutoGenerated) ...[
-              Icon(LucideIcons.lock, size: 11, color: t.fgTertiary),
-              const SizedBox(width: 3),
-              Text(
-                c.isAutoGenerated ? l.expAutoLock : l.expPresetLock,
-                style: PTypo.caption.copyWith(color: t.fgTertiary),
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(
-          controller: c.amountCtrl,
-          numbersOnly: true,
-          // 거래 100억 상한 — 넘는 값은 타이핑 자체가 안 된다
-          // (`AmountLimitFormatter`).
-          amountMax: c.amountMaxForInput,
-          enabled: !c.amountLocked && !c.moneyFieldsLocked,
-          placeholder: '0',
-          prefixText: amountInt > 0 ? amountPrefix : null,
-          suffixText: wonUnit(),
-          style: PTypo.h4.copyWith(
-            color: amountColor,
-            fontWeight: PFontWeight.bold,
+      if (auto)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            PSpacing.globalGutter,
+            PSpacing.x1,
+            PSpacing.globalGutter,
+            PSpacing.x3,
           ),
-          onChanged: (_) => onChanged(),
-        ),
-        // 왜 못 고치는지 알려 준다 — 잠긴 칸만 보여 주면 고장으로 보인다.
-        if (c.isAutoGenerated) ...[
-          const SizedBox(height: PSpace.x4),
-          Text(switch (c.autoSource) {
+          child: Text(switch (c.autoSource) {
             'TRADE_REALIZED' => l.expAutoSourceTradeRealized,
             'TRANSFER_INTEREST' => l.expAutoSourceTransferInterest,
             'CARD_CARRYOVER' ||
             'CARD_CARRYOVER_DUE' => l.expAutoSourceCardCarryover,
             _ => l.expAutoSourceDefault,
-          }, style: PTypo.micro.copyWith(color: t.fgTertiary)),
-        ]
-        // 결제가 끝난 카드 거래(D12) — 돈 칸은 회색이고, 바꾸려면 그 자리의
-        // [고쳐 쓰기] 로 새 거래를 쓴다(D13). 카테고리·가맹점·메모는 그대로 고친다.
-        // 고쳐 쓸 수 없는 잠긴 거래(중도 정리한 할부)는 버튼 없이 왜 못 바꾸는지만
-        // 말한다 — 없는 버튼을 가리키면 안 된다(QA 26 3).
-        else if (c.moneyLocked) ...[
-          const SizedBox(height: PSpace.x8),
-          Container(
-            key: const ValueKey('money-lock-note'),
-            padding: const EdgeInsets.symmetric(
-              horizontal: PSpace.x12,
-              vertical: PSpace.x8,
-            ),
-            decoration: BoxDecoration(
-              color: t.bgMuted,
-              borderRadius: PRadius.brMd,
-            ),
-            child: Row(
-              children: [
-                Icon(LucideIcons.lock, size: 14, color: t.fgTertiary),
-                const SizedBox(width: PSpace.x8),
-                Expanded(
-                  child: Text(
-                    onRewrite != null
-                        ? l.expMoneyLockedNote
-                        : l.expMoneyLockedPaidOffNote,
-                    style: PTypo.caption.copyWith(color: t.fgSecondary),
-                  ),
-                ),
-                if (onRewrite != null) ...[
-                  const SizedBox(width: PSpace.x8),
-                  PButton(
-                    label: l.expRewrite,
-                    variant: PButtonVariant.outline,
-                    size: PButtonSize.sm,
-                    onPressed: onRewrite,
-                  ),
-                ],
-              ],
-            ),
+          }, style: noteStyle),
+        )
+      else if (c.moneyLocked)
+        Padding(
+          key: const ValueKey('money-lock-note'),
+          padding: const EdgeInsets.fromLTRB(
+            PSpacing.globalGutter,
+            PSpacing.x1,
+            PSpacing.globalGutter,
+            PSpacing.x3,
           ),
-        ],
-        const SizedBox(height: PSpace.x16),
-
-        if (c.type != 'TRANSFER') ...[
-          PSectionLabel(l.expCategory, variant: PSectionLabelVariant.eyebrow),
-          const SizedBox(height: PSpace.x8),
-          categoriesAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: PCircularProgressIndicator()),
-            ),
-            error: (e, _) => Text(
-              '${l.categoryLoadError}: $e',
-              style: PTypo.caption.copyWith(color: t.statusDangerFg),
-            ),
-            data: (categories) {
-              final topCategories =
-                  categories
-                      .where(
-                        (cat) =>
-                            cat.expenseType == c.type &&
-                            (cat.parentRowId == null || cat.parentRowId == 0),
-                      )
-                      .toList()
-                    ..sort(
-                      (a, b) => (a.sortOrder ?? 0).compareTo(b.sortOrder ?? 0),
-                    );
-              if (topCategories.isEmpty) {
-                return Text(
-                  l.expNoCategoryForType,
-                  style: PTypo.caption.copyWith(color: t.fgTertiary),
-                );
-              }
-
-              final childrenByParent = <int, List<dynamic>>{};
-              for (final cat in categories) {
-                if (cat.parentRowId == null ||
-                    cat.parentRowId == 0 ||
-                    cat.expenseType != c.type) {
-                  continue;
-                }
-                childrenByParent
-                    .putIfAbsent(cat.parentRowId!, () => [])
-                    .add(cat);
-              }
-              for (final list in childrenByParent.values) {
-                list.sort(
-                  (a, b) => ((a.sortOrder ?? 0) as int).compareTo(
-                    (b.sortOrder ?? 0) as int,
-                  ),
-                );
-              }
-
-              final selectedCat = c.categoryRowId == null
-                  ? null
-                  : categories
-                        .where((cat) => cat.rowId == c.categoryRowId)
-                        .firstOrNull;
-              final selectedParentId = selectedCat == null
-                  ? null
-                  : (selectedCat.parentRowId == null ||
-                            selectedCat.parentRowId == 0
-                        ? selectedCat.rowId
-                        : selectedCat.parentRowId);
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      const gap = 6.0;
-                      const columns = 5;
-                      final cellWidth =
-                          (constraints.maxWidth - gap * (columns - 1)) /
-                          columns;
-                      return Wrap(
-                        spacing: gap,
-                        runSpacing: gap,
-                        children: [
-                          for (final cat in topCategories)
-                            SizedBox(
-                              width: cellWidth,
-                              child: PCategoryTile(
-                                name: cat.categoryName,
-                                color: resolveChartColor(
-                                  context,
-                                  cat.color,
-                                  fallback: t.fgBrand,
-                                ),
-                                icon: lucideByName(cat.icon ?? 'tag'),
-                                active: selectedParentId == cat.rowId,
-                                onTap: () => _set(() {
-                                  final firstChild =
-                                      childrenByParent[cat.rowId]?.first;
-                                  c.categoryRowId = firstChild != null
-                                      ? firstChild.rowId
-                                      : cat.rowId;
-                                }),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                  if (selectedParentId != null &&
-                      (childrenByParent[selectedParentId]?.isNotEmpty ??
-                          false)) ...[
-                    const SizedBox(height: 10),
-                    _SelectField<int>(
-                      value: c.categoryRowId,
-                      hint: l.expSubcategory,
-                      // 상위 자신은 고를 수 없다 — 이 칸은 하위가 있는 상위에서만 뜨고, 하위가
-                      // 있는 상위에는 서버가 거래를 안 받는다(EXP_009). 종전엔 첫 칸이 상위라
-                      // 고르면 저장에서 막혔다(QA 30 13, 웹과 같다).
-                      items: [
-                        for (final child in childrenByParent[selectedParentId]!)
-                          _SelectOption<int>(
-                            child.rowId as int,
-                            child.categoryName as String,
-                          ),
-                      ],
-                      onChanged: (v) => _set(() => c.categoryRowId = v),
-                    ),
-                  ],
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: PSpace.x12),
-        ],
-
-        if (c.type != 'TRANSFER') ...[
-          // 거래처
-          PSectionLabel(c.type == 'INCOME' ? l.expIncomeSource : l.expPayee),
-          const SizedBox(height: PSpace.x4),
-          PTextInput(
-            controller: c.merchantCtrl,
-            placeholder: c.type == 'INCOME'
-                ? l.expIncomeSourcePlaceholder
-                : l.expPayeePlaceholder,
-          ),
-          const SizedBox(height: PSpace.x12),
-
-          // 결제 수단 (Select)
-          PSectionLabel(
-            c.type == 'INCOME' ? l.expIncomeMethod : l.expPaymentMethod,
-          ),
-          const SizedBox(height: PSpace.x4),
-          _SelectField<String>(
-            // ''(선택 안 함)도 유효 default — null 변환 금지(웹 정합: '선택 안 함' selected).
-            value: c.paymentMethod,
-            enabled: !c.moneyFieldsLocked,
-            hint: l.expNone,
-            items: [
-              _SelectOption<String>('', l.expNone),
-              for (final code in _txPaymentMethodCodes)
-                _SelectOption<String>(code, _txPaymentMethodLabel(l, code)),
-            ],
-            onChanged: (v) => _set(() {
-              c.paymentMethod = v ?? '';
-              if (c.paymentMethod.isNotEmpty && c.assetRowId != null) {
-                final assets = assetsAsync.value ?? const [];
-                final cur = assets
-                    .where((a) => a.rowId == c.assetRowId)
-                    .firstOrNull;
-                if (cur != null &&
-                    !_allowTxAsset(cur, c.paymentMethod, c.type)) {
-                  c.assetRowId = null;
-                }
-              }
-            }),
-          ),
-          const SizedBox(height: PSpace.x12),
-
-          // 계좌·카드 (Select, payment method 로 필터)
-          PSectionLabel(
-            c.type == 'INCOME' ? l.expDepositAccount : l.expAccountCard,
-          ),
-          const SizedBox(height: PSpace.x4),
-          assetsAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Center(child: PCircularProgressIndicator()),
-            ),
-            error: (e, _) => Text(
-              '${l.expAssetLoadError}: $e',
-              style: PTypo.caption.copyWith(color: t.statusDangerFg),
-            ),
-            data: (assets) {
-              final filtered = assets
-                  .where((a) => _allowTxAsset(a, c.paymentMethod, c.type))
-                  .toList();
-              return _SelectField<int>(
-                // null(미선택)도 '선택 안 함'(-1) default로 표시 — 웹 정합.
-                value: c.assetRowId ?? -1,
-                enabled: !c.moneyFieldsLocked,
-                hint: l.expNone,
-                items: [
-                  _SelectOption<int>(-1, l.expNone),
-                  for (final a in filtered)
-                    _SelectOption<int>(
-                      a.rowId,
-                      a.institution != null
-                          ? '${a.institution} · ${a.assetName}'
-                          : a.assetName,
-                    ),
-                ],
-                onChanged: (v) => _set(() => c.assetRowId = v == -1 ? null : v),
-              );
-            },
-          ),
-          // 결제 문자로 들어온 카드를 아직 안 외운 경우에만 물어본다.
-          // 한 번 켜 두면 다음 문자부터는 자산을 고르는 단계가 사라진다.
-          if (c.smsRememberAsk) ...[
-            const SizedBox(height: PSpace.x8),
-            InkWell(
-              onTap: c.assetRowId == null
-                  ? null
-                  : () => _set(() => c.smsRememberCard = !c.smsRememberCard),
-              borderRadius: PRadius.brSm,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    PCheckbox(
-                      // 자산을 안 골랐으면 기억할 대상이 없다.
-                      value: c.assetRowId != null && c.smsRememberCard,
-                      onChanged: c.assetRowId == null
-                          ? null
-                          : (v) => _set(() => c.smsRememberCard = v ?? false),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        l.smsRememberCard,
-                        style: TextStyle(
-                          fontSize: PFontSize.caption,
-                          color: c.assetRowId == null
-                              ? t.fgTertiary
-                              : t.fgSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: PSpace.x12),
-
-          // 할부 — 신용카드 지출에만. 청구는 이 개월 수로 나뉘어 잡힌다.
-          // (체크카드는 긁는 즉시 계좌에서 빠지고, 현금·이체는 나눌 수 없다)
-          if (_showInstallment(c, assetsAsync.value)) ...[
-            PSectionLabel(l.expInstallment),
-            const SizedBox(height: PSpace.x4),
-            _SelectField<int>(
-              value: c.installmentMonths,
-              enabled: !c.moneyFieldsLocked,
-              hint: l.expLumpSum,
-              items: [
-                _SelectOption<int>(0, l.expLumpSum),
-                for (final m in _installmentMonths)
-                  _SelectOption<int>(m, l.expInstallmentMonths(m)),
-              ],
-              onChanged: (v) => _set(() => c.installmentMonths = v ?? 0),
-            ),
-            if (c.installmentMonths > 1 && c.amountInt > 0) ...[
-              const SizedBox(height: PSpace.x4),
-              Text(
-                l.expInstallmentHint(
-                  krw(c.amountInt ~/ c.installmentMonths),
-                  c.installmentMonths,
-                ),
-                style: PTypo.caption.copyWith(color: t.fgTertiary),
-              ),
-            ],
-            const SizedBox(height: PSpace.x12),
-          ],
-
-          // 통화 — 외화면 원 통화 금액·환율이 열리고, 금액(원화)이 자동으로 채워진다.
-          PSectionLabel(l.expCurrency),
-          const SizedBox(height: PSpace.x4),
-          Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _SelectField<String>(
-                  value: c.currency,
-                  enabled: !c.moneyFieldsLocked,
-                  hint: kDefaultCurrency,
-                  items: [
-                    for (final cur in kCurrencies)
-                      _SelectOption<String>(
-                        cur.code,
-                        '${cur.symbol} ${cur.code}',
-                      ),
-                  ],
-                  onChanged: (v) => _set(() {
-                    c.currencyPick = v ?? kDefaultCurrency;
-                    // 원화로 돌아오면 남은 외화 입력을 지운다(저장 시 흘러들지 않도록).
-                    if (!isForeignCurrency(c.currency)) {
-                      c.origAmountCtrl.clear();
-                      c.fxRateCtrl.clear();
-                    }
-                  }),
+              Text(
+                keepAll(
+                  rewritable
+                      ? l.expMoneyLockedNote
+                      : l.expMoneyLockedPaidOffNote,
                 ),
+                style: noteStyle,
               ),
-              if (c.isForeignTx) ...[
-                const SizedBox(width: PSpace.x8),
-                Expanded(
-                  child: PTextInput(
-                    controller: c.origAmountCtrl,
-                    enabled: !c.moneyFieldsLocked,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    placeholder: l.expOriginalAmount,
-                    onChanged: (_) => _set(_syncKrwFromForeign(c)),
-                  ),
-                ),
-                const SizedBox(width: PSpace.x8),
-                Expanded(
-                  child: PTextInput(
-                    controller: c.fxRateCtrl,
-                    enabled: !c.moneyFieldsLocked,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    placeholder: l.expExchangeRate,
-                    onChanged: (_) => _set(_syncKrwFromForeign(c)),
-                  ),
+              if (rewritable) ...[
+                const SizedBox(height: PSpacing.x2),
+                PButton(
+                  label: l.expRewrite,
+                  variant: PButtonVariant.neutralOutline,
+                  size: PButtonSize.small,
+                  onPressed: _openRewrite,
                 ),
               ],
             ],
           ),
-          if (c.isForeignTx &&
-              (c.origAmountOrNull ?? 0) > 0 &&
-              (c.fxRateOrNull ?? 0) > 0) ...[
-            const SizedBox(height: PSpace.x4),
-            Text(
-              l.expFxHint(
-                formatOriginalAmount(
-                  c.origAmountOrNull!,
-                  c.currency,
-                  Localizations.localeOf(context).toString(),
-                ),
-                krwSigned(
-                  (c.origAmountOrNull! * c.fxRateOrNull!).round(),
-                  false,
-                  unit: true,
-                ),
-              ),
-              style: PTypo.caption.copyWith(color: t.fgTertiary),
-            ),
-          ],
-          const SizedBox(height: PSpace.x12),
-        ] else ...[
-          // 이체 — 규칙과 화면 모두 반복 설정·프리셋 폼과 한 벌이다.
-          TransferAccountFields(
-            assets: assetsAsync,
-            fromAssetRowId: c.assetRowId,
-            toAssetRowId: c.toAssetRowId,
-            feeController: c.feeCtrl,
-            interestController: c.interestCtrl,
-            amountForHint: c.amountInt,
-            onFromChanged: (v) => _set(() => c.assetRowId = v),
-            onToChanged: (v) => _set(() => c.toAssetRowId = v),
-            onInterestChanged: () => _set(() {}),
-            labelBuilder: (text) => PSectionLabel(text),
-          ),
-        ],
-
-        // 날짜(·시간)
-        // 이체도 시각을 받는다 — transfer_date 가 DATETIME 이라, 시각이 있어야
-        // 같은 날 잔액수정보다 뒤에 일어난 이체가 절대 앵커에 지워지지 않는다.
-        PSectionLabel(l.expDateTime),
-        const SizedBox(height: PSpace.x4),
-        Row(
-          children: [
-            Expanded(
-              child: PDateInput(
-                value: c.date,
-                enabled: !c.moneyFieldsLocked,
-                onChanged: (d) {
-                  if (d != null) _set(() => c.date = d);
-                },
-                firstDate: DateTime(2020),
-                lastDate: DateTime(2030, 12, 31),
-              ),
-            ),
-            const SizedBox(width: PSpace.x8),
-            SizedBox(
-              width: 116,
-              child: PTimeInput(
-                value: c.time,
-                enabled: !c.moneyFieldsLocked,
-                onChanged: (tm) {
-                  if (tm != null) _set(() => c.time = tm);
-                },
-              ),
-            ),
-          ],
         ),
-        const SizedBox(height: PSpace.x16),
-
-        // 고정 수입·지출 — 이체에는 없다(내 통장끼리 옮기는 돈이라 합계가 안 달라진다).
-        if (showFixed && c.type != 'TRANSFER') ...[
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      c.type == 'INCOME'
-                          ? l.fixedSwitchIncome
-                          : l.fixedSwitchExpense,
-                      style: PTypo.body.copyWith(
-                        color: t.fgPrimary,
-                        fontWeight: PFontWeight.semi,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      c.type == 'INCOME'
-                          ? l.fixedHintIncome
-                          : l.fixedHintExpense,
-                      style: PTypo.caption.copyWith(color: t.fgTertiary),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: PSpace.x12),
-              PSwitch(
-                value: c.isFixed,
-                onChanged: (v) => _set(() => c.isFixed = v),
+      if (_splitMismatch)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            PSpacing.globalGutter,
+            PSpacing.x1,
+            PSpacing.globalGutter,
+            PSpacing.x3,
+          ),
+          child: PCallout(
+            key: const ValueKey('tx-split-mismatch'),
+            tone: PCalloutTone.warning,
+            title: l.txfSplitMismatchTitle,
+            description: l.txfSplitMismatchBody(
+              krw(c.amountInt),
+              krw(_splitSum),
+              c.amountInt - _splitSum > 0
+                  ? l.txfSplitOver(krw((c.amountInt - _splitSum).abs()))
+                  : l.txfSplitShort(krw((c.amountInt - _splitSum).abs())),
+            ),
+            actions: [
+              PButton(
+                label: l.txfMatchSplits,
+                size: PButtonSize.small,
+                variant: PButtonVariant.neutralOutline,
+                onPressed: _submitting ? null : _openReconcile,
               ),
             ],
           ),
-          const SizedBox(height: PSpace.x16),
-        ],
+        ),
+    ];
+  }
 
-        PSectionLabel(l.expDescription),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(
-          controller: c.memoCtrl,
-          maxLines: 2,
-          placeholder: l.expMemoPlaceholder,
+  /// 외화 — 환율 칸 + 원화 금액 줄(›). 원화 줄은 **원화만** 고치는 전용 단계로 간다(현지 금액 · 환율은 그대로 — H1).
+  List<Widget> _fxRows(AppLocalizations l, String? fxHint) {
+    final c = _input;
+    return [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          PSpacing.globalGutter,
+          0,
+          PSpacing.globalGutter,
+          PSpacing.x4,
+        ),
+        child: PField(
+          label: l.expExchangeRate,
+          invalid: _errs.fx != null,
+          errorMessage: _errs.fx,
+          description: fxHint,
+          child: PInput(
+            controller: c.fxRateCtrl,
+            semanticLabel: l.expExchangeRate,
+            placeholder: '0',
+            invalid: _errs.fx != null,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: const [DecimalFormatter(maxFrac: 6)],
+            onChanged: (_) => setState(() {
+              fillKrwFromForeign(c);
+              _errs.fx = null;
+              _clearPresetMark();
+            }),
+          ),
+        ),
+      ),
+      PList(
+        children: [
+          TxRow(
+            key: const ValueKey('tx-row-krw'),
+            title: l.txfKrwAmount,
+            icon: LucideIcons.coins,
+            value: c.amountInt > 0
+                ? krwSigned(c.amountInt, false, unit: true)
+                : null,
+            placeholder: l.txfNone,
+            chevron: true,
+            onTap: () => _openSub(_S.krw, focus: _amountFocus),
+            errorMessage: _errs.krw,
+          ),
+        ],
+      ),
+    ];
+  }
+
+  // ── 한 단계 ─────────────────────────────────────────────
+  Widget _buildAmountSub(AppLocalizations l) {
+    final c = _input;
+    final presetAmount = _step == _S.presetAmount;
+    final krwOnly = _step == _S.krw || presetAmount;
+    final foreign = !krwOnly && c.isForeignTx;
+    final ctrl = presetAmount
+        ? _presetAmountCtrl
+        : foreign
+        ? c.origAmountCtrl
+        : c.amountCtrl;
+    return _frame(
+      key: ValueKey('tx-sub-${_step.name}'),
+      title: _step == _S.krw ? l.txfKrwAmount : l.expAmount,
+      onBack: _requestLeaveSub,
+      showClose: false,
+      headerAction: _doneAction(l),
+      body: TxUnderlineAmount(
+        controller: ctrl,
+        focusNode: _amountFocus,
+        semanticLabel: _step == _S.krw ? l.txfKrwAmount : l.expAmount,
+        decimal: foreign,
+        formatters: foreign
+            ? const [DecimalFormatter(maxFrac: 2)]
+            : kWonFormatters,
+        suffixText: wonUnit(),
+        // 통화 칩은 금액 단계에만 — 원화 줄 단계 · 프리셋 금액에는 없다
+        chip: krwOnly || c.type == 'TRANSFER' ? null : _currencyChip(l),
+        hintMessage: presetAmount ? l.txfPresetAmountHint : null,
+        onChanged: (_) {
+          if (foreign) fillKrwFromForeign(c);
+          setState(() {});
+        },
+        onSubmitted: (_) => _doneSub(),
+      ),
+    );
+  }
+
+  Widget _buildMemoSub(AppLocalizations l) {
+    return _frame(
+      key: const ValueKey('tx-sub-memo'),
+      title: l.txfMemoStepTitle,
+      onBack: _requestLeaveSub,
+      showClose: false,
+      headerAction: _doneAction(l),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          PSpacing.globalGutter,
+          PSpacing.x3,
+          PSpacing.globalGutter,
+          PSpacing.x2,
+        ),
+        child: PField(
+          maxGraphemeCount: 500,
+          child: PTextarea(
+            controller: _input.memoCtrl,
+            focusNode: _subFocus,
+            semanticLabel: l.expDescription,
+            placeholder: l.expMemoPlaceholder,
+            maxHeight: 200,
+            onChanged: (_) => setState(() {}),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMoneySub(AppLocalizations l) {
+    final c = _input;
+    final isFee = _step == _S.fee;
+    final amount = c.amountInt;
+    final interest = c.interestOrNull ?? 0;
+    return _frame(
+      key: ValueKey('tx-sub-${_step.name}'),
+      title: isFee ? l.expFee : l.expInterest,
+      onBack: _requestLeaveSub,
+      showClose: false,
+      headerAction: _doneAction(l),
+      body: TxUnderlineAmount(
+        controller: isFee ? c.feeCtrl : c.interestCtrl,
+        focusNode: _subFocus,
+        semanticLabel: isFee ? l.expFee : l.expInterest,
+        formatters: kWonFormatters,
+        suffixText: wonUnit(),
+        hintMessage: isFee
+            ? null
+            : (amount > 0 && interest > 0
+                  ? l.expInterestSplit(
+                      krw(amount - interest < 0 ? 0 : amount - interest),
+                      krw(interest),
+                    )
+                  : l.expInterestHint),
+        onChanged: (_) => setState(() {}),
+        onSubmitted: (_) => _doneSub(),
+      ),
+    );
+  }
+
+  Widget _buildSms(AppLocalizations l) {
+    return _frame(
+      key: const ValueKey('tx-sub-sms'),
+      title: l.txfSmsStepTitle,
+      onBack: _requestLeaveSub,
+      footer: [
+        PButton(
+          label: l.smsPasteAction,
+          size: PButtonSize.large,
+          loading: _smsBusy,
+          onPressed: _smsBusy ? null : _readSms,
         ),
       ],
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          PSpacing.globalGutter,
+          PSpacing.x3,
+          PSpacing.globalGutter,
+          PSpacing.x2,
+        ),
+        child: PField(
+          label: l.smsPasteFieldLabel,
+          description: l.txfSmsHelp,
+          invalid: _smsError != null,
+          errorMessage: _smsError,
+          child: PTextarea(
+            controller: _smsCtrl,
+            focusNode: _smsFocus,
+            semanticLabel: l.smsPasteFieldLabel,
+            placeholder: l.smsPastePlaceholder,
+            invalid: _smsError != null,
+            maxHeight: 200,
+            onChanged: (_) {
+              if (_smsError != null) setState(() => _smsError = null);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPresetAll(AppLocalizations l) {
+    final c = _input;
+    final presets = [
+      for (final p
+          in ref.watch(presetListProvider).value ?? const <ExpenseTemplate>[])
+        if (p.expenseType == c.type) p,
+    ]..sort((a, b) => (b.useCount ?? 0).compareTo(a.useCount ?? 0));
+    return _frame(
+      key: const ValueKey('tx-sub-preset-all'),
+      title: l.presetPickTitle,
+      onBack: _requestLeaveSub,
+      body: PresetPickBody(presets: presets, onPick: _applyPreset),
+    );
+  }
+
+  Widget _buildPresetSave(AppLocalizations l) {
+    final c = _input;
+    final cats =
+        ref.watch(categoriesProvider).value ?? const <ExpenseCategory>[];
+    final assets = ref.watch(assetsProvider).value ?? const <Asset>[];
+    final isTransfer = c.type == 'TRANSFER';
+    final cat = c.categoryRowId == null ? null : cats.byRowId(c.categoryRowId!);
+    final from = c.assetRowId == null ? null : assets.byRowId(c.assetRowId!);
+    final to = c.toAssetRowId == null ? null : assets.byRowId(c.toAssetRowId!);
+    final parent = cat?.parentRowId == null
+        ? null
+        : cats.byRowId(cat!.parentRowId!);
+    final merchant = c.merchantCtrl.text.trim();
+    final amount = parseAmountInput(_presetAmountCtrl.text) ?? 0;
+    final detailParts = isTransfer
+        ? [transferPartiesLabel(from?.assetName, to?.assetName)]
+        : [
+            if (parent != null) parent.categoryName,
+            if (cat != null) cat.categoryName,
+            if (from != null) from.assetName,
+          ];
+    return _frame(
+      key: const ValueKey('tx-sub-preset-save'),
+      title: l.expPresetSaveTitle,
+      onBack: _requestLeaveSub,
+      footer: [
+        PButton(
+          label: l.actionSave,
+          size: PButtonSize.large,
+          loading: _presetSaving,
+          onPressed: _presetSaving ? null : _savePreset,
+        ),
+      ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_presetSaveError != null)
+            CalendarSaveErrorCallout(message: _presetSaveError!),
+          PList(
+            children: [
+              PListItem(
+                title: isTransfer || merchant.isEmpty
+                    ? l.txfPresetNoMerchant
+                    : merchant,
+                detail: detailParts.isEmpty ? null : detailParts.join(' · '),
+                prefix: isTransfer
+                    ? const PListTile(
+                        background: Color(0x00000000),
+                        color: Color(0xFF000000),
+                        child: Icon(LucideIcons.arrowRightLeft),
+                      )
+                    : (cat == null ? null : categoryTile(context, cat)),
+                suffix: Text(krwSigned(c.amountInt, false, unit: true)),
+              ),
+            ],
+          ),
+          if (_presetFormError != null)
+            TxFieldError(message: _presetFormError!),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              PSpacing.globalGutter,
+              PSpacing.x3,
+              PSpacing.globalGutter,
+              PSpacing.x4,
+            ),
+            child: PField(
+              key: ValueKey('tx-preset-name-$_presetNameGen'),
+              label: l.presetName,
+              invalid: _presetNameError != null,
+              errorMessage: _presetNameError,
+              maxGraphemeCount: _kPresetNameMax,
+              child: PInput(
+                controller: _presetNameCtrl,
+                focusNode: _subFocus,
+                semanticLabel: l.presetName,
+                placeholder: l.expPresetNamePlaceholder,
+                invalid: _presetNameError != null,
+                onChanged: (_) {
+                  if (_presetNameError != null) {
+                    setState(() => _presetNameError = null);
+                  }
+                },
+              ),
+            ),
+          ),
+          PList(
+            children: [
+              TxRow(
+                key: const ValueKey('tx-preset-amount-row'),
+                title: l.expAmount,
+                icon: LucideIcons.coins,
+                value: amount > 0 ? krwSigned(amount, false, unit: true) : null,
+                placeholder: l.txfPresetAmountEmpty,
+                chevron: true,
+                onTap: () {
+                  // 이름 · 금액은 이 단계 안의 값 — 금액 단계는 이 단계 위의 한 단계다
+                  final keepName = _presetNameCtrl.text;
+                  _openSub(_S.presetAmount, focus: _amountFocus);
+                  _presetNameCtrl.text = keepName;
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _SelectOption<T> {
-  const _SelectOption(this.value, this.label);
-  final T value;
-  final String label;
-}
+// ─── 고르기 본문 — 카테고리 · 프리셋은 20-2 의 부품(CategoryPickBody · PresetPickBody)이다 ───
 
-class _SelectField<T> extends StatelessWidget {
-  const _SelectField({
-    required this.value,
-    required this.items,
-    required this.onChanged,
-    required this.hint,
-    this.enabled = true,
+/// 계좌 · 카드 고르기 — 줄 = Logo Tile 40 + 이름 + 설명 기관. 맨 앞 "계좌·카드 없음"(지출 · 수입).
+class _AssetPickBody extends StatelessWidget {
+  const _AssetPickBody({
+    required this.assets,
+    required this.selected,
+    required this.label,
+    required this.withNone,
+    required this.noneLabel,
+    required this.failed,
+    required this.failedText,
+    required this.onRetry,
+    this.emptyText,
   });
-  final T? value;
-  final List<_SelectOption<T>> items;
-  final ValueChanged<T?> onChanged;
-  final String hint;
-  final bool enabled;
+
+  final List<Asset> assets;
+  final int? selected;
+  final String label;
+  final bool withNone;
+  final String noneLabel;
+  final String? emptyText;
+  final bool failed;
+  final String failedText;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    return PSelect<T>(
-      value: items.any((i) => i.value == value) ? value : null,
-      placeholder: hint,
-      enabled: enabled,
-      onChanged: onChanged,
-      items: [
-        for (final opt in items)
-          PSelectItem<T>(value: opt.value, label: opt.label),
+    final c = context.colors;
+    if (failed) {
+      return Padding(
+        padding: const EdgeInsets.all(PSpacing.globalGutter),
+        child: Text(
+          failedText,
+          style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PickList<int>(
+          label: label,
+          selected: selected,
+          items: [
+            if (withNone) PickItem(value: -1, title: noneLabel),
+            for (final a in assets)
+              PickItem(
+                value: a.rowId,
+                title: a.assetName,
+                detail: a.institution,
+                prefix: AssetLogo(asset: a, size: 40),
+              ),
+          ],
+        ),
+        if (emptyText != null)
+          Padding(
+            padding: const EdgeInsets.all(PSpacing.globalGutter),
+            child: Text(
+              emptyText!,
+              textAlign: TextAlign.center,
+              style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+            ),
+          ),
       ],
     );
   }

@@ -68,6 +68,8 @@ class PickerRow extends StatelessWidget {
         ],
         style: hasValue ? null : TextStyle(color: c.fgPlaceholder),
       ),
+      // 값은 줄 수와 상관없이 줄 끝 오른쪽 맞춤 — 둘째 줄도 오른쪽(본문 아래로 내려간 값만 ds 가 왼쪽으로 돌린다)
+      textAlign: TextAlign.end,
       semanticsLabel: hasValue ? (semanticValue ?? shown) : semanticValue,
     );
     Widget? suffix = shown.isEmpty ? null : valueText;
@@ -114,42 +116,51 @@ class PickerRow extends StatelessWidget {
     if (errorMessage == null) return row;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        row,
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            PSpacing.globalGutter,
-            0,
-            PSpacing.globalGutter,
-            PSpacing.x2,
-          ),
-          child: Semantics(
-            liveRegion: true,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: PSpacing.x1_5,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: PSpacing.x0_5),
-                  child: ExcludeSemantics(
-                    child: Icon(
-                      LucideIcons.circleAlert,
-                      size: 16,
-                      color: c.fgCritical,
-                    ),
-                  ),
+      children: [row, PickerErrorLine(errorMessage!)],
+    );
+  }
+}
+
+/// 줄 아래 오류 한 줄 — ⓘ + 글(field.md 꼬리 오류). PickerRow 와 손으로 만든 줄(치는 값 단계 줄)이 같은 모양을 쓴다.
+class PickerErrorLine extends StatelessWidget {
+  const PickerErrorLine(this.text, {super.key});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        PSpacing.globalGutter,
+        0,
+        PSpacing.globalGutter,
+        PSpacing.x2,
+      ),
+      child: Semantics(
+        liveRegion: true,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: PSpacing.x1_5,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: PSpacing.x0_5),
+              child: ExcludeSemantics(
+                child: Icon(
+                  LucideIcons.circleAlert,
+                  size: 16,
+                  color: c.fgCritical,
                 ),
-                Expanded(
-                  child: Text(
-                    errorMessage!,
-                    style: PTypography.t4.copyWith(color: c.fgCritical),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            Expanded(
+              child: Text(
+                text,
+                style: PTypography.t4.copyWith(color: c.fgCritical),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
+import 'package:groo_damda_app/core/auth/oauth_link_return.dart';
 
 /// OAuth 콜백 딥링크(`porestdesk://oauth/callback?code=&state=`) 처리기.
 ///
@@ -33,6 +34,10 @@ class OAuthCallbackHandler {
     if (uri.scheme != Env.authCallbackScheme) {
       return OAuthCallbackResult.notCallback;
     }
+    // 소셜 연동 복귀(`porestdesk://oauth/linked`)는 로그인 흐름이 아니다 — 경로로 먼저 가른다(I-14 10).
+    if (parseOAuthLinkReturn(uri) != null) {
+      return OAuthCallbackResult.linkReturn;
+    }
 
     final pending = await store.restorePending();
     if (pending == null) {
@@ -62,6 +67,9 @@ class OAuthCallbackHandler {
 
 enum OAuthCallbackResult {
   notCallback,
+
+  /// 연동 복귀 딥링크 — 로그인 콜백이 아니라 연결된 계정 줄이 받는다.
+  linkReturn,
   noPendingFlow,
   stateMismatch,
   noCode,

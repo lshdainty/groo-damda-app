@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
@@ -27,39 +28,48 @@ import 'package:groo_damda_app/core/update/app_update.dart';
 /// 길어지고 "갱신하고 있다" 는 착시가 생겨, 정작 빠진 것을 못 찾는다.
 ///
 /// family provider 는 base 를 넘기면 모든 인스턴스가 무효화된다.
-void invalidateAfterExpenseChange(WidgetRef ref) {
+void invalidateAfterExpenseChange(WidgetRef ref) =>
+    _invalidateExpenseChange(ref.invalidate);
+
+/// [invalidateAfterExpenseChange] 의 컨테이너판 — 화면(State)이 사라진 뒤에도 나가야 하는 요청(시트를 닫은 뒤 스낵바의 [다시 시도])이 쓴다.
+void invalidateAfterExpenseChangeIn(ProviderContainer container) =>
+    _invalidateExpenseChange(container.invalidate);
+
+void _invalidateExpenseChange(
+  void Function(ProviderOrFamily provider) invalidate,
+) {
   // 자산 — 잔액·순자산은 거래 이력에서 계산된다.
-  ref.invalidate(assetsProvider);
-  ref.invalidate(assetSummaryProvider);
-  ref.invalidate(netWorthTrendProvider);
-  ref.invalidate(assetByIdProvider);
-  ref.invalidate(expensesByAssetProvider);
-  ref.invalidate(assetBalanceTrendProvider);
-  ref.invalidate(assetTransfersProvider);
-  ref.invalidate(assetPeriodExpensesProvider);
+  invalidate(assetsProvider);
+  invalidate(assetSummaryProvider);
+  invalidate(netWorthTrendProvider);
+  invalidate(assetByIdProvider);
+  invalidate(expensesByAssetProvider);
+  invalidate(assetBalanceTrendProvider);
+  invalidate(assetTransfersProvider);
+  invalidate(assetPeriodExpensesProvider);
 
   // 홈 — 이번 달 지출·예산·위젯이 전부 이 거래를 센다.
   // 홈 합계는 `요약 ?? 목록합` 순서라, 옛 요약이 살아 있으면 새 목록으로 폴백조차
   // 하지 않는다. 요약을 비우지 않으면 "오늘 목록만 바뀌는" 비대칭이 남는다.
-  ref.invalidate(dashboardSummaryProvider);
-  ref.invalidate(monthBudgetsProvider);
+  invalidate(dashboardSummaryProvider);
+  invalidate(monthBudgetsProvider);
 
   // 통계 — 60초 규칙([_invalidateStale])이 진입·복귀에서 **각자** 판정하는 다섯.
   // 여기서는 시간과 무관하게 다섯을 **함께** 비운다(이 기기에서 바꾼 값이다).
   // rangeSummary 는 홈 합계도 같이 읽는다.
-  ref.invalidate(rangeSummaryProvider);
-  ref.invalidate(rangeExpensesProvider);
-  ref.invalidate(heatmapProvider);
-  ref.invalidate(merchantSummaryProvider);
-  ref.invalidate(merchantMonthExpensesProvider);
+  invalidate(rangeSummaryProvider);
+  invalidate(rangeExpensesProvider);
+  invalidate(heatmapProvider);
+  invalidate(merchantSummaryProvider);
+  invalidate(merchantMonthExpensesProvider);
 
   // 예산·카드 실적도 그 달 지출을 다시 센다.
-  ref.invalidate(budgetComplianceProvider);
-  ref.invalidate(cardPerformanceProvider);
+  invalidate(budgetComplianceProvider);
+  invalidate(cardPerformanceProvider);
   // 카드 청구(회차 금액·[결제 취소])도 거래에서 나온다. 빠져 있던 동안 거래를 고치면
   // 자산 목록의 잔액은 바로 맞는데 카드 상세의 회차 금액·버튼만 앱을 다시 켤 때까지 옛
   // 값이었다 — 환급이 나간 회차에 [결제 취소] 가 보이기도 했다(2026-09-22 iOS 시뮬레이터).
-  ref.invalidate(cardBillingProvider);
+  invalidate(cardBillingProvider);
 
   // 월별 거래 목록(`monthExpensesProvider`)은 부르는 쪽이 바뀐 달만 짚어 비운다 —
   // 여기서 base 로 밀면 안 본 달까지 전부 다시 받는다.

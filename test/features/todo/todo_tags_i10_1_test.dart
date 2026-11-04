@@ -121,7 +121,7 @@ void main() {
     expect(callout.tone, PCalloutTone.informative);
     expect(callout.interaction, PCalloutInteraction.display);
     expect(callout.title, isNull);
-    expect(callout.icon, LucideIcons.tag);
+    expect(callout.icon, isNull, reason: 'informative 기본 아이콘(ⓘ)');
     expect(callout.description, contains('태그별 개수'));
     expect(callout.description, isNot(contains('분포')));
     expect(callout.description, contains("'태그 없음'으로 남아요"));
@@ -190,7 +190,7 @@ void main() {
     expect(r.size, PResultSize.medium);
     expect(r.primaryAction, isNull);
     expect(r.title, '태그가 없어요');
-    expect(r.description, "'태그 추가' 버튼으로 첫 태그를 만들어보세요.");
+    expect(r.description, "\"태그 추가\" 버튼으로 첫 태그를 만들어보세요.");
     expect(
       tester.widget<PListHeader>(find.byType(PListHeader)).title,
       '할 일 태그 · 0',
@@ -246,7 +246,7 @@ void main() {
       },
     );
 
-    testWidgets('새 태그에는 [삭제] 가 없고 주 버튼은 "추가" 하나', (tester) async {
+    testWidgets('새 태그에는 [삭제] 가 없고 주 버튼은 "저장" 하나', (tester) async {
       await pumpApp(
         tester,
         const TodoTagManagementScreen(),
@@ -255,9 +255,9 @@ void main() {
       await tester.tap(find.text('태그 추가'));
       await tester.pumpAndSettle();
       expect(_button('삭제'), findsNothing);
-      expect(_button('추가'), findsOneWidget);
-      expect(tester.getRect(_button('추가')).left, 24);
-      expect(tester.getRect(_button('추가')).right, 336);
+      expect(_button('저장'), findsOneWidget);
+      expect(tester.getRect(_button('저장')).left, 24);
+      expect(tester.getRect(_button('저장')).right, 336);
     });
 
     testWidgets('[삭제] 를 누르면 시트가 닫히고 확인이 한 번 묻는다 → 지운다', (tester) async {
@@ -308,7 +308,7 @@ void main() {
       );
       await tester.tap(find.text('태그 추가'));
       await tester.pumpAndSettle();
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(find.text(keepAll('이름을 입력해주세요.')), findsOneWidget);
       expect(repo.saved, isEmpty);
@@ -320,7 +320,7 @@ void main() {
       expect(findPlain('작성한 내용이 사라져요'), findsOneWidget);
       await tester.tap(findPlain('계속 작성'));
       await tester.pumpAndSettle();
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(repo.saved.single.name, '새 태그');
     });
@@ -339,7 +339,7 @@ void main() {
       await tester.enterText(find.byType(PInput).first, '업무');
       await tester.pumpAndSettle();
       expect(find.text(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(repo.saved, isEmpty);
       expect(find.text(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
@@ -360,7 +360,7 @@ void main() {
       expect(repo.saved.single.name, '업무');
     });
 
-    testWidgets('12자 넘는 옛 이름은 저장이 막히고 "이름은 12자 이내로 입력해주세요." 가 선다', (
+    testWidgets('D5 — 안 바꾼 12자 넘는 옛 이름은 12자 검사에서 빠져 색만 고쳐 저장된다', (
       tester,
     ) async {
       final repo = _Repo();
@@ -375,8 +375,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
-      expect(repo.saved, isEmpty);
-      expect(find.text(keepAll('이름은 12자 이내로 입력해주세요.')), findsOneWidget);
+      expect(repo.saved.single.name, '아주아주긴옛태그이름열세자');
     });
 
     testWidgets('입력은 12자에서 멈추고 칸 아래에 n/12 가 보인다', (tester) async {
@@ -408,7 +407,7 @@ void main() {
       );
       await tester.tap(find.text('태그 추가'));
       await tester.pumpAndSettle();
-      await tester.tap(_button('추가'));
+      await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(find.text(keepAll('이름을 입력해주세요.')), findsOneWidget);
     });

@@ -512,7 +512,7 @@ void main() {
       await PresetRepository(dio).update(
         id: 1,
         templateName: '점심',
-        categoryRowId: 3,
+        categoryRowId: const Patch.set(3),
         assetRowId: const Patch.set(null),
         expenseType: 'EXPENSE',
         merchant: const Patch.set(null),
@@ -530,7 +530,7 @@ void main() {
       await PresetRepository(dio).update(
         id: 1,
         templateName: '점심',
-        categoryRowId: 3,
+        categoryRowId: const Patch.set(3),
         assetRowId: const Patch.set(7),
         expenseType: 'EXPENSE',
         merchant: const Patch.set('김밥천국'),
@@ -550,7 +550,7 @@ void main() {
       await PresetRepository(dio).update(
         id: 1,
         templateName: '점심',
-        categoryRowId: 3,
+        categoryRowId: const Patch.set(3),
         expenseType: 'EXPENSE',
         description: const Patch.set(null),
       );
@@ -564,7 +564,7 @@ void main() {
       await PresetRepository(dio).update(
         id: 1,
         templateName: '점심',
-        categoryRowId: 3,
+        categoryRowId: const Patch.set(3),
         expenseType: 'EXPENSE',
         merchant: const Patch.set(null),
       );
@@ -580,7 +580,7 @@ void main() {
       await PresetRepository(dio).update(
         id: 1,
         templateName: '점심',
-        categoryRowId: 3,
+        categoryRowId: const Patch.set(3),
         expenseType: 'EXPENSE',
         description: const Patch.set('회사 근처 김밥천국'),
       );
@@ -596,7 +596,7 @@ void main() {
       await PresetRepository(dio).update(
         id: 1,
         templateName: '점심',
-        categoryRowId: 3,
+        categoryRowId: const Patch.set(3),
         expenseType: 'EXPENSE',
       );
 

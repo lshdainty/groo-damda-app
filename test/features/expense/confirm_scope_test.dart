@@ -15,6 +15,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/add_tx_drive.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -28,12 +29,14 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/expense_actions.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_dialog.dart';
+import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
+import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 const _closedLine = '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
@@ -102,6 +105,7 @@ class _FakeRepo extends ExpenseRepository {
     Patch<double> exchangeRate = const Patch.keep(),
     List<SplitInput>? splits,
     Patch<bool> isFixed = const Patch.keep(),
+    bool silent = false,
   }) async {
     updates.add(expenseDate);
     return _open;
@@ -122,6 +126,7 @@ class _FakeRepo extends ExpenseRepository {
     String? originalCurrency,
     double? exchangeRate,
     bool? isFixed,
+    bool silent = false,
   }) async {
     creates.add(expenseDate);
     return _open;
@@ -144,6 +149,8 @@ Future<_FakeRepo> _pump(WidgetTester tester, Widget home) async {
         merchantMonthExpensesProvider.overrideWith(
           (ref, key) async => const [],
         ),
+        recurringListProvider.overrideWith((ref) async => const []),
+        dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
         defaultCurrencyProvider.overrideWith((ref) => 'KRW'),
       ],
@@ -239,14 +246,7 @@ void main() {
       );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).first, '13000');
-      await tester.pump();
-      await tester.tap(find.text('식비').last);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('선택 안 함').last);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('현대카드').last);
-      await tester.pumpAndSettle();
+      await fillNewTx(tester, amount: '13000', asset: '현대카드');
 
       await tester.tap(_submit('추가'));
       await tester.pumpAndSettle();

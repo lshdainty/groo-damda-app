@@ -25,9 +25,13 @@ class PResultAction {
     required this.label,
     required this.onPressed,
     this.loading = false,
+    this.icon,
   });
 
   final String label;
+
+  /// 앞 아이콘 — 새로 만드는 동작("프리셋 추가" + plus)에만.
+  final IconData? icon;
   final VoidCallback? onPressed;
   final bool loading;
 }
@@ -267,6 +271,7 @@ class PResultSection extends StatelessWidget {
       variant: variant,
       size: size,
       loading: action.loading,
+      prefixIcon: action.icon,
     );
 
     // 첫 버튼 아래 사이 20 − 블리드 8 = 12 만 띄우고, 둘째 버튼은 36 그대로 그리되 레이아웃은 위아래 8 을 뺀다

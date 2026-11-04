@@ -16,14 +16,14 @@ abstract final class Env {
   /// Desk 백엔드 base URL (dio 가 뒤에 `/api/v1` 부착). 기본 = dev 게이트웨이.
   static const String apiBase = String.fromEnvironment(
     'API_BASE',
-    defaultValue: 'https://desk-dev.porest.cloud:10443',
+    defaultValue: 'https://damda-dev.hangroo.io',
   );
 
   /// SSO **프론트** URL (React 로그인 페이지, WebView 가 띄우는 ID/PW 폼). 기본 = dev.
   /// SSO 백엔드가 아님.
   static const String ssoUrl = String.fromEnvironment(
     'SSO_URL',
-    defaultValue: 'https://sso-dev.porest.cloud:10443',
+    defaultValue: 'https://sso-dev.hangroo.io',
   );
 
   /// desk-front (React 웹) URL — 차트 WebView 가 띄우는 임베드 페이지(`/embed/stocks/:symbol`)의 origin.
@@ -31,7 +31,7 @@ abstract final class Env {
   /// 로컬은 vite dev 가 별도 포트(`:3002`)에서 SPA 만 띄운다.
   static const String webBaseUrl = String.fromEnvironment(
     'WEB_BASE_URL',
-    defaultValue: 'https://desk-dev.porest.cloud:10443',
+    defaultValue: 'https://damda-dev.hangroo.io',
   );
 
   /// OAuth2 콜백 커스텀 스킴 — OS 딥링크(Android intent-filter / iOS CFBundleURLTypes)로
@@ -42,6 +42,12 @@ abstract final class Env {
   /// SSO 로그인 후 서버 302 로 내려오는 모바일 전용 redirect_uri (private-use scheme).
   /// SSO 의 client_redirect_uris 에 동일 값으로 등록되어 있어야 한다.
   static const String oauthRedirectUri = '$authCallbackScheme://oauth/callback';
+
+  /// 소셜 계정 연동(계정 > 연결된 계정)의 복귀 경로. 스킴 · 호스트는 로그인 콜백과 같아서 그루 계정이
+  /// 복귀 주소의 origin(`porestdesk://oauth`)만 등록된 redirect_uri 와 비교해 받아 준다.
+  static const String oauthLinkReturnPath = '/linked';
+  static const String oauthLinkReturnUri =
+      '$authCallbackScheme://oauth$oauthLinkReturnPath';
 
   /// OAuth2 client_id (SSO clients.client_code).
   static const String oauthClientId = 'desk';

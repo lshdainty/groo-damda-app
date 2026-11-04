@@ -37,7 +37,7 @@ class _Repo implements SmsRepository {
   int calls = 0;
 
   @override
-  Future<SmsParseResult> parse(String text) async {
+  Future<SmsParseResult> parse(String text, {bool silent = false}) async {
     final mode = script[calls < script.length ? calls : script.length - 1];
     calls++;
     if (mode == 'hang') return Completer<SmsParseResult>().future;

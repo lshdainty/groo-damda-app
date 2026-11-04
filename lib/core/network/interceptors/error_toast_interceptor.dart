@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// API 에러가 아무 데도 안 보이고 사라지는 걸 막는 마지막 그물.
@@ -33,6 +34,25 @@ final Map<String, DateTime> _recent = {};
 /// 앱 시작 시 한 번 등록. 인터셉터에는 BuildContext 가 없어 이 키로 토스트를 띄운다.
 void registerErrorToastMessenger(GlobalKey<ScaffoldMessengerState> key) {
   _messengerKey = key;
+}
+
+/// 화면 밖(딥링크 · 수명주기)에서 알림을 띄운다 — 등록된 messenger 에 건다.
+///
+/// 문구는 그 messenger 의 로케일로 만든다(딥링크에는 BuildContext 가 없다). 아직 등록 전이면 조용히 건너뛴다.
+void showGlobalSnack(
+  String Function(AppLocalizations l) message, {
+  PSnackSeverity severity = PSnackSeverity.info,
+}) {
+  final key = _messengerKey;
+  final ctx = key?.currentContext;
+  final state = key?.currentState;
+  if (ctx == null || state == null || !ctx.mounted) return;
+  showPSnackBar(
+    ctx,
+    message(AppLocalizations.of(ctx)),
+    severity: severity,
+    messenger: state,
+  );
 }
 
 /// 테스트용 — throttle 기록을 비운다.

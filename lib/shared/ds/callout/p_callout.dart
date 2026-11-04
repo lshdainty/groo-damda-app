@@ -71,6 +71,9 @@ const double _radius = PRounded.r2_5;
 const double _iconSize = 16;
 const double _closeBox = 40;
 
+/// 본문 ↔ 버튼 줄 · 버튼 사이(웹 Callout 안 `mt-x2` · `gap-x2`).
+const double _actionsGap = PSpacing.x2;
+
 /// Callout — 화면 안, 그 기능 · 내용 가까이에 늘 보이는 안내 상자(팁 · 제약 · 주의, 그 자리에서 난 오류). 구조는
 /// SEED Callout(2026-10-02), 수치 원본은 groo-design `specs/components/callout.yaml`(값은
 /// `test/fixtures/design_spec/callout.json`). 웹(desk-front `src/shared/ds/callout`)과 같은 값이다.
@@ -109,6 +112,7 @@ class PCallout extends StatefulWidget {
     this.dismissLabel,
     this.alert = false,
     this.moreDescriptions = const [],
+    this.actions = const [],
   }) : assert(
          interaction != PCalloutInteraction.actionable || onPressed != null,
          'actionable 은 상자를 누르면 하는 일(onPressed)이 있다',
@@ -162,6 +166,10 @@ class PCallout extends StatefulWidget {
   /// [description] 다음 문단들 — 문단 사이 8(웹 Callout 안 문단 `mt-x2`). 글만 받는다(제목 · 링크는 첫 문단에만).
   final List<String> moreDescriptions;
 
+  /// 본문 아래 작은 버튼(웹 Callout 안 `Button small` 줄) — 글 칸 안, 본문 아래 8, 버튼 사이 가로 · 세로 8, 넘치면 줄을 바꾼다.
+  /// 앞 아이콘 자리는 비우고 글 시작에 맞춘다. display 에만(상자 전체가 버튼이면 안에 버튼을 두지 않는다).
+  final List<Widget> actions;
+
   @override
   State<PCallout> createState() => _PCalloutState();
 }
@@ -172,6 +180,16 @@ class _PCalloutState extends State<PCallout> {
 
   bool get _dismissible =>
       widget.interaction == PCalloutInteraction.dismissible;
+
+  @override
+  void initState() {
+    super.initState();
+    assert(
+      widget.actions.isEmpty ||
+          widget.interaction == PCalloutInteraction.display,
+      '본문 아래 버튼(actions)은 display 에만 둔다',
+    );
+  }
 
   @override
   void dispose() {
@@ -284,7 +302,21 @@ class _PCalloutState extends State<PCallout> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: _padding),
-            child: _body(look.foreground),
+            child: widget.actions.isEmpty
+                ? _body(look.foreground)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _body(look.foreground),
+                      const SizedBox(height: _actionsGap),
+                      Wrap(
+                        key: const ValueKey('callout-actions'),
+                        spacing: _actionsGap,
+                        runSpacing: _actionsGap,
+                        children: widget.actions,
+                      ),
+                    ],
+                  ),
           ),
         ),
         if (actionable) ...[
