@@ -32,11 +32,11 @@ class CardRow extends StatelessWidget {
       onTap: onTap,
       prefix: PCardArt(
         width: 56,
-        issuer: card.company?.name ?? '',
-        name: card.cardName,
+        issuer: decodeHtml(card.company?.name),
+        name: decodeHtml(card.cardName),
         image: cardImageProvider(card.imgUrl),
       ),
-      title: card.cardName,
+      title: decodeHtml(card.cardName),
       detailChild: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

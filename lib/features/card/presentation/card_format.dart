@@ -4,6 +4,53 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
 /// 카드 혜택 화면의 글 만들기(I-20 E 31 ~ 34) — 웹 `card-format.ts` 와 같은 갈래 · 같은 글이다.
 
+const _htmlNamed = {
+  'nbsp': '\u00a0',
+  'amp': '&',
+  'lt': '<',
+  'gt': '>',
+  'quot': '"',
+  'apos': "'",
+  'middot': '·',
+  'hellip': '…',
+  'rarr': '→',
+  'larr': '←',
+  'uarr': '↑',
+  'darr': '↓',
+  'times': '×',
+  'divide': '÷',
+  'mdash': '—',
+  'ndash': '–',
+  'lsquo': '‘',
+  'rsquo': '’',
+  'ldquo': '“',
+  'rdquo': '”',
+  'copy': '©',
+  'reg': '®',
+  'trade': '™',
+  'bull': '•',
+  'deg': '°',
+};
+
+/// HTML 엔티티 풀기 — 웹 `shared/lib/html.ts` `decodeHtml` 과 같은 규칙(숫자 · 16진 · 이름표, 모르는 이름은 그대로).
+String decodeHtml(String? input) {
+  if (input == null || input.isEmpty) return '';
+  int? safe(int? n) => n != null && n >= 0 && n <= 0x10FFFF ? n : null;
+  return input
+      .replaceAllMapped(RegExp(r'&#(\d+);'), (m) {
+        final n = safe(int.tryParse(m[1]!));
+        return n == null ? m[0]! : String.fromCharCode(n);
+      })
+      .replaceAllMapped(RegExp(r'&#x([0-9a-fA-F]+);'), (m) {
+        final n = safe(int.tryParse(m[1]!, radix: 16));
+        return n == null ? m[0]! : String.fromCharCode(n);
+      })
+      .replaceAllMapped(
+        RegExp(r'&([a-zA-Z][a-zA-Z0-9]+);'),
+        (m) => _htmlNamed[m[1]!] ?? m[0]!,
+      );
+}
+
 /// 글 속 네 자리 이상 숫자에 쉼표 — 서버 라벨 원문 "국내 5000원" 을 "국내 5,000원" 으로 보이기만 한다.
 String commaDigits(String text) =>
     text.replaceAllMapped(RegExp(r'\d{4,}'), (m) {
@@ -68,7 +115,7 @@ String? benefitTypeText(AppLocalizations l, String? type) => switch (type) {
 
 /// "{카드사} · {신용|체크} · {혜택 유형}" 세 조각(없는 조각은 뺀다).
 List<String> cardMetaParts(AppLocalizations l, CardCatalogSummary s) => [
-  (s.company?.name ?? '').trim(),
+  decodeHtml(s.company?.name).trim(),
   switch (s.cardType) {
     'CREDIT' => l.assetCardShortCredit,
     'CHECK' => l.assetCardShortCheck,

@@ -71,7 +71,8 @@ List<String> flattenTopTags(CardCatalogDetail d) {
   return [
     for (final g in d.topBenefits)
       for (final tag in g.tags)
-        if (tag.isNotEmpty && seen.add(tag)) tag,
+        if (decodeHtml(tag).isNotEmpty && seen.add(decodeHtml(tag)))
+          decodeHtml(tag),
   ];
 }
 
@@ -93,7 +94,10 @@ class _DetailBodyState extends State<_DetailBody> {
     final d = widget.detail;
     final s = d.summary;
     final tags = flattenTopTags(d);
-    final brands = d.brands.where((b) => b.trim().isNotEmpty).toList();
+    final brands = d.brands
+        .map(decodeHtml)
+        .where((b) => b.trim().isNotEmpty)
+        .toList();
     final benefits = d.benefits;
     final ids = [for (var i = 0; i < benefits.length; i++) 'b$i'];
     final expandable = [
@@ -115,8 +119,8 @@ class _DetailBodyState extends State<_DetailBody> {
             builder: (context, box) => Center(
               child: PCardArt(
                 width: math.min(312, box.maxWidth),
-                issuer: s.company?.name ?? '',
-                name: s.cardName,
+                issuer: decodeHtml(s.company?.name),
+                name: decodeHtml(s.cardName),
                 image: cardImageProvider(s.imgUrl),
               ),
             ),
@@ -125,8 +129,8 @@ class _DetailBodyState extends State<_DetailBody> {
         Padding(
           padding: gutter.copyWith(bottom: PSpacing.x2),
           child: Text(
-            keepAll(s.cardName),
-            semanticsLabel: s.cardName,
+            keepAll(decodeHtml(s.cardName)),
+            semanticsLabel: decodeHtml(s.cardName),
             style: PTypography.t6.copyWith(
               color: c.fgNeutral,
               fontWeight: FontWeight.w700,

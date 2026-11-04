@@ -75,4 +75,16 @@ void main() {
     );
     expect(cardMetaParts(l, s), ['신한카드', '신용', '마일리지']);
   });
+
+  decodeHtmlTests();
+}
+
+// HTML 엔티티 풀기 — 웹 decodeHtml 과 같은 규칙
+void decodeHtmlTests() {
+  test('decodeHtml 숫자 · 16진 · 이름 엔티티', () {
+    expect(decodeHtml('Mc&#39;D · A &amp; B'), "Mc'D · A & B");
+    expect(decodeHtml('&#x41;&middot;&unknown;'), 'A·&unknown;');
+    expect(decodeHtml(null), '');
+    expect(decodeHtml('&#99999999;'), '&#99999999;');
+  });
 }
