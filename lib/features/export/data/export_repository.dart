@@ -101,6 +101,7 @@ class ExportRepository {
       final res = await _dio.post<Map<String, dynamic>>(
         '/export/preview',
         data: body,
+        options: Options(extra: {kSilentErrorToast: true}),
       );
       final api = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data!,

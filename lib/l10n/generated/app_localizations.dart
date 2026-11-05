@@ -12223,6 +12223,12 @@ abstract class AppLocalizations {
   /// **'건수를 불러오지 못했어요.'**
   String get exportCountsFailed;
 
+  /// No description provided for @exportPreviewFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'미리보기를 불러오지 못했어요.'**
+  String get exportPreviewFailed;
+
   /// No description provided for @exportRangePlaceholder.
   ///
   /// In ko, this message translates to:

@@ -3696,6 +3696,7 @@
   "exportTabsLabel": "Export and import data",
   "exportSelectAll": "All",
   "exportCountsFailed": "Couldn't load the counts.",
+  "exportPreviewFailed": "Couldn't load the preview.",
   "exportRangePlaceholder": "Select a range",
   "exportStalled": "The download stopped.",
   "exportFailed": "Couldn't export.",

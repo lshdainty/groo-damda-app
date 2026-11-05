@@ -6666,6 +6666,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get exportCountsFailed => '건수를 불러오지 못했어요.';
 
   @override
+  String get exportPreviewFailed => '미리보기를 불러오지 못했어요.';
+
+  @override
   String get exportRangePlaceholder => '기간 선택';
 
   @override

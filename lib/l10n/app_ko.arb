@@ -3826,6 +3826,7 @@
   "exportTabsLabel": "데이터 내보내기 · 가져오기",
   "exportSelectAll": "모두",
   "exportCountsFailed": "건수를 불러오지 못했어요.",
+  "exportPreviewFailed": "미리보기를 불러오지 못했어요.",
   "exportRangePlaceholder": "기간 선택",
   "exportStalled": "파일을 받는 중에 멈췄어요.",
   "exportFailed": "내보내지 못했어요.",

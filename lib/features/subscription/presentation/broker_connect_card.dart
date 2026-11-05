@@ -15,6 +15,8 @@ import 'package:groo_damda_app/shared/widgets/p_badge.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 
 /// 증권사 한 곳의 연결 카드 — 키 등록 / 해제 / 기본 시세 소스 지정.
@@ -46,12 +48,52 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
   // 기본은 가린 상태고, 사용자가 잠깐 벗겨 보는 건 본인 의지다.
   bool _revealKey = false;
   bool _revealSecret = false;
+  // 연결 실패 — 키 입력 폼이라 폼 위 Callout 한 문장(값 남김). 해제 · 기본 변경은 스낵바 + [다시 시도].
+  String? _connectError;
+  final _errorKey = GlobalKey();
 
   @override
   void dispose() {
     _keyCtrl.dispose();
     _secretCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _connect(BrokerConnection c, String key, String secret) async {
+    final l = AppLocalizations.of(context);
+    setState(() {
+      _busy = true;
+      _connectError = null;
+    });
+    try {
+      final repo = await ref.read(subscriptionRepositoryProvider.future);
+      await repo.registerBrokerCredential(c.broker, key, secret, silent: true);
+      ref.invalidate(myFeaturesProvider);
+      ref.invalidate(brokerConnectionsProvider);
+      if (mounted) {
+        PSnackbar.maybeOf(
+          context,
+        )?.show(message: l.subBrokerConnected(c.displayName));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      // 4xx = 인증정보를 서버가 거절 — 틀림. 그 밖(서버 · 네트워크)은 연결 실패(웹과 같은 갈래).
+      final invalid =
+          e is ApiException &&
+          (e.statusCode ?? 0) >= 400 &&
+          (e.statusCode ?? 0) < 500;
+      setState(() {
+        _connectError = invalid
+            ? l.subBrokerInvalidCred
+            : l.subBrokerConnectFailed;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _run(
@@ -261,6 +303,8 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_connectError != null)
+          FormErrorCallout(key: _errorKey, message: _connectError!),
         // 라벨은 서버가 준다 — 회사마다 같은 자리를 다르게 부른다.
         Text(c.keyLabel, style: _fieldLabel(t)),
         const SizedBox(height: PSpace.x4),
@@ -300,22 +344,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                   final key = _keyCtrl.text.trim();
                   final secret = _secretCtrl.text.trim();
                   if (key.isEmpty || secret.isEmpty) return;
-                  _run(
-                    (repo) => repo.registerBrokerCredential(
-                      c.broker,
-                      key,
-                      secret,
-                      silent: true,
-                    ),
-                    l.subBrokerConnected(c.displayName),
-                    // 4xx = 인증정보를 서버가 거절 — 틀림. 그 밖(서버·네트워크)은 연결 실패(웹과 같은 갈래).
-                    (e) =>
-                        e is ApiException &&
-                            (e.statusCode ?? 0) >= 400 &&
-                            (e.statusCode ?? 0) < 500
-                        ? l.subBrokerInvalidCred
-                        : l.subBrokerConnectFailed,
-                  );
+                  _connect(c, key, secret);
                 },
         ),
         const SizedBox(height: PSpace.x8),

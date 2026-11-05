@@ -73,7 +73,15 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       await repo.subscribe(planCode, silent: true);
     } catch (_) {
       // 서버 글을 내지 않는다 — 정한 글 하나
-      snack?.show(message: l.subFailed, tone: PSnackbarTone.critical);
+      // 서버 글을 내지 않는다 — 정한 글 하나 + [다시 시도](같은 요금제로 구독을 다시)
+      snack?.show(
+        message: l.subFailed,
+        tone: PSnackbarTone.critical,
+        action: PSnackbarAction(
+          label: l.actionRetry,
+          onPressed: () => _subscribe(planCode),
+        ),
+      );
       if (mounted) setState(() => _busy = false);
       return;
     }

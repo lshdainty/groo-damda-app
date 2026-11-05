@@ -6790,6 +6790,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportCountsFailed => 'Couldn\'t load the counts.';
 
   @override
+  String get exportPreviewFailed => 'Couldn\'t load the preview.';
+
+  @override
   String get exportRangePlaceholder => 'Select a range';
 
   @override

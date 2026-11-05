@@ -121,6 +121,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   final GlobalKey _previewKey = GlobalKey();
   bool _downloading = false;
   bool _previewing = false;
+  bool _previewFailed = false;
   List<ExportPreviewTable>? _preview;
   String? _previewTab;
 
@@ -259,7 +260,10 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
 
   Future<void> _runPreview() async {
     if (_selected.isEmpty || _customInvalid) return;
-    setState(() => _previewing = true);
+    setState(() {
+      _previewing = true;
+      _previewFailed = false;
+    });
     try {
       final repo = await ref.read(exportRepositoryProvider.future);
       final tables = await repo.preview(_queryBody(_orderedSelected()));
@@ -275,7 +279,8 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         }
       });
     } on ApiException {
-      if (mounted) {}
+      // 서버 글은 내지 않는다(요청은 silent) — 미리보기 자리에 고정 글 + [다시 시도]
+      if (mounted) setState(() => _previewFailed = true);
     } finally {
       if (mounted) setState(() => _previewing = false);
     }
@@ -472,7 +477,29 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
             onChanged: (v) => setState(() => _mask = v),
           ),
         ),
-        if (_preview != null) ...[
+        if (_previewFailed) ...[
+          const SizedBox(height: PSpacing.x6),
+          Padding(
+            padding: _gutter,
+            child: PField(
+              invalid: true,
+              errorMessage: l.exportPreviewFailed,
+              child: const SizedBox.shrink(),
+            ),
+          ),
+          Padding(
+            padding: _gutter,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: PButton(
+                label: l.actionRetry,
+                variant: PButtonVariant.ghost,
+                size: PButtonSize.small,
+                onPressed: _runPreview,
+              ),
+            ),
+          ),
+        ] else if (_preview != null) ...[
           const SizedBox(height: PSpacing.x6),
           KeyedSubtree(key: _previewKey, child: _previewBody(l)),
         ],
