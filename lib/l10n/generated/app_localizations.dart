@@ -7810,7 +7810,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordChanged.
   ///
   /// In ko, this message translates to:
-  /// **'비밀번호를 바꿨어요'**
+  /// **'비밀번호를 바꿨어요.'**
   String get passwordChanged;
 
   /// No description provided for @passwordChangeFailed.

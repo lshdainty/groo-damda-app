@@ -2377,7 +2377,7 @@
   "appearanceRegionLoadError": "기준 지역을 불러오지 못했어요",
   "appearanceCurrencyLoadError": "기본 통화를 불러오지 못했어요",
   "appearanceSaveFailed": "설정을 바꾸지 못했어요.",
-  "passwordChanged": "비밀번호를 바꿨어요",
+  "passwordChanged": "비밀번호를 바꿨어요.",
   "passwordChangeFailed": "비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "passwordCurrent": "현재 비밀번호",
   "passwordChangeDescription": "현재 비밀번호를 확인한 뒤 새 비밀번호로 바꿔요",

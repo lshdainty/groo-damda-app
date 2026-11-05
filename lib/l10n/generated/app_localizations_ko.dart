@@ -4208,7 +4208,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceSaveFailed => '설정을 바꾸지 못했어요.';
 
   @override
-  String get passwordChanged => '비밀번호를 바꿨어요';
+  String get passwordChanged => '비밀번호를 바꿨어요.';
 
   @override
   String get passwordChangeFailed => '비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';

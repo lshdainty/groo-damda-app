@@ -4279,7 +4279,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceSaveFailed => 'Couldn\'t change the setting.';
 
   @override
-  String get passwordChanged => 'Password changed';
+  String get passwordChanged => 'Changed your password.';
 
   @override
   String get passwordChangeFailed =>

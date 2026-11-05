@@ -2350,7 +2350,7 @@
   "appearanceRegionLoadError": "Couldn't load the region",
   "appearanceCurrencyLoadError": "Couldn't load the default currency",
   "appearanceSaveFailed": "Couldn't change the setting.",
-  "passwordChanged": "Password changed",
+  "passwordChanged": "Changed your password.",
   "passwordChangeFailed": "Couldn't change your password. Please try again shortly.",
   "passwordCurrent": "Current password",
   "passwordChangeDescription": "Verify your current password and set a new one",
