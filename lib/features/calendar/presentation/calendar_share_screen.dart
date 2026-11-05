@@ -27,6 +27,7 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_p
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart' as ds;
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
@@ -85,7 +86,11 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
             children: [
               CalendarSurfaceCallout(l.calShareIntro),
               listAsync.when(
-                loading: () => const _ShareSkeleton(),
+                // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
+                skipError: true,
+                loading: () => _ShareSkeleton(
+                  onCreate: () => _showCreateDialog(context, ref),
+                ),
                 error: (e, _) => CalendarSurfaceFailure(
                   title: l.calCalendarLoadError,
                   onRetry: () => ref.invalidate(userCalendarListProvider),
@@ -98,6 +103,7 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
               PListHeader(
                 title: l.calJoinSectionTitle,
                 variant: PListHeaderVariant.boldSolid,
+                topInset: PSpacing.x6,
               ),
               PList(
                 semanticLabel: l.calJoinSectionTitle,
@@ -143,18 +149,25 @@ Widget _tile(BuildContext context, String key, IconData icon) {
     };
 
 class _ShareSkeleton extends StatelessWidget {
-  const _ShareSkeleton();
+  const _ShareSkeleton({required this.onCreate});
+  final VoidCallback onCreate;
 
   @override
-  Widget build(BuildContext context) => const Column(
-    children: [
-      CalendarSurfaceHeaderSkeleton(),
-      CalendarSurfaceRowSkeleton(),
-      CalendarSurfaceRowSkeleton(),
-      CalendarSurfaceHeaderSkeleton(),
-      CalendarSurfaceRowSkeleton(),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Column(
+      children: [
+        // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 글과 줄만 데이터 자리
+        CalendarSurfaceHeaderSkeleton(
+          action: PTextButton(label: l.calNewCalendar, onPressed: onCreate),
+        ),
+        const CalendarSurfaceRowSkeleton(),
+        const CalendarSurfaceRowSkeleton(),
+        const CalendarSurfaceHeaderSkeleton(topInset: PSpacing.x6),
+        const CalendarSurfaceRowSkeleton(),
+      ],
+    );
+  }
 }
 
 class _CalendarSections extends StatelessWidget {
@@ -183,6 +196,7 @@ class _CalendarSections extends StatelessWidget {
         PListHeader(
           title: l.calSharedCalendarsCount(shared.length),
           variant: PListHeaderVariant.boldSolid,
+          topInset: PSpacing.x6,
         ),
         _CalendarList(
           title: l.calSharedCalendarsCount(shared.length),
@@ -235,19 +249,13 @@ class _CalendarList extends ConsumerWidget {
   }
 }
 
-/// 공유받은 캘린더의 권한 배지 — 편집 가능 positive + 연필 · 읽기 전용 informative + 눈(badge.md 예시).
+/// 공유받은 캘린더의 권한 배지(소유한 캘린더는 부르지 않는다 — OWNER 갈래 없음) — 편집 가능 positive + 연필 · 읽기 전용 informative + 눈(badge.md 예시).
 Widget _roleBadge(AppLocalizations l, String role) => switch (role) {
   'EDIT' => ds.PBadge(
     label: l.calRoleEditor,
     variant: ds.PBadgeVariant.outline,
     tone: ds.PBadgeTone.positive,
     prefixIcon: LucideIcons.pencil,
-  ),
-  'OWNER' => ds.PBadge(
-    label: l.calRoleOwner,
-    variant: ds.PBadgeVariant.outline,
-    tone: ds.PBadgeTone.brand,
-    prefixIcon: LucideIcons.crown,
   ),
   _ => ds.PBadge(
     label: l.calRoleViewer,
@@ -256,6 +264,16 @@ Widget _roleBadge(AppLocalizations l, String role) => switch (role) {
     prefixIcon: LucideIcons.eye,
   ),
 };
+
+/// 캘린더 삭제 요청 — 컨테이너로 한다([다시 시도] 도 이걸 부른다). 실패는 던진다.
+Future<void> _deleteCalendarRequest(ProviderContainer container, int id) async {
+  final repo = await container.read(userCalendarRepositoryProvider.future);
+  await repo.delete(id);
+  container.invalidate(userCalendarListProvider);
+  // 서버가 이 캘린더의 일정을 기본 캘린더로 옮긴다(UserCalendarServiceImpl).
+  // 월 일정을 다시 받지 않으면 지운 캘린더 소속인 채로(색·소속 모두 옛것) 남는다.
+  container.invalidate(monthEventsProvider);
+}
 
 // ─── 새 캘린더 만들기 ────────────────────────────────────────
 
@@ -554,26 +572,22 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
 
   Future<void> _delete() async {
     final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
+    final container = ProviderScope.containerOf(context);
+    final nav = Navigator.of(context);
+    final ok = await askConfirmThenRequest(
       context,
       title: l.calDeleteCalendar,
       description: l.calDeleteCalendarConfirm(cal.calendarName),
-      actionLabel: l.calDeleteCalendarAction,
-      destructive: true,
       cancelLabel: l.actionCancel,
+      actionLabel: l.calDeleteCalendarAction,
+      request: () => _deleteCalendarRequest(container, cal.rowId),
+      failedMessage: l.calDeleteCalendarFailed,
+      retryLabel: l.actionRetry,
+      onRetried: () {
+        if (mounted) nav.pop();
+      },
     );
-    if (!ok) return;
-    try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
-      await repo.delete(cal.rowId);
-      ref.invalidate(userCalendarListProvider);
-      // 서버가 이 캘린더의 일정을 기본 캘린더로 옮긴다(UserCalendarServiceImpl).
-      // 월 일정을 다시 받지 않으면 지운 캘린더 소속인 채로(색·소속 모두 옛것) 남는다.
-      ref.invalidate(monthEventsProvider);
-      if (mounted) Navigator.of(context).pop();
-    } on ApiException {
-      // 토스트는 ErrorToastInterceptor 가 띄운다 — 여기선 흐름만 멈춘다.
-    }
+    if (ok && mounted) nav.pop();
   }
 
   @override

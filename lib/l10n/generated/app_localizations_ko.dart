@@ -358,7 +358,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetEmptyState => '아직 등록된 자산이 없어요';
 
   @override
-  String get assetEmptyHint => '설정 → 계좌·카드 관리에서 추가할 수 있어요.';
+  String get assetEmptyHint => '설정 → 계좌 · 카드 관리에서 추가할 수 있어요.';
 
   @override
   String get assetSummaryColAccounts => '계좌·예금';
@@ -393,7 +393,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetHideThisAmountDesc => '이 자산의 금액만 가려요. 합계는 그대로 보여요.';
 
   @override
-  String get assetManageTitle => '계좌·카드 관리';
+  String get assetManageTitle => '계좌 · 카드 관리';
 
   @override
   String get assetManageAdd => '추가';
@@ -465,7 +465,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetLoadFailedGoals => '저축 목표를 불러오지 못했어요';
 
   @override
-  String get assetEmptyCta => '계좌·카드 관리로 가기';
+  String get assetEmptyCta => '계좌 · 카드 관리로 가기';
 
   @override
   String get assetAccountAdded => '계좌가 추가되었습니다';
@@ -1741,7 +1741,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get calManageShareTitle => '캘린더 관리·공유';
+  String get calManageShareTitle => '캘린더 관리 · 공유';
 
   @override
   String get calJoinByCode => '초대 코드로 참여';
@@ -1843,6 +1843,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get calDeleteCalendarAction => '영구 삭제';
+
+  @override
+  String get calDeleteCalendarFailed => '캘린더를 삭제하지 못했어요.';
+
+  @override
+  String get calLabelDeleteFailed => '라벨을 삭제하지 못했어요.';
 
   @override
   String get calCopy => '복사';
@@ -3734,7 +3740,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreItemRecurring => '반복 거래';
 
   @override
-  String get moreItemAccountCard => '계좌·카드 관리';
+  String get moreItemAccountCard => '계좌 · 카드 관리';
 
   @override
   String get moreItemCardBenefits => '카드 혜택';
@@ -3818,7 +3824,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsMenuCategory => '카테고리 관리';
 
   @override
-  String get settingsMenuAccountCard => '계좌·카드 관리';
+  String get settingsMenuAccountCard => '계좌 · 카드 관리';
 
   @override
   String get settingsMenuBudget => '예산 설정';
@@ -3836,7 +3842,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsGroupShare => '공유';
 
   @override
-  String get settingsMenuCalendarShare => '캘린더 관리·공유';
+  String get settingsMenuCalendarShare => '캘린더 관리 · 공유';
 
   @override
   String get settingsMenuCalendarLabel => '캘린더 라벨';
@@ -4019,7 +4025,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hideCardAssetDetail => '자산 상세';
 
   @override
-  String get hideCardAssetManage => '계좌·카드 관리';
+  String get hideCardAssetManage => '계좌 · 카드 관리';
 
   @override
   String get hideCardLedgerMonthSummary => '월 합계';

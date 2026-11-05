@@ -1870,6 +1870,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calDeleteCalendarAction => 'Delete permanently';
 
   @override
+  String get calDeleteCalendarFailed => 'Couldn\'t delete the calendar.';
+
+  @override
+  String get calLabelDeleteFailed => 'Couldn\'t delete the label.';
+
+  @override
   String get calCopy => 'Copy';
 
   @override

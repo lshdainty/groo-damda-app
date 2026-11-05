@@ -785,7 +785,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetEmptyHint.
   ///
   /// In ko, this message translates to:
-  /// **'설정 → 계좌·카드 관리에서 추가할 수 있어요.'**
+  /// **'설정 → 계좌 · 카드 관리에서 추가할 수 있어요.'**
   String get assetEmptyHint;
 
   /// No description provided for @assetSummaryColAccounts.
@@ -851,7 +851,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetManageTitle.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 관리'**
+  /// **'계좌 · 카드 관리'**
   String get assetManageTitle;
 
   /// No description provided for @assetManageAdd.
@@ -983,7 +983,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetEmptyCta.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 관리로 가기'**
+  /// **'계좌 · 카드 관리로 가기'**
   String get assetEmptyCta;
 
   /// No description provided for @assetAccountAdded.
@@ -3292,7 +3292,7 @@ abstract class AppLocalizations {
   /// No description provided for @calManageShareTitle.
   ///
   /// In ko, this message translates to:
-  /// **'캘린더 관리·공유'**
+  /// **'캘린더 관리 · 공유'**
   String get calManageShareTitle;
 
   /// No description provided for @calJoinByCode.
@@ -3468,6 +3468,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'영구 삭제'**
   String get calDeleteCalendarAction;
+
+  /// No description provided for @calDeleteCalendarFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'캘린더를 삭제하지 못했어요.'**
+  String get calDeleteCalendarFailed;
+
+  /// No description provided for @calLabelDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'라벨을 삭제하지 못했어요.'**
+  String get calLabelDeleteFailed;
 
   /// No description provided for @calCopy.
   ///
@@ -6874,7 +6886,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreItemAccountCard.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 관리'**
+  /// **'계좌 · 카드 관리'**
   String get moreItemAccountCard;
 
   /// No description provided for @moreItemCardBenefits.
@@ -7042,7 +7054,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsMenuAccountCard.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 관리'**
+  /// **'계좌 · 카드 관리'**
   String get settingsMenuAccountCard;
 
   /// No description provided for @settingsMenuBudget.
@@ -7078,7 +7090,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsMenuCalendarShare.
   ///
   /// In ko, this message translates to:
-  /// **'캘린더 관리·공유'**
+  /// **'캘린더 관리 · 공유'**
   String get settingsMenuCalendarShare;
 
   /// No description provided for @settingsMenuCalendarLabel.
@@ -7438,7 +7450,7 @@ abstract class AppLocalizations {
   /// No description provided for @hideCardAssetManage.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 관리'**
+  /// **'계좌 · 카드 관리'**
   String get hideCardAssetManage;
 
   /// No description provided for @hideCardLedgerMonthSummary.

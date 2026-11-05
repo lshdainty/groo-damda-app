@@ -33,9 +33,12 @@ class CalendarSurfaceCallout extends StatelessWidget {
 
 /// 빈 목록 한 줄 — R9(14/19 · 옅은 색 · 가운데 · 해요체).
 class CalendarSurfaceEmptyLine extends StatelessWidget {
-  const CalendarSurfaceEmptyLine(this.text, {super.key});
+  const CalendarSurfaceEmptyLine(this.text, {super.key, this.hint});
 
   final String text;
+
+  /// 아래 힌트 한 줄(t3) — 무엇을 하면 채워지는지.
+  final String? hint;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -44,10 +47,27 @@ class CalendarSurfaceEmptyLine extends StatelessWidget {
       vertical: PSpacing.x6,
     ),
     child: Center(
-      child: Text(
-        keepAll(text),
-        textAlign: TextAlign.center,
-        style: PTypography.t4.copyWith(color: context.colors.fgNeutralSubtle),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            keepAll(text),
+            textAlign: TextAlign.center,
+            style: PTypography.t4.copyWith(
+              color: context.colors.fgNeutralSubtle,
+            ),
+          ),
+          if (hint != null) ...[
+            const SizedBox(height: PSpacing.x1),
+            Text(
+              keepAll(hint!),
+              textAlign: TextAlign.center,
+              style: PTypography.t3.copyWith(
+                color: context.colors.fgNeutralSubtle,
+              ),
+            ),
+          ],
+        ],
       ),
     ),
   );
@@ -79,15 +99,18 @@ class CalendarSurfaceFailure extends StatelessWidget {
 
 /// 목록 제목 자리의 스켈레톤 — 개수를 아직 모른다. 오른쪽 동작은 있으면 진짜를 둔다(정적 UI).
 class CalendarSurfaceHeaderSkeleton extends StatelessWidget {
-  const CalendarSurfaceHeaderSkeleton({super.key, this.action});
+  const CalendarSurfaceHeaderSkeleton({super.key, this.action, this.topInset});
 
   final Widget? action;
+
+  /// 위 여백을 이 값으로 바꾼다 — 묶음이 이어지는 자리(목록 제목 위 24).
+  final double? topInset;
 
   @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.fromLTRB(
       PSpacing.globalGutter,
-      action == null ? PSpacing.x2 : 0,
+      topInset ?? (action == null ? PSpacing.x2 : 0),
       PSpacing.globalGutter,
       action == null ? PSpacing.x2 : 0,
     ),

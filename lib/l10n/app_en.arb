@@ -1052,6 +1052,8 @@
   "calRemove": "Remove",
   "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar and all members lose access. A deleted calendar cannot be restored.",
   "calDeleteCalendarAction": "Delete permanently",
+  "calDeleteCalendarFailed": "Couldn't delete the calendar.",
+  "calLabelDeleteFailed": "Couldn't delete the label.",
   "@calDeleteCalendarConfirm": {
     "placeholders": {
       "name": {

@@ -19,13 +19,13 @@ import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_parts.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
-import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 
 /// 설정 진입 — 캘린더 라벨 관리 (전 캘린더 공용).
 ///
@@ -82,6 +82,8 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
             children: [
               CalendarSurfaceCallout(l.calLabelsIntro),
               labelsAsync.when(
+                // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
+                skipError: true,
                 // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 글과 줄만 데이터 자리
                 loading: () => Column(
                   children: [
@@ -111,11 +113,9 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
                       ),
                     ),
                     if (labels.isEmpty)
-                      PResultSection(
-                        size: PResultSize.medium,
-                        icon: LucideIcons.tag,
-                        title: l.calLabelsEmpty,
-                        description: l.calLabelsEmptyHint,
+                      CalendarSurfaceEmptyLine(
+                        l.calLabelsEmpty,
+                        hint: l.calLabelsEmptyHint,
                       )
                     else
                       PList(
@@ -141,7 +141,7 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
                                   kind: PSwipeKind.destructive,
                                   // _confirmDelete 가 자체 확인을 띄운다 — 여기서 또 주면 두 번 뜬다
                                   onSelect: () =>
-                                      _confirmDelete(context, ref, label),
+                                      _confirmDelete(context, label),
                                 ),
                               ],
                               child: PListButtonItem(
@@ -231,8 +231,37 @@ void _showLabelEditor(
       controller: controller,
       onColorChanged: (c) => selectedColor = c,
     ),
-    footerBuilder: (ctx) =>
-        PSheetFooter(controller: controller, submitLabel: l.actionSave),
+    footerBuilder: (ctx) => PSheetFooter(
+      controller: controller,
+      submitLabel: l.actionSave,
+      // 수정 폼에만 — 밀기로만 닿던 삭제가 들어간 화면에도 있다(swipe-actions.md:76).
+      // 09b-2 가 라벨 폼을 새로 짤 때 이 [삭제] 를 옮긴다.
+      leftSlot: existing == null
+          ? null
+          : SizedBox(
+              width: double.infinity,
+              child: dsb.PButton(
+                label: l.actionDelete,
+                variant: dsb.PButtonVariant.ghost,
+                ghostColor: dsb.PButtonGhostColor.critical,
+                size: dsb.PButtonSize.large,
+                onPressed: () async {
+                  final ok = await _confirmDelete(
+                    ctx,
+                    existing,
+                    onRetried: () {
+                      if (ctx.mounted) {
+                        Navigator.of(ctx, rootNavigator: true).pop();
+                      }
+                    },
+                  );
+                  if (ok && ctx.mounted) {
+                    Navigator.of(ctx, rootNavigator: true).pop();
+                  }
+                },
+              ),
+            ),
+    ),
   );
 }
 
@@ -362,28 +391,36 @@ class _LabelEditorBodyState extends State<_LabelEditorBody> {
 
 // ─── 삭제 ──────────────────────────────────────────────────
 
-Future<void> _confirmDelete(
+/// 라벨 삭제 — 확인창 → 지움. 실패하면 확인창을 닫고 고정 한 문장 critical 스낵바 + [다시 시도](묻지 않고 바로 지움).
+/// 돌려주는 값 — 지우기까지 성공했으면 true. 밀기 삭제와 편집 시트 바닥 [삭제] 가 같은 길을 쓴다.
+Future<bool> _confirmDelete(
   BuildContext context,
-  WidgetRef ref,
-  EventLabel label,
-) async {
+  EventLabel label, {
+  VoidCallback? onRetried,
+}) {
   final l = AppLocalizations.of(context);
-  final ok = await PAlertDialog.show(
+  final container = ProviderScope.containerOf(context);
+  return askConfirmThenRequest(
     context,
     title: l.calDeleteLabelTitle,
     description: l.calDeleteLabelConfirm(label.labelName),
-    actionLabel: l.actionDelete,
-    destructive: true,
     cancelLabel: l.actionCancel,
+    actionLabel: l.actionDelete,
+    request: () => _deleteLabelRequest(container, label),
+    failedMessage: l.calLabelDeleteFailed,
+    retryLabel: l.actionRetry,
+    onRetried: onRetried,
   );
-  if (!ok || !context.mounted) return;
-  try {
-    final repo = await ref.read(calendarRepositoryProvider.future);
-    await repo.deleteLabel(label.rowId);
-    ref.invalidate(eventLabelsProvider);
-    // 지운 라벨이 박힌 일정도 다시 받는다 — 안 그러면 없는 라벨이 계속 붙어 보인다.
-    ref.invalidate(monthEventsProvider);
-  } on ApiException {
-    if (!context.mounted) return;
-  }
+}
+
+/// 라벨 삭제 요청 — 컨테이너로 한다(시트가 닫힌 뒤 [다시 시도] 도 이걸 부른다). 실패는 던진다.
+Future<void> _deleteLabelRequest(
+  ProviderContainer container,
+  EventLabel label,
+) async {
+  final repo = await container.read(calendarRepositoryProvider.future);
+  await repo.deleteLabel(label.rowId);
+  container.invalidate(eventLabelsProvider);
+  // 지운 라벨이 박힌 일정도 다시 받는다 — 안 그러면 없는 라벨이 계속 붙어 보인다.
+  container.invalidate(monthEventsProvider);
 }
