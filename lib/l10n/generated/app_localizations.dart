@@ -10630,7 +10630,7 @@ abstract class AppLocalizations {
   /// No description provided for @stocksWatchGroupDeleteFail.
   ///
   /// In ko, this message translates to:
-  /// **'그룹을 지우지 못했어요.'**
+  /// **'그룹을 삭제하지 못했어요.'**
   String get stocksWatchGroupDeleteFail;
 
   /// No description provided for @stocksWatchRemoveFail.
