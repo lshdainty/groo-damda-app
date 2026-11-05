@@ -71,6 +71,13 @@ class SubscriptionInfo {
   final int? price;
   final int? durationMonths;
 
+  /// 이용 기간 끝(다음 결제 · 이용 끝나는 날) 날짜 글 — 화면 날짜 규칙(올해면 "11월 11일", 다른 해면 "2027년 11월 11일").
+  /// 서버 UTC 시각을 로컬로 읽은 뒤 [formatDay] 를 쓴다. 못 읽는 값은 null.
+  String? get periodEndLabel {
+    final dt = parseServerUtc(currentPeriodEnd);
+    return dt == null ? null : formatDay(dt).md;
+  }
+
   /// `/subscriptions/me` 에 가격 · 기간이 없을 때(옛 서버 · 실패) planCode 로 플랜 목록에서 찾아 채운다.
   /// 정상 경로는 서버가 준 값이다 — 있으면 그대로 둔다.
   SubscriptionInfo resolvedWith(List<SubscriptionPlanInfo> plans) {

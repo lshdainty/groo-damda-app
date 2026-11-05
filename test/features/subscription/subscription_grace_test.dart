@@ -164,7 +164,7 @@ void main() {
 
   testWidgets('자동갱신이 꺼지면 날짜 라벨이 "다음 결제" 가 아니다', (tester) async {
     final end = _serverUtc(const Duration(days: 30));
-    final date = localDateKey(end)!;
+    final date = formatDay(parseServerUtc(end)!).md;
     await _openSheet(
       tester,
       _sub(status: 'CANCELLED', currentPeriodEnd: end, autoRenew: false),
@@ -196,7 +196,7 @@ void main() {
 
   testWidgets('자동갱신 중인 구독은 종전 문구 그대로다', (tester) async {
     final end = _serverUtc(const Duration(days: 30));
-    final date = localDateKey(end)!;
+    final date = formatDay(parseServerUtc(end)!).md;
     await _openSheet(tester, _sub(status: 'ACTIVE', currentPeriodEnd: end));
 
     expect(findPlain(l.subUsingPro), findsOneWidget);

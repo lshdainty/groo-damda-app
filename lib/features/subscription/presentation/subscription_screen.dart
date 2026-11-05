@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
@@ -175,10 +174,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
     final hasPeriodEnd =
         sub?.currentPeriodEnd != null && sub!.currentPeriodEnd!.length >= 10;
-    // currentPeriodEnd 는 서버 UTC 시각 — 자르면 KST 밤 결제분의 갱신일이 하루 앞으로 보인다. 못 읽는 값만 잘라 쓴다
+    // currentPeriodEnd 는 서버 UTC 시각 — 로컬로 읽어 화면 날짜 규칙(올해 "11월 11일" · 다른 해 연도 붙임)으로 쓴다. 못 읽는 값만 잘라 쓴다
     final nextBill = hasPeriodEnd
-        ? (localDateKey(sub.currentPeriodEnd) ??
-              sub.currentPeriodEnd!.substring(0, 10))
+        ? (sub.periodEndLabel ?? sub.currentPeriodEnd!.substring(0, 10))
         : l.subNextBillingDate;
     // 해지한 구독의 날짜는 결제일이 아니라 이용이 끝나는 날이다
     final renews = (sub?.autoRenew ?? true) || !hasPeriodEnd;

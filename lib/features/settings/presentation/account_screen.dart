@@ -161,7 +161,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final periodEnd =
         subscription?.currentPeriodEnd != null &&
             subscription!.currentPeriodEnd!.length >= 10
-        ? (localDateKey(subscription.currentPeriodEnd) ??
+        ? (subscription.periodEndLabel ??
               subscription.currentPeriodEnd!.substring(0, 10))
         : null;
     // 유예 기간(해지했는데 기간이 남음)에는 다음 결제가 없다 — 그 날짜는 결제일이
