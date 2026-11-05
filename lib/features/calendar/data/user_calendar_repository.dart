@@ -22,14 +22,17 @@ class UserCalendarRepository {
     }
   }
 
+  /// [silent] — 전역 오류 알림을 끈다(폼이 맨 위 Callout 으로 알린다).
   Future<UserCalendar> create({
     required String calendarName,
     String? color,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/calendar/calendars',
         data: {'calendarName': calendarName, 'color': ?color},
+        options: silent ? _silent : null,
       );
       return _unwrap(res, UserCalendar.fromJson);
     } on DioException catch (e) {
@@ -37,15 +40,18 @@ class UserCalendarRepository {
     }
   }
 
+  /// 보낸 칸만 바꾼다(서버 `UpdateRequest`) — 이름만 · 색만 보낼 수 있다. [silent] 는 호출한 자리가 실패를 직접 알릴 때(폼 Callout · 스낵바).
   Future<UserCalendar> update({
     required int id,
-    required String calendarName,
+    String? calendarName,
     String? color,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/calendar/calendars/$id',
-        data: {'calendarName': calendarName, 'color': ?color},
+        data: {'calendarName': ?calendarName, 'color': ?color},
+        options: silent ? _silent : null,
       );
       return _unwrap(res, UserCalendar.fromJson);
     } on DioException catch (e) {
@@ -89,17 +95,20 @@ class UserCalendarRepository {
     try {
       await _dio.patch<dynamic>(
         '/calendar/calendars/$id/regenerate-invite-code',
+        options: _silent,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
+  /// 틀린 코드 · 이미 참여는 칸 아래 오류로 알린다 — 전역 오류 알림은 끈다(두 번 알리지 않게).
   Future<UserCalendar> joinByCode(String inviteCode) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/calendar/calendars/join',
         data: {'inviteCode': inviteCode},
+        options: _silent,
       );
       return _unwrap(res, UserCalendar.fromJson);
     } on DioException catch (e) {
@@ -109,7 +118,10 @@ class UserCalendarRepository {
 
   Future<void> removeMember(int id, int memberId) async {
     try {
-      await _dio.delete<void>('/calendar/calendars/$id/member/$memberId');
+      await _dio.delete<void>(
+        '/calendar/calendars/$id/member/$memberId',
+        options: _silent,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -120,6 +132,7 @@ class UserCalendarRepository {
       await _dio.patch<dynamic>(
         '/calendar/calendars/$id/member/$memberId/role',
         data: {'permission': permission},
+        options: _silent,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

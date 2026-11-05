@@ -3028,7 +3028,7 @@ abstract class AppLocalizations {
   /// No description provided for @calInviteCodePlaceholder.
   ///
   /// In ko, this message translates to:
-  /// **'예: ABC123'**
+  /// **'예: 3F9A1C2B'**
   String get calInviteCodePlaceholder;
 
   /// No description provided for @calRecurrenceNone.
@@ -3220,7 +3220,7 @@ abstract class AppLocalizations {
   /// No description provided for @calDeleteLabelConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 라벨을 삭제할까요? 이 라벨이 지정된 일정은 라벨 없음 상태가 돼요. 삭제한 라벨은 되돌릴 수 없어요.'**
+  /// **'\"{name}\" 라벨을 삭제할까요? 이 라벨이 붙은 일정은 라벨 없이 남아요. 삭제한 라벨은 되돌릴 수 없어요.'**
   String calDeleteLabelConfirm(String name);
 
   /// No description provided for @calDatePicker.
@@ -3409,12 +3409,6 @@ abstract class AppLocalizations {
   /// **'초대 코드'**
   String get calInviteCode;
 
-  /// No description provided for @calManageTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'{name} · 관리'**
-  String calManageTitle(String name);
-
   /// No description provided for @calDeleteCalendar.
   ///
   /// In ko, this message translates to:
@@ -3448,7 +3442,7 @@ abstract class AppLocalizations {
   /// No description provided for @calRemoveMemberConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 님을 캘린더에서 내보내시겠어요?'**
+  /// **'\"{name}\" 님을 캘린더에서 내보낼까요?'**
   String calRemoveMemberConfirm(String name);
 
   /// No description provided for @calRemove.
@@ -3460,14 +3454,8 @@ abstract class AppLocalizations {
   /// No description provided for @calDeleteCalendarConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 이동하고 모든 멤버의 접근 권한이 사라져요. 삭제한 캘린더는 되돌릴 수 없어요.'**
+  /// **'\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요. 삭제한 캘린더는 되돌릴 수 없어요.'**
   String calDeleteCalendarConfirm(String name);
-
-  /// No description provided for @calDeleteCalendarAction.
-  ///
-  /// In ko, this message translates to:
-  /// **'영구 삭제'**
-  String get calDeleteCalendarAction;
 
   /// No description provided for @calDeleteCalendarFailed.
   ///
@@ -3490,7 +3478,7 @@ abstract class AppLocalizations {
   /// No description provided for @calRegenerate.
   ///
   /// In ko, this message translates to:
-  /// **'재생성'**
+  /// **'새로 만들기'**
   String get calRegenerate;
 
   /// No description provided for @calMembers.
@@ -3499,11 +3487,125 @@ abstract class AppLocalizations {
   /// **'멤버'**
   String get calMembers;
 
+  /// No description provided for @calMembersCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'멤버 · {count}'**
+  String calMembersCount(int count);
+
+  /// No description provided for @calMemberLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'멤버를 불러오지 못했어요'**
+  String get calMemberLoadFailed;
+
+  /// No description provided for @calManageNameTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'캘린더 이름'**
+  String get calManageNameTitle;
+
+  /// No description provided for @calNameRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'캘린더 이름을 입력해주세요.'**
+  String get calNameRequired;
+
+  /// No description provided for @calInviteHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 코드를 공유하면 다른 사람이 캘린더에 참여할 수 있어요.'**
+  String get calInviteHint;
+
+  /// No description provided for @calManageSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get calManageSaveFailed;
+
+  /// No description provided for @calCreateFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get calCreateFailed;
+
+  /// No description provided for @calJoinInvalidCode.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 확인해주세요.'**
+  String get calJoinInvalidCode;
+
+  /// No description provided for @calJoinAlreadyMember.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 참여한 캘린더예요.'**
+  String get calJoinAlreadyMember;
+
+  /// No description provided for @calRemoveMemberFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'멤버를 내보내지 못했어요.'**
+  String get calRemoveMemberFailed;
+
+  /// No description provided for @calColorChangeFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'색을 바꾸지 못했어요.'**
+  String get calColorChangeFailed;
+
+  /// No description provided for @calRoleChangeFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'권한을 바꾸지 못했어요.'**
+  String get calRoleChangeFailed;
+
+  /// No description provided for @calRegenerateFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 새로 만들지 못했어요.'**
+  String get calRegenerateFailed;
+
+  /// No description provided for @calInviteNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드 없음'**
+  String get calInviteNone;
+
+  /// No description provided for @calJoinCodeRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 입력해주세요.'**
+  String get calJoinCodeRequired;
+
+  /// No description provided for @calLabelNameRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'라벨 이름을 입력해주세요.'**
+  String get calLabelNameRequired;
+
+  /// No description provided for @calLabelNameDuplicate.
+  ///
+  /// In ko, this message translates to:
+  /// **'같은 이름의 라벨이 이미 있어요.'**
+  String get calLabelNameDuplicate;
+
+  /// No description provided for @calLabelSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get calLabelSaveFailed;
+
   /// No description provided for @calMeSuffix.
   ///
   /// In ko, this message translates to:
   /// **'(나)'**
   String get calMeSuffix;
+
+  /// No description provided for @calMemberManage.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 관리'**
+  String calMemberManage(String name);
 
   /// No description provided for @calChangeToEditor.
   ///
@@ -3544,7 +3646,7 @@ abstract class AppLocalizations {
   /// No description provided for @calJoinFailed.
   ///
   /// In ko, this message translates to:
-  /// **'참여 실패'**
+  /// **'참여하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calJoinFailed;
 
   /// No description provided for @calUpdateFailed.
@@ -3564,12 +3666,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'라벨을 불러오지 못했어요'**
   String get calLabelLoadError;
-
-  /// No description provided for @calMemberLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'멤버 로드 실패'**
-  String get calMemberLoadError;
 
   /// No description provided for @dashTitle.
   ///
@@ -14340,12 +14436,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'올해'**
   String get dsDatePresetThisYear;
-
-  /// 캘린더 공유 멤버 줄 ⋮ 버튼의 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'{name} 더보기'**
-  String calMemberMore(String name);
 
   /// No description provided for @apiErrorServer.
   ///

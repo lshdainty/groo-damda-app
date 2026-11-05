@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
@@ -20,6 +22,7 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_labels_screen.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_share_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -49,7 +52,18 @@ class _LabelRepo extends CalendarRepository {
 
   final List<EventLabel> labelList;
   int deletes = 0;
+  int updates = 0;
   bool failDelete = false;
+
+  @override
+  Future<EventLabel> updateLabel({
+    required int id,
+    required String labelName,
+    String? color,
+  }) async {
+    updates++;
+    return EventLabel(rowId: id, labelName: labelName, color: color);
+  }
 
   @override
   Future<List<EventLabel>> labels() async => labelList;
@@ -263,18 +277,42 @@ void main() {
       await tester.pump(const Duration(seconds: 31));
     });
 
-    testWidgets('캘린더 줄은 누르는 줄 — 지금의 관리 시트가 열린다', (tester) async {
+    testWidgets('캘린더 줄은 꺾쇠가 달린 누르는 줄 — 누르면 관리 페이지로 옮긴다', (tester) async {
       await size(tester);
       await tester.pumpWidget(
-        app(const CalendarShareScreen(), [
-          userCalendarListProvider.overrideWith((ref) async => const [mine]),
-        ]),
+        ProviderScope(
+          overrides: [
+            authProvider.overrideWith(_NoAuth.new),
+            userCalendarListProvider.overrideWith((ref) async => const [mine]),
+          ],
+          child: MaterialApp.router(
+            theme: GrooTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('ko'),
+            routerConfig: GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (_, _) => const CalendarShareScreen(),
+                ),
+                GoRoute(
+                  path: '/settings/calendar-share/:calendarId',
+                  builder: (_, s) =>
+                      Text('manage-${s.pathParameters['calendarId']}'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
       expect(find.byType(PListRowFrame), findsWidgets);
+      expect(find.byIcon(LucideIcons.chevronRight), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('cal-share-1')));
       await tester.pumpAndSettle();
-      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.text('manage-1'), findsOneWidget);
+      expect(find.byType(PBottomSheetContent), findsNothing);
     });
   });
 
@@ -377,7 +415,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('출장').first);
       await tester.pumpAndSettle();
-      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
       expect(find.text('삭제'), findsOneWidget);
 
       // 추가 폼
@@ -387,7 +425,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('라벨 추가'));
       await tester.pumpAndSettle();
-      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
       expect(find.text('삭제'), findsNothing);
     });
 
@@ -406,7 +444,7 @@ void main() {
       await tester.tap(find.text('삭제').last);
       await tester.pumpAndSettle();
       expect(repo.deletes, 1);
-      expect(find.byType(BottomSheet), findsNothing);
+      expect(find.byType(PBottomSheetContent), findsNothing);
     });
 
     testWidgets('삭제 실패 — 고정 한 문장 + [다시 시도](바로 다시 요청) · 서버 글 0', (tester) async {
@@ -473,18 +511,70 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('가나다라마바사아자차카타파').first);
       await tester.pumpAndSettle();
-      // 안 바꾼 동안: 오류 글 없음 · [저장] 활성(프리셋과 같다)
-      expect(find.text('이름은 12자 이내로 입력해주세요.'), findsNothing);
-      final save = find.ancestor(
-        of: find.text('저장'),
-        matching: find.byType(dsb.PButton),
+      // 안 바꾼 동안: 눌러 저장하면 오류 없이 요청이 나간다(면제 — 색만 고칠 수 있다)
+      await tester.tap(find.text('저장'));
+      await tester.pumpAndSettle();
+      expect(repo.updates, 1);
+    });
+
+    testWidgets(
+      '12자 넘는 옛 이름은 입력 상한이 저장된 길이라 글이 잘리지 않고, 고쳐 13자면 "13/12" 오류색 + [저장] 막힘',
+      (tester) async {
+        await size(tester);
+        const long = EventLabel(
+          rowId: 9,
+          labelName: '가나다라마바사아자차카타파',
+          color: '#2d8060',
+        );
+        final repo = _LabelRepo(const [long]);
+        await tester.pumpWidget(
+          app(const CalendarLabelsScreen(), withRepo(repo)),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(findPlain('가나다라마바사아자차카타파').first);
+        await tester.pumpAndSettle();
+        // 13자 그대로 한 글자만 바꿈 — 잘리지 않는다(상한 13)
+        await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타하');
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<EditableText>(find.byType(EditableText))
+              .controller
+              .text,
+          '가나다라마바사아자차카타하',
+        );
+        expect(findRichPlain('13/12'), findsOneWidget);
+        await tester.tap(find.text('저장'));
+        await tester.pumpAndSettle();
+        expect(repo.updates, 0);
+        expect(findPlainContaining('12자 이내'), findsOneWidget);
+      },
+    );
+
+    testWidgets('12자 넘는 옛 이름 — 한 글자 지우면 12 검사를 통과해 저장되고, 13자 그대로 고친 값은 막힌다', (
+      tester,
+    ) async {
+      await size(tester);
+      const long = EventLabel(
+        rowId: 9,
+        labelName: '가나다라마바사아자차카타파',
+        color: '#2d8060',
       );
-      expect(tester.widget<dsb.PButton>(save.last).onPressed, isNotNull);
-      // 고치기 시작하면(여전히 12 초과 값은 입력이 12 에서 멈춘다) — 12자 이하로 줄이면 저장 가능
+      final repo = _LabelRepo(const [long]);
+      await tester.pumpWidget(
+        app(const CalendarLabelsScreen(), withRepo(repo)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('가나다라마바사아자차카타파').first);
+      await tester.pumpAndSettle();
+      // 한 글자 지움 → 12자
       await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타');
       await tester.pumpAndSettle();
       expect(find.text('12/12'), findsOneWidget);
-      expect(tester.widget<dsb.PButton>(save.last).onPressed, isNotNull);
+      await tester.tap(find.text('저장'));
+      await tester.pumpAndSettle();
+      expect(repo.updates, 1);
+      expect(findPlainContaining('12자 이내'), findsNothing);
     });
   });
 }

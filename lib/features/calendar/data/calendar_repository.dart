@@ -188,6 +188,8 @@ class CalendarRepository {
       final res = await _dio.post<Map<String, dynamic>>(
         '/calendar/label',
         data: {'labelName': labelName, 'color': ?color},
+        // 폼이 맨 위 Callout 으로 알린다 — 전역 서버 글과 겹치지 않게
+        options: _silent,
       );
       return _unwrap(res, EventLabel.fromJson);
     } on DioException catch (e) {
@@ -205,6 +207,7 @@ class CalendarRepository {
       final res = await _dio.put<Map<String, dynamic>>(
         '/calendar/label/$id',
         data: {'labelName': labelName, 'color': ?color},
+        options: _silent,
       );
       return _unwrap(res, EventLabel.fromJson);
     } on DioException catch (e) {

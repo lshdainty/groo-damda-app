@@ -900,7 +900,7 @@
   "calLabelNamePlaceholder": "예: 중요, 마감일, 회의",
   "calCalendarNamePlaceholder": "예: 가족, 업무, 운동 일정",
   "calCalendarNameFieldPlaceholder": "캘린더 이름",
-  "calInviteCodePlaceholder": "예: ABC123",
+  "calInviteCodePlaceholder": "예: 3F9A1C2B",
   "calRecurrenceNone": "반복 안 함",
   "calFormNone": "없음",
   "calFormNoReminder": "알림 없음",
@@ -960,7 +960,7 @@
   "calEditLabel": "라벨 수정",
   "calPreview": "미리보기",
   "calDeleteLabelTitle": "라벨 삭제",
-  "calDeleteLabelConfirm": "\"{name}\" 라벨을 삭제할까요? 이 라벨이 지정된 일정은 라벨 없음 상태가 돼요. 삭제한 라벨은 되돌릴 수 없어요.",
+  "calDeleteLabelConfirm": "\"{name}\" 라벨을 삭제할까요? 이 라벨이 붙은 일정은 라벨 없이 남아요. 삭제한 라벨은 되돌릴 수 없어요.",
   "@calDeleteLabelConfirm": {
     "placeholders": {
       "name": {
@@ -1055,20 +1055,12 @@
     }
   },
   "calInviteCode": "초대 코드",
-  "calManageTitle": "{name} · 관리",
-  "@calManageTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "calDeleteCalendar": "캘린더 삭제",
   "calCalendarUpdated": "캘린더를 수정했어요",
   "calInviteCodeRegenerated": "초대 코드를 새로 만들었어요",
   "calInviteCodeCopied": "초대 코드를 복사했어요",
   "calRemoveMember": "멤버 내보내기",
-  "calRemoveMemberConfirm": "\"{name}\" 님을 캘린더에서 내보내시겠어요?",
+  "calRemoveMemberConfirm": "\"{name}\" 님을 캘린더에서 내보낼까요?",
   "@calRemoveMemberConfirm": {
     "placeholders": {
       "name": {
@@ -1077,8 +1069,7 @@
     }
   },
   "calRemove": "내보내기",
-  "calDeleteCalendarConfirm": "\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 이동하고 모든 멤버의 접근 권한이 사라져요. 삭제한 캘린더는 되돌릴 수 없어요.",
-  "calDeleteCalendarAction": "영구 삭제",
+  "calDeleteCalendarConfirm": "\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요. 삭제한 캘린더는 되돌릴 수 없어요.",
   "calDeleteCalendarFailed": "캘린더를 삭제하지 못했어요.",
   "calLabelDeleteFailed": "라벨을 삭제하지 못했어요.",
   "@calDeleteCalendarConfirm": {
@@ -1089,20 +1080,52 @@
     }
   },
   "calCopy": "복사",
-  "calRegenerate": "재생성",
+  "calRegenerate": "새로 만들기",
   "calMembers": "멤버",
+  "calMembersCount": "멤버 · {count}",
+  "@calMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calMemberLoadFailed": "멤버를 불러오지 못했어요",
+  "calManageNameTitle": "캘린더 이름",
+  "calNameRequired": "캘린더 이름을 입력해주세요.",
+  "calInviteHint": "이 코드를 공유하면 다른 사람이 캘린더에 참여할 수 있어요.",
+  "calManageSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "calCreateFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "calJoinInvalidCode": "초대 코드를 확인해주세요.",
+  "calJoinAlreadyMember": "이미 참여한 캘린더예요.",
+  "calRemoveMemberFailed": "멤버를 내보내지 못했어요.",
+  "calColorChangeFailed": "색을 바꾸지 못했어요.",
+  "calRoleChangeFailed": "권한을 바꾸지 못했어요.",
+  "calRegenerateFailed": "초대 코드를 새로 만들지 못했어요.",
+  "calInviteNone": "초대 코드 없음",
+  "calJoinCodeRequired": "초대 코드를 입력해주세요.",
+  "calLabelNameRequired": "라벨 이름을 입력해주세요.",
+  "calLabelNameDuplicate": "같은 이름의 라벨이 이미 있어요.",
+  "calLabelSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "calMeSuffix": "(나)",
+  "calMemberManage": "{name} 관리",
+  "@calMemberManage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "calChangeToEditor": "편집 가능으로",
   "calChangeToViewer": "읽기 전용으로",
   "calAdd": "추가",
   "calActionFailed": "실패",
   "calSaveFailed": "저장 실패",
   "calDeleteFailed": "삭제 실패",
-  "calJoinFailed": "참여 실패",
+  "calJoinFailed": "참여하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "calUpdateFailed": "변경 실패",
   "calCalendarLoadError": "캘린더를 불러오지 못했어요",
   "calLabelLoadError": "라벨을 불러오지 못했어요",
-  "calMemberLoadError": "멤버 로드 실패",
   "dashTitle": "홈",
   "dashGreeting": "오늘도 좋은 하루 되세요",
   "dashTotalAssets": "총 자산",
@@ -4656,8 +4679,6 @@
   "dsDatePresetLast6M": "최근 6개월",
   "dsDatePresetLast1Y": "최근 1년",
   "dsDatePresetThisYear": "올해",
-  "calMemberMore": "{name} 더보기",
-  "@calMemberMore": {"description": "캘린더 공유 멤버 줄 ⋮ 버튼의 이름", "placeholders": {"name": {"type": "String"}}},
   "apiErrorServer": "요청을 처리하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "dsInfiniteListError": "더 불러오지 못했어요.",
   "@dsInfiniteListError": {"description": "목록 끝(Infinite List)에서 다음 쪽을 못 받았을 때 글 — 이미 받은 줄은 그대로 두고 다시 시도 버튼이 붙는다"},

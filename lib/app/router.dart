@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_screen.da
 import 'package:groo_damda_app/features/card/presentation/card_benefits_screen.dart';
 import 'package:groo_damda_app/features/category/presentation/category_screen.dart';
 import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_screen.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_manage_screen.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_share_screen.dart';
 import 'package:groo_damda_app/features/export/presentation/export_screen.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_paste_args.dart';
@@ -179,6 +180,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings/calendar-share',
         builder: (_, _) => const CalendarShareScreen(),
+      ),
+      // 캘린더 관리 — 캘린더 하나 = 페이지(I-09b 22). 셸 밖 · 탭 바 없음
+      GoRoute(
+        path: '/settings/calendar-share/:calendarId',
+        builder: (_, state) => CalendarManageScreen(
+          calendarId: int.tryParse(state.pathParameters['calendarId'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/settings/calendar-labels',

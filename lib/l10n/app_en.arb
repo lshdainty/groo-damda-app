@@ -871,9 +871,9 @@
   "calSelectCalendar": "Select calendar",
   "calNoLabel": "No label",
   "calLabelNamePlaceholder": "e.g. Important, Deadline, Meeting",
-  "calCalendarNamePlaceholder": "e.g. Family, Work, Workouts",
+  "calCalendarNamePlaceholder": "e.g. Family, Work, Workout",
   "calCalendarNameFieldPlaceholder": "Calendar name",
-  "calInviteCodePlaceholder": "e.g. ABC123",
+  "calInviteCodePlaceholder": "e.g. 3F9A1C2B",
   "calRecurrenceNone": "Does not repeat",
   "calFormNone": "None",
   "calFormNoReminder": "No reminder",
@@ -933,7 +933,7 @@
   "calEditLabel": "Edit label",
   "calPreview": "Preview",
   "calDeleteLabelTitle": "Delete label",
-  "calDeleteLabelConfirm": "Delete the \"{name}\" label? Events with this label will become unlabeled. A deleted label cannot be restored.",
+  "calDeleteLabelConfirm": "Delete the \"{name}\" label? Events with this label stay, without a label. This action cannot be undone.",
   "@calDeleteLabelConfirm": {
     "placeholders": {
       "name": {
@@ -1019,7 +1019,7 @@
   "calJoinCardBody": "Enter a shared invite code to join that calendar.",
   "calJoin": "Join",
   "calCreate": "Create",
-  "calJoinedCalendar": "Joined \"{name}\"",
+  "calJoinedCalendar": "Joined the \"{name}\" calendar",
   "@calJoinedCalendar": {
     "placeholders": {
       "name": {
@@ -1028,17 +1028,9 @@
     }
   },
   "calInviteCode": "Invite code",
-  "calManageTitle": "{name} · Manage",
-  "@calManageTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "calDeleteCalendar": "Delete calendar",
   "calCalendarUpdated": "Calendar updated",
-  "calInviteCodeRegenerated": "Generated a new invite code",
+  "calInviteCodeRegenerated": "New invite code created",
   "calInviteCodeCopied": "Invite code copied",
   "calRemoveMember": "Remove member",
   "calRemoveMemberConfirm": "Remove \"{name}\" from this calendar?",
@@ -1050,8 +1042,7 @@
     }
   },
   "calRemove": "Remove",
-  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar and all members lose access. A deleted calendar cannot be restored.",
-  "calDeleteCalendarAction": "Delete permanently",
+  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar and members can no longer see it. This action cannot be undone.",
   "calDeleteCalendarFailed": "Couldn't delete the calendar.",
   "calLabelDeleteFailed": "Couldn't delete the label.",
   "@calDeleteCalendarConfirm": {
@@ -1062,20 +1053,52 @@
     }
   },
   "calCopy": "Copy",
-  "calRegenerate": "Regenerate",
+  "calRegenerate": "Generate new",
   "calMembers": "Members",
+  "calMembersCount": "Members · {count}",
+  "@calMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calMemberLoadFailed": "Couldn't load members",
+  "calManageNameTitle": "Calendar name",
+  "calNameRequired": "Please enter a calendar name.",
+  "calInviteHint": "Share this code to let others join the calendar.",
+  "calManageSaveFailed": "Could not save. Please try again in a moment.",
+  "calCreateFailed": "Could not save. Please try again in a moment.",
+  "calJoinInvalidCode": "Please check the invite code.",
+  "calJoinAlreadyMember": "You have already joined this calendar.",
+  "calRemoveMemberFailed": "Couldn't remove the member.",
+  "calColorChangeFailed": "Couldn't change the color.",
+  "calRoleChangeFailed": "Couldn't change the permission.",
+  "calRegenerateFailed": "Couldn't create a new invite code.",
+  "calInviteNone": "No invite code",
+  "calJoinCodeRequired": "Please enter the invite code.",
+  "calLabelNameRequired": "Please enter a label name.",
+  "calLabelNameDuplicate": "A label with that name already exists.",
+  "calLabelSaveFailed": "Could not save. Please try again in a moment.",
   "calMeSuffix": "(me)",
-  "calChangeToEditor": "Change to editor",
-  "calChangeToViewer": "Change to viewer",
+  "calMemberManage": "Manage {name}",
+  "@calMemberManage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "calChangeToEditor": "Make editor",
+  "calChangeToViewer": "Make read only",
   "calAdd": "Add",
   "calActionFailed": "Failed",
   "calSaveFailed": "Save failed",
   "calDeleteFailed": "Delete failed",
-  "calJoinFailed": "Failed to join",
+  "calJoinFailed": "Could not join. Please try again in a moment.",
   "calUpdateFailed": "Update failed",
   "calCalendarLoadError": "Couldn't load calendars",
   "calLabelLoadError": "Couldn't load labels",
-  "calMemberLoadError": "Failed to load members",
   "dashTitle": "Home",
   "dashGreeting": "Have a great day",
   "dashTotalAssets": "Total assets",
@@ -4391,7 +4414,6 @@
   "dsDatePresetLast6M": "Last 6 months",
   "dsDatePresetLast1Y": "Last year",
   "dsDatePresetThisYear": "This year",
-  "calMemberMore": "More for {name}",
   "apiErrorServer": "We couldn't complete the request. Please try again in a moment.",
   "dsInfiniteListError": "Couldn't load more.",
   "dsInfiniteListEnd": "You've reached the end.",

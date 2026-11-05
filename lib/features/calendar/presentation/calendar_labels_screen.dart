@@ -1,46 +1,39 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
-import 'package:groo_damda_app/shared/widgets/p_color_picker.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart'
+    show CalendarSaveErrorCallout;
 import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_parts.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart'
+    show PLeaveConfirmCopy;
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
-import 'package:groo_damda_app/shared/forms/name_policy.dart';
-import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
-import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
-import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/forms/color_pick.dart';
+import 'package:groo_damda_app/shared/forms/name_policy.dart';
+import 'package:groo_damda_app/shared/forms/picker_row.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
 
 /// 라벨 이름 최대 글자 수 — 카테고리 · 라벨 · 태그 · 목표 이름 12자(웹 d837eedc, 카드 한 줄에 들어가는 길이).
 const int kLabelNameMax = 12;
-
-/// 저장할 수 있는 이름인가 — 비어 있지 않고 12자를 넘지 않는다(웹 `nameIssue` 와 같은 판정).
-///
-/// [original] 은 고치기 전 저장된 이름 — 안 바꾼 옛 이름은 12자 검사에서 뺀다(프리셋과 같다: 12자가 넘는 옛 라벨도 색만 고칠 수
-/// 있어야 한다). 이름을 고치기 시작하면 그때부터 12 검사.
-bool labelNameSubmittable(String raw, {String? original}) {
-  final issue = nameIssue(raw, kLabelNameMax);
-  if (issue == NameIssue.tooLong && raw == original) return true;
-  return issue == null || issue == NameIssue.duplicate;
-}
 
 /// 설정 진입 — 캘린더 라벨 관리 (전 캘린더 공용).
 ///
@@ -192,239 +185,264 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
 
 // ─── 추가/편집 ──────────────────────────────────────────────
 
+/// 라벨 추가 · 수정 폼(I-09b 39 · 40) — ds Bottom Sheet 입력 폼. 이름 칸(12자 · 세는 줄) + "색상" 줄, 미리보기는 없다.
+/// 바닥은 추가 [추가], 수정 [삭제][저장](삭제는 내용 폭 ghost critical 왼쪽, 글 시작 24). 비워 두고 눌러도 [저장] 은 켜 둔다.
 void _showLabelEditor(
   BuildContext context,
   WidgetRef ref,
   EventLabel? existing,
 ) {
   final l = AppLocalizations.of(context);
-  final nameCtrl = TextEditingController(text: existing?.labelName ?? '');
-  final controller = PSheetController();
-  controller.setCanSubmit(
-    labelNameSubmittable(
-      existing?.labelName ?? '',
-      original: existing?.labelName,
-    ),
-  );
-  String selectedColor = existing?.color ?? '#2c70bf';
-
-  Future<void> submit() async {
-    final name = nameCtrl.text.trim();
-    if (!labelNameSubmittable(name, original: existing?.labelName)) return;
-    controller.setSubmitting(true);
-    try {
-      final repo = await ref.read(calendarRepositoryProvider.future);
-      if (existing == null) {
-        await repo.createLabel(labelName: name, color: selectedColor);
-      } else {
-        await repo.updateLabel(
-          id: existing.rowId,
-          labelName: name,
-          color: selectedColor,
-        );
-      }
-      ref.invalidate(eventLabelsProvider);
-      // 일정 응답에 라벨 이름·색이 박혀서 온다(CalendarEvent.labelName/labelColor).
-      // 라벨을 고치면 이미 받아 둔 월 일정은 옛 이름·옛 색을 그대로 들고 있으므로
-      // 함께 무효화한다 — family 는 base 를 넘기면 모든 달이 무효화된다.
-      ref.invalidate(monthEventsProvider);
-      if (!context.mounted) return;
-      // 시트는 root navigator 소속(p_modal useRootNavigator) — root 명시.
-      Navigator.of(context, rootNavigator: true).pop();
-    } on ApiException {
-      if (!context.mounted) return;
-    } finally {
-      controller.setSubmitting(false);
-    }
-  }
-
-  controller.onSubmit = submit;
-
-  showPSheet<void>(
+  final probe = _LabelProbe();
+  final focus = FocusNode(debugLabel: 'Label name');
+  PBottomSheet.show<void>(
     context,
-    title: existing == null ? l.calNewLabel : l.calEditLabel,
-    // content 높이에 맞춰 렌더 — 짧은 폼이 85% 고정 높이로 뜨지 않게.
-    shrinkWrap: true,
-    contentBuilder: (ctx, _) => _LabelEditorBody(
-      nameController: nameCtrl,
-      initialColor: selectedColor,
-      originalName: existing?.labelName,
-      controller: controller,
-      onColorChanged: (c) => selectedColor = c,
+    form: true,
+    initialFocus: existing == null ? focus : null,
+    isDirty: () => probe.dirty(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
     ),
-    footerBuilder: (ctx) => PSheetFooter(
-      controller: controller,
-      submitLabel: l.actionSave,
-      // 수정 폼에만 — 밀기로만 닿던 삭제가 들어간 화면에도 있다(swipe-actions.md:76).
-      // 09b-2 가 라벨 폼을 새로 짤 때 이 [삭제] 를 옮긴다.
-      leftSlotCompact: true,
-      neutralSubmit: true,
-      leftSlot: existing == null
-          ? null
-          // 내용 폭 ghost critical — 왼쪽 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
-          : Transform.translate(
-              offset: const Offset(-20, 0),
-              child: dsb.PButton(
-                label: l.actionDelete,
-                variant: dsb.PButtonVariant.ghost,
-                ghostColor: dsb.PButtonGhostColor.critical,
-                size: dsb.PButtonSize.large,
-                onPressed: () async {
-                  final ok = await _confirmDelete(
-                    ctx,
-                    existing,
-                    onRetried: () {
-                      if (ctx.mounted) {
-                        Navigator.of(ctx, rootNavigator: true).pop();
-                      }
-                    },
-                  );
-                  if (ok && ctx.mounted) {
-                    Navigator.of(ctx, rootNavigator: true).pop();
-                  }
-                },
-              ),
-            ),
-    ),
-  );
+    builder: (_) =>
+        _LabelForm(existing: existing, probe: probe, nameFocus: focus),
+  ).whenComplete(focus.dispose);
 }
 
-class _LabelEditorBody extends StatefulWidget {
-  const _LabelEditorBody({
-    required this.nameController,
-    required this.initialColor,
-    this.originalName,
-    required this.controller,
-    required this.onColorChanged,
-  });
-  final TextEditingController nameController;
-  final String initialColor;
+class _LabelProbe {
+  bool Function() dirty = () => false;
+}
 
-  /// 고치기 전 저장된 이름(추가 폼은 null) — 안 바꾼 옛 이름은 12자 오류를 보이지 않는다.
-  final String? originalName;
-  final PSheetController controller;
-  final ValueChanged<String> onColorChanged;
+class _LabelForm extends ConsumerStatefulWidget {
+  const _LabelForm({
+    required this.existing,
+    required this.probe,
+    required this.nameFocus,
+  });
+  final EventLabel? existing;
+  final _LabelProbe probe;
+  final FocusNode nameFocus;
 
   @override
-  State<_LabelEditorBody> createState() => _LabelEditorBodyState();
+  ConsumerState<_LabelForm> createState() => _LabelFormState();
 }
 
-class _LabelEditorBodyState extends State<_LabelEditorBody> {
+class _LabelFormState extends ConsumerState<_LabelForm> {
+  late final TextEditingController _nameCtrl;
   late String _color;
+  late final String _initialName;
+  late final String _initialColor;
+  String? _foreignColor;
+  bool _submitting = false;
+  String? _nameError;
+  String? _saveError;
 
-  bool get _nameTooLong =>
-      nameIssue(widget.nameController.text, kLabelNameMax) == NameIssue.tooLong;
+  EventLabel? get _edit => widget.existing;
 
   @override
   void initState() {
     super.initState();
-    _color = widget.initialColor;
+    _initialName = _edit?.labelName ?? '';
+    _nameCtrl = TextEditingController(text: _initialName);
+    final stored = _edit?.color?.trim();
+    if (stored != null && stored.isNotEmpty) {
+      final color = chartColorOfHex(stored);
+      if (color == null) {
+        // 팔레트 밖 색 — "지금 색" 칸. 고르지 않으면 바꾸지 않는다
+        _foreignColor = stored;
+        _color = stored;
+      } else {
+        _color = chartHexOf(color);
+      }
+    } else {
+      // 추가 — 라벨 목록이 아직 쓰지 않은 첫 색
+      final labels = ref.read(eventLabelsProvider).value ?? const [];
+      _color = firstUnusedHex([for (final x in labels) x.color]);
+    }
+    _initialColor = _color;
+    widget.probe.dirty = () =>
+        _nameCtrl.text != _initialName || _color != _initialColor;
+  }
+
+  @override
+  void dispose() {
+    widget.probe.dirty = () => false;
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickColor() async {
+    FocusScope.of(context).unfocus();
+    final picked = await showColorPickSheet(
+      context,
+      title: AppLocalizations.of(context).calFieldColor,
+      hex: _color,
+      foreignHex: _foreignColor,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _color = picked);
+  }
+
+  /// 칸 아래에 보일 오류 — 빈 이름 · 같은 이름 · 12자 초과(안 바꾼 옛 이름은 면제 — 색만 고칠 수 있다).
+  String? _issueText(AppLocalizations l) {
+    final raw = _nameCtrl.text;
+    final taken = [
+      for (final x
+          in ref.read(eventLabelsProvider).value ?? const <EventLabel>[])
+        if (x.rowId != _edit?.rowId) x.labelName,
+    ];
+    final issue = nameIssue(raw, kLabelNameMax, taken);
+    return switch (issue) {
+      NameIssue.required => l.calLabelNameRequired,
+      NameIssue.duplicate => l.calLabelNameDuplicate,
+      NameIssue.tooLong =>
+        raw == _edit?.labelName ? null : l.nameTooLong(kLabelNameMax),
+      null => null,
+    };
+  }
+
+  Future<void> _submit() async {
+    if (_submitting) return;
+    final l = AppLocalizations.of(context);
+    final err = _issueText(l);
+    if (err != null) {
+      setState(() => _nameError = err);
+      widget.nameFocus.requestFocus();
+      return;
+    }
+    final name = _nameCtrl.text.trim();
+    setState(() {
+      _submitting = true;
+      _saveError = null;
+    });
+    try {
+      final repo = await ref.read(calendarRepositoryProvider.future);
+      if (_edit == null) {
+        await repo.createLabel(labelName: name, color: _color);
+      } else {
+        await repo.updateLabel(
+          id: _edit!.rowId,
+          labelName: name,
+          color: _color,
+        );
+      }
+      ref.invalidate(eventLabelsProvider);
+      // 일정 응답에 라벨 이름·색이 박혀서 온다 — 이미 받아 둔 월 일정도 함께 무효화한다
+      ref.invalidate(monthEventsProvider);
+      if (!mounted) return;
+      PBottomSheet.of(context).close();
+    } on ApiException {
+      if (!mounted) return;
+      setState(() => _saveError = l.calLabelSaveFailed);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _delete() async {
+    final edit = _edit!;
+    final sheet = PBottomSheet.of(context);
+    final ok = await _confirmDelete(
+      context,
+      edit,
+      onRetried: () => sheet.close(),
+    );
+    if (ok && mounted) sheet.close();
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
-    final swatch = solidSwatchColor(context, _color, fallback: t.fgBrand);
-    final preview = widget.nameController.text.trim();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      child: Column(
+    final c = context.colors;
+    final isEdit = _edit != null;
+    final save = dsb.PButton(
+      label: isEdit ? l.actionSave : l.calAdd,
+      size: dsb.PButtonSize.large,
+      loading: _submitting,
+      onPressed: _submitting ? null : _submit,
+    );
+    return PBottomSheetContent(
+      title: isEdit ? l.calEditLabel : l.calNewLabel,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 미리보기
-          Container(
-            padding: const EdgeInsets.all(PSpace.x16),
-            decoration: BoxDecoration(
-              color: softBg(context, swatch),
-              borderRadius: PRadius.brMd,
+          if (_saveError != null)
+            CalendarSaveErrorCallout(message: _saveError!),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              PSpacing.globalGutter,
+              0,
+              PSpacing.globalGutter,
+              PSpacing.x2,
             ),
-            child: Row(
-              children: [
-                // 웹 정합 — 40 radius-md 타일 + tag 아이콘 (원형 아님).
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: swatch,
-                    borderRadius: PRadius.brMd,
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(LucideIcons.tag, size: 18, color: t.fgOnBrand),
+            // 이름은 12자까지 — 세는 줄 "n/12", 입력은 12 에서 멈춘다. 12자 넘는 옛 이름은 "13/12" 로 보인다
+            child: PField(
+              // 입력 상한은 저장된 이름 길이와 12 중 큰 값(긴 옛 이름에 글자를 더해도 안 잘린다), 세는 줄 분모는 규칙 12
+              maxGraphemeCount: math.max(
+                _initialName.characters.length,
+                kLabelNameMax,
+              ),
+              counterMax: kLabelNameMax,
+              invalid: _nameError != null,
+              errorMessage: _nameError,
+              child: PInput(
+                controller: _nameCtrl,
+                focusNode: widget.nameFocus,
+                semanticLabel: l.calFieldName,
+                placeholder: l.calLabelNamePlaceholder,
+                onChanged: (_) {
+                  if (_nameError != null) setState(() => _nameError = null);
+                },
+                onSubmitted: (_) => _submit(),
+              ),
+            ),
+          ),
+          PList(
+            semanticLabel: isEdit ? l.calEditLabel : l.calNewLabel,
+            children: [
+              PickerRow(
+                title: l.calFieldColor,
+                prefix: const ExcludeSemantics(
+                  child: Icon(LucideIcons.palette),
                 ),
-                const SizedBox(width: PSpace.x12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.calPreview,
-                        // 웹 badge(11)/600 정합 — 색은 중립(tertiary) 유지.
-                        style: PTypo.micro.copyWith(
-                          color: t.fgTertiary,
-                          fontWeight: PFontWeight.semi,
-                          letterSpacing: 0.22,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        preview.isEmpty ? l.calNewLabel : preview,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        // 웹 body-lg(16)/700 정합 — 색은 중립(primary) 유지.
-                        style: PTypo.bodyLg.copyWith(
-                          color: t.fgPrimary,
-                          fontWeight: PFontWeight.bold,
-                        ),
-                      ),
-                    ],
+                value: colorPickName(context, _color),
+                leading: PickerDot(
+                  color: resolveChartColor(
+                    context,
+                    _color,
+                    fallback: c.fgBrand,
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: PSpace.x16),
-
-          // 이름
-          Text(
-            l.calFieldName,
-            style: PTypo.caption.copyWith(color: t.fgSecondary),
-          ),
-          const SizedBox(height: PSpace.x4),
-          // 이름은 12자까지 — 카드 한 줄에 들어가는 길이(웹과 같은 제품 규칙). 세는 줄 "n/12", 입력은 12 에서 멈춘다
-          PField(
-            maxGraphemeCount: kLabelNameMax,
-            invalid: _nameTooLong,
-            errorMessage: _nameTooLong ? l.nameTooLong(kLabelNameMax) : null,
-            child: PInput(
-              controller: widget.nameController,
-              semanticLabel: l.calFieldName,
-              placeholder: l.calLabelNamePlaceholder,
-              onChanged: (v) {
-                widget.controller.setCanSubmit(
-                  labelNameSubmittable(v, original: widget.originalName),
-                );
-                setState(() {});
-              },
-            ),
-          ),
-          const SizedBox(height: PSpace.x16),
-
-          // 색상
-          Text(
-            l.calFieldColor,
-            style: PTypo.caption.copyWith(color: t.fgSecondary),
-          ),
-          const SizedBox(height: PSpace.x8),
-          PColorPicker(
-            selected: _color,
-            onChanged: (hex) {
-              setState(() => _color = hex);
-              widget.onColorChanged(hex);
-            },
+                onTap: _pickColor,
+              ),
+            ],
           ),
         ],
       ),
+      footer: isEdit ? const [] : [save],
+      footerRow: isEdit
+          ? Row(
+              spacing: PSpacing.x2,
+              children: [
+                // 내용 폭 ghost critical — 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
+                Transform.translate(
+                  offset: const Offset(-20, 0),
+                  child: dsb.PButton(
+                    label: l.actionDelete,
+                    variant: dsb.PButtonVariant.ghost,
+                    ghostColor: dsb.PButtonGhostColor.critical,
+                    size: dsb.PButtonSize.large,
+                    onPressed: _submitting ? null : _delete,
+                  ),
+                ),
+                Expanded(child: save),
+              ],
+            )
+          : null,
     );
   }
 }
