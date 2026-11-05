@@ -9268,4 +9268,189 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txfDeletedCategory => 'Deleted category';
+
+  @override
+  String get expSplitSourceNote => 'Original transaction';
+
+  @override
+  String expSplitOldTotal(String amount) {
+    return 'Old total $amount';
+  }
+
+  @override
+  String expSplitItemsHeader(int count) {
+    return 'Split into $count';
+  }
+
+  @override
+  String expSplitItemTitle(int n) {
+    return 'Item $n';
+  }
+
+  @override
+  String get expSplitAddItem => 'Add item';
+
+  @override
+  String get expSplitDropItem => 'Remove this item';
+
+  @override
+  String get expSplitItemName => 'Name';
+
+  @override
+  String get expSplitItemNamePh => 'Item name';
+
+  @override
+  String expSplitItemHelp(String rest, String total) {
+    return 'Other items $rest · Total $total';
+  }
+
+  @override
+  String get expSplitRemaining => 'Remaining';
+
+  @override
+  String expSplitShortBy(String amount) {
+    return '$amount short';
+  }
+
+  @override
+  String expSplitOverBy(String amount) {
+    return '$amount over';
+  }
+
+  @override
+  String get expSplitReconcileTitle =>
+      'The total changed, so the split needs to match';
+
+  @override
+  String expSplitReconcileShort(String sum, String total, String diff) {
+    return 'Split total $sum · New total $total — $diff short.';
+  }
+
+  @override
+  String expSplitReconcileOver(String sum, String total, String diff) {
+    return 'Split total $sum · New total $total — $diff over.';
+  }
+
+  @override
+  String get expSplitActProportional => 'Proportional';
+
+  @override
+  String get expSplitActLargest => 'Apply to largest';
+
+  @override
+  String get expSplitActAdjust => 'Adjustment item';
+
+  @override
+  String get expSplitErrRemain => 'Make the remaining amount 0.';
+
+  @override
+  String get expSplitErrCount => 'Add at least two items.';
+
+  @override
+  String get expSplitRemoveAll => 'Undo split';
+
+  @override
+  String get expSplitRemoveTitle => 'Undo this split?';
+
+  @override
+  String get expSplitRemoveBody =>
+      'All split items are removed and it goes back to one transaction.';
+
+  @override
+  String get expSplitRemoveAction => 'Undo split';
+
+  @override
+  String get expSplitRemoveFailed => 'Couldn\'t undo the split.';
+
+  @override
+  String get expSplitSaveFailed =>
+      'Couldn\'t save. Please try again in a moment.';
+
+  @override
+  String get dutchMeIncludeTitle => 'Include me';
+
+  @override
+  String get dutchMeIncludeOn => 'My share is counted too';
+
+  @override
+  String dutchParticipantsLabel(int count) {
+    return '$count participants';
+  }
+
+  @override
+  String dutchChipRemove(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get dutchNameEmptyErr => 'Enter a name.';
+
+  @override
+  String get dutchMethodHeader => 'How to split';
+
+  @override
+  String get dutchEqualSub => 'Equally';
+
+  @override
+  String get dutchRatioSub => 'By shares';
+
+  @override
+  String get dutchSharesHeader => 'Shares';
+
+  @override
+  String dutchSharesTotal(String amount) {
+    return 'Total $amount';
+  }
+
+  @override
+  String get dutchPayerShort => 'Paid';
+
+  @override
+  String dutchRemainIncluded(String amount) {
+    return 'Includes $amount left over';
+  }
+
+  @override
+  String get dutchShareUnit => 'sh';
+
+  @override
+  String get dutchNoteTitle => 'Note';
+
+  @override
+  String get dutchNotePh => 'A note to keep with this split';
+
+  @override
+  String dutchPerPersonMe(String amount, String rest) {
+    return '$amount · $rest is mine';
+  }
+
+  @override
+  String get dutchErrNoOthers => 'Add someone to split with.';
+
+  @override
+  String dutchSharesShortErr(String amount) {
+    return 'The shares are $amount short.';
+  }
+
+  @override
+  String dutchSharesOverErr(String amount) {
+    return 'The shares are $amount over.';
+  }
+
+  @override
+  String get dutchSaveFailed =>
+      'Couldn\'t create the split. Please try again in a moment.';
+
+  @override
+  String get expSplitErrRow =>
+      'Give every item a category and an amount above 0.';
+
+  @override
+  String get dutchErrRatio => 'Shares must be numbers above 0.';
+
+  @override
+  String get dutchErrCustomEmpty => 'Enter an amount for every participant.';
+
+  @override
+  String get expRecurringOpenFailed => 'Couldn\'t open the repeat settings.';
 }

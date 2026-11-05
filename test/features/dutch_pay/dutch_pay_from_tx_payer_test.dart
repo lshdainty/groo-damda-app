@@ -15,11 +15,13 @@ import 'package:groo_damda_app/core/auth/user.dart';
 import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/dutch_pay/data/dutch_pay_repository.dart';
 import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay.dart';
-import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_from_tx_dialog.dart';
+import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_step.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/forms/step_probe.dart';
 
 typedef _Row = ({String? name, int? userRowId, int amount, bool isPayer});
 
@@ -46,6 +48,7 @@ class _Repo extends DutchPayRepository {
     String? dutchPayDate,
     int? sourceExpenseRowId,
     required List<_Row> participants,
+    bool silent = false,
   }) async {
     sent = participants;
     return DutchPay(rowId: 1, title: title, totalAmount: totalAmount);
@@ -80,7 +83,14 @@ Future<(_Repo, AppLocalizations)> _open(WidgetTester tester) async {
         home: Scaffold(
           body: Builder(
             builder: (ctx) => TextButton(
-              onPressed: () => showDutchPayFromTxDialog(ctx, _expense),
+              onPressed: () => PBottomSheet.show<void>(
+                ctx,
+                builder: (_) => DutchStepFlow(
+                  expense: _expense,
+                  probe: StepProbe(),
+                  onBack: () {},
+                ),
+              ),
               child: const Text('open'),
             ),
           ),
@@ -95,13 +105,7 @@ Future<(_Repo, AppLocalizations)> _open(WidgetTester tester) async {
 }
 
 Future<void> _addFriend(WidgetTester tester, AppLocalizations l) async {
-  await tester.enterText(
-    find.byWidgetPredicate(
-      (w) =>
-          w is TextField && w.decoration?.hintText == l.dutchAddNamePlaceholder,
-    ),
-    '친구A',
-  );
+  await tester.enterText(find.byType(EditableText).first, '친구A');
   await tester.tap(find.widgetWithText(PButton, l.dutchAdd));
   await tester.pumpAndSettle();
 }
@@ -127,7 +131,7 @@ void main() {
   testWidgets('나도 포함 끔: 나를 0원 결제자로 싣고 친구가 총액을 낸다', (tester) async {
     final (repo, l) = await _open(tester);
     await _addFriend(tester, l);
-    await tester.tap(find.text(l.dutchIncludeMyself));
+    await tester.tap(find.text(l.dutchMeIncludeTitle));
     await tester.pumpAndSettle();
     await _create(tester, l);
 

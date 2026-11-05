@@ -99,6 +99,22 @@ List<(String, List<Expense>)> txHistoryByDay(List<Expense> rows) {
 int linkedRecurringCount(List<RecurringTransaction>? list, int expenseRowId) =>
     list?.where((r) => r.sourceExpenseRowId == expenseRowId).length ?? 0;
 
+/// 이 거래에 연결된 반복 — 둘 이상(옛 데이터)이면 시작일이 가장 늦은 하나. 없으면 null.
+RecurringTransaction? linkedRecurringOf(
+  List<RecurringTransaction>? list,
+  int expenseRowId,
+) {
+  RecurringTransaction? best;
+  for (final r in list ?? const <RecurringTransaction>[]) {
+    if (r.sourceExpenseRowId != expenseRowId) continue;
+    if (best == null ||
+        (r.startDate ?? '').compareTo(best.startDate ?? '') > 0) {
+      best = r;
+    }
+  }
+  return best;
+}
+
 /// "더 하기" 줄 값 — 이 거래로 만든 더치페이 수.
 int linkedDutchPayCount(List<DutchPay>? list, int expenseRowId) =>
     list?.where((d) => d.sourceExpenseRowId == expenseRowId).length ?? 0;

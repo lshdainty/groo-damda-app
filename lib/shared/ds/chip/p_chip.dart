@@ -500,9 +500,13 @@ class PInputChip extends StatelessWidget {
     required this.onRemove,
     this.size = PChipSize.medium,
     this.prefixIcon,
+    this.leading,
   });
 
   final String label;
+
+  /// 글 앞 위젯 — 아바타 24 같은 것. 있으면 [prefixIcon] 보다 먼저 선다(기본 없음 — 기존 칩은 그대로).
+  final Widget? leading;
 
   /// 지우기 버튼의 이름 — "{글} 지우기".
   final String removeLabel;
@@ -545,6 +549,10 @@ class PInputChip extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(width: m.paddingX),
+              if (leading != null) ...[
+                leading!,
+                const SizedBox(width: PSpacing.x1_5),
+              ],
               if (prefixIcon != null) ...[
                 _icon(prefixIcon!, m.prefixIcon, colors.foreground),
                 const SizedBox(width: PSpacing.x1_5),

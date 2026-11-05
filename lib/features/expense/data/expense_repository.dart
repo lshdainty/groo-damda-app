@@ -144,6 +144,7 @@ class ExpenseRepository {
             'splits': [
               for (final s in splits)
                 {
+                  'rowId': ?s.rowId,
                   'categoryRowId': s.categoryRowId,
                   'amount': s.amount,
                   'label': ?s.label,

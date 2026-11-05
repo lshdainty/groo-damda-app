@@ -87,6 +87,7 @@ class PInput extends PTextControl {
     this.suffixIcon,
     this.clearable = false,
     this.keyboardType,
+    this.textAlign = TextAlign.start,
     this.textInputAction,
     this.onSubmitted,
     this.obscureText = false,
@@ -112,6 +113,9 @@ class PInput extends PTextControl {
 
   /// 숫자 · 금액은 숫자 키보드(TextInputType.number) — 쉼표는 inputFormatters 로 넣는다.
   final TextInputType? keyboardType;
+
+  /// 값 맞춤 — 기본은 시작. 줄 끝 몫 칸이 오른쪽 맞춤으로 쓴다.
+  final TextAlign textAlign;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
 
@@ -205,6 +209,7 @@ class _PInputState extends PTextControlState<PInput> {
             ),
             multiline: false,
             keyboardType: widget.keyboardType,
+            textAlign: widget.textAlign,
             textInputAction: widget.textInputAction,
             obscureText: widget.obscureText,
             onSubmitted: widget.onSubmitted,

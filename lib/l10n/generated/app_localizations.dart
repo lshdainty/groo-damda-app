@@ -5506,7 +5506,7 @@ abstract class AppLocalizations {
   /// No description provided for @dutchNameAlreadyAdded.
   ///
   /// In ko, this message translates to:
-  /// **'이미 추가된 이름이에요.'**
+  /// **'이미 넣은 이름이에요.'**
   String get dutchNameAlreadyAdded;
 
   /// No description provided for @dutchAdd.
@@ -16284,6 +16284,306 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'지운 카테고리'**
   String get txfDeletedCategory;
+
+  /// No description provided for @expSplitSourceNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'원 거래'**
+  String get expSplitSourceNote;
+
+  /// No description provided for @expSplitOldTotal.
+  ///
+  /// In ko, this message translates to:
+  /// **'옛 총액 {amount}'**
+  String expSplitOldTotal(String amount);
+
+  /// No description provided for @expSplitItemsHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 내역 {count}개'**
+  String expSplitItemsHeader(int count);
+
+  /// No description provided for @expSplitItemTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'항목 {n}'**
+  String expSplitItemTitle(int n);
+
+  /// No description provided for @expSplitAddItem.
+  ///
+  /// In ko, this message translates to:
+  /// **'항목 추가'**
+  String get expSplitAddItem;
+
+  /// No description provided for @expSplitDropItem.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 항목 지우기'**
+  String get expSplitDropItem;
+
+  /// No description provided for @expSplitItemName.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름'**
+  String get expSplitItemName;
+
+  /// No description provided for @expSplitItemNamePh.
+  ///
+  /// In ko, this message translates to:
+  /// **'항목 이름'**
+  String get expSplitItemNamePh;
+
+  /// No description provided for @expSplitItemHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'나머지 항목 합 {rest} · 총액 {total}'**
+  String expSplitItemHelp(String rest, String total);
+
+  /// No description provided for @expSplitRemaining.
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 금액'**
+  String get expSplitRemaining;
+
+  /// No description provided for @expSplitShortBy.
+  ///
+  /// In ko, this message translates to:
+  /// **'{amount} 모자라요'**
+  String expSplitShortBy(String amount);
+
+  /// No description provided for @expSplitOverBy.
+  ///
+  /// In ko, this message translates to:
+  /// **'{amount} 넘쳐요'**
+  String expSplitOverBy(String amount);
+
+  /// No description provided for @expSplitReconcileTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'총액이 바뀌어 나눈 금액을 맞춰야 해요'**
+  String get expSplitReconcileTitle;
+
+  /// No description provided for @expSplitReconcileShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 합계 {sum} · 새 총액 {total} — {diff} 모자라요.'**
+  String expSplitReconcileShort(String sum, String total, String diff);
+
+  /// No description provided for @expSplitReconcileOver.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 합계 {sum} · 새 총액 {total} — {diff} 넘쳐요.'**
+  String expSplitReconcileOver(String sum, String total, String diff);
+
+  /// No description provided for @expSplitActProportional.
+  ///
+  /// In ko, this message translates to:
+  /// **'비례 배분'**
+  String get expSplitActProportional;
+
+  /// No description provided for @expSplitActLargest.
+  ///
+  /// In ko, this message translates to:
+  /// **'큰 항목 반영'**
+  String get expSplitActLargest;
+
+  /// No description provided for @expSplitActAdjust.
+  ///
+  /// In ko, this message translates to:
+  /// **'조정 항목'**
+  String get expSplitActAdjust;
+
+  /// No description provided for @expSplitErrRemain.
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 금액을 0원으로 맞춰주세요.'**
+  String get expSplitErrRemain;
+
+  /// No description provided for @expSplitErrCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'항목을 둘 이상 넣어주세요.'**
+  String get expSplitErrCount;
+
+  /// No description provided for @expSplitRemoveAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역 분할 풀기'**
+  String get expSplitRemoveAll;
+
+  /// No description provided for @expSplitRemoveTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역 분할을 풀까요?'**
+  String get expSplitRemoveTitle;
+
+  /// No description provided for @expSplitRemoveBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'나눈 항목이 모두 지워지고 거래 하나로 돌아가요.'**
+  String get expSplitRemoveBody;
+
+  /// No description provided for @expSplitRemoveAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'풀기'**
+  String get expSplitRemoveAction;
+
+  /// No description provided for @expSplitRemoveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역 분할을 풀지 못했어요.'**
+  String get expSplitRemoveFailed;
+
+  /// No description provided for @expSplitSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get expSplitSaveFailed;
+
+  /// No description provided for @dutchMeIncludeTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'나도 포함해서 나누기'**
+  String get dutchMeIncludeTitle;
+
+  /// No description provided for @dutchMeIncludeOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 몫도 계산돼요'**
+  String get dutchMeIncludeOn;
+
+  /// No description provided for @dutchParticipantsLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'참여자 {count}명'**
+  String dutchParticipantsLabel(int count);
+
+  /// No description provided for @dutchChipRemove.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 빼기'**
+  String dutchChipRemove(String name);
+
+  /// No description provided for @dutchNameEmptyErr.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 입력해주세요.'**
+  String get dutchNameEmptyErr;
+
+  /// No description provided for @dutchMethodHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'나누는 법'**
+  String get dutchMethodHeader;
+
+  /// No description provided for @dutchEqualSub.
+  ///
+  /// In ko, this message translates to:
+  /// **'똑같이'**
+  String get dutchEqualSub;
+
+  /// No description provided for @dutchRatioSub.
+  ///
+  /// In ko, this message translates to:
+  /// **'사람마다 몫 수'**
+  String get dutchRatioSub;
+
+  /// No description provided for @dutchSharesHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'몫'**
+  String get dutchSharesHeader;
+
+  /// No description provided for @dutchSharesTotal.
+  ///
+  /// In ko, this message translates to:
+  /// **'합계 {amount}'**
+  String dutchSharesTotal(String amount);
+
+  /// No description provided for @dutchPayerShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제'**
+  String get dutchPayerShort;
+
+  /// No description provided for @dutchRemainIncluded.
+  ///
+  /// In ko, this message translates to:
+  /// **'남는 {amount} 포함'**
+  String dutchRemainIncluded(String amount);
+
+  /// No description provided for @dutchShareUnit.
+  ///
+  /// In ko, this message translates to:
+  /// **'몫'**
+  String get dutchShareUnit;
+
+  /// No description provided for @dutchNoteTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모'**
+  String get dutchNoteTitle;
+
+  /// No description provided for @dutchNotePh.
+  ///
+  /// In ko, this message translates to:
+  /// **'정산에 같이 남길 한마디'**
+  String get dutchNotePh;
+
+  /// No description provided for @dutchPerPersonMe.
+  ///
+  /// In ko, this message translates to:
+  /// **'{amount} · {rest}은 나'**
+  String dutchPerPersonMe(String amount, String rest);
+
+  /// No description provided for @dutchErrNoOthers.
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 나눌 사람을 넣어주세요.'**
+  String get dutchErrNoOthers;
+
+  /// No description provided for @dutchSharesShortErr.
+  ///
+  /// In ko, this message translates to:
+  /// **'몫을 합하면 {amount} 모자라요.'**
+  String dutchSharesShortErr(String amount);
+
+  /// No description provided for @dutchSharesOverErr.
+  ///
+  /// In ko, this message translates to:
+  /// **'몫을 합하면 {amount} 넘쳐요.'**
+  String dutchSharesOverErr(String amount);
+
+  /// No description provided for @dutchSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'정산을 만들지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get dutchSaveFailed;
+
+  /// No description provided for @expSplitErrRow.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 항목에 카테고리와 0원보다 큰 금액을 넣어주세요.'**
+  String get expSplitErrRow;
+
+  /// No description provided for @dutchErrRatio.
+  ///
+  /// In ko, this message translates to:
+  /// **'몫은 0보다 큰 수로 넣어주세요.'**
+  String get dutchErrRatio;
+
+  /// No description provided for @dutchErrCustomEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 참여자의 금액을 넣어주세요.'**
+  String get dutchErrCustomEmpty;
+
+  /// No description provided for @expRecurringOpenFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'반복 설정을 열지 못했어요.'**
+  String get expRecurringOpenFailed;
 }
 
 class _AppLocalizationsDelegate

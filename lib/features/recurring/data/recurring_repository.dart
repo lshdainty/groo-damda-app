@@ -13,11 +13,16 @@ class RecurringRepository {
   static Options? _opts(bool silent) =>
       silent ? Options(extra: {kSilentErrorToast: true}) : null;
 
-  Future<List<RecurringTransaction>> list({bool? upcoming, int? limit}) async {
+  Future<List<RecurringTransaction>> list({
+    bool? upcoming,
+    int? limit,
+    bool silent = false,
+  }) async {
     try {
       final res = await _dio.get<Map<String, dynamic>>(
         '/recurring-transactions',
         queryParameters: {'upcoming': ?upcoming, 'limit': ?limit},
+        options: _opts(silent),
       );
       final body = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data ?? const {},
@@ -106,6 +111,9 @@ class RecurringRepository {
     int? assetRowId, // 자산 미연결 반복거래 허용 — 서버도 nullable
     /// 이체면 받는 자산. 안 실으면 서버가 지운다(이 화면의 PUT 은 전체 치환이다).
     int? toAssetRowId,
+
+    /// 거래에서 만든 반복이면 그 거래 — PUT 은 빠진 키를 지우므로 연결을 지키려면 싣는다.
+    int? sourceExpenseRowId,
     int? fee,
     int? interestAmount,
     required String expenseType,
@@ -135,6 +143,7 @@ class RecurringRepository {
         data: {
           'categoryRowId': ?categoryRowId,
           'assetRowId': assetRowId,
+          'sourceExpenseRowId': ?sourceExpenseRowId,
           'toAssetRowId': ?toAssetRowId,
           'fee': ?fee,
           'interestAmount': ?interestAmount,
