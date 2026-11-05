@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 입력(PInput) · 여러 줄 입력(PTextarea)이 함께 받는 값 — 상태는 [PTextControlState].
 ///
@@ -318,7 +319,8 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
                           ? AlignmentDirectional.topStart
                           : AlignmentDirectional.centerStart,
                       child: Text(
-                        placeholder,
+                        // 예시 글은 편집 대상이 아니라 낱말 단위로 그린다(v114) — 입력 중인 글은 기본 줄바꿈
+                        keepAll(placeholder),
                         maxLines: multiline ? null : 1,
                         softWrap: multiline,
                         overflow: multiline
