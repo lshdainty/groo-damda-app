@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/category/presentation/category_edit_dialog.dart';
 import 'package:groo_damda_app/features/category/presentation/category_move_tx_sheet.dart';
@@ -17,6 +16,8 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
@@ -140,12 +141,19 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
     });
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
-      await repo.reorderCategories(items);
+      await repo.reorderCategories(items, silent: true);
       // 서버 권위 데이터로 재동기 후 오버레이 제거 — refetch 완료를 기다려 깜빡임 방지.
       ref.invalidate(categoriesProvider);
       await ref.read(categoriesProvider.future);
     } catch (e) {
       debugPrint('reorderCategories failed: $e');
+      // 낙관 순서는 finally 에서 걷혀 서버 순서로 되돌아간다 — 스낵바 한 문장, 다시 시도 없음.
+      if (mounted) {
+        PSnackbar.maybeOf(context)?.show(
+          message: AppLocalizations.of(context).categoryReorderFailed,
+          tone: PSnackbarTone.critical,
+        );
+      }
     } finally {
       if (mounted) setState(() => _optimistic.clear());
     }
@@ -201,29 +209,30 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         ? '${l.categoryDeleteMessage} ${l.categoryDeleteRecurring(using)}'
         : l.categoryDeleteMessage;
     final next = _neighborOf(cat.rowId);
-    var deleted = false;
-    await PAlertDialog.show(
+    final container = ProviderScope.containerOf(context);
+    void refresh() {
+      container.invalidate(categoriesProvider);
+      container.invalidate(rangeSummaryProvider);
+      container.invalidate(dashboardSummaryProvider);
+    }
+
+    final deleted = await askConfirmThenRequest(
       context,
       title: l.categoryDeleteConfirm(cat.categoryName),
       description: description,
       cancelLabel: l.actionCancel,
       actionLabel: l.actionDelete,
-      destructive: true,
-      onAction: () async {
-        try {
-          final repo = await ref.read(expenseRepositoryProvider.future);
-          await repo.deleteCategory(cat.rowId);
-          deleted = true;
-        } on ApiException {
-          // 확인창이 닫히고 쓴 값은 그대로 — 알림은 옛 길 그대로
-        }
+      request: () async {
+        final repo = await container.read(expenseRepositoryProvider.future);
+        await repo.deleteCategory(cat.rowId, silent: true);
       },
+      failedMessage: l.categoryDeleteFailed,
+      retryLabel: l.actionRetry,
+      onRetried: refresh,
     );
     if (!mounted) return;
     if (deleted) {
-      ref.invalidate(categoriesProvider);
-      ref.invalidate(rangeSummaryProvider);
-      ref.invalidate(dashboardSummaryProvider);
+      refresh();
       _focusRow(next);
     } else {
       _focusRow(cat.rowId);

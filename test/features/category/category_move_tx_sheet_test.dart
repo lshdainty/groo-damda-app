@@ -23,13 +23,18 @@ class _FakeRepo extends ExpenseRepository {
     required String childName,
     required String icon,
     required String color,
+    bool silent = false,
   }) async {
     calls.add('split:$id:$childName:$icon:$color');
     return 3;
   }
 
   @override
-  Future<int> moveCategoryTransactions(int id, int targetCategoryRowId) async {
+  Future<int> moveCategoryTransactions(
+    int id,
+    int targetCategoryRowId, {
+    bool silent = false,
+  }) async {
     calls.add('move:$id:$targetCategoryRowId');
     return 5;
   }

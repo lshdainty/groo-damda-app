@@ -35,7 +35,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/scroll/hold_ids.dart';
 import 'package:groo_damda_app/shared/scroll/scroll_to_keyed.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 같은 줄의 두 번째 완료 누름을 무시하는 시간 — 따닥 막기(웹 `DOUBLE_CLICK_GUARD_MS`). 붙들기([kListHold] 700)보다 짧아야 한다.
 const Duration kTodoDoubleTapGuard = Duration(milliseconds: 600);
@@ -209,12 +209,11 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
         ..invalidate(constellationCollectionProvider);
       if (mounted && gain > 0 && constToday != null && !constToday.collected) {
         final left = constToday.goal - (constToday.points + gain);
-        showPSnackBar(
-          context,
-          left <= 0
+        PSnackbar.maybeOf(context)?.show(
+          message: left <= 0
               ? l.tdmStarToastCollected(gain)
               : l.tdmStarToastGain(gain, left),
-          severity: PSnackSeverity.success,
+          tone: PSnackbarTone.positive,
         );
       }
       // 새 목록이 올 때까지 낙관 값을 쥐고 있는다 — 먼저 걷으면 옛 서버 값으로 한 번 되돌아가 깜빡인다.
@@ -226,10 +225,13 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     } on ApiException {
       // 서버 원문을 띄우지 않는다(전역 오류 알림은 이 요청에서 껐다) — 되돌리고 새 글 한 번.
       if (mounted) {
-        showPSnackBar(
-          context,
-          l.todoToggleFailed,
-          severity: PSnackSeverity.error,
+        PSnackbar.maybeOf(context)?.show(
+          message: l.todoToggleFailed,
+          tone: PSnackbarTone.critical,
+          action: PSnackbarAction(
+            label: l.actionRetry,
+            onPressed: () => _toggleDone(x),
+          ),
         );
       }
     } finally {

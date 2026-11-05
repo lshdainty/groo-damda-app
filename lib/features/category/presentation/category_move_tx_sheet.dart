@@ -9,6 +9,9 @@ import 'package:groo_damda_app/features/category/presentation/category_tile.dart
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -17,7 +20,6 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// 새 하위 이름 상한 — 카테고리 이름과 같은 12자(I-20 B 11).
 const int kCategoryChildNameMax = 12;
@@ -94,6 +96,8 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
   bool _showNameError = false;
   bool _showTargetError = false;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
 
   /// 하위가 없는 최상위만 "새 하위 만들기" 대상 — 교착이 생기는 자리가 정확히 여기다.
   /// 하위 카테고리엔 또 하위를 만들 수 없다(최대 2단계).
@@ -205,7 +209,10 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       return;
     }
     final l = AppLocalizations.of(context);
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
       final moved = _mode == _Mode.newChild
@@ -214,10 +221,12 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
               childName: name,
               icon: widget.source.icon ?? 'tag',
               color: widget.source.color ?? '#9E9E9E',
+              silent: true,
             )
           : await repo.moveCategoryTransactions(
               widget.source.rowId,
               _targetRowId!,
+              silent: true,
             );
       // 거래의 카테고리가 바뀌므로 목록·통계까지 새로 받는다.
       ref.invalidate(categoriesProvider);
@@ -225,16 +234,18 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       ref.invalidate(monthExpensesProvider);
       invalidateAfterExpenseChange(ref);
       if (!mounted) return;
-      // 알림은 옛 길 그대로 — 시트가 아직 있는 동안 띄우고 닫는다
-      showPSnackBar(
-        context,
-        l.categoryMoveTxDone(moved),
-        severity: PSnackSeverity.success,
-      );
+      // 성공은 neutral 한 문장 — 스낵바 길은 시트를 닫기 전에 쥔다.
+      final snack = PSnackbar.maybeOf(context);
       PBottomSheet.of(context).close();
+      snack?.show(message: l.categoryMoveTxDone(moved));
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -255,6 +266,14 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_failed)
+            Padding(
+              padding: gutter.copyWith(bottom: PSpacing.x4),
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.categoryMoveTxFailed,
+              ),
+            ),
           if (_canSplit)
             Padding(
               padding: gutter.copyWith(bottom: PSpacing.x6),

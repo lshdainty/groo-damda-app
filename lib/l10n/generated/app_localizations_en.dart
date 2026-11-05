@@ -2975,7 +2975,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get categoryDeleteFailed => 'Delete failed';
+  String get categoryDeleteFailed => 'Couldn\'t delete the category.';
+
+  @override
+  String get categorySaveFailed => 'Couldn\'t save the category.';
+
+  @override
+  String get categoryMoveTxFailed => 'Couldn\'t move the transactions.';
+
+  @override
+  String get categoryReorderFailed => 'Couldn\'t change the order.';
+
+  @override
+  String get todoSaveFailed => 'Couldn\'t save the to-do.';
 
   @override
   String get categoryParentMoveHint =>
@@ -6001,7 +6013,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todoAddFailed => 'Add failed';
 
   @override
-  String get todoDeleteFailed => 'Delete failed';
+  String get todoDeleteFailed => 'Couldn\'t delete the to-do.';
 
   @override
   String get todoUpdateFailed => 'Update failed';

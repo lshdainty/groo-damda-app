@@ -5416,8 +5416,32 @@ abstract class AppLocalizations {
   /// No description provided for @categoryDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'카테고리를 삭제하지 못했어요.'**
   String get categoryDeleteFailed;
+
+  /// No description provided for @categorySaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 저장하지 못했어요.'**
+  String get categorySaveFailed;
+
+  /// No description provided for @categoryMoveTxFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래를 옮기지 못했어요.'**
+  String get categoryMoveTxFailed;
+
+  /// No description provided for @categoryReorderFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'순서를 바꾸지 못했어요.'**
+  String get categoryReorderFailed;
+
+  /// No description provided for @todoSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일을 저장하지 못했어요.'**
+  String get todoSaveFailed;
 
   /// No description provided for @categoryParentMoveHint.
   ///
@@ -10924,7 +10948,7 @@ abstract class AppLocalizations {
   /// No description provided for @todoDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'할 일을 삭제하지 못했어요.'**
   String get todoDeleteFailed;
 
   /// No description provided for @todoUpdateFailed.

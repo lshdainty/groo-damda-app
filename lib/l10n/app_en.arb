@@ -1734,7 +1734,11 @@
       }
     }
   },
-  "categoryDeleteFailed": "Delete failed",
+  "categoryDeleteFailed": "Couldn't delete the category.",
+  "categorySaveFailed": "Couldn't save the category.",
+  "categoryMoveTxFailed": "Couldn't move the transactions.",
+  "categoryReorderFailed": "Couldn't change the order.",
+  "todoSaveFailed": "Couldn't save the to-do.",
   "categoryParentMoveHint": "To make it top level, create a new top-level category and move its transactions.",
   "categoryMakeRoot": "Top level",
   "categoryNamePlaceholder": "e.g., Pets, Side income",
@@ -3214,7 +3218,7 @@
   },
   "todoActionFailed": "Failed",
   "todoAddFailed": "Add failed",
-  "todoDeleteFailed": "Delete failed",
+  "todoDeleteFailed": "Couldn't delete the to-do.",
   "todoUpdateFailed": "Update failed",
   "todoStatusChangeFailed": "Status change failed",
   "todoMoveFailed": "Move failed",

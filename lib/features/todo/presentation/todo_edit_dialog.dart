@@ -14,6 +14,8 @@ import 'package:groo_damda_app/features/todo/domain/todo_ledger.dart';
 import 'package:groo_damda_app/features/todo/domain/todo_meta.dart';
 import 'package:groo_damda_app/features/todo/domain/todo_tag.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -92,6 +94,8 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
   DateTime? _due;
   bool _previewContent = false;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
   String? _titleError;
 
   bool get _isEdit => widget.edit != null;
@@ -194,7 +198,10 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       _titleFocus.requestFocus();
       return;
     }
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(todoRepositoryProvider.future);
       final content = _contentCtrl.text.trim();
@@ -208,6 +215,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
           // 태그도 이 화면이 비울 수 있는 칸이다 — "태그 없음" 을 고르면 키를 빼지 말고 명시적 null 로 실어야 서버가 지운다.
           category: Patch.set(_tag),
           dueDate: Patch.set(_due == null ? null : _fmtDate(_due!)),
+          silent: true,
         );
       } else {
         await repo.create(
@@ -216,6 +224,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
           priority: _priority,
           category: _tag,
           dueDate: _due == null ? null : _fmtDate(_due!),
+          silent: true,
         );
       }
       ref.invalidate(todoListProvider);
@@ -224,8 +233,13 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -246,6 +260,8 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x4,
         children: [
+          if (_failed)
+            field(FormErrorCallout(key: _errorKey, message: l.todoSaveFailed)),
           field(
             PField(
               label: l.calFieldTitle,

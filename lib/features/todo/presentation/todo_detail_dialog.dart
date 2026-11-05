@@ -9,7 +9,6 @@ import 'package:groo_damda_app/features/todo/domain/todo_meta.dart';
 import 'package:groo_damda_app/features/todo/presentation/todo_actions.dart';
 import 'package:groo_damda_app/features/todo/presentation/todo_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -47,20 +46,14 @@ class _TodoDetailSheetState extends ConsumerState<_TodoDetailSheet> {
 
   Future<void> _delete() async {
     if (_deleting) return;
-    final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
-      context,
-      title: todoActions.deleteConfirmTitle(context, widget.todo),
-      description: todoActions.deleteConfirmMessage(context, widget.todo),
-      cancelLabel: l.actionCancel,
-      actionLabel: l.actionDelete,
-      destructive: true,
-    );
-    if (!ok || !mounted) return;
     setState(() => _deleting = true);
     try {
-      // 삭제는 todoActions 가 한다 — 목록 줄(밀기)도 같은 것을 부른다.
-      final deleted = await todoActions.delete(context, ref, widget.todo);
+      // 확인 · 삭제 · 실패 알림은 todoActions 가 한다 — 목록 줄(밀기)도 같은 것을 부른다.
+      final deleted = await todoActions.confirmAndDelete(
+        context,
+        ref,
+        widget.todo,
+      );
       if (deleted && mounted) PBottomSheet.of(context).close();
     } finally {
       if (mounted) setState(() => _deleting = false);

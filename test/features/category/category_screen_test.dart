@@ -39,6 +39,7 @@ class _FakeRepo extends ExpenseRepository {
     String? color,
     required String expenseType,
     int? parentRowId,
+    bool silent = false,
   }) async {
     calls.add(
       'create:$categoryName:$icon:$color:$expenseType:${parentRowId ?? '-'}',
@@ -56,6 +57,7 @@ class _FakeRepo extends ExpenseRepository {
     int? sortOrder,
     bool includeParentRowId = false,
     int? parentRowId,
+    bool silent = false,
   }) async {
     calls.add(
       'update:$id:$categoryName:$icon:$color:$expenseType:${parentRowId ?? '-'}',
@@ -64,7 +66,7 @@ class _FakeRepo extends ExpenseRepository {
   }
 
   @override
-  Future<void> deleteCategory(int id) async {
+  Future<void> deleteCategory(int id, {bool silent = false}) async {
     calls.add('delete:$id');
   }
 }

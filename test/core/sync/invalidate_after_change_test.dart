@@ -457,7 +457,7 @@ class _FakeTodoRepo extends TodoRepository {
   _FakeTodoRepo() : super(Dio());
 
   @override
-  Future<void> delete(int id) async {}
+  Future<void> delete(int id, {bool silent = false}) async {}
 }
 
 class _FakeMemoRepo extends MemoRepository {

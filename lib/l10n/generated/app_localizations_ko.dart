@@ -2921,7 +2921,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get categoryDeleteFailed => '삭제 실패';
+  String get categoryDeleteFailed => '카테고리를 삭제하지 못했어요.';
+
+  @override
+  String get categorySaveFailed => '카테고리를 저장하지 못했어요.';
+
+  @override
+  String get categoryMoveTxFailed => '거래를 옮기지 못했어요.';
+
+  @override
+  String get categoryReorderFailed => '순서를 바꾸지 못했어요.';
+
+  @override
+  String get todoSaveFailed => '할 일을 저장하지 못했어요.';
 
   @override
   String get categoryParentMoveHint => '최상위로 올리려면 새 최상위를 만들어 거래를 옮겨주세요.';
@@ -5892,7 +5904,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get todoAddFailed => '추가 실패';
 
   @override
-  String get todoDeleteFailed => '삭제 실패';
+  String get todoDeleteFailed => '할 일을 삭제하지 못했어요.';
 
   @override
   String get todoUpdateFailed => '수정 실패';
