@@ -162,6 +162,7 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                     topInset: PSpacing.x2,
                     // 아이콘 동작 — 아이콘 끝이 체크 끝선에 서도록 번짐은 아이콘 안쪽 여백만큼
                     actionBleed: kListHeaderIconActionBleed,
+                    flushAction: true,
                     action: PHelpBubble(
                       title: l.hideAmountsKindLabel,
                       description: l.hideAmountsKindNote,
@@ -215,6 +216,7 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                             child: PSkeleton.text(PTypography.t4),
                           ),
                     tabularFigures: true,
+                    flushAction: true,
                     topInset: PSpacing.x4,
                     // 읽기 전에도 자리는 같다(머리 높이가 뛰지 않게) — 누르지는 못한다
                     action: PTextButton(

@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -35,6 +38,7 @@ class PListHeader extends StatelessWidget {
     this.titleSuffix,
     this.actionBleed = kTextButtonPaddingX,
     this.tabularFigures = false,
+    this.flushAction = false,
   }) : assert(action == null || trailing == null, '오른쪽은 글 버튼과 값 글 중 하나');
 
   final String title;
@@ -66,6 +70,10 @@ class PListHeader extends StatelessWidget {
   /// 제목의 숫자를 고정폭으로(개수가 바뀌어도 폭이 흔들리지 않게).
   final bool tabularFigures;
 
+  /// 동작(36)이 줄 높이를 늘리지 않게 — 위아래 8 씩 번진다(글 줄 20 + 아래 8 이 머리 높이). 스펙 list-header `action` 의 위아래
+  /// −8 블리드. 기본 false(기존 머리는 동작 36 이 줄 높이).
+  final bool flushAction;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -87,12 +95,13 @@ class PListHeader extends StatelessWidget {
           // 글 버튼(36)이 있으면 그 36 이 줄 높이다 — 위아래 8 + 20 과 같다(스펙 marginY −8)
           topInset ?? (action == null ? PSpacing.x2 : 0),
           inset,
-          action == null ? PSpacing.x2 : 0,
+          action == null || flushAction ? PSpacing.x2 : 0,
         ),
         // 오른쪽 동작이 머리 폭의 절반을 넘으면 제목 아래 줄 오른쪽 끝으로 간다(03-G 4A)
         child: PHeaderRow(
           gap: PSpacing.x2_5,
           actionBleed: trailing != null ? 0 : actionBleed,
+          actionBleedY: flushAction ? _kFlushBleedY : 0,
           expandTitle: false,
           title: Semantics(
             // headingLevel 0 은 머리말이 아니다 — 목록 위 상태 줄("읽지 않은 알림 N개")
@@ -121,10 +130,86 @@ class PListHeader extends StatelessWidget {
               ? trailing
               : Transform.translate(
                   offset: Offset(actionBleed, 0),
-                  child: action,
+                  child: flushAction
+                      ? _ActionFlush(bleed: _kFlushBleedY, child: action!)
+                      : action,
                 ),
         ),
       ),
     );
+  }
+}
+
+const double _kFlushBleedY = PSpacing.x2;
+
+/// 동작을 위아래로 [bleed] 씩 번지게 둔다 — 자기 높이는 자식보다 2 × bleed 작고, 번진 자리도 눌림을 받는다.
+class _ActionFlush extends SingleChildRenderObjectWidget {
+  const _ActionFlush({required this.bleed, required Widget child})
+    : super(child: child);
+
+  final double bleed;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderActionFlush(bleed);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderActionFlush).bleed = bleed;
+  }
+}
+
+class _RenderActionFlush extends RenderShiftedBox {
+  _RenderActionFlush(this._bleed) : super(null);
+
+  double _bleed;
+  set bleed(double v) {
+    if (_bleed == v) return;
+    _bleed = v;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      math.max(0, super.computeMinIntrinsicHeight(width) - 2 * _bleed);
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      math.max(0, super.computeMaxIntrinsicHeight(width) - 2 * _bleed);
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final c = child!.getDryLayout(constraints.loosen());
+    return constraints.constrain(
+      Size(c.width, math.max(0, c.height - 2 * _bleed)),
+    );
+  }
+
+  @override
+  void performLayout() {
+    final c = child!;
+    c.layout(constraints.loosen(), parentUsesSize: true);
+    size = constraints.constrain(
+      Size(c.size.width, math.max(0, c.size.height - 2 * _bleed)),
+    );
+    (c.parentData! as BoxParentData).offset = Offset(
+      0,
+      (size.height - c.size.height) / 2,
+    );
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (position.dx < 0 ||
+        position.dx >= size.width ||
+        position.dy < -_bleed ||
+        position.dy >= size.height + _bleed) {
+      return false;
+    }
+    if (hitTestChildren(result, position: position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
   }
 }

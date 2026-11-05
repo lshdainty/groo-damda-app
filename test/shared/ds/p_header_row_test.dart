@@ -140,6 +140,37 @@ void main() {
     }
   });
 
+  group('PListHeader flushAction — 동작이 줄 높이를 늘리지 않고 번진 자리도 눌린다', () {
+    testWidgets('머리 36(위 8 + 글 20 + 아래 8) · 동작 위 번짐을 눌러도 받는다', (tester) async {
+      _viewport(tester);
+      var taps = 0;
+      await tester.pumpWidget(
+        _app(
+          PListHeader(
+            title: '제목',
+            topInset: 8,
+            flushAction: true,
+            action: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => taps++,
+              child: const SizedBox(
+                key: ValueKey('act'),
+                width: 36,
+                height: 36,
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(PListHeader)).height, 36);
+      final r = tester.getRect(find.byKey(const ValueKey('act')));
+      expect(r.height, 36);
+      await tester.tapAt(Offset(r.center.dx, r.top + 2));
+      await tester.tapAt(Offset(r.center.dx, r.bottom - 2));
+      expect(taps, 2);
+    });
+  });
+
   group('새 공용 머리 셋 — 100% 에서 한 줄, 200% 에서 내려간다', () {
     for (final scale in [1.0, 1.3, 2.0]) {
       testWidgets('PCardHeader · 폭 360 · 글자 ${(scale * 100).round()}%', (
