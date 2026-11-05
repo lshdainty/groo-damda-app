@@ -40,7 +40,7 @@ class UserCalendarRepository {
     }
   }
 
-  /// 보낸 칸만 바꾼다(서버 `UpdateRequest`) — 이름만 · 색만 보낼 수 있다. [silent] 는 폼 실패를 Callout 으로 알릴 때.
+  /// 보낸 칸만 바꾼다(서버 `UpdateRequest`) — 이름만 · 색만 보낼 수 있다. [silent] 는 호출한 자리가 실패를 직접 알릴 때(폼 Callout · 스낵바).
   Future<UserCalendar> update({
     required int id,
     String? calendarName,
@@ -95,6 +95,7 @@ class UserCalendarRepository {
     try {
       await _dio.patch<dynamic>(
         '/calendar/calendars/$id/regenerate-invite-code',
+        options: _silent,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -131,6 +132,7 @@ class UserCalendarRepository {
       await _dio.patch<dynamic>(
         '/calendar/calendars/$id/member/$memberId/role',
         data: {'permission': permission},
+        options: _silent,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

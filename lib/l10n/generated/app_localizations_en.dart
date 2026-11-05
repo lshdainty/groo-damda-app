@@ -1719,7 +1719,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calDeleteLabelConfirm(String name) {
-    return 'Delete the \"$name\" label? Events with this label stay without a label.';
+    return 'Delete the \"$name\" label? Events with this label stay, without a label. This action cannot be undone.';
   }
 
   @override
@@ -1858,7 +1858,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calDeleteCalendarConfirm(String name) {
-    return 'Delete the \"$name\" calendar? Events move to the default calendar, and members can no longer see it.';
+    return 'Delete the \"$name\" calendar? Events move to the default calendar and members can no longer see it. This action cannot be undone.';
   }
 
   @override
@@ -1896,11 +1896,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calManageSaveFailed =>
-      'Couldn\'t save the calendar. Please try again in a moment.';
+      'Could not save. Please try again in a moment.';
 
   @override
-  String get calCreateFailed =>
-      'Couldn\'t create the calendar. Please try again in a moment.';
+  String get calCreateFailed => 'Could not save. Please try again in a moment.';
 
   @override
   String get calJoinInvalidCode => 'Please check the invite code.';
@@ -1909,7 +1908,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calJoinAlreadyMember => 'You\'ve already joined this calendar.';
 
   @override
-  String get calRemoveMemberFailed => 'Couldn\'t remove the member.';
+  String get calRemoveMemberFailed =>
+      'Could not remove the member. Please try again in a moment.';
+
+  @override
+  String get calColorChangeFailed => 'Couldn\'t change the color.';
+
+  @override
+  String get calRoleChangeFailed => 'Couldn\'t change the permission.';
+
+  @override
+  String get calRegenerateFailed => 'Couldn\'t generate a new invite code.';
+
+  @override
+  String get calInviteNone => 'No invite code';
+
+  @override
+  String get calJoinCodeRequired => 'Please enter the invite code.';
 
   @override
   String get calLabelNameRequired => 'Please enter a label name.';
@@ -1919,10 +1934,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calLabelSaveFailed =>
-      'Couldn\'t save the label. Please try again in a moment.';
+      'Could not save. Please try again in a moment.';
 
   @override
   String get calMeSuffix => '(me)';
+
+  @override
+  String calMemberManage(String name) {
+    return 'Manage $name';
+  }
 
   @override
   String get calChangeToEditor => 'Change to editor';
@@ -8181,11 +8201,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dsDatePresetThisYear => 'This year';
-
-  @override
-  String calMemberMore(String name) {
-    return 'More for $name';
-  }
 
   @override
   String get apiErrorServer =>

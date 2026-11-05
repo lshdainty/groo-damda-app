@@ -205,7 +205,7 @@ void main() {
       CalendarManageScreen(calendarId: _deletable.rowId),
     );
 
-    await tester.tap(find.text(l.calDeleteCalendar));
+    await tester.tap(findPlain(l.calDeleteCalendar));
     await tester.pumpAndSettle();
     await tester.tap(_button(l.actionDelete));
     await tester.pumpAndSettle();

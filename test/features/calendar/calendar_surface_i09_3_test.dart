@@ -22,6 +22,7 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_labels_screen.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_share_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -51,7 +52,18 @@ class _LabelRepo extends CalendarRepository {
 
   final List<EventLabel> labelList;
   int deletes = 0;
+  int updates = 0;
   bool failDelete = false;
+
+  @override
+  Future<EventLabel> updateLabel({
+    required int id,
+    required String labelName,
+    String? color,
+  }) async {
+    updates++;
+    return EventLabel(rowId: id, labelName: labelName, color: color);
+  }
 
   @override
   Future<List<EventLabel>> labels() async => labelList;
@@ -300,7 +312,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('cal-share-1')));
       await tester.pumpAndSettle();
       expect(find.text('manage-1'), findsOneWidget);
-      expect(find.byType(BottomSheet), findsNothing);
+      expect(find.byType(PBottomSheetContent), findsNothing);
     });
   });
 
@@ -403,7 +415,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('출장').first);
       await tester.pumpAndSettle();
-      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
       expect(find.text('삭제'), findsOneWidget);
 
       // 추가 폼
@@ -413,7 +425,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('라벨 추가'));
       await tester.pumpAndSettle();
-      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
       expect(find.text('삭제'), findsNothing);
     });
 
@@ -432,7 +444,7 @@ void main() {
       await tester.tap(find.text('삭제').last);
       await tester.pumpAndSettle();
       expect(repo.deletes, 1);
-      expect(find.byType(BottomSheet), findsNothing);
+      expect(find.byType(PBottomSheetContent), findsNothing);
     });
 
     testWidgets('삭제 실패 — 고정 한 문장 + [다시 시도](바로 다시 요청) · 서버 글 0', (tester) async {
@@ -499,18 +511,36 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('가나다라마바사아자차카타파').first);
       await tester.pumpAndSettle();
-      // 안 바꾼 동안: 오류 글 없음 · [저장] 활성(프리셋과 같다)
-      expect(find.text('이름은 12자 이내로 입력해주세요.'), findsNothing);
-      final save = find.ancestor(
-        of: find.text('저장'),
-        matching: find.byType(dsb.PButton),
+      // 안 바꾼 동안: 눌러 저장하면 오류 없이 요청이 나간다(면제 — 색만 고칠 수 있다)
+      await tester.tap(find.text('저장'));
+      await tester.pumpAndSettle();
+      expect(repo.updates, 1);
+    });
+
+    testWidgets('12자 넘는 옛 이름 — 한 글자 지우면 12 검사를 통과해 저장되고, 13자 그대로 고친 값은 막힌다', (
+      tester,
+    ) async {
+      await size(tester);
+      const long = EventLabel(
+        rowId: 9,
+        labelName: '가나다라마바사아자차카타파',
+        color: '#2d8060',
       );
-      expect(tester.widget<dsb.PButton>(save.last).onPressed, isNotNull);
-      // 고치기 시작하면(여전히 12 초과 값은 입력이 12 에서 멈춘다) — 12자 이하로 줄이면 저장 가능
+      final repo = _LabelRepo(const [long]);
+      await tester.pumpWidget(
+        app(const CalendarLabelsScreen(), withRepo(repo)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('가나다라마바사아자차카타파').first);
+      await tester.pumpAndSettle();
+      // 한 글자 지움 → 12자
       await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타');
       await tester.pumpAndSettle();
       expect(find.text('12/12'), findsOneWidget);
-      expect(tester.widget<dsb.PButton>(save.last).onPressed, isNotNull);
+      await tester.tap(find.text('저장'));
+      await tester.pumpAndSettle();
+      expect(repo.updates, 1);
+      expect(findPlainContaining('12자 이내'), findsNothing);
     });
   });
 }

@@ -47,17 +47,20 @@ class CalendarManageScreen extends ConsumerStatefulWidget {
 class _CalendarManageScreenState extends ConsumerState<CalendarManageScreen> {
   bool _leaving = false;
 
+  // 이름 · 색을 저장한 뒤 목록을 다시 받는 동안 옛 값이 보이지 않게 성공한 값을 먼저 보인다.
+  // 다시 받은 목록의 값이 [base] 에서 바뀌면(다시 받음 끝) 더는 쓰지 않는다.
+  String? _nameOverride;
+  String? _nameBase;
+  String? _colorOverride;
+  String? _colorBase;
+
+  /// 목록으로 돌아간다 — 한 번만. 이 화면이 맨 위일 때만(나가는 중이거나 가려졌으면 부르지 않는다: go_router 의
+  /// pop 은 맨 위 라우트를 닫으므로 두 번 부르면 목록까지 닫힌다).
   void _leave() {
-    if (_leaving) return;
+    if (_leaving || !mounted) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
     _leaving = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (context.canPop()) {
-        context.pop();
-      } else {
-        context.go('/settings/calendar-share');
-      }
-    });
+    _back();
   }
 
   void _back() {
@@ -68,6 +71,31 @@ class _CalendarManageScreenState extends ConsumerState<CalendarManageScreen> {
     }
   }
 
+  UserCalendar _effective(UserCalendar c) {
+    final name = _nameOverride != null && c.calendarName == _nameBase
+        ? _nameOverride!
+        : c.calendarName;
+    final color = _colorOverride != null && c.color == _colorBase
+        ? _colorOverride
+        : c.color;
+    if (name == c.calendarName && color == c.color) return c;
+    return UserCalendar(
+      rowId: c.rowId,
+      ownerRowId: c.ownerRowId,
+      ownerName: c.ownerName,
+      calendarName: name,
+      color: color,
+      sortOrder: c.sortOrder,
+      isDefault: c.isDefault,
+      isVisible: c.isVisible,
+      inviteCode: c.inviteCode,
+      isShared: c.isShared,
+      isOwner: c.isOwner,
+      myRole: c.myRole,
+      memberCount: c.memberCount,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -76,9 +104,12 @@ class _CalendarManageScreenState extends ConsumerState<CalendarManageScreen> {
     UserCalendar? cal;
     if (calendars != null) {
       for (final c in calendars) {
-        if (c.rowId == widget.calendarId) cal = c;
+        if (c.rowId == widget.calendarId) cal = _effective(c);
       }
-      if (cal == null) _leave();
+      // 못 찾음은 다시 받는 중이 아닐 때만 — 지운 직후 다시 받는 사이에 두 번 닫지 않게
+      if (cal == null && !listAsync.isLoading) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _leave());
+      }
     }
 
     return Scaffold(
@@ -107,7 +138,22 @@ class _CalendarManageScreenState extends ConsumerState<CalendarManageScreen> {
             ),
             children: [
               if (cal != null)
-                _ManageBody(calendar: cal)
+                _ManageBody(
+                  calendar: cal,
+                  onLeave: _leave,
+                  onRenamed: (name) => setState(() {
+                    _nameBase = calendars!
+                        .firstWhere((c) => c.rowId == cal!.rowId)
+                        .calendarName;
+                    _nameOverride = name;
+                  }),
+                  onRecolored: (color) => setState(() {
+                    _colorBase = calendars!
+                        .firstWhere((c) => c.rowId == cal!.rowId)
+                        .color;
+                    _colorOverride = color;
+                  }),
+                )
               else if (listAsync.hasError && calendars == null)
                 CalendarSurfaceFailure(
                   title: l.calCalendarLoadError,
@@ -135,13 +181,26 @@ class _ManageSkeleton extends StatelessWidget {
       CalendarSurfaceRowSkeleton(),
       CalendarSurfaceHeaderSkeleton(topInset: PSpacing.x6),
       CalendarSurfaceRowSkeleton(),
+      CalendarSurfaceHeaderSkeleton(topInset: PSpacing.x6),
+      CalendarSurfaceRowSkeleton(),
+      CalendarSurfaceRowSkeleton(),
     ],
   );
 }
 
 class _ManageBody extends ConsumerStatefulWidget {
-  const _ManageBody({required this.calendar});
+  const _ManageBody({
+    required this.calendar,
+    required this.onLeave,
+    required this.onRenamed,
+    required this.onRecolored,
+  });
   final UserCalendar calendar;
+
+  /// 목록으로 돌아간다(화면이 한 번만 부른다).
+  final VoidCallback onLeave;
+  final ValueChanged<String> onRenamed;
+  final ValueChanged<String> onRecolored;
 
   @override
   ConsumerState<_ManageBody> createState() => _ManageBodyState();
@@ -149,11 +208,14 @@ class _ManageBody extends ConsumerStatefulWidget {
 
 class _ManageBodyState extends ConsumerState<_ManageBody> {
   bool _regenerating = false;
+  bool _colorBusy = false;
 
   UserCalendar get cal => widget.calendar;
 
   Future<void> _pickColor() async {
+    if (_colorBusy) return;
     final l = AppLocalizations.of(context);
+    final snack = PSnackbar.maybeOf(context);
     final stored = cal.color ?? chartHexOf(PChartColor.blue);
     final foreign = chartColorOfHex(stored) == null ? stored : null;
     final picked = await showColorPickSheet(
@@ -163,14 +225,21 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
       foreignHex: foreign,
     );
     if (picked == null || picked == stored || !mounted) return;
+    _colorBusy = true;
     try {
       final repo = await ref.read(userCalendarRepositoryProvider.future);
-      // 색만 보낸다. 실패하면 줄 값은 옛 색 그대로(알림은 전역 길)
-      await repo.update(id: cal.rowId, color: picked);
+      // 색만 보낸다. 바로 반영하는 값이라 실패하면 줄 값은 옛 색 그대로 — 알림만, [다시 시도] 없음
+      await repo.update(id: cal.rowId, color: picked, silent: true);
+      widget.onRecolored(picked);
       ref.invalidate(userCalendarListProvider);
       ref.invalidate(monthEventsProvider);
     } on ApiException {
-      // 토스트는 ErrorToastInterceptor 가 띄운다
+      snack?.show(
+        message: l.calColorChangeFailed,
+        tone: PSnackbarTone.critical,
+      );
+    } finally {
+      _colorBusy = false;
     }
   }
 
@@ -178,17 +247,28 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
     if (_regenerating) return;
     final l = AppLocalizations.of(context);
     final snack = PSnackbar.maybeOf(context);
-    setState(() => _regenerating = true);
-    try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
-      await repo.regenerateInviteCode(cal.rowId);
-      ref.invalidate(userCalendarListProvider);
+    final container = ProviderScope.containerOf(context);
+    final id = cal.rowId;
+    Future<void> request() async {
+      final repo = await container.read(userCalendarRepositoryProvider.future);
+      await repo.regenerateInviteCode(id);
+      container.invalidate(userCalendarListProvider);
       snack?.show(
         message: l.calInviteCodeRegenerated,
         tone: PSnackbarTone.positive,
       );
-    } on ApiException {
-      // 토스트는 ErrorToastInterceptor 가 띄운다
+    }
+
+    setState(() => _regenerating = true);
+    try {
+      await request();
+    } catch (_) {
+      showConfirmFailSnackbar(
+        snack,
+        message: l.calRegenerateFailed,
+        retryLabel: l.actionRetry,
+        retry: request,
+      );
     } finally {
       if (mounted) setState(() => _regenerating = false);
     }
@@ -202,13 +282,26 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
   }
 
   Future<void> _changeRole(CalendarMember member, String permission) async {
+    final l = AppLocalizations.of(context);
+    final snack = PSnackbar.maybeOf(context);
+    final container = ProviderScope.containerOf(context);
+    final id = cal.rowId;
+    Future<void> request() async {
+      final repo = await container.read(userCalendarRepositoryProvider.future);
+      await repo.changeMemberRole(id, member.rowId, permission);
+      container.invalidate(calendarMembersProvider(id));
+      container.invalidate(userCalendarListProvider);
+    }
+
     try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
-      await repo.changeMemberRole(cal.rowId, member.rowId, permission);
-      ref.invalidate(calendarMembersProvider(cal.rowId));
-      ref.invalidate(userCalendarListProvider);
-    } on ApiException {
-      // 토스트는 ErrorToastInterceptor 가 띄운다
+      await request();
+    } catch (_) {
+      showConfirmFailSnackbar(
+        snack,
+        message: l.calRoleChangeFailed,
+        retryLabel: l.actionRetry,
+        retry: request,
+      );
     }
   }
 
@@ -238,17 +331,7 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
   Future<void> _delete() async {
     final l = AppLocalizations.of(context);
     final container = ProviderScope.containerOf(context);
-    final router = GoRouter.of(context);
     final id = cal.rowId;
-    // 지운 뒤 목록으로 돌아간다(기록에 지운 캘린더 주소가 남지 않게 pop)
-    void leave() {
-      if (router.canPop()) {
-        router.pop();
-      } else {
-        router.go('/settings/calendar-share');
-      }
-    }
-
     final ok = await askConfirmThenRequest(
       context,
       title: l.calDeleteCalendar,
@@ -258,9 +341,12 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
       request: () => _deleteCalendarRequest(container, id),
       failedMessage: l.calDeleteCalendarFailed,
       retryLabel: l.actionRetry,
-      onRetried: leave,
+      // 스낵바는 화면을 떠난 뒤에도 남는다 — 아직 이 화면이 맨 위일 때만 돌아간다
+      onRetried: () {
+        if (mounted) widget.onLeave();
+      },
     );
-    if (ok && mounted) leave();
+    if (ok && mounted) widget.onLeave();
   }
 
   void _openMenu(CalendarMember member) {
@@ -316,7 +402,11 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
                 title: l.calFieldName,
                 prefix: const ExcludeSemantics(child: Icon(LucideIcons.type)),
                 value: cal.calendarName,
-                onTap: () => showCalendarRenameSheet(context, calendar: cal),
+                onTap: () => showCalendarRenameSheet(
+                  context,
+                  calendar: cal,
+                  onRenamed: widget.onRenamed,
+                ),
               ),
               PickerRow(
                 title: l.calFieldColor,
@@ -341,7 +431,7 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
             topInset: PSpacing.x6,
           ),
           _InviteBlock(
-            code: cal.inviteCode ?? '',
+            code: (cal.inviteCode ?? '').trim(),
             hint: l.calInviteHint,
             regenerating: _regenerating,
             onCopy: _copyCode,
@@ -412,41 +502,44 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
       _ => (l.calRoleViewer, PBadgeTone.informative, LucideIcons.eye),
     };
     final email = (m.userEmail ?? '').trim();
+    final avatar = PAvatar(
+      name: m.userName,
+      size: PAvatarSize.s36,
+      decorative: true,
+    );
+    final suffix = PBadge(
+      label: label,
+      variant: PBadgeVariant.outline,
+      tone: tone,
+      prefixIcon: icon,
+    );
+    final meSuffix = [
+      if (isMe)
+        Text(
+          l.calMeSuffix,
+          style: PTypography.t5.copyWith(color: c.fgNeutralSubtle),
+        ),
+    ];
+    // 소유자에게만 누르는 줄 — 눌러서 권한 바꾸기 · 내보내기 Menu Sheet 를 연다(줄 끝 ⋮ 없음, 10-25)
+    if (canManage) {
+      return PListButtonItem(
+        key: ValueKey('cal-member-${m.rowId}'),
+        prefix: avatar,
+        title: m.userName,
+        titleSuffix: meSuffix,
+        detail: email.isEmpty ? null : email,
+        suffix: suffix,
+        semanticHint: l.calMemberManage(m.userName),
+        onTap: () => _openMenu(m),
+      );
+    }
     return PListItem(
       key: ValueKey('cal-member-${m.rowId}'),
-      prefix: PAvatar(
-        name: m.userName,
-        size: PAvatarSize.s36,
-        decorative: true,
-      ),
+      prefix: avatar,
       title: m.userName,
-      titleSuffix: [
-        if (isMe)
-          Text(
-            l.calMeSuffix,
-            style: PTypography.t5.copyWith(color: c.fgNeutralSubtle),
-          ),
-      ],
+      titleSuffix: meSuffix,
       detail: email.isEmpty ? null : email,
-      suffix: PListSuffix(
-        children: [
-          PBadge(
-            label: label,
-            variant: PBadgeVariant.outline,
-            tone: tone,
-            prefixIcon: icon,
-          ),
-          if (canManage)
-            PListAction(
-              child: PButton.icon(
-                icon: LucideIcons.ellipsisVertical,
-                semanticLabel: l.calMemberMore(m.userName),
-                variant: PButtonVariant.ghost,
-                onPressed: () => _openMenu(m),
-              ),
-            ),
-        ],
-      ),
+      suffix: suffix,
     );
   }
 }
@@ -487,10 +580,11 @@ class _InviteBlock extends StatelessWidget {
             spacing: PSpacing.x3,
             runSpacing: PSpacing.x3,
             children: [
+              // 코드가 없는 캘린더(옛 캘린더 — 초대 코드 칸이 비어 있다)는 값 자리에 글, [복사] 는 숨긴다
               Text(
-                code,
+                code.isEmpty ? l.calInviteNone : code,
                 style: PTypography.t8.copyWith(
-                  color: c.fgNeutral,
+                  color: code.isEmpty ? c.fgNeutralSubtle : c.fgNeutral,
                   fontWeight: FontWeight.w700,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
@@ -499,12 +593,13 @@ class _InviteBlock extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 spacing: PSpacing.x2,
                 children: [
-                  PButton(
-                    label: l.calCopy,
-                    variant: PButtonVariant.neutralWeak,
-                    size: PButtonSize.small,
-                    onPressed: onCopy,
-                  ),
+                  if (code.isNotEmpty)
+                    PButton(
+                      label: l.calCopy,
+                      variant: PButtonVariant.neutralWeak,
+                      size: PButtonSize.small,
+                      onPressed: onCopy,
+                    ),
                   PButton(
                     label: l.calRegenerate,
                     variant: PButtonVariant.neutralWeak,

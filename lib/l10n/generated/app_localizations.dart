@@ -3220,7 +3220,7 @@ abstract class AppLocalizations {
   /// No description provided for @calDeleteLabelConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 라벨을 삭제할까요? 이 라벨이 붙은 일정은 라벨 없이 남아요.'**
+  /// **'\"{name}\" 라벨을 삭제할까요? 이 라벨이 붙은 일정은 라벨 없이 남아요. 삭제한 라벨은 되돌릴 수 없어요.'**
   String calDeleteLabelConfirm(String name);
 
   /// No description provided for @calDatePicker.
@@ -3454,7 +3454,7 @@ abstract class AppLocalizations {
   /// No description provided for @calDeleteCalendarConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요.'**
+  /// **'\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요. 삭제한 캘린더는 되돌릴 수 없어요.'**
   String calDeleteCalendarConfirm(String name);
 
   /// No description provided for @calDeleteCalendarFailed.
@@ -3520,13 +3520,13 @@ abstract class AppLocalizations {
   /// No description provided for @calManageSaveFailed.
   ///
   /// In ko, this message translates to:
-  /// **'캘린더를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calManageSaveFailed;
 
   /// No description provided for @calCreateFailed.
   ///
   /// In ko, this message translates to:
-  /// **'캘린더를 만들지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calCreateFailed;
 
   /// No description provided for @calJoinInvalidCode.
@@ -3544,8 +3544,38 @@ abstract class AppLocalizations {
   /// No description provided for @calRemoveMemberFailed.
   ///
   /// In ko, this message translates to:
-  /// **'멤버를 내보내지 못했어요.'**
+  /// **'멤버를 내보내지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calRemoveMemberFailed;
+
+  /// No description provided for @calColorChangeFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'색을 바꾸지 못했어요.'**
+  String get calColorChangeFailed;
+
+  /// No description provided for @calRoleChangeFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'권한을 바꾸지 못했어요.'**
+  String get calRoleChangeFailed;
+
+  /// No description provided for @calRegenerateFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 새로 만들지 못했어요.'**
+  String get calRegenerateFailed;
+
+  /// No description provided for @calInviteNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드 없음'**
+  String get calInviteNone;
+
+  /// No description provided for @calJoinCodeRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 입력해주세요.'**
+  String get calJoinCodeRequired;
 
   /// No description provided for @calLabelNameRequired.
   ///
@@ -3562,7 +3592,7 @@ abstract class AppLocalizations {
   /// No description provided for @calLabelSaveFailed.
   ///
   /// In ko, this message translates to:
-  /// **'라벨을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calLabelSaveFailed;
 
   /// No description provided for @calMeSuffix.
@@ -3570,6 +3600,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'(나)'**
   String get calMeSuffix;
+
+  /// No description provided for @calMemberManage.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 관리'**
+  String calMemberManage(String name);
 
   /// No description provided for @calChangeToEditor.
   ///
@@ -14400,12 +14436,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'올해'**
   String get dsDatePresetThisYear;
-
-  /// 캘린더 공유 멤버 줄 ⋮ 버튼의 이름
-  ///
-  /// In ko, this message translates to:
-  /// **'{name} 더보기'**
-  String calMemberMore(String name);
 
   /// No description provided for @apiErrorServer.
   ///

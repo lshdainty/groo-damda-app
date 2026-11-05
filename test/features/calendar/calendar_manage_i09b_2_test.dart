@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
@@ -35,6 +36,8 @@ class _Repo extends UserCalendarRepository {
   String? lastUpdateName;
   String? lastUpdateColor;
   int joins = 0;
+  int deletes = 0;
+  int roleChanges = 0;
 
   @override
   Future<List<CalendarMember>> members(int id) async => const [
@@ -53,6 +56,16 @@ class _Repo extends UserCalendarRepository {
       permission: 'READ',
     ),
   ];
+
+  @override
+  Future<void> delete(int id) async => deletes++;
+
+  @override
+  Future<void> changeMemberRole(
+    int id,
+    int memberId,
+    String permission,
+  ) async => roleChanges++;
 
   @override
   Future<UserCalendar> update({
@@ -135,14 +148,16 @@ void main() {
         app(const CalendarManageScreen(calendarId: 2), _Repo()),
       );
       await tester.pumpAndSettle();
-      expect(find.text('이름'), findsOneWidget);
-      expect(find.text('색상'), findsOneWidget);
+      expect(findPlain('이름'), findsOneWidget);
+      expect(findPlain('색상'), findsOneWidget);
       expect(find.text('3F9A1C2B'), findsOneWidget);
       expect(find.byType(PAvatar), findsNWidgets(3));
       expect(find.byType(PBadge), findsNWidgets(3));
-      expect(find.text('캘린더 삭제'), findsOneWidget);
-      // 소유자 줄(나)과 나 아닌 멤버 둘: ⋮ 는 내보낼 수 있는 둘에만
-      expect(find.bySemanticsLabel('아주긴이름을가진가족구성원 더보기'), findsOneWidget);
+      expect(findPlain('캘린더 삭제'), findsOneWidget);
+      expect(findRichText('초대 코드'), findsOneWidget);
+      expect(find.text('복사'), findsOneWidget);
+      // 줄 끝 ⋮ 는 없다 — 내보낼 수 있는 멤버 줄은 누르는 줄이다
+      expect(find.byIcon(LucideIcons.ellipsisVertical), findsNothing);
     });
 
     testWidgets('기본 캘린더 — 삭제 줄이 없다', (tester) async {
@@ -151,7 +166,7 @@ void main() {
         app(const CalendarManageScreen(calendarId: 1), _Repo()),
       );
       await tester.pumpAndSettle();
-      expect(find.text('캘린더 삭제'), findsNothing);
+      expect(findPlain('캘린더 삭제'), findsNothing);
     });
 
     testWidgets('공유받은 캘린더 — 멤버만, 이름 · 색 · 초대 코드 · 삭제 없음', (tester) async {
@@ -160,9 +175,9 @@ void main() {
         app(const CalendarManageScreen(calendarId: 3), _Repo()),
       );
       await tester.pumpAndSettle();
-      expect(find.text('이름'), findsNothing);
-      expect(find.text('초대 코드'), findsNothing);
-      expect(find.text('캘린더 삭제'), findsNothing);
+      expect(findPlain('이름'), findsNothing);
+      expect(findRichText('초대 코드'), findsNothing);
+      expect(findPlain('캘린더 삭제'), findsNothing);
       expect(find.byType(PAvatar), findsNWidgets(3));
     });
 
@@ -182,7 +197,7 @@ void main() {
         app(const CalendarManageScreen(calendarId: 2), repo),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('이름'));
+      await tester.tap(findPlain('이름'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(EditableText), '새 이름');
       await tester.tap(find.text('저장'));
@@ -198,13 +213,117 @@ void main() {
         app(const CalendarManageScreen(calendarId: 2), repo),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('이름'));
+      await tester.tap(findPlain('이름'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(EditableText), '');
       await tester.tap(find.text('저장'));
       await tester.pumpAndSettle();
       expect(findPlain('캘린더 이름을 입력해주세요.'), findsOneWidget);
       expect(repo.lastUpdateName, isNull);
+    });
+  });
+
+  group('관리 페이지 — 검수 반영', () {
+    testWidgets('멤버 줄은 소유자에게만 누르는 줄 — 누르면 Menu Sheet, 권한 바꾸기는 요청이 나간다', (
+      tester,
+    ) async {
+      await size(tester);
+      final repo = _Repo();
+      await tester.pumpWidget(
+        app(const CalendarManageScreen(calendarId: 2), repo),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('cal-member-3')));
+      await tester.pumpAndSettle();
+      expect(findPlain('편집 가능으로'), findsOneWidget);
+      await tester.tap(findPlain('편집 가능으로'));
+      await tester.pumpAndSettle();
+      expect(repo.roleChanges, 1);
+    });
+
+    testWidgets('공유받은 캘린더의 멤버 줄은 누르지 못한다', (tester) async {
+      await size(tester);
+      await tester.pumpWidget(
+        app(const CalendarManageScreen(calendarId: 3), _Repo()),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('cal-member-3')));
+      await tester.pumpAndSettle();
+      expect(findPlain('편집 가능으로'), findsNothing);
+    });
+
+    testWidgets('초대 코드가 없는 캘린더 — "초대 코드 없음" · [복사] 없음 · [새로 만들기] 만', (
+      tester,
+    ) async {
+      await size(tester);
+      await tester.pumpWidget(
+        app(
+          const CalendarManageScreen(calendarId: 2),
+          _Repo(),
+          list: const [UserCalendar(rowId: 2, calendarName: '코드 없는 캘린더')],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('초대 코드 없음'), findsOneWidget);
+      expect(find.text('복사'), findsNothing);
+      expect(find.text('새로 만들기'), findsOneWidget);
+    });
+
+    testWidgets('캘린더를 지우면 이 페이지 하나만 닫힌다(목록은 남는다)', (tester) async {
+      await size(tester);
+      final repo = _Repo();
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => const Text('설정'),
+            routes: [
+              GoRoute(
+                path: 'list',
+                builder: (_, _) => const Text('목록'),
+                routes: [
+                  GoRoute(
+                    path: 'manage',
+                    builder: (_, _) =>
+                        const CalendarManageScreen(calendarId: 2),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+        initialLocation: '/list/manage',
+      );
+      // 목록 값이 지운 직후 바로 다시 받아진다 — 두 번 닫히던 자리
+      var calls = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            authProvider.overrideWith(_NoAuth.new),
+            userCalendarRepositoryProvider.overrideWith((ref) async => repo),
+            userCalendarListProvider.overrideWith(
+              (ref) async => calls++ == 0 ? const [dflt, owned] : const [dflt],
+            ),
+          ],
+          child: MaterialApp.router(
+            theme: GrooTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('ko'),
+            builder: (c, child) =>
+                PSnackbarHost(closeLabel: '닫기', child: child!),
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('캘린더 삭제'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제').last);
+      await tester.pumpAndSettle();
+      expect(repo.deletes, 1);
+      expect(find.text('목록'), findsOneWidget);
+      expect(find.text('설정'), findsNothing);
     });
   });
 
@@ -226,6 +345,15 @@ void main() {
       await tester.tap(find.text('열기'));
       await tester.pumpAndSettle();
     }
+
+    testWidgets('빈 칸으로 참여 — 칸 아래 "초대 코드를 입력해주세요."', (tester) async {
+      final repo = _Repo();
+      await open(tester, repo);
+      await tester.tap(find.text('참여').last);
+      await tester.pumpAndSettle();
+      expect(findPlain('초대 코드를 입력해주세요.'), findsOneWidget);
+      expect(repo.joins, 0);
+    });
 
     testWidgets('틀린 코드 — 칸 아래 오류, 서버 글 0', (tester) async {
       final repo = _Repo()..joinError = 'CAL_012';

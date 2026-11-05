@@ -1696,7 +1696,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calDeleteLabelConfirm(String name) {
-    return '\"$name\" 라벨을 삭제할까요? 이 라벨이 붙은 일정은 라벨 없이 남아요.';
+    return '\"$name\" 라벨을 삭제할까요? 이 라벨이 붙은 일정은 라벨 없이 남아요. 삭제한 라벨은 되돌릴 수 없어요.';
   }
 
   @override
@@ -1833,7 +1833,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calDeleteCalendarConfirm(String name) {
-    return '\"$name\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요.';
+    return '\"$name\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요. 삭제한 캘린더는 되돌릴 수 없어요.';
   }
 
   @override
@@ -1869,10 +1869,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calInviteHint => '이 코드를 공유하면 다른 사람이 캘린더에 참여할 수 있어요.';
 
   @override
-  String get calManageSaveFailed => '캘린더를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get calManageSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calCreateFailed => '캘린더를 만들지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get calCreateFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get calJoinInvalidCode => '초대 코드를 확인해주세요.';
@@ -1881,7 +1881,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calJoinAlreadyMember => '이미 참여한 캘린더예요.';
 
   @override
-  String get calRemoveMemberFailed => '멤버를 내보내지 못했어요.';
+  String get calRemoveMemberFailed => '멤버를 내보내지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get calColorChangeFailed => '색을 바꾸지 못했어요.';
+
+  @override
+  String get calRoleChangeFailed => '권한을 바꾸지 못했어요.';
+
+  @override
+  String get calRegenerateFailed => '초대 코드를 새로 만들지 못했어요.';
+
+  @override
+  String get calInviteNone => '초대 코드 없음';
+
+  @override
+  String get calJoinCodeRequired => '초대 코드를 입력해주세요.';
 
   @override
   String get calLabelNameRequired => '라벨 이름을 입력해주세요.';
@@ -1890,10 +1905,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calLabelNameDuplicate => '같은 이름의 라벨이 이미 있어요.';
 
   @override
-  String get calLabelSaveFailed => '라벨을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get calLabelSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get calMeSuffix => '(나)';
+
+  @override
+  String calMemberManage(String name) {
+    return '$name 관리';
+  }
 
   @override
   String get calChangeToEditor => '편집 가능으로';
@@ -7990,11 +8010,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dsDatePresetThisYear => '올해';
-
-  @override
-  String calMemberMore(String name) {
-    return '$name 더보기';
-  }
 
   @override
   String get apiErrorServer => '요청을 처리하지 못했어요. 잠시 뒤 다시 시도해주세요.';

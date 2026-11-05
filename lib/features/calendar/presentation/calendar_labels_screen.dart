@@ -33,16 +33,6 @@ import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
 /// 라벨 이름 최대 글자 수 — 카테고리 · 라벨 · 태그 · 목표 이름 12자(웹 d837eedc, 카드 한 줄에 들어가는 길이).
 const int kLabelNameMax = 12;
 
-/// 저장할 수 있는 이름인가 — 비어 있지 않고 12자를 넘지 않는다(웹 `nameIssue` 와 같은 판정).
-///
-/// [original] 은 고치기 전 저장된 이름 — 안 바꾼 옛 이름은 12자 검사에서 뺀다(프리셋과 같다: 12자가 넘는 옛 라벨도 색만 고칠 수
-/// 있어야 한다). 이름을 고치기 시작하면 그때부터 12 검사.
-bool labelNameSubmittable(String raw, {String? original}) {
-  final issue = nameIssue(raw, kLabelNameMax);
-  if (issue == NameIssue.tooLong && raw == original) return true;
-  return issue == null || issue == NameIssue.duplicate;
-}
-
 /// 설정 진입 — 캘린더 라벨 관리 (전 캘린더 공용).
 ///
 /// design `LabelManagerSection` 미러: 안내 카드 + "전체 라벨 N" 리스트

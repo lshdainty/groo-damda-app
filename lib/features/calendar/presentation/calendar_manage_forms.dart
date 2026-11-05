@@ -223,10 +223,15 @@ class _CreateFormState extends ConsumerState<_CreateForm> {
 Future<void> showCalendarRenameSheet(
   BuildContext context, {
   required UserCalendar calendar,
+  ValueChanged<String>? onRenamed,
 }) => _showForm(
   context,
-  build: (probe, focus) =>
-      _RenameForm(calendar: calendar, probe: probe, nameFocus: focus),
+  build: (probe, focus) => _RenameForm(
+    calendar: calendar,
+    probe: probe,
+    nameFocus: focus,
+    onRenamed: onRenamed,
+  ),
 );
 
 class _RenameForm extends ConsumerStatefulWidget {
@@ -234,10 +239,14 @@ class _RenameForm extends ConsumerStatefulWidget {
     required this.calendar,
     required this.probe,
     required this.nameFocus,
+    this.onRenamed,
   });
   final UserCalendar calendar;
   final _DirtyProbe probe;
   final FocusNode nameFocus;
+
+  /// 저장이 끝났다 — 목록을 다시 받는 동안 옛 이름이 보이지 않게 부모가 새 이름을 먼저 보인다.
+  final ValueChanged<String>? onRenamed;
 
   @override
   ConsumerState<_RenameForm> createState() => _RenameFormState();
@@ -288,6 +297,7 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
         calendarName: name,
         silent: true,
       );
+      widget.onRenamed?.call(name);
       ref.invalidate(userCalendarListProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
@@ -392,7 +402,7 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
     final l = AppLocalizations.of(context);
     final code = _codeCtrl.text.trim().toUpperCase();
     if (code.isEmpty) {
-      setState(() => _codeError = l.calJoinInvalidCode);
+      setState(() => _codeError = l.calJoinCodeRequired);
       widget.codeFocus.requestFocus();
       return;
     }
@@ -407,6 +417,8 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
       final repo = await ref.read(userCalendarRepositoryProvider.future);
       final joined = await repo.joinByCode(code);
       ref.invalidate(userCalendarListProvider);
+      // 그 캘린더의 일정도 이제 내 조회 결과에 들어온다(웹과 같게)
+      ref.invalidate(monthEventsProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
       snack?.show(

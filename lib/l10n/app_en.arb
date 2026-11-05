@@ -933,7 +933,7 @@
   "calEditLabel": "Edit label",
   "calPreview": "Preview",
   "calDeleteLabelTitle": "Delete label",
-  "calDeleteLabelConfirm": "Delete the \"{name}\" label? Events with this label stay without a label.",
+  "calDeleteLabelConfirm": "Delete the \"{name}\" label? Events with this label stay, without a label. This action cannot be undone.",
   "@calDeleteLabelConfirm": {
     "placeholders": {
       "name": {
@@ -1042,7 +1042,7 @@
     }
   },
   "calRemove": "Remove",
-  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar, and members can no longer see it.",
+  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar and members can no longer see it. This action cannot be undone.",
   "calDeleteCalendarFailed": "Couldn't delete the calendar.",
   "calLabelDeleteFailed": "Couldn't delete the label.",
   "@calDeleteCalendarConfirm": {
@@ -1067,15 +1067,28 @@
   "calManageNameTitle": "Calendar name",
   "calNameRequired": "Please enter a calendar name.",
   "calInviteHint": "Share this code to let others join the calendar.",
-  "calManageSaveFailed": "Couldn't save the calendar. Please try again in a moment.",
-  "calCreateFailed": "Couldn't create the calendar. Please try again in a moment.",
+  "calManageSaveFailed": "Could not save. Please try again in a moment.",
+  "calCreateFailed": "Could not save. Please try again in a moment.",
   "calJoinInvalidCode": "Please check the invite code.",
   "calJoinAlreadyMember": "You've already joined this calendar.",
-  "calRemoveMemberFailed": "Couldn't remove the member.",
+  "calRemoveMemberFailed": "Could not remove the member. Please try again in a moment.",
+  "calColorChangeFailed": "Couldn't change the color.",
+  "calRoleChangeFailed": "Couldn't change the permission.",
+  "calRegenerateFailed": "Couldn't generate a new invite code.",
+  "calInviteNone": "No invite code",
+  "calJoinCodeRequired": "Please enter the invite code.",
   "calLabelNameRequired": "Please enter a label name.",
   "calLabelNameDuplicate": "A label with that name already exists.",
-  "calLabelSaveFailed": "Couldn't save the label. Please try again in a moment.",
+  "calLabelSaveFailed": "Could not save. Please try again in a moment.",
   "calMeSuffix": "(me)",
+  "calMemberManage": "Manage {name}",
+  "@calMemberManage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "calChangeToEditor": "Change to editor",
   "calChangeToViewer": "Change to viewer",
   "calAdd": "Add",
@@ -4401,7 +4414,6 @@
   "dsDatePresetLast6M": "Last 6 months",
   "dsDatePresetLast1Y": "Last year",
   "dsDatePresetThisYear": "This year",
-  "calMemberMore": "More for {name}",
   "apiErrorServer": "We couldn't complete the request. Please try again in a moment.",
   "dsInfiniteListError": "Couldn't load more.",
   "dsInfiniteListEnd": "You've reached the end.",
