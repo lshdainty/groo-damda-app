@@ -10618,14 +10618,26 @@ abstract class AppLocalizations {
   /// No description provided for @stocksWatchGroupSaveFail.
   ///
   /// In ko, this message translates to:
-  /// **'관심 그룹을 저장하지 못했어요.'**
+  /// **'그룹을 저장하지 못했어요.'**
   String get stocksWatchGroupSaveFail;
 
   /// No description provided for @stocksWatchAddFail.
   ///
   /// In ko, this message translates to:
-  /// **'관심 등록에 실패했어요'**
+  /// **'관심 종목에 넣지 못했어요.'**
   String get stocksWatchAddFail;
+
+  /// No description provided for @stocksWatchGroupDeleteFail.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹을 지우지 못했어요.'**
+  String get stocksWatchGroupDeleteFail;
+
+  /// No description provided for @stocksWatchRemoveFail.
+  ///
+  /// In ko, this message translates to:
+  /// **'관심 종목에서 빼지 못했어요.'**
+  String get stocksWatchRemoveFail;
 
   /// No description provided for @stocksMarketToggleKr.
   ///

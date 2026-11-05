@@ -5840,10 +5840,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stocksWatchGroupNamePlaceholder => 'Group name';
 
   @override
-  String get stocksWatchGroupSaveFail => 'Couldn\'t save the watch group.';
+  String get stocksWatchGroupSaveFail => 'Couldn\'t save the group.';
 
   @override
-  String get stocksWatchAddFail => 'Failed to add to watchlist';
+  String get stocksWatchAddFail => 'Couldn\'t add it to your watchlist.';
+
+  @override
+  String get stocksWatchGroupDeleteFail => 'Couldn\'t delete the group.';
+
+  @override
+  String get stocksWatchRemoveFail =>
+      'Couldn\'t remove it from your watchlist.';
 
   @override
   String get stocksMarketToggleKr => 'KR';

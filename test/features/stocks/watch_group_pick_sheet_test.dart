@@ -45,6 +45,7 @@ class _Repo extends StocksRepository {
     int groupId,
     String symbol, {
     String? marketCode,
+    bool silent = false,
   }) async {
     added.add(groupId);
     return _item;

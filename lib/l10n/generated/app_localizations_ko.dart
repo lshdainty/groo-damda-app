@@ -5733,10 +5733,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksWatchGroupNamePlaceholder => '그룹 이름';
 
   @override
-  String get stocksWatchGroupSaveFail => '관심 그룹을 저장하지 못했어요.';
+  String get stocksWatchGroupSaveFail => '그룹을 저장하지 못했어요.';
 
   @override
-  String get stocksWatchAddFail => '관심 등록에 실패했어요';
+  String get stocksWatchAddFail => '관심 종목에 넣지 못했어요.';
+
+  @override
+  String get stocksWatchGroupDeleteFail => '그룹을 지우지 못했어요.';
+
+  @override
+  String get stocksWatchRemoveFail => '관심 종목에서 빼지 못했어요.';
 
   @override
   String get stocksMarketToggleKr => '국내';
