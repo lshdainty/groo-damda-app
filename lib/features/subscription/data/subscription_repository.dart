@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 
 class MyFeatures {
   const MyFeatures({
@@ -57,12 +58,18 @@ class SubscriptionInfo {
     required this.status,
     this.currentPeriodEnd,
     required this.autoRenew,
+    this.price,
+    this.durationMonths,
   });
   final String planCode;
   final String planName;
   final String status;
   final String? currentPeriodEnd;
   final bool autoRenew;
+
+  /// 지금 구독한 요금제의 가격(원)과 기간(개월) — 서버 값이다. 옛 서버 응답엔 없을 수 있어 null 을 받는다.
+  final int? price;
+  final int? durationMonths;
 
   /// 지금 Pro 를 쓸 수 있는가 — 해지 뒤 **유예 기간**을 포함한다.
   ///
@@ -92,6 +99,8 @@ class SubscriptionInfo {
     status: j['status'] as String,
     currentPeriodEnd: j['currentPeriodEnd'] as String?,
     autoRenew: (j['autoRenew'] as bool?) ?? false,
+    price: (j['price'] as num?)?.toInt(),
+    durationMonths: (j['durationMonths'] as num?)?.toInt(),
   );
 }
 
@@ -100,17 +109,29 @@ class SubscriptionPlanInfo {
     required this.planCode,
     required this.planName,
     this.durationMonths,
+    this.price,
   });
   final String planCode;
   final String planName;
   final int? durationMonths;
 
+  /// 가격(원) — 서버 값. 옛 서버 응답엔 없을 수 있어 null 을 받는다.
+  final int? price;
+
   factory SubscriptionPlanInfo.fromJson(Map<String, dynamic> j) =>
       SubscriptionPlanInfo(
         planCode: j['planCode'] as String,
         planName: j['planName'] as String,
-        durationMonths: j['durationMonths'] as int?,
+        durationMonths: (j['durationMonths'] as num?)?.toInt(),
+        price: (j['price'] as num?)?.toInt(),
       );
+}
+
+/// 연간 할인율(%) = round((1 − 연간 ÷ (월간 × 12)) × 100) — 서버 두 가격으로 계산한다.
+/// 월간 가격이 0 이하면 0.
+int yearlySavePct(int monthly, int yearly) {
+  if (monthly <= 0) return 0;
+  return ((1 - yearly / (monthly * 12)) * 100).round();
 }
 
 /// 증권사 한 곳의 연결 상태 + 입력 폼 라벨.
@@ -197,17 +218,26 @@ class SubscriptionRepository {
     }
   }
 
-  Future<void> subscribe(String planCode) async {
+  /// [silent] — 전역 서버 원문 알림을 끈다(화면이 정한 글을 띄울 때).
+  Future<void> subscribe(String planCode, {bool silent = false}) async {
     try {
-      await _dio.post<dynamic>('/subscriptions', data: {'planCode': planCode});
+      await _dio.post<dynamic>(
+        '/subscriptions',
+        data: {'planCode': planCode},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
-  Future<void> cancelSubscription({String? reason}) async {
+  Future<void> cancelSubscription({String? reason, bool silent = false}) async {
     try {
-      await _dio.delete<dynamic>('/subscriptions/me', data: {'reason': reason});
+      await _dio.delete<dynamic>(
+        '/subscriptions/me',
+        data: {'reason': reason},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

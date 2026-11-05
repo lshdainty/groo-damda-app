@@ -3335,7 +3335,7 @@
   "subFeatBudget": "예산 · 저축 목표 · 캘린더",
   "subFeatSecurities": "증권사 연동 · 실시간 시세 · 자산 실시간 금액",
   "subStarted": "담다 Pro 구독이 시작되었어요",
-  "subFailed": "구독에 실패했어요",
+  "subFailed": "구독하지 못했어요.",
   "subCancelConfirmTitle": "구독 해지",
   "subCancelConfirmMsg": "해지하면 {date}부터 Free 플랜으로 전환되고 증권 탭이 잠겨요. 그 전까지는 Pro 기능을 계속 쓸 수 있어요.",
   "@subCancelConfirmMsg": {
@@ -3348,10 +3348,37 @@
   "subCancel": "구독 해지",
   "subKeep": "유지하기",
   "subCanceled": "구독을 해지했어요",
-  "subCancelFailed": "해지에 실패했어요",
+  "subCancelFailed": "구독을 해지하지 못했어요.",
   "subNextBillingDate": "다음 결제일",
-  "subProcessing": "처리 중…",
   "subStartPro": "Pro 시작하기",
+  "subLoadFailed": "구독 정보를 불러오지 못했어요",
+  "subLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "subFeatHas": "있음",
+  "subFeatNone": "없음",
+  "subPricePerMonth": "{amount} / 월",
+  "@subPricePerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "subPricePerYear": "{amount} / 년",
+  "@subPricePerYear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "subNextBillingNoAmount": "다음 결제 {date}",
+  "@subNextBillingNoAmount": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subConnected": "연결됨",
   "subBrokerLastVerified": "마지막 검증 · {date}",
   "@subBrokerLastVerified": {

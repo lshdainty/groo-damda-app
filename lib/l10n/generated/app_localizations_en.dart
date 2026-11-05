@@ -6023,7 +6023,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subStarted => 'Your 담다 Pro subscription is active';
 
   @override
-  String get subFailed => 'Couldn\'t start the subscription';
+  String get subFailed => 'Couldn\'t start the subscription.';
 
   @override
   String get subCancelConfirmTitle => 'Cancel subscription';
@@ -6043,16 +6043,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subCanceled => 'Subscription canceled';
 
   @override
-  String get subCancelFailed => 'Couldn\'t cancel';
+  String get subCancelFailed => 'Couldn\'t cancel the subscription.';
 
   @override
   String get subNextBillingDate => 'Next billing date';
 
   @override
-  String get subProcessing => 'Processing…';
+  String get subStartPro => 'Start Pro';
 
   @override
-  String get subStartPro => 'Start Pro';
+  String get subLoadFailed => 'Couldn\'t load your subscription';
+
+  @override
+  String get subLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get subFeatHas => 'Included';
+
+  @override
+  String get subFeatNone => 'Not included';
+
+  @override
+  String subPricePerMonth(String amount) {
+    return '$amount / mo';
+  }
+
+  @override
+  String subPricePerYear(String amount) {
+    return '$amount / yr';
+  }
+
+  @override
+  String subNextBillingNoAmount(String date) {
+    return 'Next billing $date';
+  }
 
   @override
   String get subConnected => 'Connected';

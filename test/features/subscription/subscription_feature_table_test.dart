@@ -7,11 +7,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
-import 'package:groo_damda_app/features/subscription/presentation/subscription_sheet.dart';
+import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
+import 'package:groo_damda_app/features/subscription/presentation/subscription_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations_en.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations_ko.dart';
@@ -49,44 +49,34 @@ const _securitiesEn =
 const _ambiguousWord = '평가';
 
 Widget _app() => ProviderScope(
-  // Free 계정 고정 — 표 내용은 플랜과 무관하지만 네트워크를 타지 않게 막는다.
-  overrides: [mySubscriptionProvider.overrideWith((ref) async => null)],
+  // Free 계정 고정 — 기능 줄 내용은 플랜과 무관하지만 네트워크를 타지 않게 막는다.
+  overrides: [
+    mySubscriptionProvider.overrideWith((ref) async => null),
+    subscriptionPlansProvider.overrideWith(
+      (ref) async => const <SubscriptionPlanInfo>[],
+    ),
+    myFeaturesProvider.overrideWith((ref) async => MyFeatures.empty),
+  ],
   child: MaterialApp(
     theme: GrooTheme.light(),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('ko'),
-    home: Builder(
-      builder: (ctx) => Scaffold(
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () => showSubscriptionSheet(ctx),
-            child: const Text('열기'),
-          ),
-        ),
-      ),
-    ),
+    home: const SubscriptionScreen(),
   ),
 );
 
-/// 비교표 = '기능' 헤더를 감싼 가장 가까운 ClipRRect(표 전체를 라운딩하는 그것).
-/// 플랜 카드의 'Free'/'Pro' 와 섞이지 않게 이 안쪽만 센다.
-Finder _table(AppLocalizations l) => find
-    .ancestor(
-      of: find.text(l.subFeatureColumn),
-      matching: find.byType(ClipRRect),
-    )
-    .first;
+/// 기능 비교 = '기능 비교' 제목 아래 List — 줄 셋의 이름이 든 목록. 요금 줄의 'Free' / 'Pro' 와 섞이지 않게
+/// 이 목록 안쪽만 센다.
+Finder _table(AppLocalizations l) =>
+    find.byKey(const ValueKey('subscription-features'));
 
 Future<void> _openSheet(WidgetTester tester) async {
-  // 시트(0.92)가 표까지 한 번에 담기도록 세로를 넉넉히. 폭은 폰 폭 고정 —
-  // 넓히면 Material 이 시트를 640 으로 잘라 가운데 정렬한다.
   tester.view.physicalSize = const Size(390 * 3, 1600 * 3);
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
 
   await tester.pumpWidget(_app());
-  await tester.tap(find.text('열기'));
   await tester.pumpAndSettle();
 }
 
@@ -121,29 +111,25 @@ void main() {
     );
   });
 
-  testWidgets('Free/Pro 표시가 깨지지 않는다 — 체크 5 · 대시 1', (tester) async {
+  testWidgets('Free/Pro 표시가 깨지지 않는다 — "Free · Pro" 둘 · "Pro" 하나', (
+    tester,
+  ) async {
     await _openSheet(tester);
 
     final table = _table(l);
 
-    // 헤더 두 칸.
+    // 가계부 · 예산은 둘 다, 증권은 Pro 에만 — 폰은 표 대신 줄이고 값 글이 그 기능이 있는 플랜이다.
     expect(
-      find.descendant(of: table, matching: find.text('Free')),
-      findsOneWidget,
+      find.descendant(of: table, matching: find.text('Free · Pro')),
+      findsNWidgets(2),
     );
     expect(
       find.descendant(of: table, matching: find.text('Pro')),
       findsOneWidget,
     );
-
-    // 가계부 ✓✓ · 예산 ✓✓ · 증권 −✓ → 체크 5, 대시 1.
     expect(
-      find.descendant(of: table, matching: find.byIcon(LucideIcons.check)),
-      findsNWidgets(5),
-    );
-    expect(
-      find.descendant(of: table, matching: find.byIcon(LucideIcons.minus)),
-      findsNWidgets(1),
+      find.descendant(of: table, matching: find.text('Free')),
+      findsNothing,
     );
   });
 

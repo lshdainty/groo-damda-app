@@ -5916,7 +5916,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subStarted => '담다 Pro 구독이 시작되었어요';
 
   @override
-  String get subFailed => '구독에 실패했어요';
+  String get subFailed => '구독하지 못했어요.';
 
   @override
   String get subCancelConfirmTitle => '구독 해지';
@@ -5936,16 +5936,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subCanceled => '구독을 해지했어요';
 
   @override
-  String get subCancelFailed => '해지에 실패했어요';
+  String get subCancelFailed => '구독을 해지하지 못했어요.';
 
   @override
   String get subNextBillingDate => '다음 결제일';
 
   @override
-  String get subProcessing => '처리 중…';
+  String get subStartPro => 'Pro 시작하기';
 
   @override
-  String get subStartPro => 'Pro 시작하기';
+  String get subLoadFailed => '구독 정보를 불러오지 못했어요';
+
+  @override
+  String get subLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get subFeatHas => '있음';
+
+  @override
+  String get subFeatNone => '없음';
+
+  @override
+  String subPricePerMonth(String amount) {
+    return '$amount / 월';
+  }
+
+  @override
+  String subPricePerYear(String amount) {
+    return '$amount / 년';
+  }
+
+  @override
+  String subNextBillingNoAmount(String date) {
+    return '다음 결제 $date';
+  }
 
   @override
   String get subConnected => '연결됨';

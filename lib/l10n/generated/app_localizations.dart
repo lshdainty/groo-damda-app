@@ -10954,7 +10954,7 @@ abstract class AppLocalizations {
   /// No description provided for @subFailed.
   ///
   /// In ko, this message translates to:
-  /// **'구독에 실패했어요'**
+  /// **'구독하지 못했어요.'**
   String get subFailed;
 
   /// No description provided for @subCancelConfirmTitle.
@@ -10990,7 +10990,7 @@ abstract class AppLocalizations {
   /// No description provided for @subCancelFailed.
   ///
   /// In ko, this message translates to:
-  /// **'해지에 실패했어요'**
+  /// **'구독을 해지하지 못했어요.'**
   String get subCancelFailed;
 
   /// No description provided for @subNextBillingDate.
@@ -10999,17 +10999,53 @@ abstract class AppLocalizations {
   /// **'다음 결제일'**
   String get subNextBillingDate;
 
-  /// No description provided for @subProcessing.
-  ///
-  /// In ko, this message translates to:
-  /// **'처리 중…'**
-  String get subProcessing;
-
   /// No description provided for @subStartPro.
   ///
   /// In ko, this message translates to:
   /// **'Pro 시작하기'**
   String get subStartPro;
+
+  /// No description provided for @subLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 정보를 불러오지 못했어요'**
+  String get subLoadFailed;
+
+  /// No description provided for @subLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get subLoadFailedDesc;
+
+  /// No description provided for @subFeatHas.
+  ///
+  /// In ko, this message translates to:
+  /// **'있음'**
+  String get subFeatHas;
+
+  /// No description provided for @subFeatNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'없음'**
+  String get subFeatNone;
+
+  /// No description provided for @subPricePerMonth.
+  ///
+  /// In ko, this message translates to:
+  /// **'{amount} / 월'**
+  String subPricePerMonth(String amount);
+
+  /// No description provided for @subPricePerYear.
+  ///
+  /// In ko, this message translates to:
+  /// **'{amount} / 년'**
+  String subPricePerYear(String amount);
+
+  /// No description provided for @subNextBillingNoAmount.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 결제 {date}'**
+  String subNextBillingNoAmount(String date);
 
   /// No description provided for @subConnected.
   ///

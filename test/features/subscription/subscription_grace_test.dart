@@ -17,7 +17,7 @@ import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
-import 'package:groo_damda_app/features/subscription/presentation/subscription_sheet.dart';
+import 'package:groo_damda_app/features/subscription/presentation/subscription_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations_ko.dart';
 
@@ -38,41 +38,46 @@ SubscriptionInfo _sub({
   status: status,
   currentPeriodEnd: currentPeriodEnd,
   autoRenew: autoRenew,
+  price: 9900,
+  durationMonths: 1,
 );
 
+const _plans = [
+  SubscriptionPlanInfo(
+    planCode: 'SECURITIES',
+    planName: '담다 Pro',
+    durationMonths: 1,
+    price: 9900,
+  ),
+  SubscriptionPlanInfo(
+    planCode: 'SECURITIES_YEARLY',
+    planName: '담다 Pro 연간',
+    durationMonths: 12,
+    price: 99000,
+  ),
+];
+
 Widget _app(SubscriptionInfo? sub) => ProviderScope(
-  overrides: [mySubscriptionProvider.overrideWith((ref) async => sub)],
+  overrides: [
+    mySubscriptionProvider.overrideWith((ref) async => sub),
+    subscriptionPlansProvider.overrideWith((ref) async => _plans),
+    myFeaturesProvider.overrideWith((ref) async => MyFeatures.empty),
+  ],
   child: MaterialApp(
     theme: GrooTheme.light(),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('ko'),
-    home: Builder(
-      builder: (ctx) => Scaffold(
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () => showSubscriptionSheet(ctx),
-            child: const Text('열기'),
-          ),
-        ),
-      ),
-    ),
+    home: const SubscriptionScreen(),
   ),
 );
 
 Future<void> _openSheet(WidgetTester tester, SubscriptionInfo? sub) async {
-  // 시트(0.92)가 배너·footer 를 한 번에 담도록 세로를 넉넉히. 폭은 폰 폭 고정 —
-  // 640 을 넘기면 Material 이 시트를 640 으로 잘라 가운데 정렬한다.
-  //
-  // 430(iPhone Pro Max 급)인 이유: Pro 플랜 카드의 `Pro | 현재 플랜` 행이 390 폭에서
-  // 3.9px 넘친다. **이 변경과 무관한 기존 레이아웃 문제**로 origin/main 에서도 같은
-  // 폭에 ACTIVE 구독을 물리면 똑같이 넘친다 — 여기서 붙잡을 일이 아니라 폭을 피한다.
-  tester.view.physicalSize = const Size(430 * 3, 1600 * 3);
+  tester.view.physicalSize = const Size(390 * 3, 1600 * 3);
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
 
   await tester.pumpWidget(_app(sub));
-  await tester.tap(find.text('열기'));
   await tester.pumpAndSettle();
 }
 

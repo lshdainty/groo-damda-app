@@ -3253,7 +3253,7 @@
   "subFeatBudget": "Budget · savings goals · calendar",
   "subFeatSecurities": "Securities link · real-time quotes · real-time asset value",
   "subStarted": "Your 담다 Pro subscription is active",
-  "subFailed": "Couldn't start the subscription",
+  "subFailed": "Couldn't start the subscription.",
   "subCancelConfirmTitle": "Cancel subscription",
   "subCancelConfirmMsg": "If you cancel, you will switch to the Free plan from {date} and the Securities tab will lock. You can keep using Pro features until then.",
   "@subCancelConfirmMsg": {
@@ -3266,10 +3266,37 @@
   "subCancel": "Cancel subscription",
   "subKeep": "Keep",
   "subCanceled": "Subscription canceled",
-  "subCancelFailed": "Couldn't cancel",
+  "subCancelFailed": "Couldn't cancel the subscription.",
   "subNextBillingDate": "Next billing date",
-  "subProcessing": "Processing…",
   "subStartPro": "Start Pro",
+  "subLoadFailed": "Couldn't load your subscription",
+  "subLoadFailedDesc": "Please try again in a moment.",
+  "subFeatHas": "Included",
+  "subFeatNone": "Not included",
+  "subPricePerMonth": "{amount} / mo",
+  "@subPricePerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "subPricePerYear": "{amount} / yr",
+  "@subPricePerYear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "subNextBillingNoAmount": "Next billing {date}",
+  "@subNextBillingNoAmount": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subConnected": "Connected",
   "subBrokerLastVerified": "Last verified · {date}",
   "@subBrokerLastVerified": {

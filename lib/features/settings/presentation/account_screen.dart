@@ -19,7 +19,6 @@ import 'package:groo_damda_app/features/settings/data/oauth_link_repository.dart
 import 'package:groo_damda_app/features/settings/presentation/password_change_dialog.dart';
 import 'package:groo_damda_app/features/settings/presentation/withdrawal_sheet.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
-import 'package:groo_damda_app/features/subscription/presentation/subscription_sheet.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
@@ -143,7 +142,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final c = context.colors;
     final l = AppLocalizations.of(context);
     final user = ref.watch(authProvider).value;
-    final subscription = ref.watch(mySubscriptionProvider).asData?.value;
+    final subscriptionAsync = ref.watch(mySubscriptionProvider);
+    final subscription = subscriptionAsync.asData?.value;
     final hasSecurities = ref.watch(hasSecuritiesProvider);
     final appLockOn = ref.watch(appLockEnabledProvider);
     final hiddenCount =
@@ -151,7 +151,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final hiddenTotal = kAllHideCards.length;
     final isSubscribed = subscription?.isActive ?? false;
     // currentPeriodEnd 는 서버 UTC 시각 — 자르면 KST 밤 결제분의 갱신일이 하루
-    // 앞으로 보인다(subscription_sheet 와 같은 규칙). 못 읽는 값만 잘라 쓴다.
+    // 앞으로 보인다(구독 화면과 같은 규칙). 못 읽는 값만 잘라 쓴다.
     final periodEnd =
         subscription?.currentPeriodEnd != null &&
             subscription!.currentPeriodEnd!.length >= 10
@@ -166,6 +166,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         ? l.subProUntil(periodEnd)
         : '${periodEnd != null ? l.accountNextBilling(periodEnd) : ''}'
               '${l.accountProActive}';
+    // 값은 서버 가격 — 불러오는 중이면 값 자리 Skeleton, 실패면 값 없이 설명만(I-14 34)
+    final Widget? priceText =
+        subscriptionAsync.isLoading && !subscriptionAsync.hasValue
+        ? SizedBox(width: 72, child: PSkeleton.text(PTypography.t4))
+        : isSubscribed && subscription?.price != null
+        ? Text(
+            subscription!.durationMonths == 12
+                ? l.subPricePerYear(
+                    krwSigned(subscription.price!, false, unit: true),
+                  )
+                : l.subPricePerMonth(
+                    krwSigned(subscription.price!, false, unit: true),
+                  ),
+            textAlign: TextAlign.end,
+          )
+        : null;
     final name = user?.userName.isNotEmpty == true
         ? user!.userName
         : l.accountDefaultName;
@@ -268,14 +284,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 prefix: _icon(LucideIcons.sparkles),
                 title: '담다 Pro',
                 detail: proDesc,
-                suffix: isSubscribed
-                    ? Text(
-                        '${krwSigned(9900, false, unit: true)} '
-                        '${l.accountPerMonth}',
-                        textAlign: TextAlign.end,
-                      )
-                    : null,
-                onTap: () => showSubscriptionSheet(context),
+                suffix: PListSuffix(
+                  children: [?priceText, const Icon(LucideIcons.chevronRight)],
+                ),
+                onTap: () => context.push('/settings/subscription'),
               ),
             ],
           ),
