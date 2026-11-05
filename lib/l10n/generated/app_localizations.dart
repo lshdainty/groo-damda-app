@@ -11185,6 +11185,12 @@ abstract class AppLocalizations {
   /// **'잠시 뒤 다시 시도해주세요.'**
   String get subLoadFailedDesc;
 
+  /// No description provided for @secLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'증권 정보를 불러오지 못했어요'**
+  String get secLoadFailed;
+
   /// No description provided for @subPricePerMonth.
   ///
   /// In ko, this message translates to:

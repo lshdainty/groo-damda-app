@@ -6146,6 +6146,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subLoadFailedDesc => 'Please try again in a moment.';
 
   @override
+  String get secLoadFailed => 'Couldn\'t load your securities info';
+
+  @override
   String subPricePerMonth(String amount) {
     return '$amount / mo';
   }

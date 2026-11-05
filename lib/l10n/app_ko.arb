@@ -3381,6 +3381,7 @@
   "subStartPro": "Pro 시작하기",
   "subLoadFailed": "구독 정보를 불러오지 못했어요",
   "subLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "secLoadFailed": "증권 정보를 불러오지 못했어요",
   "subPricePerMonth": "{amount} / 월",
   "@subPricePerMonth": {
     "placeholders": {

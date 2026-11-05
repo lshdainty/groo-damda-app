@@ -3299,6 +3299,7 @@
   "subStartPro": "Start Pro",
   "subLoadFailed": "Couldn't load your subscription",
   "subLoadFailedDesc": "Please try again in a moment.",
+  "secLoadFailed": "Couldn't load your securities info",
   "subPricePerMonth": "{amount} / mo",
   "@subPricePerMonth": {
     "placeholders": {

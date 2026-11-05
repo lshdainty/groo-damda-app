@@ -6035,6 +6035,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
 
   @override
+  String get secLoadFailed => '증권 정보를 불러오지 못했어요';
+
+  @override
   String subPricePerMonth(String amount) {
     return '$amount / 월';
   }

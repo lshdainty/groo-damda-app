@@ -59,7 +59,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   void _retry() {
     ref.invalidate(mySubscriptionProvider);
     ref.invalidate(subscriptionPlansProvider);
-    ref.invalidate(myFeaturesProvider);
+    ref.invalidate(myFeaturesLoadProvider);
   }
 
   Future<void> _subscribe(String planCode) async {
@@ -85,7 +85,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       if (mounted) setState(() => _busy = false);
       return;
     }
-    container.invalidate(myFeaturesProvider);
+    container.invalidate(myFeaturesLoadProvider);
     container.invalidate(mySubscriptionProvider);
     snack?.show(message: l.subStarted, tone: PSnackbarTone.positive);
     try {
@@ -107,7 +107,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     }
 
     void refresh() {
-      container.invalidate(myFeaturesProvider);
+      container.invalidate(myFeaturesLoadProvider);
       container.invalidate(mySubscriptionProvider);
     }
 

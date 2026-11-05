@@ -68,7 +68,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
     try {
       final repo = await ref.read(subscriptionRepositoryProvider.future);
       await repo.registerBrokerCredential(c.broker, key, secret, silent: true);
-      ref.invalidate(myFeaturesProvider);
+      ref.invalidate(myFeaturesLoadProvider);
       ref.invalidate(brokerConnectionsProvider);
       if (mounted) {
         PSnackbar.maybeOf(
@@ -105,7 +105,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
     try {
       final repo = await ref.read(subscriptionRepositoryProvider.future);
       await action(repo);
-      ref.invalidate(myFeaturesProvider);
+      ref.invalidate(myFeaturesLoadProvider);
       ref.invalidate(brokerConnectionsProvider);
       if (mounted) PSnackbar.maybeOf(context)?.show(message: okMsg);
     } catch (e) {
