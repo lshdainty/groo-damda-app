@@ -409,36 +409,47 @@ class _SessionRow extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(top: PSpacing.x1_5),
-            child: Row(
-              spacing: PSpacing.x2_5,
-              children: [
-                PAvatarStack(
-                  people: [
-                    for (final p in dp.participants)
-                      (
-                        name: (p.participantName ?? '').trim().isEmpty
-                            ? l.dutchNoName
-                            : p.participantName!.trim(),
-                        image: null,
-                      ),
-                  ],
-                ),
-                Expanded(
-                  child: PProgressBar(
-                    value: paid.toDouble(),
-                    max: n == 0 ? 1 : n.toDouble(),
-                    meaning: PProgressMeaning.goal,
-                    semanticsLabel: l.dutchParticipant,
-                    semanticsValue: progressText,
+            // 막대는 늘 24 이상 — 글(줄지 않음)에 상한을 둬 200% 에서도 막대 자리를 남긴다
+            child: LayoutBuilder(
+              builder: (context, box) => Row(
+                spacing: PSpacing.x2_5,
+                children: [
+                  PAvatarStack(
+                    people: [
+                      for (final p in dp.participants)
+                        (
+                          name: (p.participantName ?? '').trim().isEmpty
+                              ? l.dutchNoName
+                              : p.participantName!.trim(),
+                          image: null,
+                        ),
+                    ],
                   ),
-                ),
-                Text(
-                  progressText,
-                  maxLines: 1,
-                  softWrap: false,
-                  style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
-                ),
-              ],
+                  Expanded(
+                    child: PProgressBar(
+                      value: paid.toDouble(),
+                      max: n == 0 ? 1 : n.toDouble(),
+                      meaning: PProgressMeaning.goal,
+                      semanticsLabel: l.dutchParticipant,
+                      semanticsValue: progressText,
+                    ),
+                  ),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      // 아바타 스택 최대 72(24 + 3 × 16) + 막대 24 + 사이 20
+                      maxWidth: (box.maxWidth - 72 - 24 - 2 * PSpacing.x2_5)
+                          .clamp(0.0, double.infinity),
+                    ),
+                    child: Text(
+                      progressText,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
