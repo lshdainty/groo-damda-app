@@ -385,75 +385,81 @@ class _SessionRow extends StatelessWidget {
       align: PListAlign.top,
       title: dp.title,
       onTap: onOpen,
-      detailChild: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: PSpacing.x1,
-        children: [
-          Text(
-            keepAllAmount(total),
-            semanticsLabel: total,
-            style: PTypography.t5.copyWith(
-              color: c.fgNeutral,
-              fontWeight: FontWeight.w700,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          PTagGroup(
-            size: PTagGroupSize.t3,
-            overflow: PTagGroupOverflow.truncate,
-            items: [
-              if (date.isNotEmpty) PTag(date),
-              PTag(l.dutchNPeople(n)),
-              if (perText != null) PTag(perText),
-            ],
-          ),
-          Padding(
-            // 위 6 — 위 Column 사이 4 가 이미 있어 2 만 더한다
-            padding: const EdgeInsets.only(top: PSpacing.x0_5),
-            // 막대는 늘 24 이상 — 글(줄지 않음)에 상한을 둬 200% 에서도 막대 자리를 남긴다
-            child: LayoutBuilder(
-              builder: (context, box) => Row(
-                spacing: PSpacing.x2_5,
-                children: [
-                  PAvatarStack(
-                    people: [
-                      for (final p in dp.participants)
-                        (
-                          name: (p.participantName ?? '').trim().isEmpty
-                              ? l.dutchNoName
-                              : p.participantName!.trim(),
-                          image: null,
-                        ),
-                    ],
-                  ),
-                  Expanded(
-                    child: PProgressBar(
-                      value: paid.toDouble(),
-                      max: n == 0 ? 1 : n.toDouble(),
-                      meaning: PProgressMeaning.goal,
-                      semanticsLabel: l.dutchParticipant,
-                      semanticsValue: progressText,
-                    ),
-                  ),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      // 아바타 스택 최대 72(24 + 3 × 16) + 막대 24 + 사이 20
-                      maxWidth: (box.maxWidth - 72 - 24 - 2 * PSpacing.x2_5)
-                          .clamp(0.0, double.infinity),
-                    ),
-                    child: Text(
-                      progressText,
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
-                      style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
-                    ),
-                  ),
-                ],
+      detailChild: Padding(
+        // 제목 → 총액 6 = 줄 안 사이 4 + 총액 위 2 (이미 2 가 있어 4 를 더한다)
+        padding: const EdgeInsets.only(top: PSpacing.x1),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: PSpacing.x1,
+          children: [
+            Text(
+              keepAllAmount(total),
+              semanticsLabel: total,
+              style: PTypography.t5.copyWith(
+                color: c.fgNeutral,
+                fontWeight: FontWeight.w700,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
-          ),
-        ],
+            PTagGroup(
+              size: PTagGroupSize.t3,
+              overflow: PTagGroupOverflow.truncate,
+              items: [
+                if (date.isNotEmpty) PTag(date),
+                PTag(l.dutchNPeople(n)),
+                if (perText != null) PTag(perText),
+              ],
+            ),
+            Padding(
+              // 위 6 — 위 Column 사이 4 가 이미 있어 2 만 더한다
+              padding: const EdgeInsets.only(top: PSpacing.x0_5),
+              // 막대는 늘 24 이상 — 글(줄지 않음)에 상한을 둬 200% 에서도 막대 자리를 남긴다
+              child: LayoutBuilder(
+                builder: (context, box) => Row(
+                  spacing: PSpacing.x2_5,
+                  children: [
+                    PAvatarStack(
+                      people: [
+                        for (final p in dp.participants)
+                          (
+                            name: (p.participantName ?? '').trim().isEmpty
+                                ? l.dutchNoName
+                                : p.participantName!.trim(),
+                            image: null,
+                          ),
+                      ],
+                    ),
+                    Expanded(
+                      child: PProgressBar(
+                        value: paid.toDouble(),
+                        max: n == 0 ? 1 : n.toDouble(),
+                        meaning: PProgressMeaning.goal,
+                        semanticsLabel: l.dutchParticipant,
+                        semanticsValue: progressText,
+                      ),
+                    ),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        // 아바타 스택 최대 72(24 + 3 × 16) + 막대 24 + 사이 20
+                        maxWidth: (box.maxWidth - 72 - 24 - 2 * PSpacing.x2_5)
+                            .clamp(0.0, double.infinity),
+                      ),
+                      child: Text(
+                        progressText,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        style: PTypography.t3.copyWith(
+                          color: c.fgNeutralSubtle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

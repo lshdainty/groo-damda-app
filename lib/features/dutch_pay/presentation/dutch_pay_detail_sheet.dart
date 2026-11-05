@@ -300,7 +300,8 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
       spacing: PSpacing.x2,
       children: [
         deleteButton,
-        Expanded(child: requestAll),
+        // [일괄 요청] 은 글 폭, 주 버튼 [모두 받음] 이 남은 폭을 채운다(웹과 같다)
+        requestAll,
         Expanded(child: settleAll),
       ],
     );
