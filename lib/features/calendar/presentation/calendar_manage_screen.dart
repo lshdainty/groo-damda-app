@@ -474,9 +474,6 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
             semanticLabel: l.calDeleteCalendar,
             children: [
               PListButtonItem(
-                prefix: ExcludeSemantics(
-                  child: Icon(LucideIcons.trash2, color: c.fgCritical),
-                ),
                 title: l.calDeleteCalendar,
                 titleColor: c.fgCritical,
                 onTap: _delete,
