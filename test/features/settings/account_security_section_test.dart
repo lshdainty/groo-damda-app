@@ -16,6 +16,7 @@ import 'package:groo_damda_app/features/settings/presentation/account_screen.dar
 import 'package:groo_damda_app/features/settings/presentation/appearance_section.dart';
 import 'package:groo_damda_app/features/settings/presentation/hide_amounts_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_switch.dart';
 
 /// OS 프롬프트 없이 정해진 결과만 돌려주는 가짜 인증.
@@ -165,9 +166,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // 전용 화면 — '전체' 탭에서 카드 목록이 바로 보이고, 저장 버튼이 아래 붙는다.
-      expect(find.text('전체'), findsOneWidget);
-      expect(find.text('순자산'), findsOneWidget);
-      expect(find.text('저장'), findsOneWidget);
+      expect(findPlain('전체'), findsOneWidget);
+      expect(findPlain('순자산'), findsOneWidget);
+      expect(findPlain('저장'), findsOneWidget);
     });
   });
 

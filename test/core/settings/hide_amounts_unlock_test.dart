@@ -11,6 +11,7 @@ import 'package:groo_damda_app/core/settings/hide_amounts_unlock_dialog.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/storage/prefs_provider.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 /// OS 프롬프트 없이 정해진 결과만 돌려주는 가짜 인증.
 class _FakeAuth extends AppLockAuth {
@@ -96,14 +97,14 @@ void main() {
       expect(auth.calls, 1);
       // 금액 보기용 문구 — 앱 잠금 해제 문구를 돌려 쓰지 않는다.
       expect(auth.lastReason, '금액을 다시 보려면 본인 확인이 필요해요.');
-      expect(find.text('금액 보기 인증'), findsNothing);
+      expect(findPlain('금액 보기 인증'), findsNothing);
       expect(
         container.read(settingsProvider).value?.isHidden('home.netWorth'),
         false,
       );
     });
 
-    testWidgets('생체인증을 취소하면 비밀번호 다이얼로그로 물러선다', (tester) async {
+    testWidgets('생체인증을 취소하면 비밀번호 시트로 물러선다', (tester) async {
       final auth = _FakeAuth(AppLockAuthResult.failure);
       final container = await pumpUnlocker(tester, auth: auth, appLock: true);
 
@@ -111,9 +112,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(auth.calls, 1);
-      expect(find.text('금액 보기 인증'), findsOneWidget);
-      // 다이얼로그를 취소하면 가린 채로 남는다.
-      await tester.tap(find.text('취소'));
+      expect(findPlain('금액 보기 인증'), findsOneWidget);
+      // 시트를 닫으면(위 닫기 원) 가린 채로 남는다.
+      await tester.tap(find.bySemanticsLabel('닫기').last);
       await tester.pumpAndSettle();
       expect(
         container.read(settingsProvider).value?.isHidden('home.netWorth'),
@@ -129,7 +130,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(auth.calls, 1);
-      expect(find.text('금액 보기 인증'), findsOneWidget);
+      expect(findPlain('금액 보기 인증'), findsOneWidget);
     });
 
     testWidgets('앱 잠금이 꺼져 있으면 프롬프트 없이 바로 비밀번호를 묻는다', (tester) async {
@@ -141,7 +142,7 @@ void main() {
 
       // 켠 적 없는 사람에게 Face ID 를 들이밀지 않는다.
       expect(auth.calls, 0);
-      expect(find.text('금액 보기 인증'), findsOneWidget);
+      expect(findPlain('금액 보기 인증'), findsOneWidget);
     });
 
     testWidgets('가리기는 인증 없이 바로 걸린다', (tester) async {

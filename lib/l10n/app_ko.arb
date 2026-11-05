@@ -26,7 +26,6 @@
   "unlockBody": "금액을 다시 보려면 비밀번호로 본인 확인이 필요해요.",
   "unlockBiometricReason": "금액을 다시 보려면 본인 확인이 필요해요.",
   "unlockPasswordLabel": "비밀번호",
-  "unlockPasswordHint": "비밀번호 입력",
   "unlockMismatch": "비밀번호가 일치하지 않아요.",
   "appLockTitle": "앱 잠금",
   "appLockRowDesc": "앱을 열 때 Face ID·지문으로 본인 확인을 해요.",
@@ -2259,27 +2258,18 @@
   "appearanceThemeDarkDesc": "어두운 배경",
   "appearanceThemeSystem": "시스템",
   "appearanceThemeSystemDesc": "OS 설정 따라가기",
-  "hideAmountsLockAllDesc": "{total}개 중 {count}개 카드를 가리는 중",
-  "@hideAmountsLockAllDesc": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "hideAmountsTitle": "금액 가리기",
   "hideAmountsSectionDesc": "가릴 카드를 골라 두세요. 저장할 때 한 번만 본인 확인을 해요.",
-  "hideAmountsLockAll": "전체 잠그기",
   "hideAmountsTabAll": "전체",
   "hideAmountsSelectAll": "모두 선택",
   "hideAmountsClearAll": "모두 해제",
-  "hideAmountsSelectedCount": "{count}개 선택",
-  "@hideAmountsSelectedCount": {
+  "hideAmountsScreensCount": "가릴 화면 · {count} / {total}",
+  "@hideAmountsScreensCount": {
     "placeholders": {
       "count": {
+        "type": "int"
+      },
+      "total": {
         "type": "int"
       }
     }
@@ -2287,9 +2277,9 @@
   "hideAmountsDiscardTitle": "저장하지 않고 나가기",
   "hideAmountsDiscardBody": "고른 내용이 사라져요.",
   "hideAmountsDiscardConfirm": "나가기",
-  "hideAmountsSaved": "저장했어요",
   "hideAmountsKindLabel": "거래 종류",
-  "hideAmountsKindNote": "화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계도 함께 가려집니다.",
+  "hideAmountsKindNote": "화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계·잔액도 함께 가려져요.",
+  "hideAmountsKindHelp": "거래 종류 도움말",
   "hideCardKindExpense": "지출 거래",
   "hideCardKindIncome": "수입 거래",
   "hideCardKindTransfer": "이체 거래",
