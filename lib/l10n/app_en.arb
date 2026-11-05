@@ -2236,7 +2236,7 @@
   "hideAmountsTabAll": "All",
   "hideAmountsSelectAll": "Select all",
   "hideAmountsClearAll": "Clear all",
-  "hideAmountsScreensCount": "Screens to hide · {count} / {total}",
+  "hideAmountsScreensCount": "Screens to hide · {count} / {total}",
   "@hideAmountsScreensCount": {
     "placeholders": {
       "count": {
@@ -2252,7 +2252,9 @@
   "hideAmountsDiscardConfirm": "Leave",
   "hideAmountsKindLabel": "Transaction type",
   "hideAmountsKindNote": "Hides amounts of that transaction type on every screen. Hiding income or expense also hides totals and balances.",
-  "hideAmountsKindHelp": "Transaction type help",
+  "hideAmountsKindHelp": "Transaction type info",
+  "hideAmountsTabsLabel": "Choose screen",
+  "hideAmountsScreensTitle": "Screens to hide · ",
   "hideCardKindExpense": "Expense",
   "hideCardKindIncome": "Income",
   "hideCardKindTransfer": "Transfers",

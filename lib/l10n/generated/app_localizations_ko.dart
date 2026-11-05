@@ -3912,7 +3912,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String hideAmountsScreensCount(int count, int total) {
-    return '가릴 화면 · $count / $total';
+    return '가릴 화면 · $count / $total';
   }
 
   @override
@@ -3929,10 +3929,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get hideAmountsKindNote =>
-      '화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계·잔액도 함께 가려져요.';
+      '화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계 · 잔액도 함께 가려져요.';
 
   @override
-  String get hideAmountsKindHelp => '거래 종류 도움말';
+  String get hideAmountsKindHelp => '거래 종류 안내';
+
+  @override
+  String get hideAmountsTabsLabel => '화면 고르기';
+
+  @override
+  String get hideAmountsScreensTitle => '가릴 화면 · ';
 
   @override
   String get hideCardKindExpense => '지출 거래';

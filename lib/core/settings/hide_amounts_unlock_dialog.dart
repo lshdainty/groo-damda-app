@@ -53,7 +53,7 @@ Future<bool> confirmHideAmountsUnlock(
 /// 생체인증만 시도한다 — 앱 잠금이 켜져 있고 인증이 되면 true. 꺼져 있거나 취소 · 실패 · 수단 없음이면 false(비밀번호로 물러선다).
 ///
 /// 앱 잠금이 꺼져 있으면 프롬프트를 띄우지 않는다 — 켠 적 없는 사람에게 갑자기 Face ID 가 뜨는 건 놀랄 일이다. 비밀번호 칸을
-/// 어디에 보일지(옛 대화상자 · 자산 폼의 같은 시트 단계)는 부르는 쪽이 정한다.
+/// 어디에 보일지(금액 가리기의 시트 · 자산 폼의 같은 시트 단계)는 부르는 쪽이 정한다.
 Future<bool> tryHideAmountsBiometric(
   BuildContext context,
   WidgetRef ref,

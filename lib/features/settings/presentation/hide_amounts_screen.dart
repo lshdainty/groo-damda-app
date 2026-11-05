@@ -160,21 +160,18 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                     title: l.hideAmountsKindLabel,
                     variant: PListHeaderVariant.boldSolid,
                     topInset: PSpacing.x2,
-                    action: Transform.translate(
-                      offset: const Offset(
-                        -(kTextButtonPaddingX - PSpacing.x2),
-                        0,
-                      ),
-                      child: PHelpBubble(
-                        title: l.hideAmountsKindNote,
-                        triggerBuilder: (context, toggle, open) => PButton.icon(
-                          icon: LucideIcons.info,
-                          semanticLabel: l.hideAmountsKindHelp,
-                          variant: PButtonVariant.ghost,
-                          ghostColor: PButtonGhostColor.neutralSubtle,
-                          size: PButtonSize.small,
-                          onPressed: toggle,
-                        ),
+                    // 아이콘 동작 — 아이콘 끝이 체크 끝선에 서도록 번짐은 아이콘 안쪽 여백만큼
+                    actionBleed: kListHeaderIconActionBleed,
+                    action: PHelpBubble(
+                      title: l.hideAmountsKindLabel,
+                      description: l.hideAmountsKindNote,
+                      triggerBuilder: (context, toggle, open) => PButton.icon(
+                        icon: LucideIcons.info,
+                        semanticLabel: l.hideAmountsKindHelp,
+                        variant: PButtonVariant.ghost,
+                        ghostColor: PButtonGhostColor.neutralSubtle,
+                        size: PButtonSize.small,
+                        onPressed: toggle,
                       ),
                     ),
                   ),
@@ -194,7 +191,7 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                     value: _tab,
                     layout: PTabsLayout.hug,
                     size: PTabsSize.small,
-                    semanticLabel: l.hideAmountsTitle,
+                    semanticLabel: l.hideAmountsTabsLabel,
                     items: [
                       for (final tab in _tabs)
                         PTab<_Tab>(
@@ -207,25 +204,33 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                     onChanged: (tab) => setState(() => _tab = tab),
                   ),
                   PListHeader(
-                    title: l.hideAmountsScreensCount(
-                      onThisTab,
-                      tabCards.length,
-                    ),
+                    // 읽기 전에는 수를 모른다 — 0 이라 말하지 않고 자리만(스켈레톤)
+                    title: loaded
+                        ? l.hideAmountsScreensCount(onThisTab, tabCards.length)
+                        : l.hideAmountsScreensTitle,
+                    titleSuffix: loaded
+                        ? null
+                        : SizedBox(
+                            width: 40,
+                            child: PSkeleton.text(PTypography.t4),
+                          ),
+                    tabularFigures: true,
                     topInset: PSpacing.x4,
-                    action: loaded
-                        ? PTextButton(
-                            label: allOnThisTab
-                                ? l.hideAmountsClearAll
-                                : l.hideAmountsSelectAll,
-                            onPressed: () => setState(() {
+                    // 읽기 전에도 자리는 같다(머리 높이가 뛰지 않게) — 누르지는 못한다
+                    action: PTextButton(
+                      label: allOnThisTab
+                          ? l.hideAmountsClearAll
+                          : l.hideAmountsSelectAll,
+                      onPressed: loaded
+                          ? () => setState(() {
                               if (allOnThisTab) {
                                 draft.removeAll(tabCards);
                               } else {
                                 draft.addAll(tabCards);
                               }
-                            }),
-                          )
-                        : null,
+                            })
+                          : null,
+                    ),
                   ),
                   if (!loaded)
                     const _CheckSkeleton(count: 6)
@@ -235,6 +240,8 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                       PListHeader(
                         title: _pageLabel(l, page!),
                         variant: PListHeaderVariant.boldSolid,
+                        // 화면 묶음은 "가릴 화면" 아래 단계 — 머리말 3
+                        headingLevel: 3,
                         topInset: i == 0 ? PSpacing.x1 : PSpacing.x3,
                       ),
                       _CheckGroup(

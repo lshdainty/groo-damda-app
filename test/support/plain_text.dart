@@ -21,3 +21,14 @@ Finder findRichPlain(String part) => find.byWidgetPredicate(
   (w) => w is RichText && plainOf(w.text.toPlainText()).contains(part),
   description: 'RichText containing "$part"',
 );
+
+/// 목록 제목처럼 `Text.rich` 로 그린 글 — 줄바꿈 글자와 자리 표시(WidgetSpan)를 빼고 **정확히** [s] 인 것([findPlain] 은
+/// `data` 가 있는 [Text] 만 본다).
+Finder findRichText(String s) => find.byWidgetPredicate(
+  (w) =>
+      w is Text &&
+      w.data == null &&
+      w.textSpan != null &&
+      plainOf(w.textSpan!.toPlainText().replaceAll('\uFFFC', '')) == s,
+  description: 'Text.rich "$s"',
+);

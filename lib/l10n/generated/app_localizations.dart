@@ -7228,7 +7228,7 @@ abstract class AppLocalizations {
   /// No description provided for @hideAmountsScreensCount.
   ///
   /// In ko, this message translates to:
-  /// **'가릴 화면 · {count} / {total}'**
+  /// **'가릴 화면 · {count} / {total}'**
   String hideAmountsScreensCount(int count, int total);
 
   /// No description provided for @hideAmountsDiscardTitle.
@@ -7258,14 +7258,26 @@ abstract class AppLocalizations {
   /// No description provided for @hideAmountsKindNote.
   ///
   /// In ko, this message translates to:
-  /// **'화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계·잔액도 함께 가려져요.'**
+  /// **'화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계 · 잔액도 함께 가려져요.'**
   String get hideAmountsKindNote;
 
   /// No description provided for @hideAmountsKindHelp.
   ///
   /// In ko, this message translates to:
-  /// **'거래 종류 도움말'**
+  /// **'거래 종류 안내'**
   String get hideAmountsKindHelp;
+
+  /// No description provided for @hideAmountsTabsLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'화면 고르기'**
+  String get hideAmountsTabsLabel;
+
+  /// No description provided for @hideAmountsScreensTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'가릴 화면 · '**
+  String get hideAmountsScreensTitle;
 
   /// No description provided for @hideCardKindExpense.
   ///

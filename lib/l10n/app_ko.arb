@@ -2263,7 +2263,7 @@
   "hideAmountsTabAll": "전체",
   "hideAmountsSelectAll": "모두 선택",
   "hideAmountsClearAll": "모두 해제",
-  "hideAmountsScreensCount": "가릴 화면 · {count} / {total}",
+  "hideAmountsScreensCount": "가릴 화면 · {count} / {total}",
   "@hideAmountsScreensCount": {
     "placeholders": {
       "count": {
@@ -2278,8 +2278,10 @@
   "hideAmountsDiscardBody": "고른 내용이 사라져요.",
   "hideAmountsDiscardConfirm": "나가기",
   "hideAmountsKindLabel": "거래 종류",
-  "hideAmountsKindNote": "화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계·잔액도 함께 가려져요.",
-  "hideAmountsKindHelp": "거래 종류 도움말",
+  "hideAmountsKindNote": "화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계 · 잔액도 함께 가려져요.",
+  "hideAmountsKindHelp": "거래 종류 안내",
+  "hideAmountsTabsLabel": "화면 고르기",
+  "hideAmountsScreensTitle": "가릴 화면 · ",
   "hideCardKindExpense": "지출 거래",
   "hideCardKindIncome": "수입 거래",
   "hideCardKindTransfer": "이체 거래",

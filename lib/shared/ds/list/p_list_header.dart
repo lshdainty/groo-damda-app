@@ -6,6 +6,9 @@ import 'package:groo_damda_app/shared/ds/header_row/p_header_row.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 
+/// 아이콘만 있는 동작(ⓘ small 36 · 아이콘 16)의 오른쪽 번짐 — 상자 안 아이콘 여백 10.
+const double kListHeaderIconActionBleed = PSpacing.x2_5;
+
 /// 목록 제목의 모양 — mediumWeak(기본: 14 · 500 · 옅은 색 — 줄보다 앞서지 않는다) · boldSolid(14 · 700 · 짙은 색 — 화면을
 /// 크게 나누는 묶음에만).
 enum PListHeaderVariant { mediumWeak, boldSolid }
@@ -30,6 +33,8 @@ class PListHeader extends StatelessWidget {
     this.inset = PSpacing.globalGutter,
     this.trailing,
     this.titleSuffix,
+    this.actionBleed = kTextButtonPaddingX,
+    this.tabularFigures = false,
   }) : assert(action == null || trailing == null, '오른쪽은 글 버튼과 값 글 중 하나');
 
   final String title;
@@ -54,6 +59,13 @@ class PListHeader extends StatelessWidget {
   /// 제목 글 바로 뒤에 놓는 것 — 아직 모르는 개수 자리의 [PSkeleton] 처럼("메모 태그 · ▭"). 읽는 이름은 [title] 이다.
   final Widget? titleSuffix;
 
+  /// 오른쪽 동작이 줄 끝에서 바깥으로 내미는 폭 — 글 버튼은 좌우 여백 14(기본), 아이콘만 있는 동작(ⓘ)은 아이콘 안쪽
+  /// 여백([kListHeaderIconActionBleed] 10)이라 아이콘 끝이 줄 끝선에 선다.
+  final double actionBleed;
+
+  /// 제목의 숫자를 고정폭으로(개수가 바뀌어도 폭이 흔들리지 않게).
+  final bool tabularFigures;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -61,6 +73,9 @@ class PListHeader extends StatelessWidget {
     final style = PTypography.t4.copyWith(
       color: strong ? c.fgNeutral : c.fgNeutralSubtle,
       fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
+      fontFeatures: tabularFigures
+          ? const [FontFeature.tabularFigures()]
+          : null,
     );
     return PTouchTargetScope(
       // 글 버튼은 보이는 36 + 위 · 아래 4 = 44 — 줄 밖(이웃)까지 받는다
@@ -77,7 +92,7 @@ class PListHeader extends StatelessWidget {
         // 오른쪽 동작이 머리 폭의 절반을 넘으면 제목 아래 줄 오른쪽 끝으로 간다(03-G 4A)
         child: PHeaderRow(
           gap: PSpacing.x2_5,
-          actionBleed: trailing != null ? 0 : kTextButtonPaddingX,
+          actionBleed: trailing != null ? 0 : actionBleed,
           expandTitle: false,
           title: Semantics(
             // headingLevel 0 은 머리말이 아니다 — 목록 위 상태 줄("읽지 않은 알림 N개")
@@ -105,7 +120,7 @@ class PListHeader extends StatelessWidget {
           action: action == null
               ? trailing
               : Transform.translate(
-                  offset: const Offset(kTextButtonPaddingX, 0),
+                  offset: Offset(actionBleed, 0),
                   child: action,
                 ),
         ),

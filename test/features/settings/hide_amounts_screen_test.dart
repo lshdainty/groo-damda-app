@@ -13,6 +13,9 @@ import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/storage/prefs_provider.dart';
 import 'package:groo_damda_app/features/settings/presentation/hide_amounts_screen.dart';
+import 'package:dio/dio.dart';
+import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/auth/auth_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -52,6 +55,18 @@ class _SlowSettings extends SettingsNotifier {
   }
 }
 
+/// 비밀번호가 맞다고 답하는 저장소.
+class _Repo extends AuthRepository {
+  _Repo() : super(Dio());
+  int calls = 0;
+
+  @override
+  Future<void> verifyPassword(String password) async => calls++;
+}
+
+/// 목록 제목의 "n / m"(앞뒤는 줄바꿈 없는 공백).
+String _count(int n, int m) => '가릴 화면 · $n\u00A0/\u00A0$m';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -61,6 +76,7 @@ void main() {
     Set<String> hidden = const {},
     bool appLock = true,
     Completer<void>? gate,
+    _Repo? repo,
   }) async {
     // 기본 800×600 은 실제 폰보다 짧다. 위 '거래 종류' 영역 때문에 체크 줄이 밀려 아래쪽 줄이 뷰포트 밖으로 나간다 — 세로만 늘린다.
     tester.view.physicalSize = const Size(2400, 3600); // dpr 3.0 → 논리 800×1200
@@ -73,6 +89,8 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         appLockAuthProvider.overrideWithValue(auth),
+        if (repo != null)
+          authRepositoryProvider.overrideWith((ref) async => repo),
         if (gate != null)
           settingsProvider.overrideWith(() => _SlowSettings(gate)),
       ],
@@ -117,6 +135,12 @@ void main() {
     await tester.pumpAndSettle();
     return container;
   }
+
+  /// 탭 줄 안의 글 — 같은 이름의 화면 묶음 제목과 헷갈리지 않게.
+  Finder tabText(String s) => find.descendant(
+    of: find.byType(PTabs<HidePage?>),
+    matching: findPlain(s),
+  );
 
   Finder saveButton() =>
       find.byWidgetPredicate((w) => w is PButton && w.label == '저장');
@@ -241,22 +265,16 @@ void main() {
       final auth = _FakeAuth(AppLockAuthResult.success);
       await pumpScreen(tester, auth: auth, hidden: {'home.netWorth'});
 
-      expect(
-        findPlain('가릴 화면 · 1 / ${kScreenHideCards.length}'),
-        findsOneWidget,
-      );
-      await tester.tap(findPlain('홈'));
+      expect(findRichText(_count(1, kScreenHideCards.length)), findsOneWidget);
+      await tester.tap(tabText('홈'));
       await tester.pumpAndSettle();
       final home = cardsOfPage(HidePage.home);
-      expect(findPlain('가릴 화면 · 1 / ${home.length}'), findsOneWidget);
+      expect(findRichText(_count(1, home.length)), findsOneWidget);
       expect(findPlain('모두 선택'), findsOneWidget);
 
       await tester.tap(findPlain('모두 선택'));
       await tester.pumpAndSettle();
-      expect(
-        findPlain('가릴 화면 · ${home.length} / ${home.length}'),
-        findsOneWidget,
-      );
+      expect(findRichText(_count(home.length, home.length)), findsOneWidget);
       expect(findPlain('모두 해제'), findsOneWidget);
     });
 
@@ -265,7 +283,7 @@ void main() {
       final container = await pumpScreen(tester, auth: auth);
 
       // '홈' 탭으로 옮겨 그 탭만 전부 고른다.
-      await tester.tap(findPlain('홈'));
+      await tester.tap(tabText('홈'));
       await tester.pumpAndSettle();
       await tester.tap(findPlain('모두 선택'));
       await tester.pumpAndSettle();
@@ -287,15 +305,18 @@ void main() {
         find.byKey(const ValueKey('hide-card-home.upcoming')),
         findsOneWidget,
       );
-      expect(findPlain('자산'), findsWidgets);
+      // 홈 · 자산 묶음 제목이 각자 선다(탭 글과 따로 센다)
+      expect(findRichText('홈'), findsOneWidget);
+      expect(findRichText('자산'), findsOneWidget);
 
-      await tester.tap(findPlain('가계부'));
+      await tester.tap(tabText('가계부'));
       await tester.pumpAndSettle();
 
       expect(findPlain('월 합계'), findsOneWidget); // 가계부 카드
       expect(findPlain('순자산'), findsNothing);
       // 화면 탭에는 화면 이름 목록 제목을 두지 않는다 — 탭 이름만 남는다.
-      expect(findPlain('가계부'), findsOneWidget);
+      expect(findRichText('가계부'), findsNothing);
+      expect(tabText('가계부'), findsOneWidget);
     });
 
     testWidgets('좌우로 밀어서 탭을 옮기지 않는다 — 탭을 눌러 바꾼다', (tester) async {
@@ -323,10 +344,71 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('hide-amounts-skeleton')), findsNothing);
       // 읽은 값(순자산 가림)에서 시작한다 — 빈 고름으로 굳지 않았다.
-      expect(
-        findPlain('가릴 화면 · 1 / ${kScreenHideCards.length}'),
-        findsOneWidget,
+      expect(findRichText(_count(1, kScreenHideCards.length)), findsOneWidget);
+    });
+
+    testWidgets('값이 있는 채 시트를 닫으면 작성한 내용이 사라진다고 묻고, 비어 있으면 그냥 닫힌다', (
+      tester,
+    ) async {
+      final auth = _FakeAuth(AppLockAuthResult.success);
+      final container = await pumpScreen(
+        tester,
+        auth: auth,
+        hidden: {'home.netWorth'},
+        appLock: false,
+        repo: _Repo(),
       );
+      await tester.tap(findPlain('순자산').first);
+      await tester.pumpAndSettle();
+      await tapSave(tester);
+      expect(findPlain('금액 보기 인증'), findsOneWidget);
+
+      // 비어 있으면 묻지 않고 닫힌다
+      await tester.tap(find.bySemanticsLabel('닫기').last);
+      await tester.pumpAndSettle();
+      expect(findPlain('금액 보기 인증'), findsNothing);
+      expect(findPlain('작성한 내용이 사라져요'), findsNothing);
+
+      // 다시 열어 값을 치고 닫으면 묻는다
+      await tapSave(tester);
+      await tester.enterText(find.byType(EditableText).last, 'pw');
+      await tester.pump();
+      await tester.tap(find.bySemanticsLabel('닫기').last);
+      await tester.pumpAndSettle();
+      expect(findPlain('작성한 내용이 사라져요'), findsOneWidget);
+      // 계속 작성 → 시트가 남는다 · 저장은 안 됨
+      await tester.tap(findPlain('계속 작성'));
+      await tester.pumpAndSettle();
+      expect(findPlain('금액 보기 인증'), findsOneWidget);
+      expect(container.read(settingsProvider).value?.hideCards, {
+        'home.netWorth',
+      });
+    });
+
+    testWidgets('맞는 비밀번호면 저장하고 시트와 화면이 닫힌다', (tester) async {
+      final auth = _FakeAuth(AppLockAuthResult.success);
+      final repo = _Repo();
+      final container = await pumpScreen(
+        tester,
+        auth: auth,
+        hidden: {'home.netWorth'},
+        appLock: false,
+        repo: repo,
+      );
+      await tester.tap(findPlain('순자산').first);
+      await tester.pumpAndSettle();
+      await tapSave(tester);
+      await tester.enterText(find.byType(EditableText).last, 'pw');
+      await tester.pump();
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PButton && w.label == '금액 보기'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(repo.calls, 1);
+      expect(container.read(settingsProvider).value?.hideCards, isEmpty);
+      expect(findPlain('금액 보기 인증'), findsNothing);
+      expect(find.byType(HideAmountsScreen), findsNothing);
     });
   });
 }

@@ -3979,7 +3979,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String hideAmountsScreensCount(int count, int total) {
-    return 'Screens to hide · $count / $total';
+    return 'Screens to hide · $count / $total';
   }
 
   @override
@@ -3999,7 +3999,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Hides amounts of that transaction type on every screen. Hiding income or expense also hides totals and balances.';
 
   @override
-  String get hideAmountsKindHelp => 'Transaction type help';
+  String get hideAmountsKindHelp => 'Transaction type info';
+
+  @override
+  String get hideAmountsTabsLabel => 'Choose screen';
+
+  @override
+  String get hideAmountsScreensTitle => 'Screens to hide · ';
 
   @override
   String get hideCardKindExpense => 'Expense';

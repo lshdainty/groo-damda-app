@@ -221,6 +221,24 @@ class _RenderHeaderRow extends RenderBox
   void paint(PaintingContext context, Offset offset) =>
       defaultPaint(context, offset);
 
+  /// 동작이 줄 끝 밖으로 번진 폭([_actionBleed])만큼 오른쪽을 더 받는다 — 보이는 단추가 줄 밖으로 나간 자리가 눌리지 않는
+  /// 죽은 띠로 남지 않게(기본 크기 검사는 줄 안만 받는다).
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final bleed = _action == null ? 0.0 : _actionBleed;
+    if (position.dx < 0 ||
+        position.dx >= size.width + bleed ||
+        position.dy < 0 ||
+        position.dy >= size.height) {
+      return false;
+    }
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
+  }
+
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
       defaultHitTestChildren(result, position: position);

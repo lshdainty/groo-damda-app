@@ -109,6 +109,37 @@ void main() {
     });
   });
 
+  group('PListHeader — 동작이 줄 밖으로 번진 자리도 눌린다', () {
+    for (final bleed in [14.0, 10.0]) {
+      testWidgets('번짐 $bleed — 줄 끝 바깥 번짐 안쪽을 누르면 동작이 받는다', (tester) async {
+        _viewport(tester);
+        var taps = 0;
+        await tester.pumpWidget(
+          _app(
+            PListHeader(
+              title: '제목',
+              actionBleed: bleed,
+              action: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => taps++,
+                child: const SizedBox(
+                  key: ValueKey('act'),
+                  width: 36,
+                  height: 36,
+                ),
+              ),
+            ),
+          ),
+        );
+        final r = tester.getRect(find.byKey(const ValueKey('act')));
+        // 줄 끝(360 − 24 = 336)에서 번짐 − 2 만큼 바깥 점
+        expect(r.right, closeTo(336 + bleed, 0.5));
+        await tester.tapAt(Offset(336 + bleed - 2, r.center.dy));
+        expect(taps, 1);
+      });
+    }
+  });
+
   group('새 공용 머리 셋 — 100% 에서 한 줄, 200% 에서 내려간다', () {
     for (final scale in [1.0, 1.3, 2.0]) {
       testWidgets('PCardHeader · 폭 360 · 글자 ${(scale * 100).round()}%', (
