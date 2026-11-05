@@ -78,9 +78,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlockPasswordLabel => 'Password';
 
   @override
-  String get unlockPasswordHint => 'Enter password';
-
-  @override
   String get unlockMismatch => 'Password doesn\'t match.';
 
   @override
@@ -3965,19 +3962,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceThemeSystemDesc => 'Follow OS setting';
 
   @override
-  String hideAmountsLockAllDesc(int total, int count) {
-    return 'Hiding $count of $total cards';
-  }
-
-  @override
   String get hideAmountsTitle => 'Hide amounts';
 
   @override
   String get hideAmountsSectionDesc =>
       'Pick the cards to hide. You\'ll verify once when you save.';
-
-  @override
-  String get hideAmountsLockAll => 'Lock everything';
 
   @override
   String get hideAmountsTabAll => 'All';
@@ -3989,8 +3978,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hideAmountsClearAll => 'Clear all';
 
   @override
-  String hideAmountsSelectedCount(int count) {
-    return '$count selected';
+  String hideAmountsScreensCount(int count, int total) {
+    return 'Screens to hide · $count / $total';
   }
 
   @override
@@ -4003,14 +3992,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hideAmountsDiscardConfirm => 'Leave';
 
   @override
-  String get hideAmountsSaved => 'Saved';
-
-  @override
   String get hideAmountsKindLabel => 'Transaction type';
 
   @override
   String get hideAmountsKindNote =>
-      'Hides amounts of that transaction type on every screen. Hiding income or expense also hides totals.';
+      'Hides amounts of that transaction type on every screen. Hiding income or expense also hides totals and balances.';
+
+  @override
+  String get hideAmountsKindHelp => 'Transaction type info';
+
+  @override
+  String get hideAmountsTabsLabel => 'Choose screen';
+
+  @override
+  String get hideAmountsScreensTitle => 'Screens to hide · ';
 
   @override
   String get hideCardKindExpense => 'Expense';

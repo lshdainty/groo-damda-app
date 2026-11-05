@@ -22,6 +22,7 @@ class PHeaderRow extends MultiChildRenderObjectWidget {
     this.gap = 8,
     this.expandTitle = true,
     this.actionBleed = 0,
+    this.actionBleedY = 0,
   }) : super(children: [title, ?action]);
 
   /// 제목과 동작 사이(한 줄) · 내려갔을 때 두 줄 사이.
@@ -31,6 +32,9 @@ class PHeaderRow extends MultiChildRenderObjectWidget {
   /// 폭에서 뺀다(그리기를 옮기는 것은 동작 쪽 몫이다).
   final double actionBleed;
 
+  /// 동작이 줄 위아래로 번진 폭 — 번진 자리도 눌림을 받는다(배치는 동작 쪽이 맡는다).
+  final double actionBleedY;
+
   /// 한 줄일 때 제목이 남는 폭을 모두 쓴다(카드 · 아코디언 머리). 아니면 글 폭만(목록 제목).
   final bool expandTitle;
 
@@ -39,6 +43,7 @@ class PHeaderRow extends MultiChildRenderObjectWidget {
     gap: gap,
     expandTitle: expandTitle,
     actionBleed: actionBleed,
+    actionBleedY: actionBleedY,
   );
 
   @override
@@ -46,7 +51,8 @@ class PHeaderRow extends MultiChildRenderObjectWidget {
     (renderObject as _RenderHeaderRow)
       ..gap = gap
       ..expandTitle = expandTitle
-      ..actionBleed = actionBleed;
+      ..actionBleed = actionBleed
+      ..actionBleedY = actionBleedY;
   }
 }
 
@@ -60,9 +66,17 @@ class _RenderHeaderRow extends RenderBox
     required double gap,
     required bool expandTitle,
     required double actionBleed,
+    double actionBleedY = 0,
   }) : _gap = gap,
        _expandTitle = expandTitle,
-       _actionBleed = actionBleed;
+       _actionBleed = actionBleed,
+       _actionBleedY = actionBleedY;
+
+  double _actionBleedY;
+  set actionBleedY(double value) {
+    if (_actionBleedY == value) return;
+    _actionBleedY = value;
+  }
 
   double _actionBleed;
   set actionBleed(double value) {
@@ -220,6 +234,25 @@ class _RenderHeaderRow extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) =>
       defaultPaint(context, offset);
+
+  /// 동작이 줄 끝 밖으로 번진 폭([_actionBleed])만큼 오른쪽을 더 받는다 — 보이는 단추가 줄 밖으로 나간 자리가 눌리지 않는
+  /// 죽은 띠로 남지 않게(기본 크기 검사는 줄 안만 받는다).
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final bleed = _action == null ? 0.0 : _actionBleed;
+    final bleedY = _action == null ? 0.0 : _actionBleedY;
+    if (position.dx < 0 ||
+        position.dx >= size.width + bleed ||
+        position.dy < -bleedY ||
+        position.dy >= size.height + bleedY) {
+      return false;
+    }
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
+  }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>

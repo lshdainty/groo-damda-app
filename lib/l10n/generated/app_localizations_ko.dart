@@ -78,9 +78,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get unlockPasswordLabel => '비밀번호';
 
   @override
-  String get unlockPasswordHint => '비밀번호 입력';
-
-  @override
   String get unlockMismatch => '비밀번호가 일치하지 않아요.';
 
   @override
@@ -3899,18 +3896,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceThemeSystemDesc => 'OS 설정 따라가기';
 
   @override
-  String hideAmountsLockAllDesc(int total, int count) {
-    return '$total개 중 $count개 카드를 가리는 중';
-  }
-
-  @override
   String get hideAmountsTitle => '금액 가리기';
 
   @override
   String get hideAmountsSectionDesc => '가릴 카드를 골라 두세요. 저장할 때 한 번만 본인 확인을 해요.';
-
-  @override
-  String get hideAmountsLockAll => '전체 잠그기';
 
   @override
   String get hideAmountsTabAll => '전체';
@@ -3922,8 +3911,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hideAmountsClearAll => '모두 해제';
 
   @override
-  String hideAmountsSelectedCount(int count) {
-    return '$count개 선택';
+  String hideAmountsScreensCount(int count, int total) {
+    return '가릴 화면 · $count / $total';
   }
 
   @override
@@ -3936,14 +3925,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hideAmountsDiscardConfirm => '나가기';
 
   @override
-  String get hideAmountsSaved => '저장했어요';
-
-  @override
   String get hideAmountsKindLabel => '거래 종류';
 
   @override
   String get hideAmountsKindNote =>
-      '화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계도 함께 가려집니다.';
+      '화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계 · 잔액도 함께 가려져요.';
+
+  @override
+  String get hideAmountsKindHelp => '거래 종류 안내';
+
+  @override
+  String get hideAmountsTabsLabel => '화면 고르기';
+
+  @override
+  String get hideAmountsScreensTitle => '가릴 화면 · ';
 
   @override
   String get hideCardKindExpense => '지출 거래';

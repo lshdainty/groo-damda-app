@@ -236,12 +236,6 @@ abstract class AppLocalizations {
   /// **'비밀번호'**
   String get unlockPasswordLabel;
 
-  /// No description provided for @unlockPasswordHint.
-  ///
-  /// In ko, this message translates to:
-  /// **'비밀번호 입력'**
-  String get unlockPasswordHint;
-
   /// No description provided for @unlockMismatch.
   ///
   /// In ko, this message translates to:
@@ -7201,12 +7195,6 @@ abstract class AppLocalizations {
   /// **'OS 설정 따라가기'**
   String get appearanceThemeSystemDesc;
 
-  /// No description provided for @hideAmountsLockAllDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'{total}개 중 {count}개 카드를 가리는 중'**
-  String hideAmountsLockAllDesc(int total, int count);
-
   /// No description provided for @hideAmountsTitle.
   ///
   /// In ko, this message translates to:
@@ -7218,12 +7206,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'가릴 카드를 골라 두세요. 저장할 때 한 번만 본인 확인을 해요.'**
   String get hideAmountsSectionDesc;
-
-  /// No description provided for @hideAmountsLockAll.
-  ///
-  /// In ko, this message translates to:
-  /// **'전체 잠그기'**
-  String get hideAmountsLockAll;
 
   /// No description provided for @hideAmountsTabAll.
   ///
@@ -7243,11 +7225,11 @@ abstract class AppLocalizations {
   /// **'모두 해제'**
   String get hideAmountsClearAll;
 
-  /// No description provided for @hideAmountsSelectedCount.
+  /// No description provided for @hideAmountsScreensCount.
   ///
   /// In ko, this message translates to:
-  /// **'{count}개 선택'**
-  String hideAmountsSelectedCount(int count);
+  /// **'가릴 화면 · {count} / {total}'**
+  String hideAmountsScreensCount(int count, int total);
 
   /// No description provided for @hideAmountsDiscardTitle.
   ///
@@ -7267,12 +7249,6 @@ abstract class AppLocalizations {
   /// **'나가기'**
   String get hideAmountsDiscardConfirm;
 
-  /// No description provided for @hideAmountsSaved.
-  ///
-  /// In ko, this message translates to:
-  /// **'저장했어요'**
-  String get hideAmountsSaved;
-
   /// No description provided for @hideAmountsKindLabel.
   ///
   /// In ko, this message translates to:
@@ -7282,8 +7258,26 @@ abstract class AppLocalizations {
   /// No description provided for @hideAmountsKindNote.
   ///
   /// In ko, this message translates to:
-  /// **'화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계도 함께 가려집니다.'**
+  /// **'화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계 · 잔액도 함께 가려져요.'**
   String get hideAmountsKindNote;
+
+  /// No description provided for @hideAmountsKindHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 종류 안내'**
+  String get hideAmountsKindHelp;
+
+  /// No description provided for @hideAmountsTabsLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'화면 고르기'**
+  String get hideAmountsTabsLabel;
+
+  /// No description provided for @hideAmountsScreensTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'가릴 화면 · '**
+  String get hideAmountsScreensTitle;
 
   /// No description provided for @hideCardKindExpense.
   ///

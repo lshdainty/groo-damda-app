@@ -1,27 +1,33 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
+import 'package:groo_damda_app/core/settings/hide_amounts_unlock_step.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 
-/// 금액 숨김 잠금해제 다이얼로그.
-///
-/// hideAmounts=true → false 전환 시 호출. 비밀번호 검증이 성공하면 [true] 반환.
-/// 취소·실패 시 [false] 또는 null 반환.
-Future<bool> showHideAmountsUnlockDialog(BuildContext context) async {
-  final ok = await showDialog<bool>(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const _HideAmountsUnlockDialog(),
+/// 금액 보기 비밀번호 시트(I-14 44) — 금액 가리기 화면이 부르는 표면. ds 입력 폼 시트(위 닫기 원 + 바닥 [금액 보기])이고,
+/// 본문은 자산 수정 폼의 같은 시트 단계와 한 부품([HideAmountsUnlockStep])이다. 바깥 누름 · 끌어내림으로 닫히지 않고, 칸에 값이
+/// 있는 채 닫으면 "작성한 내용이 사라져요" 를 묻는다. 비밀번호 검증이 성공하면 [true], 닫으면 [false].
+Future<bool> showHideAmountsUnlockSheet(BuildContext context) async {
+  final l = AppLocalizations.of(context);
+  final probe = HideAmountsUnlockProbe();
+  final ok = await PBottomSheet.show<bool>(
+    context,
+    form: true,
+    isDirty: () => probe.dirty(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
+    ),
+    builder: (sheetContext) => HideAmountsUnlockStep(
+      probe: probe,
+      onVerified: () => PBottomSheet.of(sheetContext).close(true),
+    ),
   );
   return ok == true;
 }
@@ -41,13 +47,13 @@ Future<bool> confirmHideAmountsUnlock(
 ) async {
   if (await tryHideAmountsBiometric(context, ref)) return true;
   if (!context.mounted) return false;
-  return showHideAmountsUnlockDialog(context);
+  return showHideAmountsUnlockSheet(context);
 }
 
 /// 생체인증만 시도한다 — 앱 잠금이 켜져 있고 인증이 되면 true. 꺼져 있거나 취소 · 실패 · 수단 없음이면 false(비밀번호로 물러선다).
 ///
 /// 앱 잠금이 꺼져 있으면 프롬프트를 띄우지 않는다 — 켠 적 없는 사람에게 갑자기 Face ID 가 뜨는 건 놀랄 일이다. 비밀번호 칸을
-/// 어디에 보일지(옛 대화상자 · 자산 폼의 같은 시트 단계)는 부르는 쪽이 정한다.
+/// 어디에 보일지(금액 가리기의 시트 · 자산 폼의 같은 시트 단계)는 부르는 쪽이 정한다.
 Future<bool> tryHideAmountsBiometric(
   BuildContext context,
   WidgetRef ref,
@@ -93,123 +99,5 @@ Future<void> setHideCardsWithUnlock(
   final ok = await confirmHideAmountsUnlock(context, ref);
   if (ok) {
     await notifier.revealCards(cards);
-  }
-}
-
-class _HideAmountsUnlockDialog extends ConsumerStatefulWidget {
-  const _HideAmountsUnlockDialog();
-
-  @override
-  ConsumerState<_HideAmountsUnlockDialog> createState() =>
-      _HideAmountsUnlockDialogState();
-}
-
-class _HideAmountsUnlockDialogState
-    extends ConsumerState<_HideAmountsUnlockDialog> {
-  final _ctrl = TextEditingController();
-  final _focus = FocusNode();
-  String? _error;
-  bool _submitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _focus.requestFocus());
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    _focus.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final pw = _ctrl.text;
-    if (pw.trim().isEmpty || _submitting) return;
-    setState(() {
-      _submitting = true;
-      _error = null;
-    });
-    try {
-      final repo = await ref.read(authRepositoryProvider.future);
-      await repo.verifyPassword(pw);
-      if (!mounted) return;
-      Navigator.of(context).pop(true);
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.message.isEmpty
-            ? AppLocalizations.of(context).unlockMismatch
-            : e.message;
-        _submitting = false;
-        _ctrl.clear();
-      });
-      _focus.requestFocus();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    return PFormAlertDialog(
-      title: l.unlockTitle,
-      titleLeading: Icon(LucideIcons.shieldCheck, size: 18, color: t.fgBrand),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l.unlockBody,
-            style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-          ),
-          const SizedBox(height: PSpace.x16),
-          Text(
-            l.unlockPasswordLabel,
-            style: PTypo.caption.copyWith(color: t.fgSecondary),
-          ),
-          const SizedBox(height: PSpace.x4),
-          TextField(
-            controller: _ctrl,
-            focusNode: _focus,
-            obscureText: true,
-            autofillHints: const [AutofillHints.password],
-            enabled: !_submitting,
-            decoration: InputDecoration(
-              hintText: l.unlockPasswordHint,
-              errorText: _error,
-            ),
-            onChanged: (_) => setState(() {
-              if (_error != null) _error = null;
-            }),
-            onSubmitted: (_) => _submit(),
-          ),
-        ],
-      ),
-      actions: [
-        // raw TextButton/FilledButton 은 CLAUDE.md 금지 — PButton 으로 통일.
-        // 취소는 secondary(테두리 없는 회색 채움), ghost 는 전체 폭 배치에서
-        // 버튼으로 안 보인다(spec button.md Migration notes 2026-08).
-        PButton(
-          label: l.actionCancel,
-          variant: PButtonVariant.secondary,
-          size: PButtonSize.lg,
-          fullWidth: true,
-          onPressed: _submitting
-              ? null
-              : () => Navigator.of(context).pop(false),
-        ),
-        PButton(
-          label: l.actionConfirm,
-          size: PButtonSize.lg,
-          fullWidth: true,
-          loading: _submitting,
-          onPressed: (_ctrl.text.trim().isEmpty || _submitting)
-              ? null
-              : _submit,
-        ),
-      ],
-    );
   }
 }

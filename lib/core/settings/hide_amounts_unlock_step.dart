@@ -14,20 +14,29 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 /// 서버가 틀린 비밀번호에 주는 오류 코드 — 이것만 "일치하지 않아요" 로 말하고, 그 밖의 실패는 다시 시도를 부탁한다(서버 글을 내지 않는다).
 const kWrongPasswordCode = 'USER_004';
 
-/// 금액 보기 인증 단계(I-17 21 · I-14 6-A) — 시트 안의 한 단계다. 숨김을 푸는 저장에서 생체 인증이 안 될 때 **같은 시트**의
-/// 머리 · 본문 · 바닥이 이것으로 바뀐다(위에 확인창을 따로 띄우지 않는다).
+/// 시트가 닫힐 때 칸에 값이 있는지 묻는 길 — 입력 폼 시트의 `isDirty` 가 이것을 읽는다(비밀번호 시트와 같은 모양).
+class HideAmountsUnlockProbe {
+  bool Function() dirty = () => false;
+}
+
+/// 금액 보기 인증 본문(I-17 21 · I-14 6-A · 43) — 한 부품이다. 숨김을 푸는 저장에서 생체 인증이 안 될 때 두 길이 같은 본문을
+/// 쓴다. ① 자산 수정 폼 — **같은 시트**의 머리 · 본문 · 바닥이 이것으로 바뀐다([onBack] 이 있다: 머리 ←) ② 금액 가리기 화면 —
+/// 입력 폼 시트(위 닫기 원, [onBack] 없음, 값이 있는 채 닫으면 "작성한 내용이 사라져요" 를 [probe] 로 묻는다).
 ///
 /// 머리 ←(= 취소)는 저장하지 않고 2단계로 돌아간다. 본문은 설명 + 비밀번호 칸(밑줄 · 자동 완성 password · 열리면 초점 · Enter 로
 /// 제출). 틀리면 칸을 비우고 칸 아래 오류를 알린다(서버 글 0). 맞으면 [onVerified] — 부른 쪽이 저장을 이어 간다.
 class HideAmountsUnlockStep extends ConsumerStatefulWidget {
   const HideAmountsUnlockStep({
     super.key,
-    required this.onBack,
+    this.onBack,
     required this.onVerified,
+    this.probe,
   });
 
-  final VoidCallback onBack;
+  /// 머리 ← — 같은 시트의 한 단계일 때만. 없으면 위 닫기 원이 취소다.
+  final VoidCallback? onBack;
   final VoidCallback onVerified;
+  final HideAmountsUnlockProbe? probe;
 
   @override
   ConsumerState<HideAmountsUnlockStep> createState() =>
@@ -43,6 +52,7 @@ class _HideAmountsUnlockStepState extends ConsumerState<HideAmountsUnlockStep> {
   @override
   void initState() {
     super.initState();
+    widget.probe?.dirty = () => _ctrl.text.isNotEmpty;
     // 본인 확인은 비밀번호 칸이 첫 칸이다. 시트가 이미 열려 있어(컨테이너가 초점을 쥐고 있어) 안쪽 autofocus 는 밀리므로 직접 준다
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _focus.requestFocus();
@@ -51,6 +61,7 @@ class _HideAmountsUnlockStepState extends ConsumerState<HideAmountsUnlockStep> {
 
   @override
   void dispose() {
+    widget.probe?.dirty = () => false;
     _ctrl.dispose();
     _focus.dispose();
     super.dispose();

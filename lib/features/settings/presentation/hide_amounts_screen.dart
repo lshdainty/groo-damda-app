@@ -1,30 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
-import 'package:groo_damda_app/app/theme/motion.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_unlock_dialog.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_back_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_chip.dart';
-import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/help_bubble/p_help_bubble.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
-/// 금액 가리기 화면 — 계정 > 보안 > 금액 가리기.
+/// 금액 가리기 화면 — 계정 > 보안 > 금액 가리기(I-14 5-B · 14-3). 흰 화면 하나, 스크롤 하나.
 ///
-/// 카드를 하나 만질 때마다 저장·인증하지 않는다. 화면에서 고르는 동안에는 아무 일도
-/// 일어나지 않고, [저장] 을 눌러야 한 번에 반영된다. 예전엔 스위치를 누를 때마다
-/// 풀기 인증이 떠서 여러 장을 조정하려면 그만큼 인증을 반복해야 했다.
+/// 위에서 아래로 — 소개 → "거래 종류" ⓘ + 체크 줄 셋 → 탭 줄(1차 Line · Hug) → "가릴 화면 · n / m" + 모두 선택 · 해제 →
+/// (전체) 화면 이름마다 묶음 + 체크 줄 / (화면 탭) 그 화면의 체크 줄 → 바닥 띠 [저장]. 탭은 거르기이고 좌우로 밀어 옮기지
+/// 않는다.
 ///
-/// 인증은 **푸는 카드가 하나라도 있을 때만** 받는다. 가리기만 늘리는 저장은 그대로 통과.
+/// 카드를 하나 만질 때마다 저장·인증하지 않는다. 화면에서 고르는 동안에는 아무 일도 일어나지 않고, [저장] 을 눌러야 한 번에
+/// 반영된다. 인증은 **푸는 카드가 하나라도 있을 때만** 받는다. 가리기만 늘리는 저장은 그대로 통과.
 class HideAmountsScreen extends ConsumerStatefulWidget {
   const HideAmountsScreen({super.key});
 
@@ -32,17 +34,15 @@ class HideAmountsScreen extends ConsumerStatefulWidget {
   ConsumerState<HideAmountsScreen> createState() => _HideAmountsScreenState();
 }
 
-/// 탭 값 — `null` 은 '전체'(모든 카드를 한 판에).
+/// 탭 값 — `null` 은 '전체'(모든 카드를 화면 이름으로 묶어서).
 typedef _Tab = HidePage?;
 
 class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
-  /// 화면에서 고르는 중인 선택 — 저장 전까지 설정에 반영되지 않는다.
+  /// 화면에서 고르는 중인 선택 — 저장 전까지 설정에 반영되지 않는다. 설정을 읽은 뒤에야 잡는다(읽기 전에 빈 고름으로 굳지
+  /// 않게).
   Set<String>? _draft;
   _Tab _tab;
   bool _saving = false;
-
-  /// 좌우로 넘기면 탭이 따라 움직인다. 탭을 눌러도 같은 컨트롤러로 페이지를 옮긴다.
-  final _pages = PageController();
 
   _HideAmountsScreenState() : _tab = null;
 
@@ -52,24 +52,6 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
     null,
     ...HidePage.values.where((p) => p != HidePage.kind),
   ];
-
-  @override
-  void dispose() {
-    _pages.dispose();
-    super.dispose();
-  }
-
-  void _goTab(_Tab tab) {
-    setState(() => _tab = tab);
-    _pages.animateToPage(
-      _tabs.indexOf(tab),
-      duration: PMotion.base,
-      curve: PMotion.standard,
-    );
-  }
-
-  /// 저장된 값으로 초기화(최초 1회). 설정 로드가 끝난 뒤에 잡아야 빈 집합으로 시작하지 않는다.
-  Set<String> _draftOf(Set<String> saved) => _draft ??= {...saved};
 
   bool _dirty(Set<String> saved) {
     final d = _draft;
@@ -82,6 +64,10 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
   /// 화면 탭이 다루는 카드 — 종류 3장은 위 별도 영역이 맡는다.
   List<String> _cardsOf(_Tab tab) =>
       tab == null ? kScreenHideCards : cardsOfPage(tab);
+
+  void _toggle(Set<String> draft, String card) => setState(() {
+    if (!draft.remove(card)) draft.add(card);
+  });
 
   Future<void> _save(Set<String> saved) async {
     final draft = _draft;
@@ -119,14 +105,17 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
-    final saved =
-        ref.watch(settingsProvider).value?.hideCards ?? const <String>{};
-    final draft = _draftOf(saved);
+    final settings = ref.watch(settingsProvider);
+    final loaded = settings.hasValue;
+    final saved = settings.value?.hideCards ?? const <String>{};
+    final draft = loaded ? (_draft ??= {...saved}) : <String>{};
     final tabCards = _cardsOf(_tab);
     final allOnThisTab = tabCards.every(draft.contains);
-    final dirty = _dirty(saved);
+    final onThisTab = tabCards.where(draft.contains).length;
+    final dirty = loaded && _dirty(saved);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return PopScope(
       canPop: !dirty,
@@ -135,187 +124,188 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
         _confirmDiscardAndPop();
       },
       child: Scaffold(
-        backgroundColor: context.colors.bgLayerBasement,
-        appBar: AppBar(
-          leadingWidth: PBackButton.leadingWidth,
-          titleSpacing: 0,
-          leading: PBackButton(onPressed: () => Navigator.maybePop(context)),
-          title: Text(l.hideAmountsTitle),
-          backgroundColor: t.bgSurface,
-          foregroundColor: t.fgPrimary,
-          elevation: 0,
-          actions: [
-            // 37장을 하나씩 누르게 두지 않는다 — 지금 탭 기준으로 한 번에 켜고 끈다.
-            PButton(
-              label: allOnThisTab
-                  ? l.hideAmountsClearAll
-                  : l.hideAmountsSelectAll,
-              variant: PButtonVariant.ghost,
-              size: PButtonSize.sm,
-              onPressed: () => setState(() {
-                if (allOnThisTab) {
-                  draft.removeAll(tabCards);
-                } else {
-                  draft.addAll(tabCards);
-                }
-              }),
+        backgroundColor: c.bgLayerDefault,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(PTopNavigation.heightOf(context)),
+          child: PTopNavigation(
+            title: l.hideAmountsTitle,
+            leading: PTopNavigationIconButton.back(
+              label: l.actionBack,
+              onPressed: () => Navigator.maybePop(context),
             ),
-            const SizedBox(width: PSpace.x8),
-          ],
+          ),
         ),
-        body: PScreenBandBody(
-          child: Column(
-            children: [
-              // 거래 종류 — 화면 축과 다르므로 탭 줄에 끼우지 않고 맨 위 별도 영역에 둔다.
-              // 탭에 넣으면 '화면' 목록에 화면이 아닌 게 섞이고, 어느 화면에서 왔든 늘
-              // 보여야 할 스위치가 탭 하나를 골라야 보이는 자리로 숨는다.
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  PSpace.x24,
-                  PSpace.x12,
-                  PSpace.x24,
-                  0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.hideAmountsKindLabel,
-                      style: PTypo.labelMd.copyWith(
-                        color: t.fgSecondary,
-                        fontWeight: PFontWeight.semi,
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                key: const ValueKey('hide-amounts-body'),
+                padding: const EdgeInsets.only(bottom: PSpacing.x6),
+                children: [
+                  // 소개 — 이 화면 전체의 설명(위 16 · 아래 8)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      PSpacing.globalGutter,
+                      PSpacing.x4,
+                      PSpacing.globalGutter,
+                      PSpacing.x2,
+                    ),
+                    child: Text(
+                      keepAll(l.hideAmountsSectionDesc),
+                      style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+                    ),
+                  ),
+                  // 거래 종류 — 화면 축과 다르므로 탭 줄에 끼우지 않고 맨 위 별도 영역에 둔다
+                  PListHeader(
+                    title: l.hideAmountsKindLabel,
+                    variant: PListHeaderVariant.boldSolid,
+                    topInset: PSpacing.x2,
+                    // 아이콘 동작 — 아이콘 끝이 체크 끝선에 서도록 번짐은 아이콘 안쪽 여백만큼
+                    actionBleed: kListHeaderIconActionBleed,
+                    flushAction: true,
+                    action: PHelpBubble(
+                      title: l.hideAmountsKindLabel,
+                      description: l.hideAmountsKindNote,
+                      triggerBuilder: (context, toggle, open) => PButton.icon(
+                        icon: LucideIcons.info,
+                        semanticLabel: l.hideAmountsKindHelp,
+                        variant: PButtonVariant.ghost,
+                        ghostColor: PButtonGhostColor.neutralSubtle,
+                        size: PButtonSize.small,
+                        onPressed: toggle,
                       ),
                     ),
-                    const SizedBox(height: PSpace.x8),
-                    Row(
-                      children: [
-                        for (final card in cardsOfPage(HidePage.kind)) ...[
-                          if (card != cardsOfPage(HidePage.kind).first)
-                            const SizedBox(width: PSpace.x8),
-                          Expanded(
-                            child: PChip(
-                              label: _cardLabel(l, card),
-                              selected: draft.contains(card),
-                              shape: PChipShape.rounded,
-                              fullWidth: true,
-                              onTap: () => setState(() {
-                                if (!draft.remove(card)) draft.add(card);
-                              }),
-                            ),
-                          ),
-                        ],
-                      ],
+                  ),
+                  if (!loaded)
+                    const _CheckSkeleton(count: 3)
+                  else
+                    _CheckGroup(
+                      label: l.hideAmountsKindLabel,
+                      cards: cardsOfPage(HidePage.kind),
+                      draft: draft,
+                      onToggle: (card) => _toggle(draft, card),
                     ),
-                    const SizedBox(height: PSpace.x8),
-                    Text(
-                      l.hideAmountsKindNote,
-                      style: PTypo.caption.copyWith(
-                        color: t.fgTertiary,
-                        height: 1.55,
-                      ),
-                    ),
-                    const SizedBox(height: PSpace.x12),
-                    Divider(height: 1, thickness: 1, color: t.borderSubtle),
-                  ],
-                ),
-              ),
-              // 탭 — 전체 + 화면별. 개수는 지금 고른 상태를 그대로 비춘다.
-              //
-              // pill 채움으로 둔다. underline 은 활성 탭 밑줄과 탭바 아래 경계선이
-              // 나란히 겹쳐 선이 두 줄로 보였다(통계 화면도 같은 이유로 pill 이다).
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: PSpace.x12),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: PSpace.x24),
-                  child: PTabs<_Tab>(
+                  // 탭 — 아래 목록(화면 카드)을 거르는 줄이라 그 목록과 한 덩어리(위 8)
+                  const SizedBox(height: PSpacing.x2),
+                  PTabs<_Tab>(
+                    key: const ValueKey('hide-amounts-tabs'),
                     value: _tab,
-                    variant: PTabsVariant.pills,
-                    size: PTabsSize.sm,
+                    layout: PTabsLayout.hug,
+                    size: PTabsSize.small,
+                    semanticLabel: l.hideAmountsTabsLabel,
                     items: [
-                      _tabItem(l, null, draft),
-                      for (final page in _tabs.skip(1))
-                        _tabItem(l, page!, draft),
+                      for (final tab in _tabs)
+                        PTab<_Tab>(
+                          value: tab,
+                          label: tab == null
+                              ? l.hideAmountsTabAll
+                              : _pageLabel(l, tab),
+                        ),
                     ],
-                    onChanged: _goTab,
+                    onChanged: (tab) => setState(() => _tab = tab),
                   ),
-                ),
+                  PListHeader(
+                    // 읽기 전에는 수를 모른다 — 0 이라 말하지 않고 자리만(스켈레톤)
+                    title: loaded
+                        ? l.hideAmountsScreensCount(onThisTab, tabCards.length)
+                        : l.hideAmountsScreensTitle,
+                    titleSuffix: loaded
+                        ? null
+                        : SizedBox(
+                            width: 40,
+                            child: PSkeleton.text(PTypography.t4),
+                          ),
+                    tabularFigures: true,
+                    flushAction: true,
+                    topInset: PSpacing.x4,
+                    // 읽기 전에도 자리는 같다(머리 높이가 뛰지 않게) — 누르지는 못한다
+                    action: PTextButton(
+                      label: allOnThisTab
+                          ? l.hideAmountsClearAll
+                          : l.hideAmountsSelectAll,
+                      onPressed: loaded
+                          ? () => setState(() {
+                              if (allOnThisTab) {
+                                draft.removeAll(tabCards);
+                              } else {
+                                draft.addAll(tabCards);
+                              }
+                            })
+                          : null,
+                    ),
+                  ),
+                  if (!loaded)
+                    const _CheckSkeleton(count: 6)
+                  else if (_tab == null)
+                    // 전체 — 화면 이름마다 목록 제목 + 그 화면의 체크 줄(첫 묶음 위 4 · 다음 묶음 위 12)
+                    for (final (i, page) in _tabs.skip(1).indexed) ...[
+                      PListHeader(
+                        title: _pageLabel(l, page!),
+                        variant: PListHeaderVariant.boldSolid,
+                        // 화면 묶음은 "가릴 화면" 아래 단계 — 머리말 3
+                        headingLevel: 3,
+                        topInset: i == 0 ? PSpacing.x1 : PSpacing.x3,
+                      ),
+                      _CheckGroup(
+                        label: _pageLabel(l, page),
+                        cards: cardsOfPage(page),
+                        draft: draft,
+                        onToggle: (card) => _toggle(draft, card),
+                      ),
+                    ]
+                  else
+                    // 화면 탭 — 그 화면의 체크 줄만(화면 이름 제목은 탭 이름과 같은 말이라 두지 않는다)
+                    _CheckGroup(
+                      label: _pageLabel(l, _tab!),
+                      cards: tabCards,
+                      draft: draft,
+                      onToggle: (card) => _toggle(draft, card),
+                    ),
+                ],
               ),
-              // 탭 전환은 어느 쪽으로든 — 탭을 눌러도, 좌우로 넘겨도 같은 자리로 간다.
-              // 안내 문구는 탭마다 같으므로 페이지 밖에 고정한다.
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  PSpace.x24,
-                  PSpace.x4,
-                  PSpace.x24,
-                  PSpace.x16,
-                ),
-                child: Text(
-                  l.hideAmountsSectionDesc,
-                  style: PTypo.caption.copyWith(
-                    color: t.fgTertiary,
-                    height: 1.55,
-                  ),
-                ),
+            ),
+            // 저장 — 화면 아래 고정, 위에 끝까지 닿는 선. 고르는 동안에는 아무것도 반영되지 않으므로 여기까지 와야 끝난다.
+            DecoratedBox(
+              key: const ValueKey('hide-amounts-bottom'),
+              decoration: BoxDecoration(
+                color: c.bgLayerDefault,
+                border: Border(top: BorderSide(color: c.strokeNeutralSubtle)),
               ),
-              Expanded(
-                child: PageView.builder(
-                  controller: _pages,
-                  itemCount: _tabs.length,
-                  onPageChanged: (i) => setState(() => _tab = _tabs[i]),
-                  itemBuilder: (_, i) => _CardGrid(
-                    cards: _cardsOf(_tabs[i]),
-                    draft: draft,
-                    onToggle: (card) => setState(() {
-                      if (!draft.remove(card)) draft.add(card);
-                    }),
-                  ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  PSpacing.globalGutter,
+                  PSpacing.x3,
+                  PSpacing.globalGutter,
+                  PSpacing.x4 + bottomInset,
                 ),
-              ),
-              // 저장 — 화면 아래 고정. 고르는 동안에는 아무것도 반영되지 않으므로
-              // 여기까지 와야 끝난다.
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    PSpace.x24,
-                    PSpace.x12,
-                    PSpace.x24,
-                    PSpace.x12,
-                  ),
+                child: SizedBox(
+                  width: double.infinity,
                   child: PButton(
                     label: l.actionSave,
-                    size: PButtonSize.lg,
-                    fullWidth: true,
+                    size: PButtonSize.large,
                     loading: _saving,
                     onPressed: dirty && !_saving ? () => _save(saved) : null,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  PTabItem<_Tab> _tabItem(AppLocalizations l, _Tab tab, Set<String> draft) {
-    final cards = _cardsOf(tab);
-    final on = cards.where(draft.contains).length;
-    // 라벨에 개수를 붙인다 — tabs spec 에 badge 가 없어 별도 스타일을 만들지 않는다.
-    final name = tab == null ? l.hideAmountsTabAll : _pageLabel(l, tab);
-    return PTabItem(value: tab, label: on == 0 ? name : '$name $on');
-  }
 }
 
-/// 한 탭의 카드 2열 그리드. 페이지마다 따로 스크롤한다.
-class _CardGrid extends StatelessWidget {
-  const _CardGrid({
+/// 체크 줄 묶음 — 카드 하나 = 줄 하나(이름 + 오른쪽 체크). 줄 전체가 체크를 바꾼다 · 줄 사이 선 없음.
+class _CheckGroup extends StatelessWidget {
+  const _CheckGroup({
+    required this.label,
     required this.cards,
     required this.draft,
     required this.onToggle,
   });
 
+  final String label;
   final List<String> cards;
   final Set<String> draft;
   final ValueChanged<String> onToggle;
@@ -323,21 +313,46 @@ class _CardGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    // 2열 — 라벨이 길어 3열은 말줄임이 잦다.
-    return GridView.count(
-      crossAxisCount: 2,
-      padding: const EdgeInsets.fromLTRB(PSpace.x24, 0, PSpace.x24, PSpace.x24),
-      mainAxisSpacing: PSpace.x8,
-      crossAxisSpacing: PSpace.x8,
-      childAspectRatio: 3.2,
+    return PListCheckGroup(
+      semanticLabel: label,
       children: [
         for (final card in cards)
-          PChip(
-            label: _cardLabel(l, card),
-            selected: draft.contains(card),
-            shape: PChipShape.rounded,
-            fullWidth: true,
-            onTap: () => onToggle(card),
+          PListCheckItem(
+            key: ValueKey('hide-card-$card'),
+            title: _cardLabel(l, card),
+            checked: draft.contains(card),
+            markPosition: PListMarkPosition.suffix,
+            onChanged: (_) => onToggle(card),
+          ),
+      ],
+    );
+  }
+}
+
+/// 설정을 읽기 전 자리 — 체크 줄 모양의 스켈레톤(이 기기 값이라 오래 걸리지 않는다).
+class _CheckSkeleton extends StatelessWidget {
+  const _CheckSkeleton({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      key: const ValueKey('hide-amounts-skeleton'),
+      children: [
+        for (var i = 0; i < count; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: PSpacing.globalGutter,
+              vertical: PSpacing.x3,
+            ),
+            child: Row(
+              children: [
+                SizedBox(width: 120, child: PSkeleton.text(PTypography.t5)),
+                const Spacer(),
+                const PSkeleton(width: 24, height: 24),
+              ],
+            ),
           ),
       ],
     );

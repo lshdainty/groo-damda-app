@@ -72,6 +72,8 @@ class AuthRepository {
       await _dio.post<dynamic>(
         '/users/me/verify-password',
         data: {'password': password},
+        // 실패 글은 화면이 코드로 가른 고정 글로 알린다 — 그루 계정이 쓴 글이 전역 알림으로 닿지 않게(I-14 43)
+        options: Options(extra: {kSilentErrorToast: true}),
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

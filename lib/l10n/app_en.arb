@@ -23,7 +23,6 @@
   "unlockBody": "Enter your password to view amounts again.",
   "unlockBiometricReason": "Verify it's you to view amounts again.",
   "unlockPasswordLabel": "Password",
-  "unlockPasswordHint": "Enter password",
   "unlockMismatch": "Password doesn't match.",
   "appLockTitle": "App Lock",
   "appLockRowDesc": "Verify with Face ID or fingerprint when opening the app.",
@@ -2234,14 +2233,16 @@
   "appearanceThemeSystemDesc": "Follow OS setting",
   "hideAmountsTitle": "Hide amounts",
   "hideAmountsSectionDesc": "Pick the cards to hide. You'll verify once when you save.",
-  "hideAmountsLockAll": "Lock everything",
   "hideAmountsTabAll": "All",
   "hideAmountsSelectAll": "Select all",
   "hideAmountsClearAll": "Clear all",
-  "hideAmountsSelectedCount": "{count} selected",
-  "@hideAmountsSelectedCount": {
+  "hideAmountsScreensCount": "Screens to hide · {count} / {total}",
+  "@hideAmountsScreensCount": {
     "placeholders": {
       "count": {
+        "type": "int"
+      },
+      "total": {
         "type": "int"
       }
     }
@@ -2249,9 +2250,11 @@
   "hideAmountsDiscardTitle": "Leave without saving",
   "hideAmountsDiscardBody": "Your selection will be discarded.",
   "hideAmountsDiscardConfirm": "Leave",
-  "hideAmountsSaved": "Saved",
   "hideAmountsKindLabel": "Transaction type",
-  "hideAmountsKindNote": "Hides amounts of that transaction type on every screen. Hiding income or expense also hides totals.",
+  "hideAmountsKindNote": "Hides amounts of that transaction type on every screen. Hiding income or expense also hides totals and balances.",
+  "hideAmountsKindHelp": "Transaction type info",
+  "hideAmountsTabsLabel": "Choose screen",
+  "hideAmountsScreensTitle": "Screens to hide · ",
   "hideCardKindExpense": "Expense",
   "hideCardKindIncome": "Income",
   "hideCardKindTransfer": "Transfers",
@@ -2300,17 +2303,6 @@
   "hideCardEtcSearch": "Search results",
   "hideCardEtcRecurring": "Recurring",
   "hideCardEtcPreset": "Presets",
-  "hideAmountsLockAllDesc": "Hiding {count} of {total} cards",
-  "@hideAmountsLockAllDesc": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "appearanceHideAmount": "Hide amounts",
   "appearanceHideAmountDesc": "Display all amounts as ••••",
   "appearanceRegion": "Region",
