@@ -866,6 +866,18 @@ abstract class AppLocalizations {
   /// **'달'**
   String get assetChartTableMonth;
 
+  /// No description provided for @assetChartTableWeek.
+  ///
+  /// In ko, this message translates to:
+  /// **'주'**
+  String get assetChartTableWeek;
+
+  /// No description provided for @assetPeriodAria.
+  ///
+  /// In ko, this message translates to:
+  /// **'추이 기간'**
+  String get assetPeriodAria;
+
   /// No description provided for @assetLoadFailedSummary.
   ///
   /// In ko, this message translates to:
@@ -1475,7 +1487,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetMonthTxCount.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 내역 ({count})'**
+  /// **'이번 달 내역 · {count}'**
   String assetMonthTxCount(int count);
 
   /// No description provided for @assetValuationShort.
@@ -1493,7 +1505,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetRecentTxCount.
   ///
   /// In ko, this message translates to:
-  /// **'최근 거래 ({count})'**
+  /// **'최근 거래 · {count}'**
   String assetRecentTxCount(int count);
 
   /// No description provided for @assetViewAll.

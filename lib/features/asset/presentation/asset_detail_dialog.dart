@@ -2,7 +2,6 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,10 +37,12 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
+import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
+import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
+import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart'
+    show BudgetFailure, kBudgetMask;
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
-import 'package:groo_damda_app/core/format/chart_axis.dart';
-import 'package:groo_damda_app/core/format/chart_palette.dart';
-import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
@@ -51,7 +52,6 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
-import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
@@ -63,7 +63,6 @@ import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
-import 'package:groo_damda_app/shared/widgets/p_chart_tooltip.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_type_meta.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_actions.dart';
 import 'package:groo_damda_app/features/asset/presentation/holding_format.dart';
@@ -315,6 +314,9 @@ String _titleFor(AppLocalizations l, Asset a) {
   return l.assetAccountDetail;
 }
 
+/// 글 버튼(ghost small 36)의 위아래 4 씩을 걷는 높이 비율 — 웹 `-my-x1`.
+const double _kTextLinkHeightFactor = 28 / 36;
+
 enum _Period { p3m, p6m, p1y }
 
 extension on _Period {
@@ -361,11 +363,6 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
         ref.watch(hideCardProvider('asset.detail')) ||
         asset.isAmountHidden == 'Y';
     final meta = AssetTypeMeta.of(asset.assetType);
-    final brandFg = resolveChartColor(
-      context,
-      asset.color,
-      fallback: t.fgBrand,
-    );
 
     final isCard =
         asset.assetType == 'CREDIT_CARD' || asset.assetType == 'CHECK_CARD';
@@ -444,136 +441,114 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     // CREDIT_CARD 는 신판 카드 상세 본문(_CardDetailBody) — 회차 히어로가 금액 담당.
     final isCredit = asset.assetType == 'CREDIT_CARD';
 
-    // 신용카드는 새 부품 줄(List · KvRow)이 스스로 좌우 24 를 가지므로 목록은 끝까지 벌리고 머리만 24 안쪽에 둔다.
-    final hero = _HeroCard(
-      asset: asset,
-      meta: meta,
-      valueLabel: valueLabel,
-      isCard: isCard,
-      masked: masked,
-      nameRowOnly: isCredit,
+    // 새 부품 줄(List · 목록 제목)이 스스로 좌우 24 를 가지므로 목록은 끝까지 벌리고, 줄이 아닌 것(머리 · 차트 · 내역 줄)만 24 안쪽에 둔다.
+    const gutterPad = EdgeInsets.symmetric(horizontal: PSpace.xl);
+    final hero = Padding(
+      padding: gutterPad,
+      child: _HeroCard(
+        asset: asset,
+        meta: meta,
+        valueLabel: valueLabel,
+        isCard: isCard,
+        masked: masked,
+        nameRowOnly: isCredit,
+      ),
     );
+    final first = !isCard && !isInv;
     return ListView(
-      padding: isCredit
-          ? const EdgeInsets.only(bottom: PSpace.x16)
-          : const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
+      padding: const EdgeInsets.only(bottom: PSpace.x16),
       children: [
-        if (isCredit)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: PSpace.xl),
-            child: hero,
-          )
-        else
-          hero,
+        hero,
         if (isCredit) ...[
           _CardDetailBody(asset: asset, masked: masked, onEdit: widget.onEdit),
         ] else ...[
-          const SizedBox(height: PSpace.x16),
-          // 체크카드 — 실적 배지만(청구 회차 없음, design 신판)
-          if (isCard) ...[
-            _CardPerfBadge(assetRowId: asset.rowId, masked: masked, gutter: 0),
-            const SizedBox(height: PSpace.x16),
-          ],
+          // 체크카드 — 실적 줄만(청구 회차 없음, design 신판)
+          if (isCard) const SizedBox(height: PSpace.x4),
+          if (isCard) _CardPerfBadge(assetRowId: asset.rowId, masked: masked),
           if (isInv) ...[
-            _InvChangeLine(assetRowId: asset.rowId, masked: masked),
-            _HoldingsSection(asset: asset, masked: masked),
             const SizedBox(height: PSpace.x16),
+            Padding(
+              padding: gutterPad,
+              child: _InvChangeLine(assetRowId: asset.rowId, masked: masked),
+            ),
+            Padding(
+              padding: gutterPad,
+              child: _HoldingsSection(asset: asset, masked: masked),
+            ),
           ],
 
-          // Trend header — 연결계좌형 체크카드는 잔액이 늘 0 이라 평평한 0 선뿐이다.
-          // 차트만 빼고 내역은 그대로 둔다. (web 정합)
+          // 잔액 추이(48) — 목록 제목 + Segmented 3개월 · 6개월 · 1년 + 차트(폰 140). 연결계좌형 체크카드는 잔액이 늘 0 이라
+          // 평평한 0 선뿐이다. 차트만 빼고 내역은 그대로 둔다. (web 정합)
           if (!isCheckLinked) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    trendTitle,
-                    style: PTypo.bodySm.copyWith(
-                      color: t.fgPrimary,
-                      fontWeight: PFontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                PTabs<_Period>(
+            PListHeader(
+              title: trendTitle,
+              variant: PListHeaderVariant.boldSolid,
+              topInset: first ? null : PSpacing.x4,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: PSpacing.globalGutter,
+                vertical: PSpacing.x1,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: PSegmentedControl<_Period>(
+                  semanticLabel: l.assetPeriodAria,
                   value: _period,
-                  size: PTabsSize.sm,
+                  onChanged: (p) => setState(() => _period = p),
                   items: [
                     for (final p in _Period.values)
-                      PTabItem(value: p, label: p.label(l)),
+                      PSegmentedItem(value: p, label: p.label(l)),
                   ],
-                  onChanged: (p) => setState(() => _period = p),
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: PSpace.x12),
-            SizedBox(
-              height: 160,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.globalGutter,
+                PSpacing.x2,
+                PSpacing.globalGutter,
+                0,
+              ),
               child: _BalanceTrendChart(
                 async: trendAsync,
-                tokens: t,
-                brandFg: brandFg,
                 seriesLabel: seriesLabel,
+                title: trendTitle,
                 masked: masked,
+                height: 140,
+                onRetry: () => ref.invalidate(
+                  assetBalanceTrendProvider((
+                    assetId: asset.rowId,
+                    weeks: _period.weeks,
+                  )),
+                ),
               ),
             ),
-            const SizedBox(height: PSpace.x20),
           ],
 
-          // Recent tx
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  (recentAsync.value?.isNotEmpty ?? false)
-                      ? (isCheckLinked
-                            ? l.assetMonthTxCount(recentAsync.value!.length)
-                            : l.assetRecentTxCount(recentAsync.value!.length))
-                      : l.dashRecent,
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                  ),
-                ),
-              ),
-              InkWell(
-                borderRadius: PRadius.brSm,
-                onTap: () => context.go('/expense?assetId=${asset.rowId}'),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 4,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l.assetViewAll,
-                        style: PTypo.bodySm.copyWith(
-                          color: t.fgSecondary,
-                          fontWeight: PFontWeight.semi,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      Icon(
-                        LucideIcons.chevronRight,
-                        size: 12,
-                        color: t.fgSecondary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          // 최근 거래 · 이번 달 내역(49) — 목록 제목 + 오른쪽 글 버튼 "전체 보기" + 가계부 공용 줄
+          PListHeader(
+            title: (recentAsync.value?.isNotEmpty ?? false)
+                ? (isCheckLinked
+                      ? l.assetMonthTxCount(recentAsync.value!.length)
+                      : l.assetRecentTxCount(recentAsync.value!.length))
+                : l.dashRecent,
+            variant: PListHeaderVariant.boldSolid,
+            topInset: PSpacing.x4,
+            action: PTextButton(
+              label: l.assetViewAll,
+              onPressed: () => context.go('/expense?assetId=${asset.rowId}'),
+            ),
           ),
-          const SizedBox(height: PSpace.x8),
-          _RecentExpenses(
-            async: recentAsync,
-            transfers: assetTransfers,
-            perspectiveAssetRowId: asset.rowId,
-            flags: _assetMaskFlags(ref, asset),
-            tokens: t,
+          Padding(
+            padding: gutterPad,
+            child: _RecentExpenses(
+              async: recentAsync,
+              transfers: assetTransfers,
+              perspectiveAssetRowId: asset.rowId,
+              flags: _assetMaskFlags(ref, asset),
+              tokens: t,
+            ),
           ),
         ],
       ],
@@ -1375,295 +1350,83 @@ class _HeroCard extends StatelessWidget {
   }
 }
 
-class _BalanceTrendChart extends StatefulWidget {
+/// 잔액 추이 차트(I-17 48) — 05-3 57 의 변형 하나: ds 선 차트 + 데이터 점마다 점 · 채움 없음 · 눈금 글 줄임("3억") · 툴팁 원까지.
+/// 불러오는 중은 Skeleton, 실패는 이 자리에서 다시 시도, 데이터가 없으면 가운데 한 줄. 금액을 가리면 눈금 · 툴팁이 "••••".
+class _BalanceTrendChart extends StatelessWidget {
   const _BalanceTrendChart({
     required this.async,
-    required this.tokens,
-    required this.brandFg,
     required this.seriesLabel,
+    required this.title,
     required this.masked,
+    required this.height,
+    required this.onRetry,
   });
   final AsyncValue<List<AssetBalancePoint>> async;
-  final GrooTokens tokens;
-  final Color brandFg;
   final String seriesLabel;
+  final String title;
   final bool masked;
-
-  @override
-  State<_BalanceTrendChart> createState() => _BalanceTrendChartState();
-}
-
-class _BalanceTrendChartState extends State<_BalanceTrendChart> {
-  int? _touchedIdx;
-  Offset? _touchPos;
+  final double height;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final tokens = widget.tokens;
-    final brandFg = widget.brandFg;
-    final seriesLabel = widget.seriesLabel;
-    final masked = widget.masked;
-    final list = widget.async.value ?? const <AssetBalancePoint>[];
-    // 빈 목록도 받아 온 값이다 — 스켈레톤은 값이 아예 없을 때만.
-    // 값이 있으면 다시 받는 중에도 그 값을 그대로 그린다.
-    if (widget.async.isLoading && !widget.async.hasValue) {
-      // 차트 영역 전체 PSkeleton — 부모 SizedBox(height:160) 의 영역에 fill.
-      return SizedBox.expand(child: PSkeleton(borderRadius: PRadius.brLg));
+    final c = context.colors;
+    final list = async.value;
+    if (list == null) {
+      if (async.hasError) {
+        return BudgetFailure(title: l.assetTrendLoadError, onRetry: onRetry);
+      }
+      return dsk.PSkeleton(height: height);
     }
     if (list.isEmpty) {
-      return _ChartPlaceholder(
-        text: AppLocalizations.of(context).assetChartNoData,
-        tokens: tokens,
+      return SizedBox(
+        height: height,
+        child: Center(
+          child: Text(
+            l.assetChartNoData,
+            style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+          ),
+        ),
       );
     }
-    final n = list.length;
-    final spots = [
-      for (int i = 0; i < n; i++)
-        FlSpot(i.toDouble(), list[i].balance.toDouble()),
+    String won(num v) => masked ? kBudgetMask : formatWon(v);
+    final labels = [
+      for (var i = 0; i < list.length; i++) l.assetWeeksCount(i + 1),
     ];
-    // Y축: 웹 Recharts auto-nice 와 동일한 0기준 nice 눈금 (공유 niceAxis).
-    // 대출 등 음수 잔액이면 0 아래로도 nice 확장 → 눈금이 딱 떨어지고 겹치지 않음.
-    final values = list
-        .map((p) => p.balance.toDouble())
-        .toList(growable: false);
-    final maxRaw = values.reduce((a, b) => a > b ? a : b);
-    final minRaw = values.reduce((a, b) => a < b ? a : b);
-    final yAxis = niceAxis(minRaw, maxRaw);
-    final yMin = yAxis.min;
-    final yMax = yAxis.max;
-    final yInterval = yAxis.interval;
-    final xInterval = (n / 6).clamp(1.0, double.infinity);
-
-    // 세로축 폭은 가장 긴 눈금 글자("−5,000만" 처럼 부호가 붙은 것 포함)를 글자 배율대로
-    // 재서 잡는다 — 고정 폭이면 왼쪽 끝이 잘려 `−2,500만` 이 `2,500만` 으로 읽힌다
-    // (chart.md:46 · 결함 D6).
-    final yTickStyle = PTypo.micro.copyWith(fontSize: PFontSize.micro);
-    final yScaler = MediaQuery.textScalerOf(context);
-    final yReserved = chartAxisWidth(
-      [
-        for (var v = yMin; v <= yMax + yInterval / 2; v += yInterval)
-          masked ? '••••' : formatChartAxis(v),
-      ],
-      yTickStyle,
-      scaler: yScaler,
-    ).ceilToDouble();
-
-    final chart = LineChart(
-      LineChartData(
-        minX: 0,
-        maxX: (n - 1).toDouble(),
-        minY: yMin,
-        maxY: yMax,
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          horizontalInterval: yInterval,
-          getDrawingHorizontalLine: (_) => FlLine(
-            color: tokens.borderSubtle,
-            strokeWidth: 1,
-            dashArray: const [3, 3],
-          ),
-        ),
-        borderData: FlBorderData(show: false),
-        titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: yReserved,
-              interval: yInterval,
-              getTitlesWidget: (v, _) => Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: Text(
-                  masked ? '••••' : formatChartAxis(v),
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.visible,
-                  style: PTypo.micro.copyWith(
-                    color: tokens.fgTertiary,
-                    fontSize: PFontSize.micro,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 22,
-              interval: xInterval,
-              getTitlesWidget: (v, _) {
-                final i = v.round();
-                if (i < 0 || i >= n) return const SizedBox.shrink();
-                // 너무 빽빽하면 균등 stride 만 표시.
-                final stride = (n / 6).ceil();
-                if (n > 12 && stride > 1 && i % stride != 0 && i != n - 1) {
-                  return const SizedBox.shrink();
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    l.weekN(i + 1),
-                    style: PTypo.micro.copyWith(
-                      color: tokens.fgTertiary,
-                      fontSize: PFontSize.micro,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        lineTouchData: LineTouchData(
-          enabled: true,
-          handleBuiltInTouches: true,
-          touchCallback: (event, response) {
-            if (event is FlTapUpEvent ||
-                event is FlPanEndEvent ||
-                event is FlPanCancelEvent ||
-                event is FlLongPressEnd ||
-                event is FlPointerExitEvent) {
-              if (_touchedIdx != null) {
-                setState(() => _touchedIdx = null);
-              }
-              return;
-            }
-            final touched = response?.lineBarSpots;
-            if (touched == null || touched.isEmpty) {
-              if (_touchedIdx != null) {
-                setState(() => _touchedIdx = null);
-              }
-              return;
-            }
-            final i = touched.first.x.toInt();
-            final pos = event.localPosition;
-            if (i >= 0 &&
-                i < list.length &&
-                (i != _touchedIdx || pos != _touchPos)) {
-              setState(() {
-                _touchedIdx = i;
-                if (pos != null) _touchPos = pos;
-              });
-            }
-          },
-          // 기본 RichText 툴팁 OFF — web 라운드 사각 인디케이터 정합을 위해
-          // Stack 위 PChartTooltipBox 로 직접 렌더 (아래 Positioned).
-          touchTooltipData: LineTouchTooltipData(
-            getTooltipColor: (_) => Colors.transparent,
-            tooltipBorder: BorderSide.none,
-            tooltipPadding: EdgeInsets.zero,
-            tooltipMargin: 0,
-            getTooltipItems: (touched) =>
-                List<LineTooltipItem?>.filled(touched.length, null),
-          ),
-        ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            curveSmoothness: 0.25,
-            color: brandFg,
-            barWidth: 2,
-            isStrokeCapRound: true,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (_, _, _, _) => FlDotCirclePainter(
-                radius: 3,
-                color: brandFg,
-                strokeColor: tokens.bgSurface,
-                strokeWidth: 1.5,
-              ),
-            ),
-            // web recharts 정합 — fill 은 차트 바닥이 아니라 0 기준선을 향해 채움.
-            // 양수 구간은 라인 아래(belowBarData), 음수 구간은 라인 위(aboveBarData)로
-            // cutOffY=0 에서 잘라 채운다 (카드 사용 추이처럼 전부 음수면 위쪽 fill).
-            belowBarData: BarAreaData(
-              show: true,
-              applyCutOffY: true,
-              cutOffY: 0,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  brandFg.withValues(alpha: 0.28),
-                  brandFg.withValues(alpha: 0),
-                ],
-              ),
-            ),
-            aboveBarData: BarAreaData(
-              show: true,
-              applyCutOffY: true,
-              cutOffY: 0,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  brandFg.withValues(alpha: 0.28),
-                  brandFg.withValues(alpha: 0),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    return Stack(
+    final name = '$title, ${won(list.last.balance)}';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        chart,
-        if (_touchedIdx != null &&
-            _touchedIdx! < list.length &&
-            _touchPos != null)
-          PChartTooltipLayer(
-            anchor: _touchPos!,
-            child: PChartTooltipBox(
-              // web BalanceTooltip 정합 — 'N주 · MM-DD'
-              title:
-                  '${l.weekN(_touchedIdx! + 1)} · ${_fmtWeekStart(list[_touchedIdx!].weekStart)}',
-              labelWidth: 40,
-              rows: [
-                PChartTooltipRowData(
-                  color: brandFg,
-                  label: seriesLabel,
-                  amount: masked
-                      ? '••••••'
-                      : krwSigned(
-                          list[_touchedIdx!].balance,
-                          false,
-                          unit: true,
-                        ),
-                ),
-              ],
+        PLineChart(
+          label: name,
+          height: height,
+          categories: labels,
+          area: false,
+          dots: true,
+          series: [
+            PChartSeries(
+              key: 'balance',
+              label: seriesLabel,
+              color: PChartColor.blue,
+              values: [for (final p in list) p.balance.toDouble()],
             ),
-          ),
+          ],
+          axisFormatter: (v) => masked ? kBudgetMask : formatAxisWon(v),
+          valueFormatter: won,
+        ),
+        PChartDataTable(
+          caption: name,
+          columns: [
+            PChartDataColumn(l.assetChartTableWeek),
+            PChartDataColumn(seriesLabel),
+          ],
+          rows: [
+            for (var i = 0; i < list.length; i++)
+              [labels[i], won(list[i].balance)],
+          ],
+        ),
       ],
-    );
-  }
-}
-
-/// 'YYYY-MM-DD' → 'MM-DD' (web weekStart.slice(5) 정합).
-String _fmtWeekStart(String iso) => iso.length >= 10 ? iso.substring(5) : iso;
-
-class _ChartPlaceholder extends StatelessWidget {
-  const _ChartPlaceholder({required this.text, required this.tokens});
-  final String text;
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: tokens.bgSunken,
-        borderRadius: PRadius.brLg,
-      ),
-      alignment: Alignment.center,
-      child: Text(text, style: PTypo.bodySm.copyWith(color: tokens.fgTertiary)),
     );
   }
 }
@@ -1925,16 +1688,12 @@ class _CardStatement {
 /// 카드 월 실적 배지 — design 신판(달성/잔여 요약, 웹 CardPerfBadge 미러).
 /// 달성: cat-green 10% tint / 미달: sunken. 실적 무관 카드면 숨김.
 class _CardPerfBadge extends ConsumerWidget {
-  const _CardPerfBadge({
-    required this.assetRowId,
-    required this.masked,
-    this.gutter = PSpacing.globalGutter,
-  });
+  const _CardPerfBadge({required this.assetRowId, required this.masked});
   final int assetRowId;
   final bool masked;
 
-  /// 줄 좌우 여백 — 이미 24 안쪽에 선 본문(체크카드)은 0.
-  final double gutter;
+  /// 줄 좌우 여백 — 목록이 끝까지 벌어져 있으므로 기본 24.
+  double get gutter => PSpacing.globalGutter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2532,13 +2291,16 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                               tone: PBadgeTone.positive,
                               label: l.assetInstallmentPaidOffBadge,
                             ),
-                            PListAction(
-                              child: dsb.PButton(
-                                label: l.assetInstallmentPayoffUndo,
-                                variant: dsb.PButtonVariant.ghost,
-                                size: dsb.PButtonSize.small,
-                                flush: dsb.PButtonFlush.left,
-                                onPressed: () => _undoPayoff(due),
+                            Align(
+                              heightFactor: _kTextLinkHeightFactor,
+                              child: PListAction(
+                                child: dsb.PButton(
+                                  label: l.assetInstallmentPayoffUndo,
+                                  variant: dsb.PButtonVariant.ghost,
+                                  size: dsb.PButtonSize.small,
+                                  flush: dsb.PButtonFlush.left,
+                                  onPressed: () => _undoPayoff(due),
+                                ),
                               ),
                             ),
                           ],
@@ -2548,6 +2310,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                         padding: const EdgeInsets.only(top: PSpacing.x1),
                         child: Align(
                           alignment: Alignment.centerLeft,
+                          // 웹 -my-x1 — 보이는 36 은 그대로 두고 자리만 위아래 4 씩 줄인다
+                          heightFactor: _kTextLinkHeightFactor,
                           child: PListAction(
                             child: dsb.PButton(
                               label: l.assetInstallmentPayoff,
@@ -2834,18 +2598,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         ],
         _CardPerfBadge(assetRowId: asset.rowId, masked: masked),
 
-        // 이용 내역 — 정렬 칩 + 리스트(49 는 다음 단계 — 본문만 24 안쪽에 선다)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: gutter),
-          child: Container(
-            margin: const EdgeInsets.only(top: 18),
-            padding: const EdgeInsets.only(top: 18),
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: t.borderSubtle)),
-            ),
-            child: _usageSection(l, asset, usageAsync, flags, t),
-          ),
-        ),
+        // 이용 내역(49)
+        _usageSection(l, asset, usageAsync, flags, t),
       ],
     );
   }
@@ -2857,123 +2611,93 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     MaskFlags flags,
     GrooTokens t,
   ) {
+    final c = context.colors;
+    final n = usageAsync.value?.length ?? 0;
+    const gutter = EdgeInsets.symmetric(horizontal: PSpacing.globalGutter);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(
-              l.assetUsageHistory,
-              style: PTypo.body.copyWith(
-                color: t.fgPrimary,
-                fontWeight: PFontWeight.bold,
-              ),
-            ),
-            if ((usageAsync.value?.length ?? 0) > 0) ...[
-              const SizedBox(width: 5),
-              Text(
-                '${usageAsync.value!.length}',
-                style: PTypo.body.copyWith(
-                  color: t.fgBrand,
-                  fontWeight: PFontWeight.bold,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-            ],
-            const Spacer(),
-            InkWell(
-              borderRadius: PRadius.brSm,
-              onTap: () => context.go('/expense?assetId=${asset.rowId}'),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      l.assetViewAll,
-                      style: PTypo.bodySm.copyWith(
-                        color: t.fgSecondary,
-                        fontWeight: PFontWeight.semi,
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    Icon(
-                      LucideIcons.chevronRight,
-                      size: 12,
-                      color: t.fgSecondary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        // 목록 제목 "이용 내역 · {n}" + 오른쪽 글 버튼 "전체 보기"(49) — 옛 구분선 · 꺾쇠 단추를 걷었다.
+        PListHeader(
+          title: n > 0 ? '${l.assetUsageHistory} · $n' : l.assetUsageHistory,
+          variant: PListHeaderVariant.boldSolid,
+          topInset: PSpacing.x4,
+          action: PTextButton(
+            label: l.assetViewAll,
+            onPressed: () => context.go('/expense?assetId=${asset.rowId}'),
+          ),
         ),
-        // 정렬 — 통계 화면과 동일한 pills 탭(공용, 사용자 결정)
+        // 정렬 — ds Segmented Control(최근순 · 고액순 · 카테고리별)
         Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 2),
+          padding: gutter.copyWith(top: PSpacing.x1, bottom: PSpacing.x1),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: PTabs<_UsageSort>(
+            child: PSegmentedControl<_UsageSort>(
+              semanticLabel: l.assetSortAria,
               value: _sort,
-              variant: PTabsVariant.pills,
-              size: PTabsSize.sm,
+              onChanged: (v) => setState(() => _sort = v),
               items: [
-                PTabItem(value: _UsageSort.recent, label: l.assetSortRecent),
-                PTabItem(value: _UsageSort.amount, label: l.assetSortAmount),
-                PTabItem(
+                PSegmentedItem(
+                  value: _UsageSort.recent,
+                  label: l.assetSortRecent,
+                ),
+                PSegmentedItem(
+                  value: _UsageSort.amount,
+                  label: l.assetSortAmount,
+                ),
+                PSegmentedItem(
                   value: _UsageSort.category,
                   label: l.assetSortCategory,
                 ),
               ],
-              onChanged: (v) => setState(() => _sort = v),
             ),
           ),
         ),
-        if (_sort == _UsageSort.recent)
-          // 정렬 탭 ↔ 첫 날짜 그룹 간격 — 웹 paddingTop 16 정합(사용자 결정)
-          Padding(
-            padding: const EdgeInsets.only(top: PSpace.x16),
-            child: _RecentExpenses(async: usageAsync, flags: flags, tokens: t),
-          )
-        else
-          Builder(
-            builder: (context) {
-              final list = [...(usageAsync.value ?? const <Expense>[])];
-              if (list.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 28),
-                  child: Center(
-                    child: Text(
-                      l.assetNoUsage,
-                      style: PTypo.bodySm.copyWith(color: t.fgTertiary),
-                    ),
-                  ),
-                );
-              }
-              if (_sort == _UsageSort.amount) {
-                list.sort((a, b) => b.amount.abs().compareTo(a.amount.abs()));
-              } else {
-                list.sort(
-                  (a, b) =>
-                      (a.categoryName ?? '').compareTo(b.categoryName ?? ''),
-                );
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Column(
-                  children: [
-                    for (final e in list)
-                      ExpenseRow(
-                        gutter: 0,
-                        expense: e,
-                        category: null,
-                        flags: flags,
-                        showInstallment: true,
-                      ),
-                  ],
-                ),
-              );
-            },
+        Padding(
+          padding: gutter,
+          child: _sort == _UsageSort.recent
+              ? _RecentExpenses(async: usageAsync, flags: flags, tokens: t)
+              : _plainUsage(l, usageAsync, flags, c),
+        ),
+      ],
+    );
+  }
+
+  /// 고액순 · 카테고리별 — 날짜 묶음 없이 늘어놓는 줄. 비면 가운데 한 줄.
+  Widget _plainUsage(
+    AppLocalizations l,
+    AsyncValue<List<Expense>> usageAsync,
+    MaskFlags flags,
+    PColors c,
+  ) {
+    final list = [...(usageAsync.value ?? const <Expense>[])];
+    if (list.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
+        child: Center(
+          child: Text(
+            l.assetNoUsage,
+            style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+          ),
+        ),
+      );
+    }
+    if (_sort == _UsageSort.amount) {
+      list.sort((a, b) => b.amount.abs().compareTo(a.amount.abs()));
+    } else {
+      list.sort(
+        (a, b) => (a.categoryName ?? '').compareTo(b.categoryName ?? ''),
+      );
+    }
+    return Column(
+      children: [
+        for (final e in list)
+          ExpenseRow(
+            gutter: 0,
+            expense: e,
+            category: null,
+            flags: flags,
+            showInstallment: true,
           ),
       ],
     );

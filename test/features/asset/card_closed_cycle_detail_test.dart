@@ -232,6 +232,49 @@ void main() {
     expect(find.text('한도 · 결제 설정'), findsNothing);
   });
 
+  const upcomingBilling = CardBilling(
+    cardAssetRowId: 9,
+    upcomingAmount: 40000,
+    nextPaymentDate: '2026-10-12',
+    upcomingPeriodStart: '2026-09-01',
+    upcomingPeriodEnd: '2026-09-30',
+  );
+
+  // I-17 53 — 주 버튼을 막지 않고, 누르면 칸 아래에 오류가 뜬다.
+  testWidgets('[지금 결제] 시트 — 0 원 · 예정액 초과는 누르면 칸 아래 오류', (tester) async {
+    await _open(tester, billing: upcomingBilling);
+    await tester.tap(find.text('지금 결제'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('결제 예정액 40,000원을 지금 결제할까요?'), findsOneWidget);
+    expect(find.textContaining('10월 12일 결제 예정분이에요.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '0');
+    await tester.tap(find.text('결제하기'));
+    await tester.pumpAndSettle();
+    expect(find.text('결제 금액을 넣어주세요.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '50000');
+    await tester.tap(find.text('결제하기'));
+    await tester.pumpAndSettle();
+    expect(find.text('결제 금액은 40,000원까지예요.'), findsOneWidget);
+  });
+
+  // I-17 54 — 고르기 시트: 연도 머리 + 라디오 줄, 누르면 바로 고르고 닫힌다.
+  testWidgets('회차 단추는 결제 회차 고르기 시트를 연다', (tester) async {
+    await _open(tester, billing: upcomingBilling);
+    await tester.tap(find.text('10월 12일 결제'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('결제 회차'), findsOneWidget);
+    expect(find.text('2026년'), findsOneWidget);
+    expect(find.text('예정'), findsWidgets);
+
+    await tester.tap(find.text('10월 12일 결제').last);
+    await tester.pumpAndSettle();
+    expect(find.text('결제 회차'), findsNothing);
+  });
+
   testWidgets('다가오는 회차에서는 [지금 결제] 가 있다', (tester) async {
     await _open(
       tester,

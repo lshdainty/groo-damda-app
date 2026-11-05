@@ -168,6 +168,8 @@
     }
   },
   "assetChartTableMonth": "달",
+  "assetChartTableWeek": "주",
+  "assetPeriodAria": "추이 기간",
   "assetLoadFailedSummary": "순자산을 불러오지 못했어요",
   "assetLoadFailedTrend": "순자산 추이를 불러오지 못했어요",
   "assetLoadFailedAssets": "자산을 불러오지 못했어요",
@@ -345,7 +347,7 @@
   "assetValueLabelCard": "이번 달 결제 예정",
   "assetValueLabelCheckCard": "이번 달 사용액",
   "assetCheckCardMonthLabel": "이번 달 사용",
-  "assetMonthTxCount": "이번 달 내역 ({count})",
+  "assetMonthTxCount": "이번 달 내역 · {count}",
   "@assetMonthTxCount": {
     "placeholders": {
       "count": {
@@ -355,7 +357,7 @@
   },
   "assetValuationShort": "평가액",
   "assetSeriesUsage": "사용",
-  "assetRecentTxCount": "최근 거래 ({count})",
+  "assetRecentTxCount": "최근 거래 · {count}",
   "@assetRecentTxCount": {
     "placeholders": {
       "count": {

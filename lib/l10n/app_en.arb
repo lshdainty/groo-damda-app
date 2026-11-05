@@ -164,6 +164,8 @@
     }
   },
   "assetChartTableMonth": "Month",
+  "assetChartTableWeek": "Week",
+  "assetPeriodAria": "Trend period",
   "assetLoadFailedSummary": "Couldn't load net worth",
   "assetLoadFailedTrend": "Couldn't load the net worth trend",
   "assetLoadFailedAssets": "Couldn't load your assets",
@@ -341,7 +343,7 @@
   "assetValueLabelCard": "Due this month",
   "assetValueLabelCheckCard": "Spent this month",
   "assetCheckCardMonthLabel": "Used this month",
-  "assetMonthTxCount": "This month ({count})",
+  "assetMonthTxCount": "This month · {count}",
   "@assetMonthTxCount": {
     "placeholders": {
       "count": {
@@ -351,7 +353,7 @@
   },
   "assetValuationShort": "Valuation",
   "assetSeriesUsage": "Usage",
-  "assetRecentTxCount": "Recent transactions ({count})",
+  "assetRecentTxCount": "Recent transactions · {count}",
   "@assetRecentTxCount": {
     "placeholders": {
       "count": {

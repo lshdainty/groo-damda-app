@@ -405,6 +405,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetChartTableMonth => '달';
 
   @override
+  String get assetChartTableWeek => '주';
+
+  @override
+  String get assetPeriodAria => '추이 기간';
+
+  @override
   String get assetLoadFailedSummary => '순자산을 불러오지 못했어요';
 
   @override
@@ -732,7 +738,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetMonthTxCount(int count) {
-    return '이번 달 내역 ($count)';
+    return '이번 달 내역 · $count';
   }
 
   @override
@@ -743,7 +749,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetRecentTxCount(int count) {
-    return '최근 거래 ($count)';
+    return '최근 거래 · $count';
   }
 
   @override

@@ -412,6 +412,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetChartTableMonth => 'Month';
 
   @override
+  String get assetChartTableWeek => 'Week';
+
+  @override
+  String get assetPeriodAria => 'Trend period';
+
+  @override
   String get assetLoadFailedSummary => 'Couldn\'t load net worth';
 
   @override
@@ -743,7 +749,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetMonthTxCount(int count) {
-    return 'This month ($count)';
+    return 'This month · $count';
   }
 
   @override
@@ -754,7 +760,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetRecentTxCount(int count) {
-    return 'Recent transactions ($count)';
+    return 'Recent transactions · $count';
   }
 
   @override
