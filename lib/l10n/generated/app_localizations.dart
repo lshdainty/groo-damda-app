@@ -3652,7 +3652,7 @@ abstract class AppLocalizations {
   /// No description provided for @calUpdateFailed.
   ///
   /// In ko, this message translates to:
-  /// **'바꾸지 못했어요.'**
+  /// **'캘린더 표시를 바꾸지 못했어요.'**
   String get calUpdateFailed;
 
   /// No description provided for @importExecuteFailed.
@@ -11110,13 +11110,13 @@ abstract class AppLocalizations {
   /// No description provided for @subStarted.
   ///
   /// In ko, this message translates to:
-  /// **'담다 Pro 구독이 시작되었어요'**
+  /// **'담다 Pro 구독이 시작됐어요.'**
   String get subStarted;
 
   /// No description provided for @subFailed.
   ///
   /// In ko, this message translates to:
-  /// **'구독하지 못했어요.'**
+  /// **'구독을 시작하지 못했어요.'**
   String get subFailed;
 
   /// No description provided for @subCancelConfirmTitle.
@@ -11146,7 +11146,7 @@ abstract class AppLocalizations {
   /// No description provided for @subCanceled.
   ///
   /// In ko, this message translates to:
-  /// **'구독을 해지했어요'**
+  /// **'구독을 해지했어요.'**
   String get subCanceled;
 
   /// No description provided for @subCancelFailed.
@@ -11230,13 +11230,19 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerInvalidCred.
   ///
   /// In ko, this message translates to:
-  /// **'인증정보가 올바르지 않아요'**
+  /// **'인증정보가 올바르지 않아요.'**
   String get subBrokerInvalidCred;
+
+  /// No description provided for @subBrokerConnectFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'증권사를 연결하지 못했어요.'**
+  String get subBrokerConnectFailed;
 
   /// No description provided for @subDisconnectFailed.
   ///
   /// In ko, this message translates to:
-  /// **'해제에 실패했어요'**
+  /// **'연결을 해제하지 못했어요.'**
   String get subDisconnectFailed;
 
   /// No description provided for @memoNew.
@@ -13366,7 +13372,7 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerPrimaryFailed.
   ///
   /// In ko, this message translates to:
-  /// **'기본 증권사를 바꾸지 못했어요'**
+  /// **'기본 증권사를 바꾸지 못했어요.'**
   String get subBrokerPrimaryFailed;
 
   /// No description provided for @subBrokerKeyConnected.
@@ -13378,19 +13384,19 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerConnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 계정을 연결했어요'**
+  /// **'{broker} 계정을 연결했어요.'**
   String subBrokerConnected(String broker);
 
   /// No description provided for @subBrokerDisconnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 연결을 해제했어요'**
+  /// **'{broker} 연결을 해제했어요.'**
   String subBrokerDisconnected(String broker);
 
   /// No description provided for @subBrokerPrimaryChanged.
   ///
   /// In ko, this message translates to:
-  /// **'이제 {broker} 시세로 자산을 평가해요'**
+  /// **'이제 {broker} 시세로 자산을 평가해요.'**
   String subBrokerPrimaryChanged(String broker);
 
   /// No description provided for @subBrokerKeyNotice.

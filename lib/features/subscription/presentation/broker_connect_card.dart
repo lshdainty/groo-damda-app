@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -56,7 +57,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
   Future<void> _run(
     Future<void> Function(SubscriptionRepository repo) action,
     String okMsg,
-    String errMsg,
+    String Function(Object error) errMsg,
   ) async {
     setState(() => _busy = true);
     try {
@@ -65,11 +66,11 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
       ref.invalidate(myFeaturesProvider);
       ref.invalidate(brokerConnectionsProvider);
       if (mounted) PSnackbar.maybeOf(context)?.show(message: okMsg);
-    } catch (_) {
+    } catch (e) {
       // 서버 글은 내지 않는다(요청은 silent) — 고정 글 한 문장 + [다시 시도](같은 일을 다시)
       if (mounted) {
         PSnackbar.maybeOf(context)?.show(
-          message: errMsg,
+          message: errMsg(e),
           tone: PSnackbarTone.critical,
           action: PSnackbarAction(
             label: AppLocalizations.of(context).actionRetry,
@@ -224,7 +225,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                           silent: true,
                         ),
                         l.subBrokerDisconnected(c.displayName),
-                        l.subDisconnectFailed,
+                        (_) => l.subDisconnectFailed,
                       ),
               ),
             ],
@@ -242,7 +243,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                 : () => _run(
                     (repo) => repo.setPrimaryBroker(c.broker, silent: true),
                     l.subBrokerPrimaryChanged(c.displayName),
-                    l.subBrokerPrimaryFailed,
+                    (_) => l.subBrokerPrimaryFailed,
                   ),
           ),
           const SizedBox(height: PSpace.x8),
@@ -307,7 +308,13 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                       silent: true,
                     ),
                     l.subBrokerConnected(c.displayName),
-                    l.subBrokerInvalidCred,
+                    // 4xx = 인증정보를 서버가 거절 — 틀림. 그 밖(서버·네트워크)은 연결 실패(웹과 같은 갈래).
+                    (e) =>
+                        e is ApiException &&
+                            (e.statusCode ?? 0) >= 400 &&
+                            (e.statusCode ?? 0) < 500
+                        ? l.subBrokerInvalidCred
+                        : l.subBrokerConnectFailed,
                   );
                 },
         ),

@@ -1123,7 +1123,7 @@
   "calSaveFailed": "저장 실패",
   "calDeleteFailed": "삭제 실패",
   "calJoinFailed": "참여하지 못했어요. 잠시 뒤 다시 시도해주세요.",
-  "calUpdateFailed": "바꾸지 못했어요.",
+  "calUpdateFailed": "캘린더 표시를 바꾸지 못했어요.",
   "importExecuteFailed": "가져오지 못했어요.",
   "calCalendarLoadError": "캘린더를 불러오지 못했어요",
   "calLabelLoadError": "라벨을 불러오지 못했어요",
@@ -3361,8 +3361,8 @@
   "subFeatLedger": "가계부 · 자산 관리",
   "subFeatBudget": "예산 · 저축 목표 · 캘린더",
   "subFeatSecurities": "증권사 연동 · 실시간 시세 · 자산 실시간 금액",
-  "subStarted": "담다 Pro 구독이 시작되었어요",
-  "subFailed": "구독하지 못했어요.",
+  "subStarted": "담다 Pro 구독이 시작됐어요.",
+  "subFailed": "구독을 시작하지 못했어요.",
   "subCancelConfirmTitle": "구독 해지",
   "subCancelConfirmMsg": "해지하면 {date}부터 Free 플랜으로 전환되고 증권 탭이 잠겨요. 그 전까지는 Pro 기능을 계속 쓸 수 있어요.",
   "@subCancelConfirmMsg": {
@@ -3374,7 +3374,7 @@
   },
   "subCancel": "구독 해지",
   "subKeep": "유지하기",
-  "subCanceled": "구독을 해지했어요",
+  "subCanceled": "구독을 해지했어요.",
   "subCancelFailed": "구독을 해지하지 못했어요.",
   "subNextBillingDate": "다음 결제일",
   "subStartPro": "Pro 시작하기",
@@ -3416,8 +3416,9 @@
   "subBrokerCollecting": "보유 주식·시세 자동 수집 중",
   "subConnecting": "연결 중…",
   "subConnect": "연결하기",
-  "subBrokerInvalidCred": "인증정보가 올바르지 않아요",
-  "subDisconnectFailed": "해제에 실패했어요",
+  "subBrokerInvalidCred": "인증정보가 올바르지 않아요.",
+  "subBrokerConnectFailed": "증권사를 연결하지 못했어요.",
+  "subDisconnectFailed": "연결을 해제하지 못했어요.",
   "memoNew": "메모 추가",
   "memoEditTitle": "메모 수정",
   "memoLoadError": "메모를 불러오지 못했어요",
@@ -4320,7 +4321,7 @@
   "subBrokerPrimary": "기본",
   "subBrokerUseAsPrimary": "이 증권사 시세로 자산 평가하기",
   "subBrokerPrimaryNotice": "가계부 자산은 여기서 고른 증권사 시세로 계산해요.",
-  "subBrokerPrimaryFailed": "기본 증권사를 바꾸지 못했어요",
+  "subBrokerPrimaryFailed": "기본 증권사를 바꾸지 못했어요.",
   "subBrokerKeyConnected": "{broker} API 키 연결됨",
   "@subBrokerKeyConnected": {
     "placeholders": {
@@ -4329,7 +4330,7 @@
       }
     }
   },
-  "subBrokerConnected": "{broker} 계정을 연결했어요",
+  "subBrokerConnected": "{broker} 계정을 연결했어요.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {
@@ -4337,7 +4338,7 @@
       }
     }
   },
-  "subBrokerDisconnected": "{broker} 연결을 해제했어요",
+  "subBrokerDisconnected": "{broker} 연결을 해제했어요.",
   "@subBrokerDisconnected": {
     "placeholders": {
       "broker": {
@@ -4345,7 +4346,7 @@
       }
     }
   },
-  "subBrokerPrimaryChanged": "이제 {broker} 시세로 자산을 평가해요",
+  "subBrokerPrimaryChanged": "이제 {broker} 시세로 자산을 평가해요.",
   "@subBrokerPrimaryChanged": {
     "placeholders": {
       "broker": {

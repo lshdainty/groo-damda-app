@@ -1965,7 +1965,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calJoinFailed => 'Could not join. Please try again in a moment.';
 
   @override
-  String get calUpdateFailed => 'Couldn\'t make the change.';
+  String get calUpdateFailed => 'Couldn\'t change the calendar visibility.';
 
   @override
   String get importExecuteFailed => 'Couldn\'t import the data.';
@@ -6105,7 +6105,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Securities link · real-time quotes · real-time asset value';
 
   @override
-  String get subStarted => 'Your 담다 Pro subscription is active';
+  String get subStarted => 'Your Pro subscription has started.';
 
   @override
   String get subFailed => 'Couldn\'t start the subscription.';
@@ -6125,7 +6125,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subKeep => 'Keep';
 
   @override
-  String get subCanceled => 'Subscription canceled';
+  String get subCanceled => 'Canceled the subscription.';
 
   @override
   String get subCancelFailed => 'Couldn\'t cancel the subscription.';
@@ -6175,10 +6175,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subConnect => 'Connect';
 
   @override
-  String get subBrokerInvalidCred => 'Those credentials aren\'t valid';
+  String get subBrokerInvalidCred => 'The credentials are not valid.';
 
   @override
-  String get subDisconnectFailed => 'Couldn\'t disconnect';
+  String get subBrokerConnectFailed => 'Couldn\'t connect to the broker.';
+
+  @override
+  String get subDisconnectFailed => 'Couldn\'t disconnect.';
 
   @override
   String get memoNew => 'Add memo';
@@ -7535,7 +7538,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your assets are valued using the provider selected here.';
 
   @override
-  String get subBrokerPrimaryFailed => 'Couldn\'t change the primary provider';
+  String get subBrokerPrimaryFailed => 'Couldn\'t change the primary broker.';
 
   @override
   String subBrokerKeyConnected(String broker) {
@@ -7544,17 +7547,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return 'Connected your $broker account';
+    return 'Connected your $broker account.';
   }
 
   @override
   String subBrokerDisconnected(String broker) {
-    return 'Disconnected from $broker';
+    return 'Disconnected from $broker.';
   }
 
   @override
   String subBrokerPrimaryChanged(String broker) {
-    return 'Assets are now valued with $broker';
+    return 'Assets are now valued with $broker.';
   }
 
   @override

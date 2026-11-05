@@ -1937,7 +1937,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calJoinFailed => '참여하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calUpdateFailed => '바꾸지 못했어요.';
+  String get calUpdateFailed => '캘린더 표시를 바꾸지 못했어요.';
 
   @override
   String get importExecuteFailed => '가져오지 못했어요.';
@@ -5994,10 +5994,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subFeatSecurities => '증권사 연동 · 실시간 시세 · 자산 실시간 금액';
 
   @override
-  String get subStarted => '담다 Pro 구독이 시작되었어요';
+  String get subStarted => '담다 Pro 구독이 시작됐어요.';
 
   @override
-  String get subFailed => '구독하지 못했어요.';
+  String get subFailed => '구독을 시작하지 못했어요.';
 
   @override
   String get subCancelConfirmTitle => '구독 해지';
@@ -6014,7 +6014,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subKeep => '유지하기';
 
   @override
-  String get subCanceled => '구독을 해지했어요';
+  String get subCanceled => '구독을 해지했어요.';
 
   @override
   String get subCancelFailed => '구독을 해지하지 못했어요.';
@@ -6064,10 +6064,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subConnect => '연결하기';
 
   @override
-  String get subBrokerInvalidCred => '인증정보가 올바르지 않아요';
+  String get subBrokerInvalidCred => '인증정보가 올바르지 않아요.';
 
   @override
-  String get subDisconnectFailed => '해제에 실패했어요';
+  String get subBrokerConnectFailed => '증권사를 연결하지 못했어요.';
+
+  @override
+  String get subDisconnectFailed => '연결을 해제하지 못했어요.';
 
   @override
   String get memoNew => '메모 추가';
@@ -7395,7 +7398,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subBrokerPrimaryNotice => '가계부 자산은 여기서 고른 증권사 시세로 계산해요.';
 
   @override
-  String get subBrokerPrimaryFailed => '기본 증권사를 바꾸지 못했어요';
+  String get subBrokerPrimaryFailed => '기본 증권사를 바꾸지 못했어요.';
 
   @override
   String subBrokerKeyConnected(String broker) {
@@ -7404,17 +7407,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return '$broker 계정을 연결했어요';
+    return '$broker 계정을 연결했어요.';
   }
 
   @override
   String subBrokerDisconnected(String broker) {
-    return '$broker 연결을 해제했어요';
+    return '$broker 연결을 해제했어요.';
   }
 
   @override
   String subBrokerPrimaryChanged(String broker) {
-    return '이제 $broker 시세로 자산을 평가해요';
+    return '이제 $broker 시세로 자산을 평가해요.';
   }
 
   @override

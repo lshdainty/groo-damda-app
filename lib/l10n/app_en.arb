@@ -1096,7 +1096,7 @@
   "calSaveFailed": "Save failed",
   "calDeleteFailed": "Delete failed",
   "calJoinFailed": "Could not join. Please try again in a moment.",
-  "calUpdateFailed": "Couldn't make the change.",
+  "calUpdateFailed": "Couldn't change the calendar visibility.",
   "importExecuteFailed": "Couldn't import the data.",
   "calCalendarLoadError": "Couldn't load calendars",
   "calLabelLoadError": "Couldn't load labels",
@@ -3279,7 +3279,7 @@
   "subFeatLedger": "Ledger · asset management",
   "subFeatBudget": "Budget · savings goals · calendar",
   "subFeatSecurities": "Securities link · real-time quotes · real-time asset value",
-  "subStarted": "Your 담다 Pro subscription is active",
+  "subStarted": "Your Pro subscription has started.",
   "subFailed": "Couldn't start the subscription.",
   "subCancelConfirmTitle": "Cancel subscription",
   "subCancelConfirmMsg": "If you cancel, you will switch to the Free plan from {date} and the Securities tab will lock. You can keep using Pro features until then.",
@@ -3292,7 +3292,7 @@
   },
   "subCancel": "Cancel subscription",
   "subKeep": "Keep",
-  "subCanceled": "Subscription canceled",
+  "subCanceled": "Canceled the subscription.",
   "subCancelFailed": "Couldn't cancel the subscription.",
   "subNextBillingDate": "Next billing date",
   "subStartPro": "Start Pro",
@@ -3334,8 +3334,9 @@
   "subBrokerCollecting": "Auto-collecting holdings and prices",
   "subConnecting": "Connecting…",
   "subConnect": "Connect",
-  "subBrokerInvalidCred": "Those credentials aren't valid",
-  "subDisconnectFailed": "Couldn't disconnect",
+  "subBrokerInvalidCred": "The credentials are not valid.",
+  "subBrokerConnectFailed": "Couldn't connect to the broker.",
+  "subDisconnectFailed": "Couldn't disconnect.",
   "memoNew": "Add memo",
   "memoEditTitle": "Edit memo",
   "memoLoadError": "Could not load memos",
@@ -4152,7 +4153,7 @@
   "subBrokerPrimary": "Primary",
   "subBrokerUseAsPrimary": "Value assets with this provider",
   "subBrokerPrimaryNotice": "Your assets are valued using the provider selected here.",
-  "subBrokerPrimaryFailed": "Couldn't change the primary provider",
+  "subBrokerPrimaryFailed": "Couldn't change the primary broker.",
   "subBrokerKeyConnected": "{broker} API key connected",
   "@subBrokerKeyConnected": {
     "placeholders": {
@@ -4161,7 +4162,7 @@
       }
     }
   },
-  "subBrokerConnected": "Connected your {broker} account",
+  "subBrokerConnected": "Connected your {broker} account.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {
@@ -4169,7 +4170,7 @@
       }
     }
   },
-  "subBrokerDisconnected": "Disconnected from {broker}",
+  "subBrokerDisconnected": "Disconnected from {broker}.",
   "@subBrokerDisconnected": {
     "placeholders": {
       "broker": {
@@ -4177,7 +4178,7 @@
       }
     }
   },
-  "subBrokerPrimaryChanged": "Assets are now valued with {broker}",
+  "subBrokerPrimaryChanged": "Assets are now valued with {broker}.",
   "@subBrokerPrimaryChanged": {
     "placeholders": {
       "broker": {

@@ -115,12 +115,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       // [다시 시도] 로 성공해도 같은 알림 — 확인창에서 바로 성공한 것과 같다
       onRetried: () {
         refresh();
-        snack?.show(message: l.subCanceled, tone: PSnackbarTone.positive);
+        snack?.show(message: l.subCanceled);
       },
     );
     if (!ok) return;
     refresh();
-    snack?.show(message: l.subCanceled, tone: PSnackbarTone.positive);
+    snack?.show(message: l.subCanceled);
   }
 
   @override
