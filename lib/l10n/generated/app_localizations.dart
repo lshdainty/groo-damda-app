@@ -833,7 +833,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetTrendLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'추이 데이터를 불러오지 못했어요'**
+  /// **'추이를 불러오지 못했어요'**
   String get assetTrendLoadError;
 
   /// No description provided for @assetTrendEmpty.
@@ -871,6 +871,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'주'**
   String get assetChartTableWeek;
+
+  /// No description provided for @assetTxLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역을 불러오지 못했어요'**
+  String get assetTxLoadFailed;
+
+  /// No description provided for @assetMonthTx.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 내역'**
+  String get assetMonthTx;
+
+  /// No description provided for @assetHoldingLinkedPending.
+  ///
+  /// In ko, this message translates to:
+  /// **'시세 연동 대기'**
+  String get assetHoldingLinkedPending;
 
   /// No description provided for @assetPeriodAria.
   ///
@@ -1849,12 +1867,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'거래 일시'**
   String get tradeDateTime;
-
-  /// No description provided for @tradeOpenRow.
-  ///
-  /// In ko, this message translates to:
-  /// **'{date} {name} 거래 기록'**
-  String tradeOpenRow(String date, String name);
 
   /// No description provided for @tradeDeleteConfirmTarget.
   ///

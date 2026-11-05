@@ -91,7 +91,12 @@ void main() {
 
     // 거래 기록은 보유 종목 아래, 최근 거래 위
     final holdings = tester.getTopLeft(find.text('보유 종목 · 1')).dy;
+    final trend = tester.getTopLeft(find.textContaining('평가액 추이').first).dy;
     final trades = tester.getTopLeft(find.text('거래 기록 · 1')).dy;
-    expect(trades, greaterThan(holdings));
+    final recent = tester.getTopLeft(find.text('최근 거래')).dy;
+    // 보유 종목 → 추이 → 거래 기록 → 최근 거래 (거래 기록은 추이 뒤)
+    expect(trend, greaterThan(holdings));
+    expect(trades, greaterThan(trend));
+    expect(recent, greaterThan(trades));
   });
 }

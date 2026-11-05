@@ -390,7 +390,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Counts toward net worth and total assets.';
 
   @override
-  String get assetTrendLoadError => 'Couldn\'t load trend data';
+  String get assetTrendLoadError => 'Couldn\'t load the trend';
 
   @override
   String get assetTrendEmpty => 'No trend data.';
@@ -413,6 +413,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetChartTableWeek => 'Week';
+
+  @override
+  String get assetTxLoadFailed => 'Couldn\'t load the transactions';
+
+  @override
+  String get assetMonthTx => 'This month';
+
+  @override
+  String get assetHoldingLinkedPending => 'awaiting live price';
 
   @override
   String get assetPeriodAria => 'Trend period';
@@ -941,11 +950,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tradeDateTime => 'Trade date';
-
-  @override
-  String tradeOpenRow(String date, String name) {
-    return '$name trade record on $date';
-  }
 
   @override
   String tradeDeleteConfirmTarget(

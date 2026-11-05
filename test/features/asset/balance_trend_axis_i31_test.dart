@@ -78,7 +78,11 @@ void main() {
     ) async {
       await _open(tester, scale);
       expect(find.byType(PLineChart), findsOneWidget);
-      expect(find.textContaining('−'), findsWidgets);
+      // 머리 금액("−85,000,000원")이 아니라 눈금 글이 그려진다 — 눈금은 줄인 글("−2,500만")
+      final axis = tester
+          .widget<PLineChart>(find.byType(PLineChart))
+          .axisFormatter!;
+      expect(find.text(axis(-25000000)), findsOneWidget);
     });
   }
 

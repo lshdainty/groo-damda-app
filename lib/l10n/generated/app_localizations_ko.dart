@@ -383,7 +383,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetIncludeInTotalDesc => '순자산 · 총자산 계산에 반영돼요.';
 
   @override
-  String get assetTrendLoadError => '추이 데이터를 불러오지 못했어요';
+  String get assetTrendLoadError => '추이를 불러오지 못했어요';
 
   @override
   String get assetTrendEmpty => '추이 데이터가 없어요.';
@@ -406,6 +406,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetChartTableWeek => '주';
+
+  @override
+  String get assetTxLoadFailed => '내역을 불러오지 못했어요';
+
+  @override
+  String get assetMonthTx => '이번 달 내역';
+
+  @override
+  String get assetHoldingLinkedPending => '시세 연동 대기';
 
   @override
   String get assetPeriodAria => '추이 기간';
@@ -926,11 +935,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tradeDateTime => '거래 일시';
-
-  @override
-  String tradeOpenRow(String date, String name) {
-    return '$date $name 거래 기록';
-  }
 
   @override
   String tradeDeleteConfirmTarget(

@@ -2,6 +2,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -315,9 +316,6 @@ String _titleFor(AppLocalizations l, Asset a) {
   return l.assetAccountDetail;
 }
 
-/// 글 버튼(ghost small 36)의 위아래 4 씩을 걷는 높이 비율 — 웹 `-my-x1`.
-const double _kTextLinkHeightFactor = 28 / 36;
-
 enum _Period { p3m, p6m, p1y }
 
 extension on _Period {
@@ -439,6 +437,9 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
                       (tr.transferDate ?? '').startsWith(monthPrefix)),
             )
             .toList();
+    // 머리 수 · 빈 판정은 이체까지 센다(웹 relatedItems).
+    final relatedCount =
+        (recentAsync.value?.length ?? 0) + assetTransfers.length;
     // CREDIT_CARD 는 신판 카드 상세 본문(_CardDetailBody) — 회차 히어로가 금액 담당.
     final isCredit = asset.assetType == 'CREDIT_CARD';
 
@@ -529,11 +530,11 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
 
           // 최근 거래 · 이번 달 내역(49) — 목록 제목 + 오른쪽 글 버튼 "전체 보기" + 가계부 공용 줄
           PListHeader(
-            title: (recentAsync.value?.isNotEmpty ?? false)
+            title: relatedCount > 0
                 ? (isCheckLinked
-                      ? l.assetMonthTxCount(recentAsync.value!.length)
-                      : l.assetRecentTxCount(recentAsync.value!.length))
-                : l.dashRecent,
+                      ? l.assetMonthTxCount(relatedCount)
+                      : l.assetRecentTxCount(relatedCount))
+                : (isCheckLinked ? l.assetMonthTx : l.dashRecent),
             variant: PListHeaderVariant.boldSolid,
             topInset: PSpacing.x4,
             action: PTextButton(
@@ -545,6 +546,12 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
             padding: gutterPad,
             child: _RecentExpenses(
               async: recentAsync,
+              onRetry: () => ref.invalidate(
+                isCheckLinked
+                    ? assetPeriodExpensesProvider
+                    : expensesByAssetProvider,
+              ),
+              emptyText: l.assetNoLinkedTx,
               transfers: assetTransfers,
               perspectiveAssetRowId: asset.rowId,
               flags: _assetMaskFlags(ref, asset),
@@ -897,6 +904,7 @@ Future<void> showTradeDetailSheet(
     ),
     cancelLabel: l.actionCancel,
     actionLabel: l.tradeDeleteTitle,
+    destructive: true,
     request: () => _cancelTradeRequest(container, trade, assetRowId),
     failedMessage: l.tradeCancelFailed,
     retryLabel: l.actionRetry,
@@ -1046,7 +1054,7 @@ class _HoldingRow extends ConsumerWidget {
     if (h.linked) {
       sub = rawPrice != null
           ? l.assetHoldingLinkedDetail(qty, _fmtRawPrice(rawPrice!))
-          : '${l.assetSharesCount(qty)} · ${l.assetHoldingLinkedBadge}';
+          : '${l.assetSharesCount(qty)} · ${l.assetHoldingLinkedPending}';
     } else {
       sub = h.quantityValue > 0
           ? '${l.assetHoldingQtyUnit(qty, holdingUnitLabel(l, h.holdingType))} · ${l.assetHoldingManualDetail}'
@@ -1099,9 +1107,9 @@ class _HoldingRow extends ConsumerWidget {
           if (onTrade != null)
             Align(
               alignment: Alignment.centerRight,
-              heightFactor: _kTextLinkHeightFactor,
-              child: Transform.translate(
-                offset: const Offset(PSpacing.x2, 0),
+              // 웹 -mr-x2 -mb-x1 — 보이는 상자는 그대로, 자리만 줄이고 누르는 영역은 44 를 지킨다
+              child: _TrimmedLink(
+                end: PSpacing.x2,
                 child: PListAction(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1175,7 +1183,9 @@ class _HeroCard extends StatelessWidget {
     final c = context.colors;
     final amountText = masked
         ? '••••••'
-        : '${heroBalance < 0 ? kMinus : ''}${krw(heroBalance.abs())}${wonUnit()}';
+        : keepAllAmount(
+            '${heroBalance < 0 ? kMinus : ''}${krw(heroBalance.abs())}${wonUnit()}',
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1238,14 +1248,16 @@ class _HeroCard extends StatelessWidget {
               label: l.assetCashBalance,
               value: masked
                   ? '••••••'
-                  : '${krw(asset.cashBalance!)}${wonUnit()}',
+                  : keepAllAmount('${krw(asset.cashBalance!)}${wonUnit()}'),
             ),
             KvRow(
               inset: 0,
               label: l.assetHoldingBalance,
               value: masked
                   ? '••••••'
-                  : '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
+                  : keepAllAmount(
+                      '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
+                    ),
             ),
           ],
         ],
@@ -1340,10 +1352,16 @@ class _RecentExpenses extends StatelessWidget {
     required this.async,
     required this.flags,
     required this.tokens,
+    required this.onRetry,
+    required this.emptyText,
     this.transfers = const [],
     this.perspectiveAssetRowId,
   });
   final AsyncValue<List<Expense>> async;
+
+  /// 실패 띠의 [다시 시도] · 비었을 때 글(자리마다 다르다).
+  final VoidCallback onRetry;
+  final String emptyText;
 
   /// 화면 카드 + 종류 카드 — 행·일합계마다 자기 종류로 판정한다.
   final MaskFlags flags;
@@ -1409,13 +1427,22 @@ class _RecentExpenses extends StatelessWidget {
         ],
       );
     }
-    if (list.isEmpty) {
+    // 실패가 빈 글로 보이면 안 된다 — 값이 없는 실패는 띠 + 다시 시도.
+    if (async.hasError && !async.hasValue) {
+      return BudgetFailure(
+        title: AppLocalizations.of(context).assetTxLoadFailed,
+        onRetry: onRetry,
+      );
+    }
+    if (list.isEmpty && transfers.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
         child: Center(
           child: Text(
-            AppLocalizations.of(context).assetNoLinkedTx,
-            style: PTypo.bodySm.copyWith(color: tokens.fgTertiary),
+            emptyText,
+            style: PTypography.t4.copyWith(
+              color: context.colors.fgNeutralSubtle,
+            ),
           ),
         ),
       );
@@ -1427,7 +1454,13 @@ class _RecentExpenses extends StatelessWidget {
     for (final e in list) {
       dayGroups.putIfAbsent(e.expenseDateOnly ?? '', () => <Expense>[]).add(e);
     }
-    final entries = dayGroups.entries.toList();
+    // 이체만 있는 날도 한 묶음이다(웹 relatedItems) — 이체는 지출이 있는 날에만 붙던 것을 고쳤다.
+    for (final tr in transfers) {
+      final d = tr.transferDate ?? '';
+      if (d.length >= 10) dayGroups.putIfAbsent(d.substring(0, 10), () => []);
+    }
+    final entries = dayGroups.entries.toList()
+      ..sort((a, b) => b.key.compareTo(a.key));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1715,6 +1748,14 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
   }
 
   _UsageSort _sort = _UsageSort.recent;
+  final _periodFocus = FocusNode(debugLabel: 'CardDetail period');
+
+  @override
+  void dispose() {
+    _periodFocus.dispose();
+    super.dispose();
+  }
+
   bool _paying = false;
 
   List<_CardStatement> _statements(CardBilling? b) {
@@ -2073,7 +2114,10 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         );
       },
     );
-    if (picked == null || !mounted) return;
+    if (!mounted) return;
+    // 닫힌 뒤 초점은 회차 단추로(고르지 않고 닫았을 때도)
+    _periodFocus.requestFocus();
+    if (picked == null) return;
     setState(() => _stIdx = picked);
   }
 
@@ -2118,6 +2162,13 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         : ref.watch(expensesByAssetProvider((assetId: asset.rowId, limit: 12)));
     final t = context.tokens;
 
+    // 청구를 못 불러왔는데 "0원" 을 사실처럼 보이면 안 된다 — 실패 띠 + 다시 시도(웹 CardBilling).
+    if (billingAsync.hasError && b == null) {
+      return BudgetFailure(
+        title: l.assetBillingLoadError,
+        onRetry: () => ref.invalidate(cardBillingProvider(asset.rowId)),
+      );
+    }
     if (billingAsync.isLoading && b == null) {
       // 실렌더 미러 — 회차 단추 / 금액 / 키-값 / 동작. 자리를 잡아야 데이터가 오는 순간 아래가 밀리지 않는다.
       return const ExcludeSemantics(
@@ -2195,8 +2246,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                               tone: PBadgeTone.positive,
                               label: l.assetInstallmentPaidOffBadge,
                             ),
-                            Align(
-                              heightFactor: _kTextLinkHeightFactor,
+                            _TrimmedLink(
                               child: PListAction(
                                 child: dsb.PButton(
                                   label: l.assetInstallmentPayoffUndo,
@@ -2214,15 +2264,16 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                         padding: const EdgeInsets.only(top: PSpacing.x1),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          // 웹 -my-x1 — 보이는 36 은 그대로 두고 자리만 위아래 4 씩 줄인다
-                          heightFactor: _kTextLinkHeightFactor,
-                          child: PListAction(
-                            child: dsb.PButton(
-                              label: l.assetInstallmentPayoff,
-                              variant: dsb.PButtonVariant.ghost,
-                              size: dsb.PButtonSize.small,
-                              flush: dsb.PButtonFlush.left,
-                              onPressed: () => _confirmPayoff(due),
+                          // 웹 -my-x1 — 보이는 36 은 그대로 두고 자리만 위아래 4 씩 줄인다(누르는 영역은 44)
+                          child: _TrimmedLink(
+                            child: PListAction(
+                              child: dsb.PButton(
+                                label: l.assetInstallmentPayoff,
+                                variant: dsb.PButtonVariant.ghost,
+                                size: dsb.PButtonSize.small,
+                                flush: dsb.PButtonFlush.left,
+                                onPressed: () => _confirmPayoff(due),
+                              ),
                             ),
                           ),
                         ),
@@ -2274,6 +2325,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
               child: _PeriodButton(
                 label: l.assetDueOn(st.label),
                 scheduled: st.scheduled,
+                focusNode: _periodFocus,
                 onTap: () => _openPeriodPicker(stmts),
               ),
             ),
@@ -2560,11 +2612,22 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         Padding(
           padding: gutter,
           child: _sort == _UsageSort.recent
-              ? _RecentExpenses(async: usageAsync, flags: flags, tokens: t)
+              ? _RecentExpenses(
+                  async: usageAsync,
+                  flags: flags,
+                  tokens: t,
+                  onRetry: _retryUsage,
+                  emptyText: l.assetNoUsage,
+                )
               : _plainUsage(l, usageAsync, flags, c),
         ),
       ],
     );
+  }
+
+  void _retryUsage() {
+    ref.invalidate(assetPeriodExpensesProvider);
+    ref.invalidate(expensesByAssetProvider);
   }
 
   /// 고액순 · 카테고리별 — 날짜 묶음 없이 늘어놓는 줄. 비면 가운데 한 줄.
@@ -2574,6 +2637,24 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     MaskFlags flags,
     PColors c,
   ) {
+    // 불러오는 중은 Skeleton, 실패는 띠 + 다시 시도 — 둘 다 빈 글로 보이면 안 된다.
+    if (usageAsync.isLoading && !usageAsync.hasValue) {
+      return const ExcludeSemantics(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: PSpacing.x3),
+          child: Column(
+            spacing: PSpacing.x3,
+            children: [
+              PSkeleton.line(width: double.infinity, height: 40),
+              PSkeleton.line(width: double.infinity, height: 40),
+            ],
+          ),
+        ),
+      );
+    }
+    if (usageAsync.hasError && !usageAsync.hasValue) {
+      return BudgetFailure(title: l.assetTxLoadFailed, onRetry: _retryUsage);
+    }
     final list = [...(usageAsync.value ?? const <Expense>[])];
     if (list.isEmpty) {
       return Padding(
@@ -2711,7 +2792,9 @@ class _PaySheetState extends State<_PaySheet> {
     final moveNote = !widget.hasPayAccount
         ? l.assetPayNoAccountNote
         : (widget.debt < v
-              ? l.assetPayMoveNote(krwSigned(widget.debt, false, unit: true))
+              ? l.assetPayMoveNote(
+                  krwSigned(widget.debt, widget.masked, unit: true),
+                )
               : null);
     return PBottomSheetContent(
       title: l.assetPayNow,
@@ -2845,10 +2928,14 @@ class _PeriodButton extends StatelessWidget {
     required this.label,
     required this.scheduled,
     required this.onTap,
+    this.focusNode,
   });
   final String label;
   final bool scheduled;
   final VoidCallback onTap;
+
+  /// 고르기 시트가 닫힌 뒤 초점이 돌아오는 자리.
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -2862,10 +2949,11 @@ class _PeriodButton extends StatelessWidget {
           variant: dsb.PButtonVariant.ghost,
           size: dsb.PButtonSize.small,
           flush: dsb.PButtonFlush.left,
+          focusNode: focusNode,
           onPressed: onTap,
         ),
-        // 배지와 꺾쇠도 같은 단추의 일부다 — 눌러도 열린다(읽는 이름은 앞 단추 하나).
-        ExcludeSemantics(
+        // 배지와 꺾쇠도 같은 단추의 일부다 — 눌러도 열린다. 배지("예정")는 읽히고 꺾쇠는 읽지 않는다.
+        MergeSemantics(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onTap,
@@ -2910,4 +2998,68 @@ String _fmtDate(String iso) {
 String _currentYearMonth() {
   final n = DateTime.now();
   return '${n.year.toString().padLeft(4, '0')}-${n.month.toString().padLeft(2, '0')}';
+}
+
+/// 글 버튼(ghost small 36)의 자리만 줄인다 — 웹 `-my-x1`(위아래 4) · `-mr-x2`([end]). 보이는 상자는 그대로 그리고
+/// 누르는 영역은 줄지 않는다(list.md:529 — 작은 버튼의 누르는 영역은 44): 자리 밖으로 넘친 만큼도 받는다.
+class _TrimmedLink extends SingleChildRenderObjectWidget {
+  const _TrimmedLink({this.end = 0, required super.child});
+  final double end;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderTrimmedLink(end);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderTrimmedLink renderObject,
+  ) {
+    renderObject.end = end;
+  }
+}
+
+class _RenderTrimmedLink extends RenderShiftedBox {
+  _RenderTrimmedLink(this._end) : super(null);
+
+  double _end;
+  set end(double v) {
+    if (v == _end) return;
+    _end = v;
+    markNeedsLayout();
+  }
+
+  static const double _trimY = 4;
+
+  @override
+  void performLayout() {
+    final c = child;
+    if (c == null) {
+      size = constraints.smallest;
+      return;
+    }
+    c.layout(constraints.loosen(), parentUsesSize: true);
+    size = constraints.constrain(
+      Size(
+        (c.size.width - _end).clamp(0.0, double.infinity),
+        (c.size.height - 2 * _trimY).clamp(0.0, double.infinity),
+      ),
+    );
+    (c.parentData! as BoxParentData).offset = const Offset(0, -_trimY);
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final c = child;
+    if (c == null) return false;
+    final offset = (c.parentData! as BoxParentData).offset;
+    // 자리 밖(줄인 만큼)도 자식이 받는다 — 자식 자신의 범위 검사가 마지막 판정이다.
+    final hit = result.addWithPaintOffset(
+      offset: offset,
+      position: position,
+      hitTest: (r, p) => c.hitTest(r, position: p),
+    );
+    if (hit) result.add(BoxHitTestEntry(this, position));
+    return hit;
+  }
 }
