@@ -1323,7 +1323,7 @@
   "updateSheetRetry": "Try again",
   "updateSheetDownloading": "Downloading",
   "updateSheetOpening": "Opening the installer",
-  "updateSheetFailed": "Could not download in the app. Opening your browser instead.",
+  "updateSheetFailed": "Couldn't download in the app, so we're opening your browser.",
   "updateTitle": "Update",
   "updateGateTitle": "Version {version} is here",
   "@updateGateTitle": {

@@ -2321,7 +2321,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get updateSheetOpening => '설치 화면을 여는 중이에요';
 
   @override
-  String get updateSheetFailed => '앱에서 받지 못했어요. 브라우저로 열어볼게요.';
+  String get updateSheetFailed => '앱에서 받지 못해 브라우저로 열어요.';
 
   @override
   String get updateTitle => '업데이트';

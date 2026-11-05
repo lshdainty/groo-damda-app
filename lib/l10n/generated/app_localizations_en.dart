@@ -2356,7 +2356,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateSheetFailed =>
-      'Could not download in the app. Opening your browser instead.';
+      'Couldn\'t download in the app, so we\'re opening your browser.';
 
   @override
   String get updateTitle => 'Update';

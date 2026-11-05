@@ -1350,7 +1350,7 @@
   "updateSheetRetry": "다시 시도",
   "updateSheetDownloading": "받는 중이에요",
   "updateSheetOpening": "설치 화면을 여는 중이에요",
-  "updateSheetFailed": "앱에서 받지 못했어요. 브라우저로 열어볼게요.",
+  "updateSheetFailed": "앱에서 받지 못해 브라우저로 열어요.",
   "updateTitle": "업데이트",
   "updateGateTitle": "새 버전 {version}이 나왔어요",
   "@updateGateTitle": {

@@ -4354,7 +4354,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateSheetFailed.
   ///
   /// In ko, this message translates to:
-  /// **'앱에서 받지 못했어요. 브라우저로 열어볼게요.'**
+  /// **'앱에서 받지 못해 브라우저로 열어요.'**
   String get updateSheetFailed;
 
   /// No description provided for @updateTitle.
