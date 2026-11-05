@@ -657,7 +657,7 @@ void main() {
     await tester.pumpWidget(
       _app(const StocksScreen(), [
         ..._base(),
-        myFeaturesProvider.overrideWith(
+        myFeaturesLoadProvider.overrideWith(
           (ref) async => const MyFeatures(
             features: ['SECURITIES'],
             connectedBrokers: [],

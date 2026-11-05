@@ -9,6 +9,7 @@ import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/features/stocks/presentation/namu_stocks_view.dart';
 import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
+import 'package:groo_damda_app/features/subscription/presentation/securities_gate.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
@@ -38,10 +39,17 @@ class _StocksScreenState extends ConsumerState<StocksScreen> {
 
     // 개인키 미연결 시 전 화면 연결 유도 (mock 노출 금지). 증권사 API 는 시세 포함 모든
     // 조회가 개인키 토큰을 요구하므로, 어느 증권사든 하나는 연결돼 있어야 조회가 된다.
-    final featuresAsync = ref.watch(myFeaturesProvider);
-    final features = featuresAsync.asData?.value;
+    // 실패는 "연결 안 됨" 이 아니다 — 원본(실패를 던지는 쪽)을 읽어 실패면 그 자리에서 다시 시도를 준다.
+    // 받아 둔 값이 있으면(다시 받기만 실패) 그 값을 그대로 쓴다.
+    final featuresAsync = ref.watch(myFeaturesLoadProvider);
+    final features = featuresAsync.value;
     final connected = features?.connectedBrokers ?? const <String>[];
 
+    if (features == null && featuresAsync.hasError) {
+      return SecuritiesLoadFailure(
+        onRetry: () => ref.invalidate(myFeaturesLoadProvider),
+      );
+    }
     if (!featuresAsync.isLoading && connected.isEmpty) {
       return const _ConnectGate();
     }

@@ -19,7 +19,7 @@ Future<void> _pump(WidgetTester tester, List<String> brokers) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        myFeaturesProvider.overrideWith(
+        myFeaturesLoadProvider.overrideWith(
           (ref) async => MyFeatures(
             features: const ['SECURITIES'],
             connectedBrokers: brokers,
