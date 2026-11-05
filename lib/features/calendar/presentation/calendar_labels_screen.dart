@@ -258,6 +258,7 @@ void _showLabelEditor(
       // 수정 폼에만 — 밀기로만 닿던 삭제가 들어간 화면에도 있다(swipe-actions.md:76).
       // 09b-2 가 라벨 폼을 새로 짤 때 이 [삭제] 를 옮긴다.
       leftSlotCompact: true,
+      neutralSubmit: true,
       leftSlot: existing == null
           ? null
           // 내용 폭 ghost critical — 왼쪽 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다

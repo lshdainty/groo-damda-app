@@ -31,6 +31,7 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_labels_screen.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_share_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 
 import '../../support/plain_text.dart';
@@ -92,8 +93,12 @@ class _NoAuth extends AuthNotifier {
 
 /// 텍스트를 품은 PButton — 확인 다이얼로그의 버튼과 스와이프 액션의 같은 글자를
 /// 가른다(액션은 PButton 이 아니다).
-Finder _button(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+Finder _button(String label) => find
+    .ancestor(
+      of: find.text(label),
+      matching: find.byWidgetPredicate((w) => w is PButton || w is dsb.PButton),
+    )
+    .last;
 
 /// 월 일정을 살려 두는 관찰자 + 대상 화면.
 ///

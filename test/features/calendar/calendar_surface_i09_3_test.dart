@@ -24,7 +24,7 @@ import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
 import 'package:groo_damda_app/shared/widgets/p_divider.dart';
 
@@ -477,14 +477,14 @@ void main() {
       expect(find.text('이름은 12자 이내로 입력해주세요.'), findsNothing);
       final save = find.ancestor(
         of: find.text('저장'),
-        matching: find.byType(PButton),
+        matching: find.byType(dsb.PButton),
       );
-      expect(tester.widget<PButton>(save.last).onPressed, isNotNull);
+      expect(tester.widget<dsb.PButton>(save.last).onPressed, isNotNull);
       // 고치기 시작하면(여전히 12 초과 값은 입력이 12 에서 멈춘다) — 12자 이하로 줄이면 저장 가능
       await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타');
       await tester.pumpAndSettle();
       expect(find.text('12/12'), findsOneWidget);
-      expect(tester.widget<PButton>(save.last).onPressed, isNotNull);
+      expect(tester.widget<dsb.PButton>(save.last).onPressed, isNotNull);
     });
   });
 }
