@@ -219,6 +219,7 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
       child: Material(
         type: MaterialType.transparency,
         child: PSnackbarHost(
+          key: PSnackbar.appHostKey,
           closeLabel: AppLocalizations.of(context).actionClose,
           child: child ?? const SizedBox.shrink(),
         ),

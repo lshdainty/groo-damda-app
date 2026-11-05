@@ -65,6 +65,11 @@ abstract final class PSnackbar {
     return api!;
   }
 
+  /// 앱 맨 위 호스트의 키 — 딥링크 · 수명주기처럼 BuildContext 가 없는 자리가 띠를 띄우는 가장 작은 길.
+  /// 앱의 [PSnackbarHost] 한 곳만 이 키를 단다(키는 트리에서 하나만 쓸 수 있다).
+  static final GlobalKey<PSnackbarHostState> appHostKey =
+      GlobalKey<PSnackbarHostState>(debugLabel: 'app snackbar host');
+
   static PSnackbarApi? maybeOf(BuildContext context) =>
       context.getInheritedWidgetOfExactType<_PSnackbarScope>()?.host;
 }

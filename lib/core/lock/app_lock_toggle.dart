@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 앱 잠금 스위치 — 켤 때만 생체인증을 거친다.
 ///
@@ -37,11 +37,8 @@ Future<void> setAppLockWithAuth(
       await notifier.setAppLock(true);
     case AppLockAuthResult.unavailable:
       if (context.mounted) {
-        showPSnackBar(
-          context,
-          l.appLockUnavailable,
-          severity: PSnackSeverity.warning,
-        );
+        // 오류가 아니라 "이 기기에서는 쓸 수 없어요" 안내 — neutral 한 문장(warning 톤은 ds 에 없다).
+        PSnackbar.maybeOf(context)?.show(message: l.appLockUnavailable);
       }
     case AppLockAuthResult.failure:
       // 취소·불일치 — 켜지 않고 그대로 둔다.
