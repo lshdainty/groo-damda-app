@@ -4301,9 +4301,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountProPromo => '증권 투자는 Pro 전용 · 지금 시작하기';
 
   @override
-  String get accountPerMonth => '/ 월';
-
-  @override
   String get accountProStart => 'Pro 시작';
 
   @override
@@ -5863,25 +5860,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subFreeLockedDesc => '증권 연동 · 실시간 시세가 잠겨 있어요';
 
   @override
-  String get subSpotlightTitle => '증권 투자는 Pro 전용이에요';
-
-  @override
   String get subSpotlightDesc =>
-      '실시간 시세·호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.';
+      '증권 투자는 Pro 전용이에요. 실시간 시세 · 호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.';
 
   @override
   String get subCycleMonthly => '월간';
 
   @override
+  String get subCycleYearly => '연간';
+
+  @override
+  String get subCycleLabel => '결제 주기';
+
+  @override
   String subCycleYearlyOff(int pct) {
     return '연간 $pct%↓';
   }
-
-  @override
-  String get subUnitMonth => '월';
-
-  @override
-  String get subUnitYear => '년';
 
   @override
   String subYearlyPerMonth(String amount, int pct) {
@@ -5899,9 +5893,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get subFreeCaption => '기본 가계부 기능';
-
-  @override
-  String get subFeatureColumn => '기능';
 
   @override
   String get subFeatLedger => '가계부 · 자산 관리';
@@ -5949,12 +5940,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get subLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
-
-  @override
-  String get subFeatHas => '있음';
-
-  @override
-  String get subFeatNone => '없음';
 
   @override
   String subPricePerMonth(String amount) {

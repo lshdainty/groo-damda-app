@@ -71,6 +71,23 @@ class SubscriptionInfo {
   final int? price;
   final int? durationMonths;
 
+  /// `/subscriptions/me` 에 가격 · 기간이 없을 때(옛 서버 · 실패) planCode 로 플랜 목록에서 찾아 채운다.
+  /// 정상 경로는 서버가 준 값이다 — 있으면 그대로 둔다.
+  SubscriptionInfo resolvedWith(List<SubscriptionPlanInfo> plans) {
+    if (price != null && durationMonths != null) return this;
+    final plan = plans.where((p) => p.planCode == planCode).firstOrNull;
+    if (plan == null) return this;
+    return SubscriptionInfo(
+      planCode: planCode,
+      planName: planName,
+      status: status,
+      currentPeriodEnd: currentPeriodEnd,
+      autoRenew: autoRenew,
+      price: price ?? plan.price,
+      durationMonths: durationMonths ?? plan.durationMonths,
+    );
+  }
+
   /// 지금 Pro 를 쓸 수 있는가 — 해지 뒤 **유예 기간**을 포함한다.
   ///
   /// 서버(desk-back #332)는 해지해도 만료일을 앞당기지 않는다. 응답은

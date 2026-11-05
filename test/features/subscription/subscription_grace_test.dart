@@ -13,8 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import '../../support/plain_text.dart';
 import 'package:groo_damda_app/core/format/date.dart';
-import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/presentation/subscription_screen.dart';
@@ -80,6 +80,9 @@ Future<void> _openSheet(WidgetTester tester, SubscriptionInfo? sub) async {
   await tester.pumpWidget(_app(sub));
   await tester.pumpAndSettle();
 }
+
+/// 계정 · 구독 화면이 같은 글 — 서버 값(9,900 · 1개월)에 "/ 월" 이 붙는다.
+const _amount = '9,900원 / 월';
 
 void main() {
   final l = AppLocalizationsKo();
@@ -151,12 +154,12 @@ void main() {
       _sub(status: 'CANCELLED', currentPeriodEnd: end, autoRenew: false),
     );
 
-    expect(find.text(l.subUsingPro), findsOneWidget);
-    expect(find.text(l.subUsingFree), findsNothing);
+    expect(findPlain(l.subUsingPro), findsOneWidget);
+    expect(findPlain(l.subUsingFree), findsNothing);
 
     // 이미 구독 중이고 서버가 재구독을 막는다 — 누를 수 없는 버튼을 내밀지 않는다.
-    expect(find.text(l.subStartPro), findsNothing);
-    expect(find.text(l.subCancel), findsOneWidget);
+    expect(findPlain(l.subStartPro), findsNothing);
+    expect(findPlain(l.subCancel), findsOneWidget);
   });
 
   testWidgets('자동갱신이 꺼지면 날짜 라벨이 "다음 결제" 가 아니다', (tester) async {
@@ -167,9 +170,10 @@ void main() {
       _sub(status: 'CANCELLED', currentPeriodEnd: end, autoRenew: false),
     );
 
-    expect(find.text(l.subProUntil(date)), findsOneWidget);
+    // 유예 설명 = "{날짜}까지 이용 · {가격}"(웹과 같다)
+    expect(findPlain('${l.subProUntil(date)} · $_amount'), findsOneWidget);
     expect(
-      find.text(l.subNextBilling(date, krwSigned(9900, false, unit: true))),
+      findPlain(l.subNextBilling(date, _amount)),
       findsNothing,
       reason: '해지한 구독에 다음 결제는 없다 — 없는 청구를 예고하면 안 된다',
     );
@@ -185,9 +189,9 @@ void main() {
       ),
     );
 
-    expect(find.text(l.subUsingFree), findsOneWidget);
-    expect(find.text(l.subUsingPro), findsNothing);
-    expect(find.text(l.subStartPro), findsOneWidget);
+    expect(findPlain(l.subUsingFree), findsOneWidget);
+    expect(findPlain(l.subUsingPro), findsNothing);
+    expect(findPlain(l.subStartPro), findsOneWidget);
   });
 
   testWidgets('자동갱신 중인 구독은 종전 문구 그대로다', (tester) async {
@@ -195,18 +199,15 @@ void main() {
     final date = localDateKey(end)!;
     await _openSheet(tester, _sub(status: 'ACTIVE', currentPeriodEnd: end));
 
-    expect(find.text(l.subUsingPro), findsOneWidget);
-    expect(
-      find.text(l.subNextBilling(date, krwSigned(9900, false, unit: true))),
-      findsOneWidget,
-    );
-    expect(find.text(l.subProUntil(date)), findsNothing);
+    expect(findPlain(l.subUsingPro), findsOneWidget);
+    expect(findPlain(l.subNextBilling(date, _amount)), findsOneWidget);
+    expect(findPlain(l.subProUntil(date)), findsNothing);
   });
 
   testWidgets('만료일이 없는 해지는 Free — 터지지 않는다', (tester) async {
     await _openSheet(tester, _sub(status: 'CANCELLED', autoRenew: false));
 
-    expect(find.text(l.subUsingFree), findsOneWidget);
+    expect(findPlain(l.subUsingFree), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -217,14 +218,9 @@ void main() {
     );
 
     // 자리 표시자만 있는 날짜에 "…까지 이용" 을 끼우면 더 이상해진다 — 종전 문구.
-    expect(find.text(l.subUsingPro), findsOneWidget);
+    expect(findPlain(l.subUsingPro), findsOneWidget);
     expect(
-      find.text(
-        l.subNextBilling(
-          l.subNextBillingDate,
-          krwSigned(9900, false, unit: true),
-        ),
-      ),
+      findPlain(l.subNextBilling(l.subNextBillingDate, _amount)),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);

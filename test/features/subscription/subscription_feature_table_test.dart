@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import '../../support/plain_text.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/presentation/subscription_screen.dart';
@@ -90,7 +91,7 @@ void main() {
 
     for (final gone in _removedRows) {
       expect(
-        find.text(gone),
+        findPlain(gone),
         findsNothing,
         reason: '"$gone" 은 코드에 없는 제한이다 — 표에 적으면 광고가 된다',
       );
@@ -98,15 +99,15 @@ void main() {
 
     // 남는 줄은 셋. 증권만 Pro 전용(별표).
     expect(
-      find.descendant(of: _table(l), matching: find.text(l.subFeatLedger)),
+      find.descendant(of: _table(l), matching: findPlain(l.subFeatLedger)),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: _table(l), matching: find.text(l.subFeatBudget)),
+      find.descendant(of: _table(l), matching: findPlain(l.subFeatBudget)),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: _table(l), matching: find.text(l.subFeatSecurities)),
+      find.descendant(of: _table(l), matching: findPlain(l.subFeatSecurities)),
       findsOneWidget,
     );
   });
@@ -120,15 +121,15 @@ void main() {
 
     // 가계부 · 예산은 둘 다, 증권은 Pro 에만 — 폰은 표 대신 줄이고 값 글이 그 기능이 있는 플랜이다.
     expect(
-      find.descendant(of: table, matching: find.text('Free · Pro')),
+      find.descendant(of: table, matching: findPlain('Free · Pro')),
       findsNWidgets(2),
     );
     expect(
-      find.descendant(of: table, matching: find.text('Pro')),
+      find.descendant(of: table, matching: findPlain('Pro')),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: table, matching: find.text('Free')),
+      find.descendant(of: table, matching: findPlain('Free')),
       findsNothing,
     );
   });
@@ -139,7 +140,7 @@ void main() {
     await _openSheet(tester);
 
     expect(
-      find.descendant(of: _table(l), matching: find.text(_securitiesKo)),
+      find.descendant(of: _table(l), matching: findPlain(_securitiesKo)),
       findsOneWidget,
       reason: '웹이 toBe 로 잠근 그 문자열 그대로여야 한다',
     );
@@ -149,7 +150,7 @@ void main() {
     expect(
       find.descendant(
         of: _table(l),
-        matching: find.textContaining(_ambiguousWord),
+        matching: findPlainContaining(_ambiguousWord),
       ),
       findsNothing,
       reason: '설명서가 \'$_ambiguousWord\' 를 하루 한 번 종가 스냅샷이라는 다른 뜻으로 쓴다',

@@ -2446,7 +2446,6 @@
   },
   "accountProActive": "Pro 이용 중",
   "accountProPromo": "증권 투자는 Pro 전용 · 지금 시작하기",
-  "accountPerMonth": "/ 월",
   "accountProStart": "Pro 시작",
   "accountManage": "계정 관리",
   "accountLogoutDesc": "이 기기에서만",
@@ -3302,9 +3301,10 @@
     }
   },
   "subFreeLockedDesc": "증권 연동 · 실시간 시세가 잠겨 있어요",
-  "subSpotlightTitle": "증권 투자는 Pro 전용이에요",
-  "subSpotlightDesc": "실시간 시세·호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.",
+  "subSpotlightDesc": "증권 투자는 Pro 전용이에요. 실시간 시세 · 호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.",
   "subCycleMonthly": "월간",
+  "subCycleYearly": "연간",
+  "subCycleLabel": "결제 주기",
   "subCycleYearlyOff": "연간 {pct}%↓",
   "@subCycleYearlyOff": {
     "placeholders": {
@@ -3313,8 +3313,6 @@
       }
     }
   },
-  "subUnitMonth": "월",
-  "subUnitYear": "년",
   "subYearlyPerMonth": "월 {amount} 꼴 · {pct}% 절약",
   "@subYearlyPerMonth": {
     "placeholders": {
@@ -3330,7 +3328,6 @@
   "subFeatureCompare": "기능 비교",
   "subCurrentPlan": "현재 플랜",
   "subFreeCaption": "기본 가계부 기능",
-  "subFeatureColumn": "기능",
   "subFeatLedger": "가계부 · 자산 관리",
   "subFeatBudget": "예산 · 저축 목표 · 캘린더",
   "subFeatSecurities": "증권사 연동 · 실시간 시세 · 자산 실시간 금액",
@@ -3353,8 +3350,6 @@
   "subStartPro": "Pro 시작하기",
   "subLoadFailed": "구독 정보를 불러오지 못했어요",
   "subLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
-  "subFeatHas": "있음",
-  "subFeatNone": "없음",
   "subPricePerMonth": "{amount} / 월",
   "@subPricePerMonth": {
     "placeholders": {

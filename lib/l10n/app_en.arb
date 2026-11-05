@@ -2419,7 +2419,6 @@
   },
   "accountProActive": "Pro active",
   "accountProPromo": "Securities investing is Pro-only · Start now",
-  "accountPerMonth": "/ mo",
   "accountProStart": "Start Pro",
   "accountManage": "Account Management",
   "accountLogoutDesc": "This device only",
@@ -3220,9 +3219,10 @@
     }
   },
   "subFreeLockedDesc": "Securities link and real-time quotes are locked",
-  "subSpotlightTitle": "Securities investing is Pro-only",
-  "subSpotlightDesc": "Real-time quotes and order book, domestic and overseas ticker search, watchlists, and holding P&L — subscribe to Pro and the Securities tab opens right away.",
+  "subSpotlightDesc": "Securities investing is Pro-only. Real-time quotes and order book, domestic and overseas ticker search, watchlists, and holding P&L — subscribe to Pro and the Securities tab opens right away.",
   "subCycleMonthly": "Monthly",
+  "subCycleYearly": "Yearly",
+  "subCycleLabel": "Billing cycle",
   "subCycleYearlyOff": "Yearly {pct}% off",
   "@subCycleYearlyOff": {
     "placeholders": {
@@ -3231,8 +3231,6 @@
       }
     }
   },
-  "subUnitMonth": "mo",
-  "subUnitYear": "yr",
   "subYearlyPerMonth": "≈ {amount}/mo · Save {pct}%",
   "@subYearlyPerMonth": {
     "placeholders": {
@@ -3248,7 +3246,6 @@
   "subFeatureCompare": "Feature comparison",
   "subCurrentPlan": "Current plan",
   "subFreeCaption": "Basic ledger features",
-  "subFeatureColumn": "Feature",
   "subFeatLedger": "Ledger · asset management",
   "subFeatBudget": "Budget · savings goals · calendar",
   "subFeatSecurities": "Securities link · real-time quotes · real-time asset value",
@@ -3271,8 +3268,6 @@
   "subStartPro": "Start Pro",
   "subLoadFailed": "Couldn't load your subscription",
   "subLoadFailedDesc": "Please try again in a moment.",
-  "subFeatHas": "Included",
-  "subFeatNone": "Not included",
   "subPricePerMonth": "{amount} / mo",
   "@subPricePerMonth": {
     "placeholders": {

@@ -4376,9 +4376,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountProPromo => 'Securities investing is Pro-only · Start now';
 
   @override
-  String get accountPerMonth => '/ mo';
-
-  @override
   String get accountProStart => 'Start Pro';
 
   @override
@@ -5969,25 +5966,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Securities link and real-time quotes are locked';
 
   @override
-  String get subSpotlightTitle => 'Securities investing is Pro-only';
-
-  @override
   String get subSpotlightDesc =>
-      'Real-time quotes and order book, domestic and overseas ticker search, watchlists, and holding P&L — subscribe to Pro and the Securities tab opens right away.';
+      'Securities investing is Pro-only. Real-time quotes and order book, domestic and overseas ticker search, watchlists, and holding P&L — subscribe to Pro and the Securities tab opens right away.';
 
   @override
   String get subCycleMonthly => 'Monthly';
 
   @override
+  String get subCycleYearly => 'Yearly';
+
+  @override
+  String get subCycleLabel => 'Billing cycle';
+
+  @override
   String subCycleYearlyOff(int pct) {
     return 'Yearly $pct% off';
   }
-
-  @override
-  String get subUnitMonth => 'mo';
-
-  @override
-  String get subUnitYear => 'yr';
 
   @override
   String subYearlyPerMonth(String amount, int pct) {
@@ -6005,9 +5999,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subFreeCaption => 'Basic ledger features';
-
-  @override
-  String get subFeatureColumn => 'Feature';
 
   @override
   String get subFeatLedger => 'Ledger · asset management';
@@ -6056,12 +6047,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subLoadFailedDesc => 'Please try again in a moment.';
-
-  @override
-  String get subFeatHas => 'Included';
-
-  @override
-  String get subFeatNone => 'Not included';
 
   @override
   String subPricePerMonth(String amount) {
