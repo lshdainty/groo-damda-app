@@ -1,374 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
-import 'package:groo_damda_app/core/format/krw.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_badge.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_progress.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay.dart';
-import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_screen.dart'
-    show DutchAvatar, dutchKDate;
+import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay_model.dart';
+import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_actions.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
+import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
-/// 더치페이 세션 상세 시트 (web `DutchDetailDialog` 미러).
+/// 정산 상세(I-15 38 · 39 · 40) — ds Bottom Sheet 조회. 머리 제목 = 정산 이름(줄바꿈), 본문 = "{날짜 (요일)} · {장소}" · 총액(t9 24 / 32 · 700 ·
+/// 쉼표 뒤에서만 줄바꿈) · "1인당 … · {n}명" · 선 · "참여자 · {n}" + ds List 줄(앞 Avatar 36 · 이름 · 설명 · 뒤 Badge 또는 [받음]).
+/// 바닥: 진행 중 = [삭제] ghost critical + [모두 받음] · 완료 = [삭제] 하나. 송금 요청 · 일괄 요청은 없다(서버에 요청 API 가 없다).
 ///
-/// hero(금액·1인당) + 참여자 rows(체크=markPaid 유지, '요청'=UI-only 스낵바) +
-/// 푸터(진행 중→일괄 요청 UI-only + 닫기 / 완료→닫기). 데이터는
-/// [dutchPayListProvider] 에서 [dpId] 로 라이브 조회 — markPaid 후 즉시 반영.
-///
-/// 결제자는 서버가 저장한 isPayer 로 판정한다 — 첫 번째 참여자로 추측하지 않는다.
-void showDutchPayDetailSheet(
+/// **몫은 저장된 값(`p.amount`)** — 나머지 원이 있는 사람은 그 값이 보인다. 결제자 줄은 몫이 다른 사람과 다를 때만 "· 몫 …" 을 붙인다.
+/// 데이터는 목록에서 [dpId] 로 라이브 조회한다 — 받음 뒤 목록이 새로 오면 바로 따라가고, 목록에서 사라지면(삭제) 시트가 한 번만 닫힌다.
+Future<void> showDutchPayDetailSheet(
   BuildContext context, {
   required int dpId,
-  required Future<void> Function(int) onMarkPaid,
-  required VoidCallback onSettle,
-  required VoidCallback onDelete,
 }) {
-  showPSheet<void>(
+  return PBottomSheet.show<void>(
     context,
-    title: AppLocalizations.of(context).dutchDetailTitle,
-    contentBuilder: (ctx, scrollCtrl) => _Body(
-      dpId: dpId,
-      scrollController: scrollCtrl,
-      onMarkPaid: onMarkPaid,
-      onSettle: onSettle,
-      onDelete: onDelete,
-    ),
-    initialChildSize: 0.7,
+    builder: (_) => _DetailSheet(dpId: dpId),
   );
 }
 
-class _Body extends ConsumerWidget {
-  const _Body({
-    required this.dpId,
-    required this.scrollController,
-    required this.onMarkPaid,
-    required this.onSettle,
-    required this.onDelete,
-  });
+class _DetailSheet extends ConsumerStatefulWidget {
+  const _DetailSheet({required this.dpId});
   final int dpId;
-  final ScrollController scrollController;
-  final Future<void> Function(int) onMarkPaid;
-  final VoidCallback onSettle;
-  final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    final masked = ref.watch(hideCardProvider('dutchpay.sessions'));
-    final listAsync = ref.watch(dutchPayListProvider);
-    final dp = listAsync.value
-        ?.where((d) => d.rowId == dpId)
-        .cast<DutchPay?>()
-        .firstOrNull;
-
-    if (dp == null) {
-      return const Padding(
-        padding: EdgeInsets.all(PSpace.x24),
-        child: Center(child: PCircularProgressIndicator()),
-      );
-    }
-
-    final total = dp.participants.length;
-    final paid = dp.participants.where((p) => p.isPaid).length;
-    final perPerson = total == 0 ? 0 : dp.totalAmount ~/ total;
-    final place = (dp.description ?? '').trim();
-    final date = dutchKDate(dp.dutchPayDate);
-    final heroSub = place.isEmpty ? date : '$place · $date';
-    final allPaid = total > 0 && paid == total;
-
-    return ListView(
-      controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      children: [
-        // ── Hero ──
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-          decoration: BoxDecoration(
-            color: t.bgBrandSubtle,
-            borderRadius: PRadius.brMd,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                heroSub.isEmpty ? dp.title : heroSub,
-                style: PTypo.caption.copyWith(
-                  color: t.fgTertiary,
-                  fontWeight: PFontWeight.semi,
-                ),
-              ),
-              const SizedBox(height: 6),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: krwMasked(dp.totalAmount, masked),
-                      style: PTypo.h2.copyWith(
-                        fontSize: 28,
-                        color: t.fgBrand,
-                        fontWeight: PFontWeight.bold,
-                        letterSpacing: -0.84,
-                      ),
-                    ),
-                    if (!masked)
-                      TextSpan(
-                        text: wonUnit(),
-                        style: PTypo.body.copyWith(
-                          color: t.fgBrand,
-                          fontWeight: PFontWeight.bold,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${l.dutchPerPersonLabel} ${krwSigned(perPerson, masked, unit: true, mask: '••••')}',
-                style: PTypo.caption.copyWith(color: t.fgSecondary),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 18),
-
-        // ── 참여자 라벨 ──
-        Text(
-          l.dutchParticipant,
-          style: PTypo.micro.copyWith(
-            color: t.fgSecondary,
-            fontWeight: PFontWeight.bold,
-            letterSpacing: 0.44,
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        // ── 참여자 rows ──
-        for (var i = 0; i < dp.participants.length; i++)
-          _ParticipantRow(
-            p: dp.participants[i],
-            // 순서가 아니라 저장된 값 — 참가자를 지웠다 다시 넣어도 안 바뀐다.
-            isPayer: dp.participants[i].isPayer,
-            masked: masked,
-            settled: dp.isSettled,
-            onMarkPaid: () => onMarkPaid(dp.participants[i].rowId),
-            onRequest: () => _request(context, dp.participants[i]),
-          ),
-
-        // ── 모두 지불 시 정산 완료 처리(기존 동작 유지) ──
-        if (!dp.isSettled && allPaid) ...[
-          const SizedBox(height: 12),
-          PButton(
-            label: l.dutchSettleAction,
-            icon: LucideIcons.checkCheck,
-            variant: PButtonVariant.outline,
-            size: PButtonSize.sm,
-            fullWidth: true,
-            onPressed: () {
-              onSettle();
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-
-        const SizedBox(height: 16),
-
-        // ── 푸터 액션 (시트 내 인라인) ──
-        Row(
-          children: [
-            PButton.icon(
-              icon: LucideIcons.trash2,
-              variant: PButtonVariant.ghost,
-              dangerous: true,
-              tooltip: l.actionDelete,
-              onPressed: () async {
-                final ok = await PAlertDialog.show(
-                  context,
-                  title: l.dutchDeleteTitle,
-                  description: l.dutchDeleteConfirm(dp.title),
-                  actionLabel: l.actionDelete,
-                  destructive: true,
-                  cancelLabel: l.actionCancel,
-                );
-                if (!ok || !context.mounted) return;
-                onDelete();
-                Navigator.of(context).pop();
-              },
-            ),
-            const Spacer(),
-            if (!dp.isSettled) ...[
-              PButton(
-                label: l.actionClose,
-                variant: PButtonVariant.ghost,
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              const SizedBox(width: PSpace.x4),
-              PButton(
-                label: l.dutchRequestAll,
-                icon: LucideIcons.send,
-                onPressed: () => _requestAll(context, dp),
-              ),
-            ] else
-              PButton(
-                label: l.actionClose,
-                variant: PButtonVariant.ghost,
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // UI-only: 실제 API 호출 없이 안내 스낵바만.
-  void _request(BuildContext context, DutchPayParticipant p) {
-    final l = AppLocalizations.of(context);
-    final name = (p.participantName ?? '').trim();
-    showPSnackBar(
-      context,
-      l.dutchRequestSent(name.isEmpty ? l.dutchParticipant : name),
-      severity: PSnackSeverity.success,
-    );
-  }
-
-  void _requestAll(BuildContext context, DutchPay dp) {
-    final l = AppLocalizations.of(context);
-    final pending = dp.participants.where((p) => !p.isPaid).length;
-    showPSnackBar(
-      context,
-      pending > 0 ? l.dutchRequestSentBulk(pending) : l.dutchAllSettled,
-      severity: PSnackSeverity.success,
-    );
-  }
+  ConsumerState<_DetailSheet> createState() => _DetailSheetState();
 }
 
-/// 참여자 행 — 아바타 + 이름(결제자 뱃지) + 상태문구 ↔ 완료 뱃지 / 요청 버튼.
-///
-/// 미정산 참여자: 좌측 체크 아이콘 버튼=송금 완료(markPaid) / 우측 '요청'=UI-only.
-class _ParticipantRow extends StatelessWidget {
-  const _ParticipantRow({
-    required this.p,
-    required this.isPayer,
-    required this.masked,
-    required this.settled,
-    required this.onMarkPaid,
-    required this.onRequest,
-  });
-  final DutchPayParticipant p;
-  final bool isPayer;
-  final bool masked;
-  final bool settled;
-  final Future<void> Function() onMarkPaid;
-  final VoidCallback onRequest;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    final name = (p.participantName ?? '').trim();
-    final status = p.isPaid
-        ? l.dutchSettled
-        : l.dutchNeedsPayment(krwMasked(p.amount, masked, mask: '••••'));
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          DutchAvatar(name: name.isEmpty ? '?' : name, size: 36),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        name.isEmpty ? l.dutchNoName : name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: PTypo.body.copyWith(
-                          color: t.fgPrimary,
-                          fontWeight: PFontWeight.semi,
-                        ),
-                      ),
-                    ),
-                    if (isPayer) ...[
-                      const SizedBox(width: 6),
-                      PBadge(
-                        label: l.dutchPayer,
-                        variant: PBadgeVariant.softBrand,
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  status,
-                  style: PTypo.caption.copyWith(
-                    color: p.isPaid ? t.statusSuccessFg : t.fgTertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          // 우측 슬롯: 완료 → success 뱃지(dot) / 미정 → 체크(markPaid) + 요청(UI-only).
-          if (p.isPaid)
-            PBadge(
-              label: l.actionDone,
-              variant: PBadgeVariant.softSuccess,
-              dotColor: t.statusSuccessFg,
-            )
-          else if (!settled) ...[
-            _MarkPaidButton(onMarkPaid: onMarkPaid),
-            PButton(
-              label: l.dutchRequest,
-              variant: PButtonVariant.outline,
-              size: PButtonSize.sm,
-              onPressed: onRequest,
-            ),
-          ] else
-            Text(
-              l.dutchUnsettled,
-              style: PTypo.caption.copyWith(color: t.fgTertiary),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 완료 체크 — 누르는 즉시 스피너를 띄우고 요청이 끝날 때까지 잠근다.
-///
-/// 토글류는 눌러도 표시가 없어 통신이 느리면 된 건지 모른 채 다시 누르게 됐다(사용자 신고).
-class _MarkPaidButton extends StatefulWidget {
-  const _MarkPaidButton({required this.onMarkPaid});
-  final Future<void> Function() onMarkPaid;
-
-  @override
-  State<_MarkPaidButton> createState() => _MarkPaidButtonState();
-}
-
-class _MarkPaidButtonState extends State<_MarkPaidButton> {
+class _DetailSheetState extends ConsumerState<_DetailSheet> {
   bool _busy = false;
+  bool _closed = false;
 
-  Future<void> _run() async {
+  void _closeOnce() {
+    if (_closed || !mounted) return;
+    _closed = true;
+    PBottomSheet.of(context).close();
+  }
+
+  /// 같은 요청이 도는 동안 다음 누름을 버린다 — await 앞에서 잠근다.
+  Future<void> _guard(Future<void> Function() run) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      await widget.onMarkPaid();
+      await run();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -376,16 +64,164 @@ class _MarkPaidButtonState extends State<_MarkPaidButton> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
-    return PButton.icon(
-      icon: LucideIcons.check,
-      size: PButtonSize.sm,
+    final masked = ref.watch(hideCardProvider('dutchpay.sessions'));
+    final list = ref.watch(dutchPayListProvider).value;
+    DutchPay? dp;
+    if (list != null) {
+      dp = list.where((d) => d.rowId == widget.dpId).firstOrNull;
+      if (dp == null) {
+        // 목록에서 사라졌다 — 지웠다(다시 시도로 지운 경우 포함)
+        WidgetsBinding.instance.addPostFrameCallback((_) => _closeOnce());
+      }
+    }
+    if (dp == null) {
+      return PBottomSheetContent(
+        title: l.dutchTitle,
+        closeLabel: l.actionClose,
+        body: const SizedBox(height: 80),
+      );
+    }
+    final d = dp;
+    final n = d.participants.length;
+    final place = (d.description ?? '').trim();
+    final date = dutchDateDowLabel(d.dutchPayDate);
+    final meta = [
+      if (date.isNotEmpty) date,
+      if (place.isNotEmpty) place,
+    ].join(' · ');
+    final per = dutchPerPerson(d);
+    final perText = per.even
+        ? l.dutchPerPersonOf(txMoney(per.each, masked))
+        : l.dutchPerPersonRestOf(
+            txMoney(per.each, masked),
+            txMoney(per.rest, masked),
+            per.restName!.isEmpty ? l.dutchNoName : per.restName!,
+          );
+    final totalText = txMoney(d.totalAmount, masked);
+    final shares = d.participants.map((p) => p.amount).toSet();
+    final payerExtra =
+        d.participants.any((p) => p.isPayer) && shares.length > 1;
+
+    Widget row(DutchPayParticipant p) {
+      final name = (p.participantName ?? '').trim().isEmpty
+          ? l.dutchNoName
+          : p.participantName!.trim();
+      final String detail;
+      Widget? suffix;
+      if (p.isPayer) {
+        // 결제자 몫이 다른 사람과 다를 때만 "· 몫" — 1원이 화면에 보이게(I-15 40)
+        detail = payerExtra && p.amount != per.each
+            ? l.dutchPayerPaidShare(txMoney(p.amount, masked))
+            : l.dutchPayerPaid;
+        suffix = PBadge(label: l.dutchPayer);
+      } else if (p.isPaid) {
+        detail = l.dutchShareDone(txMoney(p.amount, masked));
+        suffix = PBadge(label: l.dutchBadgePaid, tone: PBadgeTone.positive);
+      } else {
+        detail = l.dutchShareDue(txMoney(p.amount, masked));
+        suffix = PListAction(
+          child: PButton(
+            label: l.dutchMarkReceived,
+            variant: PButtonVariant.neutralWeak,
+            size: PButtonSize.small,
+            onPressed: _busy || d.isSettled
+                ? null
+                : () => _guard(() => markDutchPaid(context, d, p)),
+          ),
+        );
+      }
+      return PListItem(
+        title: name,
+        detail: detail,
+        prefix: PAvatar(name: name, size: PAvatarSize.s36),
+        suffix: suffix,
+      );
+    }
+
+    final deleteButton = PButton(
+      label: l.actionDelete,
       variant: PButtonVariant.ghost,
-      iconColor: t.statusSuccessFg,
-      tooltip: l.dutchMarkPaid,
-      loading: _busy,
-      onPressed: _busy ? null : _run,
+      ghostColor: PButtonGhostColor.critical,
+      size: PButtonSize.large,
+      onPressed: _busy
+          ? null
+          : () => _guard(() async {
+              final gone = await deleteDutchWithConfirm(context, d);
+              if (gone) _closeOnce();
+            }),
+    );
+
+    return PBottomSheetContent(
+      title: d.title,
+      closeLabel: l.actionClose,
+      // 참여자 수는 사용자 데이터라 늘어나는 목록 — 끝 흐림을 건다
+      scrollFog: true,
+      flushBody: true,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: PSpacing.globalGutter,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (meta.isNotEmpty)
+                  Text(
+                    keepAll(meta),
+                    semanticsLabel: meta,
+                    style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+                  ),
+                Text(
+                  keepAllAmount(totalText),
+                  key: const ValueKey('dutch-detail-total'),
+                  semanticsLabel: totalText,
+                  style: PTypography.t9.copyWith(
+                    color: c.fgNeutral,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                Text(
+                  keepAll('$perText · ${l.dutchNPeople(n)}'),
+                  semanticsLabel: '$perText · ${l.dutchNPeople(n)}',
+                  style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: PSpacing.x4),
+          Container(height: 1, color: c.strokeNeutralSubtle),
+          PListHeader(title: l.dutchParticipantsHeader(n), headingLevel: 3),
+          PList(
+            semanticLabel: l.dutchParticipant,
+            children: [for (final p in d.participants) row(p)],
+          ),
+        ],
+      ),
+      // 완료 = [삭제] 하나(받을 것이 없다), 진행 중 = 왼쪽 [삭제] 내용 폭 + 남은 폭 [모두 받음]
+      footer: d.isSettled ? [deleteButton] : const [],
+      footerRow: d.isSettled
+          ? null
+          : Row(
+              spacing: PSpacing.x2,
+              children: [
+                deleteButton,
+                Expanded(
+                  child: PButton(
+                    label: l.dutchSettleAll,
+                    size: PButtonSize.large,
+                    loading: _busy,
+                    onPressed: _busy
+                        ? null
+                        : () => _guard(() => settleDutch(context, d)),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

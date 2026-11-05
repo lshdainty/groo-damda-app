@@ -8,7 +8,7 @@ import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_provider
 import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay.dart';
 import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_create_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 Finder _field(String hint) => find.byWidgetPredicate(
   (w) => w is TextField && w.decoration?.hintText == hint,
@@ -76,21 +76,28 @@ void main() {
     // 웹은 토글로 빠져 참여자 0명이 됐고, 앱은 조용히 입력칸만 비웠다.
     expect(find.text('철수'), findsOneWidget);
     expect(find.text(l.dutchNameAlreadyAdded), findsOneWidget);
-    // 나 + 철수 = 2명이라 만들기가 살아 있다.
     expect(tester.widget<PButton>(_button(l.dutchCreate)).onPressed, isNotNull);
   });
 
-  testWidgets('체크가 꺼진 사람의 이름을 치면 다시 켜진다', (tester) async {
+  testWidgets('참여자를 빼면 만들기 전 안내가 뜬다', (tester) async {
     final l = await _openStep2(tester);
     await _add(tester, l, '철수');
-    // 체크를 끈다 — 참여자가 '나' 뿐이라 만들기가 죽는다.
-    await tester.tap(find.text('철수'));
+    await tester.tap(find.bySemanticsLabel(l.dutchChipRemove('철수')));
     await tester.pumpAndSettle();
-    expect(tester.widget<PButton>(_button(l.dutchCreate)).onPressed, isNull);
-    // 같은 이름을 다시 치면 새로 만들지 않고 그 사람을 켠다.
-    await _add(tester, l, '철수');
-    expect(find.text('철수'), findsOneWidget);
-    expect(tester.widget<PButton>(_button(l.dutchCreate)).onPressed, isNotNull);
+    await tester.tap(_button(l.dutchCreate));
+    await tester.pumpAndSettle();
+    expect(find.text(l.dutchNeedOne), findsOneWidget);
+  });
+
+  testWidgets('1단계에서 이름을 비우면 다음으로 안 넘어간다', (tester) async {
+    final l = await AppLocalizations.delegate.load(const Locale('ko'));
+    await _openStep2(tester);
+    await tester.tap(_button(l.dutchPrev));
+    await tester.pumpAndSettle();
+    await tester.enterText(_field(l.dutchNamePlaceholder), '');
+    await tester.tap(_button(l.dutchNext));
+    await tester.pumpAndSettle();
+    expect(find.text(l.dutchTitleRequired), findsOneWidget);
   });
 
   testWidgets('참여자 이름은 20자에서 잘린다', (tester) async {

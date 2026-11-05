@@ -11,7 +11,11 @@ class DutchPayRepository {
 
   Future<List<DutchPay>> list() async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>('/dutch-pays');
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/dutch-pays',
+        // 목록 실패는 화면의 실패 상자가 말한다 — 서버 원문 알림을 끈다
+        options: _quiet(true),
+      );
       return _unwrapList(res, 'dutchPays', DutchPay.fromJson);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -58,27 +62,39 @@ class DutchPayRepository {
     }
   }
 
-  Future<void> markPaid(int dutchPayId, int participantId) async {
+  /// 한 줄 받음 · 모두 받음 · 삭제는 [silent] 로 전역 서버 원문 알림을 끈다 — 화면이 고정 글로 알린다(I-15 확인창 실패 규칙).
+  static Options? _quiet(bool silent) =>
+      silent ? Options(extra: {kSilentErrorToast: true}) : null;
+
+  Future<void> markPaid(
+    int dutchPayId,
+    int participantId, {
+    bool silent = false,
+  }) async {
     try {
       await _dio.patch<dynamic>(
         '/dutch-pay/$dutchPayId/participant/$participantId/paid',
+        options: _quiet(silent),
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
-  Future<void> settle(int id) async {
+  Future<void> settle(int id, {bool silent = false}) async {
     try {
-      await _dio.patch<dynamic>('/dutch-pay/$id/settle');
+      await _dio.patch<dynamic>(
+        '/dutch-pay/$id/settle',
+        options: _quiet(silent),
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/dutch-pay/$id');
+      await _dio.delete<void>('/dutch-pay/$id', options: _quiet(silent));
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

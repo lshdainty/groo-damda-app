@@ -1,257 +1,276 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
-import 'package:groo_damda_app/core/format/amount_limits.dart';
+import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
-import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
-import 'package:groo_damda_app/features/expense/domain/expense.dart'
-    show Expense;
+import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
-import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_screen.dart'
-    show DutchAvatar;
+import 'package:groo_damda_app/features/dutch_pay/domain/dutch_shares.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
+import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/input_button/p_input_button.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
+import 'package:groo_damda_app/shared/forms/pick_list.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
-/// 더치페이 만들기 — 2단계 마법사 (web `DutchCreateDialog` 미러).
-///
-/// step1: 정산 이름(필수) / 장소(→description) / 총 금액(필수) + 날짜(2:1) →
-/// step2: 참여자 체크 선택 ('나' 고정 결제자 + 기존 정산 이름 빈도 추천 + 직접 추가).
-/// 저장은 EQUAL 균등 분배(floor, 나머지 첫 참여자). CUSTOM/RATIO 는 거래 연동
-/// 고급 시트(`dutch_pay_from_tx_dialog`) 담당 — 이 마법사는 EQUAL 전용.
-///
-/// [fromExpense] 가 주어지면 step1 을 거래 기반으로 prefill +
-/// sourceExpenseRowId 로 연결한다.
-void showDutchPayCreateDialog(BuildContext context, {Expense? fromExpense}) {
-  final controller = PSheetController();
-  final bodyKey = GlobalKey<_BodyState>();
+/// 참여자 이름 길이 상한 — 웹 `PARTICIPANT_NAME_MAX` 와 같은 값.
+const int kDutchPersonNameMax = 20;
+
+/// 정산 만들기(I-15 35 ~ 37 · 7-1A) — ds Bottom Sheet 입력 폼 두 단계. 머리 = 제목 "정산 정보" · "참여자" + 그 아래 "{n} / 2단계"(ds 머리에 제목 위 자리가
+/// 없어 설명 줄로 둔다). 1단계 = 정산 이름 · 총 금액 · 날짜 · 장소(선택) 한 줄에 하나, 바닥 [다음] 폭 전체. 2단계 = "{n}명 · 1인당 …" · 참여자 칩(나는 × 없음) ·
+/// 이름 + [추가] · 함께 정산했던 사람 제안 칩 · 결제한 사람 · 바닥 [이전] [정산 만들기] 반씩.
+/// 바깥 · 끌어내림으로 안 닫히고 값이 바뀐 채 닫으면 "작성한 내용이 사라져요"(2단계에서도 1단계 값까지 묻는다). 저장 실패는 맨 위 Callout.
+/// 나머지 원은 결제자에게(`computeDutchShares`).
+Future<void> showDutchPayCreateDialog(BuildContext context) {
   final l = AppLocalizations.of(context);
-  // 2단계 마법사인데 제목이 고정이라 참여자 선택 화면에서 어디에 있는지 알 수 없었다.
-  // 단계 표기는 로케일이 어순을 바꿀 수 있게 문자열 안에 둔다(웹 dutchPay.stepTitle 정합).
-  final title = ValueNotifier<String>(l.dutchStepTitle(l.dutchCreate, 1, 2));
-  showPSheet<void>(
+  final probe = _DirtyProbe();
+  return PBottomSheet.show<void>(
     context,
-    title: title.value,
-    titleListenable: title,
-    contentBuilder: (ctx, scrollCtrl) => _Body(
-      key: bodyKey,
-      fromExpense: fromExpense,
-      scrollController: scrollCtrl,
-      controller: controller,
-      onStepChanged: (step) => title.value = l.dutchStepTitle(
-        step == 1 ? l.dutchCreate : l.dutchSelectParticipants,
-        step,
-        2,
-      ),
+    form: true,
+    isDirty: () => probe.dirty(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
     ),
-    footerBuilder: (ctx) =>
-        _WizardFooter(controller: controller, bodyKey: bodyKey),
-  ).whenComplete(title.dispose);
+    builder: (_) => _CreateSheet(probe: probe),
+  );
 }
 
-/// 참여자 후보 — 이름 + 선택 여부 + '나'/추천 메타.
-class _Pick {
-  _Pick({required this.name, this.isMe = false, this.recommendCount});
+class _DirtyProbe {
+  bool Function() dirty = () => false;
+}
+
+/// 참여자 한 명 — 나(`isMe`)는 × 가 없고 늘 참여한다.
+class _Person {
+  const _Person(this.name, {this.isMe = false});
   final String name;
   final bool isMe;
-
-  /// 추천 후보가 '함께 정산한 횟수' — 있으면 note 로 표시. me/수동추가는 null.
-  final int? recommendCount;
-  bool selected = false;
 }
 
-class _Body extends ConsumerStatefulWidget {
-  const _Body({
-    super.key,
-    this.fromExpense,
-    required this.scrollController,
-    required this.controller,
-    required this.onStepChanged,
-  });
-  final Expense? fromExpense;
-  final ScrollController scrollController;
-  final PSheetController controller;
+class _CreateSheet extends ConsumerStatefulWidget {
+  const _CreateSheet({required this.probe});
+  final _DirtyProbe probe;
 
-  /// 단계가 바뀔 때 시트 제목을 갱신한다 — 제목은 시트 껍데기가 그리므로 밖으로 알린다.
-  final ValueChanged<int> onStepChanged;
   @override
-  ConsumerState<_Body> createState() => _BodyState();
+  ConsumerState<_CreateSheet> createState() => _CreateSheetState();
 }
 
-class _BodyState extends ConsumerState<_Body> {
-  late final TextEditingController _titleCtrl;
-  late final TextEditingController _placeCtrl;
-  late final TextEditingController _amountCtrl;
-  final TextEditingController _manualCtrl = TextEditingController();
+class _CreateSheetState extends ConsumerState<_CreateSheet> {
+  final _titleCtrl = TextEditingController();
+  final _amountCtrl = TextEditingController();
+  final _placeCtrl = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _titleFocus = FocusNode();
+  final _amountFocus = FocusNode();
+  final _nameFocus = FocusNode();
+  final _errorKey = GlobalKey();
+  late final DateTime _today;
   late DateTime _date;
-
-  int _step = 1; // 1=basics, 2=participants
+  int _step = 1;
+  bool _attempted1 = false;
+  bool _attempted2 = false;
   bool _submitting = false;
+  bool _saveError = false;
+  String? _nameErr;
 
-  /// 참여자 후보 — '나' 고정(0번) + 추천(기존 정산 이름 빈도) + 수동 추가.
-  final List<_Pick> _picks = [];
+  /// 참여자(나 제외) — 나는 늘 있다.
+  final List<String> _others = [];
 
-  /// 결제한 사람. 기본은 나.
-  _Pick? _payer;
-
-  /// 직접 추가 칸의 안내 문구 — 왜 안 들어갔는지 알려 준다.
-  String? _manualError;
-
-  /// 참여자 이름 길이 상한 — 웹 `PARTICIPANT_NAME_MAX` 와 같은 값(QA #40).
-  static const _kParticipantNameMax = 20;
+  /// 결제한 사람 — null 이면 나.
+  String? _payer;
 
   @override
   void initState() {
     super.initState();
-    final fe = widget.fromExpense;
-    _titleCtrl = TextEditingController(
-      text: fe?.merchant?.isNotEmpty == true
-          ? fe!.merchant
-          : (fe?.description ?? ''),
-    );
-    _placeCtrl = TextEditingController();
-    _amountCtrl = TextEditingController(
-      text: fe == null ? '' : fe.amount.abs().toString(),
-    );
-    if (fe?.expenseDate != null) {
-      try {
-        _date = DateTime.parse(fe!.expenseDate!.substring(0, 10));
-      } catch (_) {
-        _date = DateTime.now();
-      }
-    } else {
-      _date = DateTime.now();
-    }
-    // '나' 는 항상 참가하고 기본 결제자다. 다만 고정은 아니다 — 친구가 계산하고
-    // 내가 갚는 경우가 있어 결제자는 옮길 수 있다. 표시 라벨은 _PickRow 에서 로케일화.
-    final me = _Pick(name: '나', isMe: true)..selected = true;
-    _picks.add(me);
-    _payer = me;
-    widget.controller.onSubmit = _onPrimary;
+    final n = DateTime.now();
+    _today = DateTime(n.year, n.month, n.day);
+    _date = _today;
+    widget.probe.dirty = () =>
+        mounted &&
+        (_titleCtrl.text.isNotEmpty ||
+            _amountCtrl.text.isNotEmpty ||
+            _placeCtrl.text.isNotEmpty ||
+            _date != _today ||
+            _others.isNotEmpty ||
+            _nameCtrl.text.isNotEmpty);
   }
 
   @override
   void dispose() {
-    _titleCtrl.dispose();
-    _placeCtrl.dispose();
-    _amountCtrl.dispose();
-    _manualCtrl.dispose();
+    widget.probe.dirty = () => false;
+    for (final c in [_titleCtrl, _amountCtrl, _placeCtrl, _nameCtrl]) {
+      c.dispose();
+    }
+    for (final f in [_titleFocus, _amountFocus, _nameFocus]) {
+      f.dispose();
+    }
     super.dispose();
   }
 
-  void _setSubmitting(bool v) {
-    setState(() => _submitting = v);
-    widget.controller.setSubmitting(v);
+  int get _total => parseAmountInput(_amountCtrl.text) ?? 0;
+  String get _dateIso =>
+      '${_date.year.toString().padLeft(4, '0')}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}';
+
+  String _meName() =>
+      ref.read(authProvider).value?.userName ??
+      AppLocalizations.of(context).dutchMe;
+
+  /// 목록 차례 — 나 → 더한 사람. 결제자는 그중 한 명.
+  List<_Person> _list() => [
+    _Person(_meName(), isMe: true),
+    for (final n in _others) _Person(n),
+  ];
+
+  int get _payerIndex {
+    final i = _payer == null ? 0 : _others.indexOf(_payer!) + 1;
+    return i < 0 ? 0 : i;
   }
 
-  int get _total => int.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0;
-
-  int get _selectedCount => _picks.where((p) => p.selected).length;
-
-  bool get _step1Valid => _titleCtrl.text.trim().isNotEmpty && _total > 0;
-  bool get _step2Valid => _selectedCount >= 2;
-
-  String _fmtDate(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
-  /// 기존 정산 이름 빈도 기반 추천 — '나' 다음에 1회만 채움.
-  void _seedRecommendations() {
-    if (_picks.length > 1) return; // 이미 채움
-    final items = ref.read(dutchPayListProvider).value ?? const [];
-    final freq = <String, int>{};
-    for (final d in items) {
-      for (final p in d.participants) {
-        final n = (p.participantName ?? '').trim();
-        if (n.isEmpty || n == '나') continue;
-        freq[n] = (freq[n] ?? 0) + 1;
-      }
-    }
-    final sorted = freq.keys.toList()
-      ..sort((a, b) => freq[b]!.compareTo(freq[a]!));
-    for (final n in sorted.take(6)) {
-      _picks.add(_Pick(name: n, recommendCount: freq[n]));
-    }
-  }
-
-  void _addManual() {
-    final name = _manualCtrl.text.trim();
-    if (name.isEmpty) return;
-    final l = AppLocalizations.of(context);
-    if (name.length > _kParticipantNameMax) {
-      setState(() => _manualError = l.nameTooLong(_kParticipantNameMax));
+  void _next() {
+    setState(() => _attempted1 = true);
+    if (_titleCtrl.text.trim().isEmpty) {
+      _titleFocus.requestFocus();
       return;
     }
-    final i = _picks.indexWhere((p) => p.name == name);
-    if (i >= 0) {
-      // 이미 후보에 있다 — 예전엔 입력칸만 조용히 비워서 "왜 안 들어가지" 가 됐다.
-      // 체크를 켜 주고(추천 목록에 있던 사람이 그대로 참여자가 된다) 사실을 알린다.
-      // 새 _Pick 을 만들지 않는다 — 결제자 판정이 참조 동일성이라 바꿔 끼우면 잃는다.
-      setState(() {
-        final already = _picks[i].selected;
-        _picks[i].selected = true;
-        _manualError = already ? l.dutchNameAlreadyAdded : null;
-        _manualCtrl.clear();
-      });
-      widget.controller.setCanSubmit(_step2Valid);
+    if (_total <= 0) {
+      _amountFocus.requestFocus();
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() => _step = 2);
+  }
+
+  Future<void> _pickDate() async {
+    FocusScope.of(context).unfocus();
+    final picked = await PBottomSheet.show<DateTime>(
+      context,
+      builder: (sheetContext) {
+        DateTime draft = _date;
+        return StatefulBuilder(
+          builder: (ctx, setSheet) {
+            final l = AppLocalizations.of(ctx);
+            return PBottomSheetContent(
+              title: l.dutchDateLabel,
+              closeLabel: l.actionClose,
+              flushBody: true,
+              body: PDatePicker.single(
+                labels: PDatePickerLabels.of(ctx),
+                semanticLabel: l.dutchDateLabel,
+                value: draft,
+                onChanged: (v) => setSheet(() => draft = v),
+              ),
+              footer: [
+                PButton(
+                  label: l.actionDone,
+                  size: PButtonSize.large,
+                  onPressed: () => PBottomSheet.of(ctx).close(draft),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _date = DateTime(picked.year, picked.month, picked.day));
+  }
+
+  void _add(String raw) {
+    final l = AppLocalizations.of(context);
+    final name = raw.trim();
+    if (name.isEmpty) {
+      setState(() => _nameErr = l.dutchNameEmptyErr);
+      return;
+    }
+    // 같은 이름 둘 · 내 이름과 같은 참여자는 막는다(서버는 이름을 소문자로 견준다)
+    final lower = name.toLowerCase();
+    if (lower == _meName().trim().toLowerCase() ||
+        _others.any((p) => p.toLowerCase() == lower)) {
+      setState(() => _nameErr = l.dutchNameAlreadyAdded);
       return;
     }
     setState(() {
-      _picks.add(_Pick(name: name)..selected = true);
-      _manualError = null;
-      _manualCtrl.clear();
+      _others.add(name);
+      _nameCtrl.clear();
+      _nameErr = null;
     });
-    widget.controller.setCanSubmit(_step2Valid);
   }
 
-  /// footer 의 primary 버튼 — step1 이면 '다음', step2 이면 '정산 만들기'.
-  Future<void> _onPrimary() async {
-    if (_step == 1) {
-      if (!_step1Valid) return;
-      _seedRecommendations();
-      setState(() => _step = 2);
-      widget.onStepChanged(2);
-      widget.controller.setCanSubmit(_step2Valid);
-      widget.controller.bump();
-      return;
-    }
-    await _submit();
+  void _remove(String name) {
+    setState(() {
+      _others.remove(name);
+      // 결제자였던 사람이 빠지면 나로 되돌린다
+      if (_payer == name) _payer = null;
+    });
   }
 
-  void _back() {
-    setState(() => _step = 1);
-    widget.onStepChanged(1);
-    widget.controller.setCanSubmit(_step1Valid);
-    widget.controller.bump();
+  Future<void> _pickPayer() async {
+    FocusScope.of(context).unfocus();
+    final people = _list();
+    final picked = await PBottomSheet.show<int>(
+      context,
+      builder: (sheetContext) {
+        final l = AppLocalizations.of(sheetContext);
+        return PBottomSheetContent(
+          title: l.dutchPayerSelect,
+          closeLabel: l.actionClose,
+          flushBody: true,
+          scrollFog: true,
+          body: PickList<int>(
+            label: l.dutchPayerSelect,
+            selected: _payerIndex,
+            items: [
+              for (var i = 0; i < people.length; i++)
+                PickItem(
+                  value: i,
+                  title: people[i].name,
+                  prefix: PAvatar(name: people[i].name, size: PAvatarSize.s36),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _payer = picked == 0 ? null : people[picked].name);
   }
 
   Future<void> _submit() async {
-    if (_submitting || !_step2Valid) return;
-    _setSubmitting(true);
+    // 이중 제출은 await 앞에서 막는다
+    if (_submitting) return;
+    setState(() => _attempted2 = true);
+    if (_others.isEmpty) {
+      _nameFocus.requestFocus();
+      return;
+    }
+    setState(() {
+      _submitting = true;
+      _saveError = false;
+    });
+    final c = ProviderScope.containerOf(context, listen: false);
+    final me = ref.read(authProvider).value;
+    final people = _list();
+    final shares = computeDutchShares(
+      total: _total,
+      method: DutchSplitMethod.equal,
+      count: people.length,
+      payerIndex: _payerIndex,
+    );
     try {
-      final repo = await ref.read(dutchPayRepositoryProvider.future);
-      final selected = _picks.where((p) => p.selected).toList();
-      final n = selected.length;
-      final each = _total ~/ n;
-      final rest = _total - each * n;
-      final me = ref.read(authProvider).value;
-      final payload = [
-        for (var i = 0; i < n; i++)
-          (
-            name: selected[i].isMe ? (me?.userName ?? '나') : selected[i].name,
-            userRowId: selected[i].isMe ? me?.rowId : null,
-            amount: i == 0 ? each + rest : each,
-            isPayer: identical(selected[i], _payer),
-          ),
-      ];
+      final repo = await c.read(dutchPayRepositoryProvider.future);
       await repo.create(
         title: _titleCtrl.text.trim(),
         description: _placeCtrl.text.trim().isEmpty
@@ -259,453 +278,313 @@ class _BodyState extends ConsumerState<_Body> {
             : _placeCtrl.text.trim(),
         totalAmount: _total,
         splitMethod: 'EQUAL',
-        dutchPayDate: _fmtDate(_date),
-        sourceExpenseRowId: widget.fromExpense?.rowId,
-        participants: payload,
+        dutchPayDate: _dateIso,
+        silent: true,
+        participants: [
+          for (var i = 0; i < people.length; i++)
+            (
+              name: people[i].name,
+              userRowId: people[i].isMe ? me?.rowId : null,
+              amount: shares.shares[i],
+              isPayer: i == _payerIndex,
+            ),
+        ],
       );
-      ref.invalidate(dutchPayListProvider);
+      c.invalidate(dutchPayListProvider);
+      try {
+        await c.read(dutchPayListProvider.future);
+      } on Object {
+        // 저장은 끝났다 — 화면은 보던 목록을 그대로 둔다
+      }
+      if (mounted) PBottomSheet.of(context).close();
+    } catch (_) {
       if (!mounted) return;
-      Navigator.of(context).pop();
-    } on ApiException {
-      if (!mounted) return;
-    } finally {
-      if (mounted) _setSubmitting(false);
+      setState(() {
+        _saveError = true;
+        _submitting = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // footer 가 참조하는 step/검증 상태를 매 build 동기화.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      widget.controller.setCanSubmit(_step == 1 ? _step1Valid : _step2Valid);
-      widget.controller.bump();
-    });
-    return _step == 1 ? _buildStep1(context) : _buildStep2(context);
-  }
-
-  // ── Step 1: 정산 기본 정보 ──
-  Widget _buildStep1(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
-    return ListView(
-      controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      children: [
-        _StepHeader(label: l.dutchCreate, step: 1, t: t),
-        const SizedBox(height: PSpace.md),
-        _Label(l.dutchNameLabel, t),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(
-          controller: _titleCtrl,
-          autofocus: true,
-          placeholder: l.dutchNamePlaceholder,
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: PSpace.x12),
-
-        _Label(l.dutchPlaceLabel, t),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(
-          controller: _placeCtrl,
-          placeholder: l.dutchPlacePlaceholder,
-        ),
-        const SizedBox(height: PSpace.x12),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Label(l.dutchTotalLabel, t),
-                  const SizedBox(height: PSpace.x4),
-                  PTextInput(
-                    controller: _amountCtrl,
-                    numbersOnly: true,
-                    style: PTypo.h3,
-                    placeholder: '0',
-                    suffixText: wonUnit(),
-                    // 콤마를 다시 넣는 포매터라 상한 판정도 그 안에서 한다 —
-                    // amountMax 는 콤마가 붙은 값을 못 읽는다.
-                    inputFormatters: [_ThousandsFormatter()],
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ],
+    final step1 = _step == 1;
+    return PBottomSheetContent(
+      title: step1 ? l.dutchInfoTitle : l.dutchParticipant,
+      description: l.dutchStepLabel(_step, 2),
+      closeLabel: l.actionClose,
+      flushBody: true,
+      scrollFog: true,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_saveError)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: PSpacing.globalGutter,
+              ),
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.dutchSaveFailed,
               ),
             ),
-            const SizedBox(width: PSpace.x8),
-            Expanded(
-              flex: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Label(l.dutchDateLabel, t),
-                  const SizedBox(height: PSpace.x4),
-                  PDateInput(
-                    value: _date,
-                    onChanged: (d) {
-                      if (d != null) setState(() => _date = d);
-                    },
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ── Step 2: 참여자 선택 ──
-  Widget _buildStep2(BuildContext context) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    final n = _selectedCount;
-    final perPerson = n == 0 ? 0 : _total ~/ n;
-
-    return ListView(
-      controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      children: [
-        _StepHeader(label: l.dutchSelectParticipants, step: 2, t: t),
-        const SizedBox(height: PSpace.md),
-        // 요약: N명 선택 · 1인당 X원
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: t.bgBrandSubtle,
-            borderRadius: PRadius.brMd,
-          ),
-          child: Row(
-            children: [
-              Text(
-                l.dutchNSelected(n),
-                style: PTypo.bodySm.copyWith(
-                  color: t.fgPrimary,
-                  fontWeight: PFontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${l.dutchPerPersonLabel} ',
-                      style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-                    ),
-                    TextSpan(
-                      text: krwSigned(perPerson, false, unit: true),
-                      style: PTypo.bodySm.copyWith(
-                        color: t.fgBrand,
-                        fontWeight: PFontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: PSpace.md),
-
-        // 후보 리스트
-        for (var i = 0; i < _picks.length; i++) ...[
-          _PickRow(
-            pick: _picks[i],
-            isPayer: identical(_payer, _picks[i]),
-            onSetPayer: () => setState(() => _payer = _picks[i]),
-            onToggle: () => setState(() {
-              _picks[i].selected = !_picks[i].selected;
-              // 빠진 사람이 결제자였으면 결제자를 잃는다 — '나'에게 되돌린다.
-              if (!_picks[i].selected && identical(_payer, _picks[i])) {
-                _payer = _picks.firstWhere((p) => p.isMe);
-              }
-            }),
-          ),
-          if (i < _picks.length - 1) const SizedBox(height: 6),
+          step1 ? _step1(l) : _step2(l),
         ],
-        const SizedBox(height: PSpace.md),
-
-        // 직접 추가
-        Row(
-          children: [
-            Expanded(
-              child: PTextInput(
-                controller: _manualCtrl,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _addManual(),
-                onChanged: (_) {
-                  if (_manualError != null) {
-                    setState(() => _manualError = null);
-                  }
-                },
-                placeholder: l.dutchAddNamePlaceholder,
-                errorText: _manualError,
-                enabled: !_submitting,
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(_kParticipantNameMax),
-                ],
+      ),
+      footer: step1
+          ? [
+              PButton(
+                label: l.dutchNext,
+                size: PButtonSize.large,
+                onPressed: _next,
               ),
+            ]
+          : const [],
+      footerRow: step1
+          ? null
+          : Row(
+              spacing: PSpacing.x2,
+              children: [
+                Expanded(
+                  child: PButton(
+                    label: l.dutchPrev,
+                    variant: PButtonVariant.neutralWeak,
+                    size: PButtonSize.large,
+                    onPressed: _submitting
+                        ? null
+                        : () => setState(() => _step = 1),
+                  ),
+                ),
+                Expanded(
+                  child: PButton(
+                    label: l.dutchCreate,
+                    size: PButtonSize.large,
+                    loading: _submitting,
+                    onPressed: _submitting ? null : _submit,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            PButton(
-              label: l.dutchAdd,
-              icon: LucideIcons.userPlus,
-              variant: PButtonVariant.outline,
-              size: PButtonSize.sm,
-              onPressed: _submitting ? null : _addManual,
-            ),
-          ],
-        ),
-      ],
     );
   }
-}
 
-/// 참여자 체크 행 — checkbox + 아바타 + 이름·note. 선택 시 brand-tint 배경.
-class _PickRow extends StatelessWidget {
-  const _PickRow({
-    required this.pick,
-    required this.onToggle,
-    required this.isPayer,
-    required this.onSetPayer,
-  });
-  final _Pick pick;
-  final VoidCallback onToggle;
-
-  /// 이 사람이 결제했는가. 표시만 하고, 바꾸는 건 onSetPayer.
-  final bool isPayer;
-  final VoidCallback onSetPayer;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final l = AppLocalizations.of(context);
-    // 결제자 뱃지가 붙는 자리라, 결제자면 추천 횟수 대신 그걸 보여 준다.
-    final noteText = isPayer
-        ? l.dutchPayer
-        : (pick.recommendCount != null
-              ? l.dutchSettledTogetherCount(pick.recommendCount!)
-              : null);
-    return InkWell(
-      onTap: onToggle,
-      borderRadius: PRadius.brMd,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: pick.selected ? t.bgBrandSubtle : Colors.transparent,
-          borderRadius: PRadius.brMd,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                color: pick.selected ? t.bgBrandSolid : Colors.transparent,
-                border: Border.all(
-                  color: pick.selected ? t.bgBrandSolid : t.borderDefault,
-                  width: 2,
-                ),
-                borderRadius: PRadius.brSm,
-              ),
-              alignment: Alignment.center,
-              child: pick.selected
-                  ? const Icon(LucideIcons.check, size: 12, color: Colors.white)
-                  : null,
+  Widget _step1(AppLocalizations l) {
+    final emptyTitle = _attempted1 && _titleCtrl.text.trim().isEmpty;
+    final emptyAmount = _attempted1 && _total <= 0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: PSpacing.globalGutter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: PSpacing.x5,
+        children: [
+          PField(
+            label: l.dutchNameLabel,
+            indicator: PFieldIndicator.required,
+            required: true,
+            invalid: emptyTitle,
+            errorMessage: emptyTitle ? l.dutchTitleRequired : null,
+            child: PInput(
+              controller: _titleCtrl,
+              focusNode: _titleFocus,
+              autofocus: true,
+              placeholder: l.dutchNamePlaceholder,
+              onChanged: (_) {
+                if (_attempted1) setState(() {});
+              },
             ),
-            const SizedBox(width: 12),
-            DutchAvatar(name: pick.name, size: 32),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    pick.isMe ? l.dutchMe : pick.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: PTypo.bodySm.copyWith(
-                      color: t.fgPrimary,
-                      fontWeight: PFontWeight.semi,
-                    ),
-                  ),
-                  if (noteText != null) ...[
-                    const SizedBox(height: 1),
-                    Text(
-                      noteText,
-                      style: PTypo.micro.copyWith(color: t.fgTertiary),
-                    ),
-                  ],
-                ],
-              ),
+          ),
+          PField(
+            label: l.dutchTotalLabel,
+            indicator: PFieldIndicator.required,
+            required: true,
+            invalid: emptyAmount,
+            errorMessage: emptyAmount ? l.dutchAmountRequired : null,
+            child: PInput(
+              controller: _amountCtrl,
+              focusNode: _amountFocus,
+              placeholder: '0',
+              suffixText: wonUnit(),
+              tabularFigures: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: const [AmountInputFormatter()],
+              onChanged: (_) => setState(() {}),
             ),
-            // 참가한 사람만 결제자가 될 수 있다 — 안 낀 사람에게는 버튼을 주지 않는다.
-            if (pick.selected && !isPayer)
-              PButton(
-                label: l.dutchSetPayer,
-                variant: PButtonVariant.ghost,
-                size: PButtonSize.sm,
-                onPressed: onSetPayer,
-              ),
-          ],
-        ),
+          ),
+          PField(
+            label: l.dutchDateLabel,
+            child: PInputButton(
+              value: monthDayDow(_date),
+              placeholder: l.dutchDateLabel,
+              semanticLabel: l.dutchDateLabel,
+              onPressed: _pickDate,
+            ),
+          ),
+          PField(
+            label: l.dutchPlaceLabel,
+            indicator: PFieldIndicator.optional,
+            child: PInput(
+              controller: _placeCtrl,
+              placeholder: l.dutchPlacePlaceholder,
+            ),
+          ),
+        ],
       ),
     );
   }
-}
 
-/// 마법사 단계 표시 — '제목' + 'N/2' 칩.
-class _StepHeader extends StatelessWidget {
-  const _StepHeader({required this.label, required this.step, required this.t});
-  final String label;
-  final int step;
-  final GrooTokens t;
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: PTypo.body.copyWith(
-              color: t.fgPrimary,
-              fontWeight: PFontWeight.bold,
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: t.bgSunken,
-            borderRadius: PRadius.brFull,
-          ),
-          child: Text(
-            '$step / 2',
-            style: PTypo.micro.copyWith(
-              color: t.fgSecondary,
-              fontWeight: PFontWeight.bold,
-            ),
-          ),
-        ),
-      ],
+  Widget _step2(AppLocalizations l) {
+    final c = context.colors;
+    final masked = ref.watch(hideCardProvider('dutchpay.sessions'));
+    final people = _list();
+    final shares = computeDutchShares(
+      total: _total,
+      method: DutchSplitMethod.equal,
+      count: people.length,
+      payerIndex: _payerIndex,
     );
-  }
-}
-
-class _Label extends StatelessWidget {
-  const _Label(this.text, this.t);
-  final String text;
-  final GrooTokens t;
-  @override
-  Widget build(BuildContext context) {
-    return Text(text, style: PTypo.caption.copyWith(color: t.fgSecondary));
-  }
-}
-
-/// 천단위 콤마 입력 포맷터 — 표시는 1,234,567 / 값 파싱은 콤마 제거.
-class _ThousandsFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.isEmpty) {
-      return const TextEditingValue(text: '');
+    final each = _total ~/ people.length;
+    final uneven = shares.shares.toSet().length > 1;
+    final perText = uneven
+        ? l.dutchPerPersonRestOf(
+            txMoney(each, masked),
+            txMoney(shares.shares[_payerIndex] - each, masked),
+            people[_payerIndex].name,
+          )
+        : l.dutchPerPersonOf(txMoney(each, masked));
+    // 함께 정산했던 사람 — 아직 안 고른 친구만(같은 사람이 두 번 보이지 않는다)
+    final freq = <String, int>{};
+    for (final d in ref.watch(dutchPayListProvider).value ?? const []) {
+      for (final p in d.participants) {
+        final n = (p.participantName ?? '').trim();
+        if (n.isEmpty) continue;
+        freq[n] = (freq[n] ?? 0) + 1;
+      }
     }
-    final n = int.tryParse(digits);
-    // 상한 초과는 타이핑 자체를 막는다 — 콤마를 넣는 이 포매터가 값을 아는
-    // 유일한 자리라 AmountLimitFormatter 를 못 쓴다(콤마가 붙은 값을 못 읽는다).
-    if (n == null || n > kAmountMax) return oldValue;
-    final formatted = krw(n);
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
-}
-
-/// 마법사 footer — step1: 다음/취소, step2: 정산 만들기/이전.
-class _WizardFooter extends StatelessWidget {
-  const _WizardFooter({required this.controller, required this.bodyKey});
-  final PSheetController controller;
-  final GlobalKey<_BodyState> bodyKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (ctx, _) {
-        final state = bodyKey.currentState;
-        final step = state?._step ?? 1;
-        final canNext = controller.canSubmit;
-        if (step == 1) {
-          // footer 액션은 화면 폭을 반씩 나눠 갖는다 (spec drawer.md "flex:1 평등 분배").
-          // Spacer 로 우측에 몰면 한 손으로 누를 폭이 안 나온다.
-          return Row(
-            children: [
-              Expanded(
-                child: PButton(
-                  label: l.actionCancel,
-                  variant: PButtonVariant.secondary,
-                  size: PButtonSize.lg,
-                  fullWidth: true,
-                  onPressed: controller.submitting
-                      ? null
-                      : () => Navigator.of(ctx).pop(),
+    final taken = {
+      _meName().toLowerCase(),
+      ..._others.map((e) => e.toLowerCase()),
+    };
+    final suggestions =
+        (freq.keys.where((n) => !taken.contains(n.toLowerCase())).toList()
+              ..sort((a, b) => freq[b]!.compareTo(freq[a]!)))
+            .take(6)
+            .toList();
+    final noOthers = _attempted2 && _others.isEmpty;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: PSpacing.globalGutter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: PSpacing.x5,
+        children: [
+          Text(
+            '${l.dutchSummaryLine(people.length, txMoney(each, masked)).split(' · ').first} · $perText',
+            semanticsLabel: l.dutchSummaryLine(
+              people.length,
+              txMoney(each, masked),
+            ),
+            style: PTypography.t5.copyWith(color: c.fgNeutral),
+          ),
+          PField(
+            label: l.dutchParticipant,
+            invalid: noOthers,
+            errorMessage: noOthers ? l.dutchNeedOne : null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: PSpacing.x3,
+              children: [
+                PChipGroup(
+                  semanticLabel: l.dutchParticipant,
+                  children: [
+                    PChip(
+                      key: const ValueKey('dutch-chip-me'),
+                      label: people.first.name,
+                      leading: PAvatar(
+                        name: people.first.name,
+                        size: PAvatarSize.s20,
+                      ),
+                      size: PChipSize.small,
+                      onPressed: null,
+                    ),
+                    for (final n in _others)
+                      PInputChip(
+                        key: ValueKey('dutch-chip-$n'),
+                        label: n,
+                        size: PChipSize.small,
+                        leading: PAvatar(name: n, size: PAvatarSize.s20),
+                        removeLabel: l.dutchChipRemove(n),
+                        onRemove: _submitting ? null : () => _remove(n),
+                      ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: PSpace.x8),
-              Expanded(
-                child: PButton(
-                  label: l.dutchNext,
-                  icon: LucideIcons.arrowRight,
-                  size: PButtonSize.lg,
-                  fullWidth: true,
-                  onPressed: canNext && !controller.submitting
-                      ? controller.onSubmit
-                      : null,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: PSpacing.x2,
+                  children: [
+                    Expanded(
+                      child: PField(
+                        invalid: _nameErr != null,
+                        errorMessage: _nameErr,
+                        maxGraphemeCount: kDutchPersonNameMax,
+                        child: PInput(
+                          controller: _nameCtrl,
+                          focusNode: _nameFocus,
+                          semanticLabel: l.dutchParticipant,
+                          placeholder: l.dutchAddNamePlaceholder,
+                          textInputAction: TextInputAction.done,
+                          onChanged: (_) {
+                            if (_nameErr != null) {
+                              setState(() => _nameErr = null);
+                            }
+                          },
+                          onSubmitted: _add,
+                        ),
+                      ),
+                    ),
+                    PButton(
+                      label: l.dutchAdd,
+                      variant: PButtonVariant.neutralWeak,
+                      size: PButtonSize.large,
+                      onPressed: _submitting
+                          ? null
+                          : () => _add(_nameCtrl.text),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          );
-        }
-        // step1 과 같은 규칙 — 이전·만들기가 화면 폭을 반씩 나눠 갖는다.
-        return Row(
-          children: [
-            Expanded(
-              child: PButton(
-                label: l.dutchPrev,
-                variant: PButtonVariant.secondary,
-                size: PButtonSize.lg,
-                fullWidth: true,
-                onPressed: controller.submitting ? null : state?._back,
+              ],
+            ),
+          ),
+          if (suggestions.isNotEmpty)
+            PField(
+              label: l.dutchSuggestHeader,
+              labelWeight: PFieldLabelWeight.medium,
+              child: PChipGroup(
+                semanticLabel: l.dutchSuggestHeader,
+                children: [
+                  for (final n in suggestions)
+                    PChip(
+                      key: ValueKey('dutch-suggest-$n'),
+                      label: l.dutchSuggestChip(n),
+                      size: PChipSize.small,
+                      onPressed: _submitting ? null : () => _add(n),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(width: PSpace.x8),
-            Expanded(
-              child: PButton(
-                label: l.dutchCreate,
-                icon: LucideIcons.check,
-                size: PButtonSize.lg,
-                fullWidth: true,
-                loading: controller.submitting,
-                onPressed: canNext && !controller.submitting
-                    ? controller.onSubmit
-                    : null,
-              ),
+          PField(
+            label: l.dutchPayerSelect,
+            child: PInputButton(
+              value: people[_payerIndex].name,
+              semanticLabel: l.dutchPayerSelect,
+              onPressed: _pickPayer,
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
