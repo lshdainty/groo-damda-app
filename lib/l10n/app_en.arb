@@ -927,8 +927,8 @@
     }
   },
   "calLabelsEmpty": "No labels yet",
-  "calLabelsEmptyHint": "Create one with the \"New label\" button above",
-  "calLabelsIntro": "These labels are shared across all your calendars. You can pick one when creating an event.",
+  "calLabelsEmptyHint": "Create one with 'Add label' above",
+  "calLabelsIntro": "These labels are shared by every calendar. Pick one when you create an event.",
   "calNewLabel": "Add label",
   "calEditLabel": "Edit label",
   "calPreview": "Preview",
@@ -982,11 +982,11 @@
   },
   "calManageShareTitle": "Manage & share",
   "calJoinByCode": "Join with invite code",
+  "calShareIntro": "Create a calendar and invite members to manage events together with family and friends.",
+  "calJoinSectionTitle": "Invite code",
   "calRoleOwner": "Owner",
   "calRoleEditor": "Can edit",
   "calRoleViewer": "View only",
-  "calShareIntroTitle": "Share with family & friends",
-  "calShareIntroBody": "Create a calendar and invite members to manage events together.",
   "calNewCalendar": "Add calendar",
   "calMyCalendarsCount": "My calendars · {count}",
   "@calMyCalendarsCount": {
@@ -1016,7 +1016,7 @@
       }
     }
   },
-  "calJoinCardBody": "Enter an invite code you received to join a calendar.",
+  "calJoinCardBody": "Enter a shared invite code to join that calendar.",
   "calJoin": "Join",
   "calCreate": "Create",
   "calJoinedCalendar": "Joined \"{name}\"",
@@ -1052,6 +1052,8 @@
   "calRemove": "Remove",
   "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar and all members lose access. A deleted calendar cannot be restored.",
   "calDeleteCalendarAction": "Delete permanently",
+  "calDeleteCalendarFailed": "Couldn't delete the calendar.",
+  "calLabelDeleteFailed": "Couldn't delete the label.",
   "@calDeleteCalendarConfirm": {
     "placeholders": {
       "name": {
@@ -1071,8 +1073,8 @@
   "calDeleteFailed": "Delete failed",
   "calJoinFailed": "Failed to join",
   "calUpdateFailed": "Update failed",
-  "calCalendarLoadError": "Failed to load calendars",
-  "calLabelLoadError": "Failed to load labels",
+  "calCalendarLoadError": "Couldn't load calendars",
+  "calLabelLoadError": "Couldn't load labels",
   "calMemberLoadError": "Failed to load members",
   "dashTitle": "Home",
   "dashGreeting": "Have a great day",

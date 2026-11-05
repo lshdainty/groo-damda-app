@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
@@ -7,6 +9,8 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 /// 사용자 다중 캘린더 — front `userCalendarApi` 미러.
 class UserCalendarRepository {
   UserCalendarRepository(this._dio);
+
+  static final Options _silent = Options(extra: {kSilentErrorToast: true});
   final Dio _dio;
 
   Future<List<UserCalendar>> list() async {
@@ -62,7 +66,7 @@ class UserCalendarRepository {
 
   Future<void> delete(int id) async {
     try {
-      await _dio.delete<void>('/calendar/calendars/$id');
+      await _dio.delete<void>('/calendar/calendars/$id', options: _silent);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

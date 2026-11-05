@@ -34,7 +34,7 @@ final _screens = <(String, Widget Function(), String)>[
   ('저축 목표', () => const SavingGoalScreen(), '저축 목표'),
   ('반복 거래 관리', () => const RecurringScreen(), '반복 거래 관리'),
   ('프리셋 관리', () => const PresetScreen(), '프리셋 관리'),
-  ('캘린더 관리·공유', () => const CalendarShareScreen(), '캘린더 관리·공유'),
+  ('캘린더 관리 · 공유', () => const CalendarShareScreen(), '캘린더 관리 · 공유'),
   ('캘린더 라벨', () => const CalendarLabelsScreen(), '캘린더 라벨'),
   ('할 일 태그', () => const TodoTagManagementScreen(), '할 일 태그'),
   ('메모 태그', () => const MemoTagManagementScreen(), '메모 태그'),
@@ -178,7 +178,7 @@ void main() {
     );
   });
 
-  testWidgets('캘린더 관리·공유 — 머리에 아이콘 버튼은 ← 하나(⊕ 걷음)', (tester) async {
+  testWidgets('캘린더 관리 · 공유 — 머리에 아이콘 버튼은 ← 하나(⊕ 걷음)', (tester) async {
     await _pump(tester, const CalendarShareScreen());
     final bar = find.byType(PTopNavigation);
     expect(

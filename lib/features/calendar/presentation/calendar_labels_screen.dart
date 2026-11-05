@@ -12,19 +12,35 @@ import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_card.dart';
 import 'package:groo_damda_app/shared/widgets/p_color_picker.dart';
-import 'package:groo_damda_app/shared/widgets/p_empty_state.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
-import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_parts.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/forms/name_policy.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+
+/// 라벨 이름 최대 글자 수 — 카테고리 · 라벨 · 태그 · 목표 이름 12자(웹 d837eedc, 카드 한 줄에 들어가는 길이).
+const int kLabelNameMax = 12;
+
+/// 저장할 수 있는 이름인가 — 비어 있지 않고 12자를 넘지 않는다(웹 `nameIssue` 와 같은 판정).
+///
+/// [original] 은 고치기 전 저장된 이름 — 안 바꾼 옛 이름은 12자 검사에서 뺀다(프리셋과 같다: 12자가 넘는 옛 라벨도 색만 고칠 수
+/// 있어야 한다). 이름을 고치기 시작하면 그때부터 12 검사.
+bool labelNameSubmittable(String raw, {String? original}) {
+  final issue = nameIssue(raw, kLabelNameMax);
+  if (issue == NameIssue.tooLong && raw == original) return true;
+  return issue == null || issue == NameIssue.duplicate;
+}
 
 /// 설정 진입 — 캘린더 라벨 관리 (전 캘린더 공용).
 ///
@@ -53,12 +69,11 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
     final labelsAsync = ref.watch(eventLabelsProvider);
 
     return Scaffold(
-      backgroundColor: context.colors.bgLayerBasement,
+      backgroundColor: context.colors.bgLayerDefault,
       // 머리 = ds 상단 바(← + 제목) — 높이 56, 스크롤해도 선이 없다(I-16 14)
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(PTopNavigation.heightOf(context)),
@@ -70,6 +85,7 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
           ),
         ),
       ),
+      // 흰 면 하나 — 카드 · 줄 사이 선 · 구역 틈이 없다(I-09 44)
       body: PScreenBandBody(
         child: PPullToRefresh(
           onRefresh: () async {
@@ -77,293 +93,95 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
             await ref.read(eventLabelsProvider.future);
           },
           child: ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: PSpace.x24,
-              vertical: PSpace.x24,
-            ),
+            padding: const EdgeInsets.only(bottom: PSpacing.x6),
             children: [
-              // 안내 카드
-              _IntroCard(tokens: t),
-              const SizedBox(height: PSpace.x32),
-
+              CalendarSurfaceCallout(l.calLabelsIntro),
               labelsAsync.when(
-                // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 텍스트와 행만
-                // 데이터 자리. 범용 PListSkeleton(원형 아바타 2줄)은 실제 라벨 행
-                // (사각 타일 32 + 이름/사용 수 + 휴지통 + chevron)과 달라 걷어냈다.
+                // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
+                skipError: true,
+                // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 글과 줄만 데이터 자리
                 loading: () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const PSkeleton.line(width: 96, height: 14),
-                        PButton(
-                          label: l.calNewLabel,
-                          icon: LucideIcons.plus,
-                          variant: PButtonVariant.accent,
-                          size: PButtonSize.sm,
-                          onPressed: () => _showLabelEditor(context, ref, null),
-                        ),
-                      ],
-                    ),
-                    for (int i = 0; i < 4; i++)
-                      Container(
-                        decoration: i > 0
-                            ? BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(color: t.borderSubtle),
-                                ),
-                              )
-                            : null,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: PSpace.x8,
-                          vertical: 14,
-                        ),
-                        child: const Row(
-                          children: [
-                            PSkeleton(
-                              width: 32,
-                              height: 32,
-                              borderRadius: PRadius.brMd,
-                            ),
-                            SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  PSkeleton.line(width: 120, height: 14),
-                                  SizedBox(height: 2),
-                                  PSkeleton.line(width: 72, height: 12),
-                                ],
-                              ),
-                            ),
-                            PSkeleton(
-                              width: 32,
-                              height: 32,
-                              borderRadius: PRadius.brMd,
-                            ),
-                            SizedBox(width: PSpace.x4),
-                            PSkeleton(width: 15, height: 15),
-                          ],
-                        ),
+                    CalendarSurfaceHeaderSkeleton(
+                      action: PTextButton(
+                        label: l.calNewLabel,
+                        onPressed: () => _showLabelEditor(context, ref, null),
                       ),
+                    ),
+                    for (var i = 0; i < 4; i++)
+                      const CalendarSurfaceRowSkeleton(),
                   ],
                 ),
-                error: (e, _) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: PSpace.x16),
-                  child: Text(
-                    '${l.calLabelLoadError}\n$e',
-                    style: PTypo.bodySm.copyWith(color: t.statusDangerFg),
-                  ),
+                error: (e, _) => CalendarSurfaceFailure(
+                  title: l.calLabelLoadError,
+                  onRetry: () => ref.invalidate(eventLabelsProvider),
                 ),
-                data: (labels) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // label padding 제거(사용자 결정, web 정합) — label·list 한 묶음 gap 0.
-                      // 라벨행 우측 텍스트(accent) 추가 버튼 — 프리셋 정합(filled 안내카드 버튼 폐기)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                data: (labels) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    PListHeader(
+                      title: l.calAllLabelsCount(labels.length),
+                      variant: PListHeaderVariant.boldSolid,
+                      action: PTextButton(
+                        label: l.calNewLabel,
+                        onPressed: () => _showLabelEditor(context, ref, null),
+                      ),
+                    ),
+                    if (labels.isEmpty)
+                      CalendarSurfaceEmptyLine(
+                        l.calLabelsEmpty,
+                        hint: l.calLabelsEmptyHint,
+                      )
+                    else
+                      PList(
+                        semanticLabel: l.calAllLabelsCount(labels.length),
                         children: [
-                          Text(
-                            l.calAllLabelsCount(labels.length),
-                            style: PTypo.bodySm.copyWith(
-                              color: t.fgPrimary,
-                              fontWeight: PFontWeight.bold,
+                          for (final label in labels)
+                            // 밀면 수정·삭제(폰 지름길). 줄 누름은 지금 그대로 편집 시트다
+                            // — 화면을 옮기지 않으니 꺾쇠가 없다(list.md:122)
+                            PSwipeActions(
+                              key: ValueKey('cal-label-${label.rowId}'),
+                              groupTag: 'cal-label-list',
+                              actions: [
+                                PSwipeAction(
+                                  label: l.actionEdit,
+                                  icon: LucideIcons.pencil,
+                                  kind: PSwipeKind.primary,
+                                  onSelect: () =>
+                                      _showLabelEditor(context, ref, label),
+                                ),
+                                PSwipeAction(
+                                  label: l.actionDelete,
+                                  icon: LucideIcons.trash2,
+                                  kind: PSwipeKind.destructive,
+                                  // _confirmDelete 가 자체 확인을 띄운다 — 여기서 또 주면 두 번 뜬다
+                                  onSelect: () =>
+                                      _confirmDelete(context, label),
+                                ),
+                              ],
+                              child: PListButtonItem(
+                                prefix: PListTile(
+                                  background: chartToneOf(
+                                    context,
+                                    label.color,
+                                  ).weak,
+                                  color: chartToneOf(
+                                    context,
+                                    label.color,
+                                  ).solid,
+                                  child: const Icon(LucideIcons.tag),
+                                ),
+                                title: label.labelName,
+                                detail: l.calLabelUsage(label.usageCount),
+                                onTap: () =>
+                                    _showLabelEditor(context, ref, label),
+                              ),
                             ),
-                          ),
-                          PButton(
-                            label: l.calNewLabel,
-                            icon: LucideIcons.plus,
-                            variant: PButtonVariant.accent,
-                            size: PButtonSize.sm,
-                            onPressed: () =>
-                                _showLabelEditor(context, ref, null),
-                          ),
                         ],
                       ),
-                      if (labels.isEmpty)
-                        // 카드 다이어트 — 빈 상태 플랫.
-                        PEmptyState(
-                          icon: LucideIcons.tag,
-                          message: l.calLabelsEmpty,
-                          subMessage: l.calLabelsEmptyHint,
-                        )
-                      else
-                        // 카드 다이어트 — 리스트 플랫.
-                        Column(
-                          children: [
-                            for (int i = 0; i < labels.length; i++)
-                              // 밀면 수정·삭제. 행의 🗑·> 를 걷었으므로 탭(편집)이
-                              // 비제스처 경로다(spec swipe-actions.md · WCAG 2.1.1).
-                              PSwipeActions(
-                                key: ValueKey('cal-label-${labels[i].rowId}'),
-                                groupTag: 'cal-label-list',
-                                actions: [
-                                  PSwipeAction(
-                                    label: l.actionEdit,
-                                    icon: LucideIcons.pencil,
-                                    kind: PSwipeKind.primary,
-                                    onSelect: () => _showLabelEditor(
-                                      context,
-                                      ref,
-                                      labels[i],
-                                    ),
-                                  ),
-                                  PSwipeAction(
-                                    label: l.actionDelete,
-                                    icon: LucideIcons.trash2,
-                                    kind: PSwipeKind.destructive,
-                                    // _confirmDelete 가 자체 확인을 띄운다 —
-                                    // 여기서 또 주면 확인이 두 번 뜬다.
-                                    onSelect: () =>
-                                        _confirmDelete(context, ref, labels[i]),
-                                  ),
-                                ],
-                                child: _LabelRow(
-                                  label: labels[i],
-                                  tokens: t,
-                                  // web 정합 — divider 는 행 풀폭 borderTop(첫 행 제외).
-                                  showDivider: i > 0,
-                                  onTap: () =>
-                                      _showLabelEditor(context, ref, labels[i]),
-                                ),
-                              ),
-                          ],
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: PSpace.x32),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _IntroCard extends StatelessWidget {
-  const _IntroCard({required this.tokens});
-  final GrooTokens tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final l = AppLocalizations.of(context);
-    return PCard(
-      variant: PCardVariant.brand,
-      padding: const EdgeInsets.all(PSpace.x16),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              // fill 은 다크에서도 primary 고정(bgBrandSolid) — web --bg-brand 정합.
-              color: t.bgBrandSolid,
-              borderRadius: PRadius.brMd,
-            ),
-            alignment: Alignment.center,
-            child: Icon(LucideIcons.tag, size: 18, color: t.fgOnBrand),
-          ),
-          const SizedBox(width: PSpace.x12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.calLabelsTitle,
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l.calLabelsIntro,
-                  style: PTypo.caption.copyWith(color: t.fgSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LabelRow extends StatelessWidget {
-  const _LabelRow({
-    required this.label,
-    required this.tokens,
-    required this.showDivider,
-    required this.onTap,
-  });
-  final EventLabel label;
-  final GrooTokens tokens;
-  final bool showDivider;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final l = AppLocalizations.of(context);
-    // 아이콘 색 web 정합 — 다크 light-variant swap(resolveChartColor). solid 스와치는 뮤트해 보임.
-    final color = resolveChartColor(context, label.color, fallback: t.fgBrand);
-    return Container(
-      decoration: showDivider
-          ? BoxDecoration(
-              border: Border(top: BorderSide(color: t.borderSubtle)),
-            )
-          : null,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          // web 정합 — 행 padding 14px 8px(사용자 결정).
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: softBg(context, color),
-                  borderRadius: PRadius.brMd,
-                ),
-                alignment: Alignment.center,
-                // web 정합 — 색 원 대신 라벨색 tag 아이콘(16).
-                child: Icon(LucideIcons.tag, size: 16, color: color),
-              ),
-              // web 정합 — 아이콘↔텍스트 gap 14.
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label.labelName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: PTypo.body.copyWith(
-                        color: t.fgPrimary,
-                        fontWeight: PFontWeight.semi,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    // 사용 중 일정 수 — 할일 태그 행 정합.
-                    Text(
-                      l.calLabelUsage(label.usageCount),
-                      style: PTypo.caption.copyWith(
-                        color: t.fgTertiary,
-                        fontSize: 12.5,
-                      ),
-                    ),
                   ],
                 ),
               ),
-              // 🗑·> 를 두지 않는다 — 밀면 수정·삭제, 탭하면 편집(사용자 결정).
             ],
           ),
         ),
@@ -382,12 +200,17 @@ void _showLabelEditor(
   final l = AppLocalizations.of(context);
   final nameCtrl = TextEditingController(text: existing?.labelName ?? '');
   final controller = PSheetController();
-  controller.setCanSubmit((existing?.labelName ?? '').trim().isNotEmpty);
+  controller.setCanSubmit(
+    labelNameSubmittable(
+      existing?.labelName ?? '',
+      original: existing?.labelName,
+    ),
+  );
   String selectedColor = existing?.color ?? '#2c70bf';
 
   Future<void> submit() async {
     final name = nameCtrl.text.trim();
-    if (name.isEmpty) return;
+    if (!labelNameSubmittable(name, original: existing?.labelName)) return;
     controller.setSubmitting(true);
     try {
       final repo = await ref.read(calendarRepositoryProvider.future);
@@ -425,11 +248,44 @@ void _showLabelEditor(
     contentBuilder: (ctx, _) => _LabelEditorBody(
       nameController: nameCtrl,
       initialColor: selectedColor,
+      originalName: existing?.labelName,
       controller: controller,
       onColorChanged: (c) => selectedColor = c,
     ),
-    footerBuilder: (ctx) =>
-        PSheetFooter(controller: controller, submitLabel: l.actionSave),
+    footerBuilder: (ctx) => PSheetFooter(
+      controller: controller,
+      submitLabel: l.actionSave,
+      // 수정 폼에만 — 밀기로만 닿던 삭제가 들어간 화면에도 있다(swipe-actions.md:76).
+      // 09b-2 가 라벨 폼을 새로 짤 때 이 [삭제] 를 옮긴다.
+      leftSlotCompact: true,
+      neutralSubmit: true,
+      leftSlot: existing == null
+          ? null
+          // 내용 폭 ghost critical — 왼쪽 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
+          : Transform.translate(
+              offset: const Offset(-20, 0),
+              child: dsb.PButton(
+                label: l.actionDelete,
+                variant: dsb.PButtonVariant.ghost,
+                ghostColor: dsb.PButtonGhostColor.critical,
+                size: dsb.PButtonSize.large,
+                onPressed: () async {
+                  final ok = await _confirmDelete(
+                    ctx,
+                    existing,
+                    onRetried: () {
+                      if (ctx.mounted) {
+                        Navigator.of(ctx, rootNavigator: true).pop();
+                      }
+                    },
+                  );
+                  if (ok && ctx.mounted) {
+                    Navigator.of(ctx, rootNavigator: true).pop();
+                  }
+                },
+              ),
+            ),
+    ),
   );
 }
 
@@ -437,11 +293,15 @@ class _LabelEditorBody extends StatefulWidget {
   const _LabelEditorBody({
     required this.nameController,
     required this.initialColor,
+    this.originalName,
     required this.controller,
     required this.onColorChanged,
   });
   final TextEditingController nameController;
   final String initialColor;
+
+  /// 고치기 전 저장된 이름(추가 폼은 null) — 안 바꾼 옛 이름은 12자 오류를 보이지 않는다.
+  final String? originalName;
   final PSheetController controller;
   final ValueChanged<String> onColorChanged;
 
@@ -451,6 +311,9 @@ class _LabelEditorBody extends StatefulWidget {
 
 class _LabelEditorBodyState extends State<_LabelEditorBody> {
   late String _color;
+
+  bool get _nameTooLong =>
+      nameIssue(widget.nameController.text, kLabelNameMax) == NameIssue.tooLong;
 
   @override
   void initState() {
@@ -528,13 +391,22 @@ class _LabelEditorBodyState extends State<_LabelEditorBody> {
             style: PTypo.caption.copyWith(color: t.fgSecondary),
           ),
           const SizedBox(height: PSpace.x4),
-          PTextInput(
-            controller: widget.nameController,
-            placeholder: l.calLabelNamePlaceholder,
-            onChanged: (v) {
-              widget.controller.setCanSubmit(v.trim().isNotEmpty);
-              setState(() {});
-            },
+          // 이름은 12자까지 — 카드 한 줄에 들어가는 길이(웹과 같은 제품 규칙). 세는 줄 "n/12", 입력은 12 에서 멈춘다
+          PField(
+            maxGraphemeCount: kLabelNameMax,
+            invalid: _nameTooLong,
+            errorMessage: _nameTooLong ? l.nameTooLong(kLabelNameMax) : null,
+            child: PInput(
+              controller: widget.nameController,
+              semanticLabel: l.calFieldName,
+              placeholder: l.calLabelNamePlaceholder,
+              onChanged: (v) {
+                widget.controller.setCanSubmit(
+                  labelNameSubmittable(v, original: widget.originalName),
+                );
+                setState(() {});
+              },
+            ),
           ),
           const SizedBox(height: PSpace.x16),
 
@@ -559,28 +431,36 @@ class _LabelEditorBodyState extends State<_LabelEditorBody> {
 
 // ─── 삭제 ──────────────────────────────────────────────────
 
-Future<void> _confirmDelete(
+/// 라벨 삭제 — 확인창 → 지움. 실패하면 확인창을 닫고 고정 한 문장 critical 스낵바 + [다시 시도](묻지 않고 바로 지움).
+/// 돌려주는 값 — 지우기까지 성공했으면 true. 밀기 삭제와 편집 시트 바닥 [삭제] 가 같은 길을 쓴다.
+Future<bool> _confirmDelete(
   BuildContext context,
-  WidgetRef ref,
-  EventLabel label,
-) async {
+  EventLabel label, {
+  VoidCallback? onRetried,
+}) {
   final l = AppLocalizations.of(context);
-  final ok = await PAlertDialog.show(
+  final container = ProviderScope.containerOf(context);
+  return askConfirmThenRequest(
     context,
     title: l.calDeleteLabelTitle,
     description: l.calDeleteLabelConfirm(label.labelName),
-    actionLabel: l.actionDelete,
-    destructive: true,
     cancelLabel: l.actionCancel,
+    actionLabel: l.actionDelete,
+    request: () => _deleteLabelRequest(container, label),
+    failedMessage: l.calLabelDeleteFailed,
+    retryLabel: l.actionRetry,
+    onRetried: onRetried,
   );
-  if (!ok || !context.mounted) return;
-  try {
-    final repo = await ref.read(calendarRepositoryProvider.future);
-    await repo.deleteLabel(label.rowId);
-    ref.invalidate(eventLabelsProvider);
-    // 지운 라벨이 박힌 일정도 다시 받는다 — 안 그러면 없는 라벨이 계속 붙어 보인다.
-    ref.invalidate(monthEventsProvider);
-  } on ApiException {
-    if (!context.mounted) return;
-  }
+}
+
+/// 라벨 삭제 요청 — 컨테이너로 한다(시트가 닫힌 뒤 [다시 시도] 도 이걸 부른다). 실패는 던진다.
+Future<void> _deleteLabelRequest(
+  ProviderContainer container,
+  EventLabel label,
+) async {
+  final repo = await container.read(calendarRepositoryProvider.future);
+  await repo.deleteLabel(label.rowId);
+  container.invalidate(eventLabelsProvider);
+  // 지운 라벨이 박힌 일정도 다시 받는다 — 안 그러면 없는 라벨이 계속 붙어 보인다.
+  container.invalidate(monthEventsProvider);
 }

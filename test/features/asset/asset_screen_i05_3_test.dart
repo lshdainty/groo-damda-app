@@ -472,16 +472,16 @@ void main() {
   });
 
   group('61 · 빈 화면', () {
-    testWidgets('Result Section empty large + 첫 버튼 "계좌·카드 관리로 가기"', (
+    testWidgets('Result Section empty large + 첫 버튼 "계좌 · 카드 관리로 가기"', (
       tester,
     ) async {
       await _pump(tester, assets: () async => const []);
       final rs = tester.widget<PResultSection>(find.byType(PResultSection));
       expect(rs.kind, PResultKind.empty);
       expect(rs.size, PResultSize.large);
-      expect(rs.primaryAction?.label, '계좌·카드 관리로 가기');
+      expect(rs.primaryAction?.label, '계좌 · 카드 관리로 가기');
       expect(findPlain('아직 등록된 자산이 없어요'), findsOneWidget);
-      expect(findPlain('설정 → 계좌·카드 관리에서 추가할 수 있어요.'), findsOneWidget);
+      expect(findPlain('설정 → 계좌 · 카드 관리에서 추가할 수 있어요.'), findsOneWidget);
       expect(_bands, findsOneWidget);
     });
   });

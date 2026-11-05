@@ -5,7 +5,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
-import 'package:groo_damda_app/app/theme/radius.dart';
 import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
@@ -16,9 +15,7 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/widgets/p_badge.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_card.dart';
 import 'package:groo_damda_app/shared/widgets/p_color_picker.dart';
-import 'package:groo_damda_app/shared/widgets/p_divider.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
 import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
@@ -26,6 +23,13 @@ import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_parts.dart';
+import 'package:groo_damda_app/shared/ds/badge/p_badge.dart' as ds;
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 
@@ -53,14 +57,13 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
     final listAsync = ref.watch(userCalendarListProvider);
 
     return Scaffold(
-      backgroundColor: context.colors.bgLayerBasement,
+      backgroundColor: context.colors.bgLayerDefault,
       // 머리 = ds 상단 바(← + 제목) — 높이 56, 스크롤해도 선이 없다. 초대 코드 참여(⊕)는 머리에서
-      // 걷었다 — 본문 _JoinCard 가 같은 일을 한다(I-16 14 · 16, Q5-A)
+      // 걷었다 — 본문 참여 줄이 같은 일을 한다(I-16 14 · 16, Q5-A)
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(PTopNavigation.heightOf(context)),
         child: PTopNavigation(
@@ -71,6 +74,7 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
           ),
         ),
       ),
+      // 흰 면 하나 — 카드 · 줄 사이 선 · 구역 사이 틈이 없다(I-09 37). 줄 · 목록 제목이 제 좌우 24 를 갖는다
       body: PScreenBandBody(
         child: PPullToRefresh(
           onRefresh: () async {
@@ -78,37 +82,59 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
             await ref.read(userCalendarListProvider.future);
           },
           child: ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: PSpace.x24,
-              vertical: PSpace.x24,
-            ),
+            padding: const EdgeInsets.only(bottom: PSpacing.x6),
             children: [
-              _IntroCard(tokens: t),
-              const SizedBox(height: PSpace.x32),
+              CalendarSurfaceCallout(l.calShareIntro),
               listAsync.when(
-                loading: () => const PListSkeleton(rows: 4, showAvatar: true),
-                error: (e, _) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: PSpace.x16),
-                  child: Text(
-                    '${l.calCalendarLoadError}\n$e',
-                    style: PTypo.bodySm.copyWith(color: t.statusDangerFg),
-                  ),
+                // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
+                skipError: true,
+                loading: () => _ShareSkeleton(
+                  onCreate: () => _showCreateDialog(context, ref),
+                ),
+                error: (e, _) => CalendarSurfaceFailure(
+                  title: l.calCalendarLoadError,
+                  onRetry: () => ref.invalidate(userCalendarListProvider),
                 ),
                 data: (calendars) => _CalendarSections(
                   calendars: calendars,
-                  tokens: t,
                   onCreate: () => _showCreateDialog(context, ref),
                 ),
               ),
-              const SizedBox(height: PSpace.x32),
-              _JoinCard(tokens: t, onJoin: () => _showJoinDialog(context, ref)),
-              const SizedBox(height: PSpace.x32),
+              PListHeader(
+                title: l.calJoinSectionTitle,
+                variant: PListHeaderVariant.boldSolid,
+                topInset: PSpacing.x6,
+              ),
+              PList(
+                semanticLabel: l.calJoinSectionTitle,
+                children: [
+                  PListItem(
+                    prefix: _tile(context, 'gray', LucideIcons.link),
+                    title: l.calJoinByCode,
+                    detail: l.calJoinCardBody,
+                    suffix: PListAction(
+                      child: dsb.PButton(
+                        label: l.calJoin,
+                        variant: dsb.PButtonVariant.neutralWeak,
+                        size: dsb.PButtonSize.small,
+                        onPressed: () => _showJoinDialog(context, ref),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/// 앞 타일 40 — 색 키의 옅은 바탕 + 아이콘 20(`chart-{색}-weak` · `chart-{색}`).
+Widget _tile(BuildContext context, String key, IconData icon) {
+  final tone = chartToneOfKey(context, key);
+  return PListTile(background: tone.weak, color: tone.solid, child: Icon(icon));
 }
 
 (String, PBadgeVariant, IconData) _roleStyle(AppLocalizations l, String role) =>
@@ -122,93 +148,58 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
       _ => (l.calRoleViewer, PBadgeVariant.outline, LucideIcons.eye),
     };
 
-class _IntroCard extends StatelessWidget {
-  const _IntroCard({required this.tokens});
-  final GrooTokens tokens;
+class _ShareSkeleton extends StatelessWidget {
+  const _ShareSkeleton({required this.onCreate});
+  final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
-    final t = tokens;
     final l = AppLocalizations.of(context);
-    return PCard(
-      variant: PCardVariant.brand,
-      padding: const EdgeInsets.all(PSpace.x16),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            // fill 은 다크에서도 primary 고정(bgBrandSolid) — bgBrand 는 다크 cobalt400 으로 밝아짐(web 정합).
-            decoration: BoxDecoration(
-              color: t.bgBrandSolid,
-              borderRadius: PRadius.brMd,
-            ),
-            alignment: Alignment.center,
-            child: Icon(LucideIcons.users, size: 18, color: t.fgOnBrand),
-          ),
-          const SizedBox(width: PSpace.x12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.calShareIntroTitle,
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l.calShareIntroBody,
-                  style: PTypo.caption.copyWith(color: t.fgSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 글과 줄만 데이터 자리
+        CalendarSurfaceHeaderSkeleton(
+          action: PTextButton(label: l.calNewCalendar, onPressed: onCreate),
+        ),
+        const CalendarSurfaceRowSkeleton(),
+        const CalendarSurfaceRowSkeleton(),
+        const CalendarSurfaceHeaderSkeleton(topInset: PSpacing.x6),
+        const CalendarSurfaceRowSkeleton(),
+      ],
     );
   }
 }
 
 class _CalendarSections extends StatelessWidget {
-  const _CalendarSections({
-    required this.calendars,
-    required this.tokens,
-    required this.onCreate,
-  });
+  const _CalendarSections({required this.calendars, required this.onCreate});
   final List<UserCalendar> calendars;
-  final GrooTokens tokens;
   final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
-    final t = tokens;
     final l = AppLocalizations.of(context);
     final owned = calendars.where((c) => c.isOwner).toList();
     final shared = calendars.where((c) => !c.isOwner).toList();
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Section(
+        PListHeader(
           title: l.calMyCalendarsCount(owned.length),
-          tokens: t,
+          variant: PListHeaderVariant.boldSolid,
+          action: PTextButton(label: l.calNewCalendar, onPressed: onCreate),
+        ),
+        _CalendarList(
+          title: l.calMyCalendarsCount(owned.length),
           calendars: owned,
           emptyText: l.calNoOwnedCalendars,
-          // 라벨행 우측 텍스트(accent) 추가 버튼 — 프리셋 정합(사용자 결정, filled 안내카드 버튼 폐기)
-          action: PButton(
-            label: l.calNewCalendar,
-            icon: LucideIcons.plus,
-            variant: PButtonVariant.accent,
-            size: PButtonSize.sm,
-            onPressed: onCreate,
-          ),
         ),
-        const SizedBox(height: PSpace.x32),
-        _Section(
+        PListHeader(
           title: l.calSharedCalendarsCount(shared.length),
-          tokens: t,
+          variant: PListHeaderVariant.boldSolid,
+          topInset: PSpacing.x6,
+        ),
+        _CalendarList(
+          title: l.calSharedCalendarsCount(shared.length),
           calendars: shared,
           emptyText: l.calNoSharedCalendars,
         ),
@@ -217,223 +208,71 @@ class _CalendarSections extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
-  const _Section({
+class _CalendarList extends ConsumerWidget {
+  const _CalendarList({
     required this.title,
-    required this.tokens,
     required this.calendars,
     required this.emptyText,
-    this.action,
   });
   final String title;
-  final GrooTokens tokens;
   final List<UserCalendar> calendars;
   final String emptyText;
 
-  /// 라벨행 우측 액션(텍스트 버튼 등) — 없으면 라벨만.
-  final Widget? action;
-
   @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (calendars.isEmpty) return CalendarSurfaceEmptyLine(emptyText);
+    final l = AppLocalizations.of(context);
+    return PList(
+      semanticLabel: title,
       children: [
-        // label padding 제거(사용자 결정, web 정합) — label·list 한 묶음.
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: PTypo.bodySm.copyWith(
-                color: t.fgPrimary,
-                fontWeight: PFontWeight.bold,
-              ),
+        for (final cal in calendars)
+          // 누르면 지금의 관리 시트가 그대로 열린다(관리 페이지는 09b-2). 화면을 옮기는 줄이 아니라 꺾쇠가 없다
+          PListButtonItem(
+            key: ValueKey('cal-share-${cal.rowId}'),
+            prefix: PListTile(
+              background: chartToneOf(context, cal.color).weak,
+              color: chartToneOf(context, cal.color).solid,
+              child: const Icon(LucideIcons.calendar),
             ),
-            ?action,
-          ],
-        ),
-        if (calendars.isEmpty)
-          // 카드 다이어트 — 빈 상태 플랫.
-          Padding(
-            padding: EdgeInsets.zero,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 28,
-                horizontal: PSpace.x16,
-              ),
-              child: Center(
-                child: Text(
-                  emptyText,
-                  style: PTypo.bodySm.copyWith(color: t.fgTertiary),
-                ),
-              ),
-            ),
-          )
-        else
-          // 카드 다이어트 — 리스트 플랫 (row 가 자체 16/12 보유).
-          Padding(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                for (int i = 0; i < calendars.length; i++) ...[
-                  _CalendarRow(calendar: calendars[i], tokens: t),
-                  // 전체폭 구분선 (web borderTop 정합 — indent 0).
-                  if (i < calendars.length - 1) const PDivider(),
-                ],
-              ],
-            ),
+            title: cal.calendarName,
+            titleSuffix: [
+              if (cal.isDefault) ds.PBadge(label: l.calDefault),
+              if (!cal.isOwner) _roleBadge(l, cal.myRole),
+            ],
+            detail: cal.memberCount <= 1
+                ? l.calOnlyMe
+                : l.calMemberCount(cal.memberCount),
+            onTap: () => _showManageSheet(context, ref, cal),
           ),
       ],
     );
   }
 }
 
-class _CalendarRow extends ConsumerWidget {
-  const _CalendarRow({required this.calendar, required this.tokens});
-  final UserCalendar calendar;
-  final GrooTokens tokens;
+/// 공유받은 캘린더의 권한 배지(소유한 캘린더는 부르지 않는다 — OWNER 갈래 없음) — 편집 가능 positive + 연필 · 읽기 전용 informative + 눈(badge.md 예시).
+Widget _roleBadge(AppLocalizations l, String role) => switch (role) {
+  'EDIT' => ds.PBadge(
+    label: l.calRoleEditor,
+    variant: ds.PBadgeVariant.outline,
+    tone: ds.PBadgeTone.positive,
+    prefixIcon: LucideIcons.pencil,
+  ),
+  _ => ds.PBadge(
+    label: l.calRoleViewer,
+    variant: ds.PBadgeVariant.outline,
+    tone: ds.PBadgeTone.informative,
+    prefixIcon: LucideIcons.eye,
+  ),
+};
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = tokens;
-    final l = AppLocalizations.of(context);
-    final color = resolveChartColor(
-      context,
-      calendar.color,
-      fallback: t.fgBrand,
-    );
-    final (roleLabel, roleVariant, _) = _roleStyle(l, calendar.myRole);
-    return InkWell(
-      onTap: () => _showManageSheet(context, ref, calendar),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: softBg(context, color),
-                borderRadius: PRadius.brMd,
-              ),
-              alignment: Alignment.center,
-              child: Icon(LucideIcons.calendar, size: 18, color: color),
-            ),
-            const SizedBox(width: PSpace.x12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          calendar.calendarName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: PTypo.body.copyWith(
-                            color: t.fgPrimary,
-                            fontWeight: PFontWeight.semi,
-                          ),
-                        ),
-                      ),
-                      if (calendar.isDefault) ...[
-                        const SizedBox(width: 6),
-                        PBadge(
-                          label: l.calDefault,
-                          variant: PBadgeVariant.secondary,
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    calendar.memberCount <= 1
-                        ? l.calOnlyMe
-                        : l.calMemberCount(calendar.memberCount),
-                    style: PTypo.caption.copyWith(
-                      color: t.fgTertiary,
-                      fontWeight: PFontWeight.regular,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (!calendar.isOwner)
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: PBadge(label: roleLabel, variant: roleVariant),
-              ),
-            // chevron 을 두지 않는다 — 행 전체 탭으로 관리 화면에 들어간다
-            // (사용자 결정, 다른 설정 목록과 같은 규칙).
-            //
-            // 이 행에는 스와이프도 붙이지 않는다. 시스템 기본 캘린더라 삭제가 없고,
-            // 탭이 편집이 아니라 관리 화면(멤버·공유) 진입이라 '수정·삭제' 두 액션이
-            // 성립하지 않는다.
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _JoinCard extends StatelessWidget {
-  const _JoinCard({required this.tokens, required this.onJoin});
-  final GrooTokens tokens;
-  final VoidCallback onJoin;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = tokens;
-    final l = AppLocalizations.of(context);
-    // 카드 다이어트 — 플랫 행.
-    return Padding(
-      // 좌우는 페이지가 쥔다(24). 플랫 행은 상하만 갖는다.
-      padding: const EdgeInsets.symmetric(vertical: PSpace.x8),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: t.bgMuted,
-              borderRadius: PRadius.brMd,
-            ),
-            alignment: Alignment.center,
-            child: Icon(LucideIcons.link, size: 18, color: t.fgSecondary),
-          ),
-          const SizedBox(width: PSpace.x12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.calJoinByCode,
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l.calJoinCardBody,
-                  style: PTypo.caption.copyWith(color: t.fgSecondary),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: PSpace.x8),
-          PButton(
-            label: l.calJoin,
-            variant: PButtonVariant.secondary,
-            size: PButtonSize.sm,
-            onPressed: onJoin,
-          ),
-        ],
-      ),
-    );
-  }
+/// 캘린더 삭제 요청 — 컨테이너로 한다([다시 시도] 도 이걸 부른다). 실패는 던진다.
+Future<void> _deleteCalendarRequest(ProviderContainer container, int id) async {
+  final repo = await container.read(userCalendarRepositoryProvider.future);
+  await repo.delete(id);
+  container.invalidate(userCalendarListProvider);
+  // 서버가 이 캘린더의 일정을 기본 캘린더로 옮긴다(UserCalendarServiceImpl).
+  // 월 일정을 다시 받지 않으면 지운 캘린더 소속인 채로(색·소속 모두 옛것) 남는다.
+  container.invalidate(monthEventsProvider);
 }
 
 // ─── 새 캘린더 만들기 ────────────────────────────────────────
@@ -733,26 +572,22 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
 
   Future<void> _delete() async {
     final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
+    final container = ProviderScope.containerOf(context);
+    final nav = Navigator.of(context);
+    final ok = await askConfirmThenRequest(
       context,
       title: l.calDeleteCalendar,
       description: l.calDeleteCalendarConfirm(cal.calendarName),
-      actionLabel: l.calDeleteCalendarAction,
-      destructive: true,
       cancelLabel: l.actionCancel,
+      actionLabel: l.calDeleteCalendarAction,
+      request: () => _deleteCalendarRequest(container, cal.rowId),
+      failedMessage: l.calDeleteCalendarFailed,
+      retryLabel: l.actionRetry,
+      onRetried: () {
+        if (mounted) nav.pop();
+      },
     );
-    if (!ok) return;
-    try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
-      await repo.delete(cal.rowId);
-      ref.invalidate(userCalendarListProvider);
-      // 서버가 이 캘린더의 일정을 기본 캘린더로 옮긴다(UserCalendarServiceImpl).
-      // 월 일정을 다시 받지 않으면 지운 캘린더 소속인 채로(색·소속 모두 옛것) 남는다.
-      ref.invalidate(monthEventsProvider);
-      if (mounted) Navigator.of(context).pop();
-    } on ApiException {
-      // 토스트는 ErrorToastInterceptor 가 띄운다 — 여기선 흐름만 멈춘다.
-    }
+    if (ok && mounted) nav.pop();
   }
 
   @override

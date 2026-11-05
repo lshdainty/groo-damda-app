@@ -31,7 +31,10 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_labels_screen.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_share_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
+
+import '../../support/plain_text.dart';
 
 const _label = EventLabel(rowId: 7, labelName: '옛이름', color: '#2c70bf');
 const _calendar = UserCalendar(rowId: 1, calendarName: '개인', isDefault: true);
@@ -88,14 +91,14 @@ class _NoAuth extends AuthNotifier {
   Future<User?> build() async => null;
 }
 
-Finder _field(String hint) => find.byWidgetPredicate(
-  (w) => w is TextField && w.decoration?.hintText == hint,
-);
-
 /// 텍스트를 품은 PButton — 확인 다이얼로그의 버튼과 스와이프 액션의 같은 글자를
 /// 가른다(액션은 PButton 이 아니다).
-Finder _button(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+Finder _button(String label) => find
+    .ancestor(
+      of: find.text(label),
+      matching: find.byWidgetPredicate((w) => w is PButton || w is dsb.PButton),
+    )
+    .last;
 
 /// 월 일정을 살려 두는 관찰자 + 대상 화면.
 ///
@@ -155,11 +158,11 @@ void main() {
   group('라벨', () {
     testWidgets('이름을 바꾸면 월 일정을 다시 받는다', (tester) async {
       final repo = await pump(tester, const CalendarLabelsScreen());
-      expect(find.text('옛이름'), findsWidgets);
+      expect(findPlain('옛이름'), findsWidgets);
 
-      await tester.tap(find.text('옛이름').first);
+      await tester.tap(findPlain('옛이름').first);
       await tester.pumpAndSettle();
-      await tester.enterText(_field(l.calLabelNamePlaceholder), '새이름');
+      await tester.enterText(find.byType(EditableText), '새이름');
       await tester.pumpAndSettle();
       await tester.tap(_button(l.actionSave));
       await tester.pumpAndSettle();
@@ -171,7 +174,7 @@ void main() {
       final repo = await pump(tester, const CalendarLabelsScreen());
 
       // 행을 밀어 삭제 액션을 꺼낸다 → 확인 다이얼로그.
-      await tester.drag(find.text('옛이름').first, const Offset(-250, 0));
+      await tester.drag(findPlain('옛이름').first, const Offset(-250, 0));
       await tester.pumpAndSettle();
       await tester.tap(find.text(l.actionDelete).first);
       await tester.pumpAndSettle();
@@ -185,7 +188,7 @@ void main() {
   testWidgets('캘린더를 지우면 월 일정을 다시 받는다', (tester) async {
     final repo = await pump(tester, const CalendarShareScreen());
 
-    await tester.tap(find.text('회사캘린더'));
+    await tester.tap(findPlain('회사캘린더'));
     await tester.pumpAndSettle();
     await tester.tap(_button(l.calDeleteCalendar));
     await tester.pumpAndSettle();

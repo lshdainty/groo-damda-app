@@ -215,7 +215,7 @@ class CalendarRepository {
   /// 라벨 삭제. DELETE /calendar/label/{id}.
   Future<void> deleteLabel(int id) async {
     try {
-      await _dio.delete<void>('/calendar/label/$id');
+      await _dio.delete<void>('/calendar/label/$id', options: _silent);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

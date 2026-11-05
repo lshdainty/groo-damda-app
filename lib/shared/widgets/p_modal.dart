@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart' as ds;
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 
 /// 표준 footer — 좌측 보조(삭제 또는 [leftSlot]) / 우측 취소 + 저장. controller listen.
@@ -26,6 +27,8 @@ class PSheetFooter extends StatelessWidget {
     this.deleteLabel,
     this.leftSlot,
     this.showCancel,
+    this.leftSlotCompact = false,
+    this.neutralSubmit = false,
   });
   final PSheetController controller;
   final String submitLabel;
@@ -37,6 +40,13 @@ class PSheetFooter extends StatelessWidget {
   /// 숨긴다**. 액션 2개 규칙을 위젯이 지키게 해 호출부가 잊어도 3개가 되지 않는다.
   /// 우상단 X 와 드래그 내리기가 취소를 대신한다(spec drawer.md 액션 구성).
   final bool? showCancel;
+
+  /// [leftSlot] 을 내용 폭으로 두고 [저장] 이 남은 폭을 채운다(bottom-sheet.md:126 · :128 — 바닥 왼쪽 [삭제]).
+  /// 기본은 반씩 나눈다.
+  final bool leftSlotCompact;
+
+  /// [저장] 을 ds neutralSolid(짙은 회색)로 — button.md:81 · :159(저장 · 확인 같은 CTA). 기본은 옛 모양 그대로(다른 시트는 영향 없음).
+  final bool neutralSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +69,12 @@ class PSheetFooter extends StatelessWidget {
               // 액션이 좌측에 작은 글씨로 붙으면 버튼인지 알아보기 어렵다
               // (spec drawer.md "flex:1 평등 분배"). 넘겨받는 위젯이 fullWidth 를
               // 켜야 실제로 채워진다.
-              Expanded(child: leftSlot!),
-              const SizedBox(width: PSpace.x8),
+              if (leftSlotCompact)
+                leftSlot!
+              else ...[
+                Expanded(child: leftSlot!),
+                const SizedBox(width: PSpace.x8),
+              ],
             ] else if (controller.onDelete != null) ...[
               // 삭제는 error 솔리드 채움(danger) + 균등 분배 — 삭제 확인 다이얼로그의
               // 삭제 버튼과 같은 색이라, 같은 동작이 같은 색으로 이어진다.
@@ -96,18 +110,33 @@ class PSheetFooter extends StatelessWidget {
               const SizedBox(width: PSpace.x8),
             ],
             Expanded(
-              child: PButton(
-                label: submitLabel,
-                size: PButtonSize.lg,
-                fullWidth: true,
-                loading: controller.submitting,
-                onPressed:
-                    controller.canSubmit &&
-                        !controller.submitting &&
-                        controller.onSubmit != null
-                    ? controller.submitGuarded
-                    : null,
-              ),
+              child: neutralSubmit
+                  ? SizedBox(
+                      width: double.infinity,
+                      child: ds.PButton(
+                        label: submitLabel,
+                        size: ds.PButtonSize.large,
+                        loading: controller.submitting,
+                        onPressed:
+                            controller.canSubmit &&
+                                !controller.submitting &&
+                                controller.onSubmit != null
+                            ? controller.submitGuarded
+                            : null,
+                      ),
+                    )
+                  : PButton(
+                      label: submitLabel,
+                      size: PButtonSize.lg,
+                      fullWidth: true,
+                      loading: controller.submitting,
+                      onPressed:
+                          controller.canSubmit &&
+                              !controller.submitting &&
+                              controller.onSubmit != null
+                          ? controller.submitGuarded
+                          : null,
+                    ),
             ),
           ],
         );

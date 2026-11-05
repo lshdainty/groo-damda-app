@@ -1699,12 +1699,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calLabelsEmpty => 'No labels yet';
 
   @override
-  String get calLabelsEmptyHint =>
-      'Create one with the \"New label\" button above';
+  String get calLabelsEmptyHint => 'Create one with \'Add label\' above';
 
   @override
   String get calLabelsIntro =>
-      'These labels are shared across all your calendars. You can pick one when creating an event.';
+      'These labels are shared by every calendar. Pick one when you create an event.';
 
   @override
   String get calNewLabel => 'Add label';
@@ -1771,6 +1770,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calJoinByCode => 'Join with invite code';
 
   @override
+  String get calShareIntro =>
+      'Create a calendar and invite members to manage events together with family and friends.';
+
+  @override
+  String get calJoinSectionTitle => 'Invite code';
+
+  @override
   String get calRoleOwner => 'Owner';
 
   @override
@@ -1778,13 +1784,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calRoleViewer => 'View only';
-
-  @override
-  String get calShareIntroTitle => 'Share with family & friends';
-
-  @override
-  String get calShareIntroBody =>
-      'Create a calendar and invite members to manage events together.';
 
   @override
   String get calNewCalendar => 'Add calendar';
@@ -1818,7 +1817,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calJoinCardBody =>
-      'Enter an invite code you received to join a calendar.';
+      'Enter a shared invite code to join that calendar.';
 
   @override
   String get calJoin => 'Join';
@@ -1871,6 +1870,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calDeleteCalendarAction => 'Delete permanently';
 
   @override
+  String get calDeleteCalendarFailed => 'Couldn\'t delete the calendar.';
+
+  @override
+  String get calLabelDeleteFailed => 'Couldn\'t delete the label.';
+
+  @override
   String get calCopy => 'Copy';
 
   @override
@@ -1907,10 +1912,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calUpdateFailed => 'Update failed';
 
   @override
-  String get calCalendarLoadError => 'Failed to load calendars';
+  String get calCalendarLoadError => 'Couldn\'t load calendars';
 
   @override
-  String get calLabelLoadError => 'Failed to load labels';
+  String get calLabelLoadError => 'Couldn\'t load labels';
 
   @override
   String get calMemberLoadError => 'Failed to load members';
