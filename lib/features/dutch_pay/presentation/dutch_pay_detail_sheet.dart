@@ -142,6 +142,15 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
             mainAxisSize: MainAxisSize.min,
             spacing: PSpacing.x1,
             children: [
+              // 송금 요청은 아직 열리지 않았다 — 단추는 남기고 막는다(10-30 결정). 이유는 위 Callout.
+              PButton(
+                label: l.dutchSendRequest,
+                variant: PButtonVariant.neutralWeak,
+                size: PButtonSize.small,
+                semanticLabel:
+                    '${l.dutchSendRequestOf(name)}. ${l.dutchRequestSoon}',
+                onPressed: null,
+              ),
               PButton(
                 label: l.dutchMarkReceived,
                 variant: PButtonVariant.neutralWeak,
@@ -154,15 +163,6 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
                         () => markDutchPaid(context, d, p),
                         key: 'row-${p.rowId}',
                       ),
-              ),
-              // 송금 요청은 아직 열리지 않았다 — 단추는 남기고 막는다(10-30 결정). 이유는 아래 Callout.
-              PButton(
-                label: l.dutchSendRequest,
-                variant: PButtonVariant.ghost,
-                size: PButtonSize.small,
-                semanticLabel:
-                    '${l.dutchSendRequestOf(name)}. ${l.dutchRequestSoon}',
-                onPressed: null,
               ),
             ],
           ),
@@ -181,12 +181,29 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
       variant: PButtonVariant.ghost,
       ghostColor: PButtonGhostColor.critical,
       size: PButtonSize.large,
+      flush: PButtonFlush.left,
       onPressed: _busy
           ? null
           : () => _guard(() async {
               final gone = await deleteDutchWithConfirm(context, d);
               if (gone) _closeOnce();
             }),
+    );
+
+    final requestAll = PButton(
+      label: l.dutchRequestAll,
+      variant: PButtonVariant.neutralWeak,
+      size: PButtonSize.large,
+      semanticLabel: '${l.dutchRequestAll}. ${l.dutchRequestSoon}',
+      onPressed: null,
+    );
+    final settleAll = PButton(
+      label: l.dutchSettleAll,
+      size: PButtonSize.large,
+      loading: _running == 'all',
+      onPressed: _busy
+          ? null
+          : () => _guard(() => settleDutch(context, d), key: 'all'),
     );
 
     return PBottomSheetContent(
@@ -221,8 +238,10 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
+                const SizedBox(height: PSpacing.x1),
                 Text(
                   keepAll(perLine),
+                  key: const ValueKey('dutch-detail-per'),
                   semanticsLabel: perLine,
                   style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
                 ),
@@ -232,53 +251,58 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
           const SizedBox(height: PSpacing.x4),
           Container(height: 1, color: c.strokeNeutralSubtle),
           PListHeader(title: l.dutchParticipantsHeader(n), headingLevel: 3),
-          PList(
-            semanticLabel: l.dutchParticipant,
-            children: [for (final p in d.participants) row(p)],
-          ),
           if (!d.isSettled)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 PSpacing.globalGutter,
-                PSpacing.x3,
-                PSpacing.globalGutter,
                 0,
+                PSpacing.globalGutter,
+                PSpacing.x2,
               ),
-              child: PCallout(description: l.dutchRequestSoon),
+              child: PCallout(
+                tone: PCalloutTone.informative,
+                description: l.dutchRequestSoon,
+              ),
             ),
+          PList(
+            semanticLabel: l.dutchParticipant,
+            children: [for (final p in d.participants) row(p)],
+          ),
         ],
       ),
       // 완료 = [삭제] 하나(받을 것이 없다), 진행 중 = 왼쪽 [삭제] 내용 폭 + 남은 폭 [모두 받음]
       footerRow: d.isSettled
           // 완료 정산의 [삭제] 는 폭 전체가 아니라 왼쪽 · 내용 폭
           ? Row(children: [deleteButton])
-          : Row(
-              spacing: PSpacing.x2,
-              children: [
-                deleteButton,
-                Expanded(
-                  child: PButton(
-                    label: l.dutchRequestAll,
-                    variant: PButtonVariant.neutralWeak,
-                    size: PButtonSize.large,
-                    semanticLabel:
-                        '${l.dutchRequestAll}. ${l.dutchRequestSoon}',
-                    onPressed: null,
-                  ),
-                ),
-                Expanded(
-                  child: PButton(
-                    label: l.dutchSettleAll,
-                    size: PButtonSize.large,
-                    loading: _running == 'all',
-                    onPressed: _busy
-                        ? null
-                        : () =>
-                              _guard(() => settleDutch(context, d), key: 'all'),
-                  ),
-                ),
-              ],
-            ),
+          : _footer(context, deleteButton, requestAll, settleAll),
+    );
+  }
+
+  /// 바닥 줄 — 보통은 한 줄(삭제 · 일괄 요청 · 모두 받음). 글자를 크게 키우면 글이 겹치므로 세로로 쌓는다(주 버튼이 위).
+  Widget _footer(
+    BuildContext context,
+    Widget deleteButton,
+    Widget requestAll,
+    Widget settleAll,
+  ) {
+    if (MediaQuery.textScalerOf(context).scale(16) > 22) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: PSpacing.x2,
+        children: [
+          settleAll,
+          requestAll,
+          Row(children: [deleteButton]),
+        ],
+      );
+    }
+    return Row(
+      spacing: PSpacing.x2,
+      children: [
+        deleteButton,
+        Expanded(child: requestAll),
+        Expanded(child: settleAll),
+      ],
     );
   }
 }

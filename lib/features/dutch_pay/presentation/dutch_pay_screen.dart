@@ -408,7 +408,8 @@ class _SessionRow extends StatelessWidget {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: PSpacing.x1_5),
+            // 위 6 — 위 Column 사이 4 가 이미 있어 2 만 더한다
+            padding: const EdgeInsets.only(top: PSpacing.x0_5),
             // 막대는 늘 24 이상 — 글(줄지 않음)에 상한을 둬 200% 에서도 막대 자리를 남긴다
             child: LayoutBuilder(
               builder: (context, box) => Row(

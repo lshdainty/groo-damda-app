@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
@@ -451,6 +452,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
     final per = dutchPerPersonOf(shares.shares, [
       for (final p in people) p.name,
     ]);
+    final perAmount = txMoney(per.each, masked);
     final perText = !per.shown
         ? null
         : per.even
@@ -461,23 +463,22 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
             per.restName!,
           );
     // 함께 정산했던 사람 — 아직 안 고른 친구만(같은 사람이 두 번 보이지 않는다)
-    final freq = <String, int>{};
-    for (final d in ref.watch(dutchPayListProvider).value ?? const []) {
-      for (final p in d.participants) {
-        final n = (p.participantName ?? '').trim();
-        if (n.isEmpty) continue;
-        freq[n] = (freq[n] ?? 0) + 1;
-      }
-    }
+    // 최근 정산 차례(같은 날은 목록 차례) 로 한 번씩, 개수 제한 없음 — 웹과 같다
+    final recent = [...(ref.watch(dutchPayListProvider).value ?? const [])]
+      ..sort((a, b) => (b.dutchPayDate ?? '').compareTo(a.dutchPayDate ?? ''));
     final taken = {
       _meName().toLowerCase(),
       ..._others.map((e) => e.toLowerCase()),
     };
-    final suggestions =
-        (freq.keys.where((n) => !taken.contains(n.toLowerCase())).toList()
-              ..sort((a, b) => freq[b]!.compareTo(freq[a]!)))
-            .take(6)
-            .toList();
+    final seen = <String>{};
+    final suggestions = <String>[
+      for (final d in recent)
+        for (final p in d.participants)
+          if ((p.participantName ?? '').trim().isNotEmpty &&
+              !taken.contains(p.participantName!.trim().toLowerCase()) &&
+              seen.add(p.participantName!.trim().toLowerCase()))
+            p.participantName!.trim(),
+    ];
     final noOthers = _attempted2 && _others.isEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: PSpacing.globalGutter),
@@ -491,10 +492,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
                 TextSpan(text: l.dutchNPeople(people.length)),
                 if (perText != null) ...[
                   const TextSpan(text: ' · '),
-                  TextSpan(
-                    text: perText,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
+                  ..._boldAmount(perText, perAmount),
                 ],
               ],
             ),
@@ -583,7 +581,8 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
                   for (final n in suggestions)
                     PChip(
                       key: ValueKey('dutch-suggest-$n'),
-                      label: l.dutchSuggestChip(n),
+                      label: n,
+                      prefixIcon: LucideIcons.plus,
                       size: PChipSize.small,
                       onPressed: _submitting ? null : () => _add(n),
                     ),
@@ -595,6 +594,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
             child: PInputButton(
               value: people[_payerIndex].name,
               semanticLabel: l.dutchPayerSelect,
+              suffixIcon: LucideIcons.chevronDown,
               onPressed: _pickPayer,
             ),
           ),
@@ -602,4 +602,18 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
       ),
     );
   }
+}
+
+/// "1인당 36,800원 · 1원은 나" 에서 금액만 700 으로 — 글의 나머지는 그대로.
+List<InlineSpan> _boldAmount(String text, String amount) {
+  final i = text.indexOf(amount);
+  if (i < 0) return [TextSpan(text: text)];
+  return [
+    TextSpan(text: text.substring(0, i)),
+    TextSpan(
+      text: amount,
+      style: const TextStyle(fontWeight: FontWeight.w700),
+    ),
+    TextSpan(text: text.substring(i + amount.length)),
+  ];
 }

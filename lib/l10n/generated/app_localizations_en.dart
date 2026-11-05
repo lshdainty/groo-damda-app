@@ -2958,7 +2958,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPageLoadError => 'Couldn\'t load the login page.';
 
   @override
-  String get dutchSendRequest => 'Request payment';
+  String get dutchSendRequest => 'Request';
 
   @override
   String dutchSendRequestOf(String name) {

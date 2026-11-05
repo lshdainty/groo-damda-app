@@ -2901,7 +2901,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authPageLoadError => '로그인 페이지를 불러오지 못했어요.';
 
   @override
-  String get dutchSendRequest => '송금 요청';
+  String get dutchSendRequest => '요청';
 
   @override
   String dutchSendRequestOf(String name) {

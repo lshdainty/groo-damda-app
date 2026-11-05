@@ -1746,7 +1746,7 @@
   "authStateMismatch": "Security check failed (state mismatch). Please try again.",
   "authNoAuthCode": "Couldn't get the authorization code. Please try again.",
   "authPageLoadError": "Couldn't load the login page.",
-  "dutchSendRequest": "Request payment",
+  "dutchSendRequest": "Request",
   "dutchSendRequestOf": "Request payment from {name}",
   "dutchRequestSoon": "Payment requests are coming soon.",
   "@dutchSendRequestOf": {"placeholders": {"name": {"type": "String"}}},

@@ -1773,7 +1773,7 @@
   "authStateMismatch": "보안 검증에 실패했어요 (state 불일치). 다시 시도해주세요.",
   "authNoAuthCode": "인가코드를 받지 못했어요. 다시 시도해주세요.",
   "authPageLoadError": "로그인 페이지를 불러오지 못했어요.",
-  "dutchSendRequest": "송금 요청",
+  "dutchSendRequest": "요청",
   "dutchSendRequestOf": "{name}님에게 송금 요청",
   "dutchRequestSoon": "송금 요청은 곧 열려요.",
   "@dutchSendRequestOf": {"placeholders": {"name": {"type": "String"}}},

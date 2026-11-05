@@ -5368,7 +5368,7 @@ abstract class AppLocalizations {
   /// No description provided for @dutchSendRequest.
   ///
   /// In ko, this message translates to:
-  /// **'송금 요청'**
+  /// **'요청'**
   String get dutchSendRequest;
 
   /// No description provided for @dutchSendRequestOf.

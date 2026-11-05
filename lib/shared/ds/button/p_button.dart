@@ -334,7 +334,11 @@ PButtonColors resolvePButtonColors(
   if (variant == PButtonVariant.ghost && flush != null) {
     return (
       background: const Color(0x00000000),
-      foreground: pressedLike ? c.fgNeutral : c.fgNeutralSubtle,
+      foreground: ghostColor == PButtonGhostColor.critical
+          ? c.fgCritical
+          : pressedLike
+          ? c.fgNeutral
+          : c.fgNeutralSubtle,
       border: null,
       circleTrack: track,
       circleRange: range,
