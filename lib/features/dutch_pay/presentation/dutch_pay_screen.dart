@@ -55,6 +55,8 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
     final items = async.hasValue ? async.requireValue : null;
     final failed = items == null && async.hasError && !async.isLoading;
     final masked = ref.watch(hideCardProvider('dutchpay.sessions'));
+    // 요약 띠는 "더치페이 요약" 스위치를 따로 읽는다
+    final maskedSummary = ref.watch(hideCardProvider('dutchpay.summary'));
 
     final active = items == null
         ? const <DutchPay>[]
@@ -115,7 +117,7 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
       };
     }
 
-    // 숫자 자리는 받기 전에는 "…" (금액 · 수가 아직 없다)
+    // 숫자 자리는 받기 전에는 Skeleton (금액 · 수가 아직 없다)
     final waiting = items == null;
     return Scaffold(
       backgroundColor: context.colors.bgLayerBasement,
@@ -152,18 +154,18 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
                         _SummaryLine(
                           key: const ValueKey('dutch-receive'),
                           label: l.dutchToReceive,
-                          sub: waiting
-                              ? '…'
-                              : recv.count == 0
+                          loading: waiting,
+                          sub: recv.count == 0
                               ? l.dutchNoReceivable
                               : l.dutchFromPeople(recv.count),
-                          amount: waiting ? '…' : txMoney(recv.amount, masked),
+                          amount: txMoney(recv.amount, maskedSummary),
                         ),
                         _SummaryLine(
                           key: const ValueKey('dutch-send'),
                           label: l.dutchToSend,
-                          sub: waiting ? '…' : l.dutchToPeople(0),
-                          amount: waiting ? '…' : txMoney(0, masked),
+                          loading: waiting,
+                          sub: l.dutchToPeople(0),
+                          amount: txMoney(0, maskedSummary),
                         ),
                       ],
                     ),
@@ -173,8 +175,7 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
                   child: SizedBox(height: kScreenBandGap),
                 ),
                 // 목록 띠 — 화면 끝까지. Segmented 위 12 · 아래 4 는 목록과 한 덩어리
-                SliverFillRemaining(
-                  hasScrollBody: false,
+                SliverToBoxAdapter(
                   child: ColoredBox(
                     key: const ValueKey('dutch-list-band'),
                     color: context.colors.bgLayerDefault,
@@ -196,17 +197,17 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
                               PSegmentedItem(
                                 value: _DutchTab.active,
                                 label:
-                                    '${l.dutchTabActive} ${waiting ? '…' : active.length}',
+                                    '${l.dutchTabActive}${waiting ? '' : ' ${active.length}'}',
                               ),
                               PSegmentedItem(
                                 value: _DutchTab.past,
                                 label:
-                                    '${l.dutchTabPast} ${waiting ? '…' : past.length}',
+                                    '${l.dutchTabPast}${waiting ? '' : ' ${past.length}'}',
                               ),
                               PSegmentedItem(
                                 value: _DutchTab.friends,
                                 label:
-                                    '${l.dutchTabFriends} ${waiting ? '…' : friends.length}',
+                                    '${l.dutchTabFriends}${waiting ? '' : ' ${friends.length}'}',
                               ),
                             ],
                           ),
@@ -217,6 +218,11 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
                       ],
                     ),
                   ),
+                ),
+                // 줄이 적을 때 띠 바탕만 화면 끝까지 — 줄은 위 Sliver 가 그려 끝까지 스크롤된다
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: ColoredBox(color: context.colors.bgLayerDefault),
                 ),
               ],
             ),
@@ -253,7 +259,9 @@ class _SummaryLine extends StatelessWidget {
     required this.label,
     required this.sub,
     required this.amount,
+    this.loading = false,
   });
+  final bool loading;
   final String label;
   final String sub;
   final String amount;
@@ -261,6 +269,26 @@ class _SummaryLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    if (loading) {
+      return Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: PSpacing.x1,
+              children: [
+                Text(
+                  label,
+                  style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+                ),
+                PSkeleton.text(PTypography.t3, width: 72),
+              ],
+            ),
+          ),
+          PSkeleton.text(PTypography.t9, width: 128),
+        ],
+      );
+    }
     final labelStyle = PTypography.t4.copyWith(color: c.fgNeutralSubtle);
     final subStyle = PTypography.t3.copyWith(color: c.fgNeutralSubtle);
     final amountStyle = PTypography.t9.copyWith(
@@ -341,7 +369,9 @@ class _SessionRow extends StatelessWidget {
     final per = dutchPerPerson(dp);
     final date = dutchDateLabel(dp.dutchPayDate);
     final total = txMoney(dp.totalAmount, masked);
-    final perText = per.even
+    final perText = !per.shown
+        ? null
+        : per.even
         ? l.dutchPerPersonOf(txMoney(per.each, masked))
         : l.dutchPerPersonRestOf(
             txMoney(per.each, masked),
@@ -374,7 +404,7 @@ class _SessionRow extends StatelessWidget {
             items: [
               if (date.isNotEmpty) PTag(date),
               PTag(l.dutchNPeople(n)),
-              PTag(perText),
+              if (perText != null) PTag(perText),
             ],
           ),
           Padding(
@@ -440,7 +470,10 @@ class _FriendRow extends StatelessWidget {
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             )
-          : null,
+          : Text(
+              l.dutchSettled,
+              style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+            ),
     );
   }
 }

@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
-import 'package:groo_damda_app/shared/widgets/p_floating_action_button.dart';
 
 void main() {
   for (final dark in [false, true]) {
@@ -26,7 +25,6 @@ void main() {
                     PCardVariant.raised,
                   ])
                     PCard(variant: v, child: const SizedBox(height: 20)),
-                  PFloatingActionButton(icon: Icons.add, onPressed: () {}),
                 ],
               ),
             ),
@@ -42,23 +40,6 @@ void main() {
           expect(deco.boxShadow, isNull, reason: '카드는 그림자 없이');
           expect((deco.border! as Border).top.color, c.strokeNeutralWeak);
         }
-        final shadow = tester
-            .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-            .map((e) => e.decoration)
-            .whereType<BoxDecoration>()
-            .where((d) => d.shape == BoxShape.circle && d.boxShadow != null);
-        expect(shadow.single.boxShadow, theme.extension<PShadows>()!.s3);
-        expect(
-          tester
-              .widgetList<Material>(
-                find.descendant(
-                  of: find.byType(PFloatingActionButton),
-                  matching: find.byType(Material),
-                ),
-              )
-              .every((m) => m.elevation == 0),
-          isTrue,
-        );
       },
     );
   }

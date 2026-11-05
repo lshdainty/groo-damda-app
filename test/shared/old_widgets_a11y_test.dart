@@ -10,7 +10,6 @@ import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_checkbox.dart';
 import 'package:groo_damda_app/shared/widgets/p_chip.dart';
-import 'package:groo_damda_app/shared/widgets/p_floating_action_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_progress.dart';
 import 'package:groo_damda_app/shared/widgets/p_accordion.dart';
 import 'package:groo_damda_app/shared/widgets/p_radio_list.dart';
@@ -300,31 +299,6 @@ void main() {
     tester.semantics.tap(find.semantics.byLabel('지출, 탭 1/3'));
     await tester.pump();
     expect(picked, [2], reason: '고른 탭을 눌러도 부르지 않는다');
-    handle.dispose();
-  });
-
-  testWidgets('PFloatingActionButton — 버튼이고 이름은 tooltip 이다(03G-017)', (
-    tester,
-  ) async {
-    final handle = tester.ensureSemantics();
-    var taps = 0;
-    await tester.pumpWidget(
-      _host(
-        PFloatingActionButton(
-          icon: Icons.add,
-          tooltip: '거래 추가',
-          onPressed: () => taps++,
-        ),
-      ),
-    );
-    final fab = _nodes(
-      tester,
-    ).where((n) => n.label.contains('거래 추가') && n.flagsCollection.isButton);
-    expect(fab, isNotEmpty, reason: '이름 있는 버튼 노드');
-    expect(fab.first.hasAction(SemanticsAction.tap), isTrue);
-    tester.semantics.tap(find.semantics.byLabel('거래 추가'));
-    await tester.pump();
-    expect(taps, 1);
     handle.dispose();
   });
 }

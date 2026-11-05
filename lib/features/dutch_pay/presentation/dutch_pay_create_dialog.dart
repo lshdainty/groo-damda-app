@@ -8,6 +8,7 @@ import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
+import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay_model.dart';
 import 'package:groo_damda_app/features/dutch_pay/domain/dutch_shares.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -315,8 +316,8 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
     final l = AppLocalizations.of(context);
     final step1 = _step == 1;
     return PBottomSheetContent(
+      eyebrow: l.dutchStepLabel(_step, 2),
       title: step1 ? l.dutchInfoTitle : l.dutchParticipant,
-      description: l.dutchStepLabel(_step, 2),
       closeLabel: l.actionClose,
       flushBody: true,
       scrollFog: true,
@@ -447,15 +448,18 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
       count: people.length,
       payerIndex: _payerIndex,
     );
-    final each = _total ~/ people.length;
-    final uneven = shares.shares.toSet().length > 1;
-    final perText = uneven
-        ? l.dutchPerPersonRestOf(
-            txMoney(each, masked),
-            txMoney(shares.shares[_payerIndex] - each, masked),
-            people[_payerIndex].name,
-          )
-        : l.dutchPerPersonOf(txMoney(each, masked));
+    final per = dutchPerPersonOf(shares.shares, [
+      for (final p in people) p.name,
+    ]);
+    final perText = !per.shown
+        ? null
+        : per.even
+        ? l.dutchPerPersonOf(txMoney(per.each, masked))
+        : l.dutchPerPersonRestOf(
+            txMoney(per.each, masked),
+            txMoney(per.rest, masked),
+            per.restName!,
+          );
     // 함께 정산했던 사람 — 아직 안 고른 친구만(같은 사람이 두 번 보이지 않는다)
     final freq = <String, int>{};
     for (final d in ref.watch(dutchPayListProvider).value ?? const []) {
@@ -481,11 +485,18 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x5,
         children: [
-          Text(
-            '${l.dutchSummaryLine(people.length, txMoney(each, masked)).split(' · ').first} · $perText',
-            semanticsLabel: l.dutchSummaryLine(
-              people.length,
-              txMoney(each, masked),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: l.dutchNPeople(people.length)),
+                if (perText != null) ...[
+                  const TextSpan(text: ' · '),
+                  TextSpan(
+                    text: perText,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ],
             ),
             style: PTypography.t5.copyWith(color: c.fgNeutral),
           ),
@@ -500,15 +511,19 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
                 PChipGroup(
                   semanticLabel: l.dutchParticipant,
                   children: [
-                    PChip(
-                      key: const ValueKey('dutch-chip-me'),
-                      label: people.first.name,
-                      leading: PAvatar(
-                        name: people.first.name,
-                        size: PAvatarSize.s20,
+                    // 나는 고른 모양으로 두고 누름만 없앤다(막힌 칩이 아니다)
+                    IgnorePointer(
+                      child: PChip(
+                        key: const ValueKey('dutch-chip-me'),
+                        label: people.first.name,
+                        leading: PAvatar(
+                          name: people.first.name,
+                          size: PAvatarSize.s20,
+                        ),
+                        size: PChipSize.small,
+                        selected: true,
+                        onPressed: () {},
                       ),
-                      size: PChipSize.small,
-                      onPressed: null,
                     ),
                     for (final n in _others)
                       PInputChip(

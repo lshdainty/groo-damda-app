@@ -54,16 +54,39 @@ void main() {
     expect(per.even, isFalse);
   });
 
+  test('옛 데이터는 저장된 몫에서 그 사람을 찾는다(결제자가 친구)', () {
+    final d = _d([
+      _p(1, '나', 61333),
+      _p(2, '철수', 61334, payer: true),
+      _p(3, '영희', 61333),
+    ]);
+    expect(dutchPerPerson(d).restName, '철수');
+  });
+
+  test('2:1:1 은 1인당을 뺀다', () {
+    final d = _d([
+      _p(1, '나', 50000, payer: true),
+      _p(2, '철수', 25000),
+      _p(3, '영희', 25000),
+    ], total: 100000);
+    expect(dutchPerPerson(d).shown, isFalse);
+  });
+
   test('나눠 떨어지면 나머지가 없다', () {
     final d = _d([_p(1, '나', 500, payer: true), _p(2, '철수', 500)], total: 1000);
     expect(dutchPerPerson(d).even, isTrue);
   });
 
   test('받을 돈은 안 낸 몫의 합이다', () {
-    final d = _d([_p(1, '나', 500, payer: true), _p(2, '철수', 500)], total: 1000);
+    final d = _d([
+      _p(1, '나', 61334, payer: true),
+      _p(2, '철수', 61333),
+      _p(3, '영희', 61333),
+    ]);
     final r = dutchReceivable([d]);
-    expect(r.amount, 1000);
+    expect(r.amount, 122666);
     expect(r.count, 2);
+    expect(dutchFriends([d]).map((f) => f.name), ['철수', '영희']);
   });
 
   test('날짜는 올해만 해를 줄인다', () {
@@ -71,6 +94,11 @@ void main() {
     expect(dutchDateLabel('2026-10-14', now: now), '10월 14일');
     expect(dutchDateLabel('2025-10-14', now: now), contains('2025'));
     expect(dutchDateLabel(null, now: now), '');
+  });
+
+  test('상세 날짜에 요일이 붙고 작년은 해가 붙는다', () {
+    expect(dutchDateDowLabel('2025-10-14'), contains('2025'));
+    expect(dutchDateDowLabel('2026-10-20'), contains('화'));
   });
 
   test('날짜 내림차순으로 정렬한다', () {

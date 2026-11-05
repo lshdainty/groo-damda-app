@@ -9,10 +9,11 @@ import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay.dart';
 import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_create_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 
-Finder _field(String hint) => find.byWidgetPredicate(
-  (w) => w is TextField && w.decoration?.hintText == hint,
-);
+// ds PInput 은 TextField.decoration 이 없고 자리 글을 따로 그린다 — PInput.placeholder 로 찾는다
+Finder _field(String hint) =>
+    find.byWidgetPredicate((w) => w is PInput && w.placeholder == hint);
 
 Finder _button(String label) =>
     find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;

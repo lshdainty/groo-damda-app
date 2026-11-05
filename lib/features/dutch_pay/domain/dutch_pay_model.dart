@@ -16,7 +16,8 @@ List<DutchPay> dutchSorted(Iterable<DutchPay> items, {required bool settled}) =>
   var count = 0;
   for (final d in active) {
     for (final p in d.participants) {
-      if (!p.isPaid) {
+      // 서버는 결제자를 isPaid=N 으로 두지만 갚을 사람이 아니다
+      if (!p.isPaid && !p.isPayer) {
         amount += p.amount;
         count++;
       }
@@ -35,21 +36,21 @@ class DutchFriend {
   int net = 0;
 }
 
-/// participantName(빈 글 제외) 기준 집계 — 받을 돈이 큰 차례, 같으면 함께 한 횟수.
+/// participantName(빈 글 제외) 기준 집계 — 함께 한 횟수가 많은 차례, 같으면 받을 돈.
 List<DutchFriend> dutchFriends(Iterable<DutchPay> items) {
   final map = <String, DutchFriend>{};
   for (final d in items) {
     for (final p in d.participants) {
       final name = (p.participantName ?? '').trim();
-      if (name.isEmpty) continue;
+      if (name.isEmpty || p.isPayer) continue;
       final f = map.putIfAbsent(name, () => DutchFriend(name));
       f.sessions++;
       if (!d.isSettled && !p.isPaid) f.net += p.amount;
     }
   }
   return map.values.toList()..sort((a, b) {
-    if (a.net != b.net) return b.net.compareTo(a.net);
-    return b.sessions.compareTo(a.sessions);
+    if (a.sessions != b.sessions) return b.sessions.compareTo(a.sessions);
+    return b.net.compareTo(a.net);
   });
 }
 
@@ -57,34 +58,44 @@ List<DutchFriend> dutchFriends(Iterable<DutchPay> items) {
 int dutchPaidCount(DutchPay d) =>
     d.participants.where((p) => p.isPayer || p.isPaid).length;
 
-/// "1인당" — 몫이 모두 같을 때만 그 값. 나눠 떨어지지 않으면 [each] = 내림(총액 ÷ 인원)과 그 위를 진 사람 · 몫 차이.
+/// "1인당" 글 — 가장 작은 몫을 [each] 로 둔다. 몫이 모두 같으면 [each] 만, 딱 한 사람만 [each] + r (r < 인원)이면 그 사람과 r,
+/// 그 밖(비율 · 직접 입력)은 [shown] = false 로 "1인당" 조각을 뺀다. 웹과 같은 꼴이다.
 class DutchPerPerson {
-  const DutchPerPerson(this.each, {this.restName, this.rest = 0});
+  const DutchPerPerson(
+    this.each, {
+    this.restName,
+    this.rest = 0,
+    this.shown = true,
+  });
   final int each;
-
-  /// 나머지를 진 사람(저장 값이 [each] 보다 큰 사람 — 결제자 우선). 몫이 같으면 null.
   final String? restName;
-
-  /// 그 사람이 더 진 원.
   final int rest;
+  final bool shown;
   bool get even => restName == null;
 }
 
-DutchPerPerson dutchPerPerson(DutchPay d) {
-  final n = d.participants.length;
-  if (n == 0) return const DutchPerPerson(0);
-  final each = d.totalAmount ~/ n;
-  DutchPayParticipant? over;
-  for (final p in d.participants) {
-    if (p.amount > each && (over == null || p.isPayer)) over = p;
+/// 저장된 몫과 이름으로 셈 — 목록 · 만들기 · 상세가 같은 함수를 쓴다.
+DutchPerPerson dutchPerPersonOf(List<int> shares, List<String> names) {
+  if (shares.isEmpty) return const DutchPerPerson(0, shown: false);
+  final m = shares.reduce((a, b) => a < b ? a : b);
+  final over = [
+    for (var i = 0; i < shares.length; i++)
+      if (shares[i] != m) i,
+  ];
+  if (over.isEmpty) return DutchPerPerson(m);
+  if (over.length == 1) {
+    final r = shares[over.first] - m;
+    if (r < shares.length) {
+      return DutchPerPerson(m, restName: names[over.first].trim(), rest: r);
+    }
   }
-  if (over == null) return DutchPerPerson(each);
-  return DutchPerPerson(
-    each,
-    restName: (over.participantName ?? '').trim(),
-    rest: over.amount - each,
-  );
+  return DutchPerPerson(m, shown: false);
 }
+
+DutchPerPerson dutchPerPerson(DutchPay d) => dutchPerPersonOf(
+  [for (final p in d.participants) p.amount],
+  [for (final p in d.participants) p.participantName ?? ''],
+);
 
 /// 정산 날짜 — 올해는 줄임 "10월 14일", 다른 해는 표준 "2025년 10월 14일". 해를 버리지 않고 날짜 글을 통째로 읽는다(앱 "2000년" 결함).
 String dutchDateLabel(String? raw, {DateTime? now}) {

@@ -2958,6 +2958,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPageLoadError => 'Couldn\'t load the login page.';
 
   @override
+  String get dutchSendRequest => 'Request payment';
+
+  @override
+  String dutchSendRequestOf(String name) {
+    return 'Request payment from $name';
+  }
+
+  @override
+  String get dutchRequestSoon => 'Payment requests are coming soon.';
+
+  @override
   String dutchStepLabel(int step, int total) {
     return 'Step $step / $total';
   }
@@ -3059,23 +3070,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not mark as received. Please try again in a moment.';
 
   @override
-  String dutchMarkedReceived(String name) {
-    return 'Marked $name as received.';
-  }
-
-  @override
   String get dutchTitle => 'Dutch Pay';
 
   @override
   String get dutchCreate => 'Create settlement';
-
-  @override
-  String dutchStepTitle(String title, int step, int total) {
-    return '$title ($step/$total)';
-  }
-
-  @override
-  String get dutchLoadFailed => 'Failed to load Dutch Pay';
 
   @override
   String get dutchTabActive => 'Active';
@@ -3154,9 +3152,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchPayer => 'Payer';
 
   @override
-  String get dutchSetPayer => 'Set as payer';
-
-  @override
   String get dutchNameLabel => 'Settlement name';
 
   @override
@@ -3175,14 +3170,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchDateLabel => 'Date';
 
   @override
-  String get dutchSelectParticipants => 'Select participants';
-
-  @override
-  String dutchNSelected(int count) {
-    return '$count selected';
-  }
-
-  @override
   String get dutchAddNamePlaceholder => 'Enter a name to add';
 
   @override
@@ -3198,13 +3185,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchPrev => 'Back';
 
   @override
-  String get dutchDetailTitle => 'Settlement details';
-
-  @override
   String get dutchParticipant => 'Participant';
-
-  @override
-  String get dutchSettleAction => 'Mark as settled';
 
   @override
   String get dutchDeleteTitle => 'Delete Dutch Pay';
@@ -3218,34 +3199,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchRequestAll => 'Request all';
 
   @override
-  String dutchRequestSent(String name) {
-    return 'Payment request sent to $name (KakaoTalk/SMS coming soon)';
-  }
-
-  @override
-  String dutchRequestSentBulk(int count) {
-    return 'Payment request sent to $count people (KakaoTalk/SMS coming soon)';
-  }
-
-  @override
-  String get dutchAllSettled => 'All participants have already settled';
-
-  @override
-  String dutchNeedsPayment(String amount) {
-    return 'Send $amount원';
-  }
-
-  @override
   String get dutchNoName => '(No name)';
-
-  @override
-  String get dutchMarkPaid => 'Mark as paid';
-
-  @override
-  String get dutchRequest => 'Request';
-
-  @override
-  String get dutchUnsettled => 'Unsettled';
 
   @override
   String get dutchStartTitle => 'Start Dutch Pay';

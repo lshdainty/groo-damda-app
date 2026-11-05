@@ -71,12 +71,12 @@ class PButton extends StatefulWidget {
     this.loading = false,
     this.labelLines = 1,
     this.focusNode,
+    this.semanticLabel,
   }) : assert(
          prefixIcon == null || suffixIcon == null,
          '앞 · 뒤 아이콘은 하나만 쓴다(button.yaml layout withText)',
        ),
-       icon = null,
-       semanticLabel = null;
+       icon = null;
 
   /// 아이콘만 — 정사각. [semanticLabel] 이 이 버튼의 이름이다.
   const PButton.icon({
@@ -524,11 +524,11 @@ class _PButtonState extends State<PButton> {
         container: true,
         button: true,
         enabled: _enabled,
-        label: iconOnly ? widget.semanticLabel : null,
+        label: widget.semanticLabel,
         // 웹의 aria-busy — 바쁘다는 것을 이름 뒤에 읽는다
         value: widget.loading ? l10n.dsProgressCircleLabel : null,
         onTap: _enabled && !widget.loading ? _activate : null,
-        excludeSemantics: iconOnly,
+        excludeSemantics: iconOnly || widget.semanticLabel != null,
         // 앱 버튼도 포커스를 받는다 — Tab 순서에 들고 Space · Enter 로 누른다(button.yaml Behavior, 사용자 결정 2026-10-08)
         child: CallbackShortcuts(
           bindings: _enabled && !widget.loading
