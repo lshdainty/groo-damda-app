@@ -115,7 +115,7 @@ void main() {
     expect(find.text('송금 요청은 곧 열려요.'), findsOneWidget);
     final disabled = tester
         .widgetList<PButton>(find.byType(PButton))
-        .where((b) => b.label == '송금 요청' || b.label == '일괄 요청');
+        .where((b) => b.label == '요청' || b.label == '일괄 요청');
     expect(disabled, isNotEmpty);
     expect(disabled.every((b) => b.onPressed == null), isTrue);
     // 1인당 줄: 나머지 1원은 몫이 큰 사람(나)
