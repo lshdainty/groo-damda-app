@@ -4657,6 +4657,12 @@ abstract class AppLocalizations {
   /// **'매매를 처리하지 못했어요.'**
   String get tradeSaveFailed;
 
+  /// No description provided for @tradeSaveInsufficientQty.
+  ///
+  /// In ko, this message translates to:
+  /// **'보유 수량이 부족해요.'**
+  String get tradeSaveInsufficientQty;
+
   /// No description provided for @budgetMonthlyLimit.
   ///
   /// In ko, this message translates to:

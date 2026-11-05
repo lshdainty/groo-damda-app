@@ -2480,6 +2480,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tradeSaveFailed => '매매를 처리하지 못했어요.';
 
   @override
+  String get tradeSaveInsufficientQty => '보유 수량이 부족해요.';
+
+  @override
   String get budgetMonthlyLimit => '월 예산 한도';
 
   @override

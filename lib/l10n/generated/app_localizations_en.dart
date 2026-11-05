@@ -2519,6 +2519,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tradeSaveFailed => 'Couldn\'t process the trade.';
 
   @override
+  String get tradeSaveInsufficientQty => 'Not enough shares held.';
+
+  @override
   String get budgetMonthlyLimit => 'Monthly budget limit';
 
   @override

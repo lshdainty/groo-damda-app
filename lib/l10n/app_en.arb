@@ -1395,6 +1395,7 @@
   "budgetSaveFailed": "Couldn't save the budget.",
   "assetSaveFailed": "Couldn't save the asset.",
   "tradeSaveFailed": "Couldn't process the trade.",
+  "tradeSaveInsufficientQty": "Not enough shares held.",
   "budgetMonthlyLimit": "Monthly budget limit",
   "budgetLoadError": "Couldn't load budget",
   "budgetSelectMonth": "Select month",

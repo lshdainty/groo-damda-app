@@ -99,6 +99,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
   late String _type;
   bool _submitting = false;
   bool _failed = false;
+  String? _failCode;
   final _errorKey = GlobalKey();
   bool _tried = false;
 
@@ -242,6 +243,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
     }
     setState(() {
       _failed = false;
+      _failCode = null;
       _submitting = true;
     });
     try {
@@ -273,10 +275,13 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       ref.invalidate(assetTradesProvider(widget.asset.rowId));
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
-      setState(() => _failed = true);
+      setState(() {
+        _failed = true;
+        _failCode = e.code;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
@@ -361,7 +366,10 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
               padding: gutter,
               child: FormErrorCallout(
                 key: _errorKey,
-                message: l.tradeSaveFailed,
+                // 서버 글은 내지 않고 오류 코드로만 가른다(ASSET_012 = 보유 수량 부족).
+                message: _failCode == 'ASSET_012'
+                    ? l.tradeSaveInsufficientQty
+                    : l.tradeSaveFailed,
               ),
             ),
           // 매수 · 매도 — 2 ~ 4개 폼 값은 칩 하나 고르기

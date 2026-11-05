@@ -44,7 +44,8 @@ const _holding = AssetHolding(
 
 /// 저장을 서버 오류로 거절하는 가짜 — silent 로 불렸는지도 센다.
 class _FailingRepo extends AssetRepository {
-  _FailingRepo() : super(Dio());
+  _FailingRepo([this.code = 'ASSET_011']) : super(Dio());
+  final String code;
   final silentFlags = <bool>[];
 
   @override
@@ -63,7 +64,7 @@ class _FailingRepo extends AssetRepository {
     bool silent = false,
   }) async {
     silentFlags.add(silent);
-    throw ApiException(code: 'ASSET_011', message: '서버 원문');
+    throw ApiException(code: code, message: '서버 원문');
   }
 
   @override
@@ -132,6 +133,56 @@ void main() {
     expect(repo.silentFlags, [true]);
     expect(l.tradeSaveFailed, '매매를 처리하지 못했어요.');
     expect(findPlain(l.tradeSaveFailed), findsOneWidget);
+    expect(find.byType(FormErrorCallout), findsOneWidget);
+    expect(find.textContaining('서버 원문'), findsNothing);
+    // 시트는 닫히지 않았고 쓴 값이 남는다.
+    expect(_submitButton(l.actionSave), findsOneWidget);
+    expect(find.text('3'), findsWidgets);
+  });
+
+  testWidgets('매매 저장 실패 ASSET_012 — 수량 부족 문장 · 서버 글 없음', (tester) async {
+    final l = await AppLocalizations.delegate.load(const Locale('ko'));
+    final repo = _FailingRepo('ASSET_012');
+    tester.view.physicalSize = const Size(1200, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          assetsProvider.overrideWith((ref) async => [_invest, _settlement]),
+          assetRepositoryProvider.overrideWith((ref) async => repo),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => TextButton(
+                onPressed: () =>
+                    showAssetTradeSheet(ctx, asset: _invest, holding: _holding),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(0), '3');
+    await tester.enterText(find.byType(TextField).at(1), '150000');
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(find.byType(FormErrorCallout), findsNothing);
+
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+
+    expect(repo.silentFlags, [true]);
+    expect(l.tradeSaveInsufficientQty, '보유 수량이 부족해요.');
+    expect(findPlain(l.tradeSaveInsufficientQty), findsOneWidget);
+    expect(findPlain(l.tradeSaveFailed), findsNothing);
     expect(find.byType(FormErrorCallout), findsOneWidget);
     expect(find.textContaining('서버 원문'), findsNothing);
     // 시트는 닫히지 않았고 쓴 값이 남는다.
