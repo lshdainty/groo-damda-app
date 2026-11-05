@@ -877,7 +877,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tradeInsufficientQty => 'Cannot sell more than you hold.';
 
   @override
-  String get tradeHistory => 'Trade history';
+  String get tradeQtyRequired => 'Enter the quantity.';
+
+  @override
+  String get tradeAmountRequired => 'Enter the trade amount.';
+
+  @override
+  String get tradePreview => 'Preview after the trade';
+
+  @override
+  String get tradeHistory => 'Trade log';
 
   @override
   String get tradeDeleted => 'Trade cancelled';
@@ -1023,7 +1032,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add your holdings with the button above. No live price — enter the value yourself.';
 
   @override
-  String get assetHoldingsEmptyDetail => 'No holdings yet. Add them from Edit.';
+  String get assetHoldingsEmptyDetail => 'No holdings yet';
 
   @override
   String get assetHoldingSearchHint => 'Search stock name';

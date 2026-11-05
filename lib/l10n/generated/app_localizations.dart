@@ -1724,10 +1724,28 @@ abstract class AppLocalizations {
   /// **'보유 수량보다 많이 팔 수 없어요.'**
   String get tradeInsufficientQty;
 
+  /// No description provided for @tradeQtyRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'수량을 넣어주세요.'**
+  String get tradeQtyRequired;
+
+  /// No description provided for @tradeAmountRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래대금을 넣어주세요.'**
+  String get tradeAmountRequired;
+
+  /// No description provided for @tradePreview.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 후 미리보기'**
+  String get tradePreview;
+
   /// No description provided for @tradeHistory.
   ///
   /// In ko, this message translates to:
-  /// **'거래 내역'**
+  /// **'거래 기록'**
   String get tradeHistory;
 
   /// No description provided for @tradeDeleted.
@@ -1972,7 +1990,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetHoldingsEmptyDetail.
   ///
   /// In ko, this message translates to:
-  /// **'보유 종목이 없어요. 수정에서 종목을 추가해보세요.'**
+  /// **'보유 종목이 없어요'**
   String get assetHoldingsEmptyDetail;
 
   /// No description provided for @assetHoldingSearchHint.

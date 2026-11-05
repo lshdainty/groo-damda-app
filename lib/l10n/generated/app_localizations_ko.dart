@@ -863,7 +863,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tradeInsufficientQty => '보유 수량보다 많이 팔 수 없어요.';
 
   @override
-  String get tradeHistory => '거래 내역';
+  String get tradeQtyRequired => '수량을 넣어주세요.';
+
+  @override
+  String get tradeAmountRequired => '거래대금을 넣어주세요.';
+
+  @override
+  String get tradePreview => '거래 후 미리보기';
+
+  @override
+  String get tradeHistory => '거래 기록';
 
   @override
   String get tradeDeleted => '거래를 취소했어요';
@@ -1008,7 +1017,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '위 버튼으로 보유분을 더할 수 있어요. 시세 연동이 없어 평가액은 직접 입력해요.';
 
   @override
-  String get assetHoldingsEmptyDetail => '보유 종목이 없어요. 수정에서 종목을 추가해보세요.';
+  String get assetHoldingsEmptyDetail => '보유 종목이 없어요';
 
   @override
   String get assetHoldingSearchHint => '종목 이름 검색';

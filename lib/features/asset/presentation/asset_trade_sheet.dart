@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
@@ -14,20 +13,28 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_section_label.dart';
-import 'package:groo_damda_app/shared/widgets/p_select.dart';
-import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
-import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart'
+    show PLeaveConfirmCopy;
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/forms/pick_list.dart';
+import 'package:groo_damda_app/shared/forms/picker_row.dart';
 
-/// 매수·매도 입력 — web `AssetTradeDialog` 미러.
+/// 매수·매도 입력(I-17 56) — 입력 폼 시트. web `AssetTradeDialog` 미러.
 ///
 /// 예수금이 줄고 느는 진짜 사건을 여기서 기록한다. 보유 목록을 손으로 고치는 것과 다르다 —
 /// 평가액 갱신을 보고 예수금을 추측하면 시세 변동·추가 매수·재등록이 구분되지 않는다.
 ///
 /// 거래대금은 수수료를 뺀 순수 금액이다. 수수료는 매수면 취득원가에 들어가고
 /// 매도면 대금에서 빠진다 — 어느 쪽이든 예수금에서 실제로 나간다.
-void showAssetTradeSheet(
+///
+/// 바깥 · 끌기로 안 닫히고, 쓴 값이 있으면 닫기 전에 묻는다. 새 폼이라 첫 칸(수량)에 초점이 간다.
+/// 거래일은 지금까지처럼 보내지 않는다(요청 본문은 그대로 — 서버가 사용자 시계의 지금을 쓴다).
+Future<void> showAssetTradeSheet(
   BuildContext context, {
   required Asset asset,
 
@@ -36,20 +43,31 @@ void showAssetTradeSheet(
   String defaultType = 'BUY',
 }) {
   final l = AppLocalizations.of(context);
-  final controller = PSheetController();
-  showPSheet<void>(
+  final probe = _TradeProbe();
+  final qtyFocus = FocusNode(debugLabel: 'Trade quantity');
+  return PBottomSheet.show<void>(
     context,
-    title: l.tradeTitle,
-    contentBuilder: (ctx, scrollCtrl) => _TradeBody(
+    form: true,
+    initialFocus: qtyFocus,
+    isDirty: () => probe.dirty(),
+    leaveCopy: PLeaveConfirmCopy(
+      title: l.sheetLeaveTitle,
+      description: l.sheetLeaveDescription,
+      stayLabel: l.sheetLeaveStay,
+      leaveLabel: l.sheetLeaveLeave,
+    ),
+    builder: (_) => _TradeBody(
       asset: asset,
       holding: holding,
       defaultType: defaultType,
-      scrollController: scrollCtrl,
-      controller: controller,
+      probe: probe,
+      qtyFocus: qtyFocus,
     ),
-    footerBuilder: (ctx) =>
-        PSheetFooter(controller: controller, submitLabel: l.actionSave),
-  ).whenComplete(controller.dispose);
+  );
+}
+
+class _TradeProbe {
+  bool Function() dirty = () => false;
 }
 
 class _TradeBody extends ConsumerStatefulWidget {
@@ -57,14 +75,14 @@ class _TradeBody extends ConsumerStatefulWidget {
     required this.asset,
     required this.holding,
     required this.defaultType,
-    required this.scrollController,
-    required this.controller,
+    required this.probe,
+    required this.qtyFocus,
   });
   final Asset asset;
   final AssetHolding holding;
   final String defaultType;
-  final ScrollController scrollController;
-  final PSheetController controller;
+  final _TradeProbe probe;
+  final FocusNode qtyFocus;
 
   @override
   ConsumerState<_TradeBody> createState() => _TradeBodyState();
@@ -78,6 +96,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
 
   late String _type;
   bool _submitting = false;
+  bool _tried = false;
 
   /// 결제 계좌 — null 이면 증권계좌 예수금에서. 예수금을 따로 관리하지 않으면 통장을 고른다.
   int? _settlementAssetRowId;
@@ -185,14 +204,16 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
     for (final c in [_qtyCtrl, _amountCtrl, _feeCtrl]) {
       c.addListener(_sync);
     }
-    widget.controller.onSubmit = _submit;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+    widget.probe.dirty = () =>
+        _qtyCtrl.text.isNotEmpty ||
+        _amountCtrl.text.isNotEmpty ||
+        _feeCtrl.text.isNotEmpty ||
+        _memoCtrl.text.isNotEmpty;
   }
 
   void _sync() {
     if (!mounted) return;
     setState(() {});
-    widget.controller.setCanSubmit(_canSubmit);
     _schedulePreview();
   }
 
@@ -202,13 +223,20 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
     for (final c in [_qtyCtrl, _amountCtrl, _feeCtrl, _memoCtrl]) {
       c.dispose();
     }
+    widget.qtyFocus.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    if (!_canSubmit) return;
+    if (_submitting) return;
+    // 주 버튼을 막지 않고 누르면 칸 아래 오류(DESIGN.desk:4081)
+    setState(() => _tried = true);
+    if (!_canSubmit) {
+      (_qty <= 0 || (_isSell && _qty > _heldQty) ? widget.qtyFocus : null)
+          ?.requestFocus();
+      return;
+    }
     setState(() => _submitting = true);
-    widget.controller.setSubmitting(true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       await repo.createTrade(
@@ -236,20 +264,48 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       invalidateAfterAssetChange(ref);
       ref.invalidate(assetTradesProvider(widget.asset.rowId));
       if (!mounted) return;
-      Navigator.of(context).pop();
+      PBottomSheet.of(context).close();
     } on ApiException {
       if (!mounted) return;
     } finally {
-      if (mounted) {
-        setState(() => _submitting = false);
-        widget.controller.setSubmitting(false);
-      }
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
+  Future<void> _pickSettlement(List<Asset> options) async {
+    final l = AppLocalizations.of(context);
+    FocusScope.of(context).unfocus();
+    final picked = await PBottomSheet.show<int>(
+      context,
+      builder: (sheetContext) => PBottomSheetContent(
+        title: l.tradeSettlement,
+        closeLabel: l.actionClose,
+        flushBody: true,
+        scrollFog: true,
+        body: PickList<int>(
+          label: l.tradeSettlement,
+          selected: _settlementAssetRowId ?? -1,
+          items: [
+            PickItem<int>(value: -1, title: l.tradeSettlementCash),
+            for (final a in options)
+              PickItem<int>(value: a.rowId, title: _accountLabel(a)),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _settlementAssetRowId = picked == -1 ? null : picked);
+    _sync();
+  }
+
+  String _accountLabel(Asset a) =>
+      a.institution != null && a.institution!.isNotEmpty
+      ? '${a.institution} · ${a.assetName}'
+      : a.assetName;
+
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
     final realized = _realizedPreview;
     // 결제 계좌 후보 — 이 증권계좌 자신과 카드는 뺀다.
@@ -262,51 +318,65 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
                   a.assetType != 'CHECK_CARD',
             )
             .toList(growable: false);
+    final selected = settlementOptions
+        .where((a) => a.rowId == _settlementAssetRowId)
+        .firstOrNull;
+    final qtyError = _tried && _qty <= 0
+        ? l.tradeQtyRequired
+        : _isSell && _qty > _heldQty
+        ? l.tradeInsufficientQty
+        : null;
+    final amountError = _tried && _amount <= 0 ? l.tradeAmountRequired : null;
+    final critical = _viaCash && (_cashAfter ?? 0) < 0;
+    const gutter = EdgeInsets.symmetric(horizontal: PSpacing.globalGutter);
+    TextStyle value(Color color) => PTypography.t5.copyWith(
+      color: color,
+      fontWeight: FontWeight.w700,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
 
-    return ListView(
-      controller: widget.scrollController,
-      // 좌우 여백이 빠져 있어 입력칸이 시트 가장자리에 붙어 있었다.
-      // 같은 입력 폼 시트(add_tx_sheet)와 같은 값.
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
-      children: [
-        PTabs<String>(
-          items: [
-            PTabItem(value: 'BUY', label: l.tradeBuy),
-            PTabItem(value: 'SELL', label: l.tradeSell),
-          ],
-          value: _type,
-          onChanged: (v) => setState(() {
-            _type = v;
-            _sync();
-          }),
-          variant: PTabsVariant.container,
-          size: PTabsSize.sm,
-          expand: true,
-        ),
-        const SizedBox(height: PSpace.x20),
-
-        // 어떤 종목인지 — 여기서 고르는 게 아니라 이미 정해져서 들어온다.
-        // 종목 추가는 편집(토스 검색)에서 한다.
-        Container(
-          padding: const EdgeInsets.all(PSpace.x12),
-          decoration: BoxDecoration(
-            color: t.bgSunken,
-            borderRadius: PRadius.brMd,
-            border: Border.all(color: t.borderSubtle),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _holdingName,
-                style: PTypo.bodySm.copyWith(
-                  color: t.fgPrimary,
-                  fontWeight: PFontWeight.bold,
+    return PBottomSheetContent(
+      title: l.tradeTitle,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 매수 · 매도 — 2 ~ 4개 폼 값은 칩 하나 고르기
+          Padding(
+            padding: gutter,
+            child: PChipRadioGroup<String>(
+              semanticLabel: l.tradeTitle,
+              value: _type,
+              onChanged: (v) {
+                setState(() => _type = v);
+                _sync();
+              },
+              children: [
+                PChipRadio<String>(
+                  value: 'BUY',
+                  label: l.tradeBuy,
+                  variant: PChipVariant.outlineStrong,
+                  size: PChipSize.medium,
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                l.tradeHeldSummary(
+                PChipRadio<String>(
+                  value: 'SELL',
+                  label: l.tradeSell,
+                  variant: PChipVariant.outlineStrong,
+                  size: PChipSize.medium,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: PSpacing.x4),
+
+          // 어떤 종목인지 — 여기서 고르는 게 아니라 이미 정해져서 들어온다. 종목 추가는 편집(토스 검색)에서 한다.
+          PList(
+            semanticLabel: l.tradeHolding,
+            children: [
+              PListItem(
+                title: _holdingName,
+                detail: l.tradeHeldSummary(
                   _h.quantity?.toString() ?? '0',
                   _h.avgPrice != null
                       ? krwSigned(
@@ -315,171 +385,177 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
                         )
                       : '—',
                 ),
-                style: PTypo.micro.copyWith(color: t.fgTertiary),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: PSpace.x20),
+          const SizedBox(height: PSpacing.x4),
 
-        PSectionLabel(l.tradeQuantity),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(
-          controller: _qtyCtrl,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          placeholder: '0',
-        ),
-        const SizedBox(height: PSpace.x20),
-
-        PSectionLabel(l.tradeAmount),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(
-          controller: _amountCtrl,
-          keyboardType: TextInputType.number,
-          placeholder: '0',
-        ),
-        const SizedBox(height: 6),
-        Text(
-          l.tradeAmountHelp,
-          style: PTypo.micro.copyWith(color: t.fgTertiary),
-        ),
-        const SizedBox(height: PSpace.x20),
-
-        PSectionLabel(l.tradeFee),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(
-          controller: _feeCtrl,
-          keyboardType: TextInputType.number,
-          placeholder: '0',
-        ),
-        const SizedBox(height: PSpace.x20),
-
-        // 결제 계좌는 매수에만. 매도 대금은 예수금에 남기고 사용자가 이체로 관리한다 —
-        // 팔았다고 통장으로 자동 이체되지는 않는다.
-        if (!_isSell) ...[
-          PSectionLabel(l.tradeSettlement),
-          const SizedBox(height: PSpace.x4),
-          PSelect<int>(
-            value: _settlementAssetRowId ?? -1,
-            title: l.tradeSettlement,
-            items: [
-              PSelectItem(value: -1, label: l.tradeSettlementCash),
-              for (final a in settlementOptions)
-                PSelectItem(
-                  value: a.rowId,
-                  label: a.institution != null && a.institution!.isNotEmpty
-                      ? '${a.institution} · ${a.assetName}'
-                      : a.assetName,
+          Padding(
+            padding: gutter,
+            child: PField(
+              label: l.tradeQuantity,
+              invalid: qtyError != null,
+              errorMessage: qtyError,
+              child: PInput(
+                variant: PInputVariant.underline,
+                controller: _qtyCtrl,
+                focusNode: widget.qtyFocus,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-            ],
-            onChanged: (v) => setState(() {
-              _settlementAssetRowId = (v == null || v == -1) ? null : v;
-              _sync();
-            }),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            _viaCash ? l.tradeSettlementCashHelp : l.tradeSettlementAccountHelp,
-            style: PTypo.micro.copyWith(color: t.fgTertiary),
-          ),
-          const SizedBox(height: PSpace.x20),
-        ],
-
-        PSectionLabel(l.tradeMemo),
-        const SizedBox(height: PSpace.x4),
-        PTextInput(controller: _memoCtrl, placeholder: l.tradeMemoPlaceholder),
-        const SizedBox(height: PSpace.x20),
-
-        // 저장하고 놀라지 않게 예수금과 손익을 먼저 보여 준다.
-        Container(
-          padding: const EdgeInsets.all(PSpace.x12),
-          decoration: BoxDecoration(
-            color: t.bgSunken,
-            borderRadius: PRadius.brMd,
-            border: Border.all(color: t.borderSubtle),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _viaCash ? l.tradeCashAfter : l.tradeSettlementDelta,
-                    style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-                  ),
-                  Text(
-                    // 서버가 아직 답하기 전에는 자리만 잡아 둔다 — 틀린 값을 잠깐 보여 주느니 낫다.
-                    (_cashAfter == null || _cashDelta == null)
-                        ? '—'
-                        : _viaCash
-                        ? krwSigned(_cashAfter!, false, unit: true)
-                        : krwSigned(
-                            _cashDelta!.abs(),
-                            false,
-                            sign: _cashDelta! >= 0 ? '+' : kMinus,
-                            unit: true,
-                          ),
-                    style: PTypo.money.copyWith(
-                      color: _viaCash && (_cashAfter ?? 0) < 0
-                          ? t.statusDangerFg
-                          : t.fgPrimary,
-                      fontWeight: PFontWeight.bold,
-                    ),
-                  ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                 ],
+                tabularFigures: true,
+                placeholder: '0',
               ),
-              if (realized != null) ...[
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l.tradeRealizedPreview,
-                      style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-                    ),
-                    Text(
-                      krwSigned(
-                        realized.abs(),
-                        false,
-                        sign: realized >= 0 ? '+' : kMinus,
-                        unit: true,
-                      ),
-                      style: PTypo.money.copyWith(
-                        color: realized >= 0
-                            ? t.statusInfoFg
-                            : t.statusDangerFg,
-                        fontWeight: PFontWeight.bold,
-                      ),
-                    ),
-                  ],
+            ),
+          ),
+          const SizedBox(height: PSpacing.x4),
+
+          Padding(
+            padding: gutter,
+            child: PField(
+              label: l.tradeAmount,
+              description: l.tradeAmountHelp,
+              invalid: amountError != null,
+              errorMessage: amountError,
+              child: PInput(
+                variant: PInputVariant.underline,
+                controller: _amountCtrl,
+                keyboardType: TextInputType.number,
+                inputFormatters: const [AmountInputFormatter()],
+                suffixText: wonUnit(),
+                tabularFigures: true,
+                placeholder: '0',
+              ),
+            ),
+          ),
+          const SizedBox(height: PSpacing.x4),
+
+          Padding(
+            padding: gutter,
+            child: PField(
+              label: l.tradeFee,
+              indicator: PFieldIndicator.optional,
+              child: PInput(
+                variant: PInputVariant.underline,
+                controller: _feeCtrl,
+                keyboardType: TextInputType.number,
+                inputFormatters: const [AmountInputFormatter()],
+                suffixText: wonUnit(),
+                tabularFigures: true,
+                placeholder: '0',
+              ),
+            ),
+          ),
+          const SizedBox(height: PSpacing.x4),
+
+          // 결제 계좌는 매수에만. 매도 대금은 예수금에 남기고 사용자가 이체로 관리한다 —
+          // 팔았다고 통장으로 자동 이체되지는 않는다.
+          if (!_isSell) ...[
+            PickerRow(
+              title: l.tradeSettlement,
+              value: selected == null
+                  ? l.tradeSettlementCash
+                  : _accountLabel(selected),
+              semanticValue: selected == null
+                  ? l.tradeSettlementCash
+                  : _accountLabel(selected),
+              onTap: () => _pickSettlement(settlementOptions),
+            ),
+            Padding(
+              padding: gutter.copyWith(top: PSpacing.x1_5),
+              child: Text(
+                _viaCash
+                    ? l.tradeSettlementCashHelp
+                    : l.tradeSettlementAccountHelp,
+                style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+              ),
+            ),
+            const SizedBox(height: PSpacing.x4),
+          ],
+
+          Padding(
+            padding: gutter,
+            child: PField(
+              label: l.tradeMemo,
+              indicator: PFieldIndicator.optional,
+              child: PInput(
+                variant: PInputVariant.underline,
+                controller: _memoCtrl,
+                placeholder: l.tradeMemoPlaceholder,
+              ),
+            ),
+          ),
+          const SizedBox(height: PSpacing.x4),
+
+          // 저장하고 놀라지 않게 예수금과 손익을 먼저 보여 준다 — 키-값 줄.
+          PList(
+            semanticLabel: l.tradePreview,
+            children: [
+              PListItem(
+                title: _viaCash ? l.tradeCashAfter : l.tradeSettlementDelta,
+                suffix: Text(
+                  // 서버가 아직 답하기 전에는 자리만 잡아 둔다 — 틀린 값을 잠깐 보여 주느니 낫다.
+                  (_cashAfter == null || _cashDelta == null)
+                      ? '—'
+                      : _viaCash
+                      ? krwSigned(_cashAfter!, false, unit: true)
+                      : krwSigned(
+                          _cashDelta!.abs(),
+                          false,
+                          sign: _cashDelta! >= 0 ? '+' : kMinus,
+                          unit: true,
+                        ),
+                  textAlign: TextAlign.end,
+                  style: value(critical ? c.fgCritical : c.fgNeutral),
                 ),
-              ],
-              // 예수금이 모자라면 결제 계좌에서 그만큼 끌어온다 — 이체가 한 건 생긴다는 걸 미리 알린다.
-              if (_fundingAmount > 0) ...[
-                const SizedBox(height: 6),
-                Text(
-                  l.tradeFundingNotice(
-                    krwSigned(_fundingAmount, false, unit: true),
+              ),
+              if (realized != null)
+                PListItem(
+                  title: l.tradeRealizedPreview,
+                  suffix: Text(
+                    krwSigned(
+                      realized.abs(),
+                      false,
+                      sign: realized >= 0 ? '+' : kMinus,
+                      unit: true,
+                    ),
+                    textAlign: TextAlign.end,
+                    style: value(c.fgNeutral),
                   ),
-                  style: PTypo.micro.copyWith(color: t.fgTertiary),
                 ),
-              ],
-              if (!_isSell && _viaCash && (_cashAfter ?? 0) < 0) ...[
-                const SizedBox(height: 6),
-                Text(
-                  l.tradeInsufficientCash,
-                  style: PTypo.micro.copyWith(color: t.statusDangerFg),
-                ),
-              ],
-              if (_isSell && _qty > _heldQty) ...[
-                const SizedBox(height: 6),
-                Text(
-                  l.tradeInsufficientQty,
-                  style: PTypo.micro.copyWith(color: t.statusDangerFg),
-                ),
-              ],
             ],
           ),
+          // 예수금이 모자라면 결제 계좌에서 그만큼 끌어온다 — 이체가 한 건 생긴다는 걸 미리 알린다.
+          if (_fundingAmount > 0)
+            Padding(
+              padding: gutter.copyWith(top: PSpacing.x2),
+              child: Text(
+                l.tradeFundingNotice(
+                  krwSigned(_fundingAmount, false, unit: true),
+                ),
+                style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+              ),
+            ),
+          if (!_isSell && critical)
+            Padding(
+              padding: gutter.copyWith(top: PSpacing.x2),
+              child: Text(
+                l.tradeInsufficientCash,
+                style: PTypography.t3.copyWith(color: c.fgCritical),
+              ),
+            ),
+          const SizedBox(height: PSpacing.x2),
+        ],
+      ),
+      footer: [
+        PButton(
+          label: l.actionSave,
+          size: PButtonSize.large,
+          loading: _submitting,
+          onPressed: _submitting ? null : _submit,
         ),
       ],
     );

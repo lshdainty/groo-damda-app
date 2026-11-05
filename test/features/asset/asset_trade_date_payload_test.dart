@@ -25,7 +25,7 @@ import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_trade_sheet.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 const _invest = Asset(
   rowId: 12,
@@ -175,5 +175,16 @@ void main() {
       isNull,
       reason: '기기 시계 문자열엔 시간대가 없다 — 서버 사용자 시계에 맡긴다',
     );
+  });
+
+  // I-17 56 — 주 버튼을 막지 않고, 누르면 칸 아래 오류가 뜬다(저장 요청은 안 나간다).
+  testWidgets('비운 채 저장을 누르면 수량 · 거래대금 오류가 뜨고 요청은 없다', (tester) async {
+    final repo = await _openSheet(tester);
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+
+    expect(find.text('수량을 넣어주세요.'), findsOneWidget);
+    expect(find.text('거래대금을 넣어주세요.'), findsOneWidget);
+    expect(repo.createCalled, isFalse);
   });
 }

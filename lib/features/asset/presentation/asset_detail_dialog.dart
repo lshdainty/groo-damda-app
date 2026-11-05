@@ -27,6 +27,8 @@ import 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart
     show showAssetEditForm;
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart'
+    show PDelta, PDeltaDirection;
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart'
     show PLeaveConfirmCopy;
@@ -50,7 +52,6 @@ import 'package:groo_damda_app/core/settings/mask_flags.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -471,10 +472,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               padding: gutterPad,
               child: _InvChangeLine(assetRowId: asset.rowId, masked: masked),
             ),
-            Padding(
-              padding: gutterPad,
-              child: _HoldingsSection(asset: asset, masked: masked),
-            ),
+            _HoldingsSection(asset: asset, masked: masked),
           ],
 
           // 잔액 추이(48) — 목록 제목 + Segmented 3개월 · 6개월 · 1년 + 차트(폰 140). 연결계좌형 체크카드는 잔액이 늘 0 이라
@@ -526,6 +524,9 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
             ),
           ],
 
+          // 거래 기록(50) — 차례는 평가액 → 보유 종목 → 추이 → 거래 기록 → 최근 거래
+          if (isInv) _TradeHistory(assetRowId: asset.rowId, masked: masked),
+
           // 최근 거래 · 이번 달 내역(49) — 목록 제목 + 오른쪽 글 버튼 "전체 보기" + 가계부 공용 줄
           PListHeader(
             title: (recentAsync.value?.isNotEmpty ?? false)
@@ -565,39 +566,25 @@ class _InvChangeLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
     // 다시 받는 동안 앞 값을 든다(asData 는 그때 비어 등락이 깜빡인다) — asset_screen 과 같다.
     final v = ref.watch(investmentValuationMapProvider).value?[assetRowId];
     final chg = v?.changeAmt;
-    if (masked || v == null || chg == null) return const SizedBox.shrink();
+    if (v == null || chg == null) return const SizedBox.shrink();
     final base = v.value - chg;
     final pct = base == 0 ? 0.0 : chg / base * 100;
     final up = chg >= 0;
-    final color = up ? t.statusDangerFg : t.fgBrand;
+    // 등락 = ds Delta(R14) — "▲ N% · 오늘 ±M원", 방향 색(▲ critical · ▼ informative). 가리면 글만 가린다.
     return Padding(
-      padding: const EdgeInsets.only(bottom: PSpace.x16),
-      child: Row(
-        children: [
-          Text(
-            formatChangeRate(pct, signed: true),
-            style: PTypo.bodySm.copyWith(
-              color: color,
-              fontWeight: PFontWeight.bold,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(width: PSpace.x8),
-          Text(
-            l.assetTodayChange(
-              krwSigned(chg.abs(), false, sign: up ? '+' : '−'),
-            ),
-            style: PTypo.caption.copyWith(
-              color: t.fgTertiary,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.only(top: PSpacing.x1),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: PDelta(
+          direction: up ? PDeltaDirection.up : PDeltaDirection.down,
+          value: masked
+              ? '••••'
+              : '${formatChangeRateAbs(pct)} · ${l.assetTodayChange(krwSigned(chg.abs(), false, sign: up ? '+' : '−'))}',
+        ),
       ),
     );
   }
@@ -628,7 +615,6 @@ class _HoldingsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
     final holdings = _holdings;
 
@@ -649,71 +635,58 @@ class _HoldingsSection extends ConsumerWidget {
 
     double? unitKrw(String symbol) => live?.unitKrw(symbol);
 
+    // 보유 종목(50) — 목록 제목 "보유 종목 · n" + List 줄(위 맞춤). 거래 기록은 추이 뒤로 옮겼다(_TradeHistory).
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(
-              l.assetHoldings,
-              style: PTypo.bodySm.copyWith(
-                color: t.fgPrimary,
-                fontWeight: PFontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '${holdings.length}',
-              style: PTypo.bodySm.copyWith(
-                color: t.fgBrand,
-                fontWeight: PFontWeight.bold,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ],
+        PListHeader(
+          title: '${l.assetHoldings} · ${holdings.length}',
+          variant: PListHeaderVariant.boldSolid,
+          topInset: PSpacing.x4,
         ),
         if (holdings.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: PSpace.x20),
+            padding: const EdgeInsets.symmetric(
+              horizontal: PSpacing.globalGutter,
+              vertical: PSpacing.x6,
+            ),
             child: Center(
               child: Text(
                 l.assetHoldingsEmptyDetail,
-                style: PTypo.bodySm.copyWith(color: t.fgTertiary),
+                style: PTypography.t4.copyWith(
+                  color: context.colors.fgNeutralSubtle,
+                ),
               ),
             ),
           )
         else
-          for (int i = 0; i < holdings.length; i++)
-            _HoldingRow(
-              holding: holdings[i],
-              // 매수·매도는 종목마다 연다 — 어떤 종목인지 정해진 채로 들어가야
-              // 다시 고를 일이 없다(종목 추가는 편집에서 토스 검색으로).
-              onTrade: (type) => showAssetTradeSheet(
-                context,
-                asset: asset,
-                holding: holdings[i],
-                defaultType: type,
-              ),
-              first: i == 0,
-              unitKrw:
-                  holdings[i].linked &&
-                      (holdings[i].tossSymbol?.isNotEmpty ?? false)
-                  ? unitKrw(holdings[i].tossSymbol!)
-                  : null,
-              rawPrice:
-                  holdings[i].linked &&
-                      (holdings[i].tossSymbol?.isNotEmpty ?? false)
-                  ? live?.quoteOf(holdings[i].tossSymbol!)
-                  : null,
-              prevUnitKrw:
-                  holdings[i].linked &&
-                      (holdings[i].tossSymbol?.isNotEmpty ?? false)
-                  ? live?.prevUnitKrw(holdings[i].tossSymbol!)
-                  : null,
-            ),
-
-        // 거래 내역 — 언제 사고 팔았는지, 실현손익이 얼마인지. 취소도 여기서.
-        _TradeHistory(assetRowId: asset.rowId, masked: masked),
+          PList(
+            semanticLabel: l.assetHoldings,
+            children: [
+              for (final h in holdings)
+                _HoldingRow(
+                  holding: h,
+                  masked: masked,
+                  // 매수·매도는 종목마다 연다 — 어떤 종목인지 정해진 채로 들어가야
+                  // 다시 고를 일이 없다(종목 추가는 편집에서 토스 검색으로).
+                  onTrade: (type) => showAssetTradeSheet(
+                    context,
+                    asset: asset,
+                    holding: h,
+                    defaultType: type,
+                  ),
+                  unitKrw: h.linked && (h.tossSymbol?.isNotEmpty ?? false)
+                      ? unitKrw(h.tossSymbol!)
+                      : null,
+                  rawPrice: h.linked && (h.tossSymbol?.isNotEmpty ?? false)
+                      ? live?.quoteOf(h.tossSymbol!)
+                      : null,
+                  prevUnitKrw: h.linked && (h.tossSymbol?.isNotEmpty ?? false)
+                      ? live?.prevUnitKrw(h.tossSymbol!)
+                      : null,
+                ),
+            ],
+          ),
       ],
     );
   }
@@ -728,7 +701,6 @@ class _TradeHistory extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final c = context.colors;
     final l = AppLocalizations.of(context);
     final trades = ref.watch(assetTradesProvider(assetRowId)).value ?? const [];
     if (trades.isEmpty) return const SizedBox.shrink();
@@ -740,113 +712,70 @@ class _TradeHistory extends ConsumerWidget {
             .firstOrNull
             ?.holdings ??
         const <AssetHolding>[];
-
+    final title = '${l.tradeHistory} · ${trades.length}';
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: PSpacing.x4),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: PSpacing.x2),
-          child: Text(
-            '${l.tradeHistory} · ${trades.length}',
-            style: PTypography.t4.copyWith(
-              color: c.fgNeutral,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+        PListHeader(
+          title: title,
+          variant: PListHeaderVariant.boldSolid,
+          topInset: PSpacing.x4,
         ),
-        for (final tr in trades)
-          _TradeRow(
-            trade: tr,
-            holdingName: tradeHoldingName(tr, holdings),
-            masked: masked,
-            onTap: () => showTradeDetailSheet(
-              context,
-              trade: tr,
-              holdingName: tradeHoldingName(tr, holdings),
-              masked: masked,
-              assetRowId: assetRowId,
-            ),
-          ),
+        PList(
+          semanticLabel: title,
+          children: [
+            for (final tr in trades)
+              _tradeRow(
+                context,
+                trade: tr,
+                holdingName: tradeHoldingName(tr, holdings),
+                masked: masked,
+                onTap: () => showTradeDetailSheet(
+                  context,
+                  trade: tr,
+                  holdingName: tradeHoldingName(tr, holdings),
+                  masked: masked,
+                  assetRowId: assetRowId,
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
 }
 
-/// 거래 기록 줄 — 제목 "{매수 | 매도} · {종목} {수량}{단위}"(`fg-neutral`) · 설명 날짜(+ 매도 실현손익) · 뒤 금액(부호 없음).
-/// 보이는 줄 높이 46 이상, 누르는 칸은 줄 전체(≥ 44).
-class _TradeRow extends StatelessWidget {
-  const _TradeRow({
-    required this.trade,
-    required this.holdingName,
-    required this.masked,
-    required this.onTap,
-  });
-  final AssetTrade trade;
-  final String holdingName;
-  final bool masked;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final l = AppLocalizations.of(context);
-    final tr = trade;
-    final title =
-        '${tradeKindLabel(l, tr)} · $holdingName ${tradeQtyText(l, tr)}';
-    final pl = tr.realizedPl;
-    final desc = [
-      tradeDateOnly(tr),
-      if (tr.tradeType == 'SELL' && pl != null && pl != 0)
-        masked ? '••••' : tradeSignedKrw(pl),
-    ].join(' · ');
-    return Semantics(
-      button: true,
-      label: l.tradeOpenRow(tradeDateOnly(tr), holdingName),
-      excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 46),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: PSpacing.x2),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: PTypography.t5.copyWith(color: c.fgNeutral),
-                      ),
-                      Text(
-                        desc,
-                        style: PTypography.t3.copyWith(
-                          color: c.fgNeutralSubtle,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: PSpacing.x3),
-                Text(
-                  masked ? '••••' : '${krw(tr.amount ?? 0)}${wonUnit()}',
-                  textAlign: TextAlign.end,
-                  style: PTypography.t5.copyWith(
-                    color: c.fgNeutral,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+/// 거래 기록 줄(50) — 제목 "{매수 | 매도} · {종목} {수량}{단위}"(`fg-neutral`) · 설명 날짜(+ 매도 실현손익) · 뒤 금액(부호 없음).
+Widget _tradeRow(
+  BuildContext context, {
+  required AssetTrade trade,
+  required String holdingName,
+  required bool masked,
+  required VoidCallback onTap,
+}) {
+  final c = context.colors;
+  final l = AppLocalizations.of(context);
+  final tr = trade;
+  final pl = tr.realizedPl;
+  final desc = [
+    tradeDateOnly(tr),
+    if (tr.tradeType == 'SELL' && pl != null && pl != 0)
+      '${l.tradeRealizedPreview} ${masked ? '••••' : tradeSignedKrw(pl)}',
+  ].join(' · ');
+  return PListButtonItem(
+    title: '${tradeKindLabel(l, tr)} · $holdingName ${tradeQtyText(l, tr)}',
+    detail: desc,
+    onTap: onTap,
+    suffix: Text(
+      masked ? '••••' : keepAllAmount('${krw(tr.amount ?? 0)}${wonUnit()}'),
+      textAlign: TextAlign.end,
+      style: PTypography.t5.copyWith(
+        color: c.fgNeutral,
+        fontWeight: FontWeight.w700,
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
-    );
-  }
+    ),
+  );
 }
 
 String tradeKindLabel(AppLocalizations l, AssetTrade tr) =>
@@ -1076,14 +1005,14 @@ class TradeDetailBody extends StatelessWidget {
 class _HoldingRow extends ConsumerWidget {
   const _HoldingRow({
     required this.holding,
-    required this.first,
+    required this.masked,
     required this.unitKrw,
     required this.rawPrice,
     required this.prevUnitKrw,
     this.onTrade,
   });
   final AssetHolding holding;
-  final bool first;
+  final bool masked;
   final double? unitKrw; // 연동 1주 KRW 환산가 (미확보 시 null)
   final BrokerQuote? rawPrice; // 표시용 원통화 현재가
   /// 전일 종가의 KRW 환산가 — 등락 표시 전용. 부모가 livePricesProvider 에서 받아 넘긴다.
@@ -1103,7 +1032,7 @@ class _HoldingRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
     final h = holding;
     final name = (h.holdingName?.isNotEmpty ?? false)
@@ -1140,86 +1069,61 @@ class _HoldingRow extends ConsumerWidget {
       pct = (unitKrw! - prevUnitKrw!) / prevUnitKrw! * 100;
     }
 
-    return DecoratedBox(
-      position: DecorationPosition.background,
-      decoration: const BoxDecoration(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: PSpace.x12),
-        decoration: BoxDecoration(
-          border: first ? null : Border(top: BorderSide(color: t.borderSubtle)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: PTypo.body.copyWith(
-                      color: t.fgPrimary,
-                      fontWeight: PFontWeight.semi,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    sub,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: PTypo.caption.copyWith(
-                      color: t.fgTertiary,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ],
-              ),
+    String won(int v) => masked ? '••••••' : krwSigned(v, false, unit: true);
+    // 보유 줄(50) — List 줄 위 맞춤. 줄 자체는 누르지 않는다(수정은 머리 하나, 4-3A).
+    // 뒤 기둥(오른쪽 맞춤): 평가액 R13 → 등락 Delta → [매수] [매도] ghost small(금액 아래 · 오른쪽 끝 −8).
+    return PListItem(
+      align: PListAlign.top,
+      title: name,
+      detail: sub,
+      suffix: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        spacing: PSpacing.x0_5,
+        children: [
+          Text(
+            value != null ? keepAllAmount(won(value)) : '—',
+            textAlign: TextAlign.end,
+            style: PTypography.t5.copyWith(
+              color: c.fgNeutral,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
-            const SizedBox(width: PSpace.x12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  value != null ? krwSigned(value, false, unit: true) : '—',
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+          if (pct != null)
+            PDelta(
+              direction: pct >= 0 ? PDeltaDirection.up : PDeltaDirection.down,
+              value: masked ? '••••' : formatChangeRateAbs(pct),
+            ),
+          // 매수·매도는 상세를 어디서 열었든 가능해야 한다 — 편집 진입 여부에 묶으면 자산 화면에서 연 상세만 매매가 막힌다.
+          if (onTrade != null)
+            Align(
+              alignment: Alignment.centerRight,
+              heightFactor: _kTextLinkHeightFactor,
+              child: Transform.translate(
+                offset: const Offset(PSpacing.x2, 0),
+                child: PListAction(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      dsb.PButton(
+                        label: l.tradeBuy,
+                        variant: dsb.PButtonVariant.ghost,
+                        size: dsb.PButtonSize.small,
+                        onPressed: () => onTrade!('BUY'),
+                      ),
+                      dsb.PButton(
+                        label: l.tradeSell,
+                        variant: dsb.PButtonVariant.ghost,
+                        size: dsb.PButtonSize.small,
+                        onPressed: () => onTrade!('SELL'),
+                      ),
+                    ],
                   ),
                 ),
-                if (pct != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    formatChangeRate(pct, signed: true),
-                    style: PTypo.micro.copyWith(
-                      color: pct >= 0 ? t.statusDangerFg : t.fgBrand,
-                      fontWeight: PFontWeight.semi,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
-            // 매수·매도는 상세를 어디서 열었든 가능해야 한다 — 편집 진입(onTap)
-            // 여부에 묶으면 자산 화면에서 연 상세만 매매가 막힌다(웹은 된다).
-            if (onTrade != null) const SizedBox(width: PSpace.x8),
-            if (onTrade != null) ...[
-              PButton(
-                label: l.tradeBuy,
-                variant: PButtonVariant.ghost,
-                size: PButtonSize.sm,
-                onPressed: () => onTrade!('BUY'),
-              ),
-              PButton(
-                label: l.tradeSell,
-                variant: PButtonVariant.ghost,
-                size: PButtonSize.sm,
-                onPressed: () => onTrade!('SELL'),
-              ),
-            ],
-          ],
-        ),
+        ],
       ),
     );
   }
