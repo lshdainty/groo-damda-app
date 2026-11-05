@@ -226,7 +226,8 @@
       }
     }
   },
-  "assetExchangeRateDesc": "순자산은 잔액 × 환율로 환산해요. 비워 두면 환산 없이 그대로 더해져요.",
+  "assetExchangeRateDesc": "외화 잔액 · 예수금을 원화로 바꿀 때 써요.",
+  "assetExchangeRateRequired": "환율을 입력해주세요.",
   "assetMemoPlaceholder": "예: 계좌번호 뒷자리 1234",
   "assetCreditLimitLabel": "신용한도",
   "assetPaymentDayLabel": "결제일",
@@ -412,7 +413,7 @@
   "tradeSettlementDelta": "결제 계좌 변동",
   "tradeCashAfter": "거래 후 예수금",
   "tradeRealizedPreview": "실현손익",
-  "tradeFundingNotice": "예수금이 모자라 결제 계좌에서 {amount}을 옮겨요",
+  "tradeFundingNotice": "예수금이 모자라 결제 계좌에서 {amount}만큼 옮겨요",
   "@tradeFundingNotice": {
     "placeholders": {
       "amount": {
@@ -494,6 +495,15 @@
     }
   },
   "assetCashBalance": "예수금",
+  "assetHoldingKrwInputHint": "원화로 입력해요",
+  "fxApproxKrw": "약 {amount}",
+  "@fxApproxKrw": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "assetHoldingBalance": "평가금액",
   "assetHoldingsSummary": "{count}종목 · {amount}원",
   "@assetHoldingsSummary": {
@@ -1315,6 +1325,15 @@
   "expTypeIncome": "수입",
   "expTypeExpense": "지출",
   "transferFeePrefix": "수수료",
+  "transferReceivedTag": "받는 금액 {amount}",
+  "@transferReceivedTag": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transferReceived": "받는 금액",
   "transferPrincipal": "원금",
   "transferWithdrawn": "출금 합계",
   "transferDeleted": "이체를 삭제했어요",
@@ -1422,6 +1441,8 @@
   "budgetDeleteFailed": "예산을 삭제하지 못했어요.",
   "budgetSaveFailed": "예산을 저장하지 못했어요.",
   "assetSaveFailed": "자산을 저장하지 못했어요.",
+  "assetSaveCardForeign": "카드는 원화로만 등록할 수 있어요.",
+  "assetSaveRateRequired": "외화 자산은 환율을 입력해야 저장할 수 있어요.",
   "tradeSaveFailed": "매매를 처리하지 못했어요.",
   "tradeSaveInsufficientQty": "보유 수량이 부족해요.",
   "budgetMonthlyLimit": "월 예산 한도",
@@ -5254,6 +5275,14 @@
   "@txfEmptyPresetHint": {
     "placeholders": {
       "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfReceiveAmount": "받는 금액 약 {amount}",
+  "@txfReceiveAmount": {
+    "placeholders": {
+      "amount": {
         "type": "String"
       }
     }

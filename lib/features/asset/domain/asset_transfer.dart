@@ -15,6 +15,7 @@ class AssetTransfer {
     this.description,
     this.transferDate,
     this.createAt,
+    this.toAmount,
   });
 
   final int rowId;
@@ -42,6 +43,10 @@ class AssetTransfer {
   final String? transferDate; // ISO-LOCAL-DATETIME (YYYY-MM-DDTHH:mm:ss)
   final String? createAt;
 
+  /// 받는 쪽 자산 통화로 받은 금액 — 두 계좌 통화가 다를 때만 값(서버 round(amount × 보내는 환율 ÷ 받는 환율)).
+  /// null = [amount] 와 같은 값을 받았다(같은 통화 · 옛 이체 · 옛 서버). amount · fee · interestAmount 는 보내는 계좌 통화다(I-13).
+  final int? toAmount;
+
   factory AssetTransfer.fromJson(Map<String, dynamic> json) {
     return AssetTransfer(
       rowId: (json['rowId'] as num).toInt(),
@@ -58,20 +63,34 @@ class AssetTransfer {
       description: json['description'] as String?,
       transferDate: json['transferDate'] as String?,
       createAt: json['createAt'] as String?,
+      toAmount: (json['toAmount'] as num?)?.toInt(),
     );
   }
 }
 
 /// 자산 잔액 추이 1개 시점 — `AssetApiDto.AssetBalanceTrendResponse.points` 의 한 항목.
 class AssetBalancePoint {
-  const AssetBalancePoint({required this.weekStart, required this.balance});
+  const AssetBalancePoint({
+    required this.weekStart,
+    required this.balance,
+    this.balanceInKrw,
+  });
   final String weekStart; // YYYY-MM-DD
+
+  /// 그 주 말 시점 자산 잔액(자산 통화 · 옛 뜻 예수금 + 보유).
   final int balance;
+
+  /// 같은 시점 원화 합계(자산 화면과 같은 한 식, I-13). 옛 서버면 없다 — 차트는 [krwOrBalance] 를 그린다.
+  final int? balanceInKrw;
+
+  /// 차트에 그릴 값 — 원화 합계, 옛 서버면 [balance].
+  int get krwOrBalance => balanceInKrw ?? balance;
 
   factory AssetBalancePoint.fromJson(Map<String, dynamic> json) {
     return AssetBalancePoint(
       weekStart: (json['weekStart'] as String?) ?? '',
       balance: (json['balance'] as num?)?.toInt() ?? 0,
+      balanceInKrw: (json['balanceInKrw'] as num?)?.toInt(),
     );
   }
 }

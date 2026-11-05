@@ -12,6 +12,7 @@ import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/asset/domain/asset_krw.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_type_meta.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_edit_dialog.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
@@ -40,22 +41,19 @@ Map<int, int> liveValuationMap(Map<int, InvestmentValuation> inv) => {
   for (final e in inv.entries) e.key: e.value.value,
 };
 
-/// 연결 자산 balance 를 라이브 평가액(시세×수량)으로 치환한다 — 자산 화면 · 계좌·카드 관리가 같은 함수다.
-/// 라이브 평가는 '보유분'만이라 예수금을 더해야 계좌 총액이 된다(안 더하면 증권계좌의 매수 대기 자금이 목록에서 빠진다).
+/// 연결 자산의 보유 평가를 라이브 평가액(시세×수량, 원화)으로 치환한다 — 자산 화면 · 계좌·카드 관리 · 상세가 같은 함수다.
+/// 라이브 평가는 '보유분'(원화)만이라 보유 평가 자리에만 얹는다 — 통화는 바꾸지 않고, 원화 합계는
+/// round(예수금 × 환율) + 라이브(`withLiveHolding`, 서버 balanceInKrw 와 같은 식, I-13). 예수금을 빼먹으면 매수 대기 자금이 목록에서 빠진다.
 List<Asset> applyLiveValuation(List<Asset> assets, Map<int, int> valMap) {
   if (valMap.isEmpty) return assets;
   return [
     for (final a in assets)
-      valMap.containsKey(a.rowId)
-          ? a.copyWith(
-              balance: (a.cashBalance ?? 0) + valMap[a.rowId]!,
-              holdingBalance: valMap[a.rowId],
-            )
-          : a,
+      valMap.containsKey(a.rowId) ? withLiveHolding(a, valMap[a.rowId]!) : a,
   ];
 }
 
-/// 순자산 보정용 delta(라이브 − DB) — 총액 포함 자산만.
+/// 순자산 보정용 delta(라이브 − DB) — 총액 포함 자산만. balance = 예수금 + 보유라 (예수금 + 라이브 − balance) = 라이브 − 보유,
+/// 둘 다 원화다(서버 순자산이 새 식 round(예수금 × 환율) + 보유라 원화끼리 차액을 더하면 맞다, I-13).
 int liveValuationDelta(List<Asset> assets, Map<int, int> valMap) {
   if (valMap.isEmpty) return 0;
   return assets.fold<int>(
@@ -66,14 +64,11 @@ int liveValuationDelta(List<Asset> assets, Map<int, int> valMap) {
   );
 }
 
-/// 묶음 합계 셈(자산 화면 · 계좌·카드 관리가 같은 함수) — 총액 포함 자산만, 외화는 원화로 환산해 더한다.
+/// 묶음 합계 셈(자산 화면 · 계좌·카드 관리가 같은 함수) — 총액 포함 자산만, 원화 합계(서버 balanceInKrw, I-13 길 A)를 더한다.
 /// raw 로 더하면 USD 1,000 이 1,000원이 돼 서버 요약과 어긋난다(I-17 Q4).
 int assetSumIncluded(List<Asset> arr) => arr
     .where((a) => a.isIncludedInTotal == 'Y')
-    .fold<int>(
-      0,
-      (s, a) => s + balanceInKrw(a.balance ?? 0, a.currency, a.exchangeRate),
-    );
+    .fold<int>(0, (s, a) => s + assetKrw(a));
 
 /// 원까지 금액 글 — 음수는 U+2212, 가리면 점.
 String assetWon(int n, bool masked) =>
@@ -377,12 +372,8 @@ class AssetRow extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final c = context.colors;
     final masked = cardMasked || asset.isAmountHidden == 'Y';
-    // 외화는 환산액이 주 표기 — 원 통화 잔고는 밑에 함께 보여 준다.
-    final balance = balanceInKrw(
-      asset.balance ?? 0,
-      asset.currency,
-      asset.exchangeRate,
-    );
+    // 외화는 원화 합계(서버 balanceInKrw — 라이브면 보유 자리만 바꾼 값)가 주 표기, 외화 계좌(투자 아님)는 자산 통화 잔액을 밑에 함께 보여 준다.
+    final balance = assetKrw(asset);
     final isCard = _cardTypeSet.contains(asset.assetType);
     // 연결계좌형 체크카드는 결제가 계좌에서 즉시 빠져 잔액이 늘 0 이다 — 행 금액은 "이번 달 얼마 썼나"로 바꾼다.
     final checkCardMonthly =
@@ -436,12 +427,19 @@ class AssetRow extends StatelessWidget {
             spacing: PSpacing.x0_5,
             children: [
               _amount(main, c.fgNeutral, align: TextAlign.end),
-              if (foreign && checkCardMonthly == null)
+              // 외화 계좌의 자산 통화 잔액(정수 — "$100"). 투자는 줄에 두지 않는다 — 예수금만 자산 통화라 작은 글이 기관 · 종목 설명을
+              // 밀어 자른다(I-13 검수, 웹과 같다). 투자 예수금 "$100 + 약 130,000원" 은 상세에서만.
+              if (foreign &&
+                  checkCardMonthly == null &&
+                  asset.assetType != 'INVESTMENT')
                 Text(
                   masked
                       ? kBudgetMask
-                      : '${(asset.balance ?? 0) < 0 ? kMinus : ''}'
-                            '${formatOriginalAmount((asset.balance ?? 0).abs().toDouble(), asset.currency!, Localizations.localeOf(context).toString())}',
+                      : formatAssetAmount(
+                          asset.cashBalance ?? asset.balance ?? 0,
+                          asset.currency!,
+                          Localizations.localeOf(context).toString(),
+                        ),
                   textAlign: TextAlign.end,
                   style: small,
                 ),

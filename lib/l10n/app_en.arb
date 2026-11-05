@@ -222,7 +222,8 @@
       }
     }
   },
-  "assetExchangeRateDesc": "Net worth converts balance × rate. Left empty it is added without conversion.",
+  "assetExchangeRateDesc": "Converts the foreign balance or cash to KRW.",
+  "assetExchangeRateRequired": "Enter the exchange rate.",
   "assetMemoPlaceholder": "e.g. Last digits 1234",
   "assetCreditLimitLabel": "Credit limit",
   "assetPaymentDayLabel": "Payment day",
@@ -467,6 +468,15 @@
     }
   },
   "assetCashBalance": "Cash",
+  "assetHoldingKrwInputHint": "Enter in KRW",
+  "fxApproxKrw": "≈ {amount}",
+  "@fxApproxKrw": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "assetHoldingBalance": "Holdings",
   "assetHoldingsSummary": "{count} holdings · ₩{amount}",
   "@assetHoldingsSummary": {
@@ -1288,6 +1298,15 @@
   "expTypeIncome": "Income",
   "expTypeExpense": "Expense",
   "transferFeePrefix": "Fee",
+  "transferReceivedTag": "Received {amount}",
+  "@transferReceivedTag": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transferReceived": "Amount received",
   "transferPrincipal": "Principal",
   "transferWithdrawn": "Total withdrawn",
   "transferDeleted": "Transfer deleted",
@@ -1395,6 +1414,8 @@
   "budgetDeleteFailed": "Couldn't delete the budget.",
   "budgetSaveFailed": "Couldn't save the budget.",
   "assetSaveFailed": "Couldn't save the asset.",
+  "assetSaveCardForeign": "Cards can only be registered in KRW.",
+  "assetSaveRateRequired": "Enter the exchange rate to save a foreign-currency asset.",
   "tradeSaveFailed": "Couldn't process the trade.",
   "tradeSaveInsufficientQty": "Not enough shares held.",
   "budgetMonthlyLimit": "Monthly budget limit",
@@ -4982,6 +5003,14 @@
   "@txfEmptyPresetHint": {
     "placeholders": {
       "name": {
+        "type": "String"
+      }
+    }
+  },
+  "txfReceiveAmount": "Amount received ≈ {amount}",
+  "@txfReceiveAmount": {
+    "placeholders": {
+      "amount": {
         "type": "String"
       }
     }

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/asset/domain/asset_krw.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
@@ -1689,8 +1690,74 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     }
     final v = c.amountInt;
     if (v <= 0) return l.txfNone;
-    // 쉼표 뒤에서만 줄을 바꾼다 — 숫자 중간 · 쉼표 앞에서 자르지 않는다
-    return krwSigned(v, false, unit: true).replaceAll(',', '\u2060,\u200B');
+    // 쉼표 뒤에서만 줄을 바꾼다 — 숫자 중간 · 쉼표 앞에서 자르지 않는다. 이체는 보내는 계좌 통화(I-13 — "이체 $100")
+    final text = c.type == 'TRANSFER'
+        ? _transferMoney(v)
+        : krwSigned(v, false, unit: true);
+    return text.replaceAll(',', '\u2060,\u200B');
+  }
+
+  // ── 이체 통화(I-13) ─────────────────────────────────────
+  // 이체 금액 · 수수료 · 이자는 **보내는 계좌 통화**다(서버 정의) — 칸 뒤 글자 · 줄 값이 그 통화를 따른다. 보내는 계좌를 아직 안
+  // 골랐으면 원화. 외화 예수금은 정수 1단위라(센트 없음) 칸은 정수 그대로다. 웹 `use-tx-form` 의 transfer* 와 같은 셈이다.
+
+  Asset? _transferAsset({bool to = false}) {
+    final c = _input;
+    if (c.type != 'TRANSFER') return null;
+    final id = to ? c.toAssetRowId : c.assetRowId;
+    if (id == null) return null;
+    return (ref.watch(assetsProvider).value ?? const <Asset>[]).byRowId(id);
+  }
+
+  String get _transferCurrency => assetCurrencyOf(_transferAsset());
+
+  /// 이체 칸 뒤 글자 — 원화 "원" · USD 계좌면 "$".
+  String get _transferUnit => currencyUnit(_transferCurrency);
+
+  /// 보내는 계좌 통화로 쓴 금액 글 — 원화 "1,300,000원" · 외화 "$1,000".
+  String _transferMoney(int n) => isForeignCurrency(_transferCurrency)
+      ? formatAssetAmount(
+          n,
+          _transferCurrency,
+          Localizations.localeOf(context).toString(),
+        )
+      : krwSigned(n, false, unit: true);
+
+  /// 이체 금액 칸 아래 · 2단계 받는 계좌 줄 아래 읽기 전용 글 — 원화 어림과 받는 금액(웹 transferHintText 와 같은 글).
+  ///
+  /// - 두 계좌 통화가 다르면 "받는 금액 약 $1,000" — round(금액 × 보내는 환율 ÷ 받는 환율) HALF_UP, 서버 resolveToAmount 와 같은 식.
+  /// - 보내는 계좌가 외화면 "약 130,000원" — 원 단위로 친 줄 알았던 사람이 알아보게. 받는 쪽이 원화면 받는 금액 줄이 같은 말을
+  ///   하므로 그때는 두지 않는다.
+  String? _transferHint() {
+    final c = _input;
+    final amount = c.amountInt;
+    if (c.type != 'TRANSFER' || amount <= 0) return null;
+    final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final from = _transferAsset();
+    final to = _transferAsset(to: true);
+    final receive = transferReceiveAmount(amount, from, to);
+    final receiveText = receive != null && to != null
+        ? l.txfReceiveAmount(
+            isForeignCurrency(to.currency)
+                ? formatAssetAmount(receive, to.currency!, locale)
+                : krwSigned(receive, false, unit: true),
+          )
+        : null;
+    final approxText =
+        from != null &&
+            isForeignCurrency(from.currency) &&
+            !(receive != null && !isForeignCurrency(to?.currency))
+        ? l.fxApproxKrw(
+            krwSigned(
+              toKrw(amount, from.currency, from.exchangeRate),
+              false,
+              unit: true,
+            ),
+          )
+        : null;
+    final parts = [?approxText, ?receiveText];
+    return parts.isEmpty ? null : parts.join(' · ');
   }
 
   PBottomSheetContent _frame({
@@ -1825,13 +1892,14 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             formatters: foreign
                 ? const [DecimalFormatter(maxFrac: 2)]
                 : kWonFormatters,
-            suffixText: wonUnit(),
-            // 이체에는 통화 칩이 없다
+            // 이체에는 통화 칩이 없다 — 뒤 글자는 보내는 계좌 통화(I-13 — 원화 "원", USD 계좌면 "$")
+            suffixText: c.type == 'TRANSFER' ? _transferUnit : wonUnit(),
             chip: c.type == 'TRANSFER' ? null : _currencyChip(l),
             invalid: _errs.amount != null,
             errorMessage: _errs.amount,
+            // 프리셋으로 계좌가 정해진 이체 — 칸 아래 원화 어림 · 받는 금액(읽기 전용)
             hintMessage: _emptyPresetName == null
-                ? null
+                ? _transferHint()
                 : l.txfEmptyPresetHint(_emptyPresetName!),
             onChanged: (_) {
               if (foreign) {
@@ -1934,6 +2002,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       title = '$_typeName ${_titleAmount()}';
     }
 
+    final transferHint = isTransfer ? _transferHint() : null;
     final mismatch = _splitMismatch;
     final saveLabel = mismatch
         ? l.txfSaveSplitAndSave
@@ -2158,13 +2227,30 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 onTap: () => _pickAsset(income: false, to: true),
                 errorMessage: _errs.to,
               ),
+              // 금액은 보내는 계좌 통화(I-13) — 외화면 원화 어림, 두 계좌 통화가 다르면 받는 금액(읽기 전용, 서버와 같은 식 · HALF_UP)
+              if (transferHint != null)
+                Padding(
+                  key: const ValueKey('tx-transfer-hint'),
+                  padding: const EdgeInsets.fromLTRB(
+                    PSpacing.globalGutter,
+                    PSpacing.x1,
+                    PSpacing.globalGutter,
+                    PSpacing.x2,
+                  ),
+                  child: Text(
+                    masked ? '••••' : transferHint,
+                    style: PTypography.t3.copyWith(
+                      color: context.colors.fgNeutralSubtle,
+                    ),
+                  ),
+                ),
               TxRow(
                 key: const ValueKey('tx-row-fee'),
                 title: l.expFee,
                 icon: LucideIcons.percent,
                 value: c.feeOrNull == null
                     ? null
-                    : krwSigned(c.feeOrNull!, false, unit: true),
+                    : _transferMoney(c.feeOrNull!),
                 placeholder: l.txfNone,
                 chevron: true,
                 onTap: () => _openSub(_S.fee),
@@ -2176,7 +2262,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                   icon: LucideIcons.percent,
                   value: c.interestOrNull == null
                       ? null
-                      : krwSigned(c.interestOrNull!, false, unit: true),
+                      : _transferMoney(c.interestOrNull!),
                   placeholder: l.txfNone,
                   chevron: true,
                   onTap: () => _openSub(_S.interest),
@@ -2229,6 +2315,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             c.currency,
             Localizations.localeOf(context).toString(),
           )
+        : c.type == 'TRANSFER'
+        // 이체는 보내는 계좌 통화(I-13)
+        ? _transferMoney(c.amountInt)
         : krwSigned(c.amountInt, false, unit: true);
     final noteStyle = PTypography.t3.copyWith(
       color: context.colors.fgNeutralSubtle,
@@ -2410,10 +2499,15 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         formatters: foreign
             ? const [DecimalFormatter(maxFrac: 2)]
             : kWonFormatters,
-        suffixText: wonUnit(),
+        // 이체 금액은 보내는 계좌 통화(I-13) — 칸 뒤 글자 · 칸 아래 원화 어림 · 받는 금액
+        suffixText: !presetAmount && c.type == 'TRANSFER'
+            ? _transferUnit
+            : wonUnit(),
         // 통화 칩은 금액 단계에만 — 원화 줄 단계 · 프리셋 금액에는 없다
         chip: krwOnly || c.type == 'TRANSFER' ? null : _currencyChip(l),
-        hintMessage: presetAmount ? l.txfPresetAmountHint : null,
+        hintMessage: presetAmount
+            ? l.txfPresetAmountHint
+            : (_step == _S.amount ? _transferHint() : null),
         onChanged: (_) {
           if (foreign) fillKrwFromForeign(c);
           setState(() {});
@@ -2468,7 +2562,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         focusNode: _subFocus,
         semanticLabel: isFee ? l.expFee : l.expInterest,
         formatters: kWonFormatters,
-        suffixText: wonUnit(),
+        // 수수료 · 이자도 보내는 계좌 통화다(I-13) — 뒤 글자가 그 통화
+        suffixText: _transferUnit,
         hintMessage: isFee
             ? null
             : (amount > 0 && interest > 0

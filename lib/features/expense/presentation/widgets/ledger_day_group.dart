@@ -92,6 +92,8 @@ class LedgerDayGroup extends ConsumerWidget {
               key: ValueKey('t${tr.rowId}'),
               transfer: tr,
               flags: flags,
+              // 금액 · 수수료는 보내는 계좌 통화, 받는 금액은 받는 계좌 통화(I-13) — 통화는 이미 받은 자산 목록에서 읽는다
+              currencyOf: (id) => assets?.byRowId(id)?.currency,
               onTap: () => showTransferDetailSheet(context, tr),
             ),
         ],

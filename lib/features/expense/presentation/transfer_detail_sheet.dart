@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
@@ -278,8 +279,6 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     final masked = ref
         .watch(maskFlagsProvider('ledger.txDetail'))
         .of(MaskKind.transfer);
-    String won(int v) => krwSigned(v, masked, unit: true);
-
     final assetsAsync = ref.watch(assetsProvider);
     final loading = assetsAsync.isLoading && !assetsAsync.hasValue;
     if (loading) {
@@ -288,6 +287,14 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     final assets = assetsAsync.value ?? const <Asset>[];
     final from = assets.byRowId(tr.fromAssetRowId);
     final to = assets.byRowId(tr.toAssetRowId);
+    // 금액 · 수수료 · 출금액 · 이자 · 원금은 보내는 계좌 통화, 받는 금액(toAmount)은 받는 계좌 통화다(I-13). 계좌를 모르면 원화로 본다.
+    final locale = Localizations.localeOf(context).toString();
+    String inCur(int v, String? code) => masked
+        ? kHideMask
+        : isForeignCurrency(code)
+        ? formatAssetAmount(v.abs(), code!, locale)
+        : krwSigned(v, false, unit: true);
+    String won(int v) => inCur(v, from?.currency);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -335,6 +342,12 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
         TxKvList(
           semanticLabel: l.transferDetailTitle,
           rows: [
+            // 통화가 다른 두 계좌 사이 — 받는 쪽이 그 통화로 받은 금액(서버 toAmount)
+            if (tr.toAmount != null)
+              TxKvRow(
+                label: l.transferReceived,
+                value: inCur(tr.toAmount!, to?.currency),
+              ),
             if (fee > 0) TxKvRow(label: l.transferFeePrefix, value: won(fee)),
             // 보내는 쪽에서 실제로 빠져나간 금액 — 수수료가 있으면 이체 금액과 다르다
             if (fee > 0)

@@ -23,8 +23,12 @@ abstract class Asset with _$Asset {
     int? holdingBalance,
     String? currency,
 
-    /// 원화 환산율 (통화 1단위당 원화). KRW 는 1 — 순자산은 balance × 이 값으로 환산된다.
+    /// 원화 환산율 (통화 1단위당 원화). KRW 는 1 — 예수금(cashBalance)에만 곱한다(보유 평가는 원화, I-13 길 A).
     double? exchangeRate,
+
+    /// 원화 합계 — 서버 한 식 `round(cashBalance × exchangeRate) + holdingBalance`(I-13 길 A). 줄 · 묶음 합계 · 상세 큰
+    /// 금액 · 주간 추이가 이 값을 읽는다. 옛 서버면 없다(그때만 balance × 환율로 폴백 — `assetKrw`).
+    int? balanceInKrw,
     String? color,
     String? institution,
     String? memo,

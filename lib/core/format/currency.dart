@@ -80,10 +80,20 @@ String formatOriginalAmount(double amount, String code, String locale) {
   return amount < 0 ? '$kMinus$body' : body;
 }
 
-/// 자산 잔액의 원화 환산 — 화면에서 자산을 다시 더하는 곳은 이 함수를 거친다.
+/// 자산 금액 표기 — 외화 예수금 · 잔액 · 이체 금액은 서버가 **정수 1단위**로 저장하므로 소수 없이 `$100` · `−$1,000`(I-13).
 ///
-/// 서버는 순자산·요약을 이미 환산해서 준다. raw balance 를 그대로 더하면
-/// USD 1,000 이 1,000원으로 잡혀 서버 값과 어긋난다.
+/// 시세 · 단가 · 해외 결제의 원 통화 금액처럼 원래 소수가 있는 값은 [formatOriginalAmount](소수 자리 늘 보임) 그대로다.
+/// 웹 `shared/lib/groo/currency.ts` 의 `formatAssetAmount` 와 같은 규칙이다.
+String formatAssetAmount(num amount, String code, String locale) {
+  final f = NumberFormat.decimalPatternDigits(locale: locale, decimalDigits: 0);
+  final body = '${currencySymbol(code)}${f.format(amount.abs().round())}';
+  return amount < 0 ? '$kMinus$body' : body;
+}
+
+/// 옛 식(balance × 환율) — 서버 원화 합계 칸(`balanceInKrw`)이 없는 옛 서버일 때만 쓰는 폴백이다.
+///
+/// 투자 자산의 보유 평가는 원화라 balance 전체에 환율을 곱하면 보유분이 두 번 환산된다(I-13 길 A). 화면은
+/// `features/asset/domain/asset_krw.dart` 의 `assetKrw` 를 거친다 — 서버 칸이 있으면 그 값, 없을 때만 여기로 온다.
 int balanceInKrw(int balance, String? currency, double? exchangeRate) {
   if (!isForeignCurrency(currency) ||
       exchangeRate == null ||
