@@ -132,12 +132,14 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
       cancelLabel: l.actionCancel,
       onAction: () async => failure = await _requestDelete(container),
     );
-    if (!ok || !mounted) return;
+    if (!ok) return;
+    // 실패 알림은 미리 쥔 [snack] 으로 띄운다 — 요청이 도는 사이 시트가 내려가도(!mounted) 실패가 보이게 mounted 검사보다 앞에 둔다.
     if (failure != null) {
       _deleteFailed(snack, l, container);
-    } else {
-      _finishDelete();
+      return;
     }
+    if (!mounted) return;
+    _finishDelete();
   }
 
   /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null). 화면이 없어도 요청은 나간다.

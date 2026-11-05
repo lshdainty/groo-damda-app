@@ -6,7 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/core/auth/auth_repository.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 class _Capture implements HttpClientAdapter {
   final extras = <Map<String, dynamic>>[];

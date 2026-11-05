@@ -13,6 +13,7 @@ import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/import/data/import_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/attachment_input/p_attachment_input.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -220,7 +221,14 @@ class _ImportViewState extends ConsumerState<ImportView> {
         _step = _Step.done;
       });
     } on ApiException {
-      // 토스트는 ErrorToastInterceptor 가 띄운다 — 여기선 흐름만 멈춘다.
+      // 서버 글은 내지 않는다(요청은 silent) — 흐름은 멈추고 고정 글 한 문장 + [다시 시도].
+      if (mounted) {
+        PSnackbar.maybeOf(context)?.show(
+          message: l.importExecuteFailed,
+          tone: PSnackbarTone.critical,
+          action: PSnackbarAction(label: l.actionRetry, onPressed: _runImport),
+        );
+      }
     } finally {
       scrim.hide();
       if (mounted) setState(() => _executing = false);

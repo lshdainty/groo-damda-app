@@ -9,7 +9,7 @@ import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
 import 'package:groo_damda_app/features/asset/domain/net_worth_point.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 class AssetRepository {
   AssetRepository(this._dio);
@@ -467,6 +467,9 @@ class AssetRepository {
 
     /// 결제 계좌 — null 이면 증권계좌 예수금에서.
     int? settlementAssetRowId,
+
+    /// 폼이 실패를 자리에서 말할 때 — 전역 서버 글 토스트를 끈다.
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -484,6 +487,7 @@ class AssetRepository {
           'description': ?description,
           'settlementAssetRowId': settlementAssetRowId,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, AssetTrade.fromJson);
     } on DioException catch (e) {

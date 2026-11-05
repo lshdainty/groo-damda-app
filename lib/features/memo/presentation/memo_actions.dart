@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/constellation/application/constellation_providers.dart';
 import 'package:groo_damda_app/features/dashboard/application/dashboard_providers.dart';
 import 'package:groo_damda_app/features/memo/application/memo_providers.dart';
@@ -153,16 +152,6 @@ class MemoActions implements ItemActions<Memo> {
         },
       ),
     );
-  }
-
-  @override
-  Future<bool> delete(BuildContext context, WidgetRef ref, Memo m) async {
-    try {
-      await remove(ProviderScope.containerOf(context, listen: false), m);
-      return true;
-    } on ApiException {
-      return false;
-    }
   }
 
   @override

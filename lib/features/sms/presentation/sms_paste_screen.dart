@@ -16,7 +16,7 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 결제 문자를 붙여넣어 지출로 기록하는 화면. 흰 화면 하나, 버튼은 흐름 안(I-12 7-A).
 ///
@@ -77,11 +77,9 @@ class _SmsPasteScreenState extends ConsumerState<SmsPasteScreen> {
     if (!mounted) return;
     final l = AppLocalizations.of(context);
     if (text == null || text.trim().isEmpty) {
-      showPSnackBar(
+      PSnackbar.maybeOf(
         context,
-        l.smsClipboardEmpty,
-        severity: PSnackSeverity.warning,
-      );
+      )?.show(message: l.smsClipboardEmpty, tone: PSnackbarTone.critical);
       return;
     }
     setState(() {
@@ -124,11 +122,9 @@ class _SmsPasteScreenState extends ConsumerState<SmsPasteScreen> {
       }
 
       if (parsed.isLowConfidence) {
-        showPSnackBar(
+        PSnackbar.maybeOf(
           context,
-          l.smsLowConfidence,
-          severity: PSnackSeverity.warning,
-        );
+        )?.show(message: l.smsLowConfidence, tone: PSnackbarTone.critical);
       }
       showAddTxSheet(
         context,

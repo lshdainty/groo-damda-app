@@ -8,9 +8,11 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_unlock_dialog.dart';
+import 'package:groo_damda_app/core/settings/hide_cards_repository.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/storage/prefs_provider.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/hide_cards_fake.dart';
 import '../../support/plain_text.dart';
 
 /// OS 프롬프트 없이 정해진 결과만 돌려주는 가짜 인증.
@@ -51,7 +53,12 @@ void main() {
       PrefsKeys.hideCards: <String>['home.netWorth'],
     });
     final container = ProviderContainer(
-      overrides: [appLockAuthProvider.overrideWithValue(auth)],
+      overrides: [
+        appLockAuthProvider.overrideWithValue(auth),
+        hideCardsRepositoryProvider.overrideWith(
+          (ref) async => OkHideCardsRepository(),
+        ),
+      ],
     );
     addTearDown(container.dispose);
     // 게이트 없이도 잠금 상태가 굴러가도록 구독만 열어 둔다.
@@ -149,7 +156,12 @@ void main() {
       final auth = _FakeAuth(AppLockAuthResult.success);
       SharedPreferences.setMockInitialValues({PrefsKeys.appLock: true});
       final container = ProviderContainer(
-        overrides: [appLockAuthProvider.overrideWithValue(auth)],
+        overrides: [
+          appLockAuthProvider.overrideWithValue(auth),
+          hideCardsRepositoryProvider.overrideWith(
+            (ref) async => OkHideCardsRepository(),
+          ),
+        ],
       );
       addTearDown(container.dispose);
       container.listen(appLockedProvider, (_, _) {});

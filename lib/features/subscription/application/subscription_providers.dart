@@ -13,11 +13,19 @@ final subscriptionRepositoryProvider = FutureProvider<SubscriptionRepository>((
   return SubscriptionRepository(dio);
 });
 
+/// 내 기능권한 + 증권사 연결상태 — **실패를 그대로 던지는 원본**. 증권 게이트 · 증권 화면만 읽는다
+/// (실패를 "권한 없음" · "연결 안 됨" 으로 읽어 사용자를 내보내거나 연결을 권하지 않으려고 — 실패는 실패로 말한다).
+/// 나머지 호출처는 아래 [myFeaturesProvider] 를 그대로 쓴다.
+final myFeaturesLoadProvider = FutureProvider<MyFeatures>((ref) async {
+  final repo = await ref.watch(subscriptionRepositoryProvider.future);
+  return repo.getMyFeatures();
+});
+
 /// 내 기능권한 + 증권사 연결상태. 메뉴 게이트 단일 소스. 실패 시 empty(권한 없음).
+/// 계약은 그대로다 — 원본 [myFeaturesLoadProvider] 를 읽어 실패만 empty 로 삼킨다(호출처 · 폴러 무변경).
 final myFeaturesProvider = FutureProvider<MyFeatures>((ref) async {
   try {
-    final repo = await ref.watch(subscriptionRepositoryProvider.future);
-    return await repo.getMyFeatures();
+    return await ref.watch(myFeaturesLoadProvider.future);
   } catch (_) {
     return MyFeatures.empty;
   }

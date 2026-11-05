@@ -14,7 +14,9 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_badge.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 
 /// 증권사 한 곳의 연결 카드 — 키 등록 / 해제 / 기본 시세 소스 지정.
@@ -46,6 +48,9 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
   // 기본은 가린 상태고, 사용자가 잠깐 벗겨 보는 건 본인 의지다.
   bool _revealKey = false;
   bool _revealSecret = false;
+  // 연결 실패 — 키 입력 폼이라 폼 위 Callout 한 문장(값 남김). 해제 · 기본 변경은 스낵바 + [다시 시도].
+  String? _connectError;
+  final _errorKey = GlobalKey();
 
   @override
   void dispose() {
@@ -54,26 +59,66 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
     super.dispose();
   }
 
+  Future<void> _connect(BrokerConnection c, String key, String secret) async {
+    final l = AppLocalizations.of(context);
+    setState(() {
+      _busy = true;
+      _connectError = null;
+    });
+    try {
+      final repo = await ref.read(subscriptionRepositoryProvider.future);
+      await repo.registerBrokerCredential(c.broker, key, secret, silent: true);
+      ref.invalidate(myFeaturesLoadProvider);
+      ref.invalidate(brokerConnectionsProvider);
+      if (mounted) {
+        PSnackbar.maybeOf(
+          context,
+        )?.show(message: l.subBrokerConnected(c.displayName));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      // 4xx = 인증정보를 서버가 거절 — 틀림. 그 밖(서버 · 네트워크)은 연결 실패(웹과 같은 갈래).
+      final invalid =
+          e is ApiException &&
+          (e.statusCode ?? 0) >= 400 &&
+          (e.statusCode ?? 0) < 500;
+      setState(() {
+        _connectError = invalid
+            ? l.subBrokerInvalidCred
+            : l.subBrokerConnectFailed;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _run(
     Future<void> Function(SubscriptionRepository repo) action,
     String okMsg,
-    String errMsg,
+    String Function(Object error) errMsg,
   ) async {
     setState(() => _busy = true);
     try {
       final repo = await ref.read(subscriptionRepositoryProvider.future);
       await action(repo);
-      ref.invalidate(myFeaturesProvider);
+      ref.invalidate(myFeaturesLoadProvider);
       ref.invalidate(brokerConnectionsProvider);
+      if (mounted) PSnackbar.maybeOf(context)?.show(message: okMsg);
+    } catch (e) {
+      // 서버 글은 내지 않는다(요청은 silent) — 고정 글 한 문장 + [다시 시도](같은 일을 다시)
       if (mounted) {
-        showPSnackBar(context, okMsg, severity: PSnackSeverity.success);
-      }
-    } on ApiException {
-      // 서버 에러는 ErrorToastInterceptor 가 띄운다.
-    } catch (_) {
-      // API 가 아닌 예외는 인터셉터가 못 잡는다 — 여기서 알린다.
-      if (mounted) {
-        showPSnackBar(context, errMsg, severity: PSnackSeverity.error);
+        PSnackbar.maybeOf(context)?.show(
+          message: errMsg(e),
+          tone: PSnackbarTone.critical,
+          action: PSnackbarAction(
+            label: AppLocalizations.of(context).actionRetry,
+            onPressed: () => _run(action, okMsg, errMsg),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -217,9 +262,12 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                 onPressed: _busy
                     ? null
                     : () => _run(
-                        (repo) => repo.disconnectBrokerCredential(c.broker),
+                        (repo) => repo.disconnectBrokerCredential(
+                          c.broker,
+                          silent: true,
+                        ),
                         l.subBrokerDisconnected(c.displayName),
-                        l.subDisconnectFailed,
+                        (_) => l.subDisconnectFailed,
                       ),
               ),
             ],
@@ -235,9 +283,9 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
             onPressed: _busy
                 ? null
                 : () => _run(
-                    (repo) => repo.setPrimaryBroker(c.broker),
+                    (repo) => repo.setPrimaryBroker(c.broker, silent: true),
                     l.subBrokerPrimaryChanged(c.displayName),
-                    l.subBrokerPrimaryFailed,
+                    (_) => l.subBrokerPrimaryFailed,
                   ),
           ),
           const SizedBox(height: PSpace.x8),
@@ -255,6 +303,8 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_connectError != null)
+          FormErrorCallout(key: _errorKey, message: _connectError!),
         // 라벨은 서버가 준다 — 회사마다 같은 자리를 다르게 부른다.
         Text(c.keyLabel, style: _fieldLabel(t)),
         const SizedBox(height: PSpace.x4),
@@ -294,12 +344,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                   final key = _keyCtrl.text.trim();
                   final secret = _secretCtrl.text.trim();
                   if (key.isEmpty || secret.isEmpty) return;
-                  _run(
-                    (repo) =>
-                        repo.registerBrokerCredential(c.broker, key, secret),
-                    l.subBrokerConnected(c.displayName),
-                    l.subBrokerInvalidCred,
-                  );
+                  _connect(c, key, secret);
                 },
         ),
         const SizedBox(height: PSpace.x8),

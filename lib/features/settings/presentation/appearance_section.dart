@@ -9,6 +9,7 @@ import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
@@ -16,7 +17,6 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// 표시 설정 화면 — 흰 화면 하나(I-14 4-C · 14-1). 머리 = ds 상단 바(← + 제목).
 class AppearanceScreen extends StatelessWidget {
@@ -112,11 +112,10 @@ class AppearanceSection extends ConsumerWidget {
         // 실패는 아래에서 고정 글 하나로 알린다 — 서버 글이 전역 알림으로 닿지 않게(I-14 21)
         .patch(fields, optimistic: optimistic, silent: true);
     if (!ok && context.mounted) {
-      showPSnackBar(
+      // 바로 바뀌는 값 — 낙관 값은 되돌았다. 스낵바 한 문장, 다시 시도 없음.
+      PSnackbar.maybeOf(
         context,
-        l.appearanceSaveFailed,
-        severity: PSnackSeverity.error,
-      );
+      )?.show(message: l.appearanceSaveFailed, tone: PSnackbarTone.critical);
     }
   }
 

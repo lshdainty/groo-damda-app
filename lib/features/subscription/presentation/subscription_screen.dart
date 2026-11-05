@@ -59,7 +59,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   void _retry() {
     ref.invalidate(mySubscriptionProvider);
     ref.invalidate(subscriptionPlansProvider);
-    ref.invalidate(myFeaturesProvider);
+    ref.invalidate(myFeaturesLoadProvider);
   }
 
   Future<void> _subscribe(String planCode) async {
@@ -73,11 +73,19 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       await repo.subscribe(planCode, silent: true);
     } catch (_) {
       // 서버 글을 내지 않는다 — 정한 글 하나
-      snack?.show(message: l.subFailed, tone: PSnackbarTone.critical);
+      // 서버 글을 내지 않는다 — 정한 글 하나 + [다시 시도](같은 요금제로 구독을 다시)
+      snack?.show(
+        message: l.subFailed,
+        tone: PSnackbarTone.critical,
+        action: PSnackbarAction(
+          label: l.actionRetry,
+          onPressed: () => _subscribe(planCode),
+        ),
+      );
       if (mounted) setState(() => _busy = false);
       return;
     }
-    container.invalidate(myFeaturesProvider);
+    container.invalidate(myFeaturesLoadProvider);
     container.invalidate(mySubscriptionProvider);
     snack?.show(message: l.subStarted, tone: PSnackbarTone.positive);
     try {
@@ -99,7 +107,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     }
 
     void refresh() {
-      container.invalidate(myFeaturesProvider);
+      container.invalidate(myFeaturesLoadProvider);
       container.invalidate(mySubscriptionProvider);
     }
 
@@ -115,12 +123,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       // [다시 시도] 로 성공해도 같은 알림 — 확인창에서 바로 성공한 것과 같다
       onRetried: () {
         refresh();
-        snack?.show(message: l.subCanceled, tone: PSnackbarTone.positive);
+        snack?.show(message: l.subCanceled);
       },
     );
     if (!ok) return;
     refresh();
-    snack?.show(message: l.subCanceled, tone: PSnackbarTone.positive);
+    snack?.show(message: l.subCanceled);
   }
 
   @override

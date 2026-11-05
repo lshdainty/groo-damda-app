@@ -13,8 +13,8 @@ import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/features/file/application/file_providers.dart';
 import 'package:groo_damda_app/features/file/domain/file_attachment.dart';
 import 'package:groo_damda_app/shared/widgets/p_progress.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 
 /// 첨부 파일 섹션 — 거래/할일/메모/이벤트 상세에 embed.
 ///
@@ -78,16 +78,22 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
         fileName: name,
         referenceType: widget.referenceType,
         referenceRowId: widget.referenceRowId,
+        silent: true,
       );
       ref.invalidate(filesByReferenceProvider(_key));
       if (!mounted) return;
-      showPSnackBar(
-        context,
-        l.fileUploadComplete(name),
-        severity: PSnackSeverity.success,
-      );
+      PSnackbar.maybeOf(context)?.show(message: l.fileUploadComplete(name));
     } on ApiException {
+      // 서버 글은 내지 않는다(요청은 silent) — 고정 글 한 문장 + [다시 시도]
       if (!mounted) return;
+      PSnackbar.maybeOf(context)?.show(
+        message: l.fileUploadFailed,
+        tone: PSnackbarTone.critical,
+        action: PSnackbarAction(
+          label: l.actionRetry,
+          onPressed: () => _upload(path, name),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -95,22 +101,25 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
 
   Future<void> _delete(FileAttachment f) async {
     final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
-      context,
-      title: l.fileDeleteTitle,
-      description: l.fileDeleteConfirm(f.originalName),
-      actionLabel: l.actionDelete,
-      destructive: true,
-      cancelLabel: l.actionCancel,
-    );
-    if (!ok || !mounted) return;
+    final container = ProviderScope.containerOf(context);
     setState(() => _busy = true);
     try {
-      final repo = await ref.read(fileRepositoryProvider.future);
-      await repo.delete(f.rowId);
-      ref.invalidate(filesByReferenceProvider(_key));
-    } on ApiException {
-      if (!mounted) return;
+      // 확인창 뒤 실패는 공용 [askConfirmThenRequest] — critical 스낵바 + [다시 시도].
+      final ok = await askConfirmThenRequest(
+        context,
+        title: l.fileDeleteTitle,
+        description: l.fileDeleteConfirm(f.originalName),
+        actionLabel: l.actionDelete,
+        cancelLabel: l.actionCancel,
+        request: () async {
+          final repo = await container.read(fileRepositoryProvider.future);
+          await repo.delete(f.rowId, silent: true);
+        },
+        failedMessage: l.fileDeleteFailed,
+        retryLabel: l.actionRetry,
+        onRetried: () => container.invalidate(filesByReferenceProvider(_key)),
+      );
+      if (ok) container.invalidate(filesByReferenceProvider(_key));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

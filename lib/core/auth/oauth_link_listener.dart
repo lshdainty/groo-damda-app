@@ -9,10 +9,9 @@ import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/oauth_callback_handler.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
 import 'package:groo_damda_app/core/auth/oauth_link_return.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/features/settings/application/oauth_link_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// PKCE 흐름 보관소 — 로그인 화면(저장)과 콜백 리스너(복원)가 같은 인스턴스를 본다.
 final oauthFlowStoreProvider = Provider<OAuthFlowStore>(
@@ -54,10 +53,16 @@ final oauthLinkListenerProvider = Provider<void>((ref) {
       if (!_firstTimeSeen(uri)) return;
       final isError = back.kind == OAuthLinkReturnKind.failed;
       if (back.kind != OAuthLinkReturnKind.unknown) {
-        showGlobalSnack(
-          (l) => oauthLinkReturnMessage(back, l)!,
-          severity: isError ? PSnackSeverity.error : PSnackSeverity.success,
-        );
+        // 딥링크에는 BuildContext 가 없다 — 앱 맨 위 호스트 키로 건다(호스트가 아직 없으면 건너뜀).
+        final host = PSnackbar.appHostKey;
+        final ctx = host.currentContext;
+        if (ctx != null && ctx.mounted) {
+          host.currentState?.show(
+            message: oauthLinkReturnMessage(back, AppLocalizations.of(ctx))!,
+            // 연결 성공은 드문 이정표가 아니다 — neutral. 실패만 critical.
+            tone: isError ? PSnackbarTone.critical : PSnackbarTone.neutral,
+          );
+        }
       }
       return;
     }

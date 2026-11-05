@@ -19,6 +19,7 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/presentation/sms_paste_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
@@ -80,7 +81,7 @@ Future<_Repo> _pump(
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(scale)),
-          child: child!,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
         ),
         home: const SmsPasteScreen(),
       ),
@@ -123,7 +124,7 @@ void main() {
     await tester.tap(find.text('클립보드에서 붙여넣기'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('클립보드에 텍스트가 없어요.'), findsOneWidget);
+    expect(findPlain('클립보드에 텍스트가 없어요.'), findsOneWidget);
   });
 
   testWidgets('흰 화면 하나 · 머리는 Top Navigation · 옛 띠 · 경고 상자가 없다', (tester) async {

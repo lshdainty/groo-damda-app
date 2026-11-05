@@ -8,7 +8,6 @@ import 'package:logger/logger.dart';
 import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/core/auth/auth_events.dart';
 import 'package:groo_damda_app/core/network/interceptors/auth_interceptor.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/core/network/interceptors/lang_interceptor.dart';
 import 'package:groo_damda_app/core/network/interceptors/log_interceptor.dart';
 import 'package:groo_damda_app/core/network/interceptors/read_retry_interceptor.dart';
@@ -63,9 +62,6 @@ final dioProvider = FutureProvider<Dio>((ref) async {
             },
           ),
         )
-        // 아무 화면도 처리하지 않은 API 에러를 잡는 마지막 그물.
-        // 화면이 자기 토스트를 띄우면 스스로 취소한다(주석은 인터셉터 파일 참조).
-        ..interceptors.add(ErrorToastInterceptor())
         ..interceptors.add(LangInterceptor())
         ..interceptors.add(
           AppLogInterceptor(

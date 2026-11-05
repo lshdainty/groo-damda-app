@@ -1123,7 +1123,8 @@
   "calSaveFailed": "저장 실패",
   "calDeleteFailed": "삭제 실패",
   "calJoinFailed": "참여하지 못했어요. 잠시 뒤 다시 시도해주세요.",
-  "calUpdateFailed": "변경 실패",
+  "calUpdateFailed": "캘린더 표시를 바꾸지 못했어요.",
+  "importExecuteFailed": "가져오지 못했어요.",
   "calCalendarLoadError": "캘린더를 불러오지 못했어요",
   "calLabelLoadError": "라벨을 불러오지 못했어요",
   "dashTitle": "홈",
@@ -1349,7 +1350,7 @@
   "updateSheetRetry": "다시 시도",
   "updateSheetDownloading": "받는 중이에요",
   "updateSheetOpening": "설치 화면을 여는 중이에요",
-  "updateSheetFailed": "앱에서 받지 못했어요. 브라우저로 열어볼게요.",
+  "updateSheetFailed": "앱에서 받지 못해 브라우저로 열어요.",
   "updateTitle": "업데이트",
   "updateGateTitle": "새 버전 {version}이 나왔어요",
   "@updateGateTitle": {
@@ -1421,6 +1422,8 @@
   "budgetDeleteFailed": "예산을 삭제하지 못했어요.",
   "budgetSaveFailed": "예산을 저장하지 못했어요.",
   "assetSaveFailed": "자산을 저장하지 못했어요.",
+  "tradeSaveFailed": "매매를 처리하지 못했어요.",
+  "tradeSaveInsufficientQty": "보유 수량이 부족해요.",
   "budgetMonthlyLimit": "월 예산 한도",
   "budgetLoadError": "예산을 불러오지 못했습니다",
   "budgetSelectMonth": "월 선택",
@@ -1759,7 +1762,11 @@
       }
     }
   },
-  "categoryDeleteFailed": "삭제 실패",
+  "categoryDeleteFailed": "카테고리를 삭제하지 못했어요.",
+  "categorySaveFailed": "카테고리를 저장하지 못했어요.",
+  "categoryMoveTxFailed": "거래를 옮기지 못했어요.",
+  "categoryReorderFailed": "순서를 바꾸지 못했어요.",
+  "todoSaveFailed": "할 일을 저장하지 못했어요.",
   "categoryParentMoveHint": "최상위로 올리려면 새 최상위를 만들어 거래를 옮겨주세요.",
   "categoryMakeRoot": "최상위",
   "categoryNamePlaceholder": "예: 반려동물, 부수입",
@@ -1960,6 +1967,7 @@
   },
   "dutchCreated": "정산이 만들어졌어요",
   "expLoadError": "거래를 불러오지 못했어요",
+  "expTransfersLoadError": "이체 내역을 불러오지 못했어요.",
   "expEmptyMonth": "이 달에는 거래가 없습니다",
   "expEmptyDay": "이 날의 거래가 없어요",
   "expTotal": "합계",
@@ -2203,7 +2211,7 @@
   "fileTooltipGallery": "갤러리",
   "fileTooltipCamera": "카메라",
   "fileTooltipFile": "파일",
-  "fileUploadComplete": "{name} 업로드 완료",
+  "fileUploadComplete": "{name} 파일을 올렸어요.",
   "@fileUploadComplete": {
     "placeholders": {
       "name": {
@@ -2211,7 +2219,7 @@
       }
     }
   },
-  "fileUploadFailed": "업로드 실패",
+  "fileUploadFailed": "파일을 올리지 못했어요.",
   "fileDeleteTitle": "파일 삭제",
   "fileDeleteConfirm": "\"{name}\" 파일을 삭제할까요? 삭제한 파일은 되돌릴 수 없어요.",
   "@fileDeleteConfirm": {
@@ -2221,7 +2229,7 @@
       }
     }
   },
-  "fileDeleteFailed": "삭제 실패",
+  "fileDeleteFailed": "파일을 삭제하지 못했어요.",
   "fileLoadError": "첨부 로드 실패",
   "fileEmpty": "첨부된 파일 없음",
   "moreGroupMoney": "돈 관리",
@@ -2301,6 +2309,7 @@
       }
     }
   },
+  "hideAmountsSaveFailed": "금액 가리기를 저장하지 못했어요.",
   "hideAmountsDiscardTitle": "저장하지 않고 나가기",
   "hideAmountsDiscardBody": "고른 내용이 사라져요.",
   "hideAmountsDiscardConfirm": "나가기",
@@ -2370,7 +2379,7 @@
   "appearanceRegionLoadError": "기준 지역을 불러오지 못했어요",
   "appearanceCurrencyLoadError": "기본 통화를 불러오지 못했어요",
   "appearanceSaveFailed": "설정을 바꾸지 못했어요.",
-  "passwordChanged": "비밀번호를 바꿨어요",
+  "passwordChanged": "비밀번호를 바꿨어요.",
   "passwordChangeFailed": "비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "passwordCurrent": "현재 비밀번호",
   "passwordChangeDescription": "현재 비밀번호를 확인한 뒤 새 비밀번호로 바꿔요",
@@ -2422,7 +2431,7 @@
       }
     }
   },
-  "devicesLogoutFailed": "로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "devicesLogoutFailed": "로그아웃하지 못했어요.",
   "devicesLogout": "로그아웃",
   "devicesLogoutTitle": "{device}에서 로그아웃할까요?",
   "@devicesLogoutTitle": {
@@ -2444,7 +2453,7 @@
   "accountProvidersError": "연결 상태를 불러오지 못했어요",
   "accountLinkError": "계정을 연결하지 못했어요.",
   "accountUnlinkError": "연결을 해제하지 못했어요.",
-  "accountLinkedToast": "{name} 계정이 연결되었어요",
+  "accountLinkedToast": "{name} 계정이 연결됐어요.",
   "@accountLinkedToast": {
     "placeholders": {
       "name": {
@@ -2452,7 +2461,7 @@
       }
     }
   },
-  "accountUnlinkedToast": "Google 연결을 해제했어요",
+  "accountUnlinkedToast": "Google 연결을 해제했어요.",
   "accountSecuritiesDesc": "토스·나무 등 증권사 API 키를 연결해요",
   "accountBilling": "구독·결제",
   "accountNextBilling": "다음 결제 {date} · ",
@@ -2869,6 +2878,7 @@
   "savingGoalAchieved": "달성",
   "savingGoalAdd": "저축 목표 추가",
   "savingGoalSaveFailed": "저축 목표를 저장하지 못했어요.",
+  "savingGoalFirstContributeFailed": "목표는 만들었지만 첫 납입을 기록하지 못했어요.",
   "savingGoalEdit": "저축 목표 수정",
   "savingGoalSubmitAdd": "추가",
   "savingGoalDeleteTitle": "\"{title}\" 목표를 삭제할까요?",
@@ -3218,8 +3228,10 @@
   "stocksWatchGroupRename": "그룹 이름 바꾸기",
   "stocksWatchGroupDelete": "그룹 삭제",
   "stocksWatchGroupNamePlaceholder": "그룹 이름",
-  "stocksWatchGroupSaveFail": "관심 그룹을 저장하지 못했어요.",
-  "stocksWatchAddFail": "관심 등록에 실패했어요",
+  "stocksWatchGroupSaveFail": "그룹을 저장하지 못했어요.",
+  "stocksWatchAddFail": "관심 종목에 넣지 못했어요.",
+  "stocksWatchGroupDeleteFail": "그룹을 삭제하지 못했어요.",
+  "stocksWatchRemoveFail": "관심 종목에서 빼지 못했어요.",
   "stocksMarketToggleKr": "국내",
   "stocksMarketToggleUs": "미국",
   "todoAdd": "할 일 추가",
@@ -3291,7 +3303,7 @@
   },
   "todoActionFailed": "실패",
   "todoAddFailed": "추가 실패",
-  "todoDeleteFailed": "삭제 실패",
+  "todoDeleteFailed": "할 일을 삭제하지 못했어요.",
   "todoUpdateFailed": "수정 실패",
   "todoStatusChangeFailed": "상태 변경 실패",
   "todoMoveFailed": "이동 실패",
@@ -3351,8 +3363,8 @@
   "subFeatLedger": "가계부 · 자산 관리",
   "subFeatBudget": "예산 · 저축 목표 · 캘린더",
   "subFeatSecurities": "증권사 연동 · 실시간 시세 · 자산 실시간 금액",
-  "subStarted": "담다 Pro 구독이 시작되었어요",
-  "subFailed": "구독하지 못했어요.",
+  "subStarted": "담다 Pro 구독이 시작됐어요.",
+  "subFailed": "구독을 시작하지 못했어요.",
   "subCancelConfirmTitle": "구독 해지",
   "subCancelConfirmMsg": "해지하면 {date}부터 Free 플랜으로 전환되고 증권 탭이 잠겨요. 그 전까지는 Pro 기능을 계속 쓸 수 있어요.",
   "@subCancelConfirmMsg": {
@@ -3364,12 +3376,13 @@
   },
   "subCancel": "구독 해지",
   "subKeep": "유지하기",
-  "subCanceled": "구독을 해지했어요",
+  "subCanceled": "구독을 해지했어요.",
   "subCancelFailed": "구독을 해지하지 못했어요.",
   "subNextBillingDate": "다음 결제일",
   "subStartPro": "Pro 시작하기",
   "subLoadFailed": "구독 정보를 불러오지 못했어요",
   "subLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "secLoadFailed": "증권 정보를 불러오지 못했어요",
   "subPricePerMonth": "{amount} / 월",
   "@subPricePerMonth": {
     "placeholders": {
@@ -3406,8 +3419,9 @@
   "subBrokerCollecting": "보유 주식·시세 자동 수집 중",
   "subConnecting": "연결 중…",
   "subConnect": "연결하기",
-  "subBrokerInvalidCred": "인증정보가 올바르지 않아요",
-  "subDisconnectFailed": "해제에 실패했어요",
+  "subBrokerInvalidCred": "인증정보가 올바르지 않아요.",
+  "subBrokerConnectFailed": "증권사를 연결하지 못했어요.",
+  "subDisconnectFailed": "연결을 해제하지 못했어요.",
   "memoNew": "메모 추가",
   "memoEditTitle": "메모 수정",
   "memoLoadError": "메모를 불러오지 못했어요",
@@ -3815,6 +3829,7 @@
   "exportTabsLabel": "데이터 내보내기 · 가져오기",
   "exportSelectAll": "모두",
   "exportCountsFailed": "건수를 불러오지 못했어요.",
+  "exportPreviewFailed": "미리보기를 불러오지 못했어요.",
   "exportRangePlaceholder": "기간 선택",
   "exportStalled": "파일을 받는 중에 멈췄어요.",
   "exportFailed": "내보내지 못했어요.",
@@ -4310,7 +4325,7 @@
   "subBrokerPrimary": "기본",
   "subBrokerUseAsPrimary": "이 증권사 시세로 자산 평가하기",
   "subBrokerPrimaryNotice": "가계부 자산은 여기서 고른 증권사 시세로 계산해요.",
-  "subBrokerPrimaryFailed": "기본 증권사를 바꾸지 못했어요",
+  "subBrokerPrimaryFailed": "기본 증권사를 바꾸지 못했어요.",
   "subBrokerKeyConnected": "{broker} API 키 연결됨",
   "@subBrokerKeyConnected": {
     "placeholders": {
@@ -4319,7 +4334,7 @@
       }
     }
   },
-  "subBrokerConnected": "{broker} 계정을 연결했어요",
+  "subBrokerConnected": "{broker} 계정을 연결했어요.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {
@@ -4327,7 +4342,7 @@
       }
     }
   },
-  "subBrokerDisconnected": "{broker} 연결을 해제했어요",
+  "subBrokerDisconnected": "{broker} 연결을 해제했어요.",
   "@subBrokerDisconnected": {
     "placeholders": {
       "broker": {
@@ -4335,7 +4350,7 @@
       }
     }
   },
-  "subBrokerPrimaryChanged": "이제 {broker} 시세로 자산을 평가해요",
+  "subBrokerPrimaryChanged": "이제 {broker} 시세로 자산을 평가해요.",
   "@subBrokerPrimaryChanged": {
     "placeholders": {
       "broker": {
@@ -4761,7 +4776,7 @@
   "tdmCellDone": "{date}, 다 끝냄",
   "@tdmCellDone": {"placeholders": {"date": {"type": "String"}}},
   "tdmLoadFailedDesc": "잠시 후 다시 시도해주세요.",
-  "todoToggleFailed": "완료로 바꾸지 못했어요. 잠시 후 다시 시도해주세요.",
+  "todoToggleFailed": "할 일 상태를 바꾸지 못했어요.",
   "todoDetailOverdue": "마감 지남",
   "todoDueDatePlaceholder": "마감일 선택",
   "todoTagEmptyHint": "태그는 설정 › 할 일 태그에서 만들어요.",

@@ -1937,7 +1937,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calJoinFailed => '참여하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calUpdateFailed => '변경 실패';
+  String get calUpdateFailed => '캘린더 표시를 바꾸지 못했어요.';
+
+  @override
+  String get importExecuteFailed => '가져오지 못했어요.';
 
   @override
   String get calCalendarLoadError => '캘린더를 불러오지 못했어요';
@@ -2318,7 +2321,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get updateSheetOpening => '설치 화면을 여는 중이에요';
 
   @override
-  String get updateSheetFailed => '앱에서 받지 못했어요. 브라우저로 열어볼게요.';
+  String get updateSheetFailed => '앱에서 받지 못해 브라우저로 열어요.';
 
   @override
   String get updateTitle => '업데이트';
@@ -2475,6 +2478,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetSaveFailed => '자산을 저장하지 못했어요.';
+
+  @override
+  String get tradeSaveFailed => '매매를 처리하지 못했어요.';
+
+  @override
+  String get tradeSaveInsufficientQty => '보유 수량이 부족해요.';
 
   @override
   String get budgetMonthlyLimit => '월 예산 한도';
@@ -2915,7 +2924,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get categoryDeleteFailed => '삭제 실패';
+  String get categoryDeleteFailed => '카테고리를 삭제하지 못했어요.';
+
+  @override
+  String get categorySaveFailed => '카테고리를 저장하지 못했어요.';
+
+  @override
+  String get categoryMoveTxFailed => '거래를 옮기지 못했어요.';
+
+  @override
+  String get categoryReorderFailed => '순서를 바꾸지 못했어요.';
+
+  @override
+  String get todoSaveFailed => '할 일을 저장하지 못했어요.';
 
   @override
   String get categoryParentMoveHint => '최상위로 올리려면 새 최상위를 만들어 거래를 옮겨주세요.';
@@ -3297,6 +3318,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expLoadError => '거래를 불러오지 못했어요';
+
+  @override
+  String get expTransfersLoadError => '이체 내역을 불러오지 못했어요.';
 
   @override
   String get expEmptyMonth => '이 달에는 거래가 없습니다';
@@ -3751,11 +3775,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String fileUploadComplete(String name) {
-    return '$name 업로드 완료';
+    return '$name 파일을 올렸어요.';
   }
 
   @override
-  String get fileUploadFailed => '업로드 실패';
+  String get fileUploadFailed => '파일을 올리지 못했어요.';
 
   @override
   String get fileDeleteTitle => '파일 삭제';
@@ -3766,7 +3790,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get fileDeleteFailed => '삭제 실패';
+  String get fileDeleteFailed => '파일을 삭제하지 못했어요.';
 
   @override
   String get fileLoadError => '첨부 로드 실패';
@@ -3978,6 +4002,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get hideAmountsSaveFailed => '금액 가리기를 저장하지 못했어요.';
+
+  @override
   String get hideAmountsDiscardTitle => '저장하지 않고 나가기';
 
   @override
@@ -4187,7 +4214,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceSaveFailed => '설정을 바꾸지 못했어요.';
 
   @override
-  String get passwordChanged => '비밀번호를 바꿨어요';
+  String get passwordChanged => '비밀번호를 바꿨어요.';
 
   @override
   String get passwordChangeFailed => '비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
@@ -4286,7 +4313,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get devicesLogoutFailed => '로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get devicesLogoutFailed => '로그아웃하지 못했어요.';
 
   @override
   String get devicesLogout => '로그아웃';
@@ -4334,11 +4361,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String accountLinkedToast(String name) {
-    return '$name 계정이 연결되었어요';
+    return '$name 계정이 연결됐어요.';
   }
 
   @override
-  String get accountUnlinkedToast => 'Google 연결을 해제했어요';
+  String get accountUnlinkedToast => 'Google 연결을 해제했어요.';
 
   @override
   String get accountSecuritiesDesc => '토스·나무 등 증권사 API 키를 연결해요';
@@ -5078,6 +5105,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get savingGoalSaveFailed => '저축 목표를 저장하지 못했어요.';
 
   @override
+  String get savingGoalFirstContributeFailed => '목표는 만들었지만 첫 납입을 기록하지 못했어요.';
+
+  @override
   String get savingGoalEdit => '저축 목표 수정';
 
   @override
@@ -5724,10 +5754,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksWatchGroupNamePlaceholder => '그룹 이름';
 
   @override
-  String get stocksWatchGroupSaveFail => '관심 그룹을 저장하지 못했어요.';
+  String get stocksWatchGroupSaveFail => '그룹을 저장하지 못했어요.';
 
   @override
-  String get stocksWatchAddFail => '관심 등록에 실패했어요';
+  String get stocksWatchAddFail => '관심 종목에 넣지 못했어요.';
+
+  @override
+  String get stocksWatchGroupDeleteFail => '그룹을 삭제하지 못했어요.';
+
+  @override
+  String get stocksWatchRemoveFail => '관심 종목에서 빼지 못했어요.';
 
   @override
   String get stocksMarketToggleKr => '국내';
@@ -5877,7 +5913,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get todoAddFailed => '추가 실패';
 
   @override
-  String get todoDeleteFailed => '삭제 실패';
+  String get todoDeleteFailed => '할 일을 삭제하지 못했어요.';
 
   @override
   String get todoUpdateFailed => '수정 실패';
@@ -5964,10 +6000,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subFeatSecurities => '증권사 연동 · 실시간 시세 · 자산 실시간 금액';
 
   @override
-  String get subStarted => '담다 Pro 구독이 시작되었어요';
+  String get subStarted => '담다 Pro 구독이 시작됐어요.';
 
   @override
-  String get subFailed => '구독하지 못했어요.';
+  String get subFailed => '구독을 시작하지 못했어요.';
 
   @override
   String get subCancelConfirmTitle => '구독 해지';
@@ -5984,7 +6020,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subKeep => '유지하기';
 
   @override
-  String get subCanceled => '구독을 해지했어요';
+  String get subCanceled => '구독을 해지했어요.';
 
   @override
   String get subCancelFailed => '구독을 해지하지 못했어요.';
@@ -6000,6 +6036,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get subLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get secLoadFailed => '증권 정보를 불러오지 못했어요';
 
   @override
   String subPricePerMonth(String amount) {
@@ -6034,10 +6073,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subConnect => '연결하기';
 
   @override
-  String get subBrokerInvalidCred => '인증정보가 올바르지 않아요';
+  String get subBrokerInvalidCred => '인증정보가 올바르지 않아요.';
 
   @override
-  String get subDisconnectFailed => '해제에 실패했어요';
+  String get subBrokerConnectFailed => '증권사를 연결하지 못했어요.';
+
+  @override
+  String get subDisconnectFailed => '연결을 해제하지 못했어요.';
 
   @override
   String get memoNew => '메모 추가';
@@ -6631,6 +6673,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get exportCountsFailed => '건수를 불러오지 못했어요.';
+
+  @override
+  String get exportPreviewFailed => '미리보기를 불러오지 못했어요.';
 
   @override
   String get exportRangePlaceholder => '기간 선택';
@@ -7365,7 +7410,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subBrokerPrimaryNotice => '가계부 자산은 여기서 고른 증권사 시세로 계산해요.';
 
   @override
-  String get subBrokerPrimaryFailed => '기본 증권사를 바꾸지 못했어요';
+  String get subBrokerPrimaryFailed => '기본 증권사를 바꾸지 못했어요.';
 
   @override
   String subBrokerKeyConnected(String broker) {
@@ -7374,17 +7419,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return '$broker 계정을 연결했어요';
+    return '$broker 계정을 연결했어요.';
   }
 
   @override
   String subBrokerDisconnected(String broker) {
-    return '$broker 연결을 해제했어요';
+    return '$broker 연결을 해제했어요.';
   }
 
   @override
   String subBrokerPrimaryChanged(String broker) {
-    return '이제 $broker 시세로 자산을 평가해요';
+    return '이제 $broker 시세로 자산을 평가해요.';
   }
 
   @override
@@ -8221,7 +8266,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tdmLoadFailedDesc => '잠시 후 다시 시도해주세요.';
 
   @override
-  String get todoToggleFailed => '완료로 바꾸지 못했어요. 잠시 후 다시 시도해주세요.';
+  String get todoToggleFailed => '할 일 상태를 바꾸지 못했어요.';
 
   @override
   String get todoDetailOverdue => '마감 지남';

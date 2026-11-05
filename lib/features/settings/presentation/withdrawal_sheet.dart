@@ -21,7 +21,6 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// 그루 담다 이용 해지 — web `WithdrawDialog` 미러.
 ///
@@ -253,8 +252,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
         _codeSentAt = DateTime.now();
         _reauthError = null;
       });
-      // 알림은 옛 길 그대로(Q7 7A) — ds Snackbar 로 옮기는 것은 셸 PR
-      showPSnackBar(context, l.withdrawCodeSent, severity: PSnackSeverity.info);
+      // 시트가 열린 채라 스낵바가 아니라 코드 칸 아래 안내 글이 말한다(아래 _codeSentAt 블록).
     } on ApiException {
       if (!mounted) return;
       setState(() => _reauthError = l.withdrawFailed);
@@ -471,7 +469,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
           if (_codeSentAt != null) ...[
             const SizedBox(height: PSpacing.x3),
             Text(
-              l.withdrawCodeHint,
+              '${l.withdrawCodeSent} ${l.withdrawCodeHint}',
               style: PTypography.t4.copyWith(
                 color: context.colors.fgNeutralSubtle,
               ),

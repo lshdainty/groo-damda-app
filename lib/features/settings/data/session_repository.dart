@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/features/settings/domain/device_session.dart';
 
 /// "로그인된 기기" — 본인 세션 조회·해지.

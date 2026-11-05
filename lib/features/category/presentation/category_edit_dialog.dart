@@ -13,6 +13,8 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -120,6 +122,8 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   late String _icon;
   String? _nameError;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
 
   bool get _isEdit => widget.edit != null;
 
@@ -283,7 +287,10 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       if (!ok || !mounted) return;
     }
 
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
       if (_isEdit) {
@@ -296,6 +303,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           // 웹 정합 — parentRowId 는 항상 포함(null = 최상위). 자식 보유 시 기존 유지.
           includeParentRowId: true,
           parentRowId: parentDisabled ? widget.edit!.parentRowId : _parentRowId,
+          silent: true,
         );
       } else {
         await repo.createCategory(
@@ -304,14 +312,20 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           color: _color,
           expenseType: _kind,
           parentRowId: _parentRowId,
+          silent: true,
         );
       }
       _invalidateAggregates();
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -516,6 +530,19 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_failed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.globalGutter,
+                0,
+                PSpacing.globalGutter,
+                PSpacing.x4,
+              ),
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.categorySaveFailed,
+              ),
+            ),
           // 맨 위 줄 — 미리보기 타일 52 + 이름 칸(좌우 24 · 아래 8 · 사이 12)
           Padding(
             padding: const EdgeInsets.fromLTRB(

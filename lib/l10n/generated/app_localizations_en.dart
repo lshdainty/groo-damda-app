@@ -1965,7 +1965,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calJoinFailed => 'Could not join. Please try again in a moment.';
 
   @override
-  String get calUpdateFailed => 'Update failed';
+  String get calUpdateFailed => 'Couldn\'t change the calendar visibility.';
+
+  @override
+  String get importExecuteFailed => 'Couldn\'t import the data.';
 
   @override
   String get calCalendarLoadError => 'Couldn\'t load calendars';
@@ -2353,7 +2356,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateSheetFailed =>
-      'Could not download in the app. Opening your browser instead.';
+      'Couldn\'t download in the app, so we\'re opening your browser.';
 
   @override
   String get updateTitle => 'Update';
@@ -2514,6 +2517,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetSaveFailed => 'Couldn\'t save the asset.';
+
+  @override
+  String get tradeSaveFailed => 'Couldn\'t process the trade.';
+
+  @override
+  String get tradeSaveInsufficientQty => 'Not enough shares held.';
 
   @override
   String get budgetMonthlyLimit => 'Monthly budget limit';
@@ -2969,7 +2978,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get categoryDeleteFailed => 'Delete failed';
+  String get categoryDeleteFailed => 'Couldn\'t delete the category.';
+
+  @override
+  String get categorySaveFailed => 'Couldn\'t save the category.';
+
+  @override
+  String get categoryMoveTxFailed => 'Couldn\'t move the transactions.';
+
+  @override
+  String get categoryReorderFailed => 'Couldn\'t change the order.';
+
+  @override
+  String get todoSaveFailed => 'Couldn\'t save the to-do.';
 
   @override
   String get categoryParentMoveHint =>
@@ -3357,6 +3378,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expLoadError => 'Couldn\'t load transactions';
+
+  @override
+  String get expTransfersLoadError => 'Couldn\'t load the transfers.';
 
   @override
   String get expEmptyMonth => 'No transactions this month';
@@ -3819,11 +3843,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String fileUploadComplete(String name) {
-    return '$name uploaded';
+    return 'Uploaded $name.';
   }
 
   @override
-  String get fileUploadFailed => 'Upload failed';
+  String get fileUploadFailed => 'Couldn\'t upload the file.';
 
   @override
   String get fileDeleteTitle => 'Delete file';
@@ -3834,7 +3858,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get fileDeleteFailed => 'Delete failed';
+  String get fileDeleteFailed => 'Couldn\'t delete the file.';
 
   @override
   String get fileLoadError => 'Failed to load attachments';
@@ -4045,6 +4069,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String hideAmountsScreensCount(int count, int total) {
     return 'Screens to hide · $count / $total';
   }
+
+  @override
+  String get hideAmountsSaveFailed => 'Couldn\'t save the amount hiding.';
 
   @override
   String get hideAmountsDiscardTitle => 'Leave without saving';
@@ -4258,7 +4285,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceSaveFailed => 'Couldn\'t change the setting.';
 
   @override
-  String get passwordChanged => 'Password changed';
+  String get passwordChanged => 'Changed your password.';
 
   @override
   String get passwordChangeFailed =>
@@ -4361,7 +4388,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get devicesLogoutFailed => 'Couldn\'t log out. Try again in a moment.';
+  String get devicesLogoutFailed => 'Couldn\'t log out.';
 
   @override
   String get devicesLogout => 'Log out';
@@ -4410,11 +4437,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String accountLinkedToast(String name) {
-    return '$name account connected';
+    return 'Connected the $name account.';
   }
 
   @override
-  String get accountUnlinkedToast => 'Google account disconnected';
+  String get accountUnlinkedToast => 'Disconnected the Google account.';
 
   @override
   String get accountSecuritiesDesc =>
@@ -5176,6 +5203,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savingGoalSaveFailed => 'Couldn\'t save the saving goal.';
 
   @override
+  String get savingGoalFirstContributeFailed =>
+      'Created the goal, but couldn\'t record the first deposit.';
+
+  @override
   String get savingGoalEdit => 'Edit saving goal';
 
   @override
@@ -5830,10 +5861,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stocksWatchGroupNamePlaceholder => 'Group name';
 
   @override
-  String get stocksWatchGroupSaveFail => 'Couldn\'t save the watch group.';
+  String get stocksWatchGroupSaveFail => 'Couldn\'t save the group.';
 
   @override
-  String get stocksWatchAddFail => 'Failed to add to watchlist';
+  String get stocksWatchAddFail => 'Couldn\'t add it to your watchlist.';
+
+  @override
+  String get stocksWatchGroupDeleteFail => 'Couldn\'t delete the group.';
+
+  @override
+  String get stocksWatchRemoveFail =>
+      'Couldn\'t remove it from your watchlist.';
 
   @override
   String get stocksMarketToggleKr => 'KR';
@@ -5984,7 +6022,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todoAddFailed => 'Add failed';
 
   @override
-  String get todoDeleteFailed => 'Delete failed';
+  String get todoDeleteFailed => 'Couldn\'t delete the to-do.';
 
   @override
   String get todoUpdateFailed => 'Update failed';
@@ -6073,7 +6111,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Securities link · real-time quotes · real-time asset value';
 
   @override
-  String get subStarted => 'Your 담다 Pro subscription is active';
+  String get subStarted => 'Your Pro subscription has started.';
 
   @override
   String get subFailed => 'Couldn\'t start the subscription.';
@@ -6093,7 +6131,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subKeep => 'Keep';
 
   @override
-  String get subCanceled => 'Subscription canceled';
+  String get subCanceled => 'Canceled the subscription.';
 
   @override
   String get subCancelFailed => 'Couldn\'t cancel the subscription.';
@@ -6109,6 +6147,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get secLoadFailed => 'Couldn\'t load your securities info';
 
   @override
   String subPricePerMonth(String amount) {
@@ -6143,10 +6184,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subConnect => 'Connect';
 
   @override
-  String get subBrokerInvalidCred => 'Those credentials aren\'t valid';
+  String get subBrokerInvalidCred => 'The credentials are not valid.';
 
   @override
-  String get subDisconnectFailed => 'Couldn\'t disconnect';
+  String get subBrokerConnectFailed => 'Couldn\'t connect to the broker.';
+
+  @override
+  String get subDisconnectFailed => 'Couldn\'t disconnect.';
 
   @override
   String get memoNew => 'Add memo';
@@ -6753,6 +6797,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportCountsFailed => 'Couldn\'t load the counts.';
+
+  @override
+  String get exportPreviewFailed => 'Couldn\'t load the preview.';
 
   @override
   String get exportRangePlaceholder => 'Select a range';
@@ -7503,7 +7550,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your assets are valued using the provider selected here.';
 
   @override
-  String get subBrokerPrimaryFailed => 'Couldn\'t change the primary provider';
+  String get subBrokerPrimaryFailed => 'Couldn\'t change the primary broker.';
 
   @override
   String subBrokerKeyConnected(String broker) {
@@ -7512,17 +7559,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return 'Connected your $broker account';
+    return 'Connected your $broker account.';
   }
 
   @override
   String subBrokerDisconnected(String broker) {
-    return 'Disconnected from $broker';
+    return 'Disconnected from $broker.';
   }
 
   @override
   String subBrokerPrimaryChanged(String broker) {
-    return 'Assets are now valued with $broker';
+    return 'Assets are now valued with $broker.';
   }
 
   @override
@@ -8418,8 +8465,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tdmLoadFailedDesc => 'Please try again in a moment.';
 
   @override
-  String get todoToggleFailed =>
-      'Couldn\'t update the to-do. Please try again in a moment.';
+  String get todoToggleFailed => 'Couldn\'t update the to-do.';
 
   @override
   String get todoDetailOverdue => 'Overdue';

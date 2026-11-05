@@ -6,7 +6,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/password_rules.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
@@ -14,7 +14,6 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// desk-back `DeskErrorCode.USER_PASSWORD_CHANGE_FAILED` — 이 폼에서는 현재 비밀번호 불일치 하나다.
 /// 판정은 문구가 아니라 코드로 한다(문구는 그루 계정 배포 · 언어마다 바뀐다). 웹 `password-change-error.ts` 와 같다.
@@ -117,10 +116,13 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
       // 시트가 닫힌 뒤 알린다 — 서버가 받았다(성공)
-      showGlobalSnack(
-        (l) => l.passwordChanged,
-        severity: PSnackSeverity.success,
-      );
+      final host = PSnackbar.appHostKey;
+      final ctx = host.currentContext;
+      if (ctx != null && ctx.mounted) {
+        host.currentState?.show(
+          message: AppLocalizations.of(ctx).passwordChanged,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {

@@ -6,6 +6,7 @@ library;
 import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/features/stocks/data/broker_detail_dto.dart';
 import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/features/stocks/data/toss_dto.dart';
@@ -402,11 +403,16 @@ class StocksRepository {
     }
   }
 
-  Future<StockWatchGroup> createWatchGroup(String groupName) async {
+  /// [silent] 면 서버 글 전역 토스트를 끈다 — 화면이 자기 문장으로 말한다.
+  Future<StockWatchGroup> createWatchGroup(
+    String groupName, {
+    bool silent = false,
+  }) async {
     try {
       final res = await _dio.post<dynamic>(
         '/stock-watch/groups',
         data: {'groupName': groupName},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return StockWatchGroup.fromJson(_payload(res) as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -416,12 +422,14 @@ class StocksRepository {
 
   Future<StockWatchGroup> renameWatchGroup(
     int groupId,
-    String groupName,
-  ) async {
+    String groupName, {
+    bool silent = false,
+  }) async {
     try {
       final res = await _dio.put<dynamic>(
         '/stock-watch/groups/$groupId',
         data: {'groupName': groupName},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return StockWatchGroup.fromJson(_payload(res) as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -429,9 +437,12 @@ class StocksRepository {
     }
   }
 
-  Future<void> deleteWatchGroup(int groupId) async {
+  Future<void> deleteWatchGroup(int groupId, {bool silent = false}) async {
     try {
-      await _dio.delete<dynamic>('/stock-watch/groups/$groupId');
+      await _dio.delete<dynamic>(
+        '/stock-watch/groups/$groupId',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -442,11 +453,13 @@ class StocksRepository {
     int groupId,
     String symbol, {
     String? marketCode,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<dynamic>(
         '/stock-watch/groups/$groupId/items',
         data: {'symbol': symbol, 'marketCode': ?marketCode},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return WatchItem.fromJson(_payload(res) as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -454,9 +467,12 @@ class StocksRepository {
     }
   }
 
-  Future<void> removeWatchItem(int itemId) async {
+  Future<void> removeWatchItem(int itemId, {bool silent = false}) async {
     try {
-      await _dio.delete<dynamic>('/stock-watch/items/$itemId');
+      await _dio.delete<dynamic>(
+        '/stock-watch/items/$itemId',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

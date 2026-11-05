@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/features/file/domain/file_attachment.dart';
 
 /// 파일 첨부 — front `fileApi` 미러.
@@ -21,6 +22,7 @@ class FileRepository {
     required String fileName,
     required String referenceType,
     int? referenceRowId,
+    bool silent = false,
   }) async {
     try {
       final form = FormData.fromMap({
@@ -31,7 +33,10 @@ class FileRepository {
       final res = await _dio.post<Map<String, dynamic>>(
         '/files/upload',
         data: form,
-        options: Options(contentType: 'multipart/form-data'),
+        options: Options(
+          contentType: 'multipart/form-data',
+          extra: silent ? {kSilentErrorToast: true} : null,
+        ),
       );
       return _unwrap(res, FileAttachment.fromJson);
     } on DioException catch (e) {
@@ -61,9 +66,12 @@ class FileRepository {
   /// 다운로드 URL 생성 — 토큰 쿠키가 있어야 GET 가능.
   String downloadUrl(int id) => '${_dio.options.baseUrl}/files/$id';
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/files/$id');
+      await _dio.delete<void>(
+        '/files/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/stocks/application/stocks_providers.dart';
 import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/features/stocks/data/watch_dto.dart';
@@ -22,7 +21,10 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/searchable_list/p_searchable_list.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 
 // ---- 관심 그룹 -----------------------------------------------------------------
 
@@ -190,6 +192,8 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
   );
   late final FocusNode _nameFocus = widget.nameFocus;
   bool _busy = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
 
   @override
   void initState() {
@@ -208,32 +212,34 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
   Future<void> _save() async {
     final name = _ctrl.text.trim();
     if (name.isEmpty || _busy) return;
-    setState(() => _busy = true);
+    setState(() {
+      _failed = false;
+      _busy = true;
+    });
     try {
       final repo = await ref.read(stocksRepositoryProvider.future);
       final g = widget.group;
       if (g == null) {
-        await repo.createWatchGroup(name);
+        await repo.createWatchGroup(name, silent: true);
       } else {
-        await repo.renameWatchGroup(g.rowId, name);
+        await repo.renameWatchGroup(g.rowId, name, silent: true);
       }
       ref.invalidate(watchGroupsProvider);
       if (mounted) {
         widget.probe.dirty = () => false;
         PBottomSheet.of(context).close();
       }
-    } on ApiException {
-      // 서버 에러는 ErrorToastInterceptor 가 띄운다.
-      if (mounted) setState(() => _busy = false);
     } catch (_) {
-      if (mounted) {
-        setState(() => _busy = false);
-        showPSnackBar(
-          context,
-          AppLocalizations.of(context).stocksWatchGroupSaveFail,
-          severity: PSnackSeverity.error,
-        );
-      }
+      // 시트는 열린 채 쓴 이름이 남는다 — 실패는 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _failed = true;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     }
   }
 
@@ -249,15 +255,28 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
       flushBody: true,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
-        child: PField(
-          label: l.stocksWatchGroupNamePlaceholder,
-          child: PInput(
-            controller: _ctrl,
-            focusNode: _nameFocus,
-            semanticLabel: l.stocksWatchGroupNamePlaceholder,
-            onChanged: (_) => setState(() {}),
-            onSubmitted: (_) => _save(),
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_failed) ...[
+              FormErrorCallout(
+                key: _errorKey,
+                message: l.stocksWatchGroupSaveFail,
+              ),
+              const SizedBox(height: PSpacing.x4),
+            ],
+            PField(
+              label: l.stocksWatchGroupNamePlaceholder,
+              child: PInput(
+                controller: _ctrl,
+                focusNode: _nameFocus,
+                semanticLabel: l.stocksWatchGroupNamePlaceholder,
+                onChanged: (_) => setState(() {}),
+                onSubmitted: (_) => _save(),
+              ),
+            ),
+          ],
         ),
       ),
       footer: [
@@ -272,14 +291,20 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
   }
 }
 
-/// 그룹 삭제 확인 — Alert Dialog. 삭제 요청 · 실패 길은 지금 그대로.
+/// 그룹 삭제 확인 — 확인창 뒤 실패는 공용 [askConfirmThenRequest] (critical 스낵바 + [다시 시도]).
 Future<void> confirmDeleteWatchGroup(
   BuildContext context,
   WidgetRef ref,
   StockWatchGroup g,
 ) async {
   final l = AppLocalizations.of(context);
-  await PAlertDialog.show(
+  final container = ProviderScope.containerOf(context);
+  Future<void> request() async {
+    final repo = await container.read(stocksRepositoryProvider.future);
+    await repo.deleteWatchGroup(g.rowId, silent: true);
+  }
+
+  final ok = await askConfirmThenRequest(
     context,
     title: l.stocksWatchGroupDelete,
     description: g.items.isEmpty
@@ -287,21 +312,12 @@ Future<void> confirmDeleteWatchGroup(
         : l.stocksWatchGroupDeleteConfirmCount(g.groupName, g.items.length),
     cancelLabel: l.actionCancel,
     actionLabel: l.stocksWatchGroupDelete,
-    destructive: true,
-    onAction: () async {
-      final repo = await ref.read(stocksRepositoryProvider.future);
-      await repo.deleteWatchGroup(g.rowId);
-      ref.invalidate(watchGroupsProvider);
-    },
-    onActionError: (e) {
-      if (e is ApiException || !context.mounted) return;
-      showPSnackBar(
-        context,
-        l.stocksWatchGroupSaveFail,
-        severity: PSnackSeverity.error,
-      );
-    },
+    request: request,
+    failedMessage: l.stocksWatchGroupDeleteFail,
+    retryLabel: l.actionRetry,
+    onRetried: () => container.invalidate(watchGroupsProvider),
   );
+  if (ok) container.invalidate(watchGroupsProvider);
 }
 
 /// 관심 별 토글(Q3-B) — 어느 그룹에든 있으면 전부 해제, 없으면 그룹이 하나면 바로 · 둘 이상이면 시트로 고른 그룹에
@@ -317,61 +333,86 @@ Future<void> toggleWatch(
   final groupsAsync = ref.read(watchGroupsProvider);
   if (!groupsAsync.hasValue) return;
   final groups = groupsAsync.value ?? const <StockWatchGroup>[];
-  try {
-    final repo = await ref.read(stocksRepositoryProvider.future);
-    final entries = [
-      for (final g in groups) ...g.items.where((i) => i.symbol == symbol),
-    ];
-    if (entries.isNotEmpty) {
+  // 바로 바뀌는 값 — 실패하면 별은 그대로(서버 값이 그대로라 되돌릴 것이 없다) 스낵바 한 문장 + [다시 시도].
+  // 서버 글 전역 토스트는 끈다(silent). 스낵바 길은 시트가 닫히기 전에 쥔다.
+  final snack = PSnackbar.maybeOf(context);
+  final container = ProviderScope.containerOf(context);
+  final repo = await ref.read(stocksRepositoryProvider.future);
+  final entries = [
+    for (final g in groups) ...g.items.where((i) => i.symbol == symbol),
+  ];
+  final removing = entries.isNotEmpty;
+  Future<void> Function() request;
+  if (removing) {
+    request = () async {
       for (final e in entries) {
-        await repo.removeWatchItem(e.rowId);
+        await repo.removeWatchItem(e.rowId, silent: true);
       }
-    } else if (groups.isEmpty) {
-      final g = await repo.createWatchGroup(l.stocksWatchDefaultGroupName);
-      await repo.addWatchItem(g.rowId, symbol, marketCode: marketCode);
-    } else if (groups.length == 1) {
+    };
+  } else if (groups.isEmpty) {
+    // 기본 그룹은 한 번만 만든다 — 담기만 실패해 다시 시도해도 같은 그룹이 또 생기지 않는다.
+    StockWatchGroup? created;
+    request = () async {
+      created ??= await repo.createWatchGroup(
+        l.stocksWatchDefaultGroupName,
+        silent: true,
+      );
       await repo.addWatchItem(
-        groups.first.rowId,
+        created!.rowId,
         symbol,
         marketCode: marketCode,
+        silent: true,
       );
-    } else {
-      if (!context.mounted) return;
-      // 그룹 목록은 사용자 값이라 메뉴(실행)가 아니라 고르기 시트 — 웹 detail-parts.tsx 와 같다.
-      final target = await PBottomSheet.show<StockWatchGroup>(
-        context,
-        builder: (sheetContext) => PBottomSheetContent(
-          title: l.stocksWatchPickGroup,
-          closeLabel: l.actionClose,
-          flushBody: true,
-          scrollFog: true,
-          body: PList(
-            semanticLabel: l.stocksWatchPickGroup,
-            children: [
-              for (final g in groups)
-                PListButtonItem(
-                  title: g.groupName,
-                  detail: l.stocksUnitCount(g.items.length),
-                  onTap: () => PBottomSheet.of(sheetContext).close(g),
-                ),
-            ],
-          ),
+    };
+  } else if (groups.length == 1) {
+    request = () => repo.addWatchItem(
+      groups.first.rowId,
+      symbol,
+      marketCode: marketCode,
+      silent: true,
+    );
+  } else {
+    if (!context.mounted) return;
+    // 그룹 목록은 사용자 값이라 메뉴(실행)가 아니라 고르기 시트 — 웹 detail-parts.tsx 와 같다.
+    final target = await PBottomSheet.show<StockWatchGroup>(
+      context,
+      builder: (sheetContext) => PBottomSheetContent(
+        title: l.stocksWatchPickGroup,
+        closeLabel: l.actionClose,
+        flushBody: true,
+        scrollFog: true,
+        body: PList(
+          semanticLabel: l.stocksWatchPickGroup,
+          children: [
+            for (final g in groups)
+              PListButtonItem(
+                title: g.groupName,
+                detail: l.stocksUnitCount(g.items.length),
+                onTap: () => PBottomSheet.of(sheetContext).close(g),
+              ),
+          ],
         ),
-      );
-      if (target == null) return;
-      await repo.addWatchItem(target.rowId, symbol, marketCode: marketCode);
-    }
-    ref.invalidate(watchGroupsProvider);
-  } on ApiException {
-    // 서버 에러는 ErrorToastInterceptor 가 띄운다.
+      ),
+    );
+    if (target == null) return;
+    request = () => repo.addWatchItem(
+      target.rowId,
+      symbol,
+      marketCode: marketCode,
+      silent: true,
+    );
+  }
+  try {
+    await request();
+    container.invalidate(watchGroupsProvider);
   } catch (_) {
-    if (context.mounted) {
-      showPSnackBar(
-        context,
-        l.stocksWatchAddFail,
-        severity: PSnackSeverity.error,
-      );
-    }
+    showConfirmFailSnackbar(
+      snack,
+      message: removing ? l.stocksWatchRemoveFail : l.stocksWatchAddFail,
+      retryLabel: l.actionRetry,
+      retry: request,
+      onRetried: () => container.invalidate(watchGroupsProvider),
+    );
   }
 }
 

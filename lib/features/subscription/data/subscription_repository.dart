@@ -7,7 +7,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 class MyFeatures {
   const MyFeatures({
@@ -285,31 +285,40 @@ class SubscriptionRepository {
   Future<void> registerBrokerCredential(
     String broker,
     String apiKey,
-    String apiSecret,
-  ) async {
+    String apiSecret, {
+    bool silent = false,
+  }) async {
     try {
       await _dio.post<dynamic>(
         '/users/me/securities-credentials/$broker',
         data: {'apiKey': apiKey, 'apiSecret': apiSecret},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
-  Future<void> disconnectBrokerCredential(String broker) async {
+  Future<void> disconnectBrokerCredential(
+    String broker, {
+    bool silent = false,
+  }) async {
     try {
-      await _dio.delete<dynamic>('/users/me/securities-credentials/$broker');
+      await _dio.delete<dynamic>(
+        '/users/me/securities-credentials/$broker',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
   /// 가계부 자산 평가에 쓸 증권사를 지정한다.
-  Future<void> setPrimaryBroker(String broker) async {
+  Future<void> setPrimaryBroker(String broker, {bool silent = false}) async {
     try {
       await _dio.put<dynamic>(
         '/users/me/securities-credentials/$broker/primary',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

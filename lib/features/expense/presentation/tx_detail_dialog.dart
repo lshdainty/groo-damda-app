@@ -232,12 +232,14 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       cancelLabel: l.actionCancel,
       onAction: () async => failure = await _requestDelete(container, asset),
     );
-    if (!ok || !mounted) return;
+    if (!ok) return;
+    // 실패 알림은 미리 쥔 [snack] 으로 띄운다 — 요청이 도는 사이 시트가 내려가도(!mounted) 실패가 보이게 mounted 검사보다 앞에 둔다.
     if (failure != null) {
       _deleteFailed(snack, l, container, asset);
-    } else {
-      _finishDelete();
+      return;
     }
+    if (!mounted) return;
+    _finishDelete();
   }
 
   /// 지우는 요청 — 실패하면 그 오류를 돌려준다(없으면 null). 화면이 없어도(`mounted` 아님) 요청은 나간다.

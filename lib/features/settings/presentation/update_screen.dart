@@ -16,8 +16,8 @@ import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// 업데이트 — 설정에서 들어와 지금 상태를 확인하고, 있으면 여기서 받는다.
 ///
@@ -266,7 +266,9 @@ class _DownloadButton extends ConsumerWidget {
 
     // 앱 안에서 못 받았으면 브라우저에 넘긴다. 거기서는 받아지는 경우가 있다.
     final l = AppLocalizations.of(context);
-    showPSnackBar(context, l.updateSheetFailed, severity: PSnackSeverity.error);
+    PSnackbar.maybeOf(
+      context,
+    )?.show(message: l.updateSheetFailed, tone: PSnackbarTone.critical);
     await openReleaseExternally(release);
   }
 }

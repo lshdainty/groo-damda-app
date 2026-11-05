@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/import/data/import_repository.dart';
 import 'package:groo_damda_app/features/import/presentation/import_view.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/attachment_input/p_attachment_input.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/checkbox/p_checkbox.dart';
@@ -38,17 +39,26 @@ Finder _t(String part) => find.byWidgetPredicate(
 );
 
 class _ExportRepo extends ExportRepository {
-  _ExportRepo({this.fail = false, this.tables, this.stall = false})
-    : super(Dio());
+  _ExportRepo({
+    this.fail = false,
+    this.tables,
+    this.stall = false,
+    this.previewFail = false,
+  }) : super(Dio());
   final bool fail;
+  final bool previewFail;
   final bool stall;
   final List<ExportPreviewTable>? tables;
   int downloads = 0;
+  int previews = 0;
   Completer<void>? gate;
 
   @override
-  Future<List<ExportPreviewTable>> preview(Map<String, dynamic> body) async =>
-      tables ?? const [];
+  Future<List<ExportPreviewTable>> preview(Map<String, dynamic> body) async {
+    previews++;
+    if (previewFail) throw ApiException(code: 'X', message: 'server raw');
+    return tables ?? const [];
+  }
 
   @override
   Future<File> download({
@@ -156,7 +166,7 @@ Future<void> _pump(
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(textScale)),
-          child: child!,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
         ),
       ),
     ),
@@ -400,6 +410,24 @@ void main() {
       expect(find.text(_l.exportPreviewFooter(1, 1, 99)), findsNothing);
     });
 
+    testWidgets('미리보기 실패 — 고정 글 + [다시 시도] · 서버 글 없음', (tester) async {
+      final repo = _ExportRepo(previewFail: true);
+      await _pump(
+        tester,
+        const ExportScreen(),
+        overrides: [exportRepositoryProvider.overrideWith((ref) async => repo)],
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(PButton, _l.exportPreview));
+      await tester.pumpAndSettle();
+      expect(_l.exportPreviewFailed, '미리보기를 불러오지 못했어요.');
+      expect(_t(_l.exportPreviewFailed), findsOneWidget);
+      expect(find.textContaining('server raw'), findsNothing);
+      await tester.tap(_t(_l.actionRetry));
+      await tester.pumpAndSettle();
+      expect(repo.previews, 2);
+    });
+
     for (final stall in [true, false]) {
       testWidgets('내보내기 ${stall ? "멈춤" : "실패"} — 오류 띠 + [다시 시도]', (
         tester,
@@ -416,13 +444,10 @@ void main() {
         await tester.tap(find.widgetWithText(PButton, _l.exportRun));
         await tester.pumpAndSettle();
         expect(repo.downloads, 1);
-        expect(
-          find.text(stall ? _l.exportStalled : _l.exportFailed),
-          findsOneWidget,
-        );
+        expect(_t(stall ? _l.exportStalled : _l.exportFailed), findsOneWidget);
         // 서버 글은 그대로 내지 않는다
         expect(find.text('server raw'), findsNothing);
-        await tester.tap(find.text(_l.actionRetry));
+        await tester.tap(_t(_l.actionRetry));
         await tester.pumpAndSettle();
         expect(repo.downloads, 2);
       });

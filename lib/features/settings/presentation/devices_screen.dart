@@ -9,7 +9,7 @@ import 'package:groo_damda_app/core/format/now_tick.dart';
 import 'package:groo_damda_app/features/settings/application/session_providers.dart';
 import 'package:groo_damda_app/features/settings/domain/device_session.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
@@ -21,7 +21,6 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// "로그인된 기기" — 계정 > 보안에서 들어온다. 흰 화면 하나(I-12 3-A).
 ///
@@ -42,75 +41,63 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
   /// 이어서 끊으려던 손이 멈춘다.
   String? _revoking;
 
-  void _failed() {
-    if (!mounted) return;
-    showPSnackBar(
-      context,
-      AppLocalizations.of(context).devicesLogoutFailed,
-      severity: PSnackSeverity.error,
-    );
-  }
-
+  /// 확인 → 끊기. 확인창 뒤 실패는 공용 [askConfirmThenRequest] — critical 스낵바 + [다시 시도](묻지 않고 바로 끊음).
+  /// 끊은 뒤 할 일(이 기기면 로그아웃, 아니면 목록 새로 받기)은 첫 요청과 다시 시도가 같다.
   Future<void> _revoke(DeviceSession device) async {
     final l = AppLocalizations.of(context);
-    var failed = false;
-    final ok = await PAlertDialog.show(
+    final container = ProviderScope.containerOf(context);
+    Future<void> after() async {
+      // 지금 이 기기를 끊었으면 여기 머물 이유가 없다 — 로그인 화면으로 보낸다.
+      if (device.current) {
+        await container.read(authProvider.notifier).logout();
+        return;
+      }
+      container.invalidate(deviceSessionListProvider);
+    }
+
+    final ok = await askConfirmThenRequest(
       context,
       title: l.devicesLogoutTitle(device.deviceLabel ?? l.devicesUnknown),
       description: l.devicesLogoutConfirm,
       cancelLabel: l.actionCancel,
       actionLabel: l.devicesLogout,
-      destructive: true,
-      // 실패해도 확인창은 닫는다 — 아래에서 알림 하나만 띄운다
-      onAction: () async {
+      request: () async {
         if (mounted) setState(() => _revoking = device.sessionId);
         try {
-          final repo = await ref.read(sessionRepositoryProvider.future);
+          final repo = await container.read(sessionRepositoryProvider.future);
           await repo.revoke(device.sessionId);
-        } catch (_) {
-          failed = true;
+        } finally {
+          if (mounted) setState(() => _revoking = null);
         }
       },
+      failedMessage: l.devicesLogoutFailed,
+      retryLabel: l.actionRetry,
+      onRetried: () => after(),
     );
-    if (mounted) setState(() => _revoking = null);
-    if (!mounted) return;
-    if (failed) return _failed();
-    if (!ok) return;
-    // 지금 이 기기를 끊었으면 여기 머물 이유가 없다 — 로그인 화면으로 보낸다.
-    if (device.current) {
-      await ref.read(authProvider.notifier).logout();
-      return;
-    }
-    ref.invalidate(deviceSessionListProvider);
+    if (ok) await after();
   }
 
   Future<void> _revokeAll() async {
     final l = AppLocalizations.of(context);
-    var failed = false;
-    final ok = await PAlertDialog.show(
+    final container = ProviderScope.containerOf(context);
+    // 전부 끊었으니 이 기기도 끊겼다. 화면에 남겨 두면 다음 요청마다 401 이 난다.
+    // 성공 알림은 띄우지 않는다 — 확인창에서 "다시 로그인해야 해요" 라고 이미 말했고,
+    // 로그인 화면으로 떨어지는 것 자체가 결과다.
+    final ok = await askConfirmThenRequest(
       context,
       title: l.devicesLogoutAllTitle,
       description: l.devicesLogoutAllConfirm,
       cancelLabel: l.actionCancel,
       actionLabel: l.devicesLogoutAll,
-      destructive: true,
-      onAction: () async {
-        try {
-          final repo = await ref.read(sessionRepositoryProvider.future);
-          await repo.revokeAll();
-        } catch (_) {
-          failed = true;
-        }
+      request: () async {
+        final repo = await container.read(sessionRepositoryProvider.future);
+        await repo.revokeAll();
       },
+      failedMessage: l.devicesLogoutFailed,
+      retryLabel: l.actionRetry,
+      onRetried: () => container.read(authProvider.notifier).logout(),
     );
-    if (!mounted) return;
-    if (failed) return _failed();
-    if (!ok) return;
-    // 전부 끊었으니 이 기기도 끊겼다. 화면에 남겨 두면 다음 요청마다 401 이 난다.
-    //
-    // 성공 알림은 띄우지 않는다 — 확인창에서 "다시 로그인해야 해요" 라고
-    // 이미 말했고, 로그인 화면으로 떨어지는 것 자체가 결과다.
-    await ref.read(authProvider.notifier).logout();
+    if (ok) await container.read(authProvider.notifier).logout();
   }
 
   @override

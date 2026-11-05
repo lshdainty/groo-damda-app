@@ -1096,7 +1096,8 @@
   "calSaveFailed": "Save failed",
   "calDeleteFailed": "Delete failed",
   "calJoinFailed": "Could not join. Please try again in a moment.",
-  "calUpdateFailed": "Update failed",
+  "calUpdateFailed": "Couldn't change the calendar visibility.",
+  "importExecuteFailed": "Couldn't import the data.",
   "calCalendarLoadError": "Couldn't load calendars",
   "calLabelLoadError": "Couldn't load labels",
   "dashTitle": "Home",
@@ -1322,7 +1323,7 @@
   "updateSheetRetry": "Try again",
   "updateSheetDownloading": "Downloading",
   "updateSheetOpening": "Opening the installer",
-  "updateSheetFailed": "Could not download in the app. Opening your browser instead.",
+  "updateSheetFailed": "Couldn't download in the app, so we're opening your browser.",
   "updateTitle": "Update",
   "updateGateTitle": "Version {version} is here",
   "@updateGateTitle": {
@@ -1394,6 +1395,8 @@
   "budgetDeleteFailed": "Couldn't delete the budget.",
   "budgetSaveFailed": "Couldn't save the budget.",
   "assetSaveFailed": "Couldn't save the asset.",
+  "tradeSaveFailed": "Couldn't process the trade.",
+  "tradeSaveInsufficientQty": "Not enough shares held.",
   "budgetMonthlyLimit": "Monthly budget limit",
   "budgetLoadError": "Couldn't load budget",
   "budgetSelectMonth": "Select month",
@@ -1732,7 +1735,11 @@
       }
     }
   },
-  "categoryDeleteFailed": "Delete failed",
+  "categoryDeleteFailed": "Couldn't delete the category.",
+  "categorySaveFailed": "Couldn't save the category.",
+  "categoryMoveTxFailed": "Couldn't move the transactions.",
+  "categoryReorderFailed": "Couldn't change the order.",
+  "todoSaveFailed": "Couldn't save the to-do.",
   "categoryParentMoveHint": "To make it top level, create a new top-level category and move its transactions.",
   "categoryMakeRoot": "Top level",
   "categoryNamePlaceholder": "e.g., Pets, Side income",
@@ -1933,6 +1940,7 @@
   },
   "dutchCreated": "Settlement created",
   "expLoadError": "Couldn't load transactions",
+  "expTransfersLoadError": "Couldn't load the transfers.",
   "expEmptyMonth": "No transactions this month",
   "expEmptyDay": "No transactions on this day",
   "expTotal": "Total",
@@ -2176,7 +2184,7 @@
   "fileTooltipGallery": "Gallery",
   "fileTooltipCamera": "Camera",
   "fileTooltipFile": "File",
-  "fileUploadComplete": "{name} uploaded",
+  "fileUploadComplete": "Uploaded {name}.",
   "@fileUploadComplete": {
     "placeholders": {
       "name": {
@@ -2184,7 +2192,7 @@
       }
     }
   },
-  "fileUploadFailed": "Upload failed",
+  "fileUploadFailed": "Couldn't upload the file.",
   "fileDeleteTitle": "Delete file",
   "fileDeleteConfirm": "Delete \"{name}\"? A deleted file cannot be restored.",
   "@fileDeleteConfirm": {
@@ -2194,7 +2202,7 @@
       }
     }
   },
-  "fileDeleteFailed": "Delete failed",
+  "fileDeleteFailed": "Couldn't delete the file.",
   "fileLoadError": "Failed to load attachments",
   "fileEmpty": "No attachments",
   "moreGroupMoney": "Money",
@@ -2274,6 +2282,7 @@
       }
     }
   },
+  "hideAmountsSaveFailed": "Couldn't save the amount hiding.",
   "hideAmountsDiscardTitle": "Leave without saving",
   "hideAmountsDiscardBody": "Your selection will be discarded.",
   "hideAmountsDiscardConfirm": "Leave",
@@ -2343,7 +2352,7 @@
   "appearanceRegionLoadError": "Couldn't load the region",
   "appearanceCurrencyLoadError": "Couldn't load the default currency",
   "appearanceSaveFailed": "Couldn't change the setting.",
-  "passwordChanged": "Password changed",
+  "passwordChanged": "Changed your password.",
   "passwordChangeFailed": "Couldn't change your password. Please try again shortly.",
   "passwordCurrent": "Current password",
   "passwordChangeDescription": "Verify your current password and set a new one",
@@ -2395,7 +2404,7 @@
       }
     }
   },
-  "devicesLogoutFailed": "Couldn't log out. Try again in a moment.",
+  "devicesLogoutFailed": "Couldn't log out.",
   "devicesLogout": "Log out",
   "devicesLogoutTitle": "Log out of {device}?",
   "@devicesLogoutTitle": {
@@ -2417,7 +2426,7 @@
   "accountProvidersError": "Couldn't load the connection status",
   "accountLinkError": "Couldn't connect the account.",
   "accountUnlinkError": "Couldn't disconnect the account.",
-  "accountLinkedToast": "{name} account connected",
+  "accountLinkedToast": "Connected the {name} account.",
   "@accountLinkedToast": {
     "placeholders": {
       "name": {
@@ -2425,7 +2434,7 @@
       }
     }
   },
-  "accountUnlinkedToast": "Google account disconnected",
+  "accountUnlinkedToast": "Disconnected the Google account.",
   "accountSecuritiesDesc": "Connect API keys for Toss, Namu, and more",
   "accountBilling": "Subscription & Billing",
   "accountNextBilling": "Next billing {date} · ",
@@ -2842,6 +2851,7 @@
   "savingGoalAchieved": "Achieved",
   "savingGoalAdd": "Add saving goal",
   "savingGoalSaveFailed": "Couldn't save the saving goal.",
+  "savingGoalFirstContributeFailed": "Created the goal, but couldn't record the first deposit.",
   "savingGoalEdit": "Edit saving goal",
   "savingGoalSubmitAdd": "Add",
   "savingGoalDeleteTitle": "Delete the \"{title}\" goal?",
@@ -3136,8 +3146,10 @@
   "stocksWatchGroupRename": "Rename group",
   "stocksWatchGroupDelete": "Delete group",
   "stocksWatchGroupNamePlaceholder": "Group name",
-  "stocksWatchGroupSaveFail": "Couldn't save the watch group.",
-  "stocksWatchAddFail": "Failed to add to watchlist",
+  "stocksWatchGroupSaveFail": "Couldn't save the group.",
+  "stocksWatchAddFail": "Couldn't add it to your watchlist.",
+  "stocksWatchGroupDeleteFail": "Couldn't delete the group.",
+  "stocksWatchRemoveFail": "Couldn't remove it from your watchlist.",
   "stocksMarketToggleKr": "KR",
   "stocksMarketToggleUs": "US",
   "todoAdd": "Add todo",
@@ -3209,7 +3221,7 @@
   },
   "todoActionFailed": "Failed",
   "todoAddFailed": "Add failed",
-  "todoDeleteFailed": "Delete failed",
+  "todoDeleteFailed": "Couldn't delete the to-do.",
   "todoUpdateFailed": "Update failed",
   "todoStatusChangeFailed": "Status change failed",
   "todoMoveFailed": "Move failed",
@@ -3269,7 +3281,7 @@
   "subFeatLedger": "Ledger · asset management",
   "subFeatBudget": "Budget · savings goals · calendar",
   "subFeatSecurities": "Securities link · real-time quotes · real-time asset value",
-  "subStarted": "Your 담다 Pro subscription is active",
+  "subStarted": "Your Pro subscription has started.",
   "subFailed": "Couldn't start the subscription.",
   "subCancelConfirmTitle": "Cancel subscription",
   "subCancelConfirmMsg": "If you cancel, you will switch to the Free plan from {date} and the Securities tab will lock. You can keep using Pro features until then.",
@@ -3282,12 +3294,13 @@
   },
   "subCancel": "Cancel subscription",
   "subKeep": "Keep",
-  "subCanceled": "Subscription canceled",
+  "subCanceled": "Canceled the subscription.",
   "subCancelFailed": "Couldn't cancel the subscription.",
   "subNextBillingDate": "Next billing date",
   "subStartPro": "Start Pro",
   "subLoadFailed": "Couldn't load your subscription",
   "subLoadFailedDesc": "Please try again in a moment.",
+  "secLoadFailed": "Couldn't load your securities info",
   "subPricePerMonth": "{amount} / mo",
   "@subPricePerMonth": {
     "placeholders": {
@@ -3324,8 +3337,9 @@
   "subBrokerCollecting": "Auto-collecting holdings and prices",
   "subConnecting": "Connecting…",
   "subConnect": "Connect",
-  "subBrokerInvalidCred": "Those credentials aren't valid",
-  "subDisconnectFailed": "Couldn't disconnect",
+  "subBrokerInvalidCred": "The credentials are not valid.",
+  "subBrokerConnectFailed": "Couldn't connect to the broker.",
+  "subDisconnectFailed": "Couldn't disconnect.",
   "memoNew": "Add memo",
   "memoEditTitle": "Edit memo",
   "memoLoadError": "Could not load memos",
@@ -3685,6 +3699,7 @@
   "exportTabsLabel": "Export and import data",
   "exportSelectAll": "All",
   "exportCountsFailed": "Couldn't load the counts.",
+  "exportPreviewFailed": "Couldn't load the preview.",
   "exportRangePlaceholder": "Select a range",
   "exportStalled": "The download stopped.",
   "exportFailed": "Couldn't export.",
@@ -4142,7 +4157,7 @@
   "subBrokerPrimary": "Primary",
   "subBrokerUseAsPrimary": "Value assets with this provider",
   "subBrokerPrimaryNotice": "Your assets are valued using the provider selected here.",
-  "subBrokerPrimaryFailed": "Couldn't change the primary provider",
+  "subBrokerPrimaryFailed": "Couldn't change the primary broker.",
   "subBrokerKeyConnected": "{broker} API key connected",
   "@subBrokerKeyConnected": {
     "placeholders": {
@@ -4151,7 +4166,7 @@
       }
     }
   },
-  "subBrokerConnected": "Connected your {broker} account",
+  "subBrokerConnected": "Connected your {broker} account.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {
@@ -4159,7 +4174,7 @@
       }
     }
   },
-  "subBrokerDisconnected": "Disconnected from {broker}",
+  "subBrokerDisconnected": "Disconnected from {broker}.",
   "@subBrokerDisconnected": {
     "placeholders": {
       "broker": {
@@ -4167,7 +4182,7 @@
       }
     }
   },
-  "subBrokerPrimaryChanged": "Assets are now valued with {broker}",
+  "subBrokerPrimaryChanged": "Assets are now valued with {broker}.",
   "@subBrokerPrimaryChanged": {
     "placeholders": {
       "broker": {
@@ -4489,7 +4504,7 @@
   "tdmCellDone": "{date}, all done",
   "@tdmCellDone": {"placeholders": {"date": {"type": "String"}}},
   "tdmLoadFailedDesc": "Please try again in a moment.",
-  "todoToggleFailed": "Couldn't update the to-do. Please try again in a moment.",
+  "todoToggleFailed": "Couldn't update the to-do.",
   "todoDetailOverdue": "Overdue",
   "todoDueDatePlaceholder": "Select due date",
   "todoTagEmptyHint": "Create tags in Settings › Todo tags.",

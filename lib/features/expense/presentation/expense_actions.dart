@@ -144,7 +144,6 @@ class ExpenseActions implements ItemActions<Expense> {
   /// [askConfirmThenRequest] 로 [deleteExpenseRequest] 를 직접 부른다.
   ///
   /// [asset] 은 부르는 쪽이 이미 들고 있는 그 거래의 자산이다. 안 주면 자산 목록 캐시에서 찾는다.
-  @override
   Future<bool> delete(
     BuildContext context,
     WidgetRef ref,

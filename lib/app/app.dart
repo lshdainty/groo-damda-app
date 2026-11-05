@@ -171,8 +171,7 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
     final settings = ref.watch(settingsProvider).value ?? AppSettings.defaults;
     return MaterialApp.router(
       title: '그루 담다',
-      // 인터셉터에는 BuildContext 가 없다 — 이 키로 토스트를 띄운다
-      // (ErrorToastInterceptor: 아무도 처리하지 않은 API 에러의 마지막 그물).
+      // 세션을 갈아 끼울 때 앞사람의 떠 있는 알림을 걷는 통로(전역 오류 토스트는 없다 — 실패는 화면이 말한다).
       scaffoldMessengerKey: appMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: GrooTheme.light(),
@@ -219,6 +218,7 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
       child: Material(
         type: MaterialType.transparency,
         child: PSnackbarHost(
+          key: PSnackbar.appHostKey,
           closeLabel: AppLocalizations.of(context).actionClose,
           child: child ?? const SizedBox.shrink(),
         ),

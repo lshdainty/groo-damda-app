@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -369,6 +369,7 @@ class ExpenseRepository {
     String? color,
     required String expenseType, // 'EXPENSE' | 'INCOME' | 'TRANSFER'
     int? parentRowId,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -380,6 +381,7 @@ class ExpenseRepository {
           'expenseType': expenseType,
           'parentRowId': ?parentRowId,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, ExpenseCategory.fromJson);
     } on DioException catch (e) {
@@ -398,6 +400,7 @@ class ExpenseRepository {
     // [includeParentRowId] 로 명시 전송 여부를 구분 (웹은 항상 포함 전송).
     bool includeParentRowId = false,
     int? parentRowId,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
@@ -410,6 +413,7 @@ class ExpenseRepository {
           'sortOrder': ?sortOrder,
           if (includeParentRowId) 'parentRowId': parentRowId,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, ExpenseCategory.fromJson);
     } on DioException catch (e) {
@@ -417,9 +421,12 @@ class ExpenseRepository {
     }
   }
 
-  Future<void> deleteCategory(int id) async {
+  Future<void> deleteCategory(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/expense/category/$id');
+      await _dio.delete<void>(
+        '/expense/category/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -429,11 +436,16 @@ class ExpenseRepository {
   /// POST /expense/category/{id}/move-transactions
   ///
   /// 거래가 직접 달린 카테고리는 부모가 될 수 없어 하위를 만들 수 없는데, 그걸 푸는 방법.
-  Future<int> moveCategoryTransactions(int id, int targetCategoryRowId) async {
+  Future<int> moveCategoryTransactions(
+    int id,
+    int targetCategoryRowId, {
+    bool silent = false,
+  }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/expense/category/$id/move-transactions',
         data: {'targetCategoryRowId': targetCategoryRowId},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _movedCount(res.data);
     } on DioException catch (e) {
@@ -450,11 +462,13 @@ class ExpenseRepository {
     required String childName,
     required String icon,
     required String color,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/expense/category/$id/split-into-child',
         data: {'childName': childName, 'icon': icon, 'color': color},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _movedCount(res.data);
     } on DioException catch (e) {
@@ -477,8 +491,9 @@ class ExpenseRepository {
   /// 카테고리 정렬 순서 + 부모 변경. PATCH /expense/categories/reorder.
   /// [items] = (categoryRowId, sortOrder, parentRowId?) tuple 목록.
   Future<void> reorderCategories(
-    List<({int categoryRowId, int sortOrder, int? parentRowId})> items,
-  ) async {
+    List<({int categoryRowId, int sortOrder, int? parentRowId})> items, {
+    bool silent = false,
+  }) async {
     try {
       await _dio.patch<dynamic>(
         '/expense/categories/reorder',
@@ -492,6 +507,7 @@ class ExpenseRepository {
               },
           ],
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

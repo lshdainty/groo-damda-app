@@ -29,6 +29,7 @@ import 'package:groo_damda_app/features/settings/presentation/devices_screen.dar
 import 'package:groo_damda_app/features/settings/presentation/settings_screen.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
@@ -187,7 +188,7 @@ Future<GoRouter> _pump(
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(scale)),
-          child: child!,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
         ),
       ),
     ),
@@ -682,7 +683,9 @@ void main() {
       );
       await _go(tester);
       expect(find.byType(PAlertDialogView), findsNothing);
-      expect(findPlain('로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+      expect(findPlain('로그아웃하지 못했어요.'), findsOneWidget);
+      // 확인창 뒤 실패 = 스낵바 + [다시 시도]
+      expect(findPlain('다시 시도'), findsOneWidget);
       expect(_Auth.loggedOut, isFalse);
     });
 

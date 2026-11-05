@@ -3652,8 +3652,14 @@ abstract class AppLocalizations {
   /// No description provided for @calUpdateFailed.
   ///
   /// In ko, this message translates to:
-  /// **'변경 실패'**
+  /// **'캘린더 표시를 바꾸지 못했어요.'**
   String get calUpdateFailed;
+
+  /// No description provided for @importExecuteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'가져오지 못했어요.'**
+  String get importExecuteFailed;
 
   /// No description provided for @calCalendarLoadError.
   ///
@@ -4348,7 +4354,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateSheetFailed.
   ///
   /// In ko, this message translates to:
-  /// **'앱에서 받지 못했어요. 브라우저로 열어볼게요.'**
+  /// **'앱에서 받지 못해 브라우저로 열어요.'**
   String get updateSheetFailed;
 
   /// No description provided for @updateTitle.
@@ -4650,6 +4656,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'자산을 저장하지 못했어요.'**
   String get assetSaveFailed;
+
+  /// No description provided for @tradeSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'매매를 처리하지 못했어요.'**
+  String get tradeSaveFailed;
+
+  /// No description provided for @tradeSaveInsufficientQty.
+  ///
+  /// In ko, this message translates to:
+  /// **'보유 수량이 부족해요.'**
+  String get tradeSaveInsufficientQty;
 
   /// No description provided for @budgetMonthlyLimit.
   ///
@@ -5404,8 +5422,32 @@ abstract class AppLocalizations {
   /// No description provided for @categoryDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'카테고리를 삭제하지 못했어요.'**
   String get categoryDeleteFailed;
+
+  /// No description provided for @categorySaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'카테고리를 저장하지 못했어요.'**
+  String get categorySaveFailed;
+
+  /// No description provided for @categoryMoveTxFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래를 옮기지 못했어요.'**
+  String get categoryMoveTxFailed;
+
+  /// No description provided for @categoryReorderFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'순서를 바꾸지 못했어요.'**
+  String get categoryReorderFailed;
+
+  /// No description provided for @todoSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일을 저장하지 못했어요.'**
+  String get todoSaveFailed;
 
   /// No description provided for @categoryParentMoveHint.
   ///
@@ -6072,6 +6114,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'거래를 불러오지 못했어요'**
   String get expLoadError;
+
+  /// No description provided for @expTransfersLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'이체 내역을 불러오지 못했어요.'**
+  String get expTransfersLoadError;
 
   /// No description provided for @expEmptyMonth.
   ///
@@ -6910,13 +6958,13 @@ abstract class AppLocalizations {
   /// No description provided for @fileUploadComplete.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 업로드 완료'**
+  /// **'{name} 파일을 올렸어요.'**
   String fileUploadComplete(String name);
 
   /// No description provided for @fileUploadFailed.
   ///
   /// In ko, this message translates to:
-  /// **'업로드 실패'**
+  /// **'파일을 올리지 못했어요.'**
   String get fileUploadFailed;
 
   /// No description provided for @fileDeleteTitle.
@@ -6934,7 +6982,7 @@ abstract class AppLocalizations {
   /// No description provided for @fileDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'파일을 삭제하지 못했어요.'**
   String get fileDeleteFailed;
 
   /// No description provided for @fileLoadError.
@@ -7350,6 +7398,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'가릴 화면 · {count} / {total}'**
   String hideAmountsScreensCount(int count, int total);
+
+  /// No description provided for @hideAmountsSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액 가리기를 저장하지 못했어요.'**
+  String get hideAmountsSaveFailed;
 
   /// No description provided for @hideAmountsDiscardTitle.
   ///
@@ -7768,7 +7822,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordChanged.
   ///
   /// In ko, this message translates to:
-  /// **'비밀번호를 바꿨어요'**
+  /// **'비밀번호를 바꿨어요.'**
   String get passwordChanged;
 
   /// No description provided for @passwordChangeFailed.
@@ -7954,7 +8008,7 @@ abstract class AppLocalizations {
   /// No description provided for @devicesLogoutFailed.
   ///
   /// In ko, this message translates to:
-  /// **'로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'로그아웃하지 못했어요.'**
   String get devicesLogoutFailed;
 
   /// No description provided for @devicesLogout.
@@ -8044,13 +8098,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountLinkedToast.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 계정이 연결되었어요'**
+  /// **'{name} 계정이 연결됐어요.'**
   String accountLinkedToast(String name);
 
   /// No description provided for @accountUnlinkedToast.
   ///
   /// In ko, this message translates to:
-  /// **'Google 연결을 해제했어요'**
+  /// **'Google 연결을 해제했어요.'**
   String get accountUnlinkedToast;
 
   /// No description provided for @accountSecuritiesDesc.
@@ -9403,6 +9457,12 @@ abstract class AppLocalizations {
   /// **'저축 목표를 저장하지 못했어요.'**
   String get savingGoalSaveFailed;
 
+  /// No description provided for @savingGoalFirstContributeFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'목표는 만들었지만 첫 납입을 기록하지 못했어요.'**
+  String get savingGoalFirstContributeFailed;
+
   /// No description provided for @savingGoalEdit.
   ///
   /// In ko, this message translates to:
@@ -10600,14 +10660,26 @@ abstract class AppLocalizations {
   /// No description provided for @stocksWatchGroupSaveFail.
   ///
   /// In ko, this message translates to:
-  /// **'관심 그룹을 저장하지 못했어요.'**
+  /// **'그룹을 저장하지 못했어요.'**
   String get stocksWatchGroupSaveFail;
 
   /// No description provided for @stocksWatchAddFail.
   ///
   /// In ko, this message translates to:
-  /// **'관심 등록에 실패했어요'**
+  /// **'관심 종목에 넣지 못했어요.'**
   String get stocksWatchAddFail;
+
+  /// No description provided for @stocksWatchGroupDeleteFail.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹을 삭제하지 못했어요.'**
+  String get stocksWatchGroupDeleteFail;
+
+  /// No description provided for @stocksWatchRemoveFail.
+  ///
+  /// In ko, this message translates to:
+  /// **'관심 종목에서 빼지 못했어요.'**
+  String get stocksWatchRemoveFail;
 
   /// No description provided for @stocksMarketToggleKr.
   ///
@@ -10894,7 +10966,7 @@ abstract class AppLocalizations {
   /// No description provided for @todoDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'할 일을 삭제하지 못했어요.'**
   String get todoDeleteFailed;
 
   /// No description provided for @todoUpdateFailed.
@@ -11050,13 +11122,13 @@ abstract class AppLocalizations {
   /// No description provided for @subStarted.
   ///
   /// In ko, this message translates to:
-  /// **'담다 Pro 구독이 시작되었어요'**
+  /// **'담다 Pro 구독이 시작됐어요.'**
   String get subStarted;
 
   /// No description provided for @subFailed.
   ///
   /// In ko, this message translates to:
-  /// **'구독하지 못했어요.'**
+  /// **'구독을 시작하지 못했어요.'**
   String get subFailed;
 
   /// No description provided for @subCancelConfirmTitle.
@@ -11086,7 +11158,7 @@ abstract class AppLocalizations {
   /// No description provided for @subCanceled.
   ///
   /// In ko, this message translates to:
-  /// **'구독을 해지했어요'**
+  /// **'구독을 해지했어요.'**
   String get subCanceled;
 
   /// No description provided for @subCancelFailed.
@@ -11118,6 +11190,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠시 뒤 다시 시도해주세요.'**
   String get subLoadFailedDesc;
+
+  /// No description provided for @secLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'증권 정보를 불러오지 못했어요'**
+  String get secLoadFailed;
 
   /// No description provided for @subPricePerMonth.
   ///
@@ -11170,13 +11248,19 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerInvalidCred.
   ///
   /// In ko, this message translates to:
-  /// **'인증정보가 올바르지 않아요'**
+  /// **'인증정보가 올바르지 않아요.'**
   String get subBrokerInvalidCred;
+
+  /// No description provided for @subBrokerConnectFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'증권사를 연결하지 못했어요.'**
+  String get subBrokerConnectFailed;
 
   /// No description provided for @subDisconnectFailed.
   ///
   /// In ko, this message translates to:
-  /// **'해제에 실패했어요'**
+  /// **'연결을 해제하지 못했어요.'**
   String get subDisconnectFailed;
 
   /// No description provided for @memoNew.
@@ -12156,6 +12240,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'건수를 불러오지 못했어요.'**
   String get exportCountsFailed;
+
+  /// No description provided for @exportPreviewFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'미리보기를 불러오지 못했어요.'**
+  String get exportPreviewFailed;
 
   /// No description provided for @exportRangePlaceholder.
   ///
@@ -13306,7 +13396,7 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerPrimaryFailed.
   ///
   /// In ko, this message translates to:
-  /// **'기본 증권사를 바꾸지 못했어요'**
+  /// **'기본 증권사를 바꾸지 못했어요.'**
   String get subBrokerPrimaryFailed;
 
   /// No description provided for @subBrokerKeyConnected.
@@ -13318,19 +13408,19 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerConnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 계정을 연결했어요'**
+  /// **'{broker} 계정을 연결했어요.'**
   String subBrokerConnected(String broker);
 
   /// No description provided for @subBrokerDisconnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 연결을 해제했어요'**
+  /// **'{broker} 연결을 해제했어요.'**
   String subBrokerDisconnected(String broker);
 
   /// No description provided for @subBrokerPrimaryChanged.
   ///
   /// In ko, this message translates to:
-  /// **'이제 {broker} 시세로 자산을 평가해요'**
+  /// **'이제 {broker} 시세로 자산을 평가해요.'**
   String subBrokerPrimaryChanged(String broker);
 
   /// No description provided for @subBrokerKeyNotice.
@@ -14794,7 +14884,7 @@ abstract class AppLocalizations {
   /// No description provided for @todoToggleFailed.
   ///
   /// In ko, this message translates to:
-  /// **'완료로 바꾸지 못했어요. 잠시 후 다시 시도해주세요.'**
+  /// **'할 일 상태를 바꾸지 못했어요.'**
   String get todoToggleFailed;
 
   /// No description provided for @todoDetailOverdue.

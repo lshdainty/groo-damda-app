@@ -22,7 +22,8 @@ class _FakeRepo implements HideCardsRepository {
   }
 
   @override
-  Future<void> put(Set<String> cards) async => pushed.add({...cards});
+  Future<void> put(Set<String> cards, {bool silent = true}) async =>
+      pushed.add({...cards});
 }
 
 ProviderContainer _container(_FakeRepo repo) {

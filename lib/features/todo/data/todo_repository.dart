@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/features/todo/domain/todo_stats.dart';
@@ -42,6 +42,7 @@ class TodoRepository {
     String? category,
     String? dueDate,
     String? type,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -54,6 +55,7 @@ class TodoRepository {
           'dueDate': ?dueDate,
           'type': type ?? 'TASK',
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Todo.fromJson);
     } on DioException catch (e) {
@@ -78,6 +80,7 @@ class TodoRepository {
     String? priority,
     Patch<String> category = const Patch.keep(),
     Patch<String> dueDate = const Patch.keep(),
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
@@ -89,6 +92,7 @@ class TodoRepository {
           if (category.present) 'category': category.value,
           if (dueDate.present) 'dueDate': dueDate.value,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Todo.fromJson);
     } on DioException catch (e) {
@@ -125,9 +129,12 @@ class TodoRepository {
     }
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>('/todo/$id');
+      await _dio.delete<void>(
+        '/todo/$id',
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

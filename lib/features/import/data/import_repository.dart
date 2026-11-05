@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
 import 'package:groo_damda_app/core/network/dio_provider.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 // ─── 모델 (백엔드 dataimport 미러) ─────────────────────────────
 
@@ -185,6 +186,7 @@ class ImportRepository {
       final res = await _dio.post<Map<String, dynamic>>(
         '/import/analyze',
         data: form,
+        options: Options(extra: {kSilentErrorToast: true}),
       );
       final api = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data!,
@@ -223,6 +225,7 @@ class ImportRepository {
       final res = await _dio.post<Map<String, dynamic>>(
         '/import/execute',
         data: form,
+        options: Options(extra: {kSilentErrorToast: true}),
       );
       final api = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data!,

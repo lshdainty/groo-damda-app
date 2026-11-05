@@ -12,7 +12,7 @@ import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart'
     show PTouchTargetScope;
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/features/sms/data/clipboard_hint.dart';
 import 'package:groo_damda_app/features/sms/data/clipboard_hint_provider.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_prefilter.dart';
@@ -92,22 +92,18 @@ class _SmsClipboardBannerState extends ConsumerState<SmsClipboardBanner>
     final text = data?.text;
 
     if (text == null || text.trim().isEmpty) {
-      showPSnackBar(
+      PSnackbar.maybeOf(
         context,
-        l.smsClipboardEmpty,
-        severity: PSnackSeverity.warning,
-      );
+      )?.show(message: l.smsClipboardEmpty, tone: PSnackbarTone.critical);
       await _dismiss();
       return;
     }
     // 결제 문자가 아니면 서버로 보내지 않는다 — 붙여넣기 화면에서 사용자가
     // 직접 고칠 수 있도록 원문은 들고 간다.
     if (!looksLikePaymentSms(text)) {
-      showPSnackBar(
+      PSnackbar.maybeOf(
         context,
-        l.smsNotRecognized,
-        severity: PSnackSeverity.warning,
-      );
+      )?.show(message: l.smsNotRecognized, tone: PSnackbarTone.critical);
       await _dismiss();
       return;
     }

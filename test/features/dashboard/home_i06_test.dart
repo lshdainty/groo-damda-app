@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/settings/hide_cards_repository.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_summary.dart';
@@ -37,6 +38,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import '../../support/hide_cards_fake.dart';
 import '../../support/plain_text.dart';
 
 String _monthStart() {
@@ -123,6 +125,9 @@ Future<void> _pump(
   addTearDown(tester.view.reset);
   SharedPreferences.setMockInitialValues({});
   final overrides = [
+    hideCardsRepositoryProvider.overrideWith(
+      (ref) async => OkHideCardsRepository(),
+    ),
     assetSummaryProvider.overrideWith((ref, key) async {
       reads?.update('summary', (v) => v + 1, ifAbsent: () => 1);
       if (summaryError != null) throw summaryError;

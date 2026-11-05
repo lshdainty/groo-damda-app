@@ -231,7 +231,10 @@ void main() {
   testWidgets('할 일을 지우면 목록과 홈 위젯 원본을 함께 다시 받는다', (tester) async {
     final h = await _pumpDeleteProbe(tester);
 
-    final done = todoActions.delete(h.context, h.ref, _todo);
+    // 확인창 뒤 삭제 — 목록 · 상세가 쓰는 같은 길(confirmAndDelete)
+    final done = todoActions.confirmAndDelete(h.context, h.ref, _todo);
+    await tester.pumpAndSettle();
+    await tester.tap(findPlain('삭제').last);
     await tester.pumpAndSettle();
     expect(await done, isTrue, reason: '삭제가 실패했다 — 테스트가 아무것도 안 본다');
 
@@ -246,7 +249,9 @@ void main() {
   testWidgets('메모를 지우면 목록과 홈 위젯 원본을 함께 다시 받는다', (tester) async {
     final h = await _pumpDeleteProbe(tester);
 
-    final done = memoActions.delete(h.context, h.ref, _memo);
+    final done = memoActions.confirmAndDelete(h.context, _memo);
+    await tester.pumpAndSettle();
+    await tester.tap(findPlain('삭제').last);
     await tester.pumpAndSettle();
     expect(await done, isTrue, reason: '삭제가 실패했다 — 테스트가 아무것도 안 본다');
 
@@ -457,7 +462,7 @@ class _FakeTodoRepo extends TodoRepository {
   _FakeTodoRepo() : super(Dio());
 
   @override
-  Future<void> delete(int id) async {}
+  Future<void> delete(int id, {bool silent = false}) async {}
 }
 
 class _FakeMemoRepo extends MemoRepository {

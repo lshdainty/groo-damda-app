@@ -62,6 +62,7 @@ class _CapturingRepo extends TodoRepository {
     String? priority,
     Patch<String> category = const Patch.keep(),
     Patch<String> dueDate = const Patch.keep(),
+    bool silent = false,
   }) async {
     this.title = title;
     this.category = category;
@@ -78,6 +79,7 @@ class _CapturingRepo extends TodoRepository {
     String? category,
     String? dueDate,
     String? type,
+    bool silent = false,
   }) async {
     created = true;
     createdCategory = category;

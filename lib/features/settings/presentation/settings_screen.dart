@@ -9,12 +9,12 @@ import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 class _SettingsItem {
   const _SettingsItem({
@@ -206,11 +206,9 @@ Future<void> _openPrivacyPolicy(BuildContext ctx) async {
 
   // 눌렀는데 아무 일도 안 일어나는 게 제일 나쁘다
   if (!ctx.mounted) return;
-  showPSnackBar(
+  PSnackbar.maybeOf(
     ctx,
-    l.settingsPrivacyOpenFailed,
-    severity: PSnackSeverity.error,
-  );
+  )?.show(message: l.settingsPrivacyOpenFailed, tone: PSnackbarTone.critical);
 }
 
 /// 설명서(porest-desk-guide)를 브라우저로 연다.
@@ -227,7 +225,9 @@ Future<void> _openGuide(BuildContext ctx) async {
   }
 
   if (!ctx.mounted) return;
-  showPSnackBar(ctx, l.settingsGuideOpenFailed, severity: PSnackSeverity.error);
+  PSnackbar.maybeOf(
+    ctx,
+  )?.show(message: l.settingsGuideOpenFailed, tone: PSnackbarTone.critical);
 }
 
 /// 줄 뒤 화살표 — 18 · 옅은 색은 줄이 입힌다(PListRowFrame). 장식이라 읽지 않는다.

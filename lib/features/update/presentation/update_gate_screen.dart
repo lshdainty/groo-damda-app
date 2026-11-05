@@ -18,7 +18,7 @@ import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart'
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 새 버전이 나왔을 때 앞을 막고 알리는 화면.
 ///
@@ -299,7 +299,9 @@ class _Actions extends ConsumerWidget {
 
     // 앱 안에서 못 받았으면 브라우저에 넘긴다. 거기서는 받아지는 경우가 있다.
     final l = AppLocalizations.of(context);
-    showPSnackBar(context, l.updateSheetFailed, severity: PSnackSeverity.error);
+    PSnackbar.maybeOf(
+      context,
+    )?.show(message: l.updateSheetFailed, tone: PSnackbarTone.critical);
     await openReleaseExternally(release);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +9,7 @@ import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 금액 보기 비밀번호 시트(I-14 44) — 금액 가리기 화면이 부르는 표면. ds 입력 폼 시트(위 닫기 원 + 바닥 [금액 보기])이고,
 /// 본문은 자산 수정 폼의 같은 시트 단계와 한 부품([HideAmountsUnlockStep])이다. 바깥 누름 · 끌어내림으로 닫히지 않고, 칸에 값이
@@ -92,12 +95,28 @@ Future<void> setHideCardsWithUnlock(
   required bool hide,
 }) async {
   final notifier = ref.read(settingsProvider.notifier);
-  if (hide) {
-    await notifier.hideCards(cards);
-    return;
+  final snack = PSnackbar.maybeOf(context);
+  final l = AppLocalizations.of(context);
+  if (!hide) {
+    final ok = await confirmHideAmountsUnlock(context, ref);
+    if (!ok) return;
   }
-  final ok = await confirmHideAmountsUnlock(context, ref);
-  if (ok) {
-    await notifier.revealCards(cards);
+  Future<void> apply() async {
+    final saved = hide
+        ? await notifier.hideCards(cards)
+        : await notifier.revealCards(cards);
+    // 서버가 받지 못하면 로컬도 그대로다 — 같은 글 + [다시 시도](본인 확인은 이미 거쳤으니 묻지 않고 다시 올린다).
+    if (!saved) {
+      snack?.show(
+        message: l.hideAmountsSaveFailed,
+        tone: PSnackbarTone.critical,
+        action: PSnackbarAction(
+          label: l.actionRetry,
+          onPressed: () => unawaited(apply()),
+        ),
+      );
+    }
   }
+
+  await apply();
 }
