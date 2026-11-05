@@ -21,7 +21,9 @@ import 'package:groo_damda_app/shared/ds/icon_picker/category_icons.dart';
 import 'package:groo_damda_app/shared/ds/icon_picker/p_icon_picker.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
 /// 이름 길이 상한 — 웹 `GOAL_NAME_MAX` · 카테고리와 같은 값(QA #52).
 const _kNameMax = 12;
@@ -89,6 +91,8 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   String? _foreignColor;
 
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
   String? _nameError;
   String? _amountError;
   String? _currentError;
@@ -273,7 +277,10 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
       return;
     }
     final amt = target!;
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(savingGoalRepositoryProvider.future);
       // 현재 모은 금액은 update/create 필드가 아니라 contribute API 로 차액 반영(웹 동일 로직).
@@ -288,10 +295,11 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
           ),
           color: _color,
           icon: _icon,
+          silent: true,
         );
         final diff = current - widget.edit!.currentAmount;
         if (diff != 0) {
-          await repo.contribute(widget.edit!.rowId, amount: diff);
+          await repo.contribute(widget.edit!.rowId, amount: diff, silent: true);
         }
       } else {
         final created = await repo.create(
@@ -300,17 +308,23 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
           deadlineDate: _deadline == null ? null : _fmtDate(_deadline!),
           color: _color,
           icon: _icon,
+          silent: true,
         );
         if (current > 0) {
-          await repo.contribute(created.rowId, amount: current);
+          await repo.contribute(created.rowId, amount: current, silent: true);
         }
       }
       ref.invalidate(savingGoalListProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -333,6 +347,14 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_failed)
+            Padding(
+              padding: gutter,
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.savingGoalSaveFailed,
+              ),
+            ),
           Padding(
             padding: gutter,
             child: PField(

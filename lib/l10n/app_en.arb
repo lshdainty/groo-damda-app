@@ -1255,7 +1255,7 @@
   "expRefundCancelConfirm": "Remove the refund mark? This transaction counts in your totals again, and any refunded amount is reversed.",
   "expRefundCancelConfirmPlain": "Remove the refund mark? This transaction counts in your totals again.",
   "expRefundedBadge": "Refunded",
-  "expRefundedToast": "{amount} you paid in advance went back to your account.",
+  "expRefundedToast": "{amount} of what you paid early went back to your account.",
   "@expRefundedToast": {
     "placeholders": {
       "amount": {
@@ -1392,6 +1392,7 @@
   },
   "budgetDeleteConfirm": "A deleted budget can't be restored.",
   "budgetDeleteFailed": "Couldn't delete the budget.",
+  "budgetSaveFailed": "Couldn't save the budget.",
   "budgetMonthlyLimit": "Monthly budget limit",
   "budgetLoadError": "Couldn't load budget",
   "budgetSelectMonth": "Select month",
@@ -2839,6 +2840,7 @@
   "savingGoalActionFailed": "Failed",
   "savingGoalAchieved": "Achieved",
   "savingGoalAdd": "Add saving goal",
+  "savingGoalSaveFailed": "Couldn't save the saving goal.",
   "savingGoalEdit": "Edit saving goal",
   "savingGoalSubmitAdd": "Add",
   "savingGoalDeleteTitle": "Delete the \"{title}\" goal?",
@@ -4327,8 +4329,9 @@
   "statsFixedBulkBadgeSome": "Fixed {fixed}/{count}",
   "statsFixedBulkEmpty": "No transactions to organize in this period",
   "statsFixedBulkApply": "Apply to {count}",
-  "statsFixedBulkDoneFixed": "Marked {count} as fixed",
-  "statsFixedBulkDoneVariable": "Changed {count} back to variable",
+  "statsFixedBulkDoneFixed": "Marked {count} as fixed.",
+  "statsFixedBulkDoneVariable": "Changed {count} back to variable.",
+  "statsFixedBulkFailed": "Couldn't change them. Try applying again.",
   "navMainMenu": "Main menu",
   "navNotificationsNew": "Notifications, new notifications",
   "dsNotificationBadge": "New updates",
@@ -5053,7 +5056,7 @@
   "txfPresetNeedParties": "Choose the sending and receiving accounts first.",
   "txfPresetNeedCategory": "Choose a category first.",
   "txfPresetNoMerchant": "No details",
-  "txfPresetSaved": "Saved the {name} preset",
+  "txfPresetSaved": "Saved the {name} preset.",
   "@txfPresetSaved": {
     "placeholders": {
       "name": {

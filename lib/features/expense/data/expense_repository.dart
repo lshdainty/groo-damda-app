@@ -333,11 +333,13 @@ class ExpenseRepository {
   Future<int> bulkMarkFixed(
     List<int> expenseIds, {
     required bool isFixed,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/expenses/fixed',
         data: {'expenseIds': expenseIds, 'isFixed': isFixed},
+        options: _quiet(silent),
       );
       final data = res.data?['data'];
       return data is Map<String, dynamic>

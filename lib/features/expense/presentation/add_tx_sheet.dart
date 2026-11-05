@@ -54,7 +54,7 @@ import 'package:groo_damda_app/shared/ds/date_picker/date_picker_dates.dart'
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
@@ -1037,11 +1037,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       ref.invalidate(presetListProvider);
       if (!mounted) return;
       setState(() => _step = _presetOrigin);
-      showPSnackBar(
+      // 저장은 neutral(D1) — 시트 위 호스트. 호스트가 없는 자리(시험)는 조용히 건너뛴다.
+      PSnackbar.maybeOf(
         hostContextOf(context),
-        l.txfPresetSaved(name),
-        severity: PSnackSeverity.success,
-      );
+      )?.show(message: l.txfPresetSaved(name));
     } on ApiException {
       if (!mounted) return;
       // 고칠 수 있는 서버 거절(이름 중복 등)은 위에서 먼저 막았다 — 남는 건 우리 글

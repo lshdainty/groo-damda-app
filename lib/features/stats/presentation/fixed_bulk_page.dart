@@ -13,12 +13,14 @@ import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
 /// 거래를 고정으로 정리하는 페이지(I-08 Q5-A) — 기간 안 거래 묶음이 처음부터 길어 시트가 아니라 페이지다.
 /// 위 상단 바(← + 제목), 가운데 스크롤(설명 · 종류 · 방향 · 묶음 줄), 아래 바닥 [N건 적용] 하나. 앞 화면은 그대로 아래에 남는다.
@@ -44,6 +46,8 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
   bool _toFixed = true;
   Set<int> _picked = {};
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
 
   Future<void> _apply() async {
     if (_picked.isEmpty || _submitting) return;
@@ -51,12 +55,16 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
     final l = AppLocalizations.of(context);
     final host = hostContextOf(context);
     final nav = Navigator.of(context);
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
       final updated = await repo.bulkMarkFixed(
         _picked.toList(),
         isFixed: _toFixed,
+        silent: true,
       );
       // 합계가 아니라 분류가 바뀌지만 통계(고정/변동)·목록이 모두 달라진다.
       invalidateAfterExpenseChange(ref);
@@ -65,15 +73,21 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
       if (!mounted) return;
       nav.pop();
       if (!host.mounted) return;
-      showPSnackBar(
-        host,
-        _toFixed
+      // 저장 · 바꿈은 neutral(D1) — 호스트가 없는 자리(시험)는 조용히 건너뛴다.
+      PSnackbar.maybeOf(host)?.show(
+        message: _toFixed
             ? l.statsFixedBulkDoneFixed(updated)
             : l.statsFixedBulkDoneVariable(updated),
-        severity: PSnackSeverity.success,
       );
     } on ApiException {
-      // 전역 오류 토스트가 사유를 말한다 — 페이지는 그대로 둔다.
+      // 요청은 silent 라 서버 글이 안 뜬다 — 페이지는 그대로 두고 폼 맨 위 Callout 한 문장(우리 글)이 말한다.
+      // 다시 시도는 [적용] 이 한다(웹 useFixedBulk 와 같다).
+      if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -180,6 +194,19 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: PSpacing.x4),
         children: [
+          if (_failed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.x6,
+                PSpacing.x2,
+                PSpacing.x6,
+                0,
+              ),
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.statsFixedBulkFailed,
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               PSpacing.x6,

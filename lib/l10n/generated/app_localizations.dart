@@ -4639,6 +4639,12 @@ abstract class AppLocalizations {
   /// **'예산을 삭제하지 못했어요.'**
   String get budgetDeleteFailed;
 
+  /// No description provided for @budgetSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'예산을 저장하지 못했어요.'**
+  String get budgetSaveFailed;
+
   /// No description provided for @budgetMonthlyLimit.
   ///
   /// In ko, this message translates to:
@@ -9385,6 +9391,12 @@ abstract class AppLocalizations {
   /// **'저축 목표 추가'**
   String get savingGoalAdd;
 
+  /// No description provided for @savingGoalSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저축 목표를 저장하지 못했어요.'**
+  String get savingGoalSaveFailed;
+
   /// No description provided for @savingGoalEdit.
   ///
   /// In ko, this message translates to:
@@ -13918,14 +13930,20 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedBulkDoneFixed.
   ///
   /// In ko, this message translates to:
-  /// **'{count}건을 고정으로 바꿨어요'**
+  /// **'{count}건을 고정으로 바꿨어요.'**
   String statsFixedBulkDoneFixed(int count);
 
   /// No description provided for @statsFixedBulkDoneVariable.
   ///
   /// In ko, this message translates to:
-  /// **'{count}건을 변동으로 되돌렸어요'**
+  /// **'{count}건을 변동으로 되돌렸어요.'**
   String statsFixedBulkDoneVariable(int count);
+
+  /// No description provided for @statsFixedBulkFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정 · 변동을 바꾸지 못했어요. 다시 적용해 보세요.'**
+  String get statsFixedBulkFailed;
 
   /// 하단 탭 바의 이름(낭독) — Bottom Navigation
   ///
@@ -16498,7 +16516,7 @@ abstract class AppLocalizations {
   /// No description provided for @txfPresetSaved.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 프리셋을 저장했어요'**
+  /// **'{name} 프리셋을 저장했어요.'**
   String txfPresetSaved(String name);
 
   /// No description provided for @txfPresetNameTooLong.

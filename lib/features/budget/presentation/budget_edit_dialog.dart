@@ -22,8 +22,10 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
 /// 총 예산 제안 · 카테고리 예산 제안(웹 `MonthlyBudgetDialog` · `PRESETS` 와 같은 값) — 갈래마다 따로다.
 const kBudgetTotalPresets = [1500000, 2000000, 2500000, 3000000];
@@ -120,6 +122,8 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   int? _categoryRowId;
   late final int? _initialCategory;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
   String? _catError;
   String? _amountError;
 
@@ -199,17 +203,25 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       }
       return;
     }
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(budgetRepositoryProvider.future);
       if (_isEdit) {
-        await repo.update(id: widget.edit!.rowId, budgetAmount: amount!);
+        await repo.update(
+          id: widget.edit!.rowId,
+          budgetAmount: amount!,
+          silent: true,
+        );
       } else {
         await repo.create(
           categoryRowId: _isOverall ? null : _categoryRowId!,
           budgetAmount: amount!,
           budgetYear: widget.year,
           budgetMonth: widget.month,
+          silent: true,
         );
       }
       ref.invalidate(
@@ -220,8 +232,13 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -269,6 +286,16 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_failed)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: PSpacing.globalGutter,
+              ),
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.budgetSaveFailed,
+              ),
+            ),
           ?categoryRow,
           if (categoryRow != null) const SizedBox(height: PSpacing.x3),
           Padding(

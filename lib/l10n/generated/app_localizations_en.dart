@@ -2249,7 +2249,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expRefundedToast(String amount) {
-    return '$amount you paid in advance went back to your account.';
+    return '$amount of what you paid early went back to your account.';
   }
 
   @override
@@ -2508,6 +2508,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetDeleteFailed => 'Couldn\'t delete the budget.';
+
+  @override
+  String get budgetSaveFailed => 'Couldn\'t save the budget.';
 
   @override
   String get budgetMonthlyLimit => 'Monthly budget limit';
@@ -5165,6 +5168,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savingGoalAdd => 'Add saving goal';
+
+  @override
+  String get savingGoalSaveFailed => 'Couldn\'t save the saving goal.';
 
   @override
   String get savingGoalEdit => 'Edit saving goal';
@@ -7873,13 +7879,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String statsFixedBulkDoneFixed(int count) {
-    return 'Marked $count as fixed';
+    return 'Marked $count as fixed.';
   }
 
   @override
   String statsFixedBulkDoneVariable(int count) {
-    return 'Changed $count back to variable';
+    return 'Changed $count back to variable.';
   }
+
+  @override
+  String get statsFixedBulkFailed =>
+      'Couldn\'t change them. Try applying again.';
 
   @override
   String get navMainMenu => 'Main menu';
@@ -9398,7 +9408,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String txfPresetSaved(String name) {
-    return 'Saved the $name preset';
+    return 'Saved the $name preset.';
   }
 
   @override

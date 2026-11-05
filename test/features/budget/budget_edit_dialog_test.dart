@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
 import 'package:groo_damda_app/features/budget/data/budget_repository.dart';
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
@@ -19,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 class _FakeRepo extends BudgetRepository {
   _FakeRepo() : super(Dio());
   final calls = <String>[];
+  bool fail = false;
 
   @override
   Future<int?> create({
@@ -39,6 +41,8 @@ class _FakeRepo extends BudgetRepository {
     bool silent = false,
   }) async {
     calls.add('update:$id:$budgetAmount');
+    if (!silent) calls.add('NOT-SILENT');
+    if (fail) throw ApiException(code: 'X', message: '서버 원문');
   }
 }
 
@@ -175,6 +179,24 @@ void main() {
     expect(_amount(tester), '9,876,543,210');
     await _press(tester, l.actionSave);
     expect(repo.calls, ['update:7:9876543210']);
+  });
+
+  testWidgets('저장 실패 — 시트는 열린 채 맨 위에 우리 글 Callout, 서버 글 없음, 값은 남는다', (
+    tester,
+  ) async {
+    const edit = Budget(
+      rowId: 7,
+      budgetAmount: 500000,
+      budgetYear: 2026,
+      budgetMonth: 10,
+    );
+    final repo = await _open(tester, edit: edit);
+    repo.fail = true;
+    await _press(tester, l.actionSave);
+    expect(_t(l.budgetSaveFailed), findsOneWidget);
+    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(_amount(tester), '500,000');
+    expect(repo.calls, ['update:7:500000']);
   });
 
   testWidgets('100억 넘게 저장된 옛 값은 누를 때 칸 아래에 말이 나온다', (tester) async {

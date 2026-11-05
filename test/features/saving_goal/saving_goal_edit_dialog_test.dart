@@ -35,6 +35,7 @@ class _FakeRepo extends SavingGoalRepository {
     String? icon,
     String? color,
     int? linkedAssetRowId,
+    bool silent = false,
   }) async {
     calls.add('create');
     last = {
@@ -57,6 +58,7 @@ class _FakeRepo extends SavingGoalRepository {
     String? icon,
     String? color,
     int? linkedAssetRowId,
+    bool silent = false,
   }) async {
     calls.add('update');
     last = {
@@ -74,6 +76,7 @@ class _FakeRepo extends SavingGoalRepository {
     int id, {
     required int amount,
     String? note,
+    bool silent = false,
   }) async {
     calls.add('contribute:$amount');
     return _existing;
