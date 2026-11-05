@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_event_for
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_pickers.dart';
 import 'package:groo_damda_app/features/dashboard/application/dashboard_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/time_sheet.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -409,7 +410,7 @@ class _CalendarEventFormSheetState
     final l = AppLocalizations.of(context);
     FocusScope.of(context).unfocus();
     final cur = isStart ? _start : _end;
-    final picked = await showCalendarTimeSheet(
+    final picked = await showTimeSheet(
       context,
       title: isStart ? l.calFormStartTime : l.calFormEndTime,
       value: roundTimeToStep(PTimeValue.fromDateTime(cur), 5),

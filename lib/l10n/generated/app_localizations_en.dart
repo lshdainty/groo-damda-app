@@ -211,10 +211,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notiTitle => 'Notifications';
 
   @override
-  String get notiEmpty => 'No notifications';
+  String get notiEmpty => 'No notifications yet';
 
   @override
   String get notiMarkAllRead => 'Read all';
+
+  @override
+  String notiUnreadHead(String count) {
+    return '$count unread';
+  }
+
+  @override
+  String get notiLoadFailed => 'Couldn\'t load notifications';
+
+  @override
+  String get notiLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get notiDeleteFailed => 'Couldn\'t delete the notification.';
+
+  @override
+  String get notiUnreadMark => 'Unread';
+
+  @override
+  String get notiMarkReadFailed => 'Couldn\'t mark the notification as read.';
+
+  @override
+  String get notiMarkAllFailed => 'Couldn\'t mark all notifications as read.';
+
+  @override
+  String get notiPrefsSaveFailed => 'Couldn\'t save notification settings.';
+
+  @override
+  String get notiSettingsLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get notiThresholdLabel => 'Usage shown as a warning';
+
+  @override
+  String get notiThresholdDesc =>
+      'Above this value it shows as a warning and you get an alert. Above 100%, an over-budget alert is sent separately.';
 
   @override
   String notiMore(String title) {
@@ -4519,22 +4555,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sheetLeaveLeave => 'Leave';
 
   @override
-  String get notiUnreadPrefix => '';
-
-  @override
-  String get notiUnreadSuffix => ' unread';
-
-  @override
   String get notiSettings => 'Notification settings';
 
   @override
-  String get notiSettingsLoadError => 'Failed to load settings';
+  String get notiSettingsLoadError => 'Couldn\'t load notification settings';
 
   @override
   String get notiKindTitle => 'Notification types';
-
-  @override
-  String get notiKindSubtitle => 'Keep only the alerts you need.';
 
   @override
   String get notiPayment => 'Payment alerts';
@@ -4588,30 +4615,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notiThresholdTitle => 'Budget alert threshold';
 
   @override
-  String get notiThresholdCurrent => 'Current ';
-
-  @override
-  String get notiThresholdDesc1 => 'When usage exceeds this, a ';
-
-  @override
-  String get notiThresholdWarning => 'Warning';
-
-  @override
-  String get notiThresholdDesc2 =>
-      ' state is shown and you get an alert. At 100%, an ';
-
-  @override
-  String get notiThresholdOver => 'Over';
-
-  @override
-  String get notiThresholdDesc3 => ' alert is sent separately.';
-
-  @override
   String get notiQuietTitle => 'Do not disturb hours';
-
-  @override
-  String get notiQuietSubtitle =>
-      'During these hours, alerts show without sound or vibration.';
 
   @override
   String get notiQuietToggle => 'Use do not disturb';
@@ -4651,10 +4655,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notiEmailTitle => 'Email notifications';
-
-  @override
-  String get notiEmailSubtitle =>
-      'Get summaries by email even if you rarely open the app.';
 
   @override
   String get notiEmailToggle => 'Receive emails';

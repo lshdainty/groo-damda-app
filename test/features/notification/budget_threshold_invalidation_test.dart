@@ -38,7 +38,7 @@ import 'package:groo_damda_app/features/notification/presentation/notification_s
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/features/stats/domain/stats_models.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_slider.dart';
+import 'package:groo_damda_app/shared/ds/slider/p_slider.dart';
 
 /// 이번 달 1일 (`_BudgetScreenState._ymdStart` 와 같은 규칙).
 String _monthStart() {
@@ -207,9 +207,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// 슬라이더를 [v] 로 민다 — `_ThresholdCard` 가 건 콜백 그대로 탄다.
+  /// 슬라이더를 [v] 로 민다 — `_ThresholdBlock` 가 건 콜백 그대로 탄다.
   Future<void> slideTo(WidgetTester tester, double v) async {
-    tester.widget<PSlider>(find.byType(PSlider)).onChanged!(v);
+    tester.widget<PSlider>(find.byType(PSlider)).onChangeEnd!(v);
     await tester.pumpAndSettle();
   }
 

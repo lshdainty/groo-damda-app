@@ -126,8 +126,12 @@ class PSlider extends StatelessWidget {
     this.formatValue,
     this.label,
     this.disabled,
+    this.bubbleSpace = true,
   }) : assert(max > min, '최댓값은 최솟값보다 커야 한다'),
        assert(step > 0, '단계는 0 보다 커야 한다');
+
+  /// 위쪽 값 말풍선 자리(24) — 기본 켬. 머리 줄 바로 아래에 붙는 화면(알림 설정 예산 기준)이 끈다(웹 `!pt-0`).
+  final bool bubbleSpace;
 
   final double value;
 
@@ -160,6 +164,7 @@ class PSlider extends StatelessWidget {
     formatValue: formatValue ?? _plain,
     label: label,
     disabled: disabled,
+    bubbleSpace: bubbleSpace,
   );
 }
 
@@ -247,8 +252,10 @@ class _SliderCore extends StatefulWidget {
     required this.label,
     required this.disabled,
     this.thumbLabels,
+    this.bubbleSpace = true,
   });
 
+  final bool bubbleSpace;
   final List<double> values;
   final ValueChanged<List<double>> onChanged;
   final ValueChanged<List<double>> onChangeEnd;
@@ -542,7 +549,7 @@ class _SliderCoreState extends State<_SliderCore> {
     final message = PFieldScope.maybeOf(context)?.data.message;
 
     return Padding(
-      padding: const EdgeInsets.only(top: _rootPaddingTop),
+      padding: EdgeInsets.only(top: widget.bubbleSpace ? _rootPaddingTop : 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

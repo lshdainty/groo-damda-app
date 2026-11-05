@@ -34,7 +34,7 @@ class PListHeader extends StatelessWidget {
 
   final String title;
 
-  /// 머리말 단계 — 기본 2. 대화상자 · 시트 안의 목록 제목은 한 단계 낮춰 3 으로 준다(제목은 화면 머리말의 아래다).
+  /// 머리말 단계 — 기본 2. 0 이면 머리말로 읽지 않는다(상태 줄). 대화상자 · 시트 안의 목록 제목은 한 단계 낮춰 3 으로 준다(제목은 화면 머리말의 아래다).
   final int headingLevel;
   final PListHeaderVariant variant;
 
@@ -80,8 +80,9 @@ class PListHeader extends StatelessWidget {
           actionBleed: trailing != null ? 0 : kTextButtonPaddingX,
           expandTitle: false,
           title: Semantics(
-            header: true,
-            headingLevel: headingLevel,
+            // headingLevel 0 은 머리말이 아니다 — 목록 위 상태 줄("읽지 않은 알림 N개")
+            header: headingLevel > 0,
+            headingLevel: headingLevel > 0 ? headingLevel : null,
             container: true,
             label: title,
             child: ExcludeSemantics(

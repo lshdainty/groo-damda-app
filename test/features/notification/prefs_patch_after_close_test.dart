@@ -28,7 +28,7 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
 import 'package:groo_damda_app/features/notification/presentation/notification_settings_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_slider.dart';
+import 'package:groo_damda_app/shared/ds/slider/p_slider.dart';
 
 /// 로그인 조회를 네트워크로 내보내지 않는다 — 설정 화면이 이메일을 본다.
 class _NoAuth extends AuthNotifier {
@@ -119,9 +119,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// 슬라이더를 [v] 로 민다 — `_ThresholdCard` 가 건 콜백 그대로 탄다.
+  /// 슬라이더를 [v] 로 민다 — `_ThresholdBlock` 가 건 콜백 그대로 탄다.
   Future<void> slideTo(WidgetTester tester, double v) async {
-    tester.widget<PSlider>(find.byType(PSlider)).onChanged!(v);
+    tester.widget<PSlider>(find.byType(PSlider)).onChangeEnd!(v);
     await tester.pump();
     expect(repo.patches, hasLength(1), reason: 'PATCH 가 나가 있어야 이 테스트가 무언가를 본다');
   }

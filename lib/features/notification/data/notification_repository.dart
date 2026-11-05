@@ -53,7 +53,11 @@ class NotificationRepository {
 
   Future<void> markAllRead() async {
     try {
-      await _dio.patch<dynamic>('/notifications/read-all');
+      // 실패는 화면이 고정 글 + [다시 시도] 로 알린다 — 전역 서버 원문 알림과 겹치지 않게 막는다
+      await _dio.patch<dynamic>(
+        '/notifications/read-all',
+        options: Options(extra: {kSilentErrorToast: true}),
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
