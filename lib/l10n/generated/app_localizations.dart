@@ -13942,7 +13942,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedBulkFailed.
   ///
   /// In ko, this message translates to:
-  /// **'고정 · 변동을 바꾸지 못했어요. 다시 적용해 보세요.'**
+  /// **'고정 표시를 바꾸지 못했어요.'**
   String get statsFixedBulkFailed;
 
   /// 하단 탭 바의 이름(낭독) — Bottom Navigation

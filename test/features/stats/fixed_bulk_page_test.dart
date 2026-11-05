@@ -156,7 +156,7 @@ void main() {
     await tester.tap(find.byType(PButton));
     await tester.pumpAndSettle();
     expect(repo.sawSilent, isTrue);
-    expect(findPlain('고정 · 변동을 바꾸지 못했어요. 다시 적용해 보세요.'), findsOneWidget);
+    expect(findPlain('고정 표시를 바꾸지 못했어요.'), findsOneWidget);
     expect(find.textContaining('서버 원문'), findsNothing);
     expect(find.byType(FixedBulkPage), findsOneWidget);
   });

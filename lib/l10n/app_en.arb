@@ -4331,7 +4331,7 @@
   "statsFixedBulkApply": "Apply to {count}",
   "statsFixedBulkDoneFixed": "Marked {count} as fixed.",
   "statsFixedBulkDoneVariable": "Changed {count} back to variable.",
-  "statsFixedBulkFailed": "Couldn't change them. Try applying again.",
+  "statsFixedBulkFailed": "Couldn't change the fixed setting.",
   "navMainMenu": "Main menu",
   "navNotificationsNew": "Notifications, new notifications",
   "dsNotificationBadge": "New updates",

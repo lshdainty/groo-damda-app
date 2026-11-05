@@ -4560,7 +4560,7 @@
   "@statsFixedBulkDoneFixed": {"placeholders": {"count": {"type": "int"}}},
   "statsFixedBulkDoneVariable": "{count}건을 변동으로 되돌렸어요.",
   "@statsFixedBulkDoneVariable": {"placeholders": {"count": {"type": "int"}}},
-  "statsFixedBulkFailed": "고정 · 변동을 바꾸지 못했어요. 다시 적용해 보세요.",
+  "statsFixedBulkFailed": "고정 표시를 바꾸지 못했어요.",
   "navMainMenu": "주 메뉴",
   "@navMainMenu": {
     "description": "하단 탭 바의 이름(낭독) — Bottom Navigation"

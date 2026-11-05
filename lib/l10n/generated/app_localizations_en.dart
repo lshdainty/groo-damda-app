@@ -7888,8 +7888,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get statsFixedBulkFailed =>
-      'Couldn\'t change them. Try applying again.';
+  String get statsFixedBulkFailed => 'Couldn\'t change the fixed setting.';
 
   @override
   String get navMainMenu => 'Main menu';

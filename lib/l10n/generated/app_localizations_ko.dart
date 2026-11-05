@@ -7733,7 +7733,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get statsFixedBulkFailed => '고정 · 변동을 바꾸지 못했어요. 다시 적용해 보세요.';
+  String get statsFixedBulkFailed => '고정 표시를 바꾸지 못했어요.';
 
   @override
   String get navMainMenu => '주 메뉴';
