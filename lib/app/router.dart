@@ -53,6 +53,7 @@ import 'package:groo_damda_app/features/stocks/presentation/stocks_screen.dart';
 import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_gate.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_link_screen.dart';
+import 'package:groo_damda_app/features/subscription/presentation/subscription_screen.dart';
 import 'package:groo_damda_app/shared/ds/catalog/ds_catalog_screen.dart';
 import 'package:groo_damda_app/shared/widgets/branch_back_to_home.dart';
 import 'package:groo_damda_app/shared/widgets/mobile_scaffold.dart';
@@ -194,6 +195,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings/securities',
         builder: (_, _) => const SecuritiesLinkScreen(),
+      ),
+      // 구독 관리 — 계정 > 구독·결제 줄에서 push 진입(I-14 3-2A, 옛 바텀시트를 대신한다).
+      GoRoute(
+        path: '/settings/subscription',
+        builder: (_, _) => const SubscriptionScreen(),
       ),
       GoRoute(
         path: '/settings/appearance',

@@ -2446,7 +2446,6 @@
   },
   "accountProActive": "Pro 이용 중",
   "accountProPromo": "증권 투자는 Pro 전용 · 지금 시작하기",
-  "accountPerMonth": "/ 월",
   "accountProStart": "Pro 시작",
   "accountManage": "계정 관리",
   "accountLogoutDesc": "이 기기에서만",
@@ -3302,9 +3301,10 @@
     }
   },
   "subFreeLockedDesc": "증권 연동 · 실시간 시세가 잠겨 있어요",
-  "subSpotlightTitle": "증권 투자는 Pro 전용이에요",
-  "subSpotlightDesc": "실시간 시세·호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.",
+  "subSpotlightDesc": "증권 투자는 Pro 전용이에요. 실시간 시세 · 호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.",
   "subCycleMonthly": "월간",
+  "subCycleYearly": "연간",
+  "subCycleLabel": "결제 주기",
   "subCycleYearlyOff": "연간 {pct}%↓",
   "@subCycleYearlyOff": {
     "placeholders": {
@@ -3313,8 +3313,6 @@
       }
     }
   },
-  "subUnitMonth": "월",
-  "subUnitYear": "년",
   "subYearlyPerMonth": "월 {amount} 꼴 · {pct}% 절약",
   "@subYearlyPerMonth": {
     "placeholders": {
@@ -3330,12 +3328,11 @@
   "subFeatureCompare": "기능 비교",
   "subCurrentPlan": "현재 플랜",
   "subFreeCaption": "기본 가계부 기능",
-  "subFeatureColumn": "기능",
   "subFeatLedger": "가계부 · 자산 관리",
   "subFeatBudget": "예산 · 저축 목표 · 캘린더",
   "subFeatSecurities": "증권사 연동 · 실시간 시세 · 자산 실시간 금액",
   "subStarted": "담다 Pro 구독이 시작되었어요",
-  "subFailed": "구독에 실패했어요",
+  "subFailed": "구독하지 못했어요.",
   "subCancelConfirmTitle": "구독 해지",
   "subCancelConfirmMsg": "해지하면 {date}부터 Free 플랜으로 전환되고 증권 탭이 잠겨요. 그 전까지는 Pro 기능을 계속 쓸 수 있어요.",
   "@subCancelConfirmMsg": {
@@ -3348,10 +3345,35 @@
   "subCancel": "구독 해지",
   "subKeep": "유지하기",
   "subCanceled": "구독을 해지했어요",
-  "subCancelFailed": "해지에 실패했어요",
+  "subCancelFailed": "구독을 해지하지 못했어요.",
   "subNextBillingDate": "다음 결제일",
-  "subProcessing": "처리 중…",
   "subStartPro": "Pro 시작하기",
+  "subLoadFailed": "구독 정보를 불러오지 못했어요",
+  "subLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "subPricePerMonth": "{amount} / 월",
+  "@subPricePerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "subPricePerYear": "{amount} / 년",
+  "@subPricePerYear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "subNextBillingNoAmount": "다음 결제 {date}",
+  "@subNextBillingNoAmount": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subConnected": "연결됨",
   "subBrokerLastVerified": "마지막 검증 · {date}",
   "@subBrokerLastVerified": {

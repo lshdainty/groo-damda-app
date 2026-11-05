@@ -19,7 +19,6 @@ import 'package:groo_damda_app/features/settings/data/oauth_link_repository.dart
 import 'package:groo_damda_app/features/settings/presentation/password_change_dialog.dart';
 import 'package:groo_damda_app/features/settings/presentation/withdrawal_sheet.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
-import 'package:groo_damda_app/features/subscription/presentation/subscription_sheet.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
@@ -143,7 +142,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final c = context.colors;
     final l = AppLocalizations.of(context);
     final user = ref.watch(authProvider).value;
-    final subscription = ref.watch(mySubscriptionProvider).asData?.value;
+    final subscriptionAsync = ref.watch(mySubscriptionProvider);
+    // /me 에 가격 · 기간이 없으면(옛 서버) 플랜 목록에서 planCode 로 찾아 채운다 — 정상 경로는 /me 값
+    final plans = ref.watch(subscriptionPlansProvider).asData?.value;
+    final subscription = subscriptionAsync.asData?.value?.resolvedWith(
+      plans ?? const [],
+    );
+    // 구독을 아직 못 읽었으면(받는 중 · 실패) Free 로 그리지 않는다 — 배지 · 권유 글을 비우고 값 없이 둔다
+    final subKnown = subscriptionAsync.hasValue;
     final hasSecurities = ref.watch(hasSecuritiesProvider);
     final appLockOn = ref.watch(appLockEnabledProvider);
     final hiddenCount =
@@ -151,21 +157,39 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final hiddenTotal = kAllHideCards.length;
     final isSubscribed = subscription?.isActive ?? false;
     // currentPeriodEnd 는 서버 UTC 시각 — 자르면 KST 밤 결제분의 갱신일이 하루
-    // 앞으로 보인다(subscription_sheet 와 같은 규칙). 못 읽는 값만 잘라 쓴다.
+    // 앞으로 보인다(구독 화면과 같은 규칙). 못 읽는 값만 잘라 쓴다.
     final periodEnd =
         subscription?.currentPeriodEnd != null &&
             subscription!.currentPeriodEnd!.length >= 10
-        ? (localDateKey(subscription.currentPeriodEnd) ??
+        ? (subscription.periodEndLabel ??
               subscription.currentPeriodEnd!.substring(0, 10))
         : null;
     // 유예 기간(해지했는데 기간이 남음)에는 다음 결제가 없다 — 그 날짜는 결제일이
     // 아니라 이용이 끝나는 날이다. 구독 시트와 같은 문구를 쓴다.
-    final proDesc = !isSubscribed
+    final String? proDesc = !subKnown
+        ? null
+        : !isSubscribed
         ? l.accountProPromo
         : (periodEnd != null && !subscription!.autoRenew)
         ? l.subProUntil(periodEnd)
         : '${periodEnd != null ? l.accountNextBilling(periodEnd) : ''}'
               '${l.accountProActive}';
+    // 값은 서버 가격 — 불러오는 중이면 값 자리 Skeleton, 실패면 값 없이 설명만(I-14 34)
+    final Widget? priceText = !subKnown
+        ? (hasSecurities && subscriptionAsync.isLoading
+              ? SizedBox(width: 72, child: PSkeleton.text(PTypography.t4))
+              : null)
+        : isSubscribed && subscription?.price != null
+        ? PListValue.amount(
+            subscription!.durationMonths == 12
+                ? l.subPricePerYear(
+                    krwSigned(subscription.price!, false, unit: true),
+                  )
+                : l.subPricePerMonth(
+                    krwSigned(subscription.price!, false, unit: true),
+                  ),
+          )
+        : null;
     final name = user?.userName.isNotEmpty == true
         ? user!.userName
         : l.accountDefaultName;
@@ -194,6 +218,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
             name: name,
             email: user?.userEmail ?? '',
             isPro: isSubscribed,
+            planKnown: subKnown,
             joined: user?.joinedAt == null
                 ? null
                 : l.accountJoined(yearMonth(user!.joinedAt!)),
@@ -268,14 +293,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 prefix: _icon(LucideIcons.sparkles),
                 title: '담다 Pro',
                 detail: proDesc,
-                suffix: isSubscribed
-                    ? Text(
-                        '${krwSigned(9900, false, unit: true)} '
-                        '${l.accountPerMonth}',
-                        textAlign: TextAlign.end,
-                      )
-                    : null,
-                onTap: () => showSubscriptionSheet(context),
+                suffix: PListSuffix(
+                  children: [?priceText, const Icon(LucideIcons.chevronRight)],
+                ),
+                onTap: () => context.push('/settings/subscription'),
               ),
             ],
           ),
@@ -365,12 +386,16 @@ class _AccountHead extends StatelessWidget {
     required this.name,
     required this.email,
     required this.isPro,
+    required this.planKnown,
     required this.joined,
   });
 
   final String name;
   final String email;
   final bool isPro;
+
+  /// 구독을 읽었는가 — 못 읽었으면 배지를 그리지 않는다(Free 로 보이지 않게).
+  final bool planKnown;
   final String? joined;
 
   @override
@@ -425,10 +450,11 @@ class _AccountHead extends StatelessWidget {
                   onPressed: null,
                 ),
               ),
-              PBadge(
-                label: isPro ? 'Pro' : 'Free',
-                tone: isPro ? PBadgeTone.brand : PBadgeTone.neutral,
-              ),
+              if (planKnown)
+                PBadge(
+                  label: isPro ? 'Pro' : 'Free',
+                  tone: isPro ? PBadgeTone.brand : PBadgeTone.neutral,
+                ),
             ],
           ),
           if (joined != null) ...[

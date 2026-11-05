@@ -4376,9 +4376,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountProPromo => 'Securities investing is Pro-only · Start now';
 
   @override
-  String get accountPerMonth => '/ mo';
-
-  @override
   String get accountProStart => 'Start Pro';
 
   @override
@@ -5969,25 +5966,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Securities link and real-time quotes are locked';
 
   @override
-  String get subSpotlightTitle => 'Securities investing is Pro-only';
-
-  @override
   String get subSpotlightDesc =>
-      'Real-time quotes and order book, domestic and overseas ticker search, watchlists, and holding P&L — subscribe to Pro and the Securities tab opens right away.';
+      'Securities investing is Pro-only. Real-time quotes and order book, domestic and overseas ticker search, watchlists, and holding P&L — subscribe to Pro and the Securities tab opens right away.';
 
   @override
   String get subCycleMonthly => 'Monthly';
 
   @override
+  String get subCycleYearly => 'Yearly';
+
+  @override
+  String get subCycleLabel => 'Billing cycle';
+
+  @override
   String subCycleYearlyOff(int pct) {
     return 'Yearly $pct% off';
   }
-
-  @override
-  String get subUnitMonth => 'mo';
-
-  @override
-  String get subUnitYear => 'yr';
 
   @override
   String subYearlyPerMonth(String amount, int pct) {
@@ -6007,9 +6001,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subFreeCaption => 'Basic ledger features';
 
   @override
-  String get subFeatureColumn => 'Feature';
-
-  @override
   String get subFeatLedger => 'Ledger · asset management';
 
   @override
@@ -6023,7 +6014,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subStarted => 'Your 담다 Pro subscription is active';
 
   @override
-  String get subFailed => 'Couldn\'t start the subscription';
+  String get subFailed => 'Couldn\'t start the subscription.';
 
   @override
   String get subCancelConfirmTitle => 'Cancel subscription';
@@ -6043,16 +6034,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subCanceled => 'Subscription canceled';
 
   @override
-  String get subCancelFailed => 'Couldn\'t cancel';
+  String get subCancelFailed => 'Couldn\'t cancel the subscription.';
 
   @override
   String get subNextBillingDate => 'Next billing date';
 
   @override
-  String get subProcessing => 'Processing…';
+  String get subStartPro => 'Start Pro';
 
   @override
-  String get subStartPro => 'Start Pro';
+  String get subLoadFailed => 'Couldn\'t load your subscription';
+
+  @override
+  String get subLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String subPricePerMonth(String amount) {
+    return '$amount / mo';
+  }
+
+  @override
+  String subPricePerYear(String amount) {
+    return '$amount / yr';
+  }
+
+  @override
+  String subNextBillingNoAmount(String date) {
+    return 'Next billing $date';
+  }
 
   @override
   String get subConnected => 'Connected';

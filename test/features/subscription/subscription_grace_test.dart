@@ -13,11 +13,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import '../../support/plain_text.dart';
 import 'package:groo_damda_app/core/format/date.dart';
-import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
-import 'package:groo_damda_app/features/subscription/presentation/subscription_sheet.dart';
+import 'package:groo_damda_app/features/subscription/presentation/subscription_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations_ko.dart';
 
@@ -38,43 +38,51 @@ SubscriptionInfo _sub({
   status: status,
   currentPeriodEnd: currentPeriodEnd,
   autoRenew: autoRenew,
+  price: 9900,
+  durationMonths: 1,
 );
 
+const _plans = [
+  SubscriptionPlanInfo(
+    planCode: 'SECURITIES',
+    planName: '담다 Pro',
+    durationMonths: 1,
+    price: 9900,
+  ),
+  SubscriptionPlanInfo(
+    planCode: 'SECURITIES_YEARLY',
+    planName: '담다 Pro 연간',
+    durationMonths: 12,
+    price: 99000,
+  ),
+];
+
 Widget _app(SubscriptionInfo? sub) => ProviderScope(
-  overrides: [mySubscriptionProvider.overrideWith((ref) async => sub)],
+  overrides: [
+    mySubscriptionProvider.overrideWith((ref) async => sub),
+    subscriptionPlansProvider.overrideWith((ref) async => _plans),
+    myFeaturesProvider.overrideWith((ref) async => MyFeatures.empty),
+  ],
   child: MaterialApp(
     theme: GrooTheme.light(),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('ko'),
-    home: Builder(
-      builder: (ctx) => Scaffold(
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () => showSubscriptionSheet(ctx),
-            child: const Text('열기'),
-          ),
-        ),
-      ),
-    ),
+    home: const SubscriptionScreen(),
   ),
 );
 
 Future<void> _openSheet(WidgetTester tester, SubscriptionInfo? sub) async {
-  // 시트(0.92)가 배너·footer 를 한 번에 담도록 세로를 넉넉히. 폭은 폰 폭 고정 —
-  // 640 을 넘기면 Material 이 시트를 640 으로 잘라 가운데 정렬한다.
-  //
-  // 430(iPhone Pro Max 급)인 이유: Pro 플랜 카드의 `Pro | 현재 플랜` 행이 390 폭에서
-  // 3.9px 넘친다. **이 변경과 무관한 기존 레이아웃 문제**로 origin/main 에서도 같은
-  // 폭에 ACTIVE 구독을 물리면 똑같이 넘친다 — 여기서 붙잡을 일이 아니라 폭을 피한다.
-  tester.view.physicalSize = const Size(430 * 3, 1600 * 3);
+  tester.view.physicalSize = const Size(390 * 3, 1600 * 3);
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
 
   await tester.pumpWidget(_app(sub));
-  await tester.tap(find.text('열기'));
   await tester.pumpAndSettle();
 }
+
+/// 계정 · 구독 화면이 같은 글 — 서버 값(9,900 · 1개월)에 "/ 월" 이 붙는다.
+const _amount = '9,900원 / 월';
 
 void main() {
   final l = AppLocalizationsKo();
@@ -146,25 +154,26 @@ void main() {
       _sub(status: 'CANCELLED', currentPeriodEnd: end, autoRenew: false),
     );
 
-    expect(find.text(l.subUsingPro), findsOneWidget);
-    expect(find.text(l.subUsingFree), findsNothing);
+    expect(findPlain(l.subUsingPro), findsOneWidget);
+    expect(findPlain(l.subUsingFree), findsNothing);
 
     // 이미 구독 중이고 서버가 재구독을 막는다 — 누를 수 없는 버튼을 내밀지 않는다.
-    expect(find.text(l.subStartPro), findsNothing);
-    expect(find.text(l.subCancel), findsOneWidget);
+    expect(findPlain(l.subStartPro), findsNothing);
+    expect(findPlain(l.subCancel), findsOneWidget);
   });
 
   testWidgets('자동갱신이 꺼지면 날짜 라벨이 "다음 결제" 가 아니다', (tester) async {
     final end = _serverUtc(const Duration(days: 30));
-    final date = localDateKey(end)!;
+    final date = formatDay(parseServerUtc(end)!).md;
     await _openSheet(
       tester,
       _sub(status: 'CANCELLED', currentPeriodEnd: end, autoRenew: false),
     );
 
-    expect(find.text(l.subProUntil(date)), findsOneWidget);
+    // 유예 설명 = "{날짜}까지 이용 · {가격}"(웹과 같다)
+    expect(findPlain('${l.subProUntil(date)} · $_amount'), findsOneWidget);
     expect(
-      find.text(l.subNextBilling(date, krwSigned(9900, false, unit: true))),
+      findPlain(l.subNextBilling(date, _amount)),
       findsNothing,
       reason: '해지한 구독에 다음 결제는 없다 — 없는 청구를 예고하면 안 된다',
     );
@@ -180,28 +189,25 @@ void main() {
       ),
     );
 
-    expect(find.text(l.subUsingFree), findsOneWidget);
-    expect(find.text(l.subUsingPro), findsNothing);
-    expect(find.text(l.subStartPro), findsOneWidget);
+    expect(findPlain(l.subUsingFree), findsOneWidget);
+    expect(findPlain(l.subUsingPro), findsNothing);
+    expect(findPlain(l.subStartPro), findsOneWidget);
   });
 
   testWidgets('자동갱신 중인 구독은 종전 문구 그대로다', (tester) async {
     final end = _serverUtc(const Duration(days: 30));
-    final date = localDateKey(end)!;
+    final date = formatDay(parseServerUtc(end)!).md;
     await _openSheet(tester, _sub(status: 'ACTIVE', currentPeriodEnd: end));
 
-    expect(find.text(l.subUsingPro), findsOneWidget);
-    expect(
-      find.text(l.subNextBilling(date, krwSigned(9900, false, unit: true))),
-      findsOneWidget,
-    );
-    expect(find.text(l.subProUntil(date)), findsNothing);
+    expect(findPlain(l.subUsingPro), findsOneWidget);
+    expect(findPlain(l.subNextBilling(date, _amount)), findsOneWidget);
+    expect(findPlain(l.subProUntil(date)), findsNothing);
   });
 
   testWidgets('만료일이 없는 해지는 Free — 터지지 않는다', (tester) async {
     await _openSheet(tester, _sub(status: 'CANCELLED', autoRenew: false));
 
-    expect(find.text(l.subUsingFree), findsOneWidget);
+    expect(findPlain(l.subUsingFree), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -212,14 +218,9 @@ void main() {
     );
 
     // 자리 표시자만 있는 날짜에 "…까지 이용" 을 끼우면 더 이상해진다 — 종전 문구.
-    expect(find.text(l.subUsingPro), findsOneWidget);
+    expect(findPlain(l.subUsingPro), findsOneWidget);
     expect(
-      find.text(
-        l.subNextBilling(
-          l.subNextBillingDate,
-          krwSigned(9900, false, unit: true),
-        ),
-      ),
+      findPlain(l.subNextBilling(l.subNextBillingDate, _amount)),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);

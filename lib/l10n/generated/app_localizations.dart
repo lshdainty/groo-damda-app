@@ -7969,12 +7969,6 @@ abstract class AppLocalizations {
   /// **'증권 투자는 Pro 전용 · 지금 시작하기'**
   String get accountProPromo;
 
-  /// No description provided for @accountPerMonth.
-  ///
-  /// In ko, this message translates to:
-  /// **'/ 월'**
-  String get accountPerMonth;
-
   /// No description provided for @accountProStart.
   ///
   /// In ko, this message translates to:
@@ -10855,16 +10849,10 @@ abstract class AppLocalizations {
   /// **'증권 연동 · 실시간 시세가 잠겨 있어요'**
   String get subFreeLockedDesc;
 
-  /// No description provided for @subSpotlightTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'증권 투자는 Pro 전용이에요'**
-  String get subSpotlightTitle;
-
   /// No description provided for @subSpotlightDesc.
   ///
   /// In ko, this message translates to:
-  /// **'실시간 시세·호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.'**
+  /// **'증권 투자는 Pro 전용이에요. 실시간 시세 · 호가, 국내외 종목 검색, 관심종목, 보유 손익까지 — Pro를 구독하면 증권 탭이 바로 열려요.'**
   String get subSpotlightDesc;
 
   /// No description provided for @subCycleMonthly.
@@ -10873,23 +10861,23 @@ abstract class AppLocalizations {
   /// **'월간'**
   String get subCycleMonthly;
 
+  /// No description provided for @subCycleYearly.
+  ///
+  /// In ko, this message translates to:
+  /// **'연간'**
+  String get subCycleYearly;
+
+  /// No description provided for @subCycleLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 주기'**
+  String get subCycleLabel;
+
   /// No description provided for @subCycleYearlyOff.
   ///
   /// In ko, this message translates to:
   /// **'연간 {pct}%↓'**
   String subCycleYearlyOff(int pct);
-
-  /// No description provided for @subUnitMonth.
-  ///
-  /// In ko, this message translates to:
-  /// **'월'**
-  String get subUnitMonth;
-
-  /// No description provided for @subUnitYear.
-  ///
-  /// In ko, this message translates to:
-  /// **'년'**
-  String get subUnitYear;
 
   /// No description provided for @subYearlyPerMonth.
   ///
@@ -10921,12 +10909,6 @@ abstract class AppLocalizations {
   /// **'기본 가계부 기능'**
   String get subFreeCaption;
 
-  /// No description provided for @subFeatureColumn.
-  ///
-  /// In ko, this message translates to:
-  /// **'기능'**
-  String get subFeatureColumn;
-
   /// No description provided for @subFeatLedger.
   ///
   /// In ko, this message translates to:
@@ -10954,7 +10936,7 @@ abstract class AppLocalizations {
   /// No description provided for @subFailed.
   ///
   /// In ko, this message translates to:
-  /// **'구독에 실패했어요'**
+  /// **'구독하지 못했어요.'**
   String get subFailed;
 
   /// No description provided for @subCancelConfirmTitle.
@@ -10990,7 +10972,7 @@ abstract class AppLocalizations {
   /// No description provided for @subCancelFailed.
   ///
   /// In ko, this message translates to:
-  /// **'해지에 실패했어요'**
+  /// **'구독을 해지하지 못했어요.'**
   String get subCancelFailed;
 
   /// No description provided for @subNextBillingDate.
@@ -10999,17 +10981,41 @@ abstract class AppLocalizations {
   /// **'다음 결제일'**
   String get subNextBillingDate;
 
-  /// No description provided for @subProcessing.
-  ///
-  /// In ko, this message translates to:
-  /// **'처리 중…'**
-  String get subProcessing;
-
   /// No description provided for @subStartPro.
   ///
   /// In ko, this message translates to:
   /// **'Pro 시작하기'**
   String get subStartPro;
+
+  /// No description provided for @subLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 정보를 불러오지 못했어요'**
+  String get subLoadFailed;
+
+  /// No description provided for @subLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get subLoadFailedDesc;
+
+  /// No description provided for @subPricePerMonth.
+  ///
+  /// In ko, this message translates to:
+  /// **'{amount} / 월'**
+  String subPricePerMonth(String amount);
+
+  /// No description provided for @subPricePerYear.
+  ///
+  /// In ko, this message translates to:
+  /// **'{amount} / 년'**
+  String subPricePerYear(String amount);
+
+  /// No description provided for @subNextBillingNoAmount.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 결제 {date}'**
+  String subNextBillingNoAmount(String date);
 
   /// No description provided for @subConnected.
   ///
