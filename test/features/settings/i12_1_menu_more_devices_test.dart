@@ -683,7 +683,7 @@ void main() {
       );
       await _go(tester);
       expect(find.byType(PAlertDialogView), findsNothing);
-      expect(findPlain('로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+      expect(findPlain('로그아웃하지 못했어요.'), findsOneWidget);
       // 확인창 뒤 실패 = 스낵바 + [다시 시도]
       expect(findPlain('다시 시도'), findsOneWidget);
       expect(_Auth.loggedOut, isFalse);

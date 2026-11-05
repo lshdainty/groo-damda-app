@@ -7990,7 +7990,7 @@ abstract class AppLocalizations {
   /// No description provided for @devicesLogoutFailed.
   ///
   /// In ko, this message translates to:
-  /// **'로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'로그아웃하지 못했어요.'**
   String get devicesLogoutFailed;
 
   /// No description provided for @devicesLogout.
@@ -8080,13 +8080,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountLinkedToast.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 계정이 연결되었어요'**
+  /// **'{name} 계정이 연결됐어요.'**
   String accountLinkedToast(String name);
 
   /// No description provided for @accountUnlinkedToast.
   ///
   /// In ko, this message translates to:
-  /// **'Google 연결을 해제했어요'**
+  /// **'Google 연결을 해제했어요.'**
   String get accountUnlinkedToast;
 
   /// No description provided for @accountSecuritiesDesc.

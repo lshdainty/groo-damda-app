@@ -2428,7 +2428,7 @@
       }
     }
   },
-  "devicesLogoutFailed": "로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "devicesLogoutFailed": "로그아웃하지 못했어요.",
   "devicesLogout": "로그아웃",
   "devicesLogoutTitle": "{device}에서 로그아웃할까요?",
   "@devicesLogoutTitle": {
@@ -2450,7 +2450,7 @@
   "accountProvidersError": "연결 상태를 불러오지 못했어요",
   "accountLinkError": "계정을 연결하지 못했어요.",
   "accountUnlinkError": "연결을 해제하지 못했어요.",
-  "accountLinkedToast": "{name} 계정이 연결되었어요",
+  "accountLinkedToast": "{name} 계정이 연결됐어요.",
   "@accountLinkedToast": {
     "placeholders": {
       "name": {
@@ -2458,7 +2458,7 @@
       }
     }
   },
-  "accountUnlinkedToast": "Google 연결을 해제했어요",
+  "accountUnlinkedToast": "Google 연결을 해제했어요.",
   "accountSecuritiesDesc": "토스·나무 등 증권사 API 키를 연결해요",
   "accountBilling": "구독·결제",
   "accountNextBilling": "다음 결제 {date} · ",

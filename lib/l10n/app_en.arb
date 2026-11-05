@@ -2401,7 +2401,7 @@
       }
     }
   },
-  "devicesLogoutFailed": "Couldn't log out. Try again in a moment.",
+  "devicesLogoutFailed": "Couldn't log out.",
   "devicesLogout": "Log out",
   "devicesLogoutTitle": "Log out of {device}?",
   "@devicesLogoutTitle": {
@@ -2423,7 +2423,7 @@
   "accountProvidersError": "Couldn't load the connection status",
   "accountLinkError": "Couldn't connect the account.",
   "accountUnlinkError": "Couldn't disconnect the account.",
-  "accountLinkedToast": "{name} account connected",
+  "accountLinkedToast": "Connected the {name} account.",
   "@accountLinkedToast": {
     "placeholders": {
       "name": {
@@ -2431,7 +2431,7 @@
       }
     }
   },
-  "accountUnlinkedToast": "Google account disconnected",
+  "accountUnlinkedToast": "Disconnected the Google account.",
   "accountSecuritiesDesc": "Connect API keys for Toss, Namu, and more",
   "accountBilling": "Subscription & Billing",
   "accountNextBilling": "Next billing {date} · ",

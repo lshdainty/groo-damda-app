@@ -4379,7 +4379,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get devicesLogoutFailed => 'Couldn\'t log out. Try again in a moment.';
+  String get devicesLogoutFailed => 'Couldn\'t log out.';
 
   @override
   String get devicesLogout => 'Log out';
@@ -4428,11 +4428,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String accountLinkedToast(String name) {
-    return '$name account connected';
+    return 'Connected the $name account.';
   }
 
   @override
-  String get accountUnlinkedToast => 'Google account disconnected';
+  String get accountUnlinkedToast => 'Disconnected the Google account.';
 
   @override
   String get accountSecuritiesDesc =>

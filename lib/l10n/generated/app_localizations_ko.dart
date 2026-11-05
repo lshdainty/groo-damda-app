@@ -4304,7 +4304,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get devicesLogoutFailed => '로그아웃하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get devicesLogoutFailed => '로그아웃하지 못했어요.';
 
   @override
   String get devicesLogout => '로그아웃';
@@ -4352,11 +4352,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String accountLinkedToast(String name) {
-    return '$name 계정이 연결되었어요';
+    return '$name 계정이 연결됐어요.';
   }
 
   @override
-  String get accountUnlinkedToast => 'Google 연결을 해제했어요';
+  String get accountUnlinkedToast => 'Google 연결을 해제했어요.';
 
   @override
   String get accountSecuritiesDesc => '토스·나무 등 증권사 API 키를 연결해요';

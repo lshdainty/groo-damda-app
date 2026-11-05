@@ -41,7 +41,7 @@ void main() {
     )!;
     expect(
       oauthLinkReturnMessage(back, AppLocalizationsKo()),
-      'Google 계정이 연결되었어요',
+      'Google 계정이 연결됐어요.',
     );
   });
 
