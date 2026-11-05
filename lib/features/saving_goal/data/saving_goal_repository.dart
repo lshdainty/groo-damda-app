@@ -10,6 +10,9 @@ class SavingGoalRepository {
   SavingGoalRepository(this._dio);
   final Dio _dio;
 
+  static Options? _quiet(bool silent) =>
+      silent ? Options(extra: {kSilentErrorToast: true}) : null;
+
   Future<List<SavingGoal>> list() async {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/saving-goals');
@@ -27,6 +30,7 @@ class SavingGoalRepository {
     String? icon,
     String? color,
     int? linkedAssetRowId,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -40,6 +44,7 @@ class SavingGoalRepository {
           'color': ?color,
           'linkedAssetRowId': ?linkedAssetRowId,
         },
+        options: _quiet(silent),
       );
       return _unwrap(res, SavingGoal.fromJson);
     } on DioException catch (e) {
@@ -64,6 +69,7 @@ class SavingGoalRepository {
     String? icon,
     String? color,
     int? linkedAssetRowId,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
@@ -77,6 +83,7 @@ class SavingGoalRepository {
           'color': ?color,
           'linkedAssetRowId': ?linkedAssetRowId,
         },
+        options: _quiet(silent),
       );
       return _unwrap(res, SavingGoal.fromJson);
     } on DioException catch (e) {
@@ -88,11 +95,13 @@ class SavingGoalRepository {
     int id, {
     required int amount,
     String? note,
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.patch<Map<String, dynamic>>(
         '/saving-goal/$id/contribute',
         data: {'amount': amount, 'note': ?note},
+        options: _quiet(silent),
       );
       return _unwrap(res, SavingGoal.fromJson);
     } on DioException catch (e) {
@@ -103,10 +112,7 @@ class SavingGoalRepository {
   /// [silent] 면 전역 오류 토스트를 띄우지 않는다 — 화면이 자기 스낵바로 알린다.
   Future<void> delete(int id, {bool silent = false}) async {
     try {
-      await _dio.delete<void>(
-        '/saving-goal/$id',
-        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
-      );
+      await _dio.delete<void>('/saving-goal/$id', options: _quiet(silent));
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

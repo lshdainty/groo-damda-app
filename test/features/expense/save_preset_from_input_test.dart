@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 const _category = ExpenseCategory(
   rowId: 5,
@@ -98,6 +99,7 @@ Future<(_Presets, AppLocalizations)> _openSaveDialog(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        builder: (c, ch) => PSnackbarHost(closeLabel: '닫기', child: ch!),
         home: Scaffold(
           body: Builder(
             builder: (ctx) => TextButton(
@@ -146,5 +148,7 @@ void main() {
     expect(presets.created, isNotNull, reason: '계좌가 비었다고 저장을 건너뛰었다');
     expect(presets.created!['templateName'], '점심 정식');
     expect(presets.created!['assetRowId'], isNull);
+    // 저장 알림은 ds 스낵바(neutral) — 시트 위 호스트에 한 문장 + 마침표
+    expect(find.text(l.txfPresetSaved('점심 정식')), findsOneWidget);
   });
 }

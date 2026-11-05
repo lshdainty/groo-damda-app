@@ -1419,6 +1419,7 @@
   },
   "budgetDeleteConfirm": "삭제한 예산은 되돌릴 수 없어요.",
   "budgetDeleteFailed": "예산을 삭제하지 못했어요.",
+  "budgetSaveFailed": "예산을 저장하지 못했어요.",
   "budgetMonthlyLimit": "월 예산 한도",
   "budgetLoadError": "예산을 불러오지 못했습니다",
   "budgetSelectMonth": "월 선택",
@@ -2866,6 +2867,7 @@
   "savingGoalActionFailed": "실패",
   "savingGoalAchieved": "달성",
   "savingGoalAdd": "저축 목표 추가",
+  "savingGoalSaveFailed": "저축 목표를 저장하지 못했어요.",
   "savingGoalEdit": "저축 목표 수정",
   "savingGoalSubmitAdd": "추가",
   "savingGoalDeleteTitle": "\"{title}\" 목표를 삭제할까요?",
@@ -4554,10 +4556,11 @@
   "statsFixedBulkEmpty": "이 기간에는 정리할 거래가 없어요.",
   "statsFixedBulkApply": "{count}건 적용",
   "@statsFixedBulkApply": {"placeholders": {"count": {"type": "int"}}},
-  "statsFixedBulkDoneFixed": "{count}건을 고정으로 바꿨어요",
+  "statsFixedBulkDoneFixed": "{count}건을 고정으로 바꿨어요.",
   "@statsFixedBulkDoneFixed": {"placeholders": {"count": {"type": "int"}}},
-  "statsFixedBulkDoneVariable": "{count}건을 변동으로 되돌렸어요",
+  "statsFixedBulkDoneVariable": "{count}건을 변동으로 되돌렸어요.",
   "@statsFixedBulkDoneVariable": {"placeholders": {"count": {"type": "int"}}},
+  "statsFixedBulkFailed": "고정 표시를 바꾸지 못했어요.",
   "navMainMenu": "주 메뉴",
   "@navMainMenu": {
     "description": "하단 탭 바의 이름(낭독) — Bottom Navigation"
@@ -5325,7 +5328,7 @@
   "txfPresetNeedParties": "보내는 계좌와 받는 계좌를 먼저 골라주세요.",
   "txfPresetNeedCategory": "카테고리를 먼저 골라주세요.",
   "txfPresetNoMerchant": "내역 없음",
-  "txfPresetSaved": "{name} 프리셋을 저장했어요",
+  "txfPresetSaved": "{name} 프리셋을 저장했어요.",
   "@txfPresetSaved": {
     "placeholders": {
       "name": {

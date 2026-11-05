@@ -5,8 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:dio/dio.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
+import 'package:groo_damda_app/features/expense/data/expense_repository.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/stats/presentation/fixed_bulk_page.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -67,6 +70,21 @@ Future<void> _pump(
   await tester.pumpAndSettle();
 }
 
+class _ApplyRepo extends ExpenseRepository {
+  _ApplyRepo() : super(Dio());
+  bool sawSilent = false;
+
+  @override
+  Future<int> bulkMarkFixed(
+    List<int> expenseIds, {
+    required bool isFixed,
+    bool silent = false,
+  }) async {
+    sawSilent = silent;
+    throw ApiException(code: 'X', message: '서버 원문');
+  }
+}
+
 void main() {
   testWidgets('상단 바 ← + 제목, 바닥 버튼 하나(0건이면 막힘), 시트가 아니다', (tester) async {
     await _pump(tester);
@@ -106,5 +124,40 @@ void main() {
     expect(find.text('다시 시도'), findsOneWidget);
     expect(find.textContaining('정리할 거래가 없어요'), findsNothing);
     expect(find.textContaining('server error'), findsNothing);
+  });
+
+  testWidgets('적용이 실패하면 페이지는 그대로, 맨 위에 우리 글 Callout, 요청은 silent', (
+    tester,
+  ) async {
+    final repo = _ApplyRepo();
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          hideCardProvider.overrideWith((ref, card) => false),
+          expenseRepositoryProvider.overrideWith((ref) async => repo),
+          rangeExpensesProvider.overrideWith((ref, k) async => _txs()),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: const FixedBulkPage(range: _range),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(PListCheckItem).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(PButton));
+    await tester.pumpAndSettle();
+    expect(repo.sawSilent, isTrue);
+    expect(findPlain('고정 표시를 바꾸지 못했어요.'), findsOneWidget);
+    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(find.byType(FixedBulkPage), findsOneWidget);
   });
 }

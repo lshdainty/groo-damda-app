@@ -2471,6 +2471,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get budgetDeleteFailed => '예산을 삭제하지 못했어요.';
 
   @override
+  String get budgetSaveFailed => '예산을 저장하지 못했어요.';
+
+  @override
   String get budgetMonthlyLimit => '월 예산 한도';
 
   @override
@@ -5067,6 +5070,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get savingGoalAdd => '저축 목표 추가';
+
+  @override
+  String get savingGoalSaveFailed => '저축 목표를 저장하지 못했어요.';
 
   @override
   String get savingGoalEdit => '저축 목표 수정';
@@ -7718,13 +7724,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String statsFixedBulkDoneFixed(int count) {
-    return '$count건을 고정으로 바꿨어요';
+    return '$count건을 고정으로 바꿨어요.';
   }
 
   @override
   String statsFixedBulkDoneVariable(int count) {
-    return '$count건을 변동으로 되돌렸어요';
+    return '$count건을 변동으로 되돌렸어요.';
   }
+
+  @override
+  String get statsFixedBulkFailed => '고정 표시를 바꾸지 못했어요.';
 
   @override
   String get navMainMenu => '주 메뉴';
@@ -9185,7 +9194,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String txfPresetSaved(String name) {
-    return '$name 프리셋을 저장했어요';
+    return '$name 프리셋을 저장했어요.';
   }
 
   @override
