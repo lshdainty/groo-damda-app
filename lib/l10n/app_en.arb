@@ -1096,7 +1096,8 @@
   "calSaveFailed": "Save failed",
   "calDeleteFailed": "Delete failed",
   "calJoinFailed": "Could not join. Please try again in a moment.",
-  "calUpdateFailed": "Update failed",
+  "calUpdateFailed": "Couldn't make the change.",
+  "importExecuteFailed": "Couldn't import the data.",
   "calCalendarLoadError": "Couldn't load calendars",
   "calLabelLoadError": "Couldn't load labels",
   "dashTitle": "Home",
@@ -2182,7 +2183,7 @@
   "fileTooltipGallery": "Gallery",
   "fileTooltipCamera": "Camera",
   "fileTooltipFile": "File",
-  "fileUploadComplete": "{name} uploaded",
+  "fileUploadComplete": "Uploaded {name}.",
   "@fileUploadComplete": {
     "placeholders": {
       "name": {
@@ -2190,7 +2191,7 @@
       }
     }
   },
-  "fileUploadFailed": "Upload failed",
+  "fileUploadFailed": "Couldn't upload the file.",
   "fileDeleteTitle": "Delete file",
   "fileDeleteConfirm": "Delete \"{name}\"? A deleted file cannot be restored.",
   "@fileDeleteConfirm": {
@@ -2200,7 +2201,7 @@
       }
     }
   },
-  "fileDeleteFailed": "Delete failed",
+  "fileDeleteFailed": "Couldn't delete the file.",
   "fileLoadError": "Failed to load attachments",
   "fileEmpty": "No attachments",
   "moreGroupMoney": "Money",

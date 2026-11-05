@@ -7,14 +7,13 @@ import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/core/format/date.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_badge.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 
 /// 증권사 한 곳의 연결 카드 — 키 등록 / 해제 / 기본 시세 소스 지정.
@@ -65,15 +64,18 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
       await action(repo);
       ref.invalidate(myFeaturesProvider);
       ref.invalidate(brokerConnectionsProvider);
-      if (mounted) {
-        showPSnackBar(context, okMsg, severity: PSnackSeverity.success);
-      }
-    } on ApiException {
-      // 서버 에러는 ErrorToastInterceptor 가 띄운다.
+      if (mounted) PSnackbar.maybeOf(context)?.show(message: okMsg);
     } catch (_) {
-      // API 가 아닌 예외는 인터셉터가 못 잡는다 — 여기서 알린다.
+      // 서버 글은 내지 않는다(요청은 silent) — 고정 글 한 문장 + [다시 시도](같은 일을 다시)
       if (mounted) {
-        showPSnackBar(context, errMsg, severity: PSnackSeverity.error);
+        PSnackbar.maybeOf(context)?.show(
+          message: errMsg,
+          tone: PSnackbarTone.critical,
+          action: PSnackbarAction(
+            label: AppLocalizations.of(context).actionRetry,
+            onPressed: () => _run(action, okMsg, errMsg),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -217,7 +219,10 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                 onPressed: _busy
                     ? null
                     : () => _run(
-                        (repo) => repo.disconnectBrokerCredential(c.broker),
+                        (repo) => repo.disconnectBrokerCredential(
+                          c.broker,
+                          silent: true,
+                        ),
                         l.subBrokerDisconnected(c.displayName),
                         l.subDisconnectFailed,
                       ),
@@ -235,7 +240,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
             onPressed: _busy
                 ? null
                 : () => _run(
-                    (repo) => repo.setPrimaryBroker(c.broker),
+                    (repo) => repo.setPrimaryBroker(c.broker, silent: true),
                     l.subBrokerPrimaryChanged(c.displayName),
                     l.subBrokerPrimaryFailed,
                   ),
@@ -295,8 +300,12 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
                   final secret = _secretCtrl.text.trim();
                   if (key.isEmpty || secret.isEmpty) return;
                   _run(
-                    (repo) =>
-                        repo.registerBrokerCredential(c.broker, key, secret),
+                    (repo) => repo.registerBrokerCredential(
+                      c.broker,
+                      key,
+                      secret,
+                      silent: true,
+                    ),
                     l.subBrokerConnected(c.displayName),
                     l.subBrokerInvalidCred,
                   );

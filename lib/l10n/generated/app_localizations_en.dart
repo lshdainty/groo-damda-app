@@ -1965,7 +1965,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calJoinFailed => 'Could not join. Please try again in a moment.';
 
   @override
-  String get calUpdateFailed => 'Update failed';
+  String get calUpdateFailed => 'Couldn\'t make the change.';
+
+  @override
+  String get importExecuteFailed => 'Couldn\'t import the data.';
 
   @override
   String get calCalendarLoadError => 'Couldn\'t load calendars';
@@ -3837,11 +3840,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String fileUploadComplete(String name) {
-    return '$name uploaded';
+    return 'Uploaded $name.';
   }
 
   @override
-  String get fileUploadFailed => 'Upload failed';
+  String get fileUploadFailed => 'Couldn\'t upload the file.';
 
   @override
   String get fileDeleteTitle => 'Delete file';
@@ -3852,7 +3855,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get fileDeleteFailed => 'Delete failed';
+  String get fileDeleteFailed => 'Couldn\'t delete the file.';
 
   @override
   String get fileLoadError => 'Failed to load attachments';

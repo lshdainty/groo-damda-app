@@ -1123,7 +1123,8 @@
   "calSaveFailed": "저장 실패",
   "calDeleteFailed": "삭제 실패",
   "calJoinFailed": "참여하지 못했어요. 잠시 뒤 다시 시도해주세요.",
-  "calUpdateFailed": "변경 실패",
+  "calUpdateFailed": "바꾸지 못했어요.",
+  "importExecuteFailed": "가져오지 못했어요.",
   "calCalendarLoadError": "캘린더를 불러오지 못했어요",
   "calLabelLoadError": "라벨을 불러오지 못했어요",
   "dashTitle": "홈",
@@ -2209,7 +2210,7 @@
   "fileTooltipGallery": "갤러리",
   "fileTooltipCamera": "카메라",
   "fileTooltipFile": "파일",
-  "fileUploadComplete": "{name} 업로드 완료",
+  "fileUploadComplete": "{name} 파일을 올렸어요.",
   "@fileUploadComplete": {
     "placeholders": {
       "name": {
@@ -2217,7 +2218,7 @@
       }
     }
   },
-  "fileUploadFailed": "업로드 실패",
+  "fileUploadFailed": "파일을 올리지 못했어요.",
   "fileDeleteTitle": "파일 삭제",
   "fileDeleteConfirm": "\"{name}\" 파일을 삭제할까요? 삭제한 파일은 되돌릴 수 없어요.",
   "@fileDeleteConfirm": {
@@ -2227,7 +2228,7 @@
       }
     }
   },
-  "fileDeleteFailed": "삭제 실패",
+  "fileDeleteFailed": "파일을 삭제하지 못했어요.",
   "fileLoadError": "첨부 로드 실패",
   "fileEmpty": "첨부된 파일 없음",
   "moreGroupMoney": "돈 관리",

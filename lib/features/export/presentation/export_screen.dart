@@ -27,7 +27,7 @@ import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 typedef _TypeMeta = ({String name, String slug, IconData icon});
 typedef _FormatMeta = ({String value, String label, String ext, IconData icon});
@@ -301,11 +301,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         if (await file.exists()) await file.delete();
       }
       if (mounted) {
-        showPSnackBar(
-          context,
-          l.exportSuccess,
-          severity: PSnackSeverity.success,
-        );
+        PSnackbar.maybeOf(context)?.show(message: l.exportSuccess);
       }
     } on ExportStalledException {
       // 받은 바이트가 10초 동안 늘지 않으면 끊는다(I-05 47) — 옛 길의 오류 띠 + [다시 시도]
@@ -319,14 +315,14 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   }
 
   void _failBar(String message) {
-    showPSnackBar(
-      context,
-      message,
-      severity: PSnackSeverity.error,
-      duration: const Duration(seconds: 8),
-      actionLabel: AppLocalizations.of(context).actionRetry,
-      onAction: _runExport,
-      replace: true,
+    // 액션 있는 critical 띠 — 시간은 ds 규칙(6초), 8초 · replace 는 쓰지 않는다(D6).
+    PSnackbar.maybeOf(context)?.show(
+      message: message,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: AppLocalizations.of(context).actionRetry,
+        onPressed: _runExport,
+      ),
     );
   }
 

@@ -1937,7 +1937,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calJoinFailed => '참여하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calUpdateFailed => '변경 실패';
+  String get calUpdateFailed => '바꾸지 못했어요.';
+
+  @override
+  String get importExecuteFailed => '가져오지 못했어요.';
 
   @override
   String get calCalendarLoadError => '캘린더를 불러오지 못했어요';
@@ -3769,11 +3772,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String fileUploadComplete(String name) {
-    return '$name 업로드 완료';
+    return '$name 파일을 올렸어요.';
   }
 
   @override
-  String get fileUploadFailed => '업로드 실패';
+  String get fileUploadFailed => '파일을 올리지 못했어요.';
 
   @override
   String get fileDeleteTitle => '파일 삭제';
@@ -3784,7 +3787,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get fileDeleteFailed => '삭제 실패';
+  String get fileDeleteFailed => '파일을 삭제하지 못했어요.';
 
   @override
   String get fileLoadError => '첨부 로드 실패';

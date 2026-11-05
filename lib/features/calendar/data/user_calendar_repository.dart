@@ -63,6 +63,7 @@ class UserCalendarRepository {
     try {
       final res = await _dio.patch<Map<String, dynamic>>(
         '/calendar/calendars/$id/visibility',
+        options: _silent,
       );
       return _unwrap(res, UserCalendar.fromJson);
     } on DioException catch (e) {

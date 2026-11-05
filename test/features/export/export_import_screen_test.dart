@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/import/data/import_repository.dart';
 import 'package:groo_damda_app/features/import/presentation/import_view.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/attachment_input/p_attachment_input.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/checkbox/p_checkbox.dart';
@@ -156,7 +157,7 @@ Future<void> _pump(
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(textScale)),
-          child: child!,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
         ),
       ),
     ),
@@ -416,13 +417,10 @@ void main() {
         await tester.tap(find.widgetWithText(PButton, _l.exportRun));
         await tester.pumpAndSettle();
         expect(repo.downloads, 1);
-        expect(
-          find.text(stall ? _l.exportStalled : _l.exportFailed),
-          findsOneWidget,
-        );
+        expect(_t(stall ? _l.exportStalled : _l.exportFailed), findsOneWidget);
         // 서버 글은 그대로 내지 않는다
         expect(find.text('server raw'), findsNothing);
-        await tester.tap(find.text(_l.actionRetry));
+        await tester.tap(_t(_l.actionRetry));
         await tester.pumpAndSettle();
         expect(repo.downloads, 2);
       });

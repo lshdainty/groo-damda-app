@@ -4,7 +4,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -12,7 +11,7 @@ import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 캘린더 고르기 시트(I-09 7) — 내 캘린더 · 기타 소스(공휴일) · "캘린더 관리 · 공유 설정". 구조와 동작은 그대로,
 /// 부품만 ds(Bottom Sheet 고르기 · List 체크 줄 · List Header)다.
@@ -44,16 +43,12 @@ class _CalendarFilterSheet extends ConsumerWidget {
         final repo = await ref.read(userCalendarRepositoryProvider.future);
         await repo.toggleVisibility(cal.rowId);
         ref.invalidate(userCalendarListProvider);
-      } on ApiException {
-        // 서버 에러는 ErrorToastInterceptor 가 띄운다.
       } catch (_) {
-        // API 가 아닌 예외는 인터셉터가 못 잡는다 — 여기서 알린다.
+        // 바로 바뀌는 값 — 서버 값 그대로라 되돌릴 것이 없다. 스낵바 한 문장, 다시 시도 없음(요청은 silent).
         if (context.mounted) {
-          showPSnackBar(
+          PSnackbar.maybeOf(
             context,
-            l.calUpdateFailed,
-            severity: PSnackSeverity.error,
-          );
+          )?.show(message: l.calUpdateFailed, tone: PSnackbarTone.critical);
         }
       }
     }

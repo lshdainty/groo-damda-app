@@ -3652,8 +3652,14 @@ abstract class AppLocalizations {
   /// No description provided for @calUpdateFailed.
   ///
   /// In ko, this message translates to:
-  /// **'변경 실패'**
+  /// **'바꾸지 못했어요.'**
   String get calUpdateFailed;
+
+  /// No description provided for @importExecuteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'가져오지 못했어요.'**
+  String get importExecuteFailed;
 
   /// No description provided for @calCalendarLoadError.
   ///
@@ -6946,13 +6952,13 @@ abstract class AppLocalizations {
   /// No description provided for @fileUploadComplete.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 업로드 완료'**
+  /// **'{name} 파일을 올렸어요.'**
   String fileUploadComplete(String name);
 
   /// No description provided for @fileUploadFailed.
   ///
   /// In ko, this message translates to:
-  /// **'업로드 실패'**
+  /// **'파일을 올리지 못했어요.'**
   String get fileUploadFailed;
 
   /// No description provided for @fileDeleteTitle.
@@ -6970,7 +6976,7 @@ abstract class AppLocalizations {
   /// No description provided for @fileDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제 실패'**
+  /// **'파일을 삭제하지 못했어요.'**
   String get fileDeleteFailed;
 
   /// No description provided for @fileLoadError.
