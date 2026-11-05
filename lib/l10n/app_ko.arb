@@ -1421,6 +1421,7 @@
   "budgetDeleteFailed": "예산을 삭제하지 못했어요.",
   "budgetSaveFailed": "예산을 저장하지 못했어요.",
   "assetSaveFailed": "자산을 저장하지 못했어요.",
+  "tradeSaveFailed": "매매를 처리하지 못했어요.",
   "budgetMonthlyLimit": "월 예산 한도",
   "budgetLoadError": "예산을 불러오지 못했습니다",
   "budgetSelectMonth": "월 선택",

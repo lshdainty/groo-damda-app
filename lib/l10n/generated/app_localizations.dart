@@ -4651,6 +4651,12 @@ abstract class AppLocalizations {
   /// **'자산을 저장하지 못했어요.'**
   String get assetSaveFailed;
 
+  /// No description provided for @tradeSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'매매를 처리하지 못했어요.'**
+  String get tradeSaveFailed;
+
   /// No description provided for @budgetMonthlyLimit.
   ///
   /// In ko, this message translates to:

@@ -74,6 +74,7 @@ class _CapturingRepo extends AssetRepository {
     String? tradeDate,
     String? description,
     int? settlementAssetRowId,
+    bool silent = false,
   }) async {
     createCalled = true;
     createdTradeDate = tradeDate;

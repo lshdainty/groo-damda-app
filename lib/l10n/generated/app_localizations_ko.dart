@@ -2477,6 +2477,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetSaveFailed => '자산을 저장하지 못했어요.';
 
   @override
+  String get tradeSaveFailed => '매매를 처리하지 못했어요.';
+
+  @override
   String get budgetMonthlyLimit => '월 예산 한도';
 
   @override

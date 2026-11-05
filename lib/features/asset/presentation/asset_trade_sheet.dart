@@ -21,8 +21,10 @@ import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
 /// 매수·매도 입력(I-17 56) — 입력 폼 시트. web `AssetTradeDialog` 미러.
 ///
@@ -96,6 +98,8 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
 
   late String _type;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
   bool _tried = false;
 
   /// 결제 계좌 — null 이면 증권계좌 예수금에서. 예수금을 따로 관리하지 않으면 통장을 고른다.
@@ -236,7 +240,10 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
           ?.requestFocus();
       return;
     }
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       await repo.createTrade(
@@ -258,6 +265,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             ? null
             : _memoCtrl.text.trim(),
         settlementAssetRowId: _settlementAssetRowId,
+        silent: true,
       );
       // 예수금·보유·실현손익이 한꺼번에 바뀐다 — 자산과 거래 목록을 모두 새로 받는다.
       // 순자산·추이도 같은 매매로 움직이므로 자산 변경 묶음을 통째로 비운다.
@@ -266,7 +274,13 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
+      // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -342,6 +356,14 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_failed)
+            Padding(
+              padding: gutter,
+              child: FormErrorCallout(
+                key: _errorKey,
+                message: l.tradeSaveFailed,
+              ),
+            ),
           // 매수 · 매도 — 2 ~ 4개 폼 값은 칩 하나 고르기
           Padding(
             padding: gutter,
