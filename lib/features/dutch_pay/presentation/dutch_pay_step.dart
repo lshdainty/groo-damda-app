@@ -28,6 +28,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/select_box/p_select_box.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/step_done.dart';
@@ -441,23 +442,24 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
           child: PRadioSelectBoxGroup<DutchSplitMethod>(
             key: const ValueKey('dutch-method'),
             value: _method,
-            columns: 3,
+            // 3열에 제목이 한 덩어리로 안 들어가는 폭(폰)에서는 1열 가로형 — 제목은 쪼개지 않는다(select-box.md:47)
+            columns: MediaQuery.sizeOf(context).width >= 560 ? 3 : 1,
             semanticLabel: l.dutchMethodHeader,
             onChanged: _submitting ? null : (v) => setState(() => _method = v),
             children: [
               PRadioSelectBox<DutchSplitMethod>(
                 value: DutchSplitMethod.equal,
-                label: l.dutchSplitEqualTitle,
+                label: keepAll(l.dutchSplitEqualTitle),
                 description: l.dutchEqualSub,
               ),
               PRadioSelectBox<DutchSplitMethod>(
                 value: DutchSplitMethod.ratio,
-                label: l.dutchSplitRatioTitle,
+                label: keepAll(l.dutchSplitRatioTitle),
                 description: l.dutchRatioSub,
               ),
               PRadioSelectBox<DutchSplitMethod>(
                 value: DutchSplitMethod.custom,
-                label: l.dutchSplitCustomTitle,
+                label: keepAll(l.dutchSplitCustomTitle),
                 description: l.dutchSplitCustomSub,
               ),
             ],
