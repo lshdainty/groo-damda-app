@@ -390,7 +390,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Counts toward net worth and total assets.';
 
   @override
-  String get assetTrendLoadError => 'Couldn\'t load trend data';
+  String get assetTrendLoadError => 'Couldn\'t load the trend';
 
   @override
   String get assetTrendEmpty => 'No trend data.';
@@ -410,6 +410,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetChartTableMonth => 'Month';
+
+  @override
+  String get assetChartTableWeek => 'Week';
+
+  @override
+  String get assetTxLoadFailed => 'Couldn\'t load the transactions';
+
+  @override
+  String get assetMonthTx => 'This month';
+
+  @override
+  String get assetHoldingLinkedPending => 'awaiting live price';
+
+  @override
+  String get assetPeriodAria => 'Trend period';
 
   @override
   String get assetLoadFailedSummary => 'Couldn\'t load net worth';
@@ -743,7 +758,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetMonthTxCount(int count) {
-    return 'This month ($count)';
+    return 'This month · $count';
   }
 
   @override
@@ -754,7 +769,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetRecentTxCount(int count) {
-    return 'Recent transactions ($count)';
+    return 'Recent transactions · $count';
   }
 
   @override
@@ -871,7 +886,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tradeInsufficientQty => 'Cannot sell more than you hold.';
 
   @override
-  String get tradeHistory => 'Trade history';
+  String get tradeQtyRequired => 'Enter the quantity.';
+
+  @override
+  String get tradeAmountRequired => 'Enter the trade amount.';
+
+  @override
+  String get tradePreview => 'Preview after the trade';
+
+  @override
+  String get tradeHistory => 'Trade log';
 
   @override
   String get tradeDeleted => 'Trade cancelled';
@@ -926,11 +950,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tradeDateTime => 'Trade date';
-
-  @override
-  String tradeOpenRow(String date, String name) {
-    return '$name trade record on $date';
-  }
 
   @override
   String tradeDeleteConfirmTarget(
@@ -1017,7 +1036,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add your holdings with the button above. No live price — enter the value yourself.';
 
   @override
-  String get assetHoldingsEmptyDetail => 'No holdings yet. Add them from Edit.';
+  String get assetHoldingsEmptyDetail => 'No holdings yet';
 
   @override
   String get assetHoldingSearchHint => 'Search stock name';
@@ -1172,12 +1191,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetPayConfirmMessage(String amount) {
-    return 'Pay the upcoming amount of $amount KRW now?';
+    return 'Pay the $amount due now?';
   }
 
   @override
   String assetPayConfirmDateSuffix(String date) {
-    return ' The payment date is $date.';
+    return ' This is the amount due $date.';
   }
 
   @override
@@ -1259,7 +1278,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetPayRemainder(String amount) {
-    return '$amount remaining will be paid on the payment date';
+    return 'The remaining $amount will be paid on the payment date.';
   }
 
   @override
@@ -1287,14 +1306,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetPaidDone => 'Paid';
 
   @override
-  String assetUsagePeriod(String period) {
-    return 'Card usage period $period';
-  }
-
-  @override
-  String get assetLimitSettings => 'Limit · payment';
-
-  @override
   String get assetLimitUsage => 'Limit usage';
 
   @override
@@ -1311,12 +1322,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String assetLimitRemain(String amount) {
     return 'Remaining $amount';
   }
-
-  @override
-  String get assetLimitEdit => 'Edit limit · payment day';
-
-  @override
-  String get assetPerfDone => 'Monthly target met';
 
   @override
   String assetPerfRemain(String amount) {
@@ -1336,7 +1341,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetSortCategory => 'Category';
 
   @override
-  String get assetPeriodPick => 'Select period';
+  String assetDueOn(String date) {
+    return 'Paid $date';
+  }
+
+  @override
+  String get assetDueThisMonth => 'Due this month';
+
+  @override
+  String get assetUsagePeriodLabel => 'Card usage period';
+
+  @override
+  String get assetCycleMix => 'This cycle';
+
+  @override
+  String assetPerfTitle(String month) {
+    return 'Month $month target';
+  }
+
+  @override
+  String get assetPerfAchieved => 'Target met';
+
+  @override
+  String get assetPayAmountEmpty => 'Enter the payment amount.';
+
+  @override
+  String assetPayAmountOver(String amount) {
+    return 'The payment can be up to $amount.';
+  }
+
+  @override
+  String assetYearLabel(String year) {
+    return '$year';
+  }
+
+  @override
+  String get assetSortAria => 'Sort usage history';
+
+  @override
+  String get assetPeriodPick => 'Billing cycle';
 
   @override
   String get assetNoUsage => 'No usage history yet.';
@@ -1348,7 +1391,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetMonthlyPaymentDay(int day) {
-    return 'Paid on day $day each month';
+    return 'Day $day each month';
   }
 
   @override

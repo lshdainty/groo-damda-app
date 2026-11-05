@@ -70,6 +70,7 @@ class PButton extends StatefulWidget {
     this.flush,
     this.loading = false,
     this.labelLines = 1,
+    this.focusNode,
   }) : assert(
          prefixIcon == null || suffixIcon == null,
          '앞 · 뒤 아이콘은 하나만 쓴다(button.yaml layout withText)',
@@ -91,7 +92,8 @@ class PButton extends StatefulWidget {
        labelLines = 1,
        prefixIcon = null,
        suffixIcon = null,
-       flush = null;
+       flush = null,
+       focusNode = null;
 
   final String? label;
   final IconData? icon;
@@ -114,6 +116,9 @@ class PButton extends StatefulWidget {
   /// 라벨 줄 수 — 기본 1(한 줄, 줄바꿈 · 말줄임 없음). 2 이상이면 글에 넣은 줄바꿈(`\n`)에서만 줄을 바꾼다(통계 기간 버튼의
   /// 다른 해 직접 기간 "2025-01-01 ~ / 2026-03-31"). 버튼 높이는 글을 따라 자란다(최소 높이는 그대로).
   final int labelLines;
+
+  /// 초점 노드 — 밖에서 초점을 되돌릴 때(고르기 시트가 닫힌 뒤 열었던 단추로). 없으면 단추가 스스로 쥔다.
+  final FocusNode? focusNode;
 
   bool get _iconOnly => icon != null;
 
@@ -535,6 +540,7 @@ class _PButtonState extends State<PButton> {
                 }
               : const {},
           child: Focus(
+            focusNode: widget.focusNode,
             canRequestFocus: _enabled && !widget.loading,
             onFocusChange: (focused) {
               final next = focused && keyboardHighlight();

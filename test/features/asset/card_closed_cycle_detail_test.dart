@@ -9,11 +9,14 @@
 //   ⑥ 결제일 없는 카드는 "결제일을 넣어주세요"(D8)
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
+import 'package:dio/dio.dart';
+import 'package:groo_damda_app/features/asset/data/asset_repository.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
@@ -24,7 +27,29 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import '../../support/plain_text.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+
+/// 결제 요청이 어떤 값으로 나가는지 잡아 둔다.
+class _PayRepo extends AssetRepository {
+  _PayRepo() : super(Dio());
+  final calls = <({int id, int? amount, String? paymentDate})>[];
+
+  @override
+  Future<BillingItem> payCard(
+    int id, {
+    int? amount,
+    String? paymentDate,
+    bool silent = false,
+  }) async {
+    calls.add((id: id, amount: amount, paymentDate: paymentDate));
+    return _payment(
+      rowId: 99,
+      periodStart: '2026-09-01',
+      periodEnd: '2026-09-30',
+      paymentDate: paymentDate ?? '2026-10-12',
+    );
+  }
+}
 
 const _card = Asset(
   rowId: 9,
@@ -71,13 +96,18 @@ Future<void> _open(
   required CardBilling billing,
   Asset card = _card,
   List<Expense> usage = const [],
+  List<Override> extraOverrides = const [],
+  double textScale = 1.0,
+  Size size = const Size(1500, 3600),
+  double dpr = 3.0,
 }) async {
-  tester.view.physicalSize = const Size(1500, 3600);
-  tester.view.devicePixelRatio = 3.0;
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = dpr;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...extraOverrides,
         assetsProvider.overrideWith((ref) async => [card]),
         hideCardProvider.overrideWith((ref, c) => false),
         cardBillingProvider.overrideWith((ref, id) async => billing),
@@ -103,6 +133,12 @@ Future<void> _open(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         home: Scaffold(
           body: Builder(
             builder: (ctx) => TextButton(
@@ -120,7 +156,7 @@ Future<void> _open(
 
 /// 머리 금액 — 숫자와 단위가 따로 그려진다(RichText).
 Finder _head(String amount) => find.byWidgetPredicate(
-  (w) => w is RichText && w.text.toPlainText() == '$amount원',
+  (w) => w is Text && (w.semanticsLabel ?? w.data) == '$amount원',
 );
 
 void main() {
@@ -228,7 +264,102 @@ void main() {
     );
 
     expect(find.text('지금 결제'), findsNothing);
-    expect(find.text('한도 · 결제 설정'), findsOneWidget);
+    // 한도 · 결제 설정 타일은 없다 — 수정은 머리 하나(I-17 47)
+    expect(find.text('한도 · 결제 설정'), findsNothing);
+  });
+
+  const upcomingBilling = CardBilling(
+    cardAssetRowId: 9,
+    upcomingAmount: 40000,
+    nextPaymentDate: '2026-10-12',
+    upcomingPeriodStart: '2026-09-01',
+    upcomingPeriodEnd: '2026-09-30',
+  );
+
+  // I-17 53 — 주 버튼을 막지 않고, 누르면 칸 아래에 오류가 뜬다.
+  testWidgets('[지금 결제] 시트 — 0 원 · 예정액 초과는 누르면 칸 아래 오류', (tester) async {
+    await _open(tester, billing: upcomingBilling);
+    await tester.tap(find.text('지금 결제'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('결제 예정액 40,000원을 지금 결제할까요?'), findsOneWidget);
+    expect(find.textContaining('10월 12일 결제 예정분이에요.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '0');
+    await tester.tap(find.text('결제하기'));
+    await tester.pumpAndSettle();
+    expect(find.text('결제 금액을 넣어주세요.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '50000');
+    await tester.tap(find.text('결제하기'));
+    await tester.pumpAndSettle();
+    expect(find.text('결제 금액은 40,000원까지예요.'), findsOneWidget);
+  });
+
+  // 요청은 그대로 — 잘못된 금액은 나가지 않고, 맞는 금액은 payCard(amount, paymentDate) 로 나간다.
+  testWidgets('[지금 결제] — 잘못된 금액은 요청 0, 맞는 금액은 본문 그대로', (tester) async {
+    final repo = _PayRepo();
+    await _open(
+      tester,
+      billing: upcomingBilling,
+      extraOverrides: [
+        assetRepositoryProvider.overrideWith((ref) async => repo),
+      ],
+    );
+    await tester.tap(find.text('지금 결제'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '50000');
+    await tester.tap(find.text('결제하기'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, isEmpty);
+
+    await tester.enterText(find.byType(TextField), '40000');
+    await tester.tap(find.text('결제하기'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, hasLength(1));
+    expect(repo.calls.single.id, 9);
+    expect(repo.calls.single.amount, 40000);
+    expect(repo.calls.single.paymentDate, '2026-10-12');
+  });
+
+  // 청구를 못 불러오면 "0원" 이 아니라 실패 띠 + 다시 시도.
+  testWidgets('청구 조회 실패는 0원이 아니라 실패 띠', (tester) async {
+    await _open(
+      tester,
+      billing: upcomingBilling,
+      extraOverrides: [
+        cardBillingProvider.overrideWith((ref, id) async => throw Exception()),
+      ],
+    );
+    expect(find.text('청구 정보를 불러오지 못했어요'), findsOneWidget);
+    expect(find.text('0원'), findsNothing);
+  });
+
+  // (10-30) 글자 200% 에서 넘침이 없다.
+  testWidgets('카드 상세는 글자 200% 에서 넘치지 않는다', (tester) async {
+    await _open(
+      tester,
+      billing: upcomingBilling,
+      textScale: 2.0,
+      size: const Size(1170, 3600),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  // I-17 54 — 고르기 시트: 연도 머리 + 라디오 줄, 누르면 바로 고르고 닫힌다.
+  testWidgets('회차 단추는 결제 회차 고르기 시트를 연다', (tester) async {
+    await _open(tester, billing: upcomingBilling);
+    await tester.tap(find.text('10월 12일 결제'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('결제 회차'), findsOneWidget);
+    expect(find.text('2026년'), findsOneWidget);
+    expect(find.text('예정'), findsWidgets);
+
+    await tester.tap(find.text('10월 12일 결제').last);
+    await tester.pumpAndSettle();
+    expect(find.text('결제 회차'), findsNothing);
   });
 
   testWidgets('다가오는 회차에서는 [지금 결제] 가 있다', (tester) async {
@@ -297,8 +428,8 @@ void main() {
       ),
     );
 
-    expect(find.text('QC90000'), findsOneWidget);
-    expect(find.text('2/3회차 · 원금 90,000원 · 기록만'), findsOneWidget);
+    expect(find.text('QC90000 2/3회차'), findsOneWidget);
+    expect(find.text('원금 90,000원 · 기록만'), findsOneWidget);
     expect(find.text('남은 할부 한 번에 정리'), findsNothing);
   });
 

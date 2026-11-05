@@ -833,7 +833,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetTrendLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'추이 데이터를 불러오지 못했어요'**
+  /// **'추이를 불러오지 못했어요'**
   String get assetTrendLoadError;
 
   /// No description provided for @assetTrendEmpty.
@@ -865,6 +865,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'달'**
   String get assetChartTableMonth;
+
+  /// No description provided for @assetChartTableWeek.
+  ///
+  /// In ko, this message translates to:
+  /// **'주'**
+  String get assetChartTableWeek;
+
+  /// No description provided for @assetTxLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'내역을 불러오지 못했어요'**
+  String get assetTxLoadFailed;
+
+  /// No description provided for @assetMonthTx.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 내역'**
+  String get assetMonthTx;
+
+  /// No description provided for @assetHoldingLinkedPending.
+  ///
+  /// In ko, this message translates to:
+  /// **'시세 연동 대기'**
+  String get assetHoldingLinkedPending;
+
+  /// No description provided for @assetPeriodAria.
+  ///
+  /// In ko, this message translates to:
+  /// **'추이 기간'**
+  String get assetPeriodAria;
 
   /// No description provided for @assetLoadFailedSummary.
   ///
@@ -1475,7 +1505,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetMonthTxCount.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 내역 ({count})'**
+  /// **'이번 달 내역 · {count}'**
   String assetMonthTxCount(int count);
 
   /// No description provided for @assetValuationShort.
@@ -1493,7 +1523,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetRecentTxCount.
   ///
   /// In ko, this message translates to:
-  /// **'최근 거래 ({count})'**
+  /// **'최근 거래 · {count}'**
   String assetRecentTxCount(int count);
 
   /// No description provided for @assetViewAll.
@@ -1712,10 +1742,28 @@ abstract class AppLocalizations {
   /// **'보유 수량보다 많이 팔 수 없어요.'**
   String get tradeInsufficientQty;
 
+  /// No description provided for @tradeQtyRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'수량을 넣어주세요.'**
+  String get tradeQtyRequired;
+
+  /// No description provided for @tradeAmountRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래대금을 넣어주세요.'**
+  String get tradeAmountRequired;
+
+  /// No description provided for @tradePreview.
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 후 미리보기'**
+  String get tradePreview;
+
   /// No description provided for @tradeHistory.
   ///
   /// In ko, this message translates to:
-  /// **'거래 내역'**
+  /// **'거래 기록'**
   String get tradeHistory;
 
   /// No description provided for @tradeDeleted.
@@ -1819,12 +1867,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'거래 일시'**
   String get tradeDateTime;
-
-  /// No description provided for @tradeOpenRow.
-  ///
-  /// In ko, this message translates to:
-  /// **'{date} {name} 거래 기록'**
-  String tradeOpenRow(String date, String name);
 
   /// No description provided for @tradeDeleteConfirmTarget.
   ///
@@ -1960,7 +2002,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetHoldingsEmptyDetail.
   ///
   /// In ko, this message translates to:
-  /// **'보유 종목이 없어요. 수정에서 종목을 추가해보세요.'**
+  /// **'보유 종목이 없어요'**
   String get assetHoldingsEmptyDetail;
 
   /// No description provided for @assetHoldingSearchHint.
@@ -2236,13 +2278,13 @@ abstract class AppLocalizations {
   /// No description provided for @assetPayConfirmMessage.
   ///
   /// In ko, this message translates to:
-  /// **'결제 예정액 {amount}원을 지금 결제 처리할까요?'**
+  /// **'결제 예정액 {amount}을 지금 결제할까요?'**
   String assetPayConfirmMessage(String amount);
 
   /// No description provided for @assetPayConfirmDateSuffix.
   ///
   /// In ko, this message translates to:
-  /// **' 결제일은 {date} 입니다.'**
+  /// **' {date} 결제 예정분이에요.'**
   String assetPayConfirmDateSuffix(String date);
 
   /// No description provided for @assetCancelPayment.
@@ -2374,7 +2416,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetPayRemainder.
   ///
   /// In ko, this message translates to:
-  /// **'남은 {amount}은 결제일에 빠져요'**
+  /// **'남은 {amount}은 결제일에 빠져요.'**
   String assetPayRemainder(String amount);
 
   /// No description provided for @assetPayMoveNote.
@@ -2419,18 +2461,6 @@ abstract class AppLocalizations {
   /// **'결제 완료'**
   String get assetPaidDone;
 
-  /// No description provided for @assetUsagePeriod.
-  ///
-  /// In ko, this message translates to:
-  /// **'카드 이용 기간 {period}'**
-  String assetUsagePeriod(String period);
-
-  /// No description provided for @assetLimitSettings.
-  ///
-  /// In ko, this message translates to:
-  /// **'한도 · 결제 설정'**
-  String get assetLimitSettings;
-
   /// No description provided for @assetLimitUsage.
   ///
   /// In ko, this message translates to:
@@ -2454,18 +2484,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잔여 {amount}'**
   String assetLimitRemain(String amount);
-
-  /// No description provided for @assetLimitEdit.
-  ///
-  /// In ko, this message translates to:
-  /// **'한도 · 결제일 변경'**
-  String get assetLimitEdit;
-
-  /// No description provided for @assetPerfDone.
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 달 실적 달성'**
-  String get assetPerfDone;
 
   /// No description provided for @assetPerfRemain.
   ///
@@ -2497,10 +2515,70 @@ abstract class AppLocalizations {
   /// **'카테고리별'**
   String get assetSortCategory;
 
+  /// No description provided for @assetDueOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} 결제'**
+  String assetDueOn(String date);
+
+  /// No description provided for @assetDueThisMonth.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 결제 예정'**
+  String get assetDueThisMonth;
+
+  /// No description provided for @assetUsagePeriodLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 이용 기간'**
+  String get assetUsagePeriodLabel;
+
+  /// No description provided for @assetCycleMix.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 회차 구성'**
+  String get assetCycleMix;
+
+  /// No description provided for @assetPerfTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 실적'**
+  String assetPerfTitle(String month);
+
+  /// No description provided for @assetPerfAchieved.
+  ///
+  /// In ko, this message translates to:
+  /// **'실적 달성'**
+  String get assetPerfAchieved;
+
+  /// No description provided for @assetPayAmountEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 금액을 넣어주세요.'**
+  String get assetPayAmountEmpty;
+
+  /// No description provided for @assetPayAmountOver.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 금액은 {amount}까지예요.'**
+  String assetPayAmountOver(String amount);
+
+  /// No description provided for @assetYearLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'{year}년'**
+  String assetYearLabel(String year);
+
+  /// No description provided for @assetSortAria.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용 내역 정렬'**
+  String get assetSortAria;
+
   /// No description provided for @assetPeriodPick.
   ///
   /// In ko, this message translates to:
-  /// **'기간 선택'**
+  /// **'결제 회차'**
   String get assetPeriodPick;
 
   /// No description provided for @assetNoUsage.
@@ -2518,7 +2596,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetMonthlyPaymentDay.
   ///
   /// In ko, this message translates to:
-  /// **'매월 {day}일 결제'**
+  /// **'매월 {day}일'**
   String assetMonthlyPaymentDay(int day);
 
   /// No description provided for @assetBillingHistory.

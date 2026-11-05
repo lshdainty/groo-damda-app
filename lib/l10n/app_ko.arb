@@ -148,7 +148,7 @@
   },
   "assetIncludeInTotal": "전체 자산 합계에 포함",
   "assetIncludeInTotalDesc": "순자산 · 총자산 계산에 반영돼요.",
-  "assetTrendLoadError": "추이 데이터를 불러오지 못했어요",
+  "assetTrendLoadError": "추이를 불러오지 못했어요",
   "assetTrendEmpty": "추이 데이터가 없어요.",
   "assetNetWorth": "순자산",
   "assetCardLimitName": "{name} 한도",
@@ -168,6 +168,11 @@
     }
   },
   "assetChartTableMonth": "달",
+  "assetChartTableWeek": "주",
+  "assetTxLoadFailed": "내역을 불러오지 못했어요",
+  "assetMonthTx": "이번 달 내역",
+  "assetHoldingLinkedPending": "시세 연동 대기",
+  "assetPeriodAria": "추이 기간",
   "assetLoadFailedSummary": "순자산을 불러오지 못했어요",
   "assetLoadFailedTrend": "순자산 추이를 불러오지 못했어요",
   "assetLoadFailedAssets": "자산을 불러오지 못했어요",
@@ -345,7 +350,7 @@
   "assetValueLabelCard": "이번 달 결제 예정",
   "assetValueLabelCheckCard": "이번 달 사용액",
   "assetCheckCardMonthLabel": "이번 달 사용",
-  "assetMonthTxCount": "이번 달 내역 ({count})",
+  "assetMonthTxCount": "이번 달 내역 · {count}",
   "@assetMonthTxCount": {
     "placeholders": {
       "count": {
@@ -355,7 +360,7 @@
   },
   "assetValuationShort": "평가액",
   "assetSeriesUsage": "사용",
-  "assetRecentTxCount": "최근 거래 ({count})",
+  "assetRecentTxCount": "최근 거래 · {count}",
   "@assetRecentTxCount": {
     "placeholders": {
       "count": {
@@ -406,7 +411,11 @@
   },
   "tradeInsufficientCash": "예수금이 마이너스가 돼요. 그대로 기록됩니다.",
   "tradeInsufficientQty": "보유 수량보다 많이 팔 수 없어요.",
-  "tradeHistory": "거래 내역",
+  "tradeQtyRequired": "수량을 넣어주세요.",
+  "tradeAmountRequired": "거래대금을 넣어주세요.",
+  "tradePreview": "거래 후 미리보기",
+  "tradeHolding": "종목",
+  "tradeHistory": "거래 기록",
   "tradeDeleted": "거래를 취소했어요",
   "tradeDeleteTitle": "거래 취소",
   "tradeDeleteConfirm": "이 거래를 취소하시겠어요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
@@ -431,17 +440,6 @@
   "tradeAmountLabel": "거래대금",
   "tradeFeeLabel": "수수료 · 세금",
   "tradeDateTime": "거래 일시",
-  "tradeOpenRow": "{date} {name} 거래 기록",
-  "@tradeOpenRow": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "tradeDeleteConfirmTarget": "{date} {name} {qty} {kind} 거래를 취소할까요? 예수금과 보유 수량이 거래 전으로 돌아가요.",
   "@tradeDeleteConfirmTarget": {
     "placeholders": {
@@ -533,7 +531,7 @@
   "assetHoldingManualDetail": "직접 입력",
   "assetHoldingsEmptyEdit": "검색으로 보유 종목을 더할 수 있어요. 연동 종목은 현재가 × 수량으로 평가액이 자동 계산돼요.",
   "assetHoldingsEmptyManual": "위 버튼으로 보유분을 더할 수 있어요. 시세 연동이 없어 평가액은 직접 입력해요.",
-  "assetHoldingsEmptyDetail": "보유 종목이 없어요. 수정에서 종목을 추가해보세요.",
+  "assetHoldingsEmptyDetail": "보유 종목이 없어요",
   "assetHoldingSearchHint": "종목 이름 검색",
   "assetHoldingAddManual": "\"{name}\" 직접 추가 — 평가액 입력",
   "@assetHoldingAddManual": {
@@ -631,7 +629,7 @@
   "assetChartNoData": "표시할 데이터가 없어요",
   "assetNoLinkedTx": "연결된 거래 내역이 없어요.",
   "assetTxFallback": "거래",
-  "assetPayConfirmMessage": "결제 예정액 {amount}원을 지금 결제 처리할까요?",
+  "assetPayConfirmMessage": "결제 예정액 {amount}을 지금 결제할까요?",
   "@assetPayConfirmMessage": {
     "placeholders": {
       "amount": {
@@ -639,7 +637,7 @@
       }
     }
   },
-  "assetPayConfirmDateSuffix": " 결제일은 {date} 입니다.",
+  "assetPayConfirmDateSuffix": " {date} 결제 예정분이에요.",
   "@assetPayConfirmDateSuffix": {
     "placeholders": {
       "date": {
@@ -709,7 +707,7 @@
   "assetCancelPaymentFailed": "결제를 취소하지 못했어요.",
   "assetPayAction": "결제하기",
   "assetPayAmount": "결제 금액",
-  "assetPayRemainder": "남은 {amount}은 결제일에 빠져요",
+  "assetPayRemainder": "남은 {amount}은 결제일에 빠져요.",
   "@assetPayRemainder": {
     "placeholders": {
       "amount": {
@@ -731,15 +729,6 @@
   "assetUpcomingPayment": "결제 예정",
   "assetScheduledTag": "예정",
   "assetPaidDone": "결제 완료",
-  "assetUsagePeriod": "카드 이용 기간 {period}",
-  "@assetUsagePeriod": {
-    "placeholders": {
-      "period": {
-        "type": "String"
-      }
-    }
-  },
-  "assetLimitSettings": "한도 · 결제 설정",
   "assetLimitUsage": "한도 사용",
   "assetLimitPctUsed": "{pct}% 사용",
   "@assetLimitPctUsed": {
@@ -768,8 +757,6 @@
       }
     }
   },
-  "assetLimitEdit": "한도 · 결제일 변경",
-  "assetPerfDone": "이번 달 실적 달성",
   "assetPerfRemain": "실적까지 {amount}",
   "@assetPerfRemain": {
     "placeholders": {
@@ -782,7 +769,45 @@
   "assetSortRecent": "최근순",
   "assetSortAmount": "고액순",
   "assetSortCategory": "카테고리별",
-  "assetPeriodPick": "기간 선택",
+  "assetDueOn": "{date} 결제",
+  "@assetDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "assetDueThisMonth": "이번 달 결제 예정",
+  "assetUsagePeriodLabel": "카드 이용 기간",
+  "assetCycleMix": "이번 회차 구성",
+  "assetPerfTitle": "{month}월 실적",
+  "@assetPerfTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "assetPerfAchieved": "실적 달성",
+  "assetPayAmountEmpty": "결제 금액을 넣어주세요.",
+  "assetPayAmountOver": "결제 금액은 {amount}까지예요.",
+  "@assetPayAmountOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "assetYearLabel": "{year}년",
+  "@assetYearLabel": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "assetSortAria": "이용 내역 정렬",
+  "assetPeriodPick": "결제 회차",
   "assetNoUsage": "이용 내역이 없어요.",
   "assetBillingPeriod": "{start}~{end} 사용분",
   "@assetBillingPeriod": {
@@ -795,7 +820,7 @@
       }
     }
   },
-  "assetMonthlyPaymentDay": "매월 {day}일 결제",
+  "assetMonthlyPaymentDay": "매월 {day}일",
   "@assetMonthlyPaymentDay": {
     "placeholders": {
       "day": {

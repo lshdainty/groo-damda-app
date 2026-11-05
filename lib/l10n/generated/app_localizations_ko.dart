@@ -383,7 +383,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetIncludeInTotalDesc => '순자산 · 총자산 계산에 반영돼요.';
 
   @override
-  String get assetTrendLoadError => '추이 데이터를 불러오지 못했어요';
+  String get assetTrendLoadError => '추이를 불러오지 못했어요';
 
   @override
   String get assetTrendEmpty => '추이 데이터가 없어요.';
@@ -403,6 +403,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetChartTableMonth => '달';
+
+  @override
+  String get assetChartTableWeek => '주';
+
+  @override
+  String get assetTxLoadFailed => '내역을 불러오지 못했어요';
+
+  @override
+  String get assetMonthTx => '이번 달 내역';
+
+  @override
+  String get assetHoldingLinkedPending => '시세 연동 대기';
+
+  @override
+  String get assetPeriodAria => '추이 기간';
 
   @override
   String get assetLoadFailedSummary => '순자산을 불러오지 못했어요';
@@ -732,7 +747,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetMonthTxCount(int count) {
-    return '이번 달 내역 ($count)';
+    return '이번 달 내역 · $count';
   }
 
   @override
@@ -743,7 +758,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetRecentTxCount(int count) {
-    return '최근 거래 ($count)';
+    return '최근 거래 · $count';
   }
 
   @override
@@ -857,7 +872,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tradeInsufficientQty => '보유 수량보다 많이 팔 수 없어요.';
 
   @override
-  String get tradeHistory => '거래 내역';
+  String get tradeQtyRequired => '수량을 넣어주세요.';
+
+  @override
+  String get tradeAmountRequired => '거래대금을 넣어주세요.';
+
+  @override
+  String get tradePreview => '거래 후 미리보기';
+
+  @override
+  String get tradeHistory => '거래 기록';
 
   @override
   String get tradeDeleted => '거래를 취소했어요';
@@ -911,11 +935,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tradeDateTime => '거래 일시';
-
-  @override
-  String tradeOpenRow(String date, String name) {
-    return '$date $name 거래 기록';
-  }
 
   @override
   String tradeDeleteConfirmTarget(
@@ -1002,7 +1021,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '위 버튼으로 보유분을 더할 수 있어요. 시세 연동이 없어 평가액은 직접 입력해요.';
 
   @override
-  String get assetHoldingsEmptyDetail => '보유 종목이 없어요. 수정에서 종목을 추가해보세요.';
+  String get assetHoldingsEmptyDetail => '보유 종목이 없어요';
 
   @override
   String get assetHoldingSearchHint => '종목 이름 검색';
@@ -1156,12 +1175,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetPayConfirmMessage(String amount) {
-    return '결제 예정액 $amount원을 지금 결제 처리할까요?';
+    return '결제 예정액 $amount을 지금 결제할까요?';
   }
 
   @override
   String assetPayConfirmDateSuffix(String date) {
-    return ' 결제일은 $date 입니다.';
+    return ' $date 결제 예정분이에요.';
   }
 
   @override
@@ -1240,7 +1259,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetPayRemainder(String amount) {
-    return '남은 $amount은 결제일에 빠져요';
+    return '남은 $amount은 결제일에 빠져요.';
   }
 
   @override
@@ -1267,14 +1286,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetPaidDone => '결제 완료';
 
   @override
-  String assetUsagePeriod(String period) {
-    return '카드 이용 기간 $period';
-  }
-
-  @override
-  String get assetLimitSettings => '한도 · 결제 설정';
-
-  @override
   String get assetLimitUsage => '한도 사용';
 
   @override
@@ -1291,12 +1302,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String assetLimitRemain(String amount) {
     return '잔여 $amount';
   }
-
-  @override
-  String get assetLimitEdit => '한도 · 결제일 변경';
-
-  @override
-  String get assetPerfDone => '이번 달 실적 달성';
 
   @override
   String assetPerfRemain(String amount) {
@@ -1316,7 +1321,45 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetSortCategory => '카테고리별';
 
   @override
-  String get assetPeriodPick => '기간 선택';
+  String assetDueOn(String date) {
+    return '$date 결제';
+  }
+
+  @override
+  String get assetDueThisMonth => '이번 달 결제 예정';
+
+  @override
+  String get assetUsagePeriodLabel => '카드 이용 기간';
+
+  @override
+  String get assetCycleMix => '이번 회차 구성';
+
+  @override
+  String assetPerfTitle(String month) {
+    return '$month월 실적';
+  }
+
+  @override
+  String get assetPerfAchieved => '실적 달성';
+
+  @override
+  String get assetPayAmountEmpty => '결제 금액을 넣어주세요.';
+
+  @override
+  String assetPayAmountOver(String amount) {
+    return '결제 금액은 $amount까지예요.';
+  }
+
+  @override
+  String assetYearLabel(String year) {
+    return '$year년';
+  }
+
+  @override
+  String get assetSortAria => '이용 내역 정렬';
+
+  @override
+  String get assetPeriodPick => '결제 회차';
 
   @override
   String get assetNoUsage => '이용 내역이 없어요.';
@@ -1328,7 +1371,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetMonthlyPaymentDay(int day) {
-    return '매월 $day일 결제';
+    return '매월 $day일';
   }
 
   @override
