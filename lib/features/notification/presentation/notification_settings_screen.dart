@@ -18,6 +18,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/slider/p_slider.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
@@ -566,7 +567,7 @@ class _ThresholdBlockState extends State<_ThresholdBlock> {
             children: [
               Expanded(
                 child: Text(
-                  l.notiThresholdLabel,
+                  keepAll(l.notiThresholdLabel),
                   style: PTypography.t4.copyWith(
                     color: c.fgNeutral,
                     fontWeight: FontWeight.w500,
@@ -583,13 +584,14 @@ class _ThresholdBlockState extends State<_ThresholdBlock> {
             max: 100,
             step: 5,
             label: l.notiThresholdLabel,
+            bubbleSpace: false,
             formatValue: (v) => '${v.round()}%',
             onChanged: (v) => setState(() => _drag = v.round()),
             onChangeEnd: (v) => widget.onSave(v.round()),
           ),
           const SizedBox(height: 8),
           Text(
-            l.notiThresholdDesc,
+            keepAll(l.notiThresholdDesc),
             style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
           ),
         ],
@@ -689,7 +691,7 @@ class _PrefsSkeleton extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      l.notiThresholdLabel,
+                      keepAll(l.notiThresholdLabel),
                       style: PTypography.t4.copyWith(color: c.fgNeutral),
                     ),
                   ),

@@ -417,7 +417,9 @@ class _NotiRowState extends State<_NotiRow> {
     // 역할은 목록이고 **안 읽은 줄만 버튼**이다(누르면 읽음). 시각 + ⋮ 는 줄 끝 — ⋮ 는 줄 버튼 안이 아니라 형제다.
     final suffix = PListSuffix(
       children: [
-        if (time.isNotEmpty) Text(time),
+        if (time.isNotEmpty)
+          // 웹과 같다 — t3 13 · fg-neutral-subtle
+          Text(time, style: PTypography.t3.copyWith(color: c.fgNeutralSubtle)),
         PListAction(
           child: ds.PButton.icon(
             key: ValueKey('noti-more-${noti.rowId}'),
@@ -467,7 +469,7 @@ class _NotiRowState extends State<_NotiRow> {
               titleSuffix: titleSuffix,
               highlighted: true,
               align: PListAlign.top,
-              endInset: 16,
+              endInset: 24,
               onTap: _busy ? null : _tap,
             )
           : PListItem(
@@ -476,7 +478,7 @@ class _NotiRowState extends State<_NotiRow> {
               prefix: prefix,
               suffix: suffix,
               align: PListAlign.top,
-              endInset: 16,
+              endInset: 24,
             ),
     );
   }
