@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/dashboard/application/dashboard_providers.dart';
 import 'package:groo_damda_app/features/todo/application/todo_providers.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
@@ -33,22 +32,6 @@ class TodoActions implements ItemActions<Todo> {
   @override
   String deleteConfirmMessage(BuildContext context, Todo t) =>
       AppLocalizations.of(context).todoDeleteConfirm(t.title);
-
-  @override
-  Future<bool> delete(BuildContext context, WidgetRef ref, Todo t) async {
-    try {
-      final repo = await ref.read(todoRepositoryProvider.future);
-      await repo.delete(t.rowId);
-      ref.invalidate(todoListProvider);
-      // 홈 위젯(할 일 개수·최근 할 일)의 원본 — 셸 상주라 스스로 안 받는다.
-      // 저장 경로(`todo_edit_dialog`)와 같은 짝을 맞춘다: 지운 항목이 홈에
-      // 남아 있으면 목록에서 없는 것을 탭하게 된다.
-      ref.invalidate(dashboardSummaryProvider);
-      return true;
-    } on ApiException {
-      return false;
-    }
-  }
 
   /// 삭제 확인 → 지움. 확인창 뒤 실패는 공용 [askConfirmThenRequest] — critical 스낵바 + [다시 시도](묻지 않고 바로 지움).
   /// 목록 줄(밀기)과 상세가 같은 길을 쓴다. 지웠으면 true.

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
@@ -52,16 +51,6 @@ class AssetActions implements ItemActions<Asset> {
       _AssetKind.card => l.assetCardDeleteConfirm(a.assetName),
       _AssetKind.invest => l.assetInvestDeleteConfirm(a.assetName),
     };
-  }
-
-  @override
-  Future<bool> delete(BuildContext context, WidgetRef ref, Asset a) async {
-    try {
-      await _request(ProviderScope.containerOf(context), a);
-      return true;
-    } on ApiException {
-      return false;
-    }
   }
 
   /// 확인창 → 삭제. 실패하면 확인창이 닫힌 뒤 critical 스낵바 + [다시 시도](묻지 않고 바로 요청).

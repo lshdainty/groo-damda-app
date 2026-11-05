@@ -35,13 +35,8 @@ abstract interface class ItemActions<T> {
   /// 지우기 전에 물을 말. 항목마다 달라진다(딸린 게 같이 사라지는 경우 등).
   String deleteConfirmMessage(BuildContext context, T item);
 
-  /// 확인은 <b>부르는 쪽</b>이 이미 받았다고 본다. 여기서는 지우고 뒷정리만 한다.
-  ///
-  /// 확인을 여기 두면 스와이프가 두 번 묻게 된다 — 스와이프는 트레이를 열어 둔 채
-  /// 자기 확인 다이얼로그를 띄우기 때문이다.
-  ///
-  /// @return 지워졌으면 true. 실패는 이 안에서 사용자에게 알린다.
-  Future<bool> delete(BuildContext context, WidgetRef ref, T item);
+  // 삭제는 이 계약에 두지 않는다 — 확인 · 실패 알림 · 뒷정리가 한 덩어리라 각 actions 의 `confirmAndDelete` 가 맡는다
+  // (확인창 뒤 실패는 askConfirmThenRequest: critical 스낵바 + [다시 시도]). 실패를 삼키고 false 만 돌려주는 길을 두지 않는다.
 
   /// 편집 화면을 연다.
   Future<void> edit(BuildContext context, WidgetRef ref, T item);
