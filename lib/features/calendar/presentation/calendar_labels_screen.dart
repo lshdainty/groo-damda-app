@@ -33,8 +33,12 @@ import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 const int kLabelNameMax = 12;
 
 /// 저장할 수 있는 이름인가 — 비어 있지 않고 12자를 넘지 않는다(웹 `nameIssue` 와 같은 판정).
-bool labelNameSubmittable(String raw) {
+///
+/// [original] 은 고치기 전 저장된 이름 — 안 바꾼 옛 이름은 12자 검사에서 뺀다(프리셋과 같다: 12자가 넘는 옛 라벨도 색만 고칠 수
+/// 있어야 한다). 이름을 고치기 시작하면 그때부터 12 검사.
+bool labelNameSubmittable(String raw, {String? original}) {
   final issue = nameIssue(raw, kLabelNameMax);
+  if (issue == NameIssue.tooLong && raw == original) return true;
   return issue == null || issue == NameIssue.duplicate;
 }
 
@@ -196,12 +200,17 @@ void _showLabelEditor(
   final l = AppLocalizations.of(context);
   final nameCtrl = TextEditingController(text: existing?.labelName ?? '');
   final controller = PSheetController();
-  controller.setCanSubmit(labelNameSubmittable(existing?.labelName ?? ''));
+  controller.setCanSubmit(
+    labelNameSubmittable(
+      existing?.labelName ?? '',
+      original: existing?.labelName,
+    ),
+  );
   String selectedColor = existing?.color ?? '#2c70bf';
 
   Future<void> submit() async {
     final name = nameCtrl.text.trim();
-    if (!labelNameSubmittable(name)) return;
+    if (!labelNameSubmittable(name, original: existing?.labelName)) return;
     controller.setSubmitting(true);
     try {
       final repo = await ref.read(calendarRepositoryProvider.future);
@@ -239,6 +248,7 @@ void _showLabelEditor(
     contentBuilder: (ctx, _) => _LabelEditorBody(
       nameController: nameCtrl,
       initialColor: selectedColor,
+      originalName: existing?.labelName,
       controller: controller,
       onColorChanged: (c) => selectedColor = c,
     ),
@@ -282,11 +292,15 @@ class _LabelEditorBody extends StatefulWidget {
   const _LabelEditorBody({
     required this.nameController,
     required this.initialColor,
+    this.originalName,
     required this.controller,
     required this.onColorChanged,
   });
   final TextEditingController nameController;
   final String initialColor;
+
+  /// 고치기 전 저장된 이름(추가 폼은 null) — 안 바꾼 옛 이름은 12자 오류를 보이지 않는다.
+  final String? originalName;
   final PSheetController controller;
   final ValueChanged<String> onColorChanged;
 
@@ -386,7 +400,9 @@ class _LabelEditorBodyState extends State<_LabelEditorBody> {
               semanticLabel: l.calFieldName,
               placeholder: l.calLabelNamePlaceholder,
               onChanged: (v) {
-                widget.controller.setCanSubmit(labelNameSubmittable(v));
+                widget.controller.setCanSubmit(
+                  labelNameSubmittable(v, original: widget.originalName),
+                );
                 setState(() {});
               },
             ),

@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
 import 'package:groo_damda_app/shared/widgets/p_divider.dart';
 
@@ -456,7 +457,7 @@ void main() {
       );
     });
 
-    testWidgets('12자를 넘긴 옛 이름 — 칸 오류 "이름은 12자 이내로 입력해주세요." 가 보인다', (
+    testWidgets('12자 넘는 옛 이름 — 그대로 두면 오류 없이 색만 바꿔 저장되고, 고치기 시작하면 12 검사', (
       tester,
     ) async {
       await size(tester);
@@ -472,7 +473,18 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('가나다라마바사아자차카타파').first);
       await tester.pumpAndSettle();
-      expect(find.text('이름은 12자 이내로 입력해주세요.'), findsOneWidget);
+      // 안 바꾼 동안: 오류 글 없음 · [저장] 활성(프리셋과 같다)
+      expect(find.text('이름은 12자 이내로 입력해주세요.'), findsNothing);
+      final save = find.ancestor(
+        of: find.text('저장'),
+        matching: find.byType(PButton),
+      );
+      expect(tester.widget<PButton>(save.last).onPressed, isNotNull);
+      // 고치기 시작하면(여전히 12 초과 값은 입력이 12 에서 멈춘다) — 12자 이하로 줄이면 저장 가능
+      await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타');
+      await tester.pumpAndSettle();
+      expect(find.text('12/12'), findsOneWidget);
+      expect(tester.widget<PButton>(save.last).onPressed, isNotNull);
     });
   });
 }
