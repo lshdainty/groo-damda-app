@@ -7,7 +7,7 @@ import 'package:groo_damda_app/features/asset/presentation/asset_edit_route.dart
 import 'package:groo_damda_app/features/expense/domain/card_cycle.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 결제가 끝난 회차에 걸린 거래를 바꿀 때 하는 말 — 확인창 **한 문구**와 결과 토스트.
 ///
@@ -121,15 +121,15 @@ int? fixBalanceTargetFor(
   return asset?.paymentAssetRowId;
 }
 
-/// 바꾼 뒤의 결과 토스트 — 미리 낸 돈이 계좌로 돌아왔으면 그 금액을 말한다(D4).
+/// 바꾼 뒤의 결과 스낵바(ds, neutral) — 미리 낸 돈이 계좌로 돌아왔으면 그 금액을 말한다(D4).
 ///
 /// 미리보기는 없다. 열린 회차에서 미리 낸 돈이 남을 때만 서버가 결제계좌로 돌려주고,
 /// 그 금액이 응답에 실려 온다 — 사후에 한 번 알린다(스와이프 삭제 포함).
 ///
-/// [fixBalanceAssetId] 가 있으면(닫힌 회차 거래의 환불·삭제·고쳐 쓰기, D9) 토스트에
-/// [잔액 고치기] 를 단다 — 돌려받은 돈이 없어도 확인창과 같은 한 문구("이미 결제가
-/// 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.")로 띄운다(웹과 같다). 둘 다
-/// 없으면 조용히 끝난다.
+/// [fixBalanceAssetId] 가 있으면(닫힌 회차 거래의 환불·삭제·고쳐 쓰기, D9) 스낵바에
+/// [잔액 고치기] 를 단다 — 돌려받은 돈이 없어도 한 문장("결제가 끝난 회차라 기록만
+/// 바뀌고 계좌 잔액은 그대로예요.")으로 띄운다(웹과 같다). 확인창은 두 문장 그대로다. 둘 다
+/// 없으면 조용히 끝난다. 호스트가 없으면 건너뛴다.
 ///
 /// [host] 는 시트·행보다 오래 사는 context 다 — 지운 뒤 시트가 닫히고 행이 사라져도
 /// 토스트는 떠야 하고, 버튼은 그 뒤에 눌린다.
@@ -145,22 +145,22 @@ void showChangeResultToast(
   if (refunded > 0) {
     message = l.expRefundedToast(krwSigned(refunded, false, unit: true));
   } else if (fixBalanceAssetId != null) {
-    message = l.expClosedCycleLine;
+    message = l.expClosedCycleToast;
   } else {
     return;
   }
-  showPSnackBar(
-    host,
-    message,
-    severity: refunded > 0 ? PSnackSeverity.success : PSnackSeverity.info,
-    // 누를 버튼이 있으면 6초 — 기본 4초는 읽고 누르기에 짧다(sonner.md, 웹도 6초).
-    duration: Duration(seconds: fixBalanceAssetId != null ? 6 : 4),
-    actionLabel: fixBalanceAssetId != null ? l.expFixBalance : null,
-    onAction: fixBalanceAssetId == null
+  // 호스트가 없는 자리(시험 · 호스트 밖)는 조용히 건너뛴다.
+  final snack = PSnackbar.maybeOf(host);
+  if (snack == null) return;
+  // 둘 다 neutral(D1 · D2) — 돈이 돌아온 것도, 통장이 그대로라는 안내도 이정표가 아니다. 액션이 있으면 6초는 ds 가 정한다.
+  snack.show(
+    message: message,
+    action: fixBalanceAssetId == null
         ? null
-        : () => pushAssetEdit(host, fixBalanceAssetId),
-    // 바꾼 결과는 앞 토스트 뒤에 줄 서지 않고 바로 뜬다.
-    replace: true,
+        : PSnackbarAction(
+            label: l.expFixBalance,
+            onPressed: () => pushAssetEdit(host, fixBalanceAssetId),
+          ),
   );
 }
 

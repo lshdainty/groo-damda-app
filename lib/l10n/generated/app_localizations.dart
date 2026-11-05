@@ -4174,7 +4174,7 @@ abstract class AppLocalizations {
   /// No description provided for @expRefundedToast.
   ///
   /// In ko, this message translates to:
-  /// **'미리 낸 돈 중 {amount}이 계좌로 돌아왔어요'**
+  /// **'미리 낸 돈 중 {amount}이 계좌로 돌아왔어요.'**
   String expRefundedToast(String amount);
 
   /// No description provided for @expLumpSum.
@@ -13446,6 +13446,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.'**
   String get expClosedCycleLine;
+
+  /// No description provided for @expClosedCycleToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'**
+  String get expClosedCycleToast;
 
   /// No description provided for @expClosedCyclePartLine.
   ///

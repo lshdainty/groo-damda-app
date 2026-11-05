@@ -35,6 +35,7 @@ import 'package:groo_damda_app/features/recurring/application/recurring_provider
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import '../../support/plain_text.dart';
 
 const _card = Asset(
@@ -129,6 +130,11 @@ Future<void> _pumpRouted(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        // 앱과 같은 자리 — 결과 스낵바(ds)가 뜨는 호스트
+        builder: (context, child) => Material(
+          type: MaterialType.transparency,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
+        ),
         routerConfig: router,
       ),
     ),
@@ -166,10 +172,7 @@ void main() {
       await _pumpRouted(tester, _swipeRow(_closed, _card));
 
       await _swipeDeleteAndConfirm(tester);
-      expect(
-        find.text('이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.'),
-        findsOneWidget,
-      );
+      expect(find.text('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsOneWidget);
 
       await tester.tap(find.text('잔액 고치기'));
       await tester.pumpAndSettle();
@@ -189,7 +192,7 @@ void main() {
       await _swipeDeleteAndConfirm(tester);
 
       expect(find.text('잔액 고치기'), findsNothing);
-      expect(find.text('이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsNothing);
+      expect(find.text('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsNothing);
     });
 
     testWidgets('열린 회차 거래는 버튼이 없다', (tester) async {
@@ -265,6 +268,11 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('ko'),
+            // 앱과 같은 자리 — 결과 스낵바(ds)가 뜨는 호스트
+            builder: (context, child) => Material(
+              type: MaterialType.transparency,
+              child: PSnackbarHost(closeLabel: '닫기', child: child!),
+            ),
             home: AccountCardManageScreen(editAssetId: editAssetId),
           ),
         ),
@@ -344,6 +352,11 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('ko'),
+          // 앱과 같은 자리 — 결과 스낵바(ds)가 뜨는 호스트
+          builder: (context, child) => Material(
+            type: MaterialType.transparency,
+            child: PSnackbarHost(closeLabel: '닫기', child: child!),
+          ),
           routerConfig: router,
         ),
       ),
