@@ -5536,7 +5536,7 @@ abstract class AppLocalizations {
   /// No description provided for @dutchMarkFailed.
   ///
   /// In ko, this message translates to:
-  /// **'받음 처리하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'받음 처리를 하지 못했어요.'**
   String get dutchMarkFailed;
 
   /// No description provided for @dutchTitle.
@@ -5614,13 +5614,13 @@ abstract class AppLocalizations {
   /// No description provided for @dutchSettleFailed.
   ///
   /// In ko, this message translates to:
-  /// **'모두 받음 처리하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'모두 받음 처리를 하지 못했어요.'**
   String get dutchSettleFailed;
 
   /// No description provided for @dutchDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'정산을 삭제하지 못했어요.'**
   String get dutchDeleteFailed;
 
   /// No description provided for @dutchToReceive.

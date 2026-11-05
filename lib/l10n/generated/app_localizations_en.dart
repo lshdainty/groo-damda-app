@@ -3066,8 +3066,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchNoReceivable => 'Nothing to receive';
 
   @override
-  String get dutchMarkFailed =>
-      'Could not mark as received. Please try again in a moment.';
+  String get dutchMarkFailed => 'Couldn\'t mark as received.';
 
   @override
   String get dutchTitle => 'Dutch Pay';
@@ -3106,12 +3105,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchActionFailed => 'Failed';
 
   @override
-  String get dutchSettleFailed =>
-      'Could not mark all as received. Please try again in a moment.';
+  String get dutchSettleFailed => 'Couldn\'t mark all as received.';
 
   @override
-  String get dutchDeleteFailed =>
-      'Could not delete. Please try again in a moment.';
+  String get dutchDeleteFailed => 'Couldn\'t delete the settlement.';
 
   @override
   String get dutchToReceive => 'To receive';

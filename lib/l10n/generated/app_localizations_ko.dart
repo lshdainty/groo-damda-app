@@ -3009,7 +3009,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchNoReceivable => '받을 돈 없음';
 
   @override
-  String get dutchMarkFailed => '받음 처리하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get dutchMarkFailed => '받음 처리를 하지 못했어요.';
 
   @override
   String get dutchTitle => '더치페이';
@@ -3048,10 +3048,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchActionFailed => '실패';
 
   @override
-  String get dutchSettleFailed => '모두 받음 처리하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get dutchSettleFailed => '모두 받음 처리를 하지 못했어요.';
 
   @override
-  String get dutchDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get dutchDeleteFailed => '정산을 삭제하지 못했어요.';
 
   @override
   String get dutchToReceive => '받을 돈';

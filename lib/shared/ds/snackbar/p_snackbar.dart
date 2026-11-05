@@ -355,7 +355,10 @@ class _PSnackbarAvoidOverlapState extends State<PSnackbarAvoidOverlap> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final shown = TickerMode.valuesOf(context).enabled;
+    // 시트 · 확인창이 위에 올라와 있으면 아래 화면의 버튼(FAB 등)은 가려져 있다 — 피할 자리로 세지 않는다
+    final shown =
+        TickerMode.valuesOf(context).enabled &&
+        (ModalRoute.of(context)?.isCurrent ?? true);
     if (shown != visible) {
       visible = shown;
       _host?._scheduleMeasure();
