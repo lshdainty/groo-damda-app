@@ -578,6 +578,8 @@ class _ThresholdBlockState extends State<_ThresholdBlock> {
               PSliderValue('$shown%'),
             ],
           ),
+          // 머리 줄 아래 ~ 손잡이 위 21 (웹과 같다) — 말풍선 자리를 뺀 만큼 8 을 둔다
+          const SizedBox(height: 8),
           PSlider(
             value: shown.toDouble(),
             min: 50,
