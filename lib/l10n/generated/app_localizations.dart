@@ -3184,13 +3184,13 @@ abstract class AppLocalizations {
   /// No description provided for @calLabelsEmptyHint.
   ///
   /// In ko, this message translates to:
-  /// **'위 \"라벨 추가\" 버튼으로 만들어보세요'**
+  /// **'위 \'라벨 추가\' 로 만들어요'**
   String get calLabelsEmptyHint;
 
   /// No description provided for @calLabelsIntro.
   ///
   /// In ko, this message translates to:
-  /// **'모든 캘린더에서 공용으로 쓰는 라벨이에요. 일정 등록 시 선택할 수 있어요.'**
+  /// **'모든 캘린더에서 같이 쓰는 라벨이에요. 일정을 만들 때 골라요.'**
   String get calLabelsIntro;
 
   /// No description provided for @calNewLabel.
@@ -3301,6 +3301,18 @@ abstract class AppLocalizations {
   /// **'초대 코드로 참여'**
   String get calJoinByCode;
 
+  /// No description provided for @calShareIntro.
+  ///
+  /// In ko, this message translates to:
+  /// **'캘린더를 만들고 멤버를 초대해 가족 · 친구와 함께 일정을 관리해요.'**
+  String get calShareIntro;
+
+  /// No description provided for @calJoinSectionTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드'**
+  String get calJoinSectionTitle;
+
   /// No description provided for @calRoleOwner.
   ///
   /// In ko, this message translates to:
@@ -3318,18 +3330,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'읽기 전용'**
   String get calRoleViewer;
-
-  /// No description provided for @calShareIntroTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'가족·친구와 일정 공유'**
-  String get calShareIntroTitle;
-
-  /// No description provided for @calShareIntroBody.
-  ///
-  /// In ko, this message translates to:
-  /// **'캘린더를 만들고 멤버를 초대해 함께 일정을 관리할 수 있어요.'**
-  String get calShareIntroBody;
 
   /// No description provided for @calNewCalendar.
   ///
@@ -3382,7 +3382,7 @@ abstract class AppLocalizations {
   /// No description provided for @calJoinCardBody.
   ///
   /// In ko, this message translates to:
-  /// **'공유받은 초대 코드를 입력해 캘린더에 참여하세요.'**
+  /// **'공유받은 초대 코드를 넣으면 그 캘린더에 들어가요.'**
   String get calJoinCardBody;
 
   /// No description provided for @calJoin.
@@ -3544,13 +3544,13 @@ abstract class AppLocalizations {
   /// No description provided for @calCalendarLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'캘린더 로드 실패'**
+  /// **'캘린더를 불러오지 못했어요'**
   String get calCalendarLoadError;
 
   /// No description provided for @calLabelLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'라벨 로드 실패'**
+  /// **'라벨을 불러오지 못했어요'**
   String get calLabelLoadError;
 
   /// No description provided for @calMemberLoadError.

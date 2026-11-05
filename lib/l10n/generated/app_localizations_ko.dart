@@ -1677,10 +1677,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calLabelsEmpty => '라벨이 없어요';
 
   @override
-  String get calLabelsEmptyHint => '위 \"라벨 추가\" 버튼으로 만들어보세요';
+  String get calLabelsEmptyHint => '위 \'라벨 추가\' 로 만들어요';
 
   @override
-  String get calLabelsIntro => '모든 캘린더에서 공용으로 쓰는 라벨이에요. 일정 등록 시 선택할 수 있어요.';
+  String get calLabelsIntro => '모든 캘린더에서 같이 쓰는 라벨이에요. 일정을 만들 때 골라요.';
 
   @override
   String get calNewLabel => '라벨 추가';
@@ -1747,6 +1747,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calJoinByCode => '초대 코드로 참여';
 
   @override
+  String get calShareIntro => '캘린더를 만들고 멤버를 초대해 가족 · 친구와 함께 일정을 관리해요.';
+
+  @override
+  String get calJoinSectionTitle => '초대 코드';
+
+  @override
   String get calRoleOwner => '소유자';
 
   @override
@@ -1754,12 +1760,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get calRoleViewer => '읽기 전용';
-
-  @override
-  String get calShareIntroTitle => '가족·친구와 일정 공유';
-
-  @override
-  String get calShareIntroBody => '캘린더를 만들고 멤버를 초대해 함께 일정을 관리할 수 있어요.';
 
   @override
   String get calNewCalendar => '캘린더 추가';
@@ -1792,7 +1792,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get calJoinCardBody => '공유받은 초대 코드를 입력해 캘린더에 참여하세요.';
+  String get calJoinCardBody => '공유받은 초대 코드를 넣으면 그 캘린더에 들어가요.';
 
   @override
   String get calJoin => '참여';
@@ -1881,10 +1881,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calUpdateFailed => '변경 실패';
 
   @override
-  String get calCalendarLoadError => '캘린더 로드 실패';
+  String get calCalendarLoadError => '캘린더를 불러오지 못했어요';
 
   @override
-  String get calLabelLoadError => '라벨 로드 실패';
+  String get calLabelLoadError => '라벨을 불러오지 못했어요';
 
   @override
   String get calMemberLoadError => '멤버 로드 실패';
