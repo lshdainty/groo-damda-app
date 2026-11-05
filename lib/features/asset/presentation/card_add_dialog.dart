@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/select/p_select.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
 export 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showCardAddDialog, showCardEditDialog;
@@ -99,6 +100,8 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
   /// 새로 추가할 때만 안 고른 상태(자리 글)다(select.md "'없음' 을 고르면 값을 고른 것"). 저장 본문은 어느 쪽이든 null.
   bool _noAccountChosen = false;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
   bool _touched = false;
 
   /// 같은 시트가 "금액 보기 인증" 단계인가 — 칸에 쓴 값은 이 State 가 그대로 쥐고 있다.
@@ -365,7 +368,10 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
         ? double.tryParse(_fxRateCtrl.text.replaceAll(',', ''))
         : null;
 
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       // brand color hex 는 모바일 측에선 별도 파싱이라 institution 으로 추후 매칭.
@@ -404,6 +410,7 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
           paymentDay: Patch.set(isCredit ? _paymentDay : null),
           // 계좌 연결은 두 종류 다 쓴다 — 신용은 결제일 자동이체, 체크는 즉시 차감.
           paymentAssetRowId: Patch.set(_paymentAssetRowId),
+          silent: true,
         );
       } else {
         await repo.create(
@@ -424,6 +431,7 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
           dueCarryoverAmount: isCredit && dueField != null && due > 0
               ? due
               : null,
+          silent: true,
         );
       }
       // 자산이 하나 늘거나 줄면 순자산·추이·청구·실적이 함께 달라진다 —
@@ -438,8 +446,13 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값 · 단계가 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -559,6 +572,8 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
       submitLabel: _isEdit ? l.actionSave : l.calAdd,
       onBack: widget.onBack,
       submitting: _submitting,
+      errorMessage: _failed ? l.assetSaveFailed : null,
+      errorKey: _errorKey,
       onSubmit: _attempt,
       fields: [
         if (_isEdit)

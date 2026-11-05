@@ -84,6 +84,7 @@ class _CapturingRepo extends AssetRepository {
     List<AssetHolding>? holdings,
     int? carryoverAmount,
     int? dueCarryoverAmount,
+    bool silent = false,
   }) async {
     updated = true;
     this.balance = balance;

@@ -120,6 +120,8 @@ class AssetRepository {
     // 신용카드: 결제를 기다리던 지난달 청구분(양수) — 다가오는 결제일에 청구된다. [balance] 는
     // 그 뒤 쓴 금액이다. null 이면 키를 안 싣는다(없음).
     int? dueCarryoverAmount,
+    // 폼이 실패를 자리에서 말할 때 — 전역 서버 글 토스트를 끈다.
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -144,6 +146,7 @@ class AssetRepository {
           'holdings': ?holdings?.map(_holdingBody).toList(),
           'dueCarryoverAmount': ?dueCarryoverAmount,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Asset.fromJson);
     } on DioException catch (e) {
@@ -202,6 +205,8 @@ class AssetRepository {
     int? carryoverAmount,
     // 신용카드: 결제 대기 청구분 — null 이면 키가 빠진다(유지), 0 이면 서버가 지운다.
     int? dueCarryoverAmount,
+    // 폼이 실패를 자리에서 말할 때 — 전역 서버 글 토스트를 끈다.
+    bool silent = false,
   }) async {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
@@ -227,6 +232,7 @@ class AssetRepository {
           'carryoverAmount': ?carryoverAmount,
           'dueCarryoverAmount': ?dueCarryoverAmount,
         },
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Asset.fromJson);
     } on DioException catch (e) {

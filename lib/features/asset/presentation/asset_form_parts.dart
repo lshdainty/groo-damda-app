@@ -12,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/select/p_select.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 
 /// 별칭 길이 상한 — 웹 `ASSET_NAME_MAX` 와 같은 값(QA #16). 100자 별칭은 목록에서 전부 '…' 로 잘려 서로 구분이 안 된다.
 const int kAssetNameMax = 30;
@@ -38,7 +39,13 @@ class AssetFormFrame extends StatelessWidget {
     required this.submitting,
     required this.onSubmit,
     this.onBack,
+    this.errorMessage,
+    this.errorKey,
   });
+
+  /// 저장 실패 고정 문구 — 있으면 폼 맨 위 Callout 으로 보인다(서버 글 아님, 쓴 값은 그대로).
+  final String? errorMessage;
+  final Key? errorKey;
 
   final String title;
   final String submitLabel;
@@ -63,6 +70,13 @@ class AssetFormFrame extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: PSpacing.globalGutter,
+              ),
+              child: FormErrorCallout(key: errorKey, message: errorMessage!),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               PSpacing.globalGutter,

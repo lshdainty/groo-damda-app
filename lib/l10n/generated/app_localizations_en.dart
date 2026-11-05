@@ -2513,6 +2513,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetSaveFailed => 'Couldn\'t save the budget.';
 
   @override
+  String get assetSaveFailed => 'Couldn\'t save the asset.';
+
+  @override
   String get budgetMonthlyLimit => 'Monthly budget limit';
 
   @override
