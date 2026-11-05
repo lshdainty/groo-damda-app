@@ -36,6 +36,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 결제일 12일 카드 — 8월분(9/12 결제)까지 닫혔다.
 const _card = Asset(
@@ -180,6 +181,11 @@ Future<_FakeRepo> _open(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        // 앱과 같은 자리 — 결과 스낵바(ds)가 뜨는 호스트
+        builder: (context, child) => Material(
+          type: MaterialType.transparency,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
+        ),
         home: Scaffold(
           body: Builder(
             builder: (ctx) => TextButton(
@@ -347,10 +353,7 @@ void main() {
       expect(call.args['paymentMethod'], 'CARD');
       expect(call.args['splits'], isNull, reason: '분할이 없으면 키를 빼고 서버가 옮긴다');
       // 결제가 끝난 회차 거래를 고쳐 썼다 — 결제계좌 잔액을 고칠 길을 준다(D9).
-      expect(
-        find.text('이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.'),
-        findsOneWidget,
-      );
+      expect(find.text('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsOneWidget);
       expect(find.text('잔액 고치기'), findsOneWidget);
       await tester.pump(const Duration(seconds: 7));
       await tester.pumpAndSettle();

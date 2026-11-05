@@ -2249,7 +2249,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expRefundedToast(String amount) {
-    return '$amount you paid in advance went back to your account';
+    return '$amount you paid in advance went back to your account.';
   }
 
   @override
@@ -7594,6 +7594,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get expClosedCycleLine =>
       'This cycle has already been paid. Only the record changes, and your account balance stays the same.';
+
+  @override
+  String get expClosedCycleToast =>
+      'This cycle is already paid, so only the record changes and your balance stays the same.';
 
   @override
   String get expClosedCyclePartLine =>

@@ -36,6 +36,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// ds 확인창은 글자 사이에 낱말 단위 줄바꿈 U+2060 을 넣는다 — 그 글자를 뺀 글로 찾는다.
 Finder _plain(String needle) => find.byWidgetPredicate(
@@ -190,6 +191,11 @@ Future<void> _pumpApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        // 앱과 같은 자리 — 결과 스낵바(ds)가 뜨는 호스트
+        builder: (context, child) => Material(
+          type: MaterialType.transparency,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
+        ),
         home: Scaffold(body: SlidableAutoCloseBehavior(child: home)),
       ),
     ),
@@ -260,7 +266,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.deleted, [78]);
-      expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요'), findsOneWidget);
+      expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
 
@@ -273,7 +279,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.deleted, [78]);
-      expect(find.textContaining('계좌로 돌아왔어요'), findsNothing);
+      expect(find.textContaining('계좌로 돌아왔어요.'), findsNothing);
     });
   });
 
@@ -295,7 +301,7 @@ void main() {
       await tester.tap(find.text('삭제').last);
       await tester.pumpAndSettle();
       expect(repo.deleted, [77]);
-      expect(find.text('미리 낸 돈 중 12,000원이 계좌로 돌아왔어요'), findsOneWidget);
+      expect(find.text('미리 낸 돈 중 12,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
   });
@@ -404,7 +410,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.refundedAt, endsWith('T12:00:00'));
-      expect(find.text('미리 낸 돈 중 8,000원이 계좌로 돌아왔어요'), findsOneWidget);
+      expect(find.text('미리 낸 돈 중 8,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
   });
@@ -510,7 +516,7 @@ void main() {
       await tester.tap(find.text('저장').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요'), findsOneWidget);
+      expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
   });

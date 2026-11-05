@@ -1255,7 +1255,7 @@
   "expRefundCancelConfirm": "Remove the refund mark? This transaction counts in your totals again, and any refunded amount is reversed.",
   "expRefundCancelConfirmPlain": "Remove the refund mark? This transaction counts in your totals again.",
   "expRefundedBadge": "Refunded",
-  "expRefundedToast": "{amount} you paid in advance went back to your account",
+  "expRefundedToast": "{amount} you paid in advance went back to your account.",
   "@expRefundedToast": {
     "placeholders": {
       "amount": {
@@ -4222,6 +4222,7 @@
     }
   },
   "expClosedCycleLine": "This cycle has already been paid. Only the record changes, and your account balance stays the same.",
+  "expClosedCycleToast": "This cycle is already paid, so only the record changes and your balance stays the same.",
   "expClosedCyclePartLine": "Installments from past cycles stay as records only.",
   "expFixBalance": "Fix balance",
   "expMoneyLockedNote": "This transaction has already been paid. To change the amount or date, tap Rewrite",

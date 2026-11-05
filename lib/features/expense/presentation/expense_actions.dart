@@ -12,7 +12,8 @@ import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/actions/item_actions.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart'
     as ds;
 
@@ -114,17 +115,20 @@ class ExpenseActions implements ItemActions<Expense> {
           icon: LucideIcons.trash2,
           kind: ds.PSwipeActionKind.destructive,
           onSelect: () async {
-            final ok = await PAlertDialog.show(
+            // 확인창 → 요청 → 실패면 확인창을 닫고 critical 스낵바 + [다시 시도]. 요청은 컨테이너로 나가 행이 사라져도 이어진다.
+            final container = ProviderScope.containerOf(context);
+            final host = hostContextOf(context);
+            await askConfirmThenRequest(
               context,
               title: deleteConfirmTitle(context, e),
               description: deleteConfirmMessageWith(context, e, asset),
               cancelLabel: l.actionCancel,
               actionLabel: l.actionDelete,
-              destructive: true,
+              request: () =>
+                  deleteExpenseRequest(container, host, e, asset: asset),
+              failedMessage: l.expTxDeleteFailed,
+              retryLabel: l.actionRetry,
             );
-            if (ok && context.mounted) {
-              await delete(context, ref, e, asset: asset);
-            }
           },
         ),
     ];
@@ -132,44 +136,41 @@ class ExpenseActions implements ItemActions<Expense> {
 
   /// 지운다.
   ///
-  /// 열린 회차에서 미리 낸 돈이 남아 결제계좌로 돌아갔으면 그 금액을 토스트로 알린다
-  /// (D4) — 스와이프로 지워도 같다. 미리보기가 없으니 예고한 금액과 견주지 않는다.
-  /// 결제가 끝난 회차의 거래였으면 토스트에 [잔액 고치기] 를 단다(D9).
+  /// 열린 회차에서 미리 낸 돈이 남아 결제계좌로 돌아갔으면 그 금액을 스낵바로 알린다
+  /// (D4). 결제가 끝난 회차의 거래였으면 [잔액 고치기] 를 단다(D9) — 둘 다 [deleteExpenseRequest] 가 한다.
   ///
-  /// [asset] 은 부르는 쪽이 이미 들고 있는 그 거래의 자산이다(목록·상세 둘 다 자산
-  /// 목록을 보고 있다). 안 주면 자산 목록 캐시에서 찾는다.
+  /// 요청은 **silent** 라 서버 글이 전역 토스트로 뜨지 않는다. 실패하면 고정 글의 critical 스낵바 + [다시 시도] 를 띄우고 false 를
+  /// 돌려준다([throwOnError] 면 대신 던진다 — 부른 쪽이 말한다). 확인창은 부르는 쪽이 이미 받았다 — 스와이프는 확인창과 함께
+  /// [askConfirmThenRequest] 로 [deleteExpenseRequest] 를 직접 부른다.
   ///
-  /// [silent] 면 실패를 전역 스낵바로 띄우지 않는다(시트 안에서 따로 말하는 상세). [throwOnError] 면 실패를 null 이
-  /// 아니라 예외로 돌려준다 — 상세가 "실패" 와 "취소" 를 가른다. 지운 뒤에는 그 달 목록을 다시 받은 다음 돌아온다(상세가
-  /// 닫히며 옛 줄이 비치지 않게).
+  /// [asset] 은 부르는 쪽이 이미 들고 있는 그 거래의 자산이다. 안 주면 자산 목록 캐시에서 찾는다.
   @override
   Future<bool> delete(
     BuildContext context,
     WidgetRef ref,
     Expense e, {
     Asset? asset,
-    bool silent = false,
     bool throwOnError = false,
   }) async {
-    // 행은 지워지며 사라지고 상세 시트는 닫힌다 — 토스트는 그보다 오래 사는 자리에.
+    // 행은 지워지며 사라지고 상세 시트는 닫힌다 — 스낵바는 그보다 오래 사는 자리에.
     final host = hostContextOf(context);
-    // 지우기 전에 짚어 둔다 — 결제가 끝난 회차였으면 [잔액 고치기] 를 단다(D9).
-    final fixBalance = fixBalanceTargetOf(e, asset ?? assetOfExpense(ref, e));
+    final container = ProviderScope.containerOf(context);
+    final target = asset ?? assetOfExpense(ref, e);
+    final l = AppLocalizations.of(context);
+    final snack = PSnackbar.maybeOf(host);
+    Future<void> request() =>
+        deleteExpenseRequest(container, host, e, asset: target);
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
-      final refunded = await repo.delete(e.rowId, silent: silent);
-      _invalidateAfterDelete(ref, e);
-      await _refetchMonthOf(ref, e);
-      if (host.mounted) {
-        showChangeResultToast(
-          host,
-          refundedAmount: refunded,
-          fixBalanceAssetId: fixBalance,
-        );
-      }
+      await request();
       return true;
     } on ApiException {
       if (throwOnError) rethrow;
+      showConfirmFailSnackbar(
+        snack,
+        message: l.expTxDeleteFailed,
+        retryLabel: l.actionRetry,
+        retry: request,
+      );
       return false;
     }
   }
@@ -264,25 +265,6 @@ class ExpenseActions implements ItemActions<Expense> {
   /// 바뀌므로 원거래 달과 이번 달이 함께 바뀐다. 그래서 달을 가리지 않고 전부 무효화한다.
   void _invalidateAfterRefund(WidgetRef ref) {
     ref.invalidate(monthExpensesProvider);
-    invalidateAfterExpenseChange(ref);
-  }
-
-  /// 지운 거래가 속한 달의 목록과 자산 잔액을 다시 읽게 한다.
-  ///
-  /// 날짜가 없으면 어느 달을 무효화할지 알 수 없어 목록은 건너뛴다 — 자산은 날짜와
-  /// 무관하게 다시 계산돼야 하므로 그건 항상 한다.
-  void _invalidateAfterDelete(WidgetRef ref, Expense e) {
-    final date = e.expenseDate;
-    if (date != null && date.length >= 10) {
-      final parts = date.substring(0, 10).split('-');
-      final y = int.tryParse(parts[0]);
-      final m = int.tryParse(parts[1]);
-      if (y != null && m != null) {
-        ref.invalidate(monthExpensesProvider((year: y, month: m)));
-      }
-    }
-    // origin/main 에서 invalidateAssetsAfterExpense → invalidateAfterExpenseChange 로
-    // 바뀌었다(캐시 무효화 범위 확장). 자산뿐 아니라 통계까지 같이 다시 읽는다.
     invalidateAfterExpenseChange(ref);
   }
 }

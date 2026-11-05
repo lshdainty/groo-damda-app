@@ -2218,7 +2218,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expRefundedToast(String amount) {
-    return '미리 낸 돈 중 $amount이 계좌로 돌아왔어요';
+    return '미리 낸 돈 중 $amount이 계좌로 돌아왔어요.';
   }
 
   @override
@@ -7451,6 +7451,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expClosedCycleLine => '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
+
+  @override
+  String get expClosedCycleToast => '결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.';
 
   @override
   String get expClosedCyclePartLine => '지난 회차분은 기록만 남아요.';

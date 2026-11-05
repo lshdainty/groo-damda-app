@@ -30,6 +30,7 @@ import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 const _closedLine = '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
 
@@ -155,6 +156,11 @@ Future<void> _open(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        // 앱과 같은 자리 — 결과 스낵바(ds)가 뜨는 호스트
+        builder: (context, child) => Material(
+          type: MaterialType.transparency,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
+        ),
         home: Scaffold(
           body: Builder(
             builder: (ctx) => TextButton(
@@ -203,7 +209,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.created, 1);
-    expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요'), findsOneWidget);
+    expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
     expect(find.text('잔액 고치기'), findsNothing, reason: '열린 회차 — 통장이 이미 맞다');
     await _drain(tester);
   });
@@ -217,7 +223,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.created, 1);
-    expect(find.textContaining('계좌로 돌아왔어요'), findsNothing);
+    expect(find.textContaining('계좌로 돌아왔어요.'), findsNothing);
     expect(find.text(_closedLine), findsNothing);
   });
 
@@ -318,7 +324,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(sms.committed, 1);
-      expect(find.text('미리 낸 돈 중 4,000원이 계좌로 돌아왔어요'), findsOneWidget);
+      expect(find.text('미리 낸 돈 중 4,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drain(tester);
     });
   });
