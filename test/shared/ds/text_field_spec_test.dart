@@ -16,6 +16,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import '../../support/line_breaks.dart';
+import '../../support/plain_text.dart';
 import 'package:groo_damda_app/shared/ds/field/field_demo.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/input_demo.dart';
@@ -216,7 +217,7 @@ EditableText _editable(WidgetTester tester, [Finder? within]) =>
     );
 
 TextStyle _textStyle(WidgetTester tester, Finder within, String text) => tester
-    .widget<Text>(find.descendant(of: within, matching: find.text(text)))
+    .widget<Text>(find.descendant(of: within, matching: findPlain(text)))
     .style!;
 
 Icon _icon(WidgetTester tester, Finder within, IconData data) => tester
