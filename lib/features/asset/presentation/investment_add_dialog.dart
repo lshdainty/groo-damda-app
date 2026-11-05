@@ -101,6 +101,9 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   late List<_EditRow> _rows;
   bool _submitting = false;
   bool _failed = false;
+
+  /// 마지막 저장 실패의 서버 코드 — Callout 고정 글을 가르는 데만 쓴다(서버 원문은 내지 않는다).
+  String? _failCode;
   final _errorKey = GlobalKey();
 
   /// [추가] · [저장] 을 한 번이라도 눌렀나 — 필수 칸(별칭)의 안내는 이때부터 보인다.
@@ -401,9 +404,11 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   /// 단계로 바뀐다(I-17 21) — 확인하기 전에는 요청이 나가지 않고, ←(취소)면 저장도 안 한다.
   Future<void> _submit() async {
     if (_submitting) return;
-    if (_nameCtrl.text.trim().isEmpty) {
+    final nameMissing = _nameCtrl.text.trim().isEmpty;
+    // 외화면 환율이 필수다(서버 AST_036, I-13) — 비우면 칸 오류로 막는다.
+    if (nameMissing || exchangeRateMissing(_currency, _fxRateCtrl)) {
       setState(() => _showErrors = true);
-      _nameFocus.requestFocus();
+      if (nameMissing) _nameFocus.requestFocus();
       return;
     }
     if (assetUnhideNeedsConfirm(
@@ -496,10 +501,14 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       ref.invalidate(investmentValuationMapProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
+      // 고쳐 다시 할 수 있는 코드(AST_036 · AST_037)만 다른 고정 글로 가른다(I-13).
       if (!mounted) return;
-      setState(() => _failed = true);
+      setState(() {
+        _failed = true;
+        _failCode = e.code;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
@@ -534,7 +543,7 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       submitLabel: _isEdit ? l.actionSave : l.calAdd,
       onBack: widget.onBack,
       submitting: _submitting,
-      errorMessage: _failed ? l.assetSaveFailed : null,
+      errorMessage: _failed ? assetSaveFailedText(l, _failCode) : null,
       errorKey: _errorKey,
       onSubmit: _submit,
       fields: [
@@ -562,6 +571,10 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
           onAddTyped: _addTyped,
           onChanged: _updateRow,
           onRemove: _removeRow,
+          // 보유 평가 · 매수원가는 외화 계좌에서도 원화다(I-13 길 A) — 칸은 "원" 그대로, 외화 계좌에만 칸 아래 안내
+          krwHint: isForeignCurrency(_currency)
+              ? l.assetHoldingKrwInputHint
+              : null,
         ),
         // 예수금 — 보유가 없을 때만 노출한다. 보유가 있으면 평가금액은 서버가 시세로 산정하고 예수금은 입금·매도로만 움직여야 해서,
         // 여기서 총액을 적으면 이중 계상된다. 보유가 있으면 합계를 읽기 전용으로 보인다(연동 합계는 원화로 환산한 값이라 단위가 원이다).
@@ -588,6 +601,7 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
           currency: _currency,
           rateController: _fxRateCtrl,
           onCurrencyChanged: (v) => setState(() => _currencyPick = v),
+          showErrors: _showErrors,
         ),
         AssetMemoField(controller: _memoCtrl),
       ],
@@ -614,9 +628,13 @@ class _HoldingsEditor extends StatelessWidget {
     required this.onAddTyped,
     required this.onChanged,
     required this.onRemove,
+    this.krwHint,
   });
 
   final List<_EditRow> rows;
+
+  /// 외화 계좌의 수동 평가액 · 매수원가 칸 아래 안내 "원화로 입력해요"(I-13). 원화 계좌는 null.
+  final String? krwHint;
   final int total;
   final Map<String, double?> unitMap;
   final bool allowStock;
@@ -709,6 +727,7 @@ class _HoldingsEditor extends StatelessWidget {
                               : null,
                           onChanged: (next) => onChanged(r.key, next),
                           onRemove: () => onRemove(r.key),
+                          krwHint: krwHint,
                         ),
                   ],
                 ),
@@ -727,8 +746,12 @@ class _HoldingEditRow extends StatefulWidget {
     required this.unitKrw,
     required this.onChanged,
     required this.onRemove,
+    this.krwHint,
   });
   final AssetHolding holding;
+
+  /// 외화 계좌에서만 — 수동 평가액 · 매수원가 칸 아래 "원화로 입력해요".
+  final String? krwHint;
   final double? unitKrw; // 연동 1주 KRW 환산가 (미확보 시 null)
   final ValueChanged<AssetHolding> onChanged;
   final VoidCallback onRemove;
@@ -827,6 +850,7 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
     // 평가액 — 연동은 시세로 계산(읽기 전용), 미연동은 직접 입력
     final valueField = PField(
       label: l.assetHoldingValueLabel,
+      description: h.linked ? null : widget.krwHint,
       child: h.linked
           ? PInput(
               controller: _linkedValueCtrl,
@@ -937,9 +961,13 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
           // 비워 두면 서버가 같은 종목의 기존 원가를 잇는다.
           PField(
             label: l.holdingTotalCost,
+            // 외화 계좌면 "원화로 입력해요" — 평단가 안내가 있으면 두 줄
             description: avg == null
-                ? null
-                : l.holdingAvgPriceInline(krwSigned(avg, false, unit: true)),
+                ? widget.krwHint
+                : [
+                    ?widget.krwHint,
+                    l.holdingAvgPriceInline(krwSigned(avg, false, unit: true)),
+                  ].join('\n'),
             child: PInput(
               controller: _costCtrl,
               keyboardType: TextInputType.number,

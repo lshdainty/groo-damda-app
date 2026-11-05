@@ -21,7 +21,6 @@ import 'package:groo_damda_app/features/asset/presentation/pickers/picker_sheet.
 import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/card_cycle.dart';
-import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
@@ -69,26 +68,10 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
   late final TextEditingController _balanceCtrl;
   late final TextEditingController _dueCtrl;
   late final TextEditingController _creditLimitCtrl;
-  late final TextEditingController _fxRateCtrl;
 
-  /// 사용자가 고른 통화. `null` 이면 아직 아무것도 안 골랐다.
-  String? _currencyPick;
-
-  /// 이 폼이 지금 쓰는 통화 — **고른 값 > 이 자산의 값 > 설정의 기본 통화**(D7).
-  ///
-  /// 기본 통화를 `initState` 에서 굳히면 안 된다. `/me/preferences` 는 설정 화면을
-  /// 안 들른 세션에서 이 폼보다 늦게 도착해서, 초기값으로 받으면 첫 렌더의 원화에
-  /// 잠긴 채 열린다. `build` 가 구독해 두고 저장할 때까지 매번 여기서 읽는다.
-  ///
-  /// 기본 통화는 **새 자산에만** 흘린다. 기존 자산에까지 쓰면 기본 통화를 USD 로
-  /// 바꾼 순간 원화 자산이 전부 USD 로 열리고, 그대로 저장만 해도 통화가 바뀐다 —
-  /// 고치라고 만든 칸이 고장을 내는 쪽이다. 통화가 안 적힌 옛 자산도 원화로 연다
-  /// (웹 `Asset.currency` 는 non-null 이라 그쪽엔 없는 갈래다).
-  String get _currency =>
-      _currencyPick ??
-      (widget.edit != null
-          ? (widget.edit!.currency ?? kDefaultCurrency)
-          : ref.read(defaultCurrencyProvider));
+  /// 카드(신용 · 체크)는 원화만이다(I-13 사용자 결정 4, 서버 AST_037) — 통화 칸이 없고 늘 원화로 보낸다. 해외 결제는 거래의
+  /// 통화 칸으로 적는다. 웹 `use-asset-form` 의 카드 묶음과 같다(옛 USD 카드도 수정하면 원화 · 환율 없음으로 나간다).
+  String get _currency => kDefaultCurrency;
   late AssetKind _kind;
   late bool _includeInTotal;
   late bool _hideAmount;
@@ -101,6 +84,9 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
   bool _noAccountChosen = false;
   bool _submitting = false;
   bool _failed = false;
+
+  /// 마지막 저장 실패의 서버 코드 — Callout 고정 글을 가르는 데만 쓴다(서버 원문은 내지 않는다).
+  String? _failCode;
   final _errorKey = GlobalKey();
   bool _touched = false;
 
@@ -227,9 +213,6 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
     _creditLimitCtrl = TextEditingController(
       text: initialAmountText(e?.creditLimit),
     );
-    _fxRateCtrl = TextEditingController(
-      text: e?.exchangeRate != null ? trimExchangeRate(e!.exchangeRate!) : '',
-    );
     _paymentDay = e?.paymentDay;
     _paymentAssetRowId = e?.paymentAssetRowId;
     _noAccountChosen = e != null && e.paymentAssetRowId == null;
@@ -263,8 +246,6 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
     _balanceCtrl.text,
     _dueCtrl.text,
     _creditLimitCtrl.text,
-    _fxRateCtrl.text,
-    _currencyPick ?? '',
     _paymentDay ?? '',
     _paymentAssetRowId ?? '',
     _noAccountChosen,
@@ -286,7 +267,6 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
     _balanceCtrl.dispose();
     _dueCtrl.dispose();
     _creditLimitCtrl.dispose();
-    _fxRateCtrl.dispose();
     super.dispose();
   }
 
@@ -363,10 +343,8 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
     // 청구 사이클 필드는 신용카드일 때만. 빈 한도는 null 로 전송.
     final isCredit = _isCredit;
     final creditLimit = isCredit ? parseAmountField(_creditLimitCtrl) : null;
-    // 환율은 외화일 때만 보낸다 — 원화로 되돌리면 명시적 null 로 지운다.
-    final fxRate = isForeignCurrency(_currency)
-        ? double.tryParse(_fxRateCtrl.text.replaceAll(',', ''))
-        : null;
+    // 카드는 원화만 — 환율은 늘 명시적 null 로 지운다(옛 외화 카드도 원화로 돌아간다).
+    const double? fxRate = null;
 
     setState(() {
       _failed = false;
@@ -445,10 +423,14 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
       }
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
+      // 고쳐 다시 할 수 있는 코드(AST_037 카드는 원화만)만 다른 고정 글로 가른다(I-13).
       if (!mounted) return;
-      setState(() => _failed = true);
+      setState(() {
+        _failed = true;
+        _failCode = e.code;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
@@ -506,9 +488,6 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
         },
       );
     }
-    // 설정의 기본 통화가 늦게 도착하면 이 폼을 다시 그린다 — 값은 `_currency` 가
-    // 읽는다(고른 값 > 이 자산의 값 > 기본 통화).
-    ref.watch(defaultCurrencyProvider);
     final unit = currencyUnit(_currency);
     final isCredit = _isCredit;
     final newCardBillWindow = _newCardBillWindow;
@@ -572,7 +551,7 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
       submitLabel: _isEdit ? l.actionSave : l.calAdd,
       onBack: widget.onBack,
       submitting: _submitting,
-      errorMessage: _failed ? l.assetSaveFailed : null,
+      errorMessage: _failed ? assetSaveFailedText(l, _failCode) : null,
       errorKey: _errorKey,
       onSubmit: _attempt,
       fields: [
@@ -656,12 +635,6 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
             onChanged: (_) => setState(() {}),
           ),
         ],
-        // 통화·환율 — 해외 카드. 계좌 폼과 같은 위젯이다(D1).
-        AssetCurrencyFields(
-          currency: _currency,
-          rateController: _fxRateCtrl,
-          onCurrencyChanged: (v) => setState(() => _currencyPick = v),
-        ),
         // 계좌 연결 — 신용카드는 결제일에 여기서 한 번에 빠지고, 체크카드는 긁는 즉시 빠진다. 의미가 달라 라벨을 나눈다.
         PField(
           label: isCredit
