@@ -5,6 +5,7 @@ import 'package:groo_damda_app/core/network/dio_provider.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 /// 금액 가리기 목록 — 기기가 아니라 **계정**에 붙는다.
 ///
@@ -37,11 +38,14 @@ class HideCardsRepository {
   }
 
   /// 통째로 교체. 부분 갱신이 아니다.
-  Future<void> put(Set<String> cards) async {
+  ///
+  /// [silent] 는 기본이 켜짐 — 실패는 호출한 쪽이 자기 글로 말한다(저장 화면 Callout · 스낵바 + 다시 시도).
+  Future<void> put(Set<String> cards, {bool silent = true}) async {
     try {
       await _dio.put<void>(
         '/users/me/hide-cards',
         data: {'hideCards': cards.toList()},
+        options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);

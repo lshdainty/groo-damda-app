@@ -2309,6 +2309,7 @@
       }
     }
   },
+  "hideAmountsSaveFailed": "금액 가리기를 저장하지 못했어요.",
   "hideAmountsDiscardTitle": "저장하지 않고 나가기",
   "hideAmountsDiscardBody": "고른 내용이 사라져요.",
   "hideAmountsDiscardConfirm": "나가기",

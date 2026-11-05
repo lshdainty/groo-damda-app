@@ -9,6 +9,7 @@ import 'package:groo_damda_app/core/settings/hide_amounts_unlock_dialog.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/help_bubble/p_help_bubble.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -44,6 +45,9 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
   _Tab _tab;
   bool _saving = false;
 
+  /// 서버 저장이 실패했다 — 화면을 닫지 않고 고른 값을 그대로 둔 채 맨 위 Callout 으로 알린다(다시 [저장] 을 누르면 사라진다).
+  bool _saveFailed = false;
+
   _HideAmountsScreenState() : _tab = null;
 
   /// 탭 순서 — 0 은 '전체', 그 뒤로 화면별.
@@ -74,14 +78,23 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
     if (draft == null || _saving) return;
     // 푸는 게 하나라도 있으면 본인 확인 — 가리기만 늘리는 저장은 그냥 통과한다.
     final revealing = saved.difference(draft).isNotEmpty;
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _saveFailed = false;
+    });
     try {
       if (revealing) {
         final ok = await confirmHideAmountsUnlock(context, ref);
         if (!ok) return;
       }
-      await ref.read(settingsProvider.notifier).setHideCards(draft);
+      final saved = await ref
+          .read(settingsProvider.notifier)
+          .setHideCards(draft);
       if (!mounted) return;
+      if (!saved) {
+        setState(() => _saveFailed = true);
+        return;
+      }
       context.pop();
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -142,6 +155,19 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                 key: const ValueKey('hide-amounts-body'),
                 padding: const EdgeInsets.only(bottom: PSpacing.x6),
                 children: [
+                  if (_saveFailed)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        PSpacing.globalGutter,
+                        PSpacing.x4,
+                        PSpacing.globalGutter,
+                        0,
+                      ),
+                      child: FormErrorCallout(
+                        key: const ValueKey('hide-amounts-save-failed'),
+                        message: l.hideAmountsSaveFailed,
+                      ),
+                    ),
                   // 소개 — 이 화면 전체의 설명(위 16 · 아래 8)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(

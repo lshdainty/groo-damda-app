@@ -7399,6 +7399,12 @@ abstract class AppLocalizations {
   /// **'가릴 화면 · {count} / {total}'**
   String hideAmountsScreensCount(int count, int total);
 
+  /// No description provided for @hideAmountsSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액 가리기를 저장하지 못했어요.'**
+  String get hideAmountsSaveFailed;
+
   /// No description provided for @hideAmountsDiscardTitle.
   ///
   /// In ko, this message translates to:

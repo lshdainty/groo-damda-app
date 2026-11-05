@@ -4071,6 +4071,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get hideAmountsSaveFailed => 'Couldn\'t save the amount hiding.';
+
+  @override
   String get hideAmountsDiscardTitle => 'Leave without saving';
 
   @override

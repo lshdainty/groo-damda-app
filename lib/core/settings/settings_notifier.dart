@@ -125,28 +125,35 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
   }
 
   /// 가리기 — 인증 없이 자유롭게 켠다. 푸는 쪽만 인증을 받는다(화면 책임).
-  Future<void> hideCards(Iterable<String> cards) async {
-    await _writeHideCards({..._current.hideCards, ...cards});
-  }
+  ///
+  /// 금액 가리기를 바꾸는 호출은 모두 **서버가 받아야 로컬에 반영**되고, 성공 여부를 돌려준다
+  /// (`false` 면 로컬도 그대로다 — 호출한 쪽이 자기 자리에서 알린다).
+  Future<bool> hideCards(Iterable<String> cards) =>
+      _writeHideCards({..._current.hideCards, ...cards});
 
   /// 풀기 — 호출 전에 인증을 거칠 것.
-  Future<void> revealCards(Iterable<String> cards) async {
-    await _writeHideCards({..._current.hideCards}..removeAll(cards));
-  }
+  Future<bool> revealCards(Iterable<String> cards) =>
+      _writeHideCards({..._current.hideCards}..removeAll(cards));
 
   /// 고른 결과를 통째로 반영한다 — 화면에서 여러 장을 조정한 뒤 한 번에 저장하는 경로.
   ///
   /// 푸는 카드가 섞여 있으면 호출 전에 인증을 거칠 것(화면 책임). 한 장씩 켜고 끄는
   /// [hideCards]/[revealCards] 와 달리 이전 상태를 남기지 않고 그대로 덮는다.
-  Future<void> setHideCards(Set<String> next) => _writeHideCards({...next});
+  Future<bool> setHideCards(Set<String> next) => _writeHideCards({...next});
 
-  Future<void> hideAllCards() => hideCards(kAllHideCards);
+  Future<bool> hideAllCards() => hideCards(kAllHideCards);
 
-  Future<void> revealAllCards() => _writeHideCards(<String>{});
+  Future<bool> revealAllCards() => _writeHideCards(<String>{});
 
-  Future<void> _writeHideCards(Set<String> next) async {
+  /// 서버에 먼저 올리고, **받아졌을 때만** 로컬에 반영한다.
+  ///
+  /// 예전에는 로컬을 먼저 바꾸고 서버 저장을 기다리지 않았다 — 저장이 실패하면 이 기기에만 반영돼, 다음 동기화
+  /// ([syncHideCardsFromServer])가 서버의 옛 값으로 로컬을 덮어 가려 둔 금액이 사용자 모르게 다시 드러났다.
+  /// 실패하면 로컬을 건드리지 않으므로 서버와 로컬이 어긋나지 않고, 알리는 일은 호출한 쪽이 맡는다.
+  Future<bool> _writeHideCards(Set<String> next) async {
+    if (!await _putToServer(next)) return false;
     await _writeHideCardsLocal(next);
-    _push(next);
+    return true;
   }
 
   /// 로컬에만 반영한다. 서버에서 받아온 값을 되쏘지 않으려고 갈라 뒀다.
@@ -156,19 +163,14 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
     state = AsyncData(_current.copyWith(hideCards: next));
   }
 
-  /// 서버로 올린다 — 실패해도 로컬은 되돌리지 않는다.
-  ///
-  /// 사용자는 이미 화면이 바뀐 걸 봤다. 거기서 되돌리면 "저장했는데 안 됐다" 가 아니라
-  /// "저장했는데 원래대로 튀었다" 가 되어 더 헷갈린다. 실패는 전역 인터셉터가 서버
-  /// 메시지로 띄우고(비-GET), 다음 저장이 서버를 따라잡는다.
-  void _push(Set<String> next) => unawaited(_pushNow(next));
-
-  Future<void> _pushNow(Set<String> next) async {
+  /// 서버로 올린다(조용한 요청 — 실패를 이 함수가 알리지 않고 `false` 로 돌려준다).
+  Future<bool> _putToServer(Set<String> next) async {
     try {
       final repo = await ref.read(hideCardsRepositoryProvider.future);
       await repo.put(next);
+      return true;
     } catch (_) {
-      /* 전역 인터셉터가 이미 사용자에게 알린다 */
+      return false;
     }
   }
 
@@ -199,7 +201,9 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
       final local = mine ? _current.hideCards : <String>{};
       if (!mine) await _writeHideCardsLocal(local);
       // 여기서는 기다린다 — 부팅 중 한 번뿐이고, 동기화가 끝났는지 호출부가 알 수 있어야 한다.
-      await _pushNow(local);
+      // **의도된 무음**: 이 첫 올리기가 실패해도 알리지 않는다 — 사용자가 한 일이 아니고, 서버가 계속 null 이라
+      // 다음 부팅의 동기화가 같은 값을 다시 올린다(그 사이 덮어쓸 서버 값이 없어 드러나는 금액도 없다).
+      await _putToServer(local);
       return;
     }
 

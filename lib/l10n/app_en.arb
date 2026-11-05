@@ -2282,6 +2282,7 @@
       }
     }
   },
+  "hideAmountsSaveFailed": "Couldn't save the amount hiding.",
   "hideAmountsDiscardTitle": "Leave without saving",
   "hideAmountsDiscardBody": "Your selection will be discarded.",
   "hideAmountsDiscardConfirm": "Leave",

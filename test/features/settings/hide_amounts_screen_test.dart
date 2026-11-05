@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
+import 'package:groo_damda_app/core/settings/hide_cards_repository.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/storage/prefs_provider.dart';
 import 'package:groo_damda_app/features/settings/presentation/hide_amounts_screen.dart';
@@ -20,6 +21,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
+import '../../support/hide_cards_fake.dart';
 import '../../support/plain_text.dart';
 
 /// OS 프롬프트 없이 정해진 결과만 돌려주는 가짜 인증.
@@ -89,6 +91,9 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         appLockAuthProvider.overrideWithValue(auth),
+        hideCardsRepositoryProvider.overrideWith(
+          (ref) async => OkHideCardsRepository(),
+        ),
         if (repo != null)
           authRepositoryProvider.overrideWith((ref) async => repo),
         if (gate != null)

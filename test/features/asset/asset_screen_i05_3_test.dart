@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/settings/hide_cards_repository.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
@@ -32,6 +33,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 
+import '../../support/hide_cards_fake.dart';
 import '../../support/plain_text.dart';
 
 const _longName = '주거래 입출금 통장 — 아주 길게 지은 별칭 서른 글자까지 늘려 본다 하나 둘';
@@ -147,6 +149,9 @@ Future<void> _pump(
     ProviderScope(
       key: UniqueKey(),
       overrides: [
+        hideCardsRepositoryProvider.overrideWith(
+          (ref) async => OkHideCardsRepository(),
+        ),
         assetsProvider.overrideWith((ref) => (assets ?? () async => _assets)()),
         assetSummaryProvider.overrideWith(
           (ref, key) =>

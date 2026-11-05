@@ -4002,6 +4002,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get hideAmountsSaveFailed => '금액 가리기를 저장하지 못했어요.';
+
+  @override
   String get hideAmountsDiscardTitle => '저장하지 않고 나가기';
 
   @override
