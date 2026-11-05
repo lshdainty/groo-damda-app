@@ -27,6 +27,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dart';
@@ -242,17 +243,18 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
     child: PSwipeActionsProvider(child: _buildBody(context)),
   );
 
+  /// 보고 있는 달의 이체 조회 키 — 조회와 [다시 시도] 가 같은 키를 본다.
+  AssetTransfersKey get _transfersKey => (
+    startDate: ledgerYmd(DateTime(_month.year, _month.month, 1)),
+    endDate: ledgerYmd(DateTime(_month.year, _month.month + 1, 0)),
+  );
+
   Widget _buildBody(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
     final expensesAsync = ref.watch(monthExpensesProvider(_key));
     // 이체는 asset_transfer 별도 테이블이라 거래 목록에 섞여 오지 않는다.
     // 같은 달 범위로 따로 받아 화면 단에서만 합친다(통계·예산 같은 지출 전용 경로 보호).
-    final transfersAsync = ref.watch(
-      assetTransfersProvider((
-        startDate: ledgerYmd(DateTime(_month.year, _month.month, 1)),
-        endDate: ledgerYmd(DateTime(_month.year, _month.month + 1, 0)),
-      )),
-    );
+    final transfersAsync = ref.watch(assetTransfersProvider(_transfersKey));
     // 인사이트(지난달 대비) — 지난달 거래도 함께 구독(family 캐시).
     final prevAsync = ref.watch(monthExpensesProvider(_prevKey));
 
@@ -508,6 +510,35 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
     ) {
       _headerH = headerHeight;
       final listChildren = <Widget>[];
+      // 이체만 못 받았을 때(받아 둔 이체가 없는 채 실패) — 이체 줄이 조용히 빠진 목록을 "이체 없음" 으로 읽지 않게 맨 위에서 말한다.
+      // 거래 목록은 그대로 두고, 다시 시도는 이체 조회만 비운다.
+      if (!failed && transfersAsync.hasError && !transfersAsync.hasValue) {
+        listChildren.add(
+          Padding(
+            key: const ValueKey('expense-transfers-error'),
+            padding: const EdgeInsets.fromLTRB(
+              PSpacing.globalGutter,
+              PSpacing.x4,
+              PSpacing.globalGutter,
+              0,
+            ),
+            child: PCallout(
+              tone: PCalloutTone.critical,
+              description: l.expTransfersLoadError,
+              alert: true,
+              actions: [
+                PButton(
+                  label: l.actionRetry,
+                  variant: PButtonVariant.neutralOutline,
+                  size: PButtonSize.small,
+                  onPressed: () =>
+                      ref.invalidate(assetTransfersProvider(_transfersKey)),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
       if (failed) {
         listChildren.add(
           PResultSection(

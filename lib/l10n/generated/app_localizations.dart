@@ -6115,6 +6115,12 @@ abstract class AppLocalizations {
   /// **'거래를 불러오지 못했어요'**
   String get expLoadError;
 
+  /// No description provided for @expTransfersLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'이체 내역을 불러오지 못했어요.'**
+  String get expTransfersLoadError;
+
   /// No description provided for @expEmptyMonth.
   ///
   /// In ko, this message translates to:

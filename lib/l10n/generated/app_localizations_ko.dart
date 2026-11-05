@@ -3320,6 +3320,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expLoadError => '거래를 불러오지 못했어요';
 
   @override
+  String get expTransfersLoadError => '이체 내역을 불러오지 못했어요.';
+
+  @override
   String get expEmptyMonth => '이 달에는 거래가 없습니다';
 
   @override

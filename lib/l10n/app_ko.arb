@@ -1967,6 +1967,7 @@
   },
   "dutchCreated": "정산이 만들어졌어요",
   "expLoadError": "거래를 불러오지 못했어요",
+  "expTransfersLoadError": "이체 내역을 불러오지 못했어요.",
   "expEmptyMonth": "이 달에는 거래가 없습니다",
   "expEmptyDay": "이 날의 거래가 없어요",
   "expTotal": "합계",

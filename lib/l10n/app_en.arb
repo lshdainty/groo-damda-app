@@ -1940,6 +1940,7 @@
   },
   "dutchCreated": "Settlement created",
   "expLoadError": "Couldn't load transactions",
+  "expTransfersLoadError": "Couldn't load the transfers.",
   "expEmptyMonth": "No transactions this month",
   "expEmptyDay": "No transactions on this day",
   "expTotal": "Total",

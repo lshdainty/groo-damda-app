@@ -3380,6 +3380,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expLoadError => 'Couldn\'t load transactions';
 
   @override
+  String get expTransfersLoadError => 'Couldn\'t load the transfers.';
+
+  @override
   String get expEmptyMonth => 'No transactions this month';
 
   @override
