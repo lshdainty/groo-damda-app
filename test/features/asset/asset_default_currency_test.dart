@@ -229,6 +229,8 @@ void main() {
 
       expect(findPlain('\$ USD'), findsOneWidget);
       await typeInto(tester, l.assetNickname, 'QA 별칭');
+      // 외화 자산은 환율이 필수다(서버 AST_036, I-13)
+      await typeInto(tester, l.assetExchangeRate, '1300');
       await tester.tap(_submitButton(l.calAdd));
       await tester.pumpAndSettle();
 
@@ -240,7 +242,8 @@ void main() {
       );
     });
 
-    testWidgets('카드 — 고르지 않아도 USD 가 실린다', (tester) async {
+    // 카드는 원화만이다(I-13 사용자 결정 4, 서버 AST_037) — 기본 통화가 USD 여도 원화로 실린다.
+    testWidgets('카드 — 기본 통화가 USD 여도 원화로 실린다', (tester) async {
       final repo = await _host(
         tester,
         (c) => showAssetKindForm(c, AssetKind.check),
@@ -250,7 +253,7 @@ void main() {
       await tester.tap(_submitButton(l.calAdd));
       await tester.pumpAndSettle();
 
-      expect(repo.created!['currency'], 'USD');
+      expect(repo.created!['currency'], 'KRW');
     });
 
     testWidgets('투자 — 고르지 않아도 USD 가 실린다', (tester) async {
@@ -260,6 +263,8 @@ void main() {
         defaultCurrency: 'USD',
       );
       await typeInto(tester, l.assetNickname, 'QA 별칭');
+      // 외화 자산은 환율이 필수다(서버 AST_036, I-13)
+      await typeInto(tester, l.assetExchangeRate, '1300');
       await tester.tap(_submitButton(l.calAdd));
       await tester.pumpAndSettle();
 
@@ -287,6 +292,8 @@ void main() {
       await tester.tap(findPlain('¥ JPY').last);
       await tester.pumpAndSettle();
       await typeInto(tester, l.assetNickname, 'QA 별칭');
+      // 외화 자산은 환율이 필수다(서버 AST_036, I-13)
+      await typeInto(tester, l.assetExchangeRate, '9');
       await tester.tap(_submitButton(l.calAdd));
       await tester.pumpAndSettle();
 
@@ -347,6 +354,8 @@ void main() {
       reason: '열 때 한 번만 읽어 굳히면 첫 렌더의 원화에 잠긴다',
     );
     await typeInto(tester, l.assetNickname, 'QA 별칭');
+    // 외화 자산은 환율이 필수다(서버 AST_036, I-13)
+    await typeInto(tester, l.assetExchangeRate, '1300');
     await tester.tap(_submitButton(l.calAdd));
     await tester.pumpAndSettle();
     expect(repo.created!['currency'], 'USD');

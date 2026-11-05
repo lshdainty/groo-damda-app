@@ -145,15 +145,12 @@ void main() {
     expect(unitOf(tester, l.assetLoanRemainingLabel), '¥');
   });
 
-  testWidgets('카드 — 사용액·신용한도가 같은 단위다', (tester) async {
+  // 카드는 원화만이다(I-13 사용자 결정 4) — 통화 칸이 없고 사용액 · 신용한도는 늘 `원`.
+  testWidgets('카드 — 사용액·신용한도가 같은 단위(원)다', (tester) async {
     await _host(tester, (c) => showAssetKindForm(c, AssetKind.credit));
     expect(unitOf(tester, l.assetCurrentUsage), '원');
     expect(unitOf(tester, l.assetCreditLimitLabel), '원');
-
-    await _pickCurrency(tester, '\$ USD');
-
-    expect(unitOf(tester, l.assetCurrentUsage), '\$');
-    expect(unitOf(tester, l.assetCreditLimitLabel), '\$');
+    expect(find.byType(PSelect<String>), findsNothing);
   });
 
   testWidgets('영어 화면의 원화는 `₩` 다 — 이 레포가 이미 쓰는 규칙이다', (tester) async {
