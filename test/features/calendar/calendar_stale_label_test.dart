@@ -90,10 +90,6 @@ class _NoAuth extends AuthNotifier {
   Future<User?> build() async => null;
 }
 
-Finder _field(String hint) => find.byWidgetPredicate(
-  (w) => w is TextField && w.decoration?.hintText == hint,
-);
-
 /// 텍스트를 품은 PButton — 확인 다이얼로그의 버튼과 스와이프 액션의 같은 글자를
 /// 가른다(액션은 PButton 이 아니다).
 Finder _button(String label) =>
@@ -161,7 +157,7 @@ void main() {
 
       await tester.tap(findPlain('옛이름').first);
       await tester.pumpAndSettle();
-      await tester.enterText(_field(l.calLabelNamePlaceholder), '새이름');
+      await tester.enterText(find.byType(EditableText), '새이름');
       await tester.pumpAndSettle();
       await tester.tap(_button(l.actionSave));
       await tester.pumpAndSettle();

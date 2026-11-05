@@ -14,11 +14,13 @@ import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/shared/widgets/p_color_picker.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_parts.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
@@ -26,6 +28,15 @@ import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+
+/// 라벨 이름 최대 글자 수 — 카테고리 · 라벨 · 태그 · 목표 이름 12자(웹 d837eedc, 카드 한 줄에 들어가는 길이).
+const int kLabelNameMax = 12;
+
+/// 저장할 수 있는 이름인가 — 비어 있지 않고 12자를 넘지 않는다(웹 `nameIssue` 와 같은 판정).
+bool labelNameSubmittable(String raw) {
+  final issue = nameIssue(raw, kLabelNameMax);
+  return issue == null || issue == NameIssue.duplicate;
+}
 
 /// 설정 진입 — 캘린더 라벨 관리 (전 캘린더 공용).
 ///
@@ -185,12 +196,12 @@ void _showLabelEditor(
   final l = AppLocalizations.of(context);
   final nameCtrl = TextEditingController(text: existing?.labelName ?? '');
   final controller = PSheetController();
-  controller.setCanSubmit((existing?.labelName ?? '').trim().isNotEmpty);
+  controller.setCanSubmit(labelNameSubmittable(existing?.labelName ?? ''));
   String selectedColor = existing?.color ?? '#2c70bf';
 
   Future<void> submit() async {
     final name = nameCtrl.text.trim();
-    if (name.isEmpty) return;
+    if (!labelNameSubmittable(name)) return;
     controller.setSubmitting(true);
     try {
       final repo = await ref.read(calendarRepositoryProvider.future);
@@ -286,6 +297,9 @@ class _LabelEditorBody extends StatefulWidget {
 class _LabelEditorBodyState extends State<_LabelEditorBody> {
   late String _color;
 
+  bool get _nameTooLong =>
+      nameIssue(widget.nameController.text, kLabelNameMax) == NameIssue.tooLong;
+
   @override
   void initState() {
     super.initState();
@@ -362,13 +376,20 @@ class _LabelEditorBodyState extends State<_LabelEditorBody> {
             style: PTypo.caption.copyWith(color: t.fgSecondary),
           ),
           const SizedBox(height: PSpace.x4),
-          PTextInput(
-            controller: widget.nameController,
-            placeholder: l.calLabelNamePlaceholder,
-            onChanged: (v) {
-              widget.controller.setCanSubmit(v.trim().isNotEmpty);
-              setState(() {});
-            },
+          // 이름은 12자까지 — 카드 한 줄에 들어가는 길이(웹과 같은 제품 규칙). 세는 줄 "n/12", 입력은 12 에서 멈춘다
+          PField(
+            maxGraphemeCount: kLabelNameMax,
+            invalid: _nameTooLong,
+            errorMessage: _nameTooLong ? l.nameTooLong(kLabelNameMax) : null,
+            child: PInput(
+              controller: widget.nameController,
+              semanticLabel: l.calFieldName,
+              placeholder: l.calLabelNamePlaceholder,
+              onChanged: (v) {
+                widget.controller.setCanSubmit(labelNameSubmittable(v));
+                setState(() {});
+              },
+            ),
           ),
           const SizedBox(height: PSpace.x16),
 

@@ -430,5 +430,49 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.deletes, 2);
     });
+
+    testWidgets('이름 칸 — 세는 줄 n/12 · 12자는 저장 가능 · 13째 글자는 입력되지 않는다', (
+      tester,
+    ) async {
+      await size(tester);
+      final repo = _LabelRepo(labels);
+      await tester.pumpWidget(
+        app(const CalendarLabelsScreen(), withRepo(repo)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('라벨 추가'));
+      await tester.pumpAndSettle();
+      expect(find.text('0/12'), findsOneWidget);
+      await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타');
+      await tester.pumpAndSettle();
+      expect(find.text('12/12'), findsOneWidget);
+      // 13자를 넣어도 12 에서 멈춘다
+      await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타파');
+      await tester.pumpAndSettle();
+      expect(find.text('12/12'), findsOneWidget);
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+        '가나다라마바사아자차카타',
+      );
+    });
+
+    testWidgets('12자를 넘긴 옛 이름 — 칸 오류 "이름은 12자 이내로 입력해주세요." 가 보인다', (
+      tester,
+    ) async {
+      await size(tester);
+      const long = EventLabel(
+        rowId: 9,
+        labelName: '가나다라마바사아자차카타파',
+        color: '#2d8060',
+      );
+      final repo = _LabelRepo(const [long]);
+      await tester.pumpWidget(
+        app(const CalendarLabelsScreen(), withRepo(repo)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('가나다라마바사아자차카타파').first);
+      await tester.pumpAndSettle();
+      expect(find.text('이름은 12자 이내로 입력해주세요.'), findsOneWidget);
+    });
   });
 }
