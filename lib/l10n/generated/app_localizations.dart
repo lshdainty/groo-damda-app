@@ -497,7 +497,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiEmpty.
   ///
   /// In ko, this message translates to:
-  /// **'알림이 없습니다'**
+  /// **'아직 알림이 없어요'**
   String get notiEmpty;
 
   /// No description provided for @notiMarkAllRead.
@@ -505,6 +505,60 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'모두 읽음'**
   String get notiMarkAllRead;
+
+  /// 알림 목록 머리 줄 — 서버가 센 안 읽은 수(천 단위 쉼표 포함)
+  ///
+  /// In ko, this message translates to:
+  /// **'읽지 않은 알림 {count}개'**
+  String notiUnreadHead(String count);
+
+  /// No description provided for @notiLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 불러오지 못했어요'**
+  String get notiLoadFailed;
+
+  /// No description provided for @notiLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get notiLoadFailedDesc;
+
+  /// No description provided for @notiDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 삭제하지 못했어요.'**
+  String get notiDeleteFailed;
+
+  /// No description provided for @notiMarkAllFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 모두 읽음으로 바꾸지 못했어요.'**
+  String get notiMarkAllFailed;
+
+  /// No description provided for @notiPrefsSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정을 저장하지 못했어요.'**
+  String get notiPrefsSaveFailed;
+
+  /// No description provided for @notiSettingsLoadFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get notiSettingsLoadFailedDesc;
+
+  /// No description provided for @notiThresholdLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'경고로 표시할 사용률'**
+  String get notiThresholdLabel;
+
+  /// No description provided for @notiThresholdDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 값을 넘으면 경고로 표시되고 알림을 받아요. 100%를 넘으면 초과 알림이 따로 와요.'**
+  String get notiThresholdDesc;
 
   /// 알림 줄 끝 ⋮ 버튼의 이름 — 메뉴 시트의 이름이기도 하다
   ///
@@ -551,13 +605,13 @@ abstract class AppLocalizations {
   /// No description provided for @notiConnectionLost.
   ///
   /// In ko, this message translates to:
-  /// **'알림 연결이 끊어졌습니다'**
+  /// **'알림 연결이 끊어졌어요'**
   String get notiConnectionLost;
 
   /// No description provided for @notiConnectionRestored.
   ///
   /// In ko, this message translates to:
-  /// **'알림 연결이 복구되었습니다'**
+  /// **'알림 연결이 다시 이어졌어요'**
   String get notiConnectionRestored;
 
   /// No description provided for @notiNew.
@@ -8203,18 +8257,6 @@ abstract class AppLocalizations {
   /// **'나가기'**
   String get sheetLeaveLeave;
 
-  /// No description provided for @notiUnreadPrefix.
-  ///
-  /// In ko, this message translates to:
-  /// **'읽지 않은 알림 '**
-  String get notiUnreadPrefix;
-
-  /// No description provided for @notiUnreadSuffix.
-  ///
-  /// In ko, this message translates to:
-  /// **'개'**
-  String get notiUnreadSuffix;
-
   /// No description provided for @notiSettings.
   ///
   /// In ko, this message translates to:
@@ -8224,7 +8266,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiSettingsLoadError.
   ///
   /// In ko, this message translates to:
-  /// **'설정을 불러오지 못했습니다'**
+  /// **'알림 설정을 불러오지 못했어요'**
   String get notiSettingsLoadError;
 
   /// No description provided for @notiKindTitle.
@@ -8232,12 +8274,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'알림 종류'**
   String get notiKindTitle;
-
-  /// No description provided for @notiKindSubtitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'필요한 알림만 켜두면 더 편해요.'**
-  String get notiKindSubtitle;
 
   /// No description provided for @notiPayment.
   ///
@@ -8284,7 +8320,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiCalendarDesc.
   ///
   /// In ko, this message translates to:
-  /// **'캘린더 이벤트 시작 15분 전'**
+  /// **'캘린더 일정 시작 15분 전'**
   String get notiCalendarDesc;
 
   /// No description provided for @notiWeeklyReport.
@@ -8320,7 +8356,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiPushOn.
   ///
   /// In ko, this message translates to:
-  /// **'모든 알림이 활성화되어 있어요'**
+  /// **'모든 알림이 켜져 있어요'**
   String get notiPushOn;
 
   /// No description provided for @notiPushOff.
@@ -8332,56 +8368,14 @@ abstract class AppLocalizations {
   /// No description provided for @notiThresholdTitle.
   ///
   /// In ko, this message translates to:
-  /// **'예산 알림 임계값'**
+  /// **'예산 알림 기준'**
   String get notiThresholdTitle;
-
-  /// No description provided for @notiThresholdCurrent.
-  ///
-  /// In ko, this message translates to:
-  /// **'현재 '**
-  String get notiThresholdCurrent;
-
-  /// No description provided for @notiThresholdDesc1.
-  ///
-  /// In ko, this message translates to:
-  /// **'예산 사용률이 이 값을 넘으면 '**
-  String get notiThresholdDesc1;
-
-  /// No description provided for @notiThresholdWarning.
-  ///
-  /// In ko, this message translates to:
-  /// **'경고'**
-  String get notiThresholdWarning;
-
-  /// No description provided for @notiThresholdDesc2.
-  ///
-  /// In ko, this message translates to:
-  /// **' 상태로 표시되고 알림을 받습니다. 100%는 '**
-  String get notiThresholdDesc2;
-
-  /// No description provided for @notiThresholdOver.
-  ///
-  /// In ko, this message translates to:
-  /// **'초과'**
-  String get notiThresholdOver;
-
-  /// No description provided for @notiThresholdDesc3.
-  ///
-  /// In ko, this message translates to:
-  /// **'로 별도 알림이 발생합니다.'**
-  String get notiThresholdDesc3;
 
   /// No description provided for @notiQuietTitle.
   ///
   /// In ko, this message translates to:
   /// **'방해 금지 시간'**
   String get notiQuietTitle;
-
-  /// No description provided for @notiQuietSubtitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'이 시간에는 알림이 소리·진동 없이 표시됩니다.'**
-  String get notiQuietSubtitle;
 
   /// No description provided for @notiQuietToggle.
   ///
@@ -8410,7 +8404,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiSoundTitle.
   ///
   /// In ko, this message translates to:
-  /// **'소리·진동'**
+  /// **'소리 · 진동'**
   String get notiSoundTitle;
 
   /// No description provided for @notiSound.
@@ -8461,12 +8455,6 @@ abstract class AppLocalizations {
   /// **'이메일 알림'**
   String get notiEmailTitle;
 
-  /// No description provided for @notiEmailSubtitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'앱을 잘 안 열어도 이메일로 요약을 받아볼 수 있어요.'**
-  String get notiEmailSubtitle;
-
   /// No description provided for @notiEmailToggle.
   ///
   /// In ko, this message translates to:
@@ -8476,7 +8464,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiEmailNone.
   ///
   /// In ko, this message translates to:
-  /// **'등록된 이메일이 없습니다'**
+  /// **'등록된 이메일이 없어요'**
   String get notiEmailNone;
 
   /// No description provided for @notiEmailFreq.

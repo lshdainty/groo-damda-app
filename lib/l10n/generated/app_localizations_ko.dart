@@ -209,10 +209,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiTitle => '알림';
 
   @override
-  String get notiEmpty => '알림이 없습니다';
+  String get notiEmpty => '아직 알림이 없어요';
 
   @override
   String get notiMarkAllRead => '모두 읽음';
+
+  @override
+  String notiUnreadHead(String count) {
+    return '읽지 않은 알림 $count개';
+  }
+
+  @override
+  String get notiLoadFailed => '알림을 불러오지 못했어요';
+
+  @override
+  String get notiLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get notiDeleteFailed => '알림을 삭제하지 못했어요.';
+
+  @override
+  String get notiMarkAllFailed => '알림을 모두 읽음으로 바꾸지 못했어요.';
+
+  @override
+  String get notiPrefsSaveFailed => '알림 설정을 저장하지 못했어요.';
+
+  @override
+  String get notiSettingsLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get notiThresholdLabel => '경고로 표시할 사용률';
+
+  @override
+  String get notiThresholdDesc =>
+      '이 값을 넘으면 경고로 표시되고 알림을 받아요. 100%를 넘으면 초과 알림이 따로 와요.';
 
   @override
   String notiMore(String title) {
@@ -238,10 +268,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiTypeSystem => '시스템 알림';
 
   @override
-  String get notiConnectionLost => '알림 연결이 끊어졌습니다';
+  String get notiConnectionLost => '알림 연결이 끊어졌어요';
 
   @override
-  String get notiConnectionRestored => '알림 연결이 복구되었습니다';
+  String get notiConnectionRestored => '알림 연결이 다시 이어졌어요';
 
   @override
   String get notiNew => '새 알림';
@@ -4433,22 +4463,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get sheetLeaveLeave => '나가기';
 
   @override
-  String get notiUnreadPrefix => '읽지 않은 알림 ';
-
-  @override
-  String get notiUnreadSuffix => '개';
-
-  @override
   String get notiSettings => '알림 설정';
 
   @override
-  String get notiSettingsLoadError => '설정을 불러오지 못했습니다';
+  String get notiSettingsLoadError => '알림 설정을 불러오지 못했어요';
 
   @override
   String get notiKindTitle => '알림 종류';
-
-  @override
-  String get notiKindSubtitle => '필요한 알림만 켜두면 더 편해요.';
 
   @override
   String get notiPayment => '결제 알림';
@@ -4474,7 +4495,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiDutchPayDesc => '송금 요청 / 정산 완료 알림';
 
   @override
-  String get notiCalendarDesc => '캘린더 이벤트 시작 15분 전';
+  String get notiCalendarDesc => '캘린더 일정 시작 15분 전';
 
   @override
   String get notiWeeklyReport => '주간 리포트';
@@ -4492,37 +4513,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiPush => '푸시 알림';
 
   @override
-  String get notiPushOn => '모든 알림이 활성화되어 있어요';
+  String get notiPushOn => '모든 알림이 켜져 있어요';
 
   @override
   String get notiPushOff => '알림이 꺼져 있어요';
 
   @override
-  String get notiThresholdTitle => '예산 알림 임계값';
-
-  @override
-  String get notiThresholdCurrent => '현재 ';
-
-  @override
-  String get notiThresholdDesc1 => '예산 사용률이 이 값을 넘으면 ';
-
-  @override
-  String get notiThresholdWarning => '경고';
-
-  @override
-  String get notiThresholdDesc2 => ' 상태로 표시되고 알림을 받습니다. 100%는 ';
-
-  @override
-  String get notiThresholdOver => '초과';
-
-  @override
-  String get notiThresholdDesc3 => '로 별도 알림이 발생합니다.';
+  String get notiThresholdTitle => '예산 알림 기준';
 
   @override
   String get notiQuietTitle => '방해 금지 시간';
-
-  @override
-  String get notiQuietSubtitle => '이 시간에는 알림이 소리·진동 없이 표시됩니다.';
 
   @override
   String get notiQuietToggle => '방해 금지 사용';
@@ -4537,7 +4537,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiQuietEnd => '종료';
 
   @override
-  String get notiSoundTitle => '소리·진동';
+  String get notiSoundTitle => '소리 · 진동';
 
   @override
   String get notiSound => '알림음';
@@ -4564,13 +4564,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiEmailTitle => '이메일 알림';
 
   @override
-  String get notiEmailSubtitle => '앱을 잘 안 열어도 이메일로 요약을 받아볼 수 있어요.';
-
-  @override
   String get notiEmailToggle => '이메일 받기';
 
   @override
-  String get notiEmailNone => '등록된 이메일이 없습니다';
+  String get notiEmailNone => '등록된 이메일이 없어요';
 
   @override
   String get notiEmailFreq => '발송 주기';
