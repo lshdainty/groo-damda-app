@@ -9,7 +9,6 @@ import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/oauth_callback_handler.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
 import 'package:groo_damda_app/core/auth/oauth_link_return.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
 import 'package:groo_damda_app/features/settings/application/oauth_link_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
@@ -54,11 +53,16 @@ final oauthLinkListenerProvider = Provider<void>((ref) {
       if (!_firstTimeSeen(uri)) return;
       final isError = back.kind == OAuthLinkReturnKind.failed;
       if (back.kind != OAuthLinkReturnKind.unknown) {
-        showGlobalSnack(
-          (l) => oauthLinkReturnMessage(back, l)!,
-          // 연결 성공은 드문 이정표가 아니다 — neutral. 실패만 critical.
-          tone: isError ? PSnackbarTone.critical : PSnackbarTone.neutral,
-        );
+        // 딥링크에는 BuildContext 가 없다 — 앱 맨 위 호스트 키로 건다(호스트가 아직 없으면 건너뜀).
+        final host = PSnackbar.appHostKey;
+        final ctx = host.currentContext;
+        if (ctx != null && ctx.mounted) {
+          host.currentState?.show(
+            message: oauthLinkReturnMessage(back, AppLocalizations.of(ctx))!,
+            // 연결 성공은 드문 이정표가 아니다 — neutral. 실패만 critical.
+            tone: isError ? PSnackbarTone.critical : PSnackbarTone.neutral,
+          );
+        }
       }
       return;
     }

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/features/memo/domain/memo_tag.dart';
 
 /// 메모 태그 마스터 — `TodoTagRepository` 미러.

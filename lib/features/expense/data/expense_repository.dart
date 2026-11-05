@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';

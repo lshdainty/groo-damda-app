@@ -6,7 +6,7 @@ library;
 import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 import 'package:groo_damda_app/features/stocks/data/broker_detail_dto.dart';
 import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/features/stocks/data/toss_dto.dart';

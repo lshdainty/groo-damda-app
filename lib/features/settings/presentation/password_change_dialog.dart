@@ -6,7 +6,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/password_rules.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
@@ -116,7 +116,13 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
       // 시트가 닫힌 뒤 알린다 — 서버가 받았다(성공)
-      showGlobalSnack((l) => l.passwordChanged);
+      final host = PSnackbar.appHostKey;
+      final ctx = host.currentContext;
+      if (ctx != null && ctx.mounted) {
+        host.currentState?.show(
+          message: AppLocalizations.of(ctx).passwordChanged,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {

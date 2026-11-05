@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
 import 'package:groo_damda_app/core/network/dio_provider.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 /// 종별 건수 (체크박스 배지).
 class ExportTypeCount {

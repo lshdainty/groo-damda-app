@@ -29,7 +29,7 @@ import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 ///
 /// 폰은 흰 면 하나다: 머리(← "카드 혜택") → 밑줄 검색칸 → 거르기 칩 줄 → "총 n장" + 단종 카드 포함 → 카드 줄 → 끝 줄.
 /// 줄을 누르면 조회 시트가 열린다. 요청 실패는 전역 스낵바가 아니라 이 화면 안 Result Section 으로 알린다(조회는 전역
-/// 스낵바를 띄우지 않는다 — error_toast_interceptor).
+/// 스낵바를 띄우지 않는다 — 앱은 전역 오류 토스트가 없다).
 class CardBenefitsScreen extends ConsumerStatefulWidget {
   const CardBenefitsScreen({super.key});
 

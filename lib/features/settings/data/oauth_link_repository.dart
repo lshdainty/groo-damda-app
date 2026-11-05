@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/api_response.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 /// 서버가 준 소셜 연동 상태 한 줄 — 연결할 수 있는 소셜은 Google 하나다(I-14 10).
 class OAuthProviderInfo {

@@ -9,7 +9,7 @@ import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
 import 'package:groo_damda_app/features/asset/domain/net_worth_point.dart';
-import 'package:groo_damda_app/core/network/interceptors/error_toast_interceptor.dart';
+import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 class AssetRepository {
   AssetRepository(this._dio);
