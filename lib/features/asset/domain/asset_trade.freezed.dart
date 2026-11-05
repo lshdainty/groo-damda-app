@@ -334,8 +334,10 @@ mixin _$AssetTradePreview {
  int? get soldCost;/// 실현손익 — 이익 양수 / 손실 음수 (매도 전용).
  int? get realizedPl;/// 이 거래로 예수금이 움직이는 양 — 매수 음수 / 매도 양수.
  int get cashDelta;/// 거래 후 예수금.
- int get cashAfter;/// 예수금이 모자라 결제 계좌에서 끌어올 금액 — 0 이면 이체가 생기지 않는다.
- int get fundingAmount;
+ int get cashAfter;/// 예수금이 모자라 결제 계좌에서 끌어올 금액(결제 계좌 통화) — 0 이면 이체가 생기지 않는다.
+ int get fundingAmount;/// [cashDelta] · [cashAfter] 의 통화(투자 계좌 통화). 옛 서버면 없다.
+ String? get cashCurrency;/// [fundingAmount] 의 통화(결제 계좌 통화). 결제 계좌가 없거나 옛 서버면 없다.
+ String? get fundingCurrency;
 /// Create a copy of AssetTradePreview
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -348,16 +350,16 @@ $AssetTradePreviewCopyWith<AssetTradePreview> get copyWith => _$AssetTradePrevie
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AssetTradePreview&&(identical(other.soldCost, soldCost) || other.soldCost == soldCost)&&(identical(other.realizedPl, realizedPl) || other.realizedPl == realizedPl)&&(identical(other.cashDelta, cashDelta) || other.cashDelta == cashDelta)&&(identical(other.cashAfter, cashAfter) || other.cashAfter == cashAfter)&&(identical(other.fundingAmount, fundingAmount) || other.fundingAmount == fundingAmount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AssetTradePreview&&(identical(other.soldCost, soldCost) || other.soldCost == soldCost)&&(identical(other.realizedPl, realizedPl) || other.realizedPl == realizedPl)&&(identical(other.cashDelta, cashDelta) || other.cashDelta == cashDelta)&&(identical(other.cashAfter, cashAfter) || other.cashAfter == cashAfter)&&(identical(other.fundingAmount, fundingAmount) || other.fundingAmount == fundingAmount)&&(identical(other.cashCurrency, cashCurrency) || other.cashCurrency == cashCurrency)&&(identical(other.fundingCurrency, fundingCurrency) || other.fundingCurrency == fundingCurrency));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,soldCost,realizedPl,cashDelta,cashAfter,fundingAmount);
+int get hashCode => Object.hash(runtimeType,soldCost,realizedPl,cashDelta,cashAfter,fundingAmount,cashCurrency,fundingCurrency);
 
 @override
 String toString() {
-  return 'AssetTradePreview(soldCost: $soldCost, realizedPl: $realizedPl, cashDelta: $cashDelta, cashAfter: $cashAfter, fundingAmount: $fundingAmount)';
+  return 'AssetTradePreview(soldCost: $soldCost, realizedPl: $realizedPl, cashDelta: $cashDelta, cashAfter: $cashAfter, fundingAmount: $fundingAmount, cashCurrency: $cashCurrency, fundingCurrency: $fundingCurrency)';
 }
 
 
@@ -368,7 +370,7 @@ abstract mixin class $AssetTradePreviewCopyWith<$Res>  {
   factory $AssetTradePreviewCopyWith(AssetTradePreview value, $Res Function(AssetTradePreview) _then) = _$AssetTradePreviewCopyWithImpl;
 @useResult
 $Res call({
- int? soldCost, int? realizedPl, int cashDelta, int cashAfter, int fundingAmount
+ int? soldCost, int? realizedPl, int cashDelta, int cashAfter, int fundingAmount, String? cashCurrency, String? fundingCurrency
 });
 
 
@@ -385,14 +387,16 @@ class _$AssetTradePreviewCopyWithImpl<$Res>
 
 /// Create a copy of AssetTradePreview
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? soldCost = freezed,Object? realizedPl = freezed,Object? cashDelta = null,Object? cashAfter = null,Object? fundingAmount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? soldCost = freezed,Object? realizedPl = freezed,Object? cashDelta = null,Object? cashAfter = null,Object? fundingAmount = null,Object? cashCurrency = freezed,Object? fundingCurrency = freezed,}) {
   return _then(_self.copyWith(
 soldCost: freezed == soldCost ? _self.soldCost : soldCost // ignore: cast_nullable_to_non_nullable
 as int?,realizedPl: freezed == realizedPl ? _self.realizedPl : realizedPl // ignore: cast_nullable_to_non_nullable
 as int?,cashDelta: null == cashDelta ? _self.cashDelta : cashDelta // ignore: cast_nullable_to_non_nullable
 as int,cashAfter: null == cashAfter ? _self.cashAfter : cashAfter // ignore: cast_nullable_to_non_nullable
 as int,fundingAmount: null == fundingAmount ? _self.fundingAmount : fundingAmount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,cashCurrency: freezed == cashCurrency ? _self.cashCurrency : cashCurrency // ignore: cast_nullable_to_non_nullable
+as String?,fundingCurrency: freezed == fundingCurrency ? _self.fundingCurrency : fundingCurrency // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -477,10 +481,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? soldCost,  int? realizedPl,  int cashDelta,  int cashAfter,  int fundingAmount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? soldCost,  int? realizedPl,  int cashDelta,  int cashAfter,  int fundingAmount,  String? cashCurrency,  String? fundingCurrency)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AssetTradePreview() when $default != null:
-return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,_that.fundingAmount);case _:
+return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,_that.fundingAmount,_that.cashCurrency,_that.fundingCurrency);case _:
   return orElse();
 
 }
@@ -498,10 +502,10 @@ return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? soldCost,  int? realizedPl,  int cashDelta,  int cashAfter,  int fundingAmount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? soldCost,  int? realizedPl,  int cashDelta,  int cashAfter,  int fundingAmount,  String? cashCurrency,  String? fundingCurrency)  $default,) {final _that = this;
 switch (_that) {
 case _AssetTradePreview():
-return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,_that.fundingAmount);case _:
+return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,_that.fundingAmount,_that.cashCurrency,_that.fundingCurrency);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -518,10 +522,10 @@ return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? soldCost,  int? realizedPl,  int cashDelta,  int cashAfter,  int fundingAmount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? soldCost,  int? realizedPl,  int cashDelta,  int cashAfter,  int fundingAmount,  String? cashCurrency,  String? fundingCurrency)?  $default,) {final _that = this;
 switch (_that) {
 case _AssetTradePreview() when $default != null:
-return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,_that.fundingAmount);case _:
+return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,_that.fundingAmount,_that.cashCurrency,_that.fundingCurrency);case _:
   return null;
 
 }
@@ -533,7 +537,7 @@ return $default(_that.soldCost,_that.realizedPl,_that.cashDelta,_that.cashAfter,
 @JsonSerializable()
 
 class _AssetTradePreview implements AssetTradePreview {
-  const _AssetTradePreview({this.soldCost, this.realizedPl, this.cashDelta = 0, this.cashAfter = 0, this.fundingAmount = 0});
+  const _AssetTradePreview({this.soldCost, this.realizedPl, this.cashDelta = 0, this.cashAfter = 0, this.fundingAmount = 0, this.cashCurrency, this.fundingCurrency});
   factory _AssetTradePreview.fromJson(Map<String, dynamic> json) => _$AssetTradePreviewFromJson(json);
 
 /// 이번에 파는 만큼의 취득원가 (매도 전용).
@@ -544,8 +548,12 @@ class _AssetTradePreview implements AssetTradePreview {
 @override@JsonKey() final  int cashDelta;
 /// 거래 후 예수금.
 @override@JsonKey() final  int cashAfter;
-/// 예수금이 모자라 결제 계좌에서 끌어올 금액 — 0 이면 이체가 생기지 않는다.
+/// 예수금이 모자라 결제 계좌에서 끌어올 금액(결제 계좌 통화) — 0 이면 이체가 생기지 않는다.
 @override@JsonKey() final  int fundingAmount;
+/// [cashDelta] · [cashAfter] 의 통화(투자 계좌 통화). 옛 서버면 없다.
+@override final  String? cashCurrency;
+/// [fundingAmount] 의 통화(결제 계좌 통화). 결제 계좌가 없거나 옛 서버면 없다.
+@override final  String? fundingCurrency;
 
 /// Create a copy of AssetTradePreview
 /// with the given fields replaced by the non-null parameter values.
@@ -560,16 +568,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AssetTradePreview&&(identical(other.soldCost, soldCost) || other.soldCost == soldCost)&&(identical(other.realizedPl, realizedPl) || other.realizedPl == realizedPl)&&(identical(other.cashDelta, cashDelta) || other.cashDelta == cashDelta)&&(identical(other.cashAfter, cashAfter) || other.cashAfter == cashAfter)&&(identical(other.fundingAmount, fundingAmount) || other.fundingAmount == fundingAmount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AssetTradePreview&&(identical(other.soldCost, soldCost) || other.soldCost == soldCost)&&(identical(other.realizedPl, realizedPl) || other.realizedPl == realizedPl)&&(identical(other.cashDelta, cashDelta) || other.cashDelta == cashDelta)&&(identical(other.cashAfter, cashAfter) || other.cashAfter == cashAfter)&&(identical(other.fundingAmount, fundingAmount) || other.fundingAmount == fundingAmount)&&(identical(other.cashCurrency, cashCurrency) || other.cashCurrency == cashCurrency)&&(identical(other.fundingCurrency, fundingCurrency) || other.fundingCurrency == fundingCurrency));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,soldCost,realizedPl,cashDelta,cashAfter,fundingAmount);
+int get hashCode => Object.hash(runtimeType,soldCost,realizedPl,cashDelta,cashAfter,fundingAmount,cashCurrency,fundingCurrency);
 
 @override
 String toString() {
-  return 'AssetTradePreview(soldCost: $soldCost, realizedPl: $realizedPl, cashDelta: $cashDelta, cashAfter: $cashAfter, fundingAmount: $fundingAmount)';
+  return 'AssetTradePreview(soldCost: $soldCost, realizedPl: $realizedPl, cashDelta: $cashDelta, cashAfter: $cashAfter, fundingAmount: $fundingAmount, cashCurrency: $cashCurrency, fundingCurrency: $fundingCurrency)';
 }
 
 
@@ -580,7 +588,7 @@ abstract mixin class _$AssetTradePreviewCopyWith<$Res> implements $AssetTradePre
   factory _$AssetTradePreviewCopyWith(_AssetTradePreview value, $Res Function(_AssetTradePreview) _then) = __$AssetTradePreviewCopyWithImpl;
 @override @useResult
 $Res call({
- int? soldCost, int? realizedPl, int cashDelta, int cashAfter, int fundingAmount
+ int? soldCost, int? realizedPl, int cashDelta, int cashAfter, int fundingAmount, String? cashCurrency, String? fundingCurrency
 });
 
 
@@ -597,14 +605,16 @@ class __$AssetTradePreviewCopyWithImpl<$Res>
 
 /// Create a copy of AssetTradePreview
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? soldCost = freezed,Object? realizedPl = freezed,Object? cashDelta = null,Object? cashAfter = null,Object? fundingAmount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? soldCost = freezed,Object? realizedPl = freezed,Object? cashDelta = null,Object? cashAfter = null,Object? fundingAmount = null,Object? cashCurrency = freezed,Object? fundingCurrency = freezed,}) {
   return _then(_AssetTradePreview(
 soldCost: freezed == soldCost ? _self.soldCost : soldCost // ignore: cast_nullable_to_non_nullable
 as int?,realizedPl: freezed == realizedPl ? _self.realizedPl : realizedPl // ignore: cast_nullable_to_non_nullable
 as int?,cashDelta: null == cashDelta ? _self.cashDelta : cashDelta // ignore: cast_nullable_to_non_nullable
 as int,cashAfter: null == cashAfter ? _self.cashAfter : cashAfter // ignore: cast_nullable_to_non_nullable
 as int,fundingAmount: null == fundingAmount ? _self.fundingAmount : fundingAmount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,cashCurrency: freezed == cashCurrency ? _self.cashCurrency : cashCurrency // ignore: cast_nullable_to_non_nullable
+as String?,fundingCurrency: freezed == fundingCurrency ? _self.fundingCurrency : fundingCurrency // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

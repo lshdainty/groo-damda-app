@@ -62,8 +62,14 @@ abstract class AssetTradePreview with _$AssetTradePreview {
     /// 거래 후 예수금.
     @Default(0) int cashAfter,
 
-    /// 예수금이 모자라 결제 계좌에서 끌어올 금액 — 0 이면 이체가 생기지 않는다.
+    /// 예수금이 모자라 결제 계좌에서 끌어올 금액(결제 계좌 통화) — 0 이면 이체가 생기지 않는다.
     @Default(0) int fundingAmount,
+
+    /// [cashDelta] · [cashAfter] 의 통화(투자 계좌 통화). 옛 서버면 없다.
+    String? cashCurrency,
+
+    /// [fundingAmount] 의 통화(결제 계좌 통화). 결제 계좌가 없거나 옛 서버면 없다.
+    String? fundingCurrency,
   }) = _AssetTradePreview;
 
   factory AssetTradePreview.fromJson(Map<String, dynamic> json) =>

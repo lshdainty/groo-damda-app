@@ -6,12 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/asset/domain/asset_krw.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart'
     show PLeaveConfirmCopy;
@@ -347,6 +349,44 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
         : null;
     final amountError = _tried && _amount <= 0 ? l.tradeAmountRequired : null;
     final critical = _viaCash && (_cashAfter ?? 0) < 0;
+    // 금액의 통화(I-13 L6) — 거래 후 예수금은 투자 계좌 통화(cashCurrency), 결제 계좌에서 옮기는 금액은 그 계좌 통화(fundingCurrency).
+    // 옛 서버(칸 없음)면 계좌 통화로 읽는다. 원화가 아니면 "약 …원" 을 함께 쓴다(그 계좌 환율, HALF_UP). 웹 AssetTradeDialog 와 같다.
+    final locale = Localizations.localeOf(context).toString();
+    final cashCurrency = _preview?.cashCurrency ?? widget.asset.currency;
+    final fundingCurrency =
+        _preview?.fundingCurrency ?? selected?.currency ?? kDefaultCurrency;
+    ({String main, String? approx}) moneyParts(
+      int n,
+      String? code,
+      double? rate,
+    ) {
+      if (!isForeignCurrency(code)) {
+        return (main: krwSigned(n, false, unit: true), approx: null);
+      }
+      final won = toKrw(n.abs(), code, rate);
+      return (
+        main: formatAssetAmount(n, code!, locale),
+        approx: l.fxApproxKrw(krwSigned(n < 0 ? -won : won, false, unit: true)),
+      );
+    }
+
+    final cashParts = moneyParts(
+      _cashAfter ?? 0,
+      cashCurrency,
+      widget.asset.exchangeRate,
+    );
+    // 결제 계좌에서 나가는 금액 = 충당액(결제 계좌 통화, I-13 L6). 예수금이 넉넉하면 0
+    final fundingRate = selected?.exchangeRate;
+    final settlementParts = moneyParts(
+      -_fundingAmount,
+      fundingCurrency,
+      fundingRate,
+    );
+    final fundingParts = moneyParts(
+      _fundingAmount,
+      fundingCurrency,
+      fundingRate,
+    );
     const gutter = EdgeInsets.symmetric(horizontal: PSpacing.globalGutter);
     TextStyle value(Color color) => PTypography.t5.copyWith(
       color: color,
@@ -526,21 +566,22 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             children: [
               PListItem(
                 title: _viaCash ? l.tradeCashAfter : l.tradeSettlementDelta,
-                suffix: Text(
-                  // 서버가 아직 답하기 전에는 자리만 잡아 둔다 — 틀린 값을 잠깐 보여 주느니 낫다.
-                  (_cashAfter == null || _cashDelta == null)
-                      ? '—'
-                      : _viaCash
-                      ? krwSigned(_cashAfter!, false, unit: true)
-                      : krwSigned(
-                          _cashDelta!.abs(),
-                          false,
-                          sign: _cashDelta! >= 0 ? '+' : kMinus,
-                          unit: true,
+                // 서버가 아직 답하기 전에는 자리만 잡아 둔다 — 틀린 값을 잠깐 보여 주느니 낫다.
+                suffix: (_cashAfter == null || _cashDelta == null)
+                    ? Text(
+                        '—',
+                        textAlign: TextAlign.end,
+                        style: value(c.fgNeutral),
+                      )
+                    : _moneyValue(
+                        _viaCash ? cashParts : settlementParts,
+                        value(critical ? c.fgCritical : c.fgNeutral),
+                        PTypography.t3.copyWith(
+                          color: c.fgNeutralSubtle,
+                          fontWeight: FontWeight.w500,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
-                  textAlign: TextAlign.end,
-                  style: value(critical ? c.fgCritical : c.fgNeutral),
-                ),
+                      ),
               ),
               if (realized != null)
                 PListItem(
@@ -563,8 +604,11 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             Padding(
               padding: gutter.copyWith(top: PSpacing.x2),
               child: Text(
+                // 문장 안 — "$900(약 1,170,000원)"
                 l.tradeFundingNotice(
-                  krwSigned(_fundingAmount, false, unit: true),
+                  fundingParts.approx == null
+                      ? fundingParts.main
+                      : '${fundingParts.main}(${fundingParts.approx})',
                 ),
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),
@@ -590,4 +634,24 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       ],
     );
   }
+}
+
+/// 미리보기 줄 값 — 외화면 아래 작게 "약 …원"(상세 예수금 줄과 같은 모양, I-13).
+Widget _moneyValue(
+  ({String main, String? approx}) parts,
+  TextStyle mainStyle,
+  TextStyle approxStyle,
+) {
+  final main = Text(parts.main, textAlign: TextAlign.end, style: mainStyle);
+  if (parts.approx == null) return main;
+  return PListValue(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        main,
+        Text(parts.approx!, textAlign: TextAlign.end, style: approxStyle),
+      ],
+    ),
+  );
 }
