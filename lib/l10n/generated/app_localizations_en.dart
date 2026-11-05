@@ -2958,18 +2958,121 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPageLoadError => 'Couldn\'t load the login page.';
 
   @override
+  String get dutchSendRequest => 'Request';
+
+  @override
+  String dutchSendRequestOf(String name) {
+    return 'Request payment from $name';
+  }
+
+  @override
+  String get dutchRequestSoon => 'Payment requests are coming soon.';
+
+  @override
+  String dutchStepLabel(int step, int total) {
+    return 'Step $step / $total';
+  }
+
+  @override
+  String get dutchInfoTitle => 'Settlement info';
+
+  @override
+  String get dutchTitleRequired => 'Please enter a settlement name.';
+
+  @override
+  String get dutchAmountRequired => 'Please enter the total amount.';
+
+  @override
+  String get dutchNeedOne => 'Add at least one person to split with.';
+
+  @override
+  String dutchPaidProgress(int paid, int total) {
+    return '$paid/$total paid';
+  }
+
+  @override
+  String get dutchAllPaid => 'Everyone paid';
+
+  @override
+  String dutchPerPersonOf(String amount) {
+    return '$amount each';
+  }
+
+  @override
+  String dutchPerPersonRestOf(String amount, String rest, String name) {
+    return '$amount each · $rest extra for $name';
+  }
+
+  @override
+  String dutchSummaryLine(int count, String amount) {
+    return '$count people · $amount each';
+  }
+
+  @override
+  String get dutchPayerPaid => 'Paid the bill';
+
+  @override
+  String dutchPayerPaidShare(String amount) {
+    return 'Paid the bill · share $amount';
+  }
+
+  @override
+  String dutchShareDone(String amount) {
+    return '$amount paid';
+  }
+
+  @override
+  String dutchShareDue(String amount) {
+    return '$amount to send';
+  }
+
+  @override
+  String get dutchBadgePaid => 'Paid';
+
+  @override
+  String get dutchMarkReceived => 'Received';
+
+  @override
+  String dutchMarkReceivedOf(String name) {
+    return 'Mark $name as received';
+  }
+
+  @override
+  String get dutchSettleAll => 'All received';
+
+  @override
+  String dutchParticipantsHeader(int count) {
+    return 'Participants · $count';
+  }
+
+  @override
+  String get dutchSuggestHeader => 'People you split with before';
+
+  @override
+  String dutchSuggestChip(String name) {
+    return '+ $name';
+  }
+
+  @override
+  String get dutchPayerSelect => 'Paid by';
+
+  @override
+  String get dutchLoadFailedTitle => 'Could not load splits';
+
+  @override
+  String get dutchLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get dutchNoReceivable => 'Nothing to receive';
+
+  @override
+  String get dutchMarkFailed => 'Couldn\'t mark as received.';
+
+  @override
   String get dutchTitle => 'Dutch Pay';
 
   @override
   String get dutchCreate => 'Create settlement';
-
-  @override
-  String dutchStepTitle(String title, int step, int total) {
-    return '$title ($step/$total)';
-  }
-
-  @override
-  String get dutchLoadFailed => 'Failed to load Dutch Pay';
 
   @override
   String get dutchTabActive => 'Active';
@@ -2990,23 +3093,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchEmptyPastTitle => 'No completed settlements';
 
   @override
-  String get dutchEmptyPastSub => 'Completed settlements appear here.';
+  String get dutchEmptyPastSub => 'Finished splits gather here.';
 
   @override
   String get dutchEmptyFriendsTitle => 'No friends yet';
 
   @override
-  String get dutchEmptyFriendsSub =>
-      'Add participants to a settlement to see them here.';
+  String get dutchEmptyFriendsSub => 'Friends you add to a split gather here.';
 
   @override
   String get dutchActionFailed => 'Failed';
 
   @override
-  String get dutchSettleFailed => 'Settlement failed';
+  String get dutchSettleFailed => 'Couldn\'t mark all as received.';
 
   @override
-  String get dutchDeleteFailed => 'Delete failed';
+  String get dutchDeleteFailed => 'Couldn\'t delete the settlement.';
 
   @override
   String get dutchToReceive => 'To receive';
@@ -3047,16 +3149,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchPayer => 'Payer';
 
   @override
-  String get dutchSetPayer => 'Set as payer';
-
-  @override
   String get dutchNameLabel => 'Settlement name';
 
   @override
   String get dutchNamePlaceholder => 'e.g. Team dinner';
 
   @override
-  String get dutchPlaceLabel => 'Place (optional)';
+  String get dutchPlaceLabel => 'Place';
 
   @override
   String get dutchPlacePlaceholder => 'Place or merchant';
@@ -3066,14 +3165,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dutchDateLabel => 'Date';
-
-  @override
-  String get dutchSelectParticipants => 'Select participants';
-
-  @override
-  String dutchNSelected(int count) {
-    return '$count selected';
-  }
 
   @override
   String get dutchAddNamePlaceholder => 'Enter a name to add';
@@ -3091,13 +3182,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchPrev => 'Back';
 
   @override
-  String get dutchDetailTitle => 'Settlement details';
-
-  @override
   String get dutchParticipant => 'Participant';
-
-  @override
-  String get dutchSettleAction => 'Mark as settled';
 
   @override
   String get dutchDeleteTitle => 'Delete Dutch Pay';
@@ -3111,34 +3196,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchRequestAll => 'Request all';
 
   @override
-  String dutchRequestSent(String name) {
-    return 'Payment request sent to $name (KakaoTalk/SMS coming soon)';
-  }
-
-  @override
-  String dutchRequestSentBulk(int count) {
-    return 'Payment request sent to $count people (KakaoTalk/SMS coming soon)';
-  }
-
-  @override
-  String get dutchAllSettled => 'All participants have already settled';
-
-  @override
-  String dutchNeedsPayment(String amount) {
-    return 'Send $amount원';
-  }
-
-  @override
   String get dutchNoName => '(No name)';
-
-  @override
-  String get dutchMarkPaid => 'Mark as paid';
-
-  @override
-  String get dutchRequest => 'Request';
-
-  @override
-  String get dutchUnsettled => 'Unsettled';
 
   @override
   String get dutchStartTitle => 'Start Dutch Pay';

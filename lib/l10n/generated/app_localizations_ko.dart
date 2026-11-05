@@ -2901,18 +2901,121 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authPageLoadError => '로그인 페이지를 불러오지 못했어요.';
 
   @override
+  String get dutchSendRequest => '요청';
+
+  @override
+  String dutchSendRequestOf(String name) {
+    return '$name님에게 송금 요청';
+  }
+
+  @override
+  String get dutchRequestSoon => '송금 요청은 곧 열려요.';
+
+  @override
+  String dutchStepLabel(int step, int total) {
+    return '$step / $total단계';
+  }
+
+  @override
+  String get dutchInfoTitle => '정산 정보';
+
+  @override
+  String get dutchTitleRequired => '정산 이름을 입력해주세요.';
+
+  @override
+  String get dutchAmountRequired => '총 금액을 입력해주세요.';
+
+  @override
+  String get dutchNeedOne => '함께 정산할 사람을 한 명 이상 더해주세요.';
+
+  @override
+  String dutchPaidProgress(int paid, int total) {
+    return '$paid/$total명 냈어요';
+  }
+
+  @override
+  String get dutchAllPaid => '모두 냈어요';
+
+  @override
+  String dutchPerPersonOf(String amount) {
+    return '1인당 $amount';
+  }
+
+  @override
+  String dutchPerPersonRestOf(String amount, String rest, String name) {
+    return '1인당 $amount · $rest은 $name';
+  }
+
+  @override
+  String dutchSummaryLine(int count, String amount) {
+    return '$count명 · 1인당 $amount';
+  }
+
+  @override
+  String get dutchPayerPaid => '결제했어요';
+
+  @override
+  String dutchPayerPaidShare(String amount) {
+    return '결제했어요 · 몫 $amount';
+  }
+
+  @override
+  String dutchShareDone(String amount) {
+    return '$amount 냈어요';
+  }
+
+  @override
+  String dutchShareDue(String amount) {
+    return '$amount 보낼 차례';
+  }
+
+  @override
+  String get dutchBadgePaid => '냈어요';
+
+  @override
+  String get dutchMarkReceived => '받음';
+
+  @override
+  String dutchMarkReceivedOf(String name) {
+    return '$name 받음 처리';
+  }
+
+  @override
+  String get dutchSettleAll => '모두 받음';
+
+  @override
+  String dutchParticipantsHeader(int count) {
+    return '참여자 · $count';
+  }
+
+  @override
+  String get dutchSuggestHeader => '함께 정산했던 사람';
+
+  @override
+  String dutchSuggestChip(String name) {
+    return '+ $name';
+  }
+
+  @override
+  String get dutchPayerSelect => '결제한 사람';
+
+  @override
+  String get dutchLoadFailedTitle => '더치페이를 불러오지 못했어요';
+
+  @override
+  String get dutchLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get dutchNoReceivable => '받을 돈 없음';
+
+  @override
+  String get dutchMarkFailed => '받음 처리를 하지 못했어요.';
+
+  @override
   String get dutchTitle => '더치페이';
 
   @override
   String get dutchCreate => '정산 만들기';
-
-  @override
-  String dutchStepTitle(String title, int step, int total) {
-    return '$title ($step/$total)';
-  }
-
-  @override
-  String get dutchLoadFailed => '더치페이 로드 실패';
 
   @override
   String get dutchTabActive => '진행 중';
@@ -2927,28 +3030,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchEmptyActiveTitle => '진행 중인 정산이 없어요';
 
   @override
-  String get dutchEmptyActiveSub => '+ 버튼으로 새 정산을 만들어보세요.';
+  String get dutchEmptyActiveSub => '오른쪽 아래 + 버튼으로 새 정산을 만들어보세요.';
 
   @override
   String get dutchEmptyPastTitle => '완료된 정산이 없어요';
 
   @override
-  String get dutchEmptyPastSub => '정산을 마치면 여기에 모입니다.';
+  String get dutchEmptyPastSub => '정산을 마치면 여기에 모여요.';
 
   @override
   String get dutchEmptyFriendsTitle => '함께 정산한 친구가 없어요';
 
   @override
-  String get dutchEmptyFriendsSub => '정산에 참여자를 추가하면 여기에 모입니다.';
+  String get dutchEmptyFriendsSub => '정산에 친구를 더하면 여기에 모여요.';
 
   @override
   String get dutchActionFailed => '실패';
 
   @override
-  String get dutchSettleFailed => '정산 실패';
+  String get dutchSettleFailed => '모두 받음 처리를 하지 못했어요.';
 
   @override
-  String get dutchDeleteFailed => '삭제 실패';
+  String get dutchDeleteFailed => '정산을 삭제하지 못했어요.';
 
   @override
   String get dutchToReceive => '받을 돈';
@@ -2989,16 +3092,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchPayer => '결제자';
 
   @override
-  String get dutchSetPayer => '결제자로';
-
-  @override
   String get dutchNameLabel => '정산 이름';
 
   @override
   String get dutchNamePlaceholder => '예: 팀 저녁 회식';
 
   @override
-  String get dutchPlaceLabel => '장소 (선택)';
+  String get dutchPlaceLabel => '장소';
 
   @override
   String get dutchPlacePlaceholder => '장소 또는 상호명';
@@ -3008,14 +3108,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dutchDateLabel => '날짜';
-
-  @override
-  String get dutchSelectParticipants => '참여자 선택';
-
-  @override
-  String dutchNSelected(int count) {
-    return '$count명 선택';
-  }
 
   @override
   String get dutchAddNamePlaceholder => '이름 입력 후 추가';
@@ -3033,13 +3125,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchPrev => '이전';
 
   @override
-  String get dutchDetailTitle => '정산 상세';
-
-  @override
   String get dutchParticipant => '참여자';
-
-  @override
-  String get dutchSettleAction => '정산 완료 처리';
 
   @override
   String get dutchDeleteTitle => '더치페이 삭제';
@@ -3053,34 +3139,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchRequestAll => '일괄 요청';
 
   @override
-  String dutchRequestSent(String name) {
-    return '$name님에게 송금 요청을 보냈어요 (추후 카카오톡·문자 연동 예정)';
-  }
-
-  @override
-  String dutchRequestSentBulk(int count) {
-    return '$count명에게 송금 요청을 보냈어요 (추후 카카오톡·문자 연동 예정)';
-  }
-
-  @override
-  String get dutchAllSettled => '모든 참여자가 이미 정산을 완료했어요';
-
-  @override
-  String dutchNeedsPayment(String amount) {
-    return '$amount원 송금 필요';
-  }
-
-  @override
   String get dutchNoName => '(이름 없음)';
-
-  @override
-  String get dutchMarkPaid => '송금 완료 처리';
-
-  @override
-  String get dutchRequest => '요청';
-
-  @override
-  String get dutchUnsettled => '미정산';
 
   @override
   String get dutchStartTitle => '더치페이 시작';

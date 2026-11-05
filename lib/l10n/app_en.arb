@@ -1746,22 +1746,61 @@
   "authStateMismatch": "Security check failed (state mismatch). Please try again.",
   "authNoAuthCode": "Couldn't get the authorization code. Please try again.",
   "authPageLoadError": "Couldn't load the login page.",
+  "dutchSendRequest": "Request",
+  "dutchSendRequestOf": "Request payment from {name}",
+  "dutchRequestSoon": "Payment requests are coming soon.",
+  "@dutchSendRequestOf": {"placeholders": {"name": {"type": "String"}}},
+  "dutchStepLabel": "Step {step} / {total}",
+  "@dutchStepLabel": {"placeholders": {"step": {"type": "int"}, "total": {"type": "int"}}},
+  "dutchInfoTitle": "Settlement info",
+  "dutchTitleRequired": "Please enter a settlement name.",
+  "dutchAmountRequired": "Please enter the total amount.",
+  "dutchNeedOne": "Add at least one person to split with.",
+  "dutchPaidProgress": "{paid}/{total} paid",
+  "@dutchPaidProgress": {"placeholders": {"paid": {"type": "int"}, "total": {"type": "int"}}},
+  "dutchAllPaid": "Everyone paid",
+  "dutchPerPersonOf": "{amount} each",
+  "@dutchPerPersonOf": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchPerPersonRestOf": "{amount} each · {rest} extra for {name}",
+  "@dutchPerPersonRestOf": {"placeholders": {"amount": {"type": "String"}, "rest": {"type": "String"}, "name": {"type": "String"}}},
+  "dutchSummaryLine": "{count} people · {amount} each",
+  "@dutchSummaryLine": {"placeholders": {"count": {"type": "int"}, "amount": {"type": "String"}}},
+  "dutchPayerPaid": "Paid the bill",
+  "dutchPayerPaidShare": "Paid the bill · share {amount}",
+  "@dutchPayerPaidShare": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchShareDone": "{amount} paid",
+  "@dutchShareDone": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchShareDue": "{amount} to send",
+  "@dutchShareDue": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchBadgePaid": "Paid",
+  "dutchMarkReceived": "Received",
+  "dutchMarkReceivedOf": "Mark {name} as received",
+  "@dutchMarkReceivedOf": {"placeholders": {"name": {"type": "String"}}},
+  "dutchSettleAll": "All received",
+  "dutchParticipantsHeader": "Participants · {count}",
+  "@dutchParticipantsHeader": {"placeholders": {"count": {"type": "int"}}},
+  "dutchSuggestHeader": "People you split with before",
+  "dutchSuggestChip": "+ {name}",
+  "@dutchSuggestChip": {"placeholders": {"name": {"type": "String"}}},
+  "dutchPayerSelect": "Paid by",
+  "dutchLoadFailedTitle": "Could not load splits",
+  "dutchLoadFailedDesc": "Please try again in a moment.",
+  "dutchNoReceivable": "Nothing to receive",
+  "dutchMarkFailed": "Couldn't mark as received.",
   "dutchTitle": "Dutch Pay",
   "dutchCreate": "Create settlement",
-  "dutchStepTitle": "{title} ({step}/{total})",
-  "dutchLoadFailed": "Failed to load Dutch Pay",
   "dutchTabActive": "Active",
   "dutchTabPast": "Done",
   "dutchTabFriends": "Friends",
   "dutchEmptyActiveTitle": "No active settlements",
   "dutchEmptyActiveSub": "Tap + to create a new settlement.",
   "dutchEmptyPastTitle": "No completed settlements",
-  "dutchEmptyPastSub": "Completed settlements appear here.",
+  "dutchEmptyPastSub": "Finished splits gather here.",
   "dutchEmptyFriendsTitle": "No friends yet",
-  "dutchEmptyFriendsSub": "Add participants to a settlement to see them here.",
+  "dutchEmptyFriendsSub": "Friends you add to a split gather here.",
   "dutchActionFailed": "Failed",
-  "dutchSettleFailed": "Settlement failed",
-  "dutchDeleteFailed": "Delete failed",
+  "dutchSettleFailed": "Couldn't mark all as received.",
+  "dutchDeleteFailed": "Couldn't delete the settlement.",
   "dutchToReceive": "To receive",
   "dutchToSend": "To send",
   "dutchFromPeople": "from {count} people",
@@ -1800,30 +1839,18 @@
   "dutchSettled": "Settled",
   "dutchMe": "Me",
   "dutchPayer": "Payer",
-  "dutchSetPayer": "Set as payer",
   "dutchNameLabel": "Settlement name",
   "dutchNamePlaceholder": "e.g. Team dinner",
-  "dutchPlaceLabel": "Place (optional)",
+  "dutchPlaceLabel": "Place",
   "dutchPlacePlaceholder": "Place or merchant",
   "dutchTotalLabel": "Total amount",
   "dutchDateLabel": "Date",
-  "dutchSelectParticipants": "Select participants",
-  "dutchNSelected": "{count} selected",
-  "@dutchNSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "dutchAddNamePlaceholder": "Enter a name to add",
   "dutchNameAlreadyAdded": "That name is already added.",
   "dutchAdd": "Add",
   "dutchNext": "Next",
   "dutchPrev": "Back",
-  "dutchDetailTitle": "Settlement details",
   "dutchParticipant": "Participant",
-  "dutchSettleAction": "Mark as settled",
   "dutchDeleteTitle": "Delete Dutch Pay",
   "dutchDeleteConfirm": "Delete the \"{title}\" Dutch Pay? A deleted Dutch Pay cannot be restored.",
   "@dutchDeleteConfirm": {
@@ -1834,35 +1861,7 @@
     }
   },
   "dutchRequestAll": "Request all",
-  "dutchRequestSent": "Payment request sent to {name} (KakaoTalk/SMS coming soon)",
-  "@dutchRequestSent": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "dutchRequestSentBulk": "Payment request sent to {count} people (KakaoTalk/SMS coming soon)",
-  "@dutchRequestSentBulk": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "dutchAllSettled": "All participants have already settled",
-  "dutchNeedsPayment": "Send {amount}원",
-  "@dutchNeedsPayment": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "dutchNoName": "(No name)",
-  "dutchMarkPaid": "Mark as paid",
-  "dutchRequest": "Request",
-  "dutchUnsettled": "Unsettled",
   "dutchStartTitle": "Start Dutch Pay",
   "dutchFromTxDesc": "Create a Dutch Pay settlement from this transaction. Send payment requests to participants and track settlement progress.",
   "dutchSplitMethod": "Split method",

@@ -1773,35 +1773,61 @@
   "authStateMismatch": "보안 검증에 실패했어요 (state 불일치). 다시 시도해주세요.",
   "authNoAuthCode": "인가코드를 받지 못했어요. 다시 시도해주세요.",
   "authPageLoadError": "로그인 페이지를 불러오지 못했어요.",
+  "dutchSendRequest": "요청",
+  "dutchSendRequestOf": "{name}님에게 송금 요청",
+  "dutchRequestSoon": "송금 요청은 곧 열려요.",
+  "@dutchSendRequestOf": {"placeholders": {"name": {"type": "String"}}},
+  "dutchStepLabel": "{step} / {total}단계",
+  "@dutchStepLabel": {"placeholders": {"step": {"type": "int"}, "total": {"type": "int"}}},
+  "dutchInfoTitle": "정산 정보",
+  "dutchTitleRequired": "정산 이름을 입력해주세요.",
+  "dutchAmountRequired": "총 금액을 입력해주세요.",
+  "dutchNeedOne": "함께 정산할 사람을 한 명 이상 더해주세요.",
+  "dutchPaidProgress": "{paid}/{total}명 냈어요",
+  "@dutchPaidProgress": {"placeholders": {"paid": {"type": "int"}, "total": {"type": "int"}}},
+  "dutchAllPaid": "모두 냈어요",
+  "dutchPerPersonOf": "1인당 {amount}",
+  "@dutchPerPersonOf": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchPerPersonRestOf": "1인당 {amount} · {rest}은 {name}",
+  "@dutchPerPersonRestOf": {"placeholders": {"amount": {"type": "String"}, "rest": {"type": "String"}, "name": {"type": "String"}}},
+  "dutchSummaryLine": "{count}명 · 1인당 {amount}",
+  "@dutchSummaryLine": {"placeholders": {"count": {"type": "int"}, "amount": {"type": "String"}}},
+  "dutchPayerPaid": "결제했어요",
+  "dutchPayerPaidShare": "결제했어요 · 몫 {amount}",
+  "@dutchPayerPaidShare": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchShareDone": "{amount} 냈어요",
+  "@dutchShareDone": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchShareDue": "{amount} 보낼 차례",
+  "@dutchShareDue": {"placeholders": {"amount": {"type": "String"}}},
+  "dutchBadgePaid": "냈어요",
+  "dutchMarkReceived": "받음",
+  "dutchMarkReceivedOf": "{name} 받음 처리",
+  "@dutchMarkReceivedOf": {"placeholders": {"name": {"type": "String"}}},
+  "dutchSettleAll": "모두 받음",
+  "dutchParticipantsHeader": "참여자 · {count}",
+  "@dutchParticipantsHeader": {"placeholders": {"count": {"type": "int"}}},
+  "dutchSuggestHeader": "함께 정산했던 사람",
+  "dutchSuggestChip": "+ {name}",
+  "@dutchSuggestChip": {"placeholders": {"name": {"type": "String"}}},
+  "dutchPayerSelect": "결제한 사람",
+  "dutchLoadFailedTitle": "더치페이를 불러오지 못했어요",
+  "dutchLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "dutchNoReceivable": "받을 돈 없음",
+  "dutchMarkFailed": "받음 처리를 하지 못했어요.",
   "dutchTitle": "더치페이",
   "dutchCreate": "정산 만들기",
-  "dutchStepTitle": "{title} ({step}/{total})",
-  "@dutchStepTitle": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      },
-      "step": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "dutchLoadFailed": "더치페이 로드 실패",
   "dutchTabActive": "진행 중",
   "dutchTabPast": "완료",
   "dutchTabFriends": "친구",
   "dutchEmptyActiveTitle": "진행 중인 정산이 없어요",
-  "dutchEmptyActiveSub": "+ 버튼으로 새 정산을 만들어보세요.",
+  "dutchEmptyActiveSub": "오른쪽 아래 + 버튼으로 새 정산을 만들어보세요.",
   "dutchEmptyPastTitle": "완료된 정산이 없어요",
-  "dutchEmptyPastSub": "정산을 마치면 여기에 모입니다.",
+  "dutchEmptyPastSub": "정산을 마치면 여기에 모여요.",
   "dutchEmptyFriendsTitle": "함께 정산한 친구가 없어요",
-  "dutchEmptyFriendsSub": "정산에 참여자를 추가하면 여기에 모입니다.",
+  "dutchEmptyFriendsSub": "정산에 친구를 더하면 여기에 모여요.",
   "dutchActionFailed": "실패",
-  "dutchSettleFailed": "정산 실패",
-  "dutchDeleteFailed": "삭제 실패",
+  "dutchSettleFailed": "모두 받음 처리를 하지 못했어요.",
+  "dutchDeleteFailed": "정산을 삭제하지 못했어요.",
   "dutchToReceive": "받을 돈",
   "dutchToSend": "보낼 돈",
   "dutchFromPeople": "{count}명에게서",
@@ -1840,30 +1866,18 @@
   "dutchSettled": "정산 완료",
   "dutchMe": "나",
   "dutchPayer": "결제자",
-  "dutchSetPayer": "결제자로",
   "dutchNameLabel": "정산 이름",
   "dutchNamePlaceholder": "예: 팀 저녁 회식",
-  "dutchPlaceLabel": "장소 (선택)",
+  "dutchPlaceLabel": "장소",
   "dutchPlacePlaceholder": "장소 또는 상호명",
   "dutchTotalLabel": "총 금액",
   "dutchDateLabel": "날짜",
-  "dutchSelectParticipants": "참여자 선택",
-  "dutchNSelected": "{count}명 선택",
-  "@dutchNSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "dutchAddNamePlaceholder": "이름 입력 후 추가",
   "dutchNameAlreadyAdded": "이미 넣은 이름이에요.",
   "dutchAdd": "추가",
   "dutchNext": "다음",
   "dutchPrev": "이전",
-  "dutchDetailTitle": "정산 상세",
   "dutchParticipant": "참여자",
-  "dutchSettleAction": "정산 완료 처리",
   "dutchDeleteTitle": "더치페이 삭제",
   "dutchDeleteConfirm": "\"{title}\" 더치페이를 삭제할까요? 삭제한 더치페이는 되돌릴 수 없어요.",
   "@dutchDeleteConfirm": {
@@ -1874,35 +1888,7 @@
     }
   },
   "dutchRequestAll": "일괄 요청",
-  "dutchRequestSent": "{name}님에게 송금 요청을 보냈어요 (추후 카카오톡·문자 연동 예정)",
-  "@dutchRequestSent": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "dutchRequestSentBulk": "{count}명에게 송금 요청을 보냈어요 (추후 카카오톡·문자 연동 예정)",
-  "@dutchRequestSentBulk": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "dutchAllSettled": "모든 참여자가 이미 정산을 완료했어요",
-  "dutchNeedsPayment": "{amount}원 송금 필요",
-  "@dutchNeedsPayment": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "dutchNoName": "(이름 없음)",
-  "dutchMarkPaid": "송금 완료 처리",
-  "dutchRequest": "요청",
-  "dutchUnsettled": "미정산",
   "dutchStartTitle": "더치페이 시작",
   "dutchFromTxDesc": "이 거래를 기준으로 더치페이 정산을 만듭니다. 참여자에게 송금 요청을 보내고, 정산 진행 상황을 추적할 수 있어요.",
   "dutchSplitMethod": "분배 방식",
