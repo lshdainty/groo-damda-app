@@ -1,5 +1,6 @@
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,19 @@ import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showAssetEditForm;
+import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart'
+    show PLeaveConfirmCopy;
+import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart' as dsf;
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/core/format/chart_axis.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
@@ -36,8 +50,6 @@ import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
-import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
 import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
@@ -432,24 +444,34 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     // CREDIT_CARD 는 신판 카드 상세 본문(_CardDetailBody) — 회차 히어로가 금액 담당.
     final isCredit = asset.assetType == 'CREDIT_CARD';
 
+    // 신용카드는 새 부품 줄(List · KvRow)이 스스로 좌우 24 를 가지므로 목록은 끝까지 벌리고 머리만 24 안쪽에 둔다.
+    final hero = _HeroCard(
+      asset: asset,
+      meta: meta,
+      valueLabel: valueLabel,
+      isCard: isCard,
+      masked: masked,
+      nameRowOnly: isCredit,
+    );
     return ListView(
-      padding: const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
+      padding: isCredit
+          ? const EdgeInsets.only(bottom: PSpace.x16)
+          : const EdgeInsets.fromLTRB(PSpace.xl, 0, PSpace.xl, PSpace.x16),
       children: [
-        _HeroCard(
-          asset: asset,
-          meta: meta,
-          valueLabel: valueLabel,
-          isCard: isCard,
-          masked: masked,
-          nameRowOnly: isCredit,
-        ),
+        if (isCredit)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: PSpace.xl),
+            child: hero,
+          )
+        else
+          hero,
         if (isCredit) ...[
           _CardDetailBody(asset: asset, masked: masked, onEdit: widget.onEdit),
         ] else ...[
           const SizedBox(height: PSpace.x16),
           // 체크카드 — 실적 배지만(청구 회차 없음, design 신판)
           if (isCard) ...[
-            _CardPerfBadge(assetRowId: asset.rowId, masked: masked),
+            _CardPerfBadge(assetRowId: asset.rowId, masked: masked, gutter: 0),
             const SizedBox(height: PSpace.x16),
           ],
           if (isInv) ...[
@@ -1859,12 +1881,6 @@ class _DayGroupHeader extends StatelessWidget {
 
 /// 신용카드 청구 사이클 — 결제예정액·예정일 + '지금 결제' + 청구이력.
 /// GET /asset/{id}/billing 사용. '지금 결제' 후 billing/assets invalidate.
-/// chart green 시멘틱(실적 달성) — 다크 light variant 스왑(웹 --color-cat-green 미러).
-Color _chartGreenOf(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark
-    ? PColors.dark.chartGreen
-    : PColors.light.chartGreen;
-
 /// 결제 회차(청구월) 항목 — 예정 1건 + 과거 결제 완료(COMPLETED) 이력.
 class _CardStatement {
   const _CardStatement({
@@ -1909,109 +1925,87 @@ class _CardStatement {
 /// 카드 월 실적 배지 — design 신판(달성/잔여 요약, 웹 CardPerfBadge 미러).
 /// 달성: cat-green 10% tint / 미달: sunken. 실적 무관 카드면 숨김.
 class _CardPerfBadge extends ConsumerWidget {
-  const _CardPerfBadge({required this.assetRowId, required this.masked});
+  const _CardPerfBadge({
+    required this.assetRowId,
+    required this.masked,
+    this.gutter = PSpacing.globalGutter,
+  });
   final int assetRowId;
   final bool masked;
 
+  /// 줄 좌우 여백 — 이미 24 안쪽에 선 본문(체크카드)은 0.
+  final double gutter;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
+    final ym = _currentYearMonth();
     final async = ref.watch(
-      cardPerformanceProvider((
-        assetRowId: assetRowId,
-        yearMonth: _currentYearMonth(),
-      )),
+      cardPerformanceProvider((assetRowId: assetRowId, yearMonth: ym)),
     );
     final p = async.value;
     if (async.isLoading && p == null) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-        decoration: BoxDecoration(
-          color: t.bgSunken,
-          borderRadius: PRadius.brLg,
-        ),
-        child: const Row(
-          children: [
-            PSkeleton(width: 30, height: 30, borderRadius: PRadius.brFull),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  PSkeleton.line(width: 130, height: 13),
-                  SizedBox(height: 4),
-                  PSkeleton.line(width: 160, height: 11),
-                ],
+      return ExcludeSemantics(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: gutter,
+            vertical: PSpacing.x3,
+          ),
+          child: Row(
+            children: [
+              PSkeleton(width: 40, height: 40, borderRadius: PRadius.tile(40)),
+              const SizedBox(width: PSpacing.x3),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PSkeleton.line(width: 110, height: 16),
+                    SizedBox(height: 4),
+                    PSkeleton.line(width: 160, height: 12),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
+    // 실적 무관 카드면 줄을 그리지 않는다. 실패도 그리지 않는다(실적은 덧붙임).
     if (p == null || !p.isRequired || p.requiredAmount == null) {
       return const SizedBox.shrink();
     }
     final done = p.isAchieved;
-    final green = _chartGreenOf(context);
     final pct = (p.achievementRate.clamp(0, 1.5) * 100).truncate();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-      decoration: BoxDecoration(
-        // 달성은 옅은 초록 바탕(chart-green-weak, 불투명) — 옛 이끼 팔레트 고정값을 걷었다(01A-009)
-        color: done
-            ? (Theme.of(context).brightness == Brightness.dark
-                  ? PColors.dark.chartGreenWeak
-                  : PColors.light.chartGreenWeak)
-            : t.bgSunken,
-        borderRadius: PRadius.brLg,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: t.bgSurface,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              done ? LucideIcons.check : LucideIcons.target,
-              size: 15,
-              color: done ? green : t.fgSecondary,
-            ),
+    final month = int.parse(ym.substring(5, 7));
+    String money(int v) => krwSigned(v, false, unit: true);
+    return PList(
+      semanticLabel: l.assetPerfTitle('$month'),
+      children: [
+        PListItem(
+          gutter: gutter,
+          // 앞 타일 40 — 미달 chart-gray-weak + target, 달성 chart-green-weak + check (list.md 타일 · v111)
+          prefix: PListTile(
+            background: done ? c.chartGreenWeak : c.chartGrayWeak,
+            color: done ? c.chartGreen : c.chartGray,
+            child: Icon(done ? LucideIcons.check : LucideIcons.target),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  done
-                      ? l.assetPerfDone
-                      : l.assetPerfRemain(
-                          krwSigned(p.remainingAmount ?? 0, masked, unit: true),
-                        ),
-                  style: PTypo.bodySm.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.bold,
+          title: l.assetPerfTitle('$month'),
+          detail: masked
+              ? '••••••'
+              : '${money(p.currentAmount)} / ${money(p.requiredAmount!)} · $pct%',
+          suffix: PBadge(
+            size: PBadgeSize.large,
+            tone: done ? PBadgeTone.positive : PBadgeTone.neutral,
+            label: done
+                ? l.assetPerfAchieved
+                : l.assetPerfRemain(
+                    krwSigned(p.remainingAmount ?? 0, masked, unit: true),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  masked
-                      ? '•••••• · $pct%'
-                      : '${krw(p.currentAmount)} / ${krw(p.requiredAmount!)}${wonUnit()} · $pct%',
-                  style: PTypo.caption.copyWith(color: t.fgTertiary),
-                ),
-              ],
-            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -2190,144 +2184,42 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     return null;
   }
 
-  /// 결제 시트 — 금액을 고칠 수 있다(부분 선결제). 기본값은 남은 청구액.
+  /// 지금 결제 = 입력 폼 시트(I-17 53) — 금액을 고칠 수 있다(부분 선결제). 기본값은 남은 청구액.
   /// 일부만 내면 나머지는 결제일에 정상적으로 빠진다(서버가 '사용액 − 이미 결제액'으로 잡는다).
-  Future<void> _confirmAndPay(CardBilling b, _CardStatement st) async {
+  /// 시트 한 장 — 상세 시트 위에 또 뜨지 않는다(페이지 위). 바깥 · 끌기로 안 닫히고, 금액을 바꾼 채 닫으면 묻는다.
+  Future<void> _confirmAndPay(CardBilling b, _CardStatement st) {
     final l = AppLocalizations.of(context);
-    // 고른 회차의 예정액이 상한 — 다음 회차를 미리 낼 수도 있다.
-    final upcoming = st.amount;
     // 돈은 잔액에 잡힌 빚까지만 움직인다(서버 payoff 캡). 청구액이 그보다 크면 차액은
     // 청구 기록만 남고 계좌에서 안 빠진다 — 완료만 보고 빠진 줄 아는 일이 없게 미리 알린다.
     final balance = widget.asset.balance ?? 0;
     final debt = balance < 0 ? -balance : 0;
-    final ctrl = TextEditingController(text: upcoming.toString());
-    final sheet = PSheetController();
-
-    int parsed() => int.tryParse(ctrl.text.replaceAll(',', '')) ?? 0;
-    void syncCanSubmit() {
-      final v = parsed();
-      sheet.setCanSubmit(v > 0 && v <= upcoming);
-    }
-
-    ctrl.addListener(syncCanSubmit);
-    // 채워 둔 금액으로 한 번 판정한다 — 리스너는 입력이 바뀔 때만 돌아, 안 부르면
-    // [결제하기] 가 기본값(꺼짐)으로 남는다. 금액 칸을 한 번 눌러야 켜졌다(2026-09-22 iOS).
-    syncCanSubmit();
-    // 폼 저장 실패 = 시트 안 맨 위 Callout(입력 금액 유지 · 시트 유지 · 스낵바 없음). 시트를 다시 열면 새 값이라 지워진다.
-    final failed = ValueNotifier<bool>(false);
-    final errorKey = GlobalKey();
-    sheet.onSubmit = () async {
-      // 같은 제출이 두 번 들어와도(Enter 연타) 요청은 한 번만 — 진행 중 제출은 컨트롤러가, 이중 진입은 _paying 이 막는다.
-      failed.value = false;
-      sheet.setSubmitting(true);
-      final ok = await _pay(parsed(), st.paymentDate);
-      sheet.setSubmitting(false);
-      if (ok) {
-        if (mounted) Navigator.of(context, rootNavigator: true).pop();
-      } else if (mounted) {
-        failed.value = true;
-        revealFormError(errorKey);
-      }
-    };
-
-    await showPSheet<void>(
+    final focus = FocusNode(debugLabel: 'CardPay amount');
+    final probe = _PayProbe();
+    return PBottomSheet.show<void>(
       context,
-      title: l.assetPayNow,
-      shrinkWrap: true,
-      contentBuilder: (ctx, _) {
-        final t = ctx.tokens;
-        return StatefulBuilder(
-          builder: (ctx, setLocal) {
-            ctrl.removeListener(syncCanSubmit);
-            void onChanged() {
-              syncCanSubmit();
-              setLocal(() {});
-            }
-
-            ctrl.addListener(onChanged);
-            final v = parsed();
-            final dateSuffix = l.assetPayConfirmDateSuffix(st.paymentDate);
-            final moveNote = b.paymentAssetRowId == null
-                ? l.assetPayNoAccountNote
-                : (debt < v
-                      ? l.assetPayMoveNote(krwSigned(debt, false, unit: true))
-                      : null);
-            // 시트 본문 좌우는 호출처가 쥔다 — showPSheet 는 헤더·푸터만 24 를 준다.
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(
-                PSpace.xl,
-                0,
-                PSpace.xl,
-                PSpace.x16,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: failed,
-                    builder: (_, f, _) => f
-                        ? FormErrorCallout(
-                            key: errorKey,
-                            message: l.assetPayFailed,
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  Text(
-                    '${l.assetPayConfirmMessage(krw(upcoming))}$dateSuffix',
-                    style: PTypo.body.copyWith(
-                      color: t.fgSecondary,
-                      height: 1.7,
-                    ),
-                  ),
-                  if (moveNote != null) ...[
-                    const SizedBox(height: PSpace.x8),
-                    Text(
-                      moveNote,
-                      style: PTypo.body.copyWith(
-                        color: t.fgSecondary,
-                        height: 1.6,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: PSpace.x20),
-                  Text(
-                    l.assetPayAmount,
-                    style: PTypo.caption.copyWith(
-                      color: t.fgPrimary,
-                      fontWeight: PFontWeight.medium,
-                    ),
-                  ),
-                  const SizedBox(height: PSpace.x8),
-                  PTextInput(
-                    controller: ctrl,
-                    // 값 범위는 아래 setCanSubmit(0 < v <= upcoming)이 잡는다 —
-                    // 여기서는 `-`·`.` 만 막는다(청구 로직은 건드리지 않는다).
-                    numbersOnly: true,
-                    placeholder: '0',
-                  ),
-                  if (v > 0 && v < upcoming) ...[
-                    const SizedBox(height: PSpace.x8),
-                    Text(
-                      l.assetPayRemainder(
-                        krwSigned(upcoming - v, false, unit: true),
-                      ),
-                      style: PTypo.micro.copyWith(color: t.fgTertiary),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          },
-        );
-      },
-      footerBuilder: (ctx) =>
-          PSheetFooter(controller: sheet, submitLabel: l.assetPayAction),
+      form: true,
+      // 새 폼은 첫 칸(금액)에 초점이 간다
+      initialFocus: focus,
+      isDirty: () => probe.dirty(),
+      leaveCopy: PLeaveConfirmCopy(
+        title: l.sheetLeaveTitle,
+        description: l.sheetLeaveDescription,
+        stayLabel: l.sheetLeaveStay,
+        leaveLabel: l.sheetLeaveLeave,
+      ),
+      builder: (_) => _PaySheet(
+        probe: probe,
+        focus: focus,
+        // 고른 회차의 예정액이 상한 — 다음 회차를 미리 낼 수도 있다.
+        upcoming: st.amount,
+        paymentDate: st.paymentDate,
+        debt: debt,
+        hasPayAccount: b.paymentAssetRowId != null,
+        masked: widget.masked,
+        // 요청 · 금액 · 결제일 · 무효화는 그대로 — 이중 진입은 _paying 이 막는다.
+        onPay: (amount) => _pay(amount, st.paymentDate),
+      ),
     );
-
-    ctrl.dispose();
-    sheet.dispose();
-    failed.dispose();
   }
 
   /// 결제 요청(silent) — 성공이면 true. 실패는 호출한 시트가 맨 위 Callout 으로 보인다.
@@ -2490,7 +2382,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     }
   }
 
-  void _openPeriodPicker(List<_CardStatement> stmts) {
+  /// 결제 회차 고르기(I-17 54) — 고르기 시트. 연도 묶음 머리 + 라디오 줄, 누르면 바로 고르고 닫힌다.
+  Future<void> _openPeriodPicker(List<_CardStatement> stmts) async {
     final activeIdx = _activeIdx(stmts);
     final byYear = <String, List<(int, _CardStatement)>>{};
     for (var i = 0; i < stmts.length; i++) {
@@ -2499,132 +2392,31 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         stmts[i],
       ));
     }
-    showPSheet<void>(
+    final picked = await PBottomSheet.show<int>(
       context,
-      title: AppLocalizations.of(context).assetPeriodPick,
-      shrinkWrap: true,
-      contentBuilder: (ctx, _) {
-        final t = ctx.tokens;
-        // 시트 본문 좌우는 호출처가 쥔다 — 안 주면 연도 라벨이 화면 끝에 붙어 잘린다.
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(
-            PSpace.xl,
-            0,
-            PSpace.xl,
-            PSpace.x16,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final entry in byYear.entries)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 52,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 15),
-                          child: Text(
-                            entry.key,
-                            style: TextStyle(
-                              fontFamily: PTypo.sans,
-                              fontSize: PFontSize.bodyMd,
-                              fontWeight: PFontWeight.bold,
-                              color: t.fgPrimary,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (var ri = 0; ri < entry.value.length; ri++)
-                              InkWell(
-                                onTap: () {
-                                  // showPSheet 는 root navigator — rootNavigator pop 필수.
-                                  Navigator.of(
-                                    context,
-                                    rootNavigator: true,
-                                  ).pop();
-                                  setState(() => _stIdx = entry.value[ri].$1);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 2,
-                                    vertical: 15,
-                                  ),
-                                  decoration: ri == 0
-                                      ? null
-                                      : BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                              color: t.borderSubtle,
-                                            ),
-                                          ),
-                                        ),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        entry.value[ri].$2.scheduled
-                                            ? '${entry.value[ri].$2.label} (${AppLocalizations.of(ctx).assetScheduledTag})'
-                                            : entry.value[ri].$2.label,
-                                        style: TextStyle(
-                                          fontFamily: PTypo.sans,
-                                          fontSize: PFontSize.bodyMd,
-                                          fontWeight:
-                                              entry.value[ri].$1 == activeIdx
-                                              ? PFontWeight.bold
-                                              : PFontWeight.medium,
-                                          color: t.fgPrimary,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        widget.masked
-                                            ? '••••••'
-                                            : krwSigned(
-                                                entry.value[ri].$2.amount,
-                                                false,
-                                                unit: true,
-                                              ),
-                                        style: PTypo.bodySm.copyWith(
-                                          color: t.fgTertiary,
-                                        ),
-                                      ),
-                                      if (entry.value[ri].$1 == activeIdx) ...[
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          LucideIcons.check,
-                                          size: 16,
-                                          color: t.fgBrand,
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+      builder: (sheetContext) {
+        final sl = AppLocalizations.of(sheetContext);
+        return PBottomSheetContent(
+          title: sl.assetPeriodPick,
+          closeLabel: sl.actionClose,
+          flushBody: true,
+          scrollFog: true,
+          body: _PeriodPickBody(
+            byYear: byYear,
+            activeIdx: activeIdx,
+            masked: widget.masked,
+            onPick: (i) => PBottomSheet.of(sheetContext).close(i),
           ),
         );
       },
     );
+    if (picked == null || !mounted) return;
+    setState(() => _stIdx = picked);
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
+    final c = context.colors;
     final l = AppLocalizations.of(context);
     final masked = widget.masked;
     final asset = widget.asset;
@@ -2639,7 +2431,6 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     // 100 으로 눌러 두면 목록(실퍼센트)과 다른 숫자가 나오고, 얼마나 넘겼는지도
     // 안 보인다. 바 채움만 아래에서 100% 로 캡한다(넘치면 그릴 수 없다).
     final limitPct = limit > 0 ? ((used / limit) * 100).round() : 0;
-    final limitWarn = limitPct >= 80;
     final paymentDay = b?.paymentDay ?? asset.paymentDay;
     final cancellable = _cancellablePayment(b);
     // 이용 내역의 금액 가리기 — 화면·종류 카드에 이 카드 자체의 숨김까지(합집합).
@@ -2662,848 +2453,815 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
             )),
           )
         : ref.watch(expensesByAssetProvider((assetId: asset.rowId, limit: 12)));
+    final t = context.tokens;
 
     if (billingAsync.isLoading && b == null) {
-      // 실렌더(아래 히어로) 미러 — 회차 라벨+chevron / 금액 / 결제일 행 / 액션 타일.
-      // 액션 타일까지 자리를 잡아야 데이터가 오는 순간 아래가 통째로 밀리지 않는다.
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(2, 2, 2, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PSkeleton.line(width: 130, height: 20),
-                    SizedBox(width: 7),
-                    PSkeleton(
-                      width: 24,
-                      height: 24,
-                      borderRadius: PRadius.brFull,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                PSkeleton.line(width: 180, height: 32),
-              ],
-            ),
+      // 실렌더 미러 — 회차 단추 / 금액 / 키-값 / 동작. 자리를 잡아야 데이터가 오는 순간 아래가 밀리지 않는다.
+      return const ExcludeSemantics(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            PSpacing.globalGutter,
+            PSpacing.x3,
+            PSpacing.globalGutter,
+            0,
           ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: t.borderSubtle)),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 14),
-            child: const Row(
-              children: [
-                SizedBox(
-                  width: 68,
-                  child: PSkeleton.line(width: 56, height: 14),
-                ),
-                PSkeleton.line(width: 110, height: 14),
-                Spacer(),
-                PSkeleton.line(width: 90, height: 11),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PSkeleton.line(width: 130, height: 20),
+              SizedBox(height: PSpacing.x3),
+              PSkeleton.line(width: 180, height: 32),
+              SizedBox(height: PSpacing.x4),
+              PSkeleton.line(width: double.infinity, height: 20),
+              SizedBox(height: PSpacing.x4),
+              PSkeleton(
+                width: double.infinity,
+                height: 40,
+                borderRadius: PRadius.brMd,
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 14, bottom: 4),
-            child: Row(
-              children: [
-                for (int i = 0; i < 2; i++) ...[
-                  if (i > 0) const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: t.bgSunken,
-                        borderRadius: PRadius.brLg,
-                      ),
-                      child: const Column(
-                        children: [
-                          PSkeleton(
-                            width: 30,
-                            height: 30,
-                            borderRadius: PRadius.brMd,
-                          ),
-                          SizedBox(height: 8),
-                          PSkeleton.line(width: 48, height: 11),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+        ),
       );
     }
 
-    final green = _chartGreenOf(context);
+    const gutter = PSpacing.globalGutter;
+    final closed = st != null && !st.scheduled;
+    final mix = st != null && st.scheduled && st.installments.isNotEmpty;
+    final closedMix = closed && st.installments.isNotEmpty;
+    // 지금 결제 — 닫힌 회차를 보고 있을 땐 숨긴다(D10). 그 회차는 이미 결제일이 지나 더 낼 것이 없다.
+    final showPayNow = st == null || st.scheduled;
+    String won(int v) => masked ? '••••••' : krwSigned(v, false, unit: true);
+
+    Widget note(String text, Key key) => Padding(
+      padding: const EdgeInsets.fromLTRB(gutter, PSpacing.x1, gutter, 0),
+      child: Text(
+        text,
+        key: key,
+        style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+      ),
+    );
+
+    // 이번 회차 구성 줄 — 닫힌 회차도 서버가 구성을 내려 준다(24차 8). 기록용 회차분이면 "· 기록만" 을 붙이고,
+    // 이미 결제일이 지난 회차라 정리 · 되돌리기는 두지 않는다.
+    List<Widget> dueRows() => [
+      for (final due in st!.installments)
+        PListItem(
+          align: PListAlign.top,
+          title:
+              '${due.merchant ?? due.description ?? l.assetInstallmentFallback} ${l.assetInstallmentSeq(due.sequence, due.installmentMonths)}',
+          detailChild: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${masked ? '••••••' : l.assetInstallmentPrincipal(won(due.principalAmount))}${due.recordOnly ? ' · ${l.expRecordOnlyBadge}' : ''}',
+                style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+              ),
+              // 정리/되돌리기 — 상환하면 남은 원금이 이 회차에 몰리므로 두 상태가 같은 자리를 쓴다.
+              if (mix)
+                due.paidOff
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: PSpacing.x1),
+                        child: Wrap(
+                          spacing: PSpacing.x2,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            PBadge(
+                              variant: PBadgeVariant.outline,
+                              tone: PBadgeTone.positive,
+                              label: l.assetInstallmentPaidOffBadge,
+                            ),
+                            PListAction(
+                              child: dsb.PButton(
+                                label: l.assetInstallmentPayoffUndo,
+                                variant: dsb.PButtonVariant.ghost,
+                                size: dsb.PButtonSize.small,
+                                flush: dsb.PButtonFlush.left,
+                                onPressed: () => _undoPayoff(due),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(top: PSpacing.x1),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: PListAction(
+                            child: dsb.PButton(
+                              label: l.assetInstallmentPayoff,
+                              variant: dsb.PButtonVariant.ghost,
+                              size: dsb.PButtonSize.small,
+                              flush: dsb.PButtonFlush.left,
+                              onPressed: () => _confirmPayoff(due),
+                            ),
+                          ),
+                        ),
+                      ),
+            ],
+          ),
+          suffix: Text(
+            masked ? '••••••' : keepAllAmount(won(due.amount)),
+            textAlign: TextAlign.end,
+            style: PTypography.t5.copyWith(
+              color: c.fgNeutral,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+    ];
+
+    Widget mixHeader() => PListHeader(
+      title: l.assetCycleMix,
+      variant: PListHeaderVariant.boldSolid,
+      topInset: PSpacing.x4,
+    );
+
+    // 한도 사용 막대 — 이름 "{이름} {한도} 중 {사용}", 값 글은 "88%" · 넘치면 "{금액} 초과". 80% 경고 색은 없다.
+    final over = used > limit;
+    final ratio = limit > 0 ? used / limit : 0.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 결제 예정 히어로 — 회차 선택
+        // 결제 예정 — 회차 단추 + 금액(R13). 회차가 하나도 없으면 단추 없이 라벨 + "0원".
+        if (st == null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(gutter, PSpacing.x3, gutter, 0),
+            child: Text(
+              l.assetDueThisMonth,
+              style: PTypography.t3.copyWith(
+                color: c.fgNeutralSubtle,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.fromLTRB(gutter, PSpacing.x2, gutter, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _PeriodButton(
+                label: l.assetDueOn(st.label),
+                scheduled: st.scheduled,
+                onTap: () => _openPeriodPicker(stmts),
+              ),
+            ),
+          ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(2, 2, 2, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                borderRadius: PRadius.brMd,
-                onTap: stmts.isEmpty ? null : () => _openPeriodPicker(stmts),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      st?.label ?? '—',
-                      style: TextStyle(
-                        fontFamily: PTypo.sans,
-                        fontSize: PFontSize.h3,
-                        fontWeight: PFontWeight.bold,
-                        letterSpacing: -0.4,
-                        color: t.fgPrimary,
-                      ),
-                    ),
-                    if (st?.scheduled ?? false) ...[
-                      const SizedBox(width: 7),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: t.borderDefault),
-                          borderRadius: PRadius.brFull,
-                        ),
-                        child: Text(
-                          l.assetScheduledTag,
-                          style: PTypo.micro.copyWith(
-                            color: t.fgSecondary,
-                            fontWeight: PFontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(width: 7),
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: t.bgSunken,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        LucideIcons.chevronDown,
-                        size: 14,
-                        color: t.fgSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: masked ? '••••••' : krw(st?.amount ?? 0),
-                      style: TextStyle(
-                        fontFamily: PTypo.sans,
-                        fontSize: PFontSize.displayMd,
-                        fontWeight: PFontWeight.bold,
-                        letterSpacing: -0.96,
-                        color: t.fgPrimary,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    if (!masked)
-                      TextSpan(
-                        text: wonUnit(),
-                        style: TextStyle(
-                          fontFamily: PTypo.sans,
-                          fontSize: PFontSize.h3,
-                          fontWeight: PFontWeight.bold,
-                          color: t.fgPrimary,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              if (st != null && !st.scheduled) ...[
-                const SizedBox(height: 6),
-                // 낸 돈이 0 인 회차는 "결제 완료" 가 아니다 — 기록만 있는 회차다(D10).
-                if (st.paid == 0)
-                  Text(
-                    l.assetRecordCycle,
-                    key: const ValueKey('record-cycle-label'),
-                    style: PTypo.caption.copyWith(
-                      color: t.fgTertiary,
-                      fontWeight: PFontWeight.semi,
-                    ),
-                  )
-                else
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(LucideIcons.check, size: 13, color: green),
-                      const SizedBox(width: 4),
-                      Text(
-                        l.assetPaidDone,
-                        style: PTypo.caption.copyWith(
-                          color: green,
-                          fontWeight: PFontWeight.semi,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-              // 머리 금액(지금 기록 합)과 실제로 나간 돈이 다를 때만 한 줄(D10).
-              // 문장은 남기고 금액만 가린다(금액 가리기).
-              if (st != null && !st.scheduled) ...[
-                if (_closedCycleLine(l, st, masked) case final line?) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    line,
-                    key: const ValueKey('closed-cycle-paid-line'),
-                    style: PTypo.caption.copyWith(color: t.fgSecondary),
-                  ),
-                ],
-              ],
-              if (st != null && !st.scheduled && st.preRegistration) ...[
-                const SizedBox(height: 4),
-                Text(
-                  l.assetPreRegistrationNote,
-                  key: const ValueKey('pre-registration-note'),
-                  style: PTypo.caption.copyWith(color: t.fgTertiary),
-                ),
-              ],
-            ],
+          padding: const EdgeInsets.fromLTRB(gutter, PSpacing.x1, gutter, 0),
+          child: Text(
+            masked ? '••••••' : keepAllAmount(won(st?.amount ?? 0)),
+            semanticsLabel: masked ? '••••••' : won(st?.amount ?? 0),
+            style: PTypography.t9.copyWith(
+              color: c.fgNeutral,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
           ),
         ),
-
-        // 결제일이 없는 옛 신용카드 — 서버는 이제 결제일을 필수로 받는다(D8). 그 카드는
-        // 늘 열린 회차로 보이니, 결제일을 넣으라고 이 자리에서 말한다(누르면 수정 폼).
-        if (paymentDay == null)
-          InkWell(
-            key: const ValueKey('payment-day-missing'),
-            onTap: _goEdit,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: t.borderSubtle)),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 14),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 68,
-                    child: Text(
-                      l.assetPaymentDay,
-                      style: PTypo.bodySm.copyWith(color: t.fgTertiary),
+        // 낸 돈이 0 인 회차는 "결제 완료" 가 아니다 — 기록만 있는 회차다(D10).
+        if (closed)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(gutter, 6, gutter, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: st.paid == 0
+                  ? PBadge(
+                      key: const ValueKey('record-cycle-label'),
+                      label: l.assetRecordCycle,
+                    )
+                  : PBadge(
+                      tone: PBadgeTone.positive,
+                      prefixIcon: LucideIcons.check,
+                      label: l.assetPaidDone,
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      l.assetPaymentDayMissing,
-                      style: PTypo.body.copyWith(
-                        color: t.statusWarningFg,
-                        fontWeight: PFontWeight.semi,
-                      ),
-                    ),
-                  ),
-                  Icon(LucideIcons.chevronRight, size: 14, color: t.fgTertiary),
-                ],
-              ),
             ),
           ),
+        // 머리 금액(지금 기록 합)과 실제로 나간 돈이 다를 때만 한 줄(D10). 문장은 남기고 금액만 가린다.
+        if (closed)
+          if (_closedCycleLine(l, st, masked) case final line?)
+            note(line, const ValueKey('closed-cycle-paid-line')),
+        if (closed && st.preRegistration)
+          note(
+            l.assetPreRegistrationNote,
+            const ValueKey('pre-registration-note'),
+          ),
 
-        // 결제일 · 카드 이용 기간
+        // 키-값 — 결제일 · 카드 이용 기간. 결제일이 없는 옛 카드는 값 자리에서 넣으라고 말한다(D8, 누르면 수정 폼).
+        const SizedBox(height: PSpacing.x1),
         if (paymentDay != null)
-          Container(
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: t.borderSubtle)),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 14),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 68,
-                  child: Text(
-                    l.assetPaymentDay,
-                    style: PTypo.bodySm.copyWith(color: t.fgTertiary),
+          KvRow(
+            label: l.assetPaymentDay,
+            value: l.assetMonthlyPaymentDay(paymentDay),
+          )
+        else
+          PList(
+            children: [
+              PListItem(
+                title: l.assetPaymentDay,
+                suffix: PListAction(
+                  child: dsb.PButton(
+                    key: const ValueKey('payment-day-missing'),
+                    label: l.assetPaymentDayMissing,
+                    variant: dsb.PButtonVariant.ghost,
+                    size: dsb.PButtonSize.small,
+                    flush: dsb.PButtonFlush.right,
+                    onPressed: _goEdit,
                   ),
                 ),
-                Text(
-                  l.assetMonthlyPaymentDay(paymentDay),
-                  style: PTypo.body.copyWith(
-                    color: t.fgPrimary,
-                    fontWeight: PFontWeight.semi,
+              ),
+            ],
+          ),
+        if (periodText != null)
+          KvRow(label: l.assetUsagePeriodLabel, value: periodText),
+
+        // 이번 회차 구성 — 할부가 있을 때만. 예정액이 이용 내역 합과 다른 이유(과거 할부의 이번 회차분)를 설명한다.
+        if (mix) ...[
+          mixHeader(),
+          PList(
+            semanticLabel: l.assetCycleMix,
+            children: [
+              ...dueRows(),
+              // 일시불·선결제 요약 — 할부와 함께 있어야 예정액 합이 설명된다.
+              if ((st.lumpSumAmount ?? 0) != 0)
+                PListItem(
+                  title: l.assetLumpSumLabel,
+                  suffix: Text(
+                    keepAllAmount(won(st.lumpSumAmount!)),
+                    textAlign: TextAlign.end,
+                    style: PTypography.t5.copyWith(
+                      color: c.fgNeutralMuted,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
-                const Spacer(),
-                if (periodText != null)
-                  Text(
-                    l.assetUsagePeriod(periodText),
-                    style: PTypo.caption.copyWith(color: t.fgTertiary),
+              if ((st.alreadyPaidAmount ?? 0) > 0)
+                PListItem(
+                  title: l.assetAlreadyPaidLabel,
+                  suffix: Text(
+                    masked
+                        ? '••••••'
+                        : keepAllAmount('$kMinus${won(st.alreadyPaidAmount!)}'),
+                    textAlign: TextAlign.end,
+                    style: PTypography.t5.copyWith(
+                      color: c.fgNeutralMuted,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-              ],
+                ),
+            ],
+          ),
+        ],
+        // 닫힌 회차의 할부 회차분 — 같은 줄, 동작 없음.
+        if (closedMix) ...[
+          mixHeader(),
+          PList(semanticLabel: l.assetCycleMix, children: dueRows()),
+        ],
+
+        // 동작(4-3A) — [지금 결제] [결제 취소]. 하나만 보이면 그 하나가 폭 전체.
+        if (showPayNow || cancellable != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              gutter,
+              PSpacing.x4,
+              gutter,
+              PSpacing.x1,
             ),
+            child: () {
+              final pay = dsb.PButton(
+                label: l.assetPayNow,
+                variant: dsb.PButtonVariant.neutralWeak,
+                prefixIcon: LucideIcons.zap,
+                // 낼 것이 없으면 막힘(ds disabled)
+                onPressed: canPay && b != null && st != null
+                    ? () => _confirmAndPay(b, st)
+                    : null,
+              );
+              final cancel = cancellable == null
+                  ? null
+                  : dsb.PButton(
+                      label: l.assetCancelPayment,
+                      variant: dsb.PButtonVariant.neutralWeak,
+                      prefixIcon: LucideIcons.undo2,
+                      onPressed: _paying
+                          ? null
+                          : () => _confirmAndCancelPayment(cancellable),
+                    );
+              if (showPayNow && cancel != null) {
+                return PResponsivePair(primary: pay, secondary: cancel);
+              }
+              return SizedBox(width: double.infinity, child: cancel ?? pay);
+            }(),
           ),
 
-        // 이번 회차 구성 — 할부가 있을 때만. 예정액이 이용 내역 합과 다른 이유
-        // (과거 할부의 이번 회차분)를 이 자리에서 설명한다. 닫힌 회차도 서버가 구성을
-        // 내려 준다(24차 8) — 기록용 회차분이면 "· 기록만" 을 붙이고, 이미 결제일이
-        // 지난 회차라 정리·되돌리기는 두지 않는다.
-        if (st?.installments.isNotEmpty ?? false)
-          Container(
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: t.borderSubtle)),
+        // 한도 사용 · 실적
+        if (limit > 0) ...[
+          PListHeader(
+            title: l.assetLimitUsage,
+            variant: PListHeaderVariant.boldSolid,
+            topInset: PSpacing.x4,
+            trailing: Text(
+              l.assetLimitPctUsed(limitPct),
+              style: PTypography.t4.copyWith(
+                color: c.fgNeutral,
+                fontWeight: FontWeight.w700,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 14),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              gutter,
+              PSpacing.x1,
+              gutter,
+              PSpacing.x2,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var i = 0; i < st!.installments.length; i++) ...[
-                  if (i > 0) const SizedBox(height: 12),
-                  Builder(
-                    builder: (context) {
-                      final due = st.installments[i];
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  due.merchant ??
-                                      due.description ??
-                                      l.assetInstallmentFallback,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: PTypo.bodySm.copyWith(
-                                    color: t.fgPrimary,
-                                    fontWeight: PFontWeight.semi,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  [
-                                    l.assetInstallmentSeq(
-                                      due.sequence,
-                                      due.installmentMonths,
-                                    ),
-                                    widget.masked
-                                        ? '••••••'
-                                        : l.assetInstallmentPrincipal(
-                                            krwSigned(
-                                              due.principalAmount,
-                                              false,
-                                              unit: true,
-                                            ),
-                                          ),
-                                    if (due.recordOnly) l.expRecordOnlyBadge,
-                                  ].join(' · '),
-                                  style: PTypo.caption.copyWith(
-                                    color: t.fgTertiary,
-                                  ),
-                                ),
-                                if (!st.scheduled && due.paidOff) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    l.assetInstallmentPaidOffBadge,
-                                    style: PTypo.caption.copyWith(
-                                      color: t.statusSuccessFg,
-                                      fontWeight: PFontWeight.semi,
-                                    ),
-                                  ),
-                                ],
-                                if (st.scheduled) ...[
-                                  const SizedBox(height: 4),
-                                  // 정리/되돌리기 — 상환하면 남은 원금이 이 회차에
-                                  // 몰리므로 두 상태가 같은 자리를 쓴다.
-                                  due.paidOff
-                                      ? Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              l.assetInstallmentPaidOffBadge,
-                                              style: PTypo.caption.copyWith(
-                                                color: t.statusSuccessFg,
-                                                fontWeight: PFontWeight.semi,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            InkWell(
-                                              onTap: () => _undoPayoff(due),
-                                              child: Text(
-                                                l.assetInstallmentPayoffUndo,
-                                                style: PTypo.caption.copyWith(
-                                                  color: t.fgTertiary,
-                                                  decoration:
-                                                      TextDecoration.underline,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      : InkWell(
-                                          onTap: () => _confirmPayoff(due),
-                                          child: Text(
-                                            l.assetInstallmentPayoff,
-                                            style: PTypo.caption.copyWith(
-                                              color: t.fgBrand,
-                                              fontWeight: PFontWeight.semi,
-                                            ),
-                                          ),
-                                        ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            widget.masked
-                                ? '••••••'
-                                : krwSigned(due.amount, false, unit: true),
-                            style: PTypo.bodySm.copyWith(
-                              color: t.fgPrimary,
-                              fontWeight: PFontWeight.bold,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                PProgressBar(
+                  value: used.toDouble(),
+                  max: limit.toDouble(),
+                  semanticsLabel: l.dsProgressSemantics(
+                    l.assetCardLimitName(asset.assetName),
+                    won(limit),
+                    won(used),
                   ),
-                ],
-                // 일시불·선결제 요약 — 할부와 함께 있어야 예정액 합이 설명된다.
-                if ((st.lumpSumAmount ?? 0) != 0) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l.assetLumpSumLabel,
-                          style: PTypo.caption.copyWith(color: t.fgTertiary),
+                  semanticsValue: over
+                      ? l.dsProgressOver(won(used - limit))
+                      : '${(math.min(ratio, 1.0) * 100).round()}%',
+                ),
+                const SizedBox(height: PSpacing.x2),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        masked
+                            ? '••••••'
+                            : l.assetLimitOf(won(used), won(limit)),
+                        style: PTypography.t3.copyWith(
+                          color: c.fgNeutralSubtle,
                         ),
                       ),
-                      Text(
-                        widget.masked
+                    ),
+                    const SizedBox(width: PSpacing.x2),
+                    Flexible(
+                      child: Text(
+                        masked
                             ? '••••••'
-                            : krwSigned(st.lumpSumAmount!, false, unit: true),
-                        style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-                      ),
-                    ],
-                  ),
-                ],
-                if ((st.alreadyPaidAmount ?? 0) > 0) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l.assetAlreadyPaidLabel,
-                          style: PTypo.caption.copyWith(color: t.fgTertiary),
+                            : over
+                            ? l.dsProgressOver(won(used - limit))
+                            : l.assetLimitRemain(won(limit - used)),
+                        textAlign: TextAlign.end,
+                        style: PTypography.t3.copyWith(
+                          color: over ? c.fgCritical : c.fgNeutralSubtle,
+                          fontWeight: over ? FontWeight.w700 : null,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
-                      Text(
-                        widget.masked
-                            ? '••••••'
-                            : '$kMinus${krwSigned(st.alreadyPaidAmount!, false, unit: true)}',
-                        style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
+        ],
+        _CardPerfBadge(assetRowId: asset.rowId, masked: masked),
 
-        // 빠른 액션
+        // 이용 내역 — 정렬 칩 + 리스트(49 는 다음 단계 — 본문만 24 안쪽에 선다)
         Padding(
-          padding: const EdgeInsets.only(top: 14, bottom: 4),
-          child: Row(
-            children: [
-              // 지금 결제 — 닫힌 회차를 보고 있을 땐 숨긴다(D10). 그 회차는 이미
-              // 결제일이 지나 더 낼 것이 없다.
-              if (st == null || st.scheduled) ...[
-                Expanded(
-                  child: _CardActionTile(
-                    icon: LucideIcons.zap,
-                    label: l.assetPayNow,
-                    enabled: canPay,
-                    onTap: b == null || st == null
-                        ? null
-                        : () => _confirmAndPay(b, st),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: _CardActionTile(
-                  icon: LucideIcons.slidersHorizontal,
-                  label: l.assetLimitSettings,
-                  onTap: _goEdit,
-                ),
-              ),
-              // 결제 취소 — 실수로 누른 결제를 무른다. 되돌릴 수 있을 때만 보인다
-              // (결제일이 된 회차·환급이 나간 회차는 못 무른다, D6). 서버가 그래도
-              // 거절하면 그 메시지는 전역 인터셉터가 띄운다.
-              if (cancellable != null) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _CardActionTile(
-                    icon: LucideIcons.undo2,
-                    label: l.assetCancelPayment,
-                    enabled: !_paying,
-                    onTap: () => _confirmAndCancelPayment(cancellable),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-
-        // 한도 사용 · 실적
-        if (limit > 0)
-          Container(
+          padding: const EdgeInsets.symmetric(horizontal: gutter),
+          child: Container(
             margin: const EdgeInsets.only(top: 18),
             padding: const EdgeInsets.only(top: 18),
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: t.borderSubtle)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      l.assetLimitUsage,
-                      style: PTypo.body.copyWith(
-                        color: t.fgPrimary,
-                        fontWeight: PFontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      l.assetLimitPctUsed(limitPct),
-                      style: PTypo.bodySm.copyWith(
-                        color: limitWarn ? chartRedOf(context) : t.fgBrand,
-                        fontWeight: PFontWeight.bold,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 11, bottom: 7),
-                  child: ClipRRect(
-                    borderRadius: PRadius.brFull,
-                    child: SizedBox(
-                      height: 8,
-                      width: double.infinity,
-                      child: Stack(
-                        children: [
-                          Container(color: t.bgSunken),
-                          FractionallySizedBox(
-                            widthFactor: (limitPct / 100).clamp(0.0, 1.0),
-                            child: Container(
-                              color: limitWarn
-                                  ? chartRedOf(context)
-                                  : t.bgBrandSolid,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      masked
-                          ? '••••••'
-                          : l.assetLimitOf(
-                              krw(used),
-                              '${krw(limit)}${wonUnit()}',
-                            ),
-                      style: PTypo.caption.copyWith(color: t.fgTertiary),
-                    ),
-                    const Spacer(),
-                    Text(
-                      masked
-                          ? '••••••'
-                          : l.assetLimitRemain(
-                              krwSigned(
-                                (limit - used).clamp(0, limit),
-                                false,
-                                unit: true,
-                              ),
-                            ),
-                      style: PTypo.caption.copyWith(color: t.fgTertiary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    borderRadius: PRadius.brFull,
-                    onTap: _goEdit,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 13,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: t.borderDefault),
-                        borderRadius: PRadius.brFull,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            LucideIcons.pencil,
-                            size: 12,
-                            color: t.fgPrimary,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            l.assetLimitEdit,
-                            style: PTypo.caption.copyWith(
-                              color: t.fgPrimary,
-                              fontWeight: PFontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                _CardPerfBadge(assetRowId: asset.rowId, masked: masked),
-              ],
+            child: _usageSection(l, asset, usageAsync, flags, t),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _usageSection(
+    AppLocalizations l,
+    Asset asset,
+    AsyncValue<List<Expense>> usageAsync,
+    MaskFlags flags,
+    GrooTokens t,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Text(
+              l.assetUsageHistory,
+              style: PTypo.body.copyWith(
+                color: t.fgPrimary,
+                fontWeight: PFontWeight.bold,
+              ),
             ),
+            if ((usageAsync.value?.length ?? 0) > 0) ...[
+              const SizedBox(width: 5),
+              Text(
+                '${usageAsync.value!.length}',
+                style: PTypo.body.copyWith(
+                  color: t.fgBrand,
+                  fontWeight: PFontWeight.bold,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
+            const Spacer(),
+            InkWell(
+              borderRadius: PRadius.brSm,
+              onTap: () => context.go('/expense?assetId=${asset.rowId}'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l.assetViewAll,
+                      style: PTypo.bodySm.copyWith(
+                        color: t.fgSecondary,
+                        fontWeight: PFontWeight.semi,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(
+                      LucideIcons.chevronRight,
+                      size: 12,
+                      color: t.fgSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        // 정렬 — 통계 화면과 동일한 pills 탭(공용, 사용자 결정)
+        Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 2),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: PTabs<_UsageSort>(
+              value: _sort,
+              variant: PTabsVariant.pills,
+              size: PTabsSize.sm,
+              items: [
+                PTabItem(value: _UsageSort.recent, label: l.assetSortRecent),
+                PTabItem(value: _UsageSort.amount, label: l.assetSortAmount),
+                PTabItem(
+                  value: _UsageSort.category,
+                  label: l.assetSortCategory,
+                ),
+              ],
+              onChanged: (v) => setState(() => _sort = v),
+            ),
+          ),
+        ),
+        if (_sort == _UsageSort.recent)
+          // 정렬 탭 ↔ 첫 날짜 그룹 간격 — 웹 paddingTop 16 정합(사용자 결정)
+          Padding(
+            padding: const EdgeInsets.only(top: PSpace.x16),
+            child: _RecentExpenses(async: usageAsync, flags: flags, tokens: t),
           )
         else
-          Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: _CardPerfBadge(assetRowId: asset.rowId, masked: masked),
-          ),
-
-        // 이용 내역 — 정렬 칩 + 리스트
-        Container(
-          margin: const EdgeInsets.only(top: 18),
-          padding: const EdgeInsets.only(top: 18),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: t.borderSubtle)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    l.assetUsageHistory,
-                    style: PTypo.body.copyWith(
-                      color: t.fgPrimary,
-                      fontWeight: PFontWeight.bold,
+          Builder(
+            builder: (context) {
+              final list = [...(usageAsync.value ?? const <Expense>[])];
+              if (list.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 28),
+                  child: Center(
+                    child: Text(
+                      l.assetNoUsage,
+                      style: PTypo.bodySm.copyWith(color: t.fgTertiary),
                     ),
                   ),
-                  if ((usageAsync.value?.length ?? 0) > 0) ...[
-                    const SizedBox(width: 5),
-                    Text(
-                      '${usageAsync.value!.length}',
-                      style: PTypo.body.copyWith(
-                        color: t.fgBrand,
-                        fontWeight: PFontWeight.bold,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                );
+              }
+              if (_sort == _UsageSort.amount) {
+                list.sort((a, b) => b.amount.abs().compareTo(a.amount.abs()));
+              } else {
+                list.sort(
+                  (a, b) =>
+                      (a.categoryName ?? '').compareTo(b.categoryName ?? ''),
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Column(
+                  children: [
+                    for (final e in list)
+                      ExpenseRow(
+                        gutter: 0,
+                        expense: e,
+                        category: null,
+                        flags: flags,
+                        showInstallment: true,
                       ),
-                    ),
                   ],
-                  const Spacer(),
-                  InkWell(
-                    borderRadius: PRadius.brSm,
-                    onTap: () => context.go('/expense?assetId=${asset.rowId}'),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 4,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            l.assetViewAll,
-                            style: PTypo.bodySm.copyWith(
-                              color: t.fgSecondary,
-                              fontWeight: PFontWeight.semi,
-                            ),
-                          ),
-                          const SizedBox(width: 2),
-                          Icon(
-                            LucideIcons.chevronRight,
-                            size: 12,
-                            color: t.fgSecondary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // 정렬 — 통계 화면과 동일한 pills 탭(공용, 사용자 결정)
-              Padding(
-                padding: const EdgeInsets.only(top: 12, bottom: 2),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: PTabs<_UsageSort>(
-                    value: _sort,
-                    variant: PTabsVariant.pills,
-                    size: PTabsSize.sm,
-                    items: [
-                      PTabItem(
-                        value: _UsageSort.recent,
-                        label: l.assetSortRecent,
-                      ),
-                      PTabItem(
-                        value: _UsageSort.amount,
-                        label: l.assetSortAmount,
-                      ),
-                      PTabItem(
-                        value: _UsageSort.category,
-                        label: l.assetSortCategory,
-                      ),
-                    ],
-                    onChanged: (v) => setState(() => _sort = v),
-                  ),
                 ),
-              ),
-              if (_sort == _UsageSort.recent)
-                // 정렬 탭 ↔ 첫 날짜 그룹 간격 — 웹 paddingTop 16 정합(사용자 결정)
-                Padding(
-                  padding: const EdgeInsets.only(top: PSpace.x16),
-                  child: _RecentExpenses(
-                    async: usageAsync,
-                    flags: flags,
-                    tokens: t,
-                  ),
-                )
-              else
-                Builder(
-                  builder: (context) {
-                    final list = [...(usageAsync.value ?? const <Expense>[])];
-                    if (list.isEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 28),
-                        child: Center(
-                          child: Text(
-                            l.assetNoUsage,
-                            style: PTypo.bodySm.copyWith(color: t.fgTertiary),
-                          ),
-                        ),
-                      );
-                    }
-                    if (_sort == _UsageSort.amount) {
-                      list.sort(
-                        (a, b) => b.amount.abs().compareTo(a.amount.abs()),
-                      );
-                    } else {
-                      list.sort(
-                        (a, b) => (a.categoryName ?? '').compareTo(
-                          b.categoryName ?? '',
-                        ),
-                      );
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Column(
-                        children: [
-                          for (final e in list)
-                            ExpenseRow(
-                              gutter: 0,
-                              expense: e,
-                              category: null,
-                              flags: flags,
-                              showInstallment: true,
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-            ],
+              );
+            },
           ),
+      ],
+    );
+  }
+}
+
+/// 지금 결제 폼 시트가 "바꾼 값이 있나" 를 시트 밖에 알려 주는 통로.
+class _PayProbe {
+  bool Function() dirty = () => false;
+}
+
+/// 지금 결제 = 입력 폼(I-17 53). 안내 글 → (실패 Callout) → (돈이 다 안 움직이는 안내 Callout) → 결제 금액 칸.
+/// 금액 검사(0 < 금액 ≤ 예정액)는 그대로이되 주 버튼을 막지 않고 누르면 칸 아래 오류. 요청은 [onPay] — 실패하면 시트 안에
+/// 맨 위가 아니라 안내 아래 Callout(입력 금액 유지 · 시트 유지 · 스낵바 없음).
+class _PaySheet extends StatefulWidget {
+  const _PaySheet({
+    required this.probe,
+    required this.focus,
+    required this.upcoming,
+    required this.paymentDate,
+    required this.debt,
+    required this.hasPayAccount,
+    required this.masked,
+    required this.onPay,
+  });
+  final _PayProbe probe;
+  final FocusNode focus;
+  final int upcoming;
+  final String paymentDate;
+  final int debt;
+  final bool hasPayAccount;
+  final bool masked;
+  final Future<bool> Function(int amount) onPay;
+
+  @override
+  State<_PaySheet> createState() => _PaySheetState();
+}
+
+class _PaySheetState extends State<_PaySheet> {
+  late final TextEditingController _ctrl;
+  late final String _initial;
+  final _errorKey = GlobalKey();
+  bool _tried = false;
+  bool _failed = false;
+  bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initial = formatAmountInput(widget.upcoming);
+    _ctrl = TextEditingController(text: _initial);
+    widget.probe.dirty = () => _ctrl.text != _initial;
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    widget.focus.dispose();
+    super.dispose();
+  }
+
+  int get _amount => parseAmountInput(_ctrl.text) ?? 0;
+
+  String _money(int v) => krwSigned(v, widget.masked, unit: true);
+
+  Future<void> _submit() async {
+    if (_submitting) return;
+    setState(() => _tried = true);
+    final v = _amount;
+    if (v <= 0 || v > widget.upcoming) {
+      widget.focus.requestFocus();
+      return;
+    }
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
+    final ok = await widget.onPay(v);
+    if (!mounted) return;
+    setState(() => _submitting = false);
+    if (ok) {
+      PBottomSheet.of(context).close();
+      return;
+    }
+    setState(() => _failed = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final c = _errorKey.currentContext;
+      if (c != null) revealBelowFog(c);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.colors;
+    final v = _amount;
+    final upcoming = widget.upcoming;
+    final d = DateTime.tryParse(widget.paymentDate);
+    final dateText = d != null ? formatDay(d).md : widget.paymentDate;
+    final error = !_tried
+        ? null
+        : v <= 0
+        ? l.assetPayAmountEmpty
+        : v > upcoming
+        ? l.assetPayAmountOver(_money(upcoming))
+        : null;
+    final moveNote = !widget.hasPayAccount
+        ? l.assetPayNoAccountNote
+        : (widget.debt < v
+              ? l.assetPayMoveNote(krwSigned(widget.debt, false, unit: true))
+              : null);
+    return PBottomSheetContent(
+      title: l.assetPayNow,
+      closeLabel: l.actionClose,
+      flushBody: true,
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          PSpacing.globalGutter,
+          0,
+          PSpacing.globalGutter,
+          PSpacing.x2,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              '${l.assetPayConfirmMessage(_money(upcoming))}${l.assetPayConfirmDateSuffix(dateText)}',
+              style: PTypography.t5.copyWith(color: c.fgNeutralMuted),
+            ),
+            const SizedBox(height: PSpacing.x4),
+            // 폼 저장 실패 = 안내 아래 Callout(웹과 같은 자리). 다시 누르면 지워진다.
+            if (_failed)
+              FormErrorCallout(key: _errorKey, message: l.assetPayFailed),
+            if (moveNote != null) ...[
+              PCallout(tone: PCalloutTone.warning, description: moveNote),
+              const SizedBox(height: PSpacing.x4),
+            ],
+            dsf.PField(
+              label: l.assetPayAmount,
+              invalid: error != null,
+              errorMessage: error,
+              description: v > 0 && v < upcoming
+                  ? l.assetPayRemainder(_money(upcoming - v))
+                  : null,
+              child: PInput(
+                variant: PInputVariant.underline,
+                controller: _ctrl,
+                focusNode: widget.focus,
+                placeholder: '0',
+                suffixText: wonUnit(),
+                tabularFigures: true,
+                keyboardType: TextInputType.number,
+                // 값 범위는 _submit(0 < v <= 예정액)이 잡는다 — 여기서는 숫자만(청구 로직은 건드리지 않는다).
+                inputFormatters: const [AmountInputFormatter()],
+                onChanged: (_) => setState(() {}),
+                onSubmitted: (_) => _submit(),
+              ),
+            ),
+          ],
+        ),
+      ),
+      footer: [
+        dsb.PButton(
+          label: l.assetPayAction,
+          size: dsb.PButtonSize.large,
+          loading: _submitting,
+          onPressed: _submitting ? null : _submit,
         ),
       ],
     );
   }
 }
 
-/// 빠른 액션 타일 — sunken 박스 + 아이콘 30 박스(surface) + 라벨(design cdt-action).
-class _CardActionTile extends StatelessWidget {
-  const _CardActionTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.enabled = true,
+/// 결제 회차 고르기 본문(I-17 54) — 연도마다 List Header "{연도}년" + 라디오 줄(제목 "{M월 D일} 결제" + 예정 배지 · 뒤 금액).
+/// 열면 고른 줄이 보이게 스크롤한다.
+class _PeriodPickBody extends StatefulWidget {
+  const _PeriodPickBody({
+    required this.byYear,
+    required this.activeIdx,
+    required this.masked,
+    required this.onPick,
   });
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-  final bool enabled;
+  final Map<String, List<(int, _CardStatement)>> byYear;
+  final int activeIdx;
+  final bool masked;
+  final ValueChanged<int> onPick;
+
+  @override
+  State<_PeriodPickBody> createState() => _PeriodPickBodyState();
+}
+
+class _PeriodPickBodyState extends State<_PeriodPickBody> {
+  final _selectedKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final c = _selectedKey.currentContext;
+      if (c != null && c.mounted) {
+        Scrollable.ensureVisible(c, alignment: 0.5);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-    return Opacity(
-      opacity: enabled ? 1 : 0.55,
-      child: InkWell(
-        borderRadius: PRadius.brLg,
-        onTap: enabled ? onTap : null,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
-          decoration: BoxDecoration(
-            color: t.bgSunken,
-            borderRadius: PRadius.brLg,
-          ),
-          child: Column(
+    final l = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final entry in widget.byYear.entries)
+          PListRadioGroup<int>(
+            semanticLabel: l.assetYearLabel(entry.key),
+            value: widget.activeIdx,
+            onChanged: widget.onPick,
             children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: t.bgSurface,
-                  borderRadius: PRadius.brMd,
+              PListHeader(title: l.assetYearLabel(entry.key)),
+              for (final (i, s) in entry.value)
+                PListRadioItem<int>(
+                  key: i == widget.activeIdx ? _selectedKey : null,
+                  value: i,
+                  title: l.assetDueOn(s.label),
+                  titleSuffix: s.scheduled
+                      ? [PBadge(label: l.assetScheduledTag)]
+                      : null,
+                  detail: widget.masked
+                      ? '••••••'
+                      : krwSigned(s.amount, false, unit: true),
                 ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 15, color: t.fgSecondary),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PTypo.caption.copyWith(
-                  color: t.fgPrimary,
-                  fontWeight: PFontWeight.semi,
-                ),
-              ),
             ],
           ),
+      ],
+    );
+  }
+}
+
+/// 회차 단추(I-17 46) — ghost small "{M월 D일} 결제" + 예정이면 Badge "예정" + 뒤 꺾쇠 16. 누르면 결제 회차 고르기(54).
+class _PeriodButton extends StatelessWidget {
+  const _PeriodButton({
+    required this.label,
+    required this.scheduled,
+    required this.onTap,
+  });
+  final String label;
+  final bool scheduled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        dsb.PButton(
+          label: label,
+          variant: dsb.PButtonVariant.ghost,
+          size: dsb.PButtonSize.small,
+          flush: dsb.PButtonFlush.left,
+          onPressed: onTap,
         ),
-      ),
+        // 배지와 꺾쇠도 같은 단추의 일부다 — 눌러도 열린다(읽는 이름은 앞 단추 하나).
+        ExcludeSemantics(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: PSpacing.x2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (scheduled) ...[
+                    const SizedBox(width: PSpacing.x1),
+                    PBadge(label: l.assetScheduledTag),
+                  ],
+                  const SizedBox(width: PSpacing.x1),
+                  Icon(
+                    LucideIcons.chevronDown,
+                    size: 16,
+                    color: c.fgNeutralMuted,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

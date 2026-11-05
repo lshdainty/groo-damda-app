@@ -1156,12 +1156,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetPayConfirmMessage(String amount) {
-    return '결제 예정액 $amount원을 지금 결제 처리할까요?';
+    return '결제 예정액 $amount을 지금 결제할까요?';
   }
 
   @override
   String assetPayConfirmDateSuffix(String date) {
-    return ' 결제일은 $date 입니다.';
+    return ' $date 결제 예정분이에요.';
   }
 
   @override
@@ -1240,7 +1240,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetPayRemainder(String amount) {
-    return '남은 $amount은 결제일에 빠져요';
+    return '남은 $amount은 결제일에 빠져요.';
   }
 
   @override
@@ -1267,14 +1267,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetPaidDone => '결제 완료';
 
   @override
-  String assetUsagePeriod(String period) {
-    return '카드 이용 기간 $period';
-  }
-
-  @override
-  String get assetLimitSettings => '한도 · 결제 설정';
-
-  @override
   String get assetLimitUsage => '한도 사용';
 
   @override
@@ -1291,12 +1283,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String assetLimitRemain(String amount) {
     return '잔여 $amount';
   }
-
-  @override
-  String get assetLimitEdit => '한도 · 결제일 변경';
-
-  @override
-  String get assetPerfDone => '이번 달 실적 달성';
 
   @override
   String assetPerfRemain(String amount) {
@@ -1316,7 +1302,45 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetSortCategory => '카테고리별';
 
   @override
-  String get assetPeriodPick => '기간 선택';
+  String assetDueOn(String date) {
+    return '$date 결제';
+  }
+
+  @override
+  String get assetDueThisMonth => '이번 달 결제 예정';
+
+  @override
+  String get assetUsagePeriodLabel => '카드 이용 기간';
+
+  @override
+  String get assetCycleMix => '이번 회차 구성';
+
+  @override
+  String assetPerfTitle(String month) {
+    return '$month월 실적';
+  }
+
+  @override
+  String get assetPerfAchieved => '실적 달성';
+
+  @override
+  String get assetPayAmountEmpty => '결제 금액을 넣어주세요.';
+
+  @override
+  String assetPayAmountOver(String amount) {
+    return '결제 금액은 $amount까지예요.';
+  }
+
+  @override
+  String assetYearLabel(String year) {
+    return '$year년';
+  }
+
+  @override
+  String get assetSortAria => '이용 내역 정렬';
+
+  @override
+  String get assetPeriodPick => '결제 회차';
 
   @override
   String get assetNoUsage => '이용 내역이 없어요.';
@@ -1328,7 +1352,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetMonthlyPaymentDay(int day) {
-    return '매월 $day일 결제';
+    return '매월 $day일';
   }
 
   @override

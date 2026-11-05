@@ -1172,12 +1172,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetPayConfirmMessage(String amount) {
-    return 'Pay the upcoming amount of $amount KRW now?';
+    return 'Pay the $amount due now?';
   }
 
   @override
   String assetPayConfirmDateSuffix(String date) {
-    return ' The payment date is $date.';
+    return ' This is the amount due $date.';
   }
 
   @override
@@ -1259,7 +1259,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetPayRemainder(String amount) {
-    return '$amount remaining will be paid on the payment date';
+    return 'The remaining $amount will be paid on the payment date.';
   }
 
   @override
@@ -1287,14 +1287,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetPaidDone => 'Paid';
 
   @override
-  String assetUsagePeriod(String period) {
-    return 'Card usage period $period';
-  }
-
-  @override
-  String get assetLimitSettings => 'Limit · payment';
-
-  @override
   String get assetLimitUsage => 'Limit usage';
 
   @override
@@ -1311,12 +1303,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String assetLimitRemain(String amount) {
     return 'Remaining $amount';
   }
-
-  @override
-  String get assetLimitEdit => 'Edit limit · payment day';
-
-  @override
-  String get assetPerfDone => 'Monthly target met';
 
   @override
   String assetPerfRemain(String amount) {
@@ -1336,7 +1322,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetSortCategory => 'Category';
 
   @override
-  String get assetPeriodPick => 'Select period';
+  String assetDueOn(String date) {
+    return 'Paid $date';
+  }
+
+  @override
+  String get assetDueThisMonth => 'Due this month';
+
+  @override
+  String get assetUsagePeriodLabel => 'Card usage period';
+
+  @override
+  String get assetCycleMix => 'This cycle';
+
+  @override
+  String assetPerfTitle(String month) {
+    return 'Month $month target';
+  }
+
+  @override
+  String get assetPerfAchieved => 'Target met';
+
+  @override
+  String get assetPayAmountEmpty => 'Enter the payment amount.';
+
+  @override
+  String assetPayAmountOver(String amount) {
+    return 'The payment can be up to $amount.';
+  }
+
+  @override
+  String assetYearLabel(String year) {
+    return '$year';
+  }
+
+  @override
+  String get assetSortAria => 'Sort usage history';
+
+  @override
+  String get assetPeriodPick => 'Billing cycle';
 
   @override
   String get assetNoUsage => 'No usage history yet.';
@@ -1348,7 +1372,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetMonthlyPaymentDay(int day) {
-    return 'Paid on day $day each month';
+    return 'Day $day each month';
   }
 
   @override

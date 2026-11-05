@@ -594,7 +594,7 @@
   "assetChartNoData": "No data to show",
   "assetNoLinkedTx": "No linked transactions.",
   "assetTxFallback": "Transaction",
-  "assetPayConfirmMessage": "Pay the upcoming amount of {amount} KRW now?",
+  "assetPayConfirmMessage": "Pay the {amount} due now?",
   "@assetPayConfirmMessage": {
     "placeholders": {
       "amount": {
@@ -602,7 +602,7 @@
       }
     }
   },
-  "assetPayConfirmDateSuffix": " The payment date is {date}.",
+  "assetPayConfirmDateSuffix": " This is the amount due {date}.",
   "@assetPayConfirmDateSuffix": {
     "placeholders": {
       "date": {
@@ -672,7 +672,7 @@
   "assetCancelPaymentFailed": "Couldn't cancel the payment.",
   "assetPayAction": "Pay",
   "assetPayAmount": "Payment amount",
-  "assetPayRemainder": "{amount} remaining will be paid on the payment date",
+  "assetPayRemainder": "The remaining {amount} will be paid on the payment date.",
   "@assetPayRemainder": {
     "placeholders": {
       "amount": {
@@ -694,15 +694,6 @@
   "assetUpcomingPayment": "Upcoming payment",
   "assetScheduledTag": "Upcoming",
   "assetPaidDone": "Paid",
-  "assetUsagePeriod": "Card usage period {period}",
-  "@assetUsagePeriod": {
-    "placeholders": {
-      "period": {
-        "type": "String"
-      }
-    }
-  },
-  "assetLimitSettings": "Limit · payment",
   "assetLimitUsage": "Limit usage",
   "assetLimitPctUsed": "{pct}% used",
   "@assetLimitPctUsed": {
@@ -731,8 +722,6 @@
       }
     }
   },
-  "assetLimitEdit": "Edit limit · payment day",
-  "assetPerfDone": "Monthly target met",
   "assetPerfRemain": "{amount} to target",
   "@assetPerfRemain": {
     "placeholders": {
@@ -745,7 +734,45 @@
   "assetSortRecent": "Recent",
   "assetSortAmount": "Amount",
   "assetSortCategory": "Category",
-  "assetPeriodPick": "Select period",
+  "assetDueOn": "Paid {date}",
+  "@assetDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "assetDueThisMonth": "Due this month",
+  "assetUsagePeriodLabel": "Card usage period",
+  "assetCycleMix": "This cycle",
+  "assetPerfTitle": "Month {month} target",
+  "@assetPerfTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "assetPerfAchieved": "Target met",
+  "assetPayAmountEmpty": "Enter the payment amount.",
+  "assetPayAmountOver": "The payment can be up to {amount}.",
+  "@assetPayAmountOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "assetYearLabel": "{year}",
+  "@assetYearLabel": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "assetSortAria": "Sort usage history",
+  "assetPeriodPick": "Billing cycle",
   "assetNoUsage": "No usage history yet.",
   "assetBillingPeriod": "Usage {start}–{end}",
   "@assetBillingPeriod": {
@@ -758,7 +785,7 @@
       }
     }
   },
-  "assetMonthlyPaymentDay": "Paid on day {day} each month",
+  "assetMonthlyPaymentDay": "Day {day} each month",
   "@assetMonthlyPaymentDay": {
     "placeholders": {
       "day": {

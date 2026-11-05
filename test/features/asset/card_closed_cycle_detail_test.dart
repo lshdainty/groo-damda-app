@@ -24,7 +24,7 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import '../../support/plain_text.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 const _card = Asset(
   rowId: 9,
@@ -120,7 +120,7 @@ Future<void> _open(
 
 /// 머리 금액 — 숫자와 단위가 따로 그려진다(RichText).
 Finder _head(String amount) => find.byWidgetPredicate(
-  (w) => w is RichText && w.text.toPlainText() == '$amount원',
+  (w) => w is Text && (w.semanticsLabel ?? w.data) == '$amount원',
 );
 
 void main() {
@@ -228,7 +228,8 @@ void main() {
     );
 
     expect(find.text('지금 결제'), findsNothing);
-    expect(find.text('한도 · 결제 설정'), findsOneWidget);
+    // 한도 · 결제 설정 타일은 없다 — 수정은 머리 하나(I-17 47)
+    expect(find.text('한도 · 결제 설정'), findsNothing);
   });
 
   testWidgets('다가오는 회차에서는 [지금 결제] 가 있다', (tester) async {
@@ -297,8 +298,8 @@ void main() {
       ),
     );
 
-    expect(find.text('QC90000'), findsOneWidget);
-    expect(find.text('2/3회차 · 원금 90,000원 · 기록만'), findsOneWidget);
+    expect(find.text('QC90000 2/3회차'), findsOneWidget);
+    expect(find.text('원금 90,000원 · 기록만'), findsOneWidget);
     expect(find.text('남은 할부 한 번에 정리'), findsNothing);
   });
 

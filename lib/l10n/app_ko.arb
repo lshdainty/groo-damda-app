@@ -631,7 +631,7 @@
   "assetChartNoData": "표시할 데이터가 없어요",
   "assetNoLinkedTx": "연결된 거래 내역이 없어요.",
   "assetTxFallback": "거래",
-  "assetPayConfirmMessage": "결제 예정액 {amount}원을 지금 결제 처리할까요?",
+  "assetPayConfirmMessage": "결제 예정액 {amount}을 지금 결제할까요?",
   "@assetPayConfirmMessage": {
     "placeholders": {
       "amount": {
@@ -639,7 +639,7 @@
       }
     }
   },
-  "assetPayConfirmDateSuffix": " 결제일은 {date} 입니다.",
+  "assetPayConfirmDateSuffix": " {date} 결제 예정분이에요.",
   "@assetPayConfirmDateSuffix": {
     "placeholders": {
       "date": {
@@ -709,7 +709,7 @@
   "assetCancelPaymentFailed": "결제를 취소하지 못했어요.",
   "assetPayAction": "결제하기",
   "assetPayAmount": "결제 금액",
-  "assetPayRemainder": "남은 {amount}은 결제일에 빠져요",
+  "assetPayRemainder": "남은 {amount}은 결제일에 빠져요.",
   "@assetPayRemainder": {
     "placeholders": {
       "amount": {
@@ -731,15 +731,6 @@
   "assetUpcomingPayment": "결제 예정",
   "assetScheduledTag": "예정",
   "assetPaidDone": "결제 완료",
-  "assetUsagePeriod": "카드 이용 기간 {period}",
-  "@assetUsagePeriod": {
-    "placeholders": {
-      "period": {
-        "type": "String"
-      }
-    }
-  },
-  "assetLimitSettings": "한도 · 결제 설정",
   "assetLimitUsage": "한도 사용",
   "assetLimitPctUsed": "{pct}% 사용",
   "@assetLimitPctUsed": {
@@ -768,8 +759,6 @@
       }
     }
   },
-  "assetLimitEdit": "한도 · 결제일 변경",
-  "assetPerfDone": "이번 달 실적 달성",
   "assetPerfRemain": "실적까지 {amount}",
   "@assetPerfRemain": {
     "placeholders": {
@@ -782,7 +771,45 @@
   "assetSortRecent": "최근순",
   "assetSortAmount": "고액순",
   "assetSortCategory": "카테고리별",
-  "assetPeriodPick": "기간 선택",
+  "assetDueOn": "{date} 결제",
+  "@assetDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "assetDueThisMonth": "이번 달 결제 예정",
+  "assetUsagePeriodLabel": "카드 이용 기간",
+  "assetCycleMix": "이번 회차 구성",
+  "assetPerfTitle": "{month}월 실적",
+  "@assetPerfTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "assetPerfAchieved": "실적 달성",
+  "assetPayAmountEmpty": "결제 금액을 넣어주세요.",
+  "assetPayAmountOver": "결제 금액은 {amount}까지예요.",
+  "@assetPayAmountOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "assetYearLabel": "{year}년",
+  "@assetYearLabel": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "assetSortAria": "이용 내역 정렬",
+  "assetPeriodPick": "결제 회차",
   "assetNoUsage": "이용 내역이 없어요.",
   "assetBillingPeriod": "{start}~{end} 사용분",
   "@assetBillingPeriod": {
@@ -795,7 +822,7 @@
       }
     }
   },
-  "assetMonthlyPaymentDay": "매월 {day}일 결제",
+  "assetMonthlyPaymentDay": "매월 {day}일",
   "@assetMonthlyPaymentDay": {
     "placeholders": {
       "day": {

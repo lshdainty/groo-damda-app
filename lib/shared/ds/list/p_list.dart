@@ -571,6 +571,7 @@ class PListRadioItem<T> extends StatefulWidget {
     this.highlighted = false,
     this.align = PListAlign.center,
     this.prefix,
+    this.titleSuffix,
     this.markPosition = PListMarkPosition.suffix,
     this.tone = PRadioTone.neutral,
     this.enabled = true,
@@ -593,6 +594,9 @@ class PListRadioItem<T> extends StatefulWidget {
   final bool highlighted;
   final PListAlign align;
   final Widget? prefix;
+
+  /// 제목 뒤에 붙는 배지 줄("예정") — 제목과 한 덩어리로 줄이 바뀐다.
+  final List<Widget>? titleSuffix;
   final PListMarkPosition markPosition;
   final PRadioTone tone;
 
@@ -678,6 +682,7 @@ class _PListRadioItemState<T> extends State<PListRadioItem<T>>
       detail: widget.detail,
       detailChild: widget.detailChild,
       titleColor: widget.titleColor,
+      titleSuffix: widget.titleSuffix,
       prefix: widget.markPosition == PListMarkPosition.prefix
           ? mark
           : widget.prefix,
