@@ -536,6 +536,12 @@ abstract class AppLocalizations {
   /// **'안 읽음'**
   String get notiUnreadMark;
 
+  /// No description provided for @notiMarkReadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 읽음으로 바꾸지 못했어요.'**
+  String get notiMarkReadFailed;
+
   /// No description provided for @notiMarkAllFailed.
   ///
   /// In ko, this message translates to:

@@ -122,14 +122,7 @@ class NotificationScreen extends ConsumerWidget {
                       today: groups[g].isToday,
                       onTap: () async {
                         if (!n.isRead) {
-                          try {
-                            final repo = await ref.read(
-                              notificationRepositoryProvider.future,
-                            );
-                            await repo.markRead(n.rowId);
-                            ref.invalidate(notificationListProvider);
-                            ref.invalidate(unreadCountProvider);
-                          } catch (_) {}
+                          await _markReadOne(context, ref, n.rowId);
                         }
                       },
                       onDelete: () => _delete(container, n),
@@ -151,6 +144,41 @@ Future<void> _delete(ProviderContainer c, AppNotification n) async {
   await repo.delete(n.rowId);
   c.invalidate(notificationListProvider);
   c.invalidate(unreadCountProvider);
+}
+
+/// 알림 하나 읽음 — 실패하면 critical 스낵바 + [다시 시도].
+Future<void> _markReadOne(
+  BuildContext context,
+  WidgetRef ref,
+  int rowId,
+) async {
+  final c = ProviderScope.containerOf(context, listen: false);
+  final snack = PSnackbar.maybeOf(context);
+  final l = AppLocalizations.of(context);
+  await _markReadOneDetached(c, snack, l, rowId);
+}
+
+Future<void> _markReadOneDetached(
+  ProviderContainer c,
+  PSnackbarApi? snack,
+  AppLocalizations l,
+  int rowId,
+) async {
+  try {
+    final repo = await c.read(notificationRepositoryProvider.future);
+    await repo.markRead(rowId);
+    c.invalidate(notificationListProvider);
+    c.invalidate(unreadCountProvider);
+  } catch (_) {
+    snack?.show(
+      message: l.notiMarkReadFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () => _markReadOneDetached(c, snack, l, rowId),
+      ),
+    );
+  }
 }
 
 /// 모두 읽음 — 실패하면 critical 스낵바 + [다시 시도](같은 요청을 바로). 요청은 전역 오류 알림을 끈다.

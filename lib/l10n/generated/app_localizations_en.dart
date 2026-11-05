@@ -234,6 +234,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notiUnreadMark => 'Unread';
 
   @override
+  String get notiMarkReadFailed => 'Couldn\'t mark the notification as read.';
+
+  @override
   String get notiMarkAllFailed => 'Couldn\'t mark all notifications as read.';
 
   @override

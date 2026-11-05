@@ -610,11 +610,24 @@ class _PrefsSkeleton extends StatelessWidget {
     radius: PSkeletonRadius.full,
   );
 
-  Widget _row(IconData icon, String title, {String? detail}) => PListItem(
+  Widget _row(
+    IconData icon,
+    String title, {
+    String? detail,
+    Widget? detailChild,
+  }) => PListItem(
     prefix: Icon(icon),
     title: title,
     detail: detail,
+    detailChild: detailChild,
     suffix: _switchSlot,
+  );
+
+  /// 시작 · 종료 · 발송 주기 — 들인 줄, 값 자리만 Skeleton.
+  Widget _valueRow(String title) => PListItem(
+    prefix: const SizedBox(width: kPListIconSize),
+    title: title,
+    suffix: const PSkeleton(width: 64, height: 16),
   );
 
   @override
@@ -704,6 +717,8 @@ class _PrefsSkeleton extends StatelessWidget {
               l.notiQuietToggle,
               detail: l.notiQuietToggleDesc,
             ),
+            _valueRow(l.notiQuietStart),
+            _valueRow(l.notiQuietEnd),
           ],
         ),
         PListHeader(
@@ -726,7 +741,16 @@ class _PrefsSkeleton extends StatelessWidget {
           variant: PListHeaderVariant.boldSolid,
           topInset: 16,
         ),
-        PList(children: [_row(LucideIcons.mail, l.notiEmailToggle)]),
+        PList(
+          children: [
+            _row(
+              LucideIcons.mail,
+              l.notiEmailToggle,
+              detailChild: const PSkeleton(width: 160, height: 14),
+            ),
+            _valueRow(l.notiEmailFreq),
+          ],
+        ),
         const SizedBox(height: 24),
       ],
     );
