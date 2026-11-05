@@ -18,7 +18,7 @@ import 'package:groo_damda_app/features/notification/domain/notification.dart';
 import 'package:groo_damda_app/features/notification/presentation/notification_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 class _FakeRepo extends NotificationRepository {
@@ -91,11 +91,14 @@ Future<void> _pump(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(scale)),
-          child: child!,
+        builder: (context, child) => PSnackbarHost(
+          closeLabel: '닫기',
+          child: MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          ),
         ),
       ),
     ),
@@ -185,7 +188,9 @@ void main() {
     expect(more.left, greaterThanOrEqualTo(0));
   });
 
-  testWidgets('지우기가 실패하면 확인창은 열려 있고 오류 알림이 뜬다(웹과 같다)', (tester) async {
+  testWidgets('지우기가 실패하면 확인창이 닫히고 critical 띠 + [다시 시도] 가 뜬다 — 서버 글은 안 나온다', (
+    tester,
+  ) async {
     final deleted = <int>[];
     await _pump(tester, deleted, fail: true);
     await tester.tap(find.byKey(const ValueKey('noti-more-1')));
@@ -193,57 +198,12 @@ void main() {
     await tester.tap(find.text(keepAll('삭제')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('삭제'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
     expect(tester.takeException(), isNull);
     expect(deleted, isEmpty);
-    // 창은 그대로
-    expect(find.text(keepAll('알림 삭제')), findsOneWidget);
-    // 오류 알림
-    expect(find.textContaining('삭제하지 못했어요'), findsWidgets);
-    // 확정 버튼이 다시 눌린다(로딩이 풀렸다)
-    expect(find.text('삭제'), findsOneWidget);
-  });
-
-  testWidgets('실패 알림 띠는 확인창 딤 위에 그려진다 — 눌러서 동작한다(DESIGN Z-index)', (
-    tester,
-  ) async {
-    await _pump(tester, <int>[], fail: true);
-    await tester.tap(find.byKey(const ValueKey('noti-more-1')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(keepAll('삭제')));
-    await tester.pumpAndSettle();
-    expect(find.text(keepAll('알림 삭제')), findsOneWidget);
-    // 확인창이 떠 있는 동안 액션이 달린 띠를 띄워 눌러 본다 — 딤 아래에 그려지면 딤이 받아 동작하지 않는다
-    var taps = 0;
-    final ctx = tester.element(find.byType(PAlertDialogView));
-    showPSnackBar(
-      ctx,
-      '확인창 위 띠',
-      actionLabel: '다시 시도',
-      onAction: () => taps++,
-      duration: const Duration(seconds: 20),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    // 확인창 라우트의 Scaffold 안에도 띠가 그려진다
-    final routeScaffold = find.ancestor(
-      of: find.byType(PAlertDialogView),
-      matching: find.byType(Scaffold),
-    );
-    expect(routeScaffold, findsOneWidget);
-    expect(
-      find.descendant(of: routeScaffold, matching: find.text('확인창 위 띠')),
-      findsOneWidget,
-    );
-    await tester.tap(
-      find.descendant(of: routeScaffold, matching: find.text('다시 시도')),
-    );
-    await tester.pump();
-    expect(taps, 1, reason: '딤 위에 있어 눌린다');
-    expect(
-      find.text(keepAll('알림 삭제')),
-      findsOneWidget,
-      reason: '띠를 눌러도 확인창은 닫히지 않는다',
-    );
+    expect(find.text(keepAll('알림 삭제')), findsNothing, reason: '확인창은 닫힌다');
+    expect(find.textContaining('알림을 삭제하지 못했어요.'), findsOneWidget);
+    expect(find.text('다시 시도'), findsOneWidget);
   });
 }

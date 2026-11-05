@@ -229,6 +229,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiDeleteFailed => '알림을 삭제하지 못했어요.';
 
   @override
+  String get notiUnreadMark => '안 읽음';
+
+  @override
   String get notiMarkAllFailed => '알림을 모두 읽음으로 바꾸지 못했어요.';
 
   @override

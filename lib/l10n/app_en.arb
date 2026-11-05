@@ -81,6 +81,7 @@
   "notiLoadFailed": "Couldn't load notifications",
   "notiLoadFailedDesc": "Please try again in a moment.",
   "notiDeleteFailed": "Couldn't delete the notification.",
+  "notiUnreadMark": "Unread",
   "notiMarkAllFailed": "Couldn't mark all notifications as read.",
   "notiPrefsSaveFailed": "Couldn't save notification settings.",
   "notiSettingsLoadFailedDesc": "Please try again in a moment.",

@@ -231,6 +231,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notiDeleteFailed => 'Couldn\'t delete the notification.';
 
   @override
+  String get notiUnreadMark => 'Unread';
+
+  @override
   String get notiMarkAllFailed => 'Couldn\'t mark all notifications as read.';
 
   @override

@@ -4,11 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/app/theme/radius.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
-import 'package:groo_damda_app/features/calendar/presentation/calendar_event_pickers.dart';
+import 'package:groo_damda_app/shared/forms/time_sheet.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -22,7 +21,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 
 /// 알림 "설정" 화면(I-15 48 ~ 54) — 흰 면 하나: 푸시 알림 스위치 줄 → "알림 종류" + 스위치 줄 일곱 → "예산 알림 기준" +
 /// Slider → "방해 금지 시간" → "소리 · 진동" → "이메일 알림". 묶음 제목은 목록 제목(boldSolid), 줄은 ds List.
@@ -159,7 +158,7 @@ class _Content extends ConsumerWidget {
     }
   }
 
-  /// 스위치 줄 — 앞 아이콘 22 · 제목 · 설명 · 오른쪽 Switch 24. [enabled] 가 거짓이면 막힌 줄(켜진 모양 그대로 회색).
+  /// 스위치 줄 — 앞 아이콘 22 · 제목 · 설명 · 오른쪽 Switch 32. [enabled] 가 거짓이면 막힌 줄(켜진 모양 그대로 회색).
   Widget _switchRow(
     BuildContext context,
     WidgetRef ref, {
@@ -230,10 +229,12 @@ class _Content extends ConsumerWidget {
     };
 
     Future<void> pickTime(String title, String current, String field) async {
-      final picked = await showCalendarTimeSheet(
+      final picked = await showTimeSheet(
         context,
         title: title,
         value: _parseHm(current),
+        // 방해 금지 시작 · 끝은 1분 간격(time-picker.md)
+        minuteStep: 1,
       );
       if (picked == null || !context.mounted) return;
       final hm = _fmtHm(picked);
@@ -572,14 +573,8 @@ class _ThresholdBlockState extends State<_ThresholdBlock> {
                   ),
                 ),
               ),
-              Text(
-                '$shown%',
-                style: PTypography.t5.copyWith(
-                  color: c.fgNeutral,
-                  fontWeight: FontWeight.w700,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
+              // 머리 값 — 보조 기술에는 숨긴다(값은 손잡이가 읽는다)
+              PSliderValue('$shown%'),
             ],
           ),
           PSlider(
@@ -587,20 +582,10 @@ class _ThresholdBlockState extends State<_ThresholdBlock> {
             min: 50,
             max: 100,
             step: 5,
-            label: l.notiThresholdTitle,
+            label: l.notiThresholdLabel,
             formatValue: (v) => '${v.round()}%',
             onChanged: (v) => setState(() => _drag = v.round()),
             onChangeEnd: (v) => widget.onSave(v.round()),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              for (final t in const ['50%', '100%'])
-                Text(
-                  t,
-                  style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
-                ),
-            ],
           ),
           const SizedBox(height: 8),
           Text(
@@ -620,9 +605,9 @@ class _PrefsSkeleton extends StatelessWidget {
   const _PrefsSkeleton();
 
   static const _switchSlot = PSkeleton(
-    width: 38,
-    height: 24,
-    borderRadius: PRadius.brFull,
+    width: 52,
+    height: 32,
+    radius: PSkeletonRadius.full,
   );
 
   Widget _row(IconData icon, String title, {String? detail}) => PListItem(
@@ -695,14 +680,14 @@ class _PrefsSkeleton extends StatelessWidget {
                       style: PTypography.t4.copyWith(color: c.fgNeutral),
                     ),
                   ),
-                  const PSkeleton.line(width: 36, height: 16),
+                  const PSkeleton(width: 36, height: 16),
                 ],
               ),
               const SizedBox(height: 12),
               const PSkeleton(
                 width: double.infinity,
                 height: 4,
-                borderRadius: PRadius.brFull,
+                radius: PSkeletonRadius.full,
               ),
             ],
           ),

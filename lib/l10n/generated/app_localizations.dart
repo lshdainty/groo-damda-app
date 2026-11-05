@@ -530,6 +530,12 @@ abstract class AppLocalizations {
   /// **'알림을 삭제하지 못했어요.'**
   String get notiDeleteFailed;
 
+  /// No description provided for @notiUnreadMark.
+  ///
+  /// In ko, this message translates to:
+  /// **'안 읽음'**
+  String get notiUnreadMark;
+
   /// No description provided for @notiMarkAllFailed.
   ///
   /// In ko, this message translates to:

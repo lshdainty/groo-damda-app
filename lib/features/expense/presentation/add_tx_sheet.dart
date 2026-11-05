@@ -43,6 +43,7 @@ import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_prefilter.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/time_sheet.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -899,7 +900,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final l = AppLocalizations.of(context);
     FocusScope.of(context).unfocus();
     final t = _input.time;
-    final picked = await showCalendarTimeSheet(
+    final picked = await showTimeSheet(
       context,
       title: l.txfTimeTitle,
       value: roundTimeToStep(PTimeValue(t.hour, t.minute), 5),
