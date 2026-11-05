@@ -517,6 +517,40 @@ void main() {
       expect(repo.updates, 1);
     });
 
+    testWidgets(
+      '12자 넘는 옛 이름은 입력 상한이 저장된 길이라 글이 잘리지 않고, 고쳐 13자면 "13/12" 오류색 + [저장] 막힘',
+      (tester) async {
+        await size(tester);
+        const long = EventLabel(
+          rowId: 9,
+          labelName: '가나다라마바사아자차카타파',
+          color: '#2d8060',
+        );
+        final repo = _LabelRepo(const [long]);
+        await tester.pumpWidget(
+          app(const CalendarLabelsScreen(), withRepo(repo)),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(findPlain('가나다라마바사아자차카타파').first);
+        await tester.pumpAndSettle();
+        // 13자 그대로 한 글자만 바꿈 — 잘리지 않는다(상한 13)
+        await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타하');
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<EditableText>(find.byType(EditableText))
+              .controller
+              .text,
+          '가나다라마바사아자차카타하',
+        );
+        expect(findRichPlain('13/12'), findsOneWidget);
+        await tester.tap(find.text('저장'));
+        await tester.pumpAndSettle();
+        expect(repo.updates, 0);
+        expect(findPlainContaining('12자 이내'), findsOneWidget);
+      },
+    );
+
     testWidgets('12자 넘는 옛 이름 — 한 글자 지우면 12 검사를 통과해 저장되고, 13자 그대로 고친 값은 막힌다', (
       tester,
     ) async {

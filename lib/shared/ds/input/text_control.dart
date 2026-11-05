@@ -235,7 +235,8 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
       for (final affix in affixes)
         if (affix != null && affix.isNotEmpty) affix,
       if (message != null && message.isNotEmpty) message,
-      if (max != null) l10n.dsFieldCountSemantics(_count, max),
+      if (max != null)
+        l10n.dsFieldCountSemantics(_count, field?.counterMax ?? max),
     ];
     return parts.isEmpty ? null : parts.join('\n');
   }

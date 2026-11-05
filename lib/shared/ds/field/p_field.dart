@@ -59,6 +59,7 @@ class PFieldControlData {
     this.disabled = false,
     this.readOnly = false,
     this.maxGraphemeCount,
+    this.counterMax,
     this.edgeInset = 0,
   });
 
@@ -79,6 +80,9 @@ class PFieldControlData {
   /// 최대 글자 수(자소) — 입력은 최대에서 멈춘다(한글은 조합이 끝난 뒤 자른다).
   final int? maxGraphemeCount;
 
+  /// 세는 줄 분모 — 없으면 [maxGraphemeCount].
+  final int? counterMax;
+
   /// 머리 · 꼬리가 입력 양옆에서 들어온 만큼 — 입력이 화면 폭을 다 쓰는 칸(첨부)이 줄 안쪽 여백으로 읽는다.
   final double edgeInset;
 
@@ -92,6 +96,7 @@ class PFieldControlData {
       other.disabled == disabled &&
       other.readOnly == readOnly &&
       other.maxGraphemeCount == maxGraphemeCount &&
+      other.counterMax == counterMax &&
       other.edgeInset == edgeInset;
 
   @override
@@ -103,6 +108,7 @@ class PFieldControlData {
     disabled,
     readOnly,
     maxGraphemeCount,
+    counterMax,
     edgeInset,
   );
 }
@@ -193,6 +199,7 @@ class PField extends StatefulWidget {
     this.disabled = false,
     this.readOnly = false,
     this.maxGraphemeCount,
+    this.counterMax,
     this.edgeInset = 0,
     required this.child,
   }) : assert(
@@ -235,6 +242,11 @@ class PField extends StatefulWidget {
 
   /// 최대 글자 수(자소) — 있으면 꼬리 오른쪽에 "쓴 수/최대" 를 보이고 입력은 최대에서 멈춘다.
   final int? maxGraphemeCount;
+
+  /// 세는 줄 분모 — 기본 null 이면 [maxGraphemeCount] 가 분모다(지금 그대로). 값이 있으면 "쓴 수/[counterMax]" 로 보이고 쓴 수가
+  /// 이를 넘으면 오류 색이다. 입력 상한은 [maxGraphemeCount] 가 따로 정한다 — 규칙(12자)보다 긴 옛 값을 고칠 때 입력이 잘려 글이
+  /// 사라지지 않게 상한만 넓히고 분모는 규칙 값으로 둔다.
+  final int? counterMax;
 
   /// 머리 · 꼬리의 좌우 안쪽 여백(기본 0) — 입력이 Field 폭을 다 쓰는 자리에서 쓴다. 입력은 화면 폭 그대로이고 라벨 · 설명 ·
   /// 오류 · 글자 수만 이만큼 들어와 다른 칸과 같은 자리에 선다(첨부 칸의 줄이 화면 끝까지 가는 길 — attachment-input.yaml
@@ -335,6 +347,7 @@ class _PFieldState extends State<PField> implements PFieldLink {
       disabled: widget.disabled,
       readOnly: widget.readOnly,
       maxGraphemeCount: max,
+      counterMax: widget.counterMax,
       edgeInset: widget.edgeInset,
     );
 
@@ -364,7 +377,11 @@ class _PFieldState extends State<PField> implements PFieldLink {
           else
             const Spacer(),
           if (max != null)
-            _CharacterCount(count: _count, max: max, invalid: widget.invalid),
+            _CharacterCount(
+              count: _count,
+              max: widget.counterMax ?? max,
+              invalid: widget.invalid,
+            ),
         ],
       );
     }
@@ -619,7 +636,7 @@ class _CharacterCount extends StatelessWidget {
                 TextSpan(
                   text: _groupThousands(n),
                   style: style.copyWith(
-                    color: invalid
+                    color: invalid || n > max
                         ? c.fgCritical
                         : n == 0
                         ? c.fgNeutralSubtle
@@ -629,7 +646,9 @@ class _CharacterCount extends StatelessWidget {
                 TextSpan(
                   text: '/${_groupThousands(max)}',
                   style: style.copyWith(
-                    color: invalid ? c.fgCritical : c.fgNeutralSubtle,
+                    color: invalid || n > max
+                        ? c.fgCritical
+                        : c.fgNeutralSubtle,
                   ),
                 ),
               ],

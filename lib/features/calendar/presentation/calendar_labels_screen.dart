@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -379,7 +381,12 @@ class _LabelFormState extends ConsumerState<_LabelForm> {
             ),
             // 이름은 12자까지 — 세는 줄 "n/12", 입력은 12 에서 멈춘다. 12자 넘는 옛 이름은 "13/12" 로 보인다
             child: PField(
-              maxGraphemeCount: kLabelNameMax,
+              // 입력 상한은 저장된 이름 길이와 12 중 큰 값(긴 옛 이름에 글자를 더해도 안 잘린다), 세는 줄 분모는 규칙 12
+              maxGraphemeCount: math.max(
+                _initialName.characters.length,
+                kLabelNameMax,
+              ),
+              counterMax: kLabelNameMax,
               invalid: _nameError != null,
               errorMessage: _nameError,
               child: PInput(
