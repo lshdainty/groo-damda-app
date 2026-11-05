@@ -1084,54 +1084,60 @@ class _HoldingRow extends ConsumerWidget {
       align: PListAlign.top,
       title: name,
       detail: sub,
-      suffix: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        spacing: PSpacing.x0_5,
-        children: [
-          Text(
-            value != null ? keepAllAmount(won(value)) : '—',
-            textAlign: TextAlign.end,
-            style: PTypography.t5.copyWith(
-              color: c.fgNeutral,
-              fontWeight: FontWeight.w700,
-              fontFeatures: const [FontFeature.tabularFigures()],
+      // 뒤 기둥은 줄 폭의 42% 까지 — 글자 200% 에서 평가액이 이름 자리를 다 먹지 않는다(금액은 쉼표 뒤에서 줄이 바뀐다)
+      suffix: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width * 0.42,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          spacing: PSpacing.x0_5,
+          children: [
+            Text(
+              value != null ? keepAllAmount(won(value)) : '—',
+              textAlign: TextAlign.end,
+              style: PTypography.t5.copyWith(
+                color: c.fgNeutral,
+                fontWeight: FontWeight.w700,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
-          ),
-          if (pct != null)
-            PDelta(
-              direction: pct >= 0 ? PDeltaDirection.up : PDeltaDirection.down,
-              value: masked ? '••••' : formatChangeRateAbs(pct),
-            ),
-          // 매수·매도는 상세를 어디서 열었든 가능해야 한다 — 편집 진입 여부에 묶으면 자산 화면에서 연 상세만 매매가 막힌다.
-          if (onTrade != null)
-            Align(
-              alignment: Alignment.centerRight,
-              // 웹 -mr-x2 -mb-x1 — 보이는 상자는 그대로, 자리만 줄이고 누르는 영역은 44 를 지킨다
-              child: _TrimmedLink(
-                end: PSpacing.x2,
-                child: PListAction(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      dsb.PButton(
-                        label: l.tradeBuy,
-                        variant: dsb.PButtonVariant.ghost,
-                        size: dsb.PButtonSize.small,
-                        onPressed: () => onTrade!('BUY'),
-                      ),
-                      dsb.PButton(
-                        label: l.tradeSell,
-                        variant: dsb.PButtonVariant.ghost,
-                        size: dsb.PButtonSize.small,
-                        onPressed: () => onTrade!('SELL'),
-                      ),
-                    ],
+            if (pct != null)
+              PDelta(
+                direction: pct >= 0 ? PDeltaDirection.up : PDeltaDirection.down,
+                value: masked ? '••••' : formatChangeRateAbs(pct),
+              ),
+            // 매수·매도는 상세를 어디서 열었든 가능해야 한다 — 편집 진입 여부에 묶으면 자산 화면에서 연 상세만 매매가 막힌다.
+            if (onTrade != null)
+              Align(
+                alignment: Alignment.centerRight,
+                // 웹 -mr-x2 -mb-x1 — 보이는 상자는 그대로, 자리만 줄이고 누르는 영역은 44 를 지킨다
+                child: _TrimmedLink(
+                  end: PSpacing.x2,
+                  child: PListAction(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        dsb.PButton(
+                          label: l.tradeBuy,
+                          variant: dsb.PButtonVariant.ghost,
+                          size: dsb.PButtonSize.small,
+                          onPressed: () => onTrade!('BUY'),
+                        ),
+                        dsb.PButton(
+                          label: l.tradeSell,
+                          variant: dsb.PButtonVariant.ghost,
+                          size: dsb.PButtonSize.small,
+                          onPressed: () => onTrade!('SELL'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
