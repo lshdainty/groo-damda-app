@@ -18,6 +18,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
@@ -29,7 +30,7 @@ import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/domain/event_label.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_labels_screen.dart';
-import 'package:groo_damda_app/features/calendar/presentation/calendar_share_screen.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_manage_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
@@ -104,25 +105,37 @@ Finder _button(String label) => find
 ///
 /// 무효화가 재조회로 이어지려면 듣는 쪽이 있어야 한다 — 실제 앱에서는 셸에
 /// 상주하는 캘린더 화면이 그 역할이다.
-Widget _harness(Widget screen, DateTime month) => MaterialApp(
+Widget _harness(Widget screen, DateTime month) => MaterialApp.router(
   theme: GrooTheme.light(),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('ko'),
-  home: Scaffold(
-    body: Column(
-      children: [
-        Consumer(
-          builder: (_, ref, _) {
-            ref.watch(
-              monthEventsProvider((year: month.year, month: month.month)),
-            );
-            return const SizedBox.shrink();
-          },
+  // 관리 페이지는 지운 뒤 목록으로 돌아가므로 라우터가 필요하다
+  routerConfig: GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, _) => Scaffold(
+          body: Column(
+            children: [
+              Consumer(
+                builder: (_, ref, _) {
+                  ref.watch(
+                    monthEventsProvider((year: month.year, month: month.month)),
+                  );
+                  return const SizedBox.shrink();
+                },
+              ),
+              Expanded(child: screen),
+            ],
+          ),
         ),
-        Expanded(child: screen),
-      ],
-    ),
+      ),
+      GoRoute(
+        path: '/settings/calendar-share',
+        builder: (_, _) => const SizedBox(),
+      ),
+    ],
   ),
 );
 
@@ -186,11 +199,13 @@ void main() {
   });
 
   testWidgets('캘린더를 지우면 월 일정을 다시 받는다', (tester) async {
-    final repo = await pump(tester, const CalendarShareScreen());
+    // 관리 페이지의 "캘린더 삭제" 줄(I-09b 29)
+    final repo = await pump(
+      tester,
+      CalendarManageScreen(calendarId: _deletable.rowId),
+    );
 
-    await tester.tap(findPlain('회사캘린더'));
-    await tester.pumpAndSettle();
-    await tester.tap(_button(l.calDeleteCalendar));
+    await tester.tap(find.text(l.calDeleteCalendar));
     await tester.pumpAndSettle();
     await tester.tap(_button(l.actionDelete));
     await tester.pumpAndSettle();

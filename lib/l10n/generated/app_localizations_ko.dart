@@ -1591,7 +1591,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calCalendarNameFieldPlaceholder => '캘린더 이름';
 
   @override
-  String get calInviteCodePlaceholder => '예: ABC123';
+  String get calInviteCodePlaceholder => '예: 3F9A1C2B';
 
   @override
   String get calRecurrenceNone => '반복 안 함';
@@ -1696,7 +1696,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calDeleteLabelConfirm(String name) {
-    return '\"$name\" 라벨을 삭제할까요? 이 라벨이 지정된 일정은 라벨 없음 상태가 돼요. 삭제한 라벨은 되돌릴 수 없어요.';
+    return '\"$name\" 라벨을 삭제할까요? 이 라벨이 붙은 일정은 라벨 없이 남아요.';
   }
 
   @override
@@ -1809,11 +1809,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calInviteCode => '초대 코드';
 
   @override
-  String calManageTitle(String name) {
-    return '$name · 관리';
-  }
-
-  @override
   String get calDeleteCalendar => '캘린더 삭제';
 
   @override
@@ -1830,7 +1825,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calRemoveMemberConfirm(String name) {
-    return '\"$name\" 님을 캘린더에서 내보내시겠어요?';
+    return '\"$name\" 님을 캘린더에서 내보낼까요?';
   }
 
   @override
@@ -1838,11 +1833,8 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calDeleteCalendarConfirm(String name) {
-    return '\"$name\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 이동하고 모든 멤버의 접근 권한이 사라져요. 삭제한 캘린더는 되돌릴 수 없어요.';
+    return '\"$name\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요.';
   }
-
-  @override
-  String get calDeleteCalendarAction => '영구 삭제';
 
   @override
   String get calDeleteCalendarFailed => '캘린더를 삭제하지 못했어요.';
@@ -1854,10 +1846,51 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calCopy => '복사';
 
   @override
-  String get calRegenerate => '재생성';
+  String get calRegenerate => '새로 만들기';
 
   @override
   String get calMembers => '멤버';
+
+  @override
+  String calMembersCount(int count) {
+    return '멤버 · $count';
+  }
+
+  @override
+  String get calMemberLoadFailed => '멤버를 불러오지 못했어요';
+
+  @override
+  String get calManageNameTitle => '캘린더 이름';
+
+  @override
+  String get calNameRequired => '캘린더 이름을 입력해주세요.';
+
+  @override
+  String get calInviteHint => '이 코드를 공유하면 다른 사람이 캘린더에 참여할 수 있어요.';
+
+  @override
+  String get calManageSaveFailed => '캘린더를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get calCreateFailed => '캘린더를 만들지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get calJoinInvalidCode => '초대 코드를 확인해주세요.';
+
+  @override
+  String get calJoinAlreadyMember => '이미 참여한 캘린더예요.';
+
+  @override
+  String get calRemoveMemberFailed => '멤버를 내보내지 못했어요.';
+
+  @override
+  String get calLabelNameRequired => '라벨 이름을 입력해주세요.';
+
+  @override
+  String get calLabelNameDuplicate => '같은 이름의 라벨이 이미 있어요.';
+
+  @override
+  String get calLabelSaveFailed => '라벨을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get calMeSuffix => '(나)';
@@ -1881,7 +1914,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calDeleteFailed => '삭제 실패';
 
   @override
-  String get calJoinFailed => '참여 실패';
+  String get calJoinFailed => '참여하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get calUpdateFailed => '변경 실패';
@@ -1891,9 +1924,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get calLabelLoadError => '라벨을 불러오지 못했어요';
-
-  @override
-  String get calMemberLoadError => '멤버 로드 실패';
 
   @override
   String get dashTitle => '홈';

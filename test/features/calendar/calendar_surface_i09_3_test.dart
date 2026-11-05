@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
@@ -263,18 +265,42 @@ void main() {
       await tester.pump(const Duration(seconds: 31));
     });
 
-    testWidgets('캘린더 줄은 누르는 줄 — 지금의 관리 시트가 열린다', (tester) async {
+    testWidgets('캘린더 줄은 꺾쇠가 달린 누르는 줄 — 누르면 관리 페이지로 옮긴다', (tester) async {
       await size(tester);
       await tester.pumpWidget(
-        app(const CalendarShareScreen(), [
-          userCalendarListProvider.overrideWith((ref) async => const [mine]),
-        ]),
+        ProviderScope(
+          overrides: [
+            authProvider.overrideWith(_NoAuth.new),
+            userCalendarListProvider.overrideWith((ref) async => const [mine]),
+          ],
+          child: MaterialApp.router(
+            theme: GrooTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('ko'),
+            routerConfig: GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (_, _) => const CalendarShareScreen(),
+                ),
+                GoRoute(
+                  path: '/settings/calendar-share/:calendarId',
+                  builder: (_, s) =>
+                      Text('manage-${s.pathParameters['calendarId']}'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
       expect(find.byType(PListRowFrame), findsWidgets);
+      expect(find.byIcon(LucideIcons.chevronRight), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('cal-share-1')));
       await tester.pumpAndSettle();
-      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.text('manage-1'), findsOneWidget);
+      expect(find.byType(BottomSheet), findsNothing);
     });
   });
 

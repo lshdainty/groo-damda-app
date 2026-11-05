@@ -1611,7 +1611,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calCalendarNameFieldPlaceholder => 'Calendar name';
 
   @override
-  String get calInviteCodePlaceholder => 'e.g. ABC123';
+  String get calInviteCodePlaceholder => 'e.g. 3F9A1C2B';
 
   @override
   String get calRecurrenceNone => 'Does not repeat';
@@ -1719,7 +1719,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calDeleteLabelConfirm(String name) {
-    return 'Delete the \"$name\" label? Events with this label will become unlabeled. A deleted label cannot be restored.';
+    return 'Delete the \"$name\" label? Events with this label stay without a label.';
   }
 
   @override
@@ -1834,11 +1834,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calInviteCode => 'Invite code';
 
   @override
-  String calManageTitle(String name) {
-    return '$name · Manage';
-  }
-
-  @override
   String get calDeleteCalendar => 'Delete calendar';
 
   @override
@@ -1863,11 +1858,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calDeleteCalendarConfirm(String name) {
-    return 'Delete the \"$name\" calendar? Events move to the default calendar and all members lose access. A deleted calendar cannot be restored.';
+    return 'Delete the \"$name\" calendar? Events move to the default calendar, and members can no longer see it.';
   }
-
-  @override
-  String get calDeleteCalendarAction => 'Delete permanently';
 
   @override
   String get calDeleteCalendarFailed => 'Couldn\'t delete the calendar.';
@@ -1879,10 +1871,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calCopy => 'Copy';
 
   @override
-  String get calRegenerate => 'Regenerate';
+  String get calRegenerate => 'Generate new';
 
   @override
   String get calMembers => 'Members';
+
+  @override
+  String calMembersCount(int count) {
+    return 'Members · $count';
+  }
+
+  @override
+  String get calMemberLoadFailed => 'Couldn\'t load members';
+
+  @override
+  String get calManageNameTitle => 'Calendar name';
+
+  @override
+  String get calNameRequired => 'Please enter a calendar name.';
+
+  @override
+  String get calInviteHint =>
+      'Share this code to let others join the calendar.';
+
+  @override
+  String get calManageSaveFailed =>
+      'Couldn\'t save the calendar. Please try again in a moment.';
+
+  @override
+  String get calCreateFailed =>
+      'Couldn\'t create the calendar. Please try again in a moment.';
+
+  @override
+  String get calJoinInvalidCode => 'Please check the invite code.';
+
+  @override
+  String get calJoinAlreadyMember => 'You\'ve already joined this calendar.';
+
+  @override
+  String get calRemoveMemberFailed => 'Couldn\'t remove the member.';
+
+  @override
+  String get calLabelNameRequired => 'Please enter a label name.';
+
+  @override
+  String get calLabelNameDuplicate => 'A label with that name already exists.';
+
+  @override
+  String get calLabelSaveFailed =>
+      'Couldn\'t save the label. Please try again in a moment.';
 
   @override
   String get calMeSuffix => '(me)';
@@ -1906,7 +1943,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calDeleteFailed => 'Delete failed';
 
   @override
-  String get calJoinFailed => 'Failed to join';
+  String get calJoinFailed => 'Couldn\'t join. Please try again in a moment.';
 
   @override
   String get calUpdateFailed => 'Update failed';
@@ -1916,9 +1953,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calLabelLoadError => 'Couldn\'t load labels';
-
-  @override
-  String get calMemberLoadError => 'Failed to load members';
 
   @override
   String get dashTitle => 'Home';

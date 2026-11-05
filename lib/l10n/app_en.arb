@@ -873,7 +873,7 @@
   "calLabelNamePlaceholder": "e.g. Important, Deadline, Meeting",
   "calCalendarNamePlaceholder": "e.g. Family, Work, Workouts",
   "calCalendarNameFieldPlaceholder": "Calendar name",
-  "calInviteCodePlaceholder": "e.g. ABC123",
+  "calInviteCodePlaceholder": "e.g. 3F9A1C2B",
   "calRecurrenceNone": "Does not repeat",
   "calFormNone": "None",
   "calFormNoReminder": "No reminder",
@@ -933,7 +933,7 @@
   "calEditLabel": "Edit label",
   "calPreview": "Preview",
   "calDeleteLabelTitle": "Delete label",
-  "calDeleteLabelConfirm": "Delete the \"{name}\" label? Events with this label will become unlabeled. A deleted label cannot be restored.",
+  "calDeleteLabelConfirm": "Delete the \"{name}\" label? Events with this label stay without a label.",
   "@calDeleteLabelConfirm": {
     "placeholders": {
       "name": {
@@ -1028,14 +1028,6 @@
     }
   },
   "calInviteCode": "Invite code",
-  "calManageTitle": "{name} · Manage",
-  "@calManageTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "calDeleteCalendar": "Delete calendar",
   "calCalendarUpdated": "Calendar updated",
   "calInviteCodeRegenerated": "Generated a new invite code",
@@ -1050,8 +1042,7 @@
     }
   },
   "calRemove": "Remove",
-  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar and all members lose access. A deleted calendar cannot be restored.",
-  "calDeleteCalendarAction": "Delete permanently",
+  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar, and members can no longer see it.",
   "calDeleteCalendarFailed": "Couldn't delete the calendar.",
   "calLabelDeleteFailed": "Couldn't delete the label.",
   "@calDeleteCalendarConfirm": {
@@ -1062,8 +1053,28 @@
     }
   },
   "calCopy": "Copy",
-  "calRegenerate": "Regenerate",
+  "calRegenerate": "Generate new",
   "calMembers": "Members",
+  "calMembersCount": "Members · {count}",
+  "@calMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calMemberLoadFailed": "Couldn't load members",
+  "calManageNameTitle": "Calendar name",
+  "calNameRequired": "Please enter a calendar name.",
+  "calInviteHint": "Share this code to let others join the calendar.",
+  "calManageSaveFailed": "Couldn't save the calendar. Please try again in a moment.",
+  "calCreateFailed": "Couldn't create the calendar. Please try again in a moment.",
+  "calJoinInvalidCode": "Please check the invite code.",
+  "calJoinAlreadyMember": "You've already joined this calendar.",
+  "calRemoveMemberFailed": "Couldn't remove the member.",
+  "calLabelNameRequired": "Please enter a label name.",
+  "calLabelNameDuplicate": "A label with that name already exists.",
+  "calLabelSaveFailed": "Couldn't save the label. Please try again in a moment.",
   "calMeSuffix": "(me)",
   "calChangeToEditor": "Change to editor",
   "calChangeToViewer": "Change to viewer",
@@ -1071,11 +1082,10 @@
   "calActionFailed": "Failed",
   "calSaveFailed": "Save failed",
   "calDeleteFailed": "Delete failed",
-  "calJoinFailed": "Failed to join",
+  "calJoinFailed": "Couldn't join. Please try again in a moment.",
   "calUpdateFailed": "Update failed",
   "calCalendarLoadError": "Couldn't load calendars",
   "calLabelLoadError": "Couldn't load labels",
-  "calMemberLoadError": "Failed to load members",
   "dashTitle": "Home",
   "dashGreeting": "Have a great day",
   "dashTotalAssets": "Total assets",
