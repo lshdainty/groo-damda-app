@@ -3223,7 +3223,7 @@
   "stocksWatchGroupNamePlaceholder": "그룹 이름",
   "stocksWatchGroupSaveFail": "그룹을 저장하지 못했어요.",
   "stocksWatchAddFail": "관심 종목에 넣지 못했어요.",
-  "stocksWatchGroupDeleteFail": "그룹을 지우지 못했어요.",
+  "stocksWatchGroupDeleteFail": "그룹을 삭제하지 못했어요.",
   "stocksWatchRemoveFail": "관심 종목에서 빼지 못했어요.",
   "stocksMarketToggleKr": "국내",
   "stocksMarketToggleUs": "미국",

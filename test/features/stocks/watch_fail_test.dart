@@ -139,7 +139,7 @@ void main() {
     await tester.tap(findPlain(l.stocksWatchGroupDelete).last);
     await tester.pumpAndSettle();
     expect(repo.deletes, 1);
-    expect(l.stocksWatchGroupDeleteFail, '그룹을 지우지 못했어요.');
+    expect(l.stocksWatchGroupDeleteFail, '그룹을 삭제하지 못했어요.');
     expect(findPlain(l.stocksWatchGroupDeleteFail), findsOneWidget);
     expect(find.textContaining('서버 원문'), findsNothing);
     await tester.tap(findPlain(l.actionRetry));
