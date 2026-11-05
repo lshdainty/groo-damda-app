@@ -20,6 +20,7 @@ import 'package:groo_damda_app/features/settings/presentation/password_change_di
 import 'package:groo_damda_app/features/settings/presentation/withdrawal_sheet.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
@@ -32,7 +33,6 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
-import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
 
 /// 계정 화면 — 흰 화면 하나(I-14 1-B · 14-1).
 ///
@@ -76,9 +76,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     ref.invalidate(oauthProvidersProvider);
   }
 
-  void _toast(String message, PSnackSeverity severity) {
+  void _toast(
+    String message, {
+    PSnackbarTone tone = PSnackbarTone.neutral,
+    PSnackbarAction? action,
+  }) {
     if (!mounted) return;
-    showPSnackBar(context, message, severity: severity);
+    PSnackbar.maybeOf(
+      context,
+    )?.show(message: message, tone: tone, action: action);
   }
 
   Future<void> _link() async {
@@ -98,7 +104,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     } catch (_) {
       if (!mounted) return;
       setState(() => _linking = false);
-      _toast(l.accountLinkError, PSnackSeverity.error);
+      // 연결 시작 실패 — critical 한 문장 + [다시 시도](같은 연결을 다시 시작한다)
+      _toast(
+        l.accountLinkError,
+        tone: PSnackbarTone.critical,
+        action: PSnackbarAction(label: l.actionRetry, onPressed: _link),
+      );
     }
   }
 
@@ -114,18 +125,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       if (mounted) {
         setState(() => _unlinking = false);
         // 다시 시도 — 같은 해제를 다시 요청한다(snackbar.md:71)
-        showPSnackBar(
-          context,
+        _toast(
           l.accountUnlinkError,
-          severity: PSnackSeverity.error,
-          duration: const Duration(seconds: 6),
-          actionLabel: l.actionRetry,
-          onAction: _unlink,
+          tone: PSnackbarTone.critical,
+          action: PSnackbarAction(label: l.actionRetry, onPressed: _unlink),
         );
       }
       return;
     }
-    _toast(l.accountUnlinkedToast, PSnackSeverity.success);
+    _toast(l.accountUnlinkedToast);
     try {
       // 목록을 다시 받은 뒤 푼다 — 줄이 이전 상태로 잠깐 되돌아 보이지 않게. 다시 받기 실패는 줄이 [다시 시도] 로 말한다
       ref.invalidate(oauthProvidersProvider);
