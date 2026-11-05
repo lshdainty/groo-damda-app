@@ -3544,7 +3544,7 @@ abstract class AppLocalizations {
   /// No description provided for @calRemoveMemberFailed.
   ///
   /// In ko, this message translates to:
-  /// **'멤버를 내보내지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'멤버를 내보내지 못했어요.'**
   String get calRemoveMemberFailed;
 
   /// No description provided for @calColorChangeFailed.

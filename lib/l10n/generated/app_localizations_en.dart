@@ -1605,7 +1605,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calLabelNamePlaceholder => 'e.g. Important, Deadline, Meeting';
 
   @override
-  String get calCalendarNamePlaceholder => 'e.g. Family, Work, Workouts';
+  String get calCalendarNamePlaceholder => 'e.g. Family, Work, Workout';
 
   @override
   String get calCalendarNameFieldPlaceholder => 'Calendar name';
@@ -1827,7 +1827,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calJoinedCalendar(String name) {
-    return 'Joined \"$name\"';
+    return 'Joined the \"$name\" calendar';
   }
 
   @override
@@ -1840,7 +1840,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calCalendarUpdated => 'Calendar updated';
 
   @override
-  String get calInviteCodeRegenerated => 'Generated a new invite code';
+  String get calInviteCodeRegenerated => 'New invite code created';
 
   @override
   String get calInviteCodeCopied => 'Invite code copied';
@@ -1905,11 +1905,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calJoinInvalidCode => 'Please check the invite code.';
 
   @override
-  String get calJoinAlreadyMember => 'You\'ve already joined this calendar.';
+  String get calJoinAlreadyMember => 'You have already joined this calendar.';
 
   @override
-  String get calRemoveMemberFailed =>
-      'Could not remove the member. Please try again in a moment.';
+  String get calRemoveMemberFailed => 'Couldn\'t remove the member.';
 
   @override
   String get calColorChangeFailed => 'Couldn\'t change the color.';
@@ -1918,7 +1917,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calRoleChangeFailed => 'Couldn\'t change the permission.';
 
   @override
-  String get calRegenerateFailed => 'Couldn\'t generate a new invite code.';
+  String get calRegenerateFailed => 'Couldn\'t create a new invite code.';
 
   @override
   String get calInviteNone => 'No invite code';
@@ -1945,10 +1944,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get calChangeToEditor => 'Change to editor';
+  String get calChangeToEditor => 'Make editor';
 
   @override
-  String get calChangeToViewer => 'Change to viewer';
+  String get calChangeToViewer => 'Make read only';
 
   @override
   String get calAdd => 'Add';
@@ -1963,7 +1962,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calDeleteFailed => 'Delete failed';
 
   @override
-  String get calJoinFailed => 'Couldn\'t join. Please try again in a moment.';
+  String get calJoinFailed => 'Could not join. Please try again in a moment.';
 
   @override
   String get calUpdateFailed => 'Update failed';

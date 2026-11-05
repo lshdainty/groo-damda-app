@@ -1881,7 +1881,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calJoinAlreadyMember => '이미 참여한 캘린더예요.';
 
   @override
-  String get calRemoveMemberFailed => '멤버를 내보내지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get calRemoveMemberFailed => '멤버를 내보내지 못했어요.';
 
   @override
   String get calColorChangeFailed => '색을 바꾸지 못했어요.';
