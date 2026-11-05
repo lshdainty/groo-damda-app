@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/icon_picker/category_icons.dart';
 import 'package:groo_damda_app/shared/ds/icon_picker/p_icon_picker.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
@@ -311,7 +312,26 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
           silent: true,
         );
         if (current > 0) {
-          await repo.contribute(created.rowId, amount: current, silent: true);
+          // 만들기는 성공했다 — 그 목표는 이미 있다. 첫 납입만 실패하면 폼을 열어 두지 않는다
+          // (다시 누르면 같은 목표가 또 생긴다). 닫고 스낵바 + [다시 시도](납입만).
+          try {
+            await repo.contribute(created.rowId, amount: current, silent: true);
+          } on ApiException {
+            ref.invalidate(savingGoalListProvider);
+            if (!mounted) return;
+            final l = AppLocalizations.of(context);
+            final container = ProviderScope.containerOf(context);
+            final snack = PSnackbar.of(context);
+            PBottomSheet.of(context).close();
+            _firstContributionFailed(
+              container,
+              l,
+              snack,
+              created.rowId,
+              current,
+            );
+            return;
+          }
         }
       }
       ref.invalidate(savingGoalListProvider);
@@ -328,6 +348,35 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  /// 첫 납입 실패 스낵바 — [다시 시도] 는 만든 목표 id 로 납입만 다시 한다(만들기 재요청 금지).
+  /// 또 실패하면 같은 띠를 다시 띄운다. 시트가 닫힌 뒤에도 쓰이므로 State 를 쓰지 않는다.
+  static void _firstContributionFailed(
+    ProviderContainer container,
+    AppLocalizations l,
+    PSnackbarApi snack,
+    int goalId,
+    int amount,
+  ) {
+    snack.show(
+      message: l.savingGoalFirstContributeFailed,
+      tone: PSnackbarTone.critical,
+      action: PSnackbarAction(
+        label: l.actionRetry,
+        onPressed: () async {
+          try {
+            final repo = await container.read(
+              savingGoalRepositoryProvider.future,
+            );
+            await repo.contribute(goalId, amount: amount, silent: true);
+            container.invalidate(savingGoalListProvider);
+          } on ApiException {
+            _firstContributionFailed(container, l, snack, goalId, amount);
+          }
+        },
+      ),
+    );
   }
 
   @override

@@ -5182,6 +5182,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savingGoalSaveFailed => 'Couldn\'t save the saving goal.';
 
   @override
+  String get savingGoalFirstContributeFailed =>
+      'Created the goal, but couldn\'t record the first deposit.';
+
+  @override
   String get savingGoalEdit => 'Edit saving goal';
 
   @override

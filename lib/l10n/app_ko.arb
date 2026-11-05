@@ -2871,6 +2871,7 @@
   "savingGoalAchieved": "달성",
   "savingGoalAdd": "저축 목표 추가",
   "savingGoalSaveFailed": "저축 목표를 저장하지 못했어요.",
+  "savingGoalFirstContributeFailed": "목표는 만들었지만 첫 납입을 기록하지 못했어요.",
   "savingGoalEdit": "저축 목표 수정",
   "savingGoalSubmitAdd": "추가",
   "savingGoalDeleteTitle": "\"{title}\" 목표를 삭제할까요?",

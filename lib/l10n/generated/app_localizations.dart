@@ -9415,6 +9415,12 @@ abstract class AppLocalizations {
   /// **'저축 목표를 저장하지 못했어요.'**
   String get savingGoalSaveFailed;
 
+  /// No description provided for @savingGoalFirstContributeFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'목표는 만들었지만 첫 납입을 기록하지 못했어요.'**
+  String get savingGoalFirstContributeFailed;
+
   /// No description provided for @savingGoalEdit.
   ///
   /// In ko, this message translates to:

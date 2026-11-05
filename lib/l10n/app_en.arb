@@ -2844,6 +2844,7 @@
   "savingGoalAchieved": "Achieved",
   "savingGoalAdd": "Add saving goal",
   "savingGoalSaveFailed": "Couldn't save the saving goal.",
+  "savingGoalFirstContributeFailed": "Created the goal, but couldn't record the first deposit.",
   "savingGoalEdit": "Edit saving goal",
   "savingGoalSubmitAdd": "Add",
   "savingGoalDeleteTitle": "Delete the \"{title}\" goal?",

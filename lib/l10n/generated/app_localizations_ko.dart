@@ -5084,6 +5084,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get savingGoalSaveFailed => '저축 목표를 저장하지 못했어요.';
 
   @override
+  String get savingGoalFirstContributeFailed => '목표는 만들었지만 첫 납입을 기록하지 못했어요.';
+
+  @override
   String get savingGoalEdit => '저축 목표 수정';
 
   @override
