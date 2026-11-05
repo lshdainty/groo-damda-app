@@ -4770,7 +4770,7 @@
   "tdmCellDone": "{date}, 다 끝냄",
   "@tdmCellDone": {"placeholders": {"date": {"type": "String"}}},
   "tdmLoadFailedDesc": "잠시 후 다시 시도해주세요.",
-  "todoToggleFailed": "완료로 바꾸지 못했어요. 잠시 후 다시 시도해주세요.",
+  "todoToggleFailed": "할 일 상태를 바꾸지 못했어요.",
   "todoDetailOverdue": "마감 지남",
   "todoDueDatePlaceholder": "마감일 선택",
   "todoTagEmptyHint": "태그는 설정 › 할 일 태그에서 만들어요.",

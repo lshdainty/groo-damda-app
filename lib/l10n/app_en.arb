@@ -4498,7 +4498,7 @@
   "tdmCellDone": "{date}, all done",
   "@tdmCellDone": {"placeholders": {"date": {"type": "String"}}},
   "tdmLoadFailedDesc": "Please try again in a moment.",
-  "todoToggleFailed": "Couldn't update the to-do. Please try again in a moment.",
+  "todoToggleFailed": "Couldn't update the to-do.",
   "todoDetailOverdue": "Overdue",
   "todoDueDatePlaceholder": "Select due date",
   "todoTagEmptyHint": "Create tags in Settings › Todo tags.",

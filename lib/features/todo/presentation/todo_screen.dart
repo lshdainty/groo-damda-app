@@ -225,14 +225,9 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     } on ApiException {
       // 서버 원문을 띄우지 않는다(전역 오류 알림은 이 요청에서 껐다) — 되돌리고 새 글 한 번.
       if (mounted) {
-        PSnackbar.maybeOf(context)?.show(
-          message: l.todoToggleFailed,
-          tone: PSnackbarTone.critical,
-          action: PSnackbarAction(
-            label: l.actionRetry,
-            onPressed: () => _toggleDone(x),
-          ),
-        );
+        PSnackbar.maybeOf(
+          context,
+        )?.show(message: l.todoToggleFailed, tone: PSnackbarTone.critical);
       }
     } finally {
       if (_optimisticToken[x.rowId] == token) {

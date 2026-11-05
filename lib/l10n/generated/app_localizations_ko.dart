@@ -8248,7 +8248,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tdmLoadFailedDesc => '잠시 후 다시 시도해주세요.';
 
   @override
-  String get todoToggleFailed => '완료로 바꾸지 못했어요. 잠시 후 다시 시도해주세요.';
+  String get todoToggleFailed => '할 일 상태를 바꾸지 못했어요.';
 
   @override
   String get todoDetailOverdue => '마감 지남';

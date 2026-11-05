@@ -14848,7 +14848,7 @@ abstract class AppLocalizations {
   /// No description provided for @todoToggleFailed.
   ///
   /// In ko, this message translates to:
-  /// **'완료로 바꾸지 못했어요. 잠시 후 다시 시도해주세요.'**
+  /// **'할 일 상태를 바꾸지 못했어요.'**
   String get todoToggleFailed;
 
   /// No description provided for @todoDetailOverdue.

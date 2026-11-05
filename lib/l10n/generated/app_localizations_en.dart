@@ -8447,8 +8447,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tdmLoadFailedDesc => 'Please try again in a moment.';
 
   @override
-  String get todoToggleFailed =>
-      'Couldn\'t update the to-do. Please try again in a moment.';
+  String get todoToggleFailed => 'Couldn\'t update the to-do.';
 
   @override
   String get todoDetailOverdue => 'Overdue';
