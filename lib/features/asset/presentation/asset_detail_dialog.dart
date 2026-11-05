@@ -1164,10 +1164,16 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    // 머리 설명(45) — 투자 "{종류} · 보유 {n}종목 · {메모}"(기관 없음), 그 밖 "{기관} · {종류} · {메모}"(웹 describeAsset).
+    final heldCount = asset.holdings.isNotEmpty
+        ? asset.holdings.length
+        : ((asset.tossSymbol?.isNotEmpty ?? false) ? 1 : 0);
+    final isInv = asset.assetType == 'INVESTMENT';
     final subtitle = [
-      asset.institution,
+      if (!isInv) asset.institution,
       // 마이너스통장은 BANK_ACCOUNT 라 코드만 보면 '입출금' 으로 나온다.
       assetTypeLabelOf(l, asset),
+      if (isInv) l.assetHoldingsCount(heldCount),
       asset.memo,
     ].where((s) => s != null && s.isNotEmpty).join(' · ');
     // 카드만 절대값이다. 카드 잔액은 "미결제 사용액이 음수" 라는 규약이라 화면에는
@@ -2527,10 +2533,13 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
+                      flex: 3,
                       child: Text(
                         masked
                             ? '••••••'
-                            : l.assetLimitOf(won(used), won(limit)),
+                            : keepAllAmount(
+                                l.assetLimitOf(won(used), won(limit)),
+                              ),
                         style: PTypography.t3.copyWith(
                           color: c.fgNeutralSubtle,
                         ),
@@ -2538,12 +2547,15 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                     ),
                     const SizedBox(width: PSpacing.x2),
                     Flexible(
+                      flex: 2,
                       child: Text(
                         masked
                             ? '••••••'
-                            : over
-                            ? l.dsProgressOver(won(used - limit))
-                            : l.assetLimitRemain(won(limit - used)),
+                            : keepAllAmount(
+                                over
+                                    ? l.dsProgressOver(won(used - limit))
+                                    : l.assetLimitRemain(won(limit - used)),
+                              ),
                         textAlign: TextAlign.end,
                         style: PTypography.t3.copyWith(
                           color: over ? c.fgCritical : c.fgNeutralSubtle,
