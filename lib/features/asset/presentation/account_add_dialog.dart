@@ -20,6 +20,7 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/brand/bank_colors.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
 export 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showAccountAddDialog, showAccountEditDialog;
@@ -77,6 +78,8 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
   late bool _includeInTotal;
   late bool _hideAmount;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
   bool _touched = false;
 
   /// [추가] · [저장] 을 한 번이라도 눌렀나 — 필수 칸(별칭)의 안내는 이때부터 보인다.
@@ -256,7 +259,10 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
     // 마이너스 한도는 신용카드 한도와 같은 컬럼(`credit_limit`)을 쓴다 — 선택 입력.
     final limit = isOverdraft ? parseAmountField(_limitCtrl) : null;
 
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       if (_isEdit) {
@@ -276,6 +282,7 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
           isAmountHidden: _hideAmount ? 'Y' : 'N',
           creditLimit: Patch.set(limit),
           isOverdraft: isOverdraft,
+          silent: true,
         );
       } else {
         await repo.create(
@@ -290,6 +297,7 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
           isAmountHidden: _hideAmount ? 'Y' : 'N',
           creditLimit: limit,
           isOverdraft: isOverdraft,
+          silent: true,
         );
       }
       // 자산이 하나 늘거나 줄면 순자산·추이·청구·실적이 함께 달라진다 —
@@ -298,8 +306,13 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값 · 단계가 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -359,6 +372,8 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
       submitLabel: _isEdit ? l.actionSave : l.calAdd,
       onBack: widget.onBack,
       submitting: _submitting,
+      errorMessage: _failed ? l.assetSaveFailed : null,
+      errorKey: _errorKey,
       onSubmit: _attempt,
       fields: [
         if (_isEdit)

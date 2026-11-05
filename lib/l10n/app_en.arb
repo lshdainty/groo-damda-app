@@ -1393,6 +1393,7 @@
   "budgetDeleteConfirm": "A deleted budget can't be restored.",
   "budgetDeleteFailed": "Couldn't delete the budget.",
   "budgetSaveFailed": "Couldn't save the budget.",
+  "assetSaveFailed": "Couldn't save the asset.",
   "budgetMonthlyLimit": "Monthly budget limit",
   "budgetLoadError": "Couldn't load budget",
   "budgetSelectMonth": "Select month",

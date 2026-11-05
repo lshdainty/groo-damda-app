@@ -33,6 +33,7 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 
 export 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showInvestmentAddDialog, showInvestmentEditDialog;
@@ -99,6 +100,8 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   late bool _hideAmount;
   late List<_EditRow> _rows;
   bool _submitting = false;
+  bool _failed = false;
+  final _errorKey = GlobalKey();
 
   /// [추가] · [저장] 을 한 번이라도 눌렀나 — 필수 칸(별칭)의 안내는 이때부터 보인다.
   bool _showErrors = false;
@@ -442,7 +445,10 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
         ? double.tryParse(_fxRateCtrl.text.replaceAll(',', ''))
         : null;
 
-    setState(() => _submitting = true);
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       if (_isEdit) {
@@ -465,6 +471,7 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
           isIncludedInTotal: _includeInTotal ? 'Y' : 'N',
           isAmountHidden: _hideAmount ? 'Y' : 'N',
           holdings: holdings,
+          silent: true,
         );
       } else {
         // 메모는 생성 화면에도 칸이 있다 — 종전엔 안 실어서, 적어 넣고 저장하면
@@ -480,6 +487,7 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
           isIncludedInTotal: _includeInTotal ? 'Y' : 'N',
           isAmountHidden: _hideAmount ? 'Y' : 'N',
           holdings: holdings,
+          silent: true,
         );
       }
       // 자산이 하나 늘거나 줄면 순자산·추이·청구·실적이 함께 달라진다 —
@@ -489,8 +497,13 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException {
-      // 표면이 닫히지 않고 쓴 값 · 단계가 남는다 — 알림은 옛 길 그대로
+      // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _errorKey.currentContext;
+        if (ctx != null && ctx.mounted) revealBelowFog(ctx);
+      });
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -521,6 +534,8 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       submitLabel: _isEdit ? l.actionSave : l.calAdd,
       onBack: widget.onBack,
       submitting: _submitting,
+      errorMessage: _failed ? l.assetSaveFailed : null,
+      errorKey: _errorKey,
       onSubmit: _submit,
       fields: [
         PickerField(
