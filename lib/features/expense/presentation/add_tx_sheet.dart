@@ -260,6 +260,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     _ => _returnTo,
   };
   bool _submitting = false;
+
+  /// 저장 흐름 안(확인창 · 자산 목록 기다림 포함) — 두 번 누름만 막고 화면에는 드러내지 않는다.
+  bool _saveBusy = false;
   bool _leaving = false;
 
   /// 지금 모드 — 고쳐 쓰기로 갈아 끼우면 [_edit] 가 비고 [_replaceOf] 가 선다.
@@ -1128,19 +1131,27 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     }
   }
 
-  /// 저장 — 들어오는 순간 막는 표시를 켜고(자산 목록을 기다리는 동안 [추가] 를 또 눌러도 요청이 둘 나가지 않게) 어떤 길로 끝나도 푼다.
+  /// 저장 — 들어오는 순간 두 번 누름 막기를 켜고(자산 목록을 기다리는 동안 [추가] 를 또 눌러도 요청이 둘 나가지 않게) 어떤 길로
+  /// 끝나도 푼다. 막기는 보이지 않는다 — 단추의 진행 원([_submitting])은 요청이 나간 동안만 돈다(웹 use-tx-form 의 savingRef ·
+  /// mutation pending 과 같다). 확인창이 떠 있는 동안 뒤의 [추가] · [저장] 은 그대로다.
   Future<void> _save() async {
-    if (_submitting) return;
-    setState(() => _submitting = true);
+    if (_saveBusy || _submitting) return;
+    _saveBusy = true;
     try {
       await _saveInner();
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      _saveBusy = false;
+      if (mounted && _submitting) setState(() => _submitting = false);
     }
   }
 
   Future<void> _saveInner() async {
-    if (!await _ensureAssets()) {
+    // 자산 목록을 받는 동안은 요청이 나가 있다 — 그때만 원을 돌린다
+    final waitAssets = !ref.read(assetsProvider).hasValue;
+    if (waitAssets) setState(() => _submitting = true);
+    final assetsOk = await _ensureAssets();
+    if (waitAssets && mounted) setState(() => _submitting = false);
+    if (!assetsOk) {
       if (!mounted) return;
       setState(() => _saveError = AppLocalizations.of(context).txfSaveFailed);
       scrollSheetBodyToTop(context);
