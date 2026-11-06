@@ -306,6 +306,36 @@ void main() {
       expect(repo.replaced, 0);
     });
 
+    testWidgets(
+      '받아 둔 분할이 있어도 다시 받기가 실패면 저장 · 고쳐 쓰기를 막는다 — 옛 분할로 덮지 않는다(웹 검수 L4)',
+      (tester) async {
+        var down = false;
+        final repo = _FakeRepo();
+        await _open(
+          tester,
+          _locked,
+          repo: repo,
+          splits: () => down
+              ? Future.error(Exception('network'))
+              : Future.value(const <ExpenseSplit>[]),
+        );
+        final failure = find.byKey(const ValueKey('tx-detail-split-failure'));
+        expect(failure, findsNothing);
+        // 다른 기기에서 분할을 바꿨을 수 있다 — 다시 받는데 망이 끊겼다
+        down = true;
+        ProviderScope.containerOf(
+          tester.element(find.byType(PButton).last),
+        ).invalidate(expenseSplitsProvider);
+        await tester.pumpAndSettle();
+        expect(failure, findsOneWidget, reason: '값이 있어도 그 자리 실패 + 다시 시도');
+        await _openRewrite(tester);
+        await tester.tap(_submit('저장'));
+        await tester.pumpAndSettle();
+        expect(findTextContaining('원래 거래는 지워지고'), findsNothing);
+        expect(repo.replaced, 0);
+      },
+    );
+
     testWidgets('못 불러온 자리의 [다시 시도] 는 나눈 내역을 다시 받는다', (tester) async {
       // riverpod 3 은 실패를 스스로 다시 받는다 — 망이 살아날 때까지 계속 실패시킨다
       var down = true;

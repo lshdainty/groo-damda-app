@@ -37,7 +37,6 @@ import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
-import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
@@ -1665,8 +1664,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           spAsync.isLoading &&
           !spAsync.hasValue &&
           !spAsync.hasError;
-      _splitsFailed = spAsync.loadFailed;
-      _splitsRetrying = spAsync.loadRetrying;
+      // 분할만은 마지막 받기가 실패면 막는다 — 값이 있어도(캐시) 다른 기기에서 바뀐 분할을 옛 값으로 덮을 수 있다(웹 검수 L4).
+      // 실패 표시는 그 자리 실패 + [다시 시도] 그대로
+      _splitsFailed = spAsync.hasError;
+      _splitsRetrying = spAsync.hasError && spAsync.isLoading;
       final sp = spAsync.value;
       _serverSplits = sp == null
           ? const []
