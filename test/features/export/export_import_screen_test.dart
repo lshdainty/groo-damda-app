@@ -30,12 +30,15 @@ import 'package:groo_damda_app/shared/ds/select_box/p_select_box.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
+import '../../support/plain_text.dart';
 
 final _l = lookupAppLocalizations(const Locale('ko'));
 
 /// keepAll 이 끼우는 보이지 않는 글자(U+2060)를 빼고 찾는다.
 Finder _t(String part) => find.byWidgetPredicate(
-  (w) => w is Text && (w.data ?? '').replaceAll('\u2060', '') == part,
+  (w) =>
+      w is Text &&
+      plainOf(w.data ?? w.textSpan!.toPlainText()) == plainOf(part),
 );
 
 class _ExportRepo extends ExportRepository {
@@ -322,7 +325,7 @@ void main() {
         ],
       );
       await tester.pumpAndSettle();
-      final rect = tester.getRect(find.widgetWithText(PButton, _l.exportRun));
+      final rect = tester.getRect(findWidgetWithText(PButton, _l.exportRun));
       expect(rect.bottom, 2400 - 34 - 24);
     });
 
@@ -353,7 +356,7 @@ void main() {
         overrides: [exportRepositoryProvider.overrideWith((ref) async => repo)],
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, _l.exportPreview));
+      await tester.tap(findWidgetWithText(PButton, _l.exportPreview));
       await tester.pumpAndSettle();
       final item = tester
           .widgetList<PListItem>(find.byType(PListItem))
@@ -369,12 +372,12 @@ void main() {
       await tester.pumpAndSettle();
       // 바닥 글 = 한 키 · 선택한 종류 수(3) · 합계(표 totalCount 합 1)
       expect(
-        find.text(_l.exportPreviewFooter(1, 3, 123459)),
+        findText(_l.exportPreviewFooter(1, 3, 123459)),
         findsNothing,
         reason: '빈 표 탭에서는 그 탭의 행 수(0)',
       );
       // 합계 = 고른 종류(거래 내역 · 자산 · 예산)의 건수 합 — 예산은 건수가 없어 0, 미리보기 표 건수(1)가 아니다
-      expect(find.text(_l.exportPreviewFooter(0, 3, 123459)), findsOneWidget);
+      expect(findText(_l.exportPreviewFooter(0, 3, 123459)), findsOneWidget);
       final res = tester.widget<PResultSection>(find.byType(PResultSection));
       expect(res.kind, PResultKind.empty);
       expect(res.size, PResultSize.medium);
@@ -404,10 +407,10 @@ void main() {
       await tester.tap(_t(_l.exportTypeExpense));
       await tester.tap(_t(_l.exportTypeAsset));
       await tester.pump();
-      await tester.tap(find.widgetWithText(PButton, _l.exportPreview));
+      await tester.tap(findWidgetWithText(PButton, _l.exportPreview));
       await tester.pumpAndSettle();
-      expect(find.text(_l.exportPreviewFooter(1, 1, 0)), findsOneWidget);
-      expect(find.text(_l.exportPreviewFooter(1, 1, 99)), findsNothing);
+      expect(findText(_l.exportPreviewFooter(1, 1, 0)), findsOneWidget);
+      expect(findText(_l.exportPreviewFooter(1, 1, 99)), findsNothing);
     });
 
     testWidgets('미리보기 실패 — 고정 글 + [다시 시도] · 서버 글 없음', (tester) async {
@@ -418,11 +421,11 @@ void main() {
         overrides: [exportRepositoryProvider.overrideWith((ref) async => repo)],
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, _l.exportPreview));
+      await tester.tap(findWidgetWithText(PButton, _l.exportPreview));
       await tester.pumpAndSettle();
       expect(_l.exportPreviewFailed, '미리보기를 불러오지 못했어요.');
       expect(_t(_l.exportPreviewFailed), findsOneWidget);
-      expect(find.textContaining('server raw'), findsNothing);
+      expect(findTextContaining('server raw'), findsNothing);
       await tester.tap(_t(_l.actionRetry));
       await tester.pumpAndSettle();
       expect(repo.previews, 2);
@@ -441,12 +444,12 @@ void main() {
           ],
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.widgetWithText(PButton, _l.exportRun));
+        await tester.tap(findWidgetWithText(PButton, _l.exportRun));
         await tester.pumpAndSettle();
         expect(repo.downloads, 1);
         expect(_t(stall ? _l.exportStalled : _l.exportFailed), findsOneWidget);
         // 서버 글은 그대로 내지 않는다
-        expect(find.text('server raw'), findsNothing);
+        expect(findText('server raw'), findsNothing);
         await tester.tap(_t(_l.actionRetry));
         await tester.pumpAndSettle();
         expect(repo.downloads, 2);
@@ -464,9 +467,9 @@ void main() {
         ],
       );
       await tester.pumpAndSettle();
-      expect(find.text(keepAll(_l.exportCountsFailed)), findsOneWidget);
-      expect(find.text(_l.actionRetry), findsOneWidget);
-      expect(find.text('…'), findsNothing);
+      expect(findText(keepAll(_l.exportCountsFailed)), findsOneWidget);
+      expect(findText(_l.actionRetry), findsOneWidget);
+      expect(findText('…'), findsNothing);
     });
 
     testWidgets('글자 200% · 다크 — 오류 없이 그려진다', (tester) async {
@@ -536,8 +539,8 @@ void main() {
           importRepositoryProvider.overrideWith((ref) async => _ImportRepo()),
         ],
       );
-      expect(find.text(_l.importStepMeta(1, 3)), findsOneWidget);
-      expect(find.text(_l.importStepUpload), findsWidgets);
+      expect(findText(_l.importStepMeta(1, 3)), findsOneWidget);
+      expect(findText(_l.importStepUpload), findsWidgets);
       final src = tester.widget<PRadioSelectBoxGroup<String>>(
         find.byType(PRadioSelectBoxGroup<String>),
       );
@@ -551,7 +554,7 @@ void main() {
       );
       expect(att.layout, PAttachmentLayout.dropzone);
       expect(att.maxFileSize, 10 * 1024 * 1024);
-      expect(find.text('✓'), findsNothing);
+      expect(findText('✓'), findsNothing);
     });
 
     testWidgets('10MB 넘으면 고르는 순간 칸 아래 오류 글 · 서버로 안 보낸다', (tester) async {
@@ -564,8 +567,8 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('attachment-pick')));
       await tester.pumpAndSettle();
-      expect(find.text(keepAll(_l.importFileTooLarge)), findsOneWidget);
-      expect(find.text(_l.importStepMeta(2, 3)), findsNothing);
+      expect(findText(keepAll(_l.importFileTooLarge)), findsOneWidget);
+      expect(findText(_l.importStepMeta(2, 3)), findsNothing);
     });
 
     testWidgets('분석 → 2단계 머리 · 매핑 · 옵션 Checkbox · 확정 덮개 → 완료 CTA', (
@@ -579,15 +582,15 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('attachment-pick')));
       await tester.pumpAndSettle();
-      expect(find.text(_l.importStepMeta(2, 3)), findsOneWidget);
-      expect(find.text(_l.importStepMapping), findsWidgets);
+      expect(findText(_l.importStepMeta(2, 3)), findsOneWidget);
+      expect(findText(_l.importStepMapping), findsWidgets);
       // 오류 · 중복은 상태 Badge 로 가른다
-      expect(find.text(_l.importBadgeError), findsOneWidget);
-      expect(find.text(_l.importBadgeDup), findsOneWidget);
+      expect(findText(_l.importBadgeError), findsOneWidget);
+      expect(findText(_l.importBadgeDup), findsOneWidget);
       // 옵션 둘 = ds Checkbox 줄
       expect(find.byType(PListCheckItem), findsNWidgets(2));
 
-      await tester.tap(find.widgetWithText(PButton, _l.importDoImport(8)));
+      await tester.tap(findWidgetWithText(PButton, _l.importDoImport(8)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1100));
       await tester.pump();
@@ -607,17 +610,17 @@ void main() {
       expect(section.kind, PResultKind.done);
       expect(section.size, PResultSize.large);
       final cta = tester.widget<PButton>(
-        find.widgetWithText(PButton, _l.importGoExpense),
+        findWidgetWithText(PButton, _l.importGoExpense),
       );
       expect(cta.size, PButtonSize.large);
       expect(cta.variant, PButtonVariant.neutralSolid);
       final ctaRect = tester.getRect(
-        find.widgetWithText(PButton, _l.importGoExpense),
+        findWidgetWithText(PButton, _l.importGoExpense),
       );
       expect(ctaRect.width, 360 - 48, reason: '바닥 CTA 는 좌우 24 로 폭 가득');
-      await tester.tap(find.text(_l.importGoExpense));
+      await tester.tap(findText(_l.importGoExpense));
       await tester.pumpAndSettle();
-      expect(find.text('EXPENSE'), findsOneWidget);
+      expect(findText('EXPENSE'), findsOneWidget);
     });
 
     test('실행 응답 파싱 — 실패 줄 · 잘림 · 만든 카테고리, 옛 응답은 빈 값', () {
@@ -675,7 +678,7 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('attachment-pick')));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, _l.importDoImport(8)));
+      await tester.tap(findWidgetWithText(PButton, _l.importDoImport(8)));
       await tester.pumpAndSettle();
       expect(_t(_l.importCreatedCatTitle(5)), findsOneWidget);
       // 만든 카테고리 = List 줄(배지 아님) + "외 3개"
@@ -685,7 +688,7 @@ void main() {
       expect(_t(_l.importFailureLine(3)), findsOneWidget);
       expect(_t(_l.importFailReasonDate), findsOneWidget);
       expect(_t(_l.importFailReasonUnknown), findsOneWidget);
-      expect(find.textContaining('fxRate'), findsNothing);
+      expect(findTextContaining('fxRate'), findsNothing);
       expect(_t(_l.importFailuresCapped(120, 2)), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

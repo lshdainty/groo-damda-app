@@ -17,6 +17,7 @@ import 'package:groo_damda_app/shared/widgets/p_segmented.dart';
 import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
 import 'package:groo_damda_app/shared/widgets/p_type_chip.dart';
 import 'package:groo_damda_app/shared/widgets/p_tile.dart';
+import '../support/plain_text.dart';
 
 Widget _host(Widget child, {Brightness mode = Brightness.light}) => MaterialApp(
   theme: mode == Brightness.dark ? GrooTheme.dark() : GrooTheme.light(),
@@ -70,7 +71,7 @@ void main() {
       );
       final t = mode == Brightness.dark ? GrooTokens.dark : GrooTokens.light;
       expect(find.byType(Opacity), findsNothing, reason: '불투명도로 흐리게 하지 않는다');
-      final disabledText = tester.widget<Text>(find.text('저장'));
+      final disabledText = tester.widget<Text>(findText('저장'));
       expect(disabledText.style!.color, t.fgDisabled);
       final saveNode = _nodes(tester).firstWhere((n) => n.label.contains('저장'));
       expect(saveNode.flagsCollection.isButton, isTrue);
@@ -160,8 +161,8 @@ void main() {
     );
     final t = GrooTokens.light;
     expect(find.byType(Opacity), findsNothing);
-    expect(tester.widget<Text>(find.text('라이트')).style!.color, t.fgDisabled);
-    expect(tester.widget<Text>(find.text('막힌 항목')).style!.color, t.fgDisabled);
+    expect(tester.widget<Text>(findText('라이트')).style!.color, t.fgDisabled);
+    expect(tester.widget<Text>(findText('막힌 항목')).style!.color, t.fgDisabled);
   });
 
   for (final reduce in [false, true]) {
@@ -188,7 +189,7 @@ void main() {
             )
             .scale;
         for (final label in ['저장', '식비']) {
-          final f = find.text(label);
+          final f = findText(label);
           expect(scaleOf(f), 1);
           final g = await tester.startGesture(tester.getCenter(f));
           await tester.pump();

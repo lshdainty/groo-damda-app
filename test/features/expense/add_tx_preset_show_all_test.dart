@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _cat = ExpenseCategory(
   rowId: 5,
@@ -79,9 +80,17 @@ Future<void> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
+
+/// 프리셋 칩 줄 — ListView 가 아니라 끝 흐림 가로 줄(PScrollFog Row, bf4df171)이다.
+Finder _chipRow() => find
+    .descendant(
+      of: find.byKey(const ValueKey('tx-preset-chips')),
+      matching: find.byType(Scrollable),
+    )
+    .first;
 
 void main() {
   late AppLocalizations l;
@@ -91,51 +100,52 @@ void main() {
 
   testWidgets('지금 종류가 9개면 "모두 보기" 가 보이고, 누르면 아홉째도 고를 수 있다', (tester) async {
     await _open(tester, _nine());
-    await tester.drag(find.byType(ListView).first, const Offset(-3000, 0));
+    await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
-    expect(find.text(l.presetShowAll), findsOneWidget);
-    await tester.tap(find.text(l.presetShowAll));
+    expect(findText(l.presetShowAll), findsOneWidget);
+    await tester.tap(findText(l.presetShowAll));
     await tester.pumpAndSettle();
-    expect(find.text(l.presetPickTitle), findsOneWidget);
-    expect(find.text('지출8'), findsOneWidget, reason: '칩에 못 든 아홉째가 고르기 목록에 있다');
+    expect(findText(l.presetPickTitle), findsOneWidget);
+    expect(findText('지출8'), findsOneWidget, reason: '칩에 못 든 아홉째가 고르기 목록에 있다');
   });
 
   testWidgets('지출 3 + 수입 6 이면 지출 탭에 "모두 보기" 가 없다', (tester) async {
     await _open(tester, _mixed());
-    expect(find.text(l.presetShowAll), findsNothing);
+    expect(findText(l.presetShowAll), findsNothing);
   });
 
   testWidgets('찾기 0건이면 "찾는 프리셋이 없어요."', (tester) async {
     await _open(tester, _nine());
-    await tester.drag(find.byType(ListView).first, const Offset(-3000, 0));
+    await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l.presetShowAll));
+    await tester.tap(findText(l.presetShowAll));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).last, '없는이름');
     await tester.pumpAndSettle();
-    expect(find.text(l.presetNoResult), findsOneWidget);
+    expect(findText(l.presetNoResult), findsOneWidget);
   });
 
   // B2 — 고르기 시트가 카테고리 조회를 스스로 지켜본다: 실패 → [다시 시도] → 받으면 화면이 줄로 바뀐다
   testWidgets('카테고리 조회가 실패하면 실패 화면 · 다시 시도로 받으면 줄이 나온다', (tester) async {
-    var calls = 0;
+    // riverpod 3 은 실패를 스스로 다시 받는다 — [다시 시도] 를 누를 때까지 계속 실패시킨다
+    var down = true;
     await _open(
       tester,
       _nine(),
       categories: () async {
-        calls++;
-        if (calls == 1) throw Exception('x');
+        if (down) throw Exception('x');
         return [_cat];
       },
     );
-    await tester.drag(find.byType(ListView).first, const Offset(-3000, 0));
+    await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l.presetShowAll));
+    await tester.tap(findText(l.presetShowAll));
     await tester.pumpAndSettle();
-    expect(find.text(l.presetCategoryLoadFailed), findsOneWidget);
-    await tester.tap(find.text(l.actionRetry));
+    expect(findText(l.presetCategoryLoadFailed), findsOneWidget);
+    down = false;
+    await tester.tap(findText(l.actionRetry));
     await tester.pumpAndSettle();
-    expect(find.text(l.presetCategoryLoadFailed), findsNothing);
-    expect(find.text('지출8'), findsOneWidget);
+    expect(findText(l.presetCategoryLoadFailed), findsNothing);
+    expect(findText('지출8'), findsOneWidget);
   });
 }

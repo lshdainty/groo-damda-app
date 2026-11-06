@@ -7,6 +7,7 @@ import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
+import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/data/recurring_repository.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
@@ -17,8 +18,19 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 
 import 'recurring_test_support.dart';
+import '../../support/plain_text.dart';
 
 const _bank = Asset(rowId: 7, assetName: '주거래', assetType: 'BANK_ACCOUNT');
+
+/// 거래의 카테고리(2) — 목록에 없으면 폼이 "지운 카테고리" 로 보고 비워 저장을 막는다(의도된 규칙)
+const _food = ExpenseCategory(
+  rowId: 2,
+  categoryName: '식비',
+  expenseType: 'EXPENSE',
+  sortOrder: 0,
+  icon: 'utensils',
+  color: '#2c70bf',
+);
 
 const _expense = Expense(
   rowId: 9,
@@ -141,11 +153,11 @@ Future<_Repo> _open(WidgetTester tester, {RecurringTransaction? linked}) async {
       recurringListProvider.overrideWith(
         (ref) async => linked == null ? const [] : [linked],
       ),
-      categoriesProvider.overrideWith((ref) async => const []),
+      categoriesProvider.overrideWith((ref) async => const [_food]),
       assetsProvider.overrideWith((ref) async => [_bank]),
     ],
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -156,7 +168,7 @@ void main() {
   ) async {
     final repo = await _open(tester);
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
-    await tester.tap(find.widgetWithText(PButton, l.recurringAdd));
+    await tester.tap(findWidgetWithText(PButton, l.recurringAdd));
     await tester.pumpAndSettle();
     final c = repo.created!;
     expect(c['sourceExpenseRowId'], 9);
@@ -187,7 +199,7 @@ void main() {
     );
     final repo = await _open(tester, linked: linked);
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
-    await tester.tap(find.widgetWithText(PButton, l.actionSave));
+    await tester.tap(findWidgetWithText(PButton, l.actionSave));
     await tester.pumpAndSettle();
     final u = repo.updated!;
     expect(u['assetRowId'], isNull);

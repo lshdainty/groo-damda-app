@@ -15,6 +15,7 @@ import 'package:groo_damda_app/app/app.dart' show appMessengerKey;
 import 'package:groo_damda_app/app/session_scope.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('pull-to-refresh');
 
@@ -247,7 +248,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(_state(tester).offset, 0);
     expect(_state(tester).state, PPullToRefreshPhase.idle);
-    expect(find.text('줄 0'), findsOneWidget, reason: '보던 내용은 그대로');
+    expect(findText('줄 0'), findsOneWidget, reason: '보던 내용은 그대로');
     expect(
       find.byWidgetPredicate(
         (w) =>

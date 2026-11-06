@@ -14,6 +14,7 @@
 // 같은 매핑을 적용한 뒤 **실제로 그려진 순서**를 본다 — 사용자가 보는 결과가 곧 계약이다.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/plain_text.dart';
 
 /// category_screen 의 두 onReorderItem 이 쓰는 것과 같은 매핑.
 List<String> applyReorder(List<String> source, int oldIndex, int newIndex) {
@@ -58,7 +59,7 @@ void main() {
     );
 
     final gesture = await tester.startGesture(
-      tester.getCenter(find.text(initial[from])),
+      tester.getCenter(findText(initial[from])),
     );
     // 기본 드래그 핸들은 롱프레스로 잡힌다 — 인식 시간(500ms)을 넉넉히 넘긴다.
     await tester.pump(const Duration(seconds: 1));

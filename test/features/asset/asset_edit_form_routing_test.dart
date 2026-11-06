@@ -78,7 +78,7 @@ Future<void> _pumpAndOpen(WidgetTester tester, Asset asset) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 

@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/shared/scroll/scroll_to_keyed.dart';
+import '../support/plain_text.dart';
 
 const _rows = 40;
 const _rowHeight = 120.0;
@@ -64,7 +65,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('day $target'), findsOneWidget);
+    expect(findText('day $target'), findsOneWidget);
     expect(keys[target]!.currentContext, isNotNull);
   });
 
@@ -84,7 +85,7 @@ void main() {
     scrollToKeyedItem(controller: ctrl, key: keys[2], index: 2, count: _rows);
     await tester.pumpAndSettle();
 
-    expect(find.text('day 2'), findsOneWidget);
+    expect(findText('day 2'), findsOneWidget);
   });
 
   testWidgets('이미 보이는 항목은 그대로 보인다', (tester) async {
@@ -93,7 +94,7 @@ void main() {
     scrollToKeyedItem(controller: ctrl, key: keys[0], index: 0, count: _rows);
     await tester.pumpAndSettle();
 
-    expect(find.text('day 0'), findsOneWidget);
+    expect(findText('day 0'), findsOneWidget);
   });
 
   testWidgets('목록에 없는 항목을 불러도 죽지 않는다', (tester) async {
@@ -109,7 +110,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 아무 일도 안 일어났고 화면은 처음 그대로다.
-    expect(find.text('day 0'), findsOneWidget);
+    expect(findText('day 0'), findsOneWidget);
   });
 
   group('ensureVisibleWhenReady — 만들어지기를 기다린다', () {

@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../../support/plain_text.dart';
 
 /// 일정 시트를 띄운다 — 폰 폭 390 · 아주 긴 높이(줄 아홉이 다 그려진다).
 Future<void> openEventForm(
@@ -86,7 +87,7 @@ Future<void> openEventForm(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 

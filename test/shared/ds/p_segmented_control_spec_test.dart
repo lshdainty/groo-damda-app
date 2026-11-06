@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/checkbox/selection_control.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('segmented-control');
 
@@ -560,7 +561,7 @@ void main() {
         final track = tester.getRect(_control_);
         final unit = (track.width - 8) / 3;
         expect(tester.getRect(_indicator).left, track.left + 4);
-        await tester.tap(find.text(keepAll('전체')));
+        await tester.tap(findText(keepAll('전체')));
         await tester.pump();
         await tester.pump(duration ~/ 2);
         // 반쯤 — 두 칸 가는 길의 중간 어딘가에 있다
@@ -799,10 +800,10 @@ void main() {
           _Live(initial: 'today', items: _todo(), onChanged: calls.add),
         ),
       );
-      await tester.tap(find.text(keepAll('전체')));
+      await tester.tap(findText(keepAll('전체')));
       await tester.pump(const Duration(milliseconds: 400));
       expect(calls, ['all']);
-      await tester.tap(find.text(keepAll('전체')));
+      await tester.tap(findText(keepAll('전체')));
       await tester.pump();
       expect(calls, ['all']);
       // 글 · 칸 가장자리 어디를 눌러도 고른다
@@ -825,9 +826,9 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text(keepAll('이번 주')));
+      await tester.tap(findText(keepAll('이번 주')));
       expect(calls, isEmpty);
-      await tester.tap(find.text(keepAll('전체')));
+      await tester.tap(findText(keepAll('전체')));
       expect(calls, ['all']);
 
       calls.clear();
@@ -843,7 +844,7 @@ void main() {
         ),
       );
       for (final label in ['오늘', '이번 주', '전체']) {
-        await tester.tap(find.text(keepAll(label)));
+        await tester.tap(findText(keepAll(label)));
       }
       expect(calls, isEmpty);
       // 값은 그대로 — 알약도 제 자리
@@ -893,7 +894,7 @@ void main() {
       final width = tester.getSize(_plate(1)).width;
       // 점이 있는 칸 이름 뒤에 읽는 글을 덧붙인다 — 점만으로 알리지 않는다
       expect(find.bySemanticsLabel('완료 새 소식'), findsOneWidget);
-      await tester.tap(find.text(keepAll('완료')));
+      await tester.tap(findText(keepAll('완료')));
       await tester.pump(const Duration(milliseconds: 400));
       expect(_dot, findsNothing);
       expect(find.bySemanticsLabel('완료 새 소식'), findsNothing);

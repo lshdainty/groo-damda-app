@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
 import 'package:groo_damda_app/features/card/presentation/card_benefit_detail_sheet.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import '../../support/plain_text.dart';
 
 CardCatalogDetail _detail({bool cautions = true, int benefits = 2}) =>
     CardCatalogDetail(
@@ -62,7 +63,7 @@ Future<void> _open(WidgetTester t) async {
   t.view.physicalSize = const Size(390, 844);
   t.view.devicePixelRatio = 1;
   addTearDown(t.view.reset);
-  await t.tap(find.text('열기'));
+  await t.tap(findText('열기'));
   for (var i = 0; i < 20; i++) {
     await t.pump(const Duration(milliseconds: 100));
   }
@@ -103,7 +104,7 @@ void main() {
     await t.pumpWidget(_app(() => Exception('ApiException(E500): boom')));
     await _open(t);
     expect(_text('카드 정보를 불러오지 못했어요'), findsOneWidget);
-    expect(find.textContaining('boom'), findsNothing);
+    expect(findTextContaining('boom'), findsNothing);
     expect(_text('다시 시도'), findsOneWidget);
   });
 

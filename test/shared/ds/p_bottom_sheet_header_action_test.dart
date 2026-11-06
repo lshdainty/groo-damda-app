@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../support/plain_text.dart';
 
 Widget _app(Widget home, {double scale = 1}) => MaterialApp(
   theme: GrooTheme.light(),
@@ -57,7 +58,7 @@ Future<void> _open(WidgetTester tester, Widget app) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(app);
-  await tester.tap(find.text('열기'));
+  await tester.tap(findText('열기'));
   await tester.pumpAndSettle();
 }
 

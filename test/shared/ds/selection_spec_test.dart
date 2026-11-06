@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/switch/switch_demo.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _checkbox = DesignSpec.load('checkbox');
 final _radio = DesignSpec.load('radio-group');
@@ -790,7 +791,7 @@ void main() {
 
       await pump(false);
       await tester.tap(find.byType(PCheckmark));
-      await tester.tap(find.text(keepAll('단종된 카드도 보기')));
+      await tester.tap(findText(keepAll('단종된 카드도 보기')));
       expect(calls, [true, true]);
 
       await pump(true);
@@ -798,7 +799,7 @@ void main() {
       expect(calls.last, false);
 
       await pump(null);
-      await tester.tap(find.text(keepAll('단종된 카드도 보기')));
+      await tester.tap(findText(keepAll('단종된 카드도 보기')));
       expect(calls.last, true);
     });
 
@@ -922,7 +923,7 @@ void main() {
             ),
           ),
         );
-        final label = find.text(keepAll('이 카드 기억하기'));
+        final label = findText(keepAll('이 카드 기억하기'));
         final before = tester.getRect(label);
         final gesture = await tester.startGesture(tester.getCenter(label));
         await tester.pump();
@@ -1182,8 +1183,8 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, fielded(disabled: true, calls: calls)),
       );
-      await tester.tap(find.text(keepAll('거래 내역')), warnIfMissed: false);
-      await tester.tap(find.text(keepAll('예산')), warnIfMissed: false);
+      await tester.tap(findText(keepAll('거래 내역')), warnIfMissed: false);
+      await tester.tap(findText(keepAll('예산')), warnIfMissed: false);
       expect(calls, isEmpty);
       // 칸마다 막힘 — 비활성 색으로 그린다(칸에 onChanged 가 있어도)
       for (final box in tester.widgetList<PCheckmark>(
@@ -1197,7 +1198,7 @@ void main() {
     testWidgets('막히지 않은 Field 안에서는 그대로 누른다', (tester) async {
       final calls = <bool>[];
       await tester.pumpWidget(_host(Brightness.light, fielded(calls: calls)));
-      await tester.tap(find.text(keepAll('거래 내역')));
+      await tester.tap(findText(keepAll('거래 내역')));
       expect(calls, [true]);
     });
 
@@ -1209,7 +1210,7 @@ void main() {
           fielded(disabled: true, groupDisabled: false, calls: calls),
         ),
       );
-      await tester.tap(find.text(keepAll('거래 내역')));
+      await tester.tap(findText(keepAll('거래 내역')));
       expect(calls, [true]);
     });
 
@@ -1220,11 +1221,11 @@ void main() {
         _host(Brightness.light, fielded(invalid: true, calls: calls)),
       );
       for (final label in ['거래 내역', '예산']) {
-        final node = tester.getSemantics(find.text(keepAll(label)));
+        final node = tester.getSemantics(findText(keepAll(label)));
         expect(node.validationResult, SemanticsValidationResult.invalid);
       }
       // 오류여도 칸은 눌린다 · 모양(비활성 색)은 바뀌지 않는다
-      await tester.tap(find.text(keepAll('거래 내역')));
+      await tester.tap(findText(keepAll('거래 내역')));
       expect(calls, [true]);
       for (final box in tester.widgetList<PCheckmark>(
         find.byType(PCheckmark),
@@ -1248,9 +1249,9 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text(keepAll('거래 내역')));
+      await tester.tap(findText(keepAll('거래 내역')));
       expect(calls, [true]);
-      final node = tester.getSemantics(find.text(keepAll('거래 내역')));
+      final node = tester.getSemantics(findText(keepAll('거래 내역')));
       expect(node.validationResult, SemanticsValidationResult.none);
       semantics.dispose();
     });
@@ -1301,7 +1302,7 @@ void main() {
           .widget<PRadiomark>(
             find.descendant(
               of: find.ancestor(
-                of: find.text(keepAll(label)),
+                of: findText(keepAll(label)),
                 matching: find.byType(PRadio<String>),
               ),
               matching: find.byType(PRadiomark),
@@ -1309,7 +1310,7 @@ void main() {
           )
           .checked;
 
-      await tester.tap(find.text(keepAll('매일')));
+      await tester.tap(findText(keepAll('매일')));
       await tester.pump();
       expect(calls, ['daily']);
       expect(selected('매일'), isTrue);
@@ -1318,7 +1319,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.ancestor(
-            of: find.text(keepAll('매주')),
+            of: findText(keepAll('매주')),
             matching: find.byType(PRadio<String>),
           ),
           matching: find.byType(PRadiomark),
@@ -1330,7 +1331,7 @@ void main() {
       expect(selected('매일'), isFalse);
 
       // 고른 것을 다시 누르면 아무 일도 없다
-      await tester.tap(find.text(keepAll('매주')));
+      await tester.tap(findText(keepAll('매주')));
       await tester.pump();
       expect(calls, ['daily', 'weekly']);
     });
@@ -1345,14 +1346,14 @@ void main() {
           repeatGroup(value: 'none', onChanged: calls.add, disabled: 'daily'),
         ),
       );
-      await tester.tap(find.text(keepAll('매일')), warnIfMissed: false);
+      await tester.tap(findText(keepAll('매일')), warnIfMissed: false);
       expect(calls, isEmpty);
 
       await tester.pumpWidget(
         _host(Brightness.light, repeatGroup(value: 'none', onChanged: null)),
       );
       await tester.pump(const Duration(milliseconds: 400));
-      await tester.tap(find.text(keepAll('매주')), warnIfMissed: false);
+      await tester.tap(findText(keepAll('매주')), warnIfMissed: false);
       expect(calls, isEmpty);
       final marks = tester.widgetList<PRadiomark>(find.byType(PRadiomark));
       expect(marks.every((m) => !m.enabled), isTrue);
@@ -1367,7 +1368,7 @@ void main() {
       expect(dot.color, PColors.light.fgDisabled);
       expect(ring.color, PColors.light.bgDisabled);
       expect(ring.border, isNull);
-      final label = tester.widget<Text>(find.text(keepAll('반복 없음')));
+      final label = tester.widget<Text>(findText(keepAll('반복 없음')));
       expect(label.style!.color, PColors.light.fgDisabled);
     });
 
@@ -1653,7 +1654,7 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, fielded(disabled: true, onChanged: calls.add)),
       );
-      await tester.tap(find.text(keepAll('매월')), warnIfMissed: false);
+      await tester.tap(findText(keepAll('매월')), warnIfMissed: false);
       expect(calls, isEmpty);
       // 막힘은 골라 둔 선택을 지우지 않는다
       expect(
@@ -1669,7 +1670,7 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, fielded(onChanged: calls.add)),
       );
-      await tester.tap(find.text(keepAll('매월')));
+      await tester.tap(findText(keepAll('매월')));
       expect(calls, ['monthly']);
     });
 
@@ -1681,7 +1682,7 @@ void main() {
           fielded(disabled: true, groupDisabled: false, onChanged: calls.add),
         ),
       );
-      await tester.tap(find.text(keepAll('매월')));
+      await tester.tap(findText(keepAll('매월')));
       expect(calls, ['monthly']);
     });
 
@@ -1720,7 +1721,7 @@ void main() {
       );
       await pump(false);
       await tester.tap(find.byType(PSwitchmark));
-      await tester.tap(find.text(keepAll('종일')));
+      await tester.tap(findText(keepAll('종일')));
       expect(calls, [true, true]);
       await pump(true);
       await tester.tap(find.byType(PSwitchmark));
@@ -1972,10 +1973,9 @@ void main() {
         ),
       ),
     );
-    final parent = find.widgetWithText(PCheckbox, keepAll('전체')).last;
-    PCheckbox item(String label) => tester.widget<PCheckbox>(
-      find.widgetWithText(PCheckbox, keepAll(label)),
-    );
+    final parent = findWidgetWithText(PCheckbox, keepAll('전체')).last;
+    PCheckbox item(String label) =>
+        tester.widget<PCheckbox>(findWidgetWithText(PCheckbox, keepAll(label)));
     await tester.ensureVisible(parent);
     await tester.pump();
     expect(tester.widget<PCheckbox>(parent).checked, isNull);
@@ -1983,7 +1983,7 @@ void main() {
     await tester.pump();
     expect(tester.widget<PCheckbox>(parent).checked, isTrue);
     expect(item('예산').checked, isTrue);
-    await tester.tap(find.widgetWithText(PCheckbox, keepAll('메모')));
+    await tester.tap(findWidgetWithText(PCheckbox, keepAll('메모')));
     await tester.pump();
     expect(tester.widget<PCheckbox>(parent).checked, isNull);
     // 넘어간 예외가 없다

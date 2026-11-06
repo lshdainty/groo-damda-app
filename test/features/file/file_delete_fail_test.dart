@@ -68,7 +68,7 @@ void main() {
     expect(repo.silent, [true]);
     expect(l.fileDeleteFailed, '파일을 삭제하지 못했어요.');
     expect(findPlain(l.fileDeleteFailed), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     await tester.tap(findPlain(l.actionRetry));
     await tester.pumpAndSettle();
     expect(repo.deletes, 2);

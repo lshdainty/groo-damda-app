@@ -16,6 +16,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/plain_text.dart';
 
 class _FakeRepo extends BudgetRepository {
   _FakeRepo() : super(Dio());
@@ -118,7 +119,7 @@ Future<_FakeRepo> _open(
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -194,7 +195,7 @@ void main() {
     repo.fail = true;
     await _press(tester, l.actionSave);
     expect(_t(l.budgetSaveFailed), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     expect(_amount(tester), '500,000');
     expect(repo.calls, ['update:7:500000']);
   });

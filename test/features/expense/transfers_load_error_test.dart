@@ -9,6 +9,7 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/presentation/expense_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 String _ymd(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-'
@@ -58,16 +59,16 @@ void main() {
   testWidgets('이체 조회 실패 — 문구 + 다시 시도, 거래 목록은 그대로', (tester) async {
     await _pump(tester, transfersFail: true);
 
-    expect(find.text('이체 내역을 불러오지 못했어요.'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(findText('이체 내역을 불러오지 못했어요.'), findsOneWidget);
+    expect(findText('다시 시도'), findsOneWidget);
     // 거래 목록 전체가 실패 화면으로 바뀌지 않는다.
-    expect(find.text('거래를 불러오지 못했어요'), findsNothing);
-    expect(find.textContaining('1,234'), findsWidgets);
+    expect(findText('거래를 불러오지 못했어요'), findsNothing);
+    expect(findTextContaining('1,234'), findsWidgets);
   });
 
   testWidgets('이체 조회가 성공하면 실패 안내가 없다', (tester) async {
     await _pump(tester, transfersFail: false);
 
-    expect(find.text('이체 내역을 불러오지 못했어요.'), findsNothing);
+    expect(findText('이체 내역을 불러오지 못했어요.'), findsNothing);
   });
 }

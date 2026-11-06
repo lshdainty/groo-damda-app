@@ -103,7 +103,7 @@ Future<void> _pump(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -138,8 +138,8 @@ void main() {
     expect(l.todoSaveFailed, '할 일을 저장하지 못했어요.');
     expect(findPlain(l.todoSaveFailed), findsOneWidget);
     expect(find.byType(FormErrorCallout), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
-    expect(find.text('QA 할 일'), findsWidgets);
+    expect(findTextContaining('서버 원문'), findsNothing);
+    expect(findText('QA 할 일'), findsWidgets);
   });
 
   testWidgets('카테고리 저장 실패 — 맨 위 Callout · silent · 서버 글 없음', (tester) async {
@@ -169,7 +169,7 @@ void main() {
     expect(l.categorySaveFailed, '카테고리를 저장하지 못했어요.');
     expect(findPlain(l.categorySaveFailed), findsOneWidget);
     expect(find.byType(FormErrorCallout), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
   });
 
   testWidgets('할 일 삭제 실패 — 확인창 뒤 스낵바 + 다시 시도 · 서버 글 없음', (tester) async {
@@ -188,7 +188,7 @@ void main() {
     expect(repo.silent, ['delete']);
     expect(l.todoDeleteFailed, '할 일을 삭제하지 못했어요.');
     expect(findPlain(l.todoDeleteFailed), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     await tester.tap(findPlain(l.actionRetry));
     await tester.pumpAndSettle();
     expect(repo.deletes, 2);

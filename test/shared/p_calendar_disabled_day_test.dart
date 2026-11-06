@@ -6,6 +6,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_calendar.dart';
+import '../support/plain_text.dart';
 
 void main() {
   testWidgets('firstDay 앞의 날은 취소선 + fg-disabled, 이후 날은 그대로', (tester) async {
@@ -26,7 +27,7 @@ void main() {
       ),
     );
     TextStyle style(String day) => tester
-        .widgetList<Text>(find.text(day))
+        .widgetList<Text>(findText(day))
         .map((t) => t.style!)
         .firstWhere((s) => s.fontSize != null);
     final blocked = style('9');

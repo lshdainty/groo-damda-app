@@ -42,6 +42,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
+import '../../support/plain_text.dart';
 
 /// ds List 의 keepAll 이 글자 사이에 넣는 U+2060 · U+200B 를 뺀 글로 찾는다.
 String _plain(String s) => s.replaceAll('\u2060', '').replaceAll('\u200B', '');
@@ -183,7 +184,7 @@ Future<void> _pickMonth(
     of: find.byWidgetPredicate(
       (w) => w is PWheelPickerColumn && w.semanticLabel == name,
     ),
-    matching: find.text(text),
+    matching: findText(text),
   );
   if (target.year != from.year) {
     await tester.tap(col('연도', '${target.year}년').first);
@@ -191,7 +192,7 @@ Future<void> _pickMonth(
   }
   await tester.tap(col('월', '${target.month}월').first);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('완료'));
+  await tester.tap(findText('완료'));
   if (settle) {
     await tester.pumpAndSettle();
   } else {
@@ -323,7 +324,7 @@ void main() {
 
   testWidgets('8 소비 요약 ↔ 월 달력은 하나만 펼친다 · 요약에 카드가 없다', (tester) async {
     await _pump(tester);
-    await tester.tap(find.text('소비 요약'));
+    await tester.tap(findText('소비 요약'));
     await tester.pumpAndSettle();
     expect(_text('합계'), findsOneWidget);
     expect(find.byType(PCard), findsNothing);
@@ -332,7 +333,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_text('합계'), findsNothing);
     // 요약을 다시 펼치면 달력이 접힌다
-    await tester.tap(find.text('소비 요약'));
+    await tester.tap(findText('소비 요약'));
     await tester.pumpAndSettle();
     expect(_text('합계'), findsOneWidget);
   });
@@ -351,7 +352,7 @@ void main() {
     // 접힌 상태 — 한 주. 다음 달은 모두 오는 날이다
     final dayTexts = find.descendant(
       of: find.byType(InkWell),
-      matching: find.text('1'),
+      matching: findText('1'),
     );
     expect(dayTexts, findsWidgets);
     final text = tester.widget<Text>(dayTexts.first);
@@ -450,7 +451,7 @@ void main() {
     );
     expect(node.getSemanticsData().headingLevel, 2);
     // 그날 합계는 폰에서 그대로 둔다
-    expect(find.textContaining('−12,000원'), findsWidgets);
+    expect(findTextContaining('−12,000원'), findsWidgets);
     handle.dispose();
   });
 
@@ -487,7 +488,7 @@ void main() {
         tester,
         expenses: (_) => Future.error(Exception('RAW_SERVER_TEXT_9137')),
       );
-      expect(find.textContaining('RAW_SERVER_TEXT_9137'), findsNothing);
+      expect(findTextContaining('RAW_SERVER_TEXT_9137'), findsNothing);
       final section = tester.widget<PResultSection>(
         find.byType(PResultSection),
       );
@@ -505,11 +506,11 @@ void main() {
             ? Future.value([_tx(1, '점심 가게', 12000)])
             : pending.future,
       );
-      expect(find.text('${now.year}년 ${now.month}월'), findsWidgets);
+      expect(findText('${now.year}년 ${now.month}월'), findsWidgets);
       final prevMonth = DateTime(now.year, now.month - 1, 1);
       await _pickMonth(tester, now, prevMonth, settle: false);
       // 달 이름은 바로 바뀌고, 머리 틀(Scroll Auto Hide · 달 이동 줄)은 그대로 있다
-      expect(find.text('${prevMonth.year}년 ${prevMonth.month}월'), findsWidgets);
+      expect(findText('${prevMonth.year}년 ${prevMonth.month}월'), findsWidgets);
       expect(find.byType(PScrollAutoHide), findsOneWidget);
       expect(find.byType(PSkeleton), findsWidgets);
       // 옛 달 숫자는 지운다
@@ -562,14 +563,14 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('열기'));
+      await tester.tap(findText('열기'));
       await tester.pumpAndSettle();
       return _result;
     }
 
     testWidgets('조건이 하나 이하면 조건 맞추기 두 줄이 막힌다 · 안내가 뜬다', (tester) async {
       await open(tester);
-      expect(find.text('조건이 두 개 이상일 때 고를 수 있어요.'), findsOneWidget);
+      expect(findText('조건이 두 개 이상일 때 고를 수 있어요.'), findsOneWidget);
       expect(_text('모두 일치'), findsOneWidget);
       expect(_text('하나라도 일치'), findsOneWidget);
       expect(_text('걸린 조건을 모두 만족하는 거래만'), findsOneWidget);
@@ -577,18 +578,18 @@ void main() {
 
     testWidgets('빼고 로 바꾸면 고른 것이 exclude 로 옮겨 가고 섞이지 않는다', (tester) async {
       await open(tester);
-      await tester.ensureVisible(find.text('식비'));
-      await tester.tap(find.text('식비'));
+      await tester.ensureVisible(findText('식비'));
+      await tester.tap(findText('식비'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('고른 것 빼고').first);
-      await tester.tap(find.text('고른 것 빼고').first);
+      await tester.ensureVisible(findText('고른 것 빼고').first);
+      await tester.tap(findText('고른 것 빼고').first);
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('교통'));
-      await tester.tap(find.text('교통'));
+      await tester.ensureVisible(findText('교통'));
+      await tester.tap(findText('교통'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('필터 적용'));
+      await tester.tap(findText('필터 적용'));
       await tester.pumpAndSettle();
-      expect(find.text('필터 적용'), findsNothing);
+      expect(findText('필터 적용'), findsNothing);
       // 넣기 · 빼기가 한 조건 안에서 섞이지 않는다 — 식비(넣기)가 빼기로 옮겨 가고 교통이 더해졌다
       expect(_result!.categories.include, isEmpty);
       expect(_result!.categories.exclude, {1, 2});
@@ -596,13 +597,13 @@ void main() {
 
     testWidgets('아무것도 안 고른 채 "고른 것 빼고" 를 먼저 누르면 그 모드로 남는다', (tester) async {
       await open(tester);
-      await tester.ensureVisible(find.text('고른 것 빼고').first);
-      await tester.tap(find.text('고른 것 빼고').first);
+      await tester.ensureVisible(findText('고른 것 빼고').first);
+      await tester.tap(findText('고른 것 빼고').first);
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('식비'));
-      await tester.tap(find.text('식비'));
+      await tester.ensureVisible(findText('식비'));
+      await tester.tap(findText('식비'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('필터 적용'));
+      await tester.tap(findText('필터 적용'));
       await tester.pumpAndSettle();
       expect(_result!.categories.include, isEmpty);
       expect(_result!.categories.exclude, {1});
@@ -621,24 +622,24 @@ void main() {
           ],
         ),
       );
-      expect(find.text('시작일이 종료일보다 늦을 수 없어요.'), findsOneWidget);
-      await tester.tap(find.text('필터 적용'));
+      expect(findText('시작일이 종료일보다 늦을 수 없어요.'), findsOneWidget);
+      await tester.tap(findText('필터 적용'));
       await tester.pumpAndSettle();
       // 막혀서 시트가 그대로 열려 있다
-      expect(find.text('필터 적용'), findsOneWidget);
+      expect(findText('필터 적용'), findsOneWidget);
     });
 
     testWidgets('거래 종류 둘 다 끄면 전체 — 칩 줄에 엉뚱한 수입 칩이 생기지 않는다', (tester) async {
       await open(tester);
       for (final name in ['지출', '수입']) {
-        await tester.ensureVisible(find.text(name).first);
+        await tester.ensureVisible(findText(name).first);
         await tester.pumpAndSettle();
-        await tester.tap(find.text(name).first);
+        await tester.tap(findText(name).first);
         await tester.pumpAndSettle();
       }
-      await tester.tap(find.text('필터 적용'));
+      await tester.tap(findText('필터 적용'));
       await tester.pumpAndSettle();
-      expect(find.text('필터 적용'), findsNothing);
+      expect(findText('필터 적용'), findsNothing);
       // 둘 다 끄면 둘 다 켠 것과 같다 — 빈 집합을 내보내지 않는다(= 종류 조건 없음)
       expect(_result!.types, {'EXPENSE', 'INCOME'});
       expect(activeConditionCount(_result!), 0);
@@ -677,7 +678,7 @@ void main() {
 
   testWidgets('11 합계 줄 제목만 700 · 7 소비 요약 위 8', (tester) async {
     await _pump(tester);
-    await tester.tap(find.text('소비 요약'));
+    await tester.tap(findText('소비 요약'));
     await tester.pumpAndSettle();
     FontWeight? weightOf(String t) => tester
         .widget<Text>(
@@ -694,8 +695,8 @@ void main() {
     // 접힌 주 달력 — 오늘이 든 주의 칸 금액(오늘 거래가 없으면 이번 달 1일 거래는 월 달력에서)
     await tester.tap(find.bySemanticsLabel('월 달력'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('-1', findRichText: true), findsNothing);
-    expect(find.textContaining('−', findRichText: true), findsWidgets);
+    expect(findTextContaining('-1', findRichText: true), findsNothing);
+    expect(findTextContaining('−', findRichText: true), findsWidgets);
     expect(_text('−12,000', contains: true), findsWidgets);
   });
 
@@ -714,7 +715,7 @@ void main() {
 
   testWidgets('빈 달에도 지난달 이용 내역 보기 단추가 있다', (tester) async {
     await _pump(tester, expenses: (_) async => const []);
-    expect(find.textContaining('이용 내역 보기'), findsOneWidget);
+    expect(findTextContaining('이용 내역 보기'), findsOneWidget);
   });
 
   testWidgets('실패에는 설명 글이 있다', (tester) async {
@@ -759,7 +760,7 @@ void main() {
     await _pump(tester, hidden: {'ledger.txList'});
     await tester.tap(find.bySemanticsLabel('월 달력'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('−••'), findsWidgets);
+    expect(findTextContaining('−••'), findsWidgets);
   });
 
   testWidgets('가림: 월 합계 카드를 켜면 인사이트 금액도 가린다', (tester) async {
@@ -785,18 +786,18 @@ void main() {
     await tester.tap(find.byType(PInputButton).first);
     await tester.pumpAndSettle();
     final names = PDatePickerLabels.ko.presetNames;
-    expect(find.text(names[PDatePreset.thisWeek]!), findsOneWidget);
-    expect(find.text(names[PDatePreset.thisMonth]!), findsOneWidget);
-    expect(find.text(names[PDatePreset.last3Months]!), findsOneWidget);
-    expect(find.text(names[PDatePreset.lastMonth]!), findsNothing);
-    expect(find.text(names[PDatePreset.thisYear]!), findsNothing);
+    expect(findText(names[PDatePreset.thisWeek]!), findsOneWidget);
+    expect(findText(names[PDatePreset.thisMonth]!), findsOneWidget);
+    expect(findText(names[PDatePreset.last3Months]!), findsOneWidget);
+    expect(findText(names[PDatePreset.lastMonth]!), findsNothing);
+    expect(findText(names[PDatePreset.thisYear]!), findsNothing);
   });
 
   testWidgets('글자 200% — 두 자리 날 숫자 원이 글을 따라 늘어 잘리지 않는다', (tester) async {
     await _pump(tester, textScale: 2, expenses: (_) async => const []);
     await tester.tap(find.bySemanticsLabel('월 달력'), warnIfMissed: false);
     await tester.pumpAndSettle();
-    final text = find.text('18').first;
+    final text = findText('18').first;
     final circle = find
         .ancestor(of: text, matching: find.byType(Container))
         .first;
@@ -877,7 +878,7 @@ void main() {
       tester,
     ) async {
       await _pump(tester, textScale: scale);
-      await tester.tap(find.text('소비 요약'));
+      await tester.tap(findText('소비 요약'));
       await tester.pumpAndSettle();
       // 요약 줄 셋(수입 · 지출 · 합계)
       final items = find.descendant(
@@ -1035,7 +1036,7 @@ void main() {
         );
         await tester.tap(find.bySemanticsLabel('월 달력'), warnIfMissed: false);
         await tester.pumpAndSettle();
-        await tester.tap(find.text('소비 요약'), warnIfMissed: false);
+        await tester.tap(findText('소비 요약'), warnIfMissed: false);
         await tester.pumpAndSettle();
         FlutterError.onError = prev;
         final mine = errors

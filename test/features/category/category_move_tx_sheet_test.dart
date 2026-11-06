@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
+import '../../support/plain_text.dart';
 
 class _FakeRepo extends ExpenseRepository {
   _FakeRepo() : super(Dio());
@@ -117,7 +118,7 @@ Future<_FakeRepo> _open(
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }

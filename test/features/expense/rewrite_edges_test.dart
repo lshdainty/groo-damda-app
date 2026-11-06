@@ -30,6 +30,7 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../support/plain_text.dart';
 
 const _lockedNote = '결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요';
 const _paidOffNote = '결제가 끝난 거래예요. 중도 정리한 할부라 금액·날짜를 바꿀 수 없어요.';
@@ -153,16 +154,16 @@ Future<_FakeRepo> _open(
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return r;
 }
 
 Finder _submit(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 Future<void> _openRewrite(WidgetTester tester) async {
-  await tester.tap(find.text('고쳐 쓰기'));
+  await tester.tap(findText('고쳐 쓰기'));
   await tester.pumpAndSettle();
 }
 
@@ -174,23 +175,23 @@ void main() {
         _locked.copyWith(installmentMonths: 3, replaceable: false),
       );
 
-      expect(find.text(_paidOffNote), findsOneWidget);
-      expect(find.text(_lockedNote), findsNothing);
-      expect(find.text('고쳐 쓰기'), findsNothing);
+      expect(findText(_paidOffNote), findsOneWidget);
+      expect(findText(_lockedNote), findsNothing);
+      expect(findText('고쳐 쓰기'), findsNothing);
     });
 
     testWidgets('replaceable=true 면 버튼과 종전 안내', (tester) async {
       await _open(tester, _locked.copyWith(replaceable: true));
 
-      expect(find.text(_lockedNote), findsOneWidget);
-      expect(find.text('고쳐 쓰기'), findsOneWidget);
+      expect(findText(_lockedNote), findsOneWidget);
+      expect(findText('고쳐 쓰기'), findsOneWidget);
     });
 
     testWidgets('판정이 없는 옛 서버면 잠금으로 본다 — 버튼이 있다', (tester) async {
       await _open(tester, _locked);
 
-      expect(find.text(_lockedNote), findsOneWidget);
-      expect(find.text('고쳐 쓰기'), findsOneWidget);
+      expect(findText(_lockedNote), findsOneWidget);
+      expect(findText('고쳐 쓰기'), findsOneWidget);
     });
   });
 
@@ -209,11 +210,11 @@ void main() {
 
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
 
       expect(repo.replaced, 1);
-      expect(find.text('고쳐 쓰기'), findsNothing, reason: '시트가 닫혔다');
+      expect(findText('고쳐 쓰기'), findsNothing, reason: '시트가 닫혔다');
       expect(_monthFetches, greaterThan(before), reason: '목록을 다시 읽었다');
     });
 
@@ -230,18 +231,18 @@ void main() {
 
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
 
       expect(repo.replaced, 1);
-      expect(find.text('고쳐 쓰기'), findsOneWidget, reason: '시트가 그대로다');
+      expect(findText('고쳐 쓰기'), findsOneWidget, reason: '시트가 그대로다');
       expect(
         tester.widget<PButton>(_submit('저장')).onPressed,
         isNotNull,
         reason: '다시 시도할 수 있다',
       );
       // 서버 원문이 아니라 폼 맨 위 우리 글(웹과 같다) — 고친 값은 그대로다
-      expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+      expect(findText('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
     });
   });
 
@@ -249,13 +250,17 @@ void main() {
     testWidgets('고쳐 쓰기 저장이 막혀 있다가 다 불러오면 풀린다', (tester) async {
       final pending = Completer<List<ExpenseSplit>>();
       await _open(tester, _locked, splits: () => pending.future);
+      // 받는 동안에도 [고쳐 쓰기] 가 보이고 안내는 사실 그대로다 — "중도 정리한 할부" 로 바꾸지 않는다(P3)
+      expect(findText(_lockedNote), findsOneWidget);
+      expect(findText(_paidOffNote), findsNothing);
+      expect(findText('고쳐 쓰기'), findsOneWidget);
       await _openRewrite(tester);
 
       // 저장은 켜 둔다 — 누르면 요청 없이 "불러오는 중" 안내만 낸다
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      expect(find.text('나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.'), findsOneWidget);
-      expect(find.textContaining('원래 거래는 지워지고'), findsNothing);
+      expect(findText('나눈 내역을 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.'), findsOneWidget);
+      expect(findTextContaining('원래 거래는 지워지고'), findsNothing);
 
       pending.complete(const [
         ExpenseSplit(
@@ -270,7 +275,7 @@ void main() {
 
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('원래 거래는 지워지고'), findsOneWidget);
+      expect(findTextContaining('원래 거래는 지워지고'), findsOneWidget);
     });
 
     testWidgets('못 불러왔으면 저장 · 고쳐 쓰기를 막는다 — 분할을 모르는 채 보내지 않는다(N5)', (
@@ -283,13 +288,49 @@ void main() {
         repo: repo,
         splits: () => Future.error(Exception('network')),
       );
+      // 그 자리 실패 + [다시 시도](웹 상세 · 나누기 단계 SplitFailure 와 같은 꼴) — 안내는 사실 그대로
+      final failure = find.byKey(const ValueKey('tx-detail-split-failure'));
+      expect(failure, findsOneWidget);
+      expect(
+        find.descendant(of: failure, matching: findText('다시 시도')),
+        findsOneWidget,
+      );
+      expect(findText(_paidOffNote), findsNothing);
       await _openRewrite(tester);
 
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      expect(find.text('나눈 내역을 불러오지 못했어요'), findsOneWidget);
-      expect(find.textContaining('원래 거래는 지워지고'), findsNothing);
+      // 실패 띠 제목 + 저장 칸 오류
+      expect(findText('나눈 내역을 불러오지 못했어요'), findsNWidgets(2));
+      expect(findTextContaining('원래 거래는 지워지고'), findsNothing);
       expect(repo.replaced, 0);
+    });
+
+    testWidgets('못 불러온 자리의 [다시 시도] 는 나눈 내역을 다시 받는다', (tester) async {
+      // riverpod 3 은 실패를 스스로 다시 받는다 — 망이 살아날 때까지 계속 실패시킨다
+      var down = true;
+      var calls = 0;
+      await _open(
+        tester,
+        _locked,
+        splits: () {
+          calls++;
+          return down
+              ? Future.error(Exception('network'))
+              : Future.value(const <ExpenseSplit>[]);
+        },
+      );
+      final failure = find.byKey(const ValueKey('tx-detail-split-failure'));
+      expect(failure, findsOneWidget);
+      down = false;
+      final before = calls;
+      await tester.tap(
+        find.descendant(of: failure, matching: findText('다시 시도')),
+      );
+      await tester.pumpAndSettle();
+      expect(calls, greaterThan(before));
+      expect(failure, findsNothing);
+      expect(findText(_lockedNote), findsOneWidget);
     });
   });
 }

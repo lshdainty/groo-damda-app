@@ -343,14 +343,14 @@ void main() {
     ) async {
       final handle = tester.ensureSemantics();
       await _pump(tester);
-      expect(find.text('전체 보기'), findsNWidgets(5));
+      expect(findText('전체 보기'), findsNWidgets(5));
       expect(find.bySemanticsLabel('카테고리 전체 보기'), findsOneWidget);
       expect(find.bySemanticsLabel('최근 할 일 전체 보기'), findsOneWidget);
       // 연체 배지는 제목 줄에 붙고 heading 노드 밖이다
       // 보이는 글 "연체 23", 읽는 글 "연체 23건"(웹 OverdueBadge 와 같다, I-06 home 21)
-      final badge = find.widgetWithText(PBadge, '연체 23');
+      final badge = findWidgetWithText(PBadge, '연체 23');
       expect(badge, findsOneWidget);
-      expect(find.text('연체 23건'), findsNothing, reason: '보이는 글에는 건이 없다');
+      expect(findText('연체 23건'), findsNothing, reason: '보이는 글에는 건이 없다');
       expect(find.bySemanticsLabel(RegExp('연체 23건')), findsOneWidget);
       expect(
         find.ancestor(
@@ -459,7 +459,7 @@ void main() {
       expect(donut.centerAmount, isNull, reason: '폰은 가운데 글을 그리지 않는다');
       expect(donut.diameter, 120);
       // 합계 줄(목록 위 한 줄)
-      expect(find.text('이번 달 지출'), findsOneWidget);
+      expect(findText('이번 달 지출'), findsOneWidget);
       // 범례 이름은 줄을 바꾼다 — 말줄임 · 줄 수 제한 없음
       final names = tester.widgetList<Text>(
         find.byKey(const ValueKey('chart-donut-label')),
@@ -503,10 +503,10 @@ void main() {
       expect(bars.first.label, '총 예산');
       expect(bars.last.label, '$_longCat 예산', reason: '긴 카테고리 이름 + 예산');
       // 총 예산도(3,912,345,678 > 3,000,000) · 긴 이름 예산도(987,654,321 > 100,000,000) 넘쳤다
-      expect(find.textContaining('초과'), findsNWidgets(2));
+      expect(findTextContaining('초과'), findsNWidgets(2));
       final overText = find.descendant(
         of: find.byWidget(bars.last),
-        matching: find.textContaining('887,654,321원 초과'),
+        matching: findTextContaining('887,654,321원 초과'),
       );
       expect(overText, findsOneWidget, reason: '긴 이름 줄에 "…원 초과" 가 있다');
       expect(find.byType(PListTile), findsNothing, reason: '카테고리 타일을 뺀다');
@@ -577,9 +577,9 @@ void main() {
         expect(t.overflow, isNot(TextOverflow.ellipsis));
         expect(t.maxLines, isNull);
       }
-      final today = tester.widget<Text>(find.text('오늘'));
+      final today = tester.widget<Text>(findText('오늘'));
       expect(today.style?.color, PColors.light.fgWarning);
-      final far = tester.widget<Text>(find.text('D-12').first);
+      final far = tester.widget<Text>(findText('D-12').first);
       expect(far.style?.color, isNull, reason: '사흘 밖은 값 글자 기본색');
     });
 
@@ -671,7 +671,7 @@ void main() {
       expect(findPlain('0원'), findsNothing, reason: '조용한 0원이 없다');
       // 순자산 · 일정 · 오늘 쓴 돈은 그대로
       expect(findPlain('98,765,432,100원'), findsOneWidget);
-      expect(find.text('오늘'), findsOneWidget);
+      expect(findText('오늘'), findsOneWidget);
     });
 
     testWidgets('실패 한 벌 — "{구역}을/를 불러오지 못했어요" + 같은 설명', (tester) async {
@@ -711,7 +711,7 @@ void main() {
       final reads = <String, int>{};
       await _pump(tester, summaryError: Exception('x'), reads: reads);
       final before = Map.of(reads);
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(reads['summary'], before['summary']! + 1);
@@ -724,7 +724,7 @@ void main() {
       final reads = <String, int>{};
       await _pump(tester, budgetsError: Exception('x'), reads: reads);
       final before = Map.of(reads);
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(reads['budgets'], before['budgets']! + 1);
@@ -736,7 +736,7 @@ void main() {
       await _pump(tester, dashError: Exception('x'), reads: reads);
       expect(find.byType(PResultSection), findsNWidgets(2));
       final before = Map.of(reads);
-      await tester.tap(find.text('다시 시도').first);
+      await tester.tap(findText('다시 시도').first);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(reads['dash'], before['dash']! + 1);
@@ -748,7 +748,7 @@ void main() {
       expect(findPlain('다가오는 일정'), findsOneWidget);
       expect(findPlain('최근 할 일'), findsOneWidget);
       // 카테고리 · 예산 · 오늘 쓴 돈 + 일정 · 할 일 = 다섯
-      expect(find.text('전체 보기'), findsNWidgets(5));
+      expect(findText('전체 보기'), findsNWidgets(5));
     });
   });
 

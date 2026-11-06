@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/accordion/p_expand_motion.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('accordion');
 
@@ -38,7 +39,7 @@ Widget _host(Brightness mode, Widget child, {bool reduceMotion = false}) =>
     );
 
 /// 제목은 낱말 단위 줄바꿈 이음 문자가 들어 있다(keepAll) — 같은 변환으로 찾는다.
-Finder _title(String t) => find.text(keepAll(t));
+Finder _title(String t) => findText(keepAll(t));
 
 Finder _key(String k) => find.byKey(ValueKey(k));
 Finder _keyed(String prefix) => find.byWidgetPredicate(
@@ -676,7 +677,7 @@ void main() {
         want['expandAll.radius']! as num,
         (deco.borderRadius! as BorderRadius).topLeft.x,
       );
-      final label = find.text('모두 펼치기');
+      final label = findText('모두 펼치기');
       _expectText(
         failures,
         mode.name,
@@ -883,12 +884,12 @@ void main() {
         ['coffee'],
         ['coffee', 'fuel'],
       ], reason: '하나만 여는 모드가 없다');
-      expect(find.text('커피 할인 상세'), findsOneWidget);
-      expect(find.text('주유 할인 상세'), findsOneWidget);
+      expect(findText('커피 할인 상세'), findsOneWidget);
+      expect(findText('주유 할인 상세'), findsOneWidget);
       await tester.tap(_title('커피 할인'));
       await tester.pumpAndSettle();
       expect(seen.last, ['fuel']);
-      expect(find.text('커피 할인 상세'), findsNothing);
+      expect(findText('커피 할인 상세'), findsNothing);
     });
 
     testWidgets('쥐고 다루는 값을 안 바꿔 주면 그대로다', (tester) async {
@@ -907,7 +908,7 @@ void main() {
       );
       await tester.tap(_title('커피 할인'));
       await tester.pumpAndSettle();
-      expect(find.text('커피 할인 상세'), findsNothing);
+      expect(findText('커피 할인 상세'), findsNothing);
     });
 
     testWidgets(
@@ -1042,11 +1043,11 @@ void main() {
         expect(nodeOf(2).hasPrimaryFocus, isTrue);
         await tester.sendKeyEvent(LogicalKeyboardKey.enter);
         await tester.pumpAndSettle();
-        expect(find.text('c 상세'), findsOneWidget);
+        expect(findText('c 상세'), findsOneWidget);
         expect(nodeOf(2).hasPrimaryFocus, isTrue, reason: '펼쳐도 포커스는 트리거에 그대로');
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
-        expect(find.text('c 상세'), findsNothing);
+        expect(findText('c 상세'), findsNothing);
       },
     );
 
@@ -1085,16 +1086,16 @@ void main() {
           ),
         ),
       );
-      expect(find.text('모두 펼치기'), findsOneWidget, reason: '하나라도 접혀 있다');
-      await tester.tap(find.text('모두 펼치기'));
+      expect(findText('모두 펼치기'), findsOneWidget, reason: '하나라도 접혀 있다');
+      await tester.tap(findText('모두 펼치기'));
       await tester.pumpAndSettle();
       expect(values, ['coffee', 'fuel']);
-      expect(find.text('모두 접기'), findsOneWidget);
+      expect(findText('모두 접기'), findsOneWidget);
       expect(find.byIcon(LucideIcons.chevronsDownUp), findsNothing);
-      await tester.tap(find.text('모두 접기'));
+      await tester.tap(findText('모두 접기'));
       await tester.pumpAndSettle();
       expect(values, isEmpty);
-      expect(find.text('모두 펼치기'), findsOneWidget);
+      expect(findText('모두 펼치기'), findsOneWidget);
       expect(find.byIcon(LucideIcons.chevronsUpDown), findsNothing);
     });
 

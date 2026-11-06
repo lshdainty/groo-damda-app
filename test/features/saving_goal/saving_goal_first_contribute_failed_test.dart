@@ -85,7 +85,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).at(0), '비상금');
     await tester.enterText(find.byType(TextField).at(1), '1000000');
@@ -108,7 +108,7 @@ void main() {
     expect(findPlain(l.savingGoalSubmitAdd), findsNothing);
     expect(l.savingGoalFirstContributeFailed, '목표는 만들었지만 첫 납입을 기록하지 못했어요.');
     expect(findPlain(l.savingGoalFirstContributeFailed), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
 
     await tester.tap(findPlain(l.actionRetry));
     await tester.pumpAndSettle();

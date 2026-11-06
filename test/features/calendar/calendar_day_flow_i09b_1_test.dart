@@ -262,7 +262,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(
       find
-          .descendant(of: find.byType(CalendarScreen), matching: find.text(day))
+          .descendant(of: find.byType(CalendarScreen), matching: findText(day))
           .first,
     );
     await tester.pumpAndSettle();
@@ -432,7 +432,7 @@ void main() {
       await tester.tap(back());
       await tester.pumpAndSettle();
       expect(find.byType(PAlertDialogView), findsOneWidget);
-      await tester.tap(find.text(l.sheetLeaveStay));
+      await tester.tap(findText(l.sheetLeaveStay));
       await tester.pumpAndSettle();
       expect(findPlain(l.calEventEdit), findsOneWidget, reason: '계속 작성');
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -442,7 +442,7 @@ void main() {
         findsOneWidget,
         reason: 'Esc 도 같은 물음',
       );
-      await tester.tap(find.text(l.sheetLeaveLeave));
+      await tester.tap(findText(l.sheetLeaveLeave));
       await tester.pumpAndSettle();
       expect(detailTitle(), findsOneWidget);
       expect(
@@ -462,7 +462,7 @@ void main() {
       await tester.tap(close());
       await tester.pumpAndSettle();
       expect(find.byType(PAlertDialogView), findsOneWidget);
-      await tester.tap(find.text(l.sheetLeaveLeave));
+      await tester.tap(findText(l.sheetLeaveLeave));
       await tester.pumpAndSettle();
       expect(root(), findsNothing);
     });
@@ -512,7 +512,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pumpAndSettle();
@@ -541,7 +541,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pumpAndSettle();
@@ -560,7 +560,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pumpAndSettle();
@@ -602,7 +602,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pumpAndSettle();
@@ -622,6 +622,13 @@ void main() {
       tester,
     ) async {
       final world = await pump(tester, now: nov, day: '1');
+      // 2026-11-01 은 일요일이라 11월 달력은 10월을 받지 않는다 — 10월을 지켜보는 곳(다른 화면)을 하나 둔다
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      final sub = container.listen(monthEventsProvider(octKey), (_, _) {});
+      addTearDown(sub.close);
+      await tester.pumpAndSettle();
       await tapEvent(tester, '걸친 일정');
       final beforeOct = world.builds[octKey]!;
       final beforeNov = world.builds[novKey]!;
@@ -630,7 +637,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pumpAndSettle();
@@ -671,7 +678,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pump();
@@ -679,7 +686,7 @@ void main() {
     }
 
     Future<void> tapRetry(WidgetTester tester) async {
-      await tester.tap(find.text(l.actionRetry));
+      await tester.tap(findText(l.actionRetry));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
@@ -701,7 +708,7 @@ void main() {
           findsOneWidget,
           reason: '시트 안 Callout 이 아니라 스낵바 한 곳',
         );
-        expect(find.text(l.actionRetry), findsOneWidget);
+        expect(findText(l.actionRetry), findsOneWidget);
         expect(
           tester.widget<PButton>(button(l.actionDelete)).onPressed,
           isNotNull,
@@ -735,13 +742,13 @@ void main() {
       await tester.tap(button(l.actionDelete));
       await tester.pumpAndSettle();
       await confirmDelete(tester);
-      expect(find.text(l.actionRetry), findsOneWidget);
+      expect(findText(l.actionRetry), findsOneWidget);
 
       await tester.tap(close());
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
       expect(root(), findsNothing, reason: '시트는 닫혔다');
-      expect(find.text(l.actionRetry), findsOneWidget, reason: '띠는 남는다');
+      expect(findText(l.actionRetry), findsOneWidget, reason: '띠는 남는다');
 
       world.failDelete = false;
       final octBefore = world.builds[(year: 2026, month: 10)]!;
@@ -773,7 +780,7 @@ void main() {
       await tester.pumpAndSettle();
       await confirmDelete(tester);
       expect(find.byType(PAlertDialogView), findsNothing);
-      expect(find.text(l.actionRetry), findsOneWidget);
+      expect(findText(l.actionRetry), findsOneWidget);
       expect(findPlainContaining(l.calFormDeleteFailed), findsOneWidget);
 
       world.failDelete = false;
@@ -798,7 +805,7 @@ void main() {
       await tester.pumpAndSettle();
       // 바뀐 값이 없으면 바로 닫히고, 있으면 버리기 확인이 뜬다 — 값을 안 만졌으므로 바로 닫힌다
       expect(root(), findsNothing);
-      expect(find.text(l.actionRetry), findsOneWidget, reason: '띠는 남는다');
+      expect(findText(l.actionRetry), findsOneWidget, reason: '띠는 남는다');
 
       world.failDelete = false;
       final octBefore = world.builds[(year: 2026, month: 10)]!;
@@ -820,13 +827,30 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pump(const Duration(milliseconds: 400));
       expect(world.deleted, {1});
-      expect(tester.widget<PButton>(button(l.actionDelete)).onPressed, isNull);
-      expect(tester.widget<PButton>(button(l.actionSave)).onPressed, isNull);
+      // 닫히는 중인 확인창의 [삭제] 는 빼고 폼의 단추만 본다
+      bool inDialog(Element e) {
+        var found = false;
+        e.visitAncestorElements((a) {
+          if (a.widget is PAlertDialogView) found = true;
+          return !found;
+        });
+        return found;
+      }
+
+      for (final label in [l.actionDelete, l.actionSave]) {
+        final btns = button(label)
+            .evaluate()
+            .where((e) => !inDialog(e))
+            .map((e) => e.widget as PButton)
+            .toList();
+        expect(btns, isNotEmpty, reason: label);
+        expect(btns.every((b) => b.onPressed == null), isTrue, reason: label);
+      }
       world.gate!.complete();
       await tester.pumpAndSettle();
       expect(rowTitle('내 일정'), findsNothing);

@@ -14,6 +14,7 @@ import 'package:groo_damda_app/features/stocks/presentation/watch_actions.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
+import '../../support/plain_text.dart';
 
 const _item = WatchItem(
   rowId: 1,
@@ -91,7 +92,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
 
     final l = lookupAppLocalizations(const Locale('ko'));

@@ -122,7 +122,7 @@ Future<_FailingRepo> _open(WidgetTester tester, Asset asset) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -145,10 +145,10 @@ void main() {
       expect(l.assetSaveFailed, '자산을 저장하지 못했어요.');
       expect(findPlain(l.assetSaveFailed), findsOneWidget);
       expect(find.byType(FormErrorCallout), findsOneWidget);
-      expect(find.textContaining('서버 원문'), findsNothing);
+      expect(findTextContaining('서버 원문'), findsNothing);
       // 시트는 닫히지 않았고 쓴 값이 남는다.
       expect(buttonLabeled(l.actionSave), findsOneWidget);
-      expect(findPlain(c.$2.assetName), findsWidgets);
+      expect(findText(c.$2.assetName), findsWidgets);
     });
   }
 }

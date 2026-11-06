@@ -713,10 +713,10 @@ void main() {
       expect(_contentBox, findsNothing);
       expect(
         find
-                .descendant(of: _value, matching: find.text('간편결제'))
+                .descendant(of: _value, matching: findText('간편결제'))
                 .evaluate()
                 .isNotEmpty ||
-            find.text('간편결제').evaluate().isNotEmpty,
+            findText('간편결제').evaluate().isNotEmpty,
         isTrue,
       );
       // 앞 아이콘이 고른 선택지의 것으로 바뀐다
@@ -739,7 +739,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(_host(Brightness.light, _select(value: 'none')));
-      expect(find.text('결제 수단 선택'), findsOneWidget);
+      expect(findText('결제 수단 선택'), findsOneWidget);
       expect(tester.widget<Icon>(_prefix).icon, LucideIcons.creditCard);
     });
 
@@ -759,7 +759,7 @@ void main() {
       await _settle(tester);
       expect(_contentBox, findsOneWidget);
       expect(seen.last, ['kb', 'cash']);
-      expect(find.text('국민 주계좌, 현금'), findsOneWidget);
+      expect(findText('국민 주계좌, 현금'), findsOneWidget);
       // 다시 누르면 풀린다
       await tester.tap(_row('국민 주계좌'));
       await tester.pump();
@@ -776,7 +776,7 @@ void main() {
           width: 240,
         ),
       );
-      expect(find.text('현금 외 2개'), findsOneWidget);
+      expect(findText('현금 외 2개'), findsOneWidget);
       await tester.pumpWidget(
         _host(
           Brightness.light,
@@ -784,7 +784,7 @@ void main() {
           width: 700,
         ),
       );
-      expect(find.text('현금, 국민 주계좌, 간편결제'), findsOneWidget);
+      expect(findText('현금, 국민 주계좌, 간편결제'), findsOneWidget);
       // 줄이는 글이 없으면 말줄임
       await tester.pumpWidget(
         _host(
@@ -796,9 +796,9 @@ void main() {
           width: 240,
         ),
       );
-      expect(find.textContaining('외'), findsNothing);
+      expect(findTextContaining('외'), findsNothing);
       expect(
-        tester.widget<Text>(find.text('현금, 국민 주계좌, 간편결제')).overflow,
+        tester.widget<Text>(findText('현금, 국민 주계좌, 간편결제')).overflow,
         TextOverflow.ellipsis,
       );
     });
@@ -959,7 +959,7 @@ void main() {
       expect(row.bottom, lessThanOrEqualTo(box.bottom + 0.5));
       // 맨 위 선택지는 밀려 나갔다 — 안에서 스크롤된 채로 열렸다
       expect(
-        find.text('카테고리 1').hitTestable().evaluate(),
+        findText('카테고리 1').hitTestable().evaluate(),
         isEmpty,
         reason: '스크롤된 채로 열려야 한다',
       );
@@ -978,7 +978,7 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, const _Live(initial: 'long', groups: groups)),
       );
-      final shown = tester.widget<Text>(find.text(long).first);
+      final shown = tester.widget<Text>(findText(long).first);
       expect(shown.maxLines, 1);
       expect(shown.overflow, TextOverflow.ellipsis);
       await _open(tester);

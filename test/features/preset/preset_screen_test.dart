@@ -16,6 +16,7 @@ import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 const _cat = ExpenseCategory(
   rowId: 1,
@@ -99,7 +100,8 @@ Future<_Repo> _open(
 }
 
 Finder _t(String s) => find.byWidgetPredicate(
-  (w) => w is Text && (w.data ?? '').replaceAll('⁠', '') == s,
+  (w) =>
+      w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == plainOf(s),
 );
 
 void main() {
@@ -140,7 +142,7 @@ void main() {
   testWidgets('목록 제목 "프리셋 n개" · 안내 상자 0 · 줄 끝 ⋮ 0', (tester) async {
     await _open(tester, [_a, _b, _tr]);
     expect(_t(l.presetListTitle(3)), findsOneWidget);
-    expect(find.text('프리셋이란?'), findsNothing);
+    expect(findText('프리셋이란?'), findsNothing);
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.bySemanticsLabel(RegExp('더보기')), findsNothing);
   });
@@ -164,23 +166,23 @@ void main() {
     await tester.tap(_t('점심'));
     await tester.pumpAndSettle();
     expect(_t(l.presetDetailTitle), findsOneWidget);
-    expect(find.text(l.actionDelete), findsWidgets);
-    expect(find.text(l.actionEdit), findsWidgets);
+    expect(findText(l.actionDelete), findsWidgets);
+    expect(findText(l.actionEdit), findsWidgets);
   });
 
   testWidgets('빈 화면 — 안내 글 · 본문 버튼 하나 · 머리 "추가" 없음', (tester) async {
     await _open(tester, []);
     expect(_t(l.presetEmptyTitle), findsOneWidget);
     expect(_t(l.presetEmptyDesc), findsOneWidget);
-    expect(find.text(l.presetAddAction), findsNothing);
-    expect(find.text(l.presetAdd), findsOneWidget);
+    expect(findText(l.presetAddAction), findsNothing);
+    expect(findText(l.presetAdd), findsOneWidget);
   });
 
   testWidgets('목록 조회 실패 — Result Section + 다시 시도, 서버 원문 0', (tester) async {
     await _open(tester, [], failList: true);
     expect(_t(l.presetLoadFailed), findsOneWidget);
-    expect(find.text(l.actionRetry), findsOneWidget);
-    expect(find.textContaining('x'), findsNothing);
+    expect(findText(l.actionRetry), findsOneWidget);
+    expect(findTextContaining('x'), findsNothing);
   });
 
   testWidgets('삭제 실패 — 확인창을 닫고 critical 스낵바 + 다시 시도(시트는 열려 있다)', (
@@ -189,14 +191,14 @@ void main() {
     final repo = await _open(tester, [_a], failDelete: true);
     await tester.tap(_t('점심'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l.actionDelete).last);
+    await tester.tap(findText(l.actionDelete).last);
     await tester.pumpAndSettle();
     expect(_t(l.presetDeleteConfirmTitle('점심')), findsOneWidget);
-    await tester.tap(find.text(l.actionDelete).last);
+    await tester.tap(findText(l.actionDelete).last);
     await tester.pumpAndSettle();
     expect(repo.deletes, 1);
     expect(_t(l.presetDeleteFailed), findsOneWidget);
-    expect(find.text(l.actionRetry), findsOneWidget);
+    expect(findText(l.actionRetry), findsOneWidget);
     expect(_t(l.presetDetailTitle), findsOneWidget, reason: '시트는 열려 있다');
   });
 }

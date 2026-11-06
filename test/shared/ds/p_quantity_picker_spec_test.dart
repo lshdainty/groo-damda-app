@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/quantity_picker/p_quantity_picker.dart'
 
 import '../../support/design_spec.dart';
 import '../../support/spec_check.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(Brightness mode, Widget child, {double width = 342}) =>
     MaterialApp(
@@ -316,7 +317,7 @@ void main() {
         k.px('root.borderWidth', border.width);
         failures.addAll(k.failures);
         // 범위 밖 값은 고치지 않는다
-        expect(find.text('5'), findsOneWidget);
+        expect(findText('5'), findsOneWidget);
 
         // 막힘 — 두 버튼 아이콘 · 값 fg-disabled
         await tester.pumpWidget(
@@ -420,13 +421,13 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, _Harness(onChanged: seen.add)),
       );
-      expect(find.text('2회'), findsOneWidget);
+      expect(findText('2회'), findsOneWidget);
       await tester.tap(_inc);
       await tester.pump();
       expect(seen, [3]);
-      expect(find.text('3회'), findsOneWidget);
+      expect(findText('3회'), findsOneWidget);
       // 값 칸은 liveRegion — 바뀐 값을 단위와 함께 읽는다
-      final live = tester.getSemantics(find.text('3회'));
+      final live = tester.getSemantics(findText('3회'));
       expect(live.label, '3회');
       expect(live.flagsCollection.isLiveRegion, isTrue);
       await tester.tap(_dec);
@@ -452,7 +453,7 @@ void main() {
       await tester.tap(_inc);
       await tester.pump();
       expect(seen, [3]);
-      expect(find.text('2회'), findsOneWidget);
+      expect(findText('2회'), findsOneWidget);
     });
 
     testWidgets('step 만큼 바꾸되 끝을 넘지 않는다 · 처음 값은 기본 min', (tester) async {
@@ -462,16 +463,16 @@ void main() {
           const PQuantityPicker(semanticLabel: '분', min: 10, max: 30, step: 15),
         ),
       );
-      expect(find.text('10'), findsOneWidget);
+      expect(findText('10'), findsOneWidget);
       await tester.tap(_inc);
       await tester.pump();
-      expect(find.text('25'), findsOneWidget);
+      expect(findText('25'), findsOneWidget);
       await tester.tap(_inc);
       await tester.pump();
-      expect(find.text('30'), findsOneWidget);
+      expect(findText('30'), findsOneWidget);
       await tester.tap(_dec);
       await tester.pump();
-      expect(find.text('15'), findsOneWidget);
+      expect(findText('15'), findsOneWidget);
     });
 
     testWidgets('끝에서는 막힌 모습으로 눌러도 아무 일이 없고 초점은 남는다', (tester) async {
@@ -510,8 +511,8 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       // 지금 값 · min 만 — 9007199254740991 은 어디에도 없다
-      expect(find.text('9007199254740991'), findsNothing);
-      expect(find.text('0'), findsOneWidget); // 숨긴 자리 글(min)
+      expect(findText('9007199254740991'), findsNothing);
+      expect(findText('0'), findsOneWidget); // 숨긴 자리 글(min)
       final before = tester.getSize(_root).width;
       expect(before, lessThan(400));
     });
@@ -794,7 +795,7 @@ void main() {
         await tester.pump();
         expect(removed, 1);
         expect(seen, isEmpty, reason: '값은 바꾸지 않는다');
-        expect(find.text('1회'), findsOneWidget);
+        expect(findText('1회'), findsOneWidget);
 
         // 최소가 아니면 보통 줄이기
         await tester.tap(_inc);

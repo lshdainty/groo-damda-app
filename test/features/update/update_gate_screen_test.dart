@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
+import '../../support/plain_text.dart';
 
 class _FakeInstaller extends ApkInstaller {
   _FakeInstaller(this.progress);
@@ -128,7 +129,7 @@ void main() {
   ) async {
     final handle = tester.ensureSemantics();
     await _pump(tester, forced: true);
-    final title = find.text('새 버전 9.9.9이 나왔어요');
+    final title = findText('새 버전 9.9.9이 나왔어요');
     expect(title, findsOneWidget);
     expect(tester.getSemantics(title).hasFlag(SemanticsFlag.isHeader), isTrue);
     final style = tester.widget<Text>(title).style!;
@@ -183,7 +184,7 @@ void main() {
     final circle = tester.widget<PProgressCircle>(find.byType(PProgressCircle));
     expect(circle.size, PProgressCircleSize.s24);
     expect(circle.value, closeTo(37, 0.001));
-    expect(find.text('받는 중이에요'), findsOneWidget);
+    expect(findText('받는 중이에요'), findsOneWidget);
   });
 
   testWidgets('길이를 모르면 값 없는 원', (tester) async {

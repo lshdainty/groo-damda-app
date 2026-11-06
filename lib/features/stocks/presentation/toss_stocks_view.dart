@@ -2216,7 +2216,13 @@ class _OrderBookSkeleton extends StatelessWidget {
 
 typedef _Fill = ({String time, double p, int q, int dir});
 
-/// 라이브 체결 테이프 변환 (토스 trades). dir=직전 체결가 대비 방향. 웹 `liveTradeFills` 미러.
+/// 라이브 체결 테이프 변환 (토스 trades). dir=바로 앞(더 오래된) 체결가 대비 방향 — 보이는 12줄 밖의 체결도 견줄 대상이다.
+/// 받은 것 중 가장 오래된 줄은 견줄 체결이 없어 오름 · 내림 어느 쪽도 아니다(dir 0 → 중립 색). 웹 detail-parts `fills` 와 같다.
+@visibleForTesting
+List<({String time, double p, int q, int dir})> liveTradeFillsForTest(
+  List<TossTrade>? trades,
+) => _liveTradeFills(trades);
+
 List<_Fill> _liveTradeFills(List<TossTrade>? trades) {
   if (trades == null || trades.isEmpty) return const [];
   final out = <_Fill>[];
@@ -2224,13 +2230,17 @@ List<_Fill> _liveTradeFills(List<TossTrade>? trades) {
   for (var i = 0; i < n; i++) {
     final tr = trades[i];
     final p = tr.priceValue;
-    final prev = i + 1 < trades.length ? trades[i + 1].priceValue : p;
+    final prev = i + 1 < trades.length ? trades[i + 1].priceValue : null;
     final time = clock12Minutes(tr.timestamp);
     out.add((
       time: time,
       p: p,
       q: tr.volumeValue.round(),
-      dir: p >= prev ? 1 : -1,
+      dir: prev == null
+          ? 0
+          : p >= prev
+          ? 1
+          : -1,
     ));
   }
   return out;
@@ -2461,7 +2471,9 @@ class _TradeTape extends StatelessWidget {
                             softWrap: false,
                             textAlign: TextAlign.right,
                             style: priceStyle.copyWith(
-                              color: stocksRoleTrend(context, f.dir.toDouble()),
+                              color: f.dir == 0
+                                  ? context.colors.fgNeutral
+                                  : stocksRoleTrend(context, f.dir.toDouble()),
                             ),
                           ),
                         ),

@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/top_navigation/top_navigation_demo.dart
 
 import '../../support/design_spec.dart';
 import '../../support/spec_check.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('top-navigation');
 
@@ -342,7 +343,7 @@ void main() {
           // 글 버튼 — 높이 44 · 좌우 10 · 모서리 8 · t5 · 500
           final tb = _in('text', _textButtonBox);
           final tbRect = tester.getRect(tb);
-          final label = find.descendant(of: tb, matching: find.text('모두 읽음'));
+          final label = find.descendant(of: tb, matching: findText('모두 읽음'));
           final labelRect = tester.getRect(label);
           final labelText = tester.widget<Text>(label);
           k.px('textButton.height', tbRect.height);
@@ -750,7 +751,7 @@ void main() {
           closeTo(10 * expected, 1e-6),
           reason: '배율 $scale',
         );
-        final label = tester.widget<Text>(find.text('모두 읽음'));
+        final label = tester.widget<Text>(findText('모두 읽음'));
         expect(label.textScaler!.scale(10), closeTo(10 * expected, 1e-6));
         expect(
           tester.getRect(find.byKey(const ValueKey('top-navigation'))).height,

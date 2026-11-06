@@ -25,6 +25,7 @@ import 'package:groo_damda_app/features/notification/data/user_preferences_repos
 import 'package:groo_damda_app/features/settings/presentation/appearance_section.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
+import '../../support/plain_text.dart';
 
 /// 서버 대신 값을 들고 있는 가짜 — 무엇이 나갔는지까지 잡는다.
 class _FakePrefsRepo extends UserPreferencesRepository {
@@ -109,15 +110,21 @@ Future<_FakePrefsRepo> _pump(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (hang) {
+    // 받는 중이면 Skeleton 이 늘 돈다 — 가라앉기를 기다리지 않는다
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+  } else {
+    await tester.pumpAndSettle();
+  }
   return repo;
 }
 
 /// 줄을 눌러 고르기 시트를 열고 항목을 고른다 — 시트는 고르면 바로 닫힌다.
 Future<void> _choose(WidgetTester tester, String row, String option) async {
-  await tester.tap(find.text(row));
+  await tester.tap(findText(row));
   await tester.pumpAndSettle();
-  await tester.tap(find.text(option).last);
+  await tester.tap(findText(option).last);
   await tester.pumpAndSettle();
 }
 
@@ -131,13 +138,13 @@ void main() {
       {'defaultCurrency': 'USD'},
     ], reason: '기기에만 넣으면 폰을 바꾸는 순간 사라지고 새 자산·거래도 못 읽는다');
     // 줄 끝 값이 바로 바뀐다
-    expect(find.text('미국 달러'), findsOneWidget);
+    expect(findText('미국 달러'), findsOneWidget);
   });
 
   testWidgets('서버가 준 값으로 그린다', (tester) async {
     await _pump(tester, serverCurrency: 'EUR');
 
-    expect(find.text('유로'), findsOneWidget);
+    expect(findText('유로'), findsOneWidget);
   });
 
   testWidgets('같은 값을 다시 고르면 아무것도 안 보낸다', (tester) async {
@@ -152,20 +159,20 @@ void main() {
     final repo = await _pump(tester, hang: true);
 
     // 못 읽은 것을 원화로 그리지 않는다 — 값 자리는 Skeleton
-    expect(find.text('대한민국 원'), findsNothing);
-    await tester.tap(find.text('기본 통화'));
+    expect(findText('대한민국 원'), findsNothing);
+    await tester.tap(findText('기본 통화'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('미국 달러'), findsNothing);
+    expect(findText('미국 달러'), findsNothing);
     expect(repo.patches, isEmpty);
   });
 
   testWidgets('받기에 실패하면 설명 자리 안내 + [다시 시도]', (tester) async {
     await _pump(tester, fail: true);
 
-    expect(find.text('기본 통화를 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('기준 지역을 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('다시 시도'), findsNWidgets(2));
-    expect(find.text('대한민국 원'), findsNothing);
+    expect(findText('기본 통화를 불러오지 못했어요'), findsOneWidget);
+    expect(findText('기준 지역을 불러오지 못했어요'), findsOneWidget);
+    expect(findText('다시 시도'), findsNWidgets(2));
+    expect(findText('대한민국 원'), findsNothing);
   });
 
   testWidgets('기기에는 아무것도 안 남긴다', (tester) async {
@@ -183,7 +190,7 @@ void main() {
 
     final ys = [
       for (final t in ['테마', '언어', '기준 지역', '기본 통화'])
-        tester.getTopLeft(find.text(t).first).dy,
+        tester.getTopLeft(findText(t).first).dy,
     ];
     expect(ys, [...ys]..sort());
     expect(find.byIcon(LucideIcons.chevronRight), findsNothing);
@@ -192,7 +199,7 @@ void main() {
   testWidgets('끝 흐림은 지역 고르기(18개)만 켠다 — 위 20 · 아래 80', (tester) async {
     await _pump(tester);
 
-    await tester.tap(find.text('기준 지역'));
+    await tester.tap(findText('기준 지역'));
     await tester.pumpAndSettle();
     final fog = tester.widget<PScrollFogMask>(find.byType(PScrollFogMask));
     expect(fog.start, 20);
@@ -201,7 +208,7 @@ void main() {
     // 테마 · 통화 고르기는 줄이 적어 흐림을 끈다
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('기본 통화'));
+    await tester.tap(findText('기본 통화'));
     await tester.pumpAndSettle();
     expect(find.byType(PScrollFogMask), findsNothing);
   });

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/core/lock/app_lock_gate.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../support/plain_text.dart';
 
 class _FakeAuth extends AppLockAuth {
   _FakeAuth() : super(LocalAuthentication());
@@ -302,7 +303,7 @@ void main() {
         api,
         action: PSnackbarAction(label: '되돌리기', onPressed: () {}),
       );
-      await tester.tap(find.text('위'));
+      await tester.tap(findText('위'));
       expect(topTaps, 1);
       // 띠 왼쪽 바깥 여백(좌 8 안, x=3) 은 아래 버튼으로 간다
       await tester.tapAt(Offset(3, tester.getRect(_band).center.dy));
@@ -342,7 +343,7 @@ void main() {
       await tester.tap(_action);
       await tester.pump();
       expect(undone, 1);
-      expect(find.text('대화상자'), findsOneWidget);
+      expect(findText('대화상자'), findsOneWidget);
     });
 
     testWidgets('잠금 화면 아래 — 잠겨 있으면 띠가 가려지고 눌리지 않는다', (tester) async {
@@ -369,7 +370,7 @@ void main() {
         home: const Scaffold(body: Center(child: Text('화면 글'))),
       );
       await _show(tester, api);
-      final screen = tester.getSemantics(find.text('화면 글'));
+      final screen = tester.getSemantics(findText('화면 글'));
       final band = tester.getSemantics(
         find.byKey(const ValueKey('snackbar-message')),
       );
@@ -385,7 +386,7 @@ void main() {
       expect(live, isTrue);
       // 순서 — 화면 글의 정렬 키가 띠보다 앞이다(띠가 호스트 Stack 의 뒤 자식)
       expect(
-        tester.getRect(find.text('화면 글')).top,
+        tester.getRect(findText('화면 글')).top,
         lessThan(tester.getRect(_band).top),
       );
       expect(screen.id, isNot(band.id));

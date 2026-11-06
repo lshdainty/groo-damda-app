@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import '../../support/plain_text.dart';
 
 final _cats = <ExpenseCategory>[
   const ExpenseCategory(
@@ -90,14 +91,15 @@ void main() {
     ]);
     expect(_headerAdd, findsOneWidget);
     expect(
-      find.descendant(of: _headerAdd, matching: find.text('추가')),
+      find.descendant(of: _headerAdd, matching: findText('추가')),
       findsOneWidget,
     );
     final header = find.byType(PListHeader);
     expect(header, findsOneWidget);
     final title = find.byKey(const ValueKey('plist-header-title'));
     expect(
-      tester.widget<Text>(title).data!.replaceAll('\u2060', ''),
+      // 목록 제목은 Text.rich 다(075866bc)
+      plainOf(tester.widget<Text>(title).textSpan!.toPlainText()),
       '지출 카테고리 2개',
     );
     final toggle = find.descendant(
@@ -105,7 +107,7 @@ void main() {
       matching: find.byType(PTextButton),
     );
     expect(
-      find.descendant(of: toggle, matching: find.text('순서 바꾸기')),
+      find.descendant(of: toggle, matching: findText('순서 바꾸기')),
       findsOneWidget,
     );
     // 제목 줄 오른쪽 끝 — 제목은 왼쪽, 버튼은 오른쪽
@@ -117,7 +119,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(PTopNavigation),
-        matching: find.text('순서 바꾸기'),
+        matching: findText('순서 바꾸기'),
       ),
       findsNothing,
     );
@@ -125,11 +127,11 @@ void main() {
     await tester.tap(toggle);
     await tester.pumpAndSettle();
     expect(
-      find.descendant(of: header, matching: find.text('완료')),
+      find.descendant(of: header, matching: findText('완료')),
       findsOneWidget,
     );
     expect(
-      find.textContaining(keepAll('손잡이를 끌어')),
+      findTextContaining(keepAll('손잡이를 끌어')),
       findsOneWidget,
       reason: '편집 모드 안내 줄',
     );
@@ -138,7 +140,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(
-      find.descendant(of: header, matching: find.text('순서 바꾸기')),
+      find.descendant(of: header, matching: findText('순서 바꾸기')),
       findsOneWidget,
     );
   });
@@ -163,7 +165,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(PListHeader), findsNothing);
-    expect(find.textContaining('0개'), findsNothing);
+    expect(findTextContaining('0개'), findsNothing);
   });
 
   testWidgets('카테고리 — 조회 실패에서도 "0개" 를 그리지 않는다', (tester) async {
@@ -171,7 +173,7 @@ void main() {
       categoriesProvider.overrideWith((ref) async => throw Exception('x')),
     ]);
     expect(find.byType(PListHeader), findsNothing);
-    expect(find.textContaining('0개'), findsNothing);
+    expect(findTextContaining('0개'), findsNothing);
   });
 
   testWidgets('반복 거래 — 머리 "추가" 는 목록이 있을 때만', (tester) async {
@@ -191,7 +193,7 @@ void main() {
     ]);
     expect(_headerAdd, findsOneWidget);
     expect(
-      find.descendant(of: _headerAdd, matching: find.text('추가')),
+      find.descendant(of: _headerAdd, matching: findText('추가')),
       findsOneWidget,
     );
   });
@@ -229,7 +231,7 @@ void main() {
     ]);
     expect(_headerAdd, findsOneWidget);
     expect(
-      find.descendant(of: _headerAdd, matching: find.text('추가')),
+      find.descendant(of: _headerAdd, matching: findText('추가')),
       findsOneWidget,
     );
   });

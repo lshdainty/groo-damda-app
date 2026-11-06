@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/catalog/ds_catalog_screen.dart';
 import 'package:groo_damda_app/shared/ds/catalog/ds_registry.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   testWidgets('앱 카탈로그는 58개를 싣고 라이트 · 다크 판을 그린다', (tester) async {
@@ -23,11 +24,11 @@ void main() {
     );
 
     final built = entries.where((e) => e.demo != null).length;
-    expect(find.textContaining('확정 스펙 58개 중 $built개'), findsOneWidget);
-    expect(find.textContaining(PDesignSource.sha256), findsOneWidget);
+    expect(findTextContaining('확정 스펙 58개 중 $built개'), findsOneWidget);
+    expect(findTextContaining(PDesignSource.sha256), findsOneWidget);
     // 역할 색 판 — 라이트 · 다크 하나씩
-    expect(find.text('라이트'), findsWidgets);
-    expect(find.text('다크'), findsWidgets);
+    expect(findText('라이트'), findsWidgets);
+    expect(findText('다크'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -36,10 +37,10 @@ void main() {
       MaterialApp(theme: GrooTheme.light(), home: const DsCatalogScreen()),
     );
 
-    final darkLabel = find.text('다크').first;
+    final darkLabel = findText('다크').first;
     final ctx = tester.element(darkLabel);
     expect(ctx.colors.bgLayerDefault, PColors.dark.bgLayerDefault);
-    final lightCtx = tester.element(find.text('라이트').first);
+    final lightCtx = tester.element(findText('라이트').first);
     expect(lightCtx.colors.bgLayerDefault, PColors.light.bgLayerDefault);
   });
 

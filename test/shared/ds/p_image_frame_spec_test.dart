@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 
 import '../../support/design_spec.dart';
 import '../../support/fake_image.dart';
+import '../../support/plain_text.dart';
 
 final _frame = DesignSpec.load('image-frame');
 final _card = DesignSpec.load('card-art');
@@ -581,7 +582,7 @@ void main() {
             (box.borderRadius as BorderRadius).topLeft.x,
             (want['indicator.radius'] as num).toDouble(),
           );
-          final text = tester.widget<Text>(find.text('1 / 12'));
+          final text = tester.widget<Text>(findText('1 / 12'));
           final typo = want['indicator.typography'] as Map;
           expect(text.style!.fontSize, (typo['fontSize'] as num).toDouble());
           expect(

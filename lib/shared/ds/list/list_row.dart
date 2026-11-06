@@ -98,8 +98,15 @@ const double kPListStackBelowEm = 16;
 /// 금액처럼 위젯으로 만든 값 — 뒤 붙이개 자리에 두면 줄이 "값" 으로 읽는다. 줄 안 폭이 좁으면([kPListStackBelowEm])
 /// 글 값과 함께 본문 아래로 내려가고, 화살표 · 스위치 · 체크 · 작은 버튼 같은 조작 요소는 줄 끝에 남는다.
 /// 금액 글은 [keepAllAmount] 로 만든다(쉼표 뒤에서만 줄을 바꾼다).
+///
+/// [mergeSemantics] — 값은 본문과 한 이름으로 읽힌다(03-D 결정 4 A). 값 안에 따로 누르는 조각이 있으면(일정 폼 시작 · 종료의
+/// 날짜 · 시각 조각) false 로 둔다 — 그 줄은 본문 · 조각이 각자 노드가 되어 보조 기술로 조각을 따로 누를 수 있다. 배치는 같다.
 class PListValue extends StatelessWidget {
-  const PListValue({super.key, required this.child});
+  const PListValue({
+    super.key,
+    required this.child,
+    this.mergeSemantics = true,
+  });
 
   /// 금액 글 — 보이는 글에는 쉼표 뒤에서만 줄이 바뀌는 [keepAllAmount], 읽는 이름은 원래 글이다. 목록 금액은 이 길로 만든다
   /// (웹 `list.tsx` 가 붙이개 글에 `withCommaBreaks` 를 스스로 거는 것과 같다).
@@ -114,6 +121,7 @@ class PListValue extends StatelessWidget {
       );
 
   final Widget child;
+  final bool mergeSemantics;
 
   @override
   Widget build(BuildContext context) => child;
@@ -148,7 +156,11 @@ const double kPListExpandSlotHeight = PTouch.min - 2 * PSpacing.x0_5;
 Widget alignListValueStart(Widget w) {
   bool isEnd(TextAlign? a) => a == TextAlign.end || a == TextAlign.right;
   if (w is PListValue) {
-    return PListValue(key: w.key, child: alignListValueStart(w.child));
+    return PListValue(
+      key: w.key,
+      mergeSemantics: w.mergeSemantics,
+      child: alignListValueStart(w.child),
+    );
   }
   if (w is Text && isEnd(w.textAlign)) {
     final span = w.textSpan;
@@ -636,7 +648,11 @@ class _PListRowFrameState extends State<PListRowFrame> {
     final suffix = widget.suffix;
     if (suffix == null) return buildBodyNode();
     final parts = splitListSuffix(suffix);
-    final merge = mergeValue && parts.values.isNotEmpty;
+    // 값 안에 따로 누르는 조각이 있으면 합치지 않는다 — 합치면 조각이 줄 이름 속으로 들어가 따로 누를 수 없다
+    final merge =
+        mergeValue &&
+        parts.values.isNotEmpty &&
+        parts.values.every((v) => v is! PListValue || v.mergeSemantics);
     final bodyNode = buildBodyNode(container: !merge);
     // 글 값 · 금액 값(PListValue)은 본문 최소 폭만 남기고 줄을 바꾼다 — 금액은 쉼표 뒤에서만(03-D 결정 2 B, keepAllAmount 의 U+200B).
     // (값 + 화살표를 PListSuffix 로 넘긴 줄도 값이 있으면 같은 제한을 받는다 — 화살표는 제한 밖이다)

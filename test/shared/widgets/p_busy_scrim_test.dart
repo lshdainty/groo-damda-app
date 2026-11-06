@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
+import '../../support/plain_text.dart';
 
 List<String> _labels(WidgetTester t) => [
   for (final n in t.semantics.simulatedAccessibilityTraversal()) n.label,
@@ -44,11 +45,11 @@ void main() {
 
   testWidgets('1초 전에는 원이 없고 손은 막힌다', (tester) async {
     await pump(tester);
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 999));
     expect(find.byType(PProgressCircle), findsNothing);
-    await tester.tap(find.text('뒤 화면 버튼'), warnIfMissed: false);
+    await tester.tap(findText('뒤 화면 버튼'), warnIfMissed: false);
     expect(taps, 0, reason: '처음부터 손을 막는다');
     handle.hide();
     await tester.pump();
@@ -60,7 +61,7 @@ void main() {
     ) async {
       final sem = tester.ensureSemantics();
       await pump(tester, dark: dark);
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       await tester.pump();

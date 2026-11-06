@@ -14,6 +14,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import '../support/plain_text.dart';
 
 const _footerKey = ValueKey('sheet-footer-row');
 const _bodyKey = ValueKey('sheet-body');
@@ -65,7 +66,7 @@ Future<void> _openSheet(WidgetTester tester, {bool shrinkWrap = false}) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -85,7 +86,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final toast = tester.getRect(
-      _inSheet(find.text('미리 낸 돈 중 5,000원이 계좌로 돌아왔어요')),
+      _inSheet(findText('미리 낸 돈 중 5,000원이 계좌로 돌아왔어요')),
     );
     final footer = tester.getRect(find.byKey(_footerKey));
     expect(
@@ -95,7 +96,7 @@ void main() {
     );
 
     // 토스트가 떠 있어도 [삭제] 가 눌린다 — 가려져 있으면 토스트가 탭을 먹는다.
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pump();
     expect(_deleteTaps, 1);
 

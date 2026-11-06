@@ -1,11 +1,9 @@
 // 할 일 화면 시험이 함께 쓰는 하네스 — 실제 글꼴, 가짜 레포지토리, 이번 달 기준 지어낸 데이터.
 // 고정한 오늘은 쓰지 않는다 — 날짜는 오늘 기준 상대(이번 달 안)로 만든다(고정한 오늘 + 벽시계 = 시한폭탄).
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -21,15 +19,7 @@ import 'package:groo_damda_app/features/todo/domain/todo_tag.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
-/// 실제 글꼴(Pretendard) — 시험 기본 글꼴(Ahem)은 글자마다 폭이 같아 줄바꿈 · 폭 시험이 틀어진다.
-Future<void> loadRealFonts() async {
-  final bytes = File('assets/fonts/PretendardVariable.ttf').readAsBytesSync();
-  for (final family in ['Pretendard', 'FlutterTest']) {
-    final loader = FontLoader(family)
-      ..addFont(Future.value(ByteData.view(bytes.buffer)));
-    await loader.load();
-  }
-}
+export '../../support/real_fonts.dart' show loadRealFonts;
 
 String ymd(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-'

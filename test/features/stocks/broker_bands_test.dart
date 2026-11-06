@@ -14,6 +14,8 @@ import 'package:groo_damda_app/features/stocks/presentation/stocks_broker_parts.
 import 'package:groo_damda_app/features/stocks/presentation/stocks_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/plain_text.dart';
+import '../../support/real_fonts.dart';
 
 Future<void> _pump(
   WidgetTester tester,
@@ -51,6 +53,9 @@ Finder _t(String s) =>
     find.byWidgetPredicate((w) => w is Text && _plain(w) == s);
 
 void main() {
+  // 200% 넘침 · "이름 값" 한 줄은 실제 글꼴로 잰다(T5)
+  setUpAll(loadRealFonts);
+
   group('호가 · 체결 줄은 큰 글자에서 글자를 따라 늘어난다(앱 검수)', () {
     final book = TossOrderbook(
       currency: 'KRW',
@@ -177,17 +182,17 @@ void main() {
         await tester.tap(_t('체결').first);
         await tester.pump();
         expect(tester.takeException(), isNull);
-        final price = tester.getRect(find.textContaining('1,234,000원').first);
+        final price = tester.getRect(findTextContaining('1,234,000원').first);
         expect(
           price.right,
           lessThanOrEqualTo(320),
           reason: '체결 가격 끝이 화면 밖으로 잘렸다',
         );
         final fm = tester.renderObject<RenderBox>(
-          find.textContaining('1,234,000원').first,
+          findTextContaining('1,234,000원').first,
         );
         expect(fm.size.width, greaterThanOrEqualTo(price.width - 0.5));
-        final second = tester.getRect(find.textContaining('1,234,100원').first);
+        final second = tester.getRect(findTextContaining('1,234,100원').first);
         expect(
           second.top,
           greaterThanOrEqualTo(price.bottom - 1),
@@ -318,9 +323,9 @@ void main() {
       expect(_t('10월 29일'), findsOneWidget);
       expect(_t('—'), findsOneWidget, reason: '당일 잠정 개인은 null');
       expect(_t('0'), findsOneWidget);
-      expect(find.textContaining('-'), findsNothing, reason: '음수에도 부호를 쓰지 않는다');
-      expect(find.textContaining('4,321,000'), findsOneWidget);
-      expect(find.textContaining('987,654'), findsOneWidget);
+      expect(findTextContaining('-'), findsNothing, reason: '음수에도 부호를 쓰지 않는다');
+      expect(findTextContaining('4,321,000'), findsOneWidget);
+      expect(findTextContaining('987,654'), findsOneWidget);
     });
 
     testWidgets('M12 머리 제목과 단위 글은 좁은 폭 · 글자 200% 에서 줄을 나눠 쌓고 넘치지 않는다', (
@@ -418,7 +423,7 @@ void main() {
         await tester.pump();
         expect(tester.takeException(), isNull);
         for (final label in ['Individual', 'Foreign', 'Institution']) {
-          final f = find.text(label);
+          final f = findText(label);
           expect(f, findsOneWidget, reason: '$label 이 한 낱말로 남아 있어야 한다');
           expect(
             tester.getRect(f).height,
@@ -459,7 +464,7 @@ void main() {
         for (var i = 0; i < 3; i++)
           (
             tester.getRect(_t(labels[i])),
-            tester.getRect(find.textContaining(values[i])),
+            tester.getRect(findTextContaining(values[i])),
           ),
       ];
     }
@@ -501,7 +506,7 @@ void main() {
 
     testWidgets('"—" · "0" 줄은 값 칸 오른쪽 끝에 붙어 숫자 끝과 나란하다(웹과 같다)', (tester) async {
       await pumpNullZero(tester, 360);
-      final number = tester.getRect(find.textContaining('12,345,678'));
+      final number = tester.getRect(findTextContaining('12,345,678'));
       final dash = tester.getRect(_t('—'));
       final zero = tester.getRect(_t('0'));
       expect(dash.right, closeTo(number.right, 1.5), reason: '"—" 이 이름 옆에 붙었다');

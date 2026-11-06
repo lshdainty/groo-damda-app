@@ -127,7 +127,7 @@ Future<void> _host(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -498,7 +498,7 @@ void main() {
         final h = tester.getSize(boxes.first).height;
         expect(h, lessThan(22 + 24 + 4 + 28));
         final invest = tester.getRect(boxes.at(8)); // 투자(마지막 묶음의 끝)
-        final next = tester.getRect(find.text(l.actionNext));
+        final next = tester.getRect(findText(l.actionNext));
         expect(invest.bottom, lessThanOrEqualTo(next.top));
         final sheet = tester.getRect(
           find.byKey(const ValueKey('p-bottom-sheet-root')),

@@ -96,7 +96,7 @@ class _NoAuth extends AuthNotifier {
 /// 가른다(액션은 PButton 이 아니다).
 Finder _button(String label) => find
     .ancestor(
-      of: find.text(label),
+      of: findText(label),
       matching: find.byWidgetPredicate((w) => w is PButton || w is dsb.PButton),
     )
     .last;
@@ -189,7 +189,7 @@ void main() {
       // 행을 밀어 삭제 액션을 꺼낸다 → 확인 다이얼로그.
       await tester.drag(findPlain('옛이름').first, const Offset(-250, 0));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(l.actionDelete).first);
+      await tester.tap(findText(l.actionDelete).first);
       await tester.pumpAndSettle();
       await tester.tap(_button(l.actionDelete));
       await tester.pumpAndSettle();

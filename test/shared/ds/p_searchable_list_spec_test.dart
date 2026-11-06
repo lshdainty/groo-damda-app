@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/searchable_list/searchable_list_demo.da
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('searchable-list');
 
@@ -998,8 +999,8 @@ void main() {
           ),
         ),
       );
-      expect(find.text(keepAll("'나루로리롱'에 대한 검색 결과가 없어요")), findsOneWidget);
-      expect(find.text(keepAll('카드사 이름으로도 찾아보세요.')), findsOneWidget);
+      expect(findText(keepAll("'나루로리롱'에 대한 검색 결과가 없어요")), findsOneWidget);
+      expect(findText(keepAll('카드사 이름으로도 찾아보세요.')), findsOneWidget);
       final live = find.byWidgetPredicate(
         (w) => w is Semantics && w.properties.liveRegion == true,
       );
@@ -1021,7 +1022,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text(keepAll('검색 결과가 없어요')), findsOneWidget);
+      expect(findText(keepAll('검색 결과가 없어요')), findsOneWidget);
       // 결과가 있을 때는 알림 자리가 없다
       await tester.pumpWidget(
         _host(
@@ -1062,9 +1063,9 @@ void main() {
       );
       await tester.pumpWidget(error());
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text(keepAll('검색 결과를 불러오지 못했어요')), findsOneWidget);
-      expect(find.text(keepAll('검색 결과가 없어요')), findsNothing);
-      await tester.tap(find.text('다시 시도'));
+      expect(findText(keepAll('검색 결과를 불러오지 못했어요')), findsOneWidget);
+      expect(findText(keepAll('검색 결과가 없어요')), findsNothing);
+      await tester.tap(findText('다시 시도'));
       await tester.pump();
       expect(retries, 1);
       await tester.pumpWidget(error(retrying: true));

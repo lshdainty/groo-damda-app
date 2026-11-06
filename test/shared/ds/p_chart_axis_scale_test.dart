@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(double scale, {int months = 12}) => MaterialApp(
   theme: GrooTheme.light(),
@@ -86,7 +87,7 @@ void main() {
   testWidgets('200% — 눈금 글이 온전하다("1,500억" 이 그대로 그려진다)', (tester) async {
     await tester.pumpWidget(_host(2));
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('1,500억'), findsOneWidget);
+    expect(findText('1,500억'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -95,7 +96,7 @@ void main() {
   ) async {
     await tester.pumpWidget(_host(1));
     await tester.pump(const Duration(seconds: 1));
-    final labels = find.textContaining(RegExp(r'^\d\d월$'));
+    final labels = findTextContaining(RegExp(r'^\d\d월$'));
     final rects = [
       for (final e in labels.evaluate())
         tester.getRect(find.byWidget(e.widget)),

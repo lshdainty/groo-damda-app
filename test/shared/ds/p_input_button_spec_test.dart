@@ -93,7 +93,7 @@ class _Check {
 }
 
 TextStyle _textStyle(WidgetTester tester, Finder within, String text) => tester
-    .widget<Text>(find.descendant(of: within, matching: find.text(text)))
+    .widget<Text>(find.descendant(of: within, matching: findText(text)))
     .style!;
 
 Icon _icon(WidgetTester tester, Finder within, IconData data) => tester
@@ -721,7 +721,7 @@ void main() {
       final text = tester.widget<Text>(
         find.descendant(
           of: find.byType(PInputButton),
-          matching: find.textContaining('가나다라'),
+          matching: findTextContaining('가나다라'),
         ),
       );
       expect(text.maxLines, 1);

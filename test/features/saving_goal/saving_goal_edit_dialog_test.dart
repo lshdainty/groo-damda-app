@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/saving_goal/domain/saving_goal.dart';
 import 'package:groo_damda_app/features/saving_goal/presentation/saving_goal_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../support/plain_text.dart';
 
 const _existing = SavingGoal(
   rowId: 1,
@@ -133,7 +134,7 @@ Future<_FakeRepo> _open(
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }

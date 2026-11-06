@@ -20,6 +20,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import '../../support/plain_text.dart';
 
 class _FakeRepo extends NotificationRepository {
   _FakeRepo(this.deleted, {this.fail = false}) : super(Dio());
@@ -128,7 +129,7 @@ void main() {
     );
     await tester.tapAt(box.topCenter - const Offset(0, 5));
     await tester.pumpAndSettle();
-    expect(find.text(keepAll('삭제')), findsOneWidget, reason: '넓힌 영역에서 메뉴가 열린다');
+    expect(findText(keepAll('삭제')), findsOneWidget, reason: '넓힌 영역에서 메뉴가 열린다');
     handle.dispose();
     // ⋮ 는 읽음 처리 InkWell 안에 들어 있지 않다
     expect(
@@ -149,18 +150,18 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('noti-more-2')));
     await tester.pumpAndSettle();
     // 시트: 제목 + 삭제 한 줄
-    expect(find.text(keepAll('할 일 알림')), findsWidgets);
-    expect(find.text(keepAll('삭제')), findsOneWidget);
-    await tester.tap(find.text(keepAll('삭제')));
+    expect(findText(keepAll('할 일 알림')), findsWidgets);
+    expect(findText(keepAll('삭제')), findsOneWidget);
+    await tester.tap(findText(keepAll('삭제')));
     await tester.pumpAndSettle();
     // 시트는 닫히고 확인창이 뜬다
-    expect(find.text(keepAll('알림 삭제')), findsOneWidget);
-    expect(find.text(keepAll('삭제한 알림은 되돌릴 수 없어요.')), findsOneWidget);
-    expect(find.text('취소'), findsOneWidget);
+    expect(findText(keepAll('알림 삭제')), findsOneWidget);
+    expect(findText(keepAll('삭제한 알림은 되돌릴 수 없어요.')), findsOneWidget);
+    expect(findText('취소'), findsOneWidget);
     expect(deleted, isEmpty, reason: '확인 전에는 지우지 않는다');
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
-    expect(find.text(keepAll('알림 삭제')), findsNothing);
+    expect(findText(keepAll('알림 삭제')), findsNothing);
     expect(deleted, isEmpty);
   });
 
@@ -169,13 +170,13 @@ void main() {
     await _pump(tester, deleted);
     await tester.tap(find.byKey(const ValueKey('noti-more-1')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(keepAll('삭제')));
+    await tester.tap(findText(keepAll('삭제')));
     await tester.pumpAndSettle();
     // 확인창의 삭제 버튼(시트의 삭제 줄은 이미 닫혔다)
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     expect(deleted, [1]);
-    expect(find.text(keepAll('알림 삭제')), findsNothing);
+    expect(findText(keepAll('알림 삭제')), findsNothing);
   });
 
   testWidgets('가장 나쁜 값 — 글자 200% · 긴 제목에서도 넘치지 않고 ⋮ 가 화면 안에 든다', (
@@ -195,15 +196,15 @@ void main() {
     await _pump(tester, deleted, fail: true);
     await tester.tap(find.byKey(const ValueKey('noti-more-1')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(keepAll('삭제')));
+    await tester.tap(findText(keepAll('삭제')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
     expect(tester.takeException(), isNull);
     expect(deleted, isEmpty);
-    expect(find.text(keepAll('알림 삭제')), findsNothing, reason: '확인창은 닫힌다');
-    expect(find.textContaining('알림을 삭제하지 못했어요.'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(findText(keepAll('알림 삭제')), findsNothing, reason: '확인창은 닫힌다');
+    expect(findTextContaining('알림을 삭제하지 못했어요.'), findsOneWidget);
+    expect(findText('다시 시도'), findsOneWidget);
   });
 }

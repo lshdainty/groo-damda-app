@@ -12,6 +12,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/plain_text.dart';
 
 const _place = '서울특별시 강남구 테헤란로 427 위워크타워 12층 대회의실 B';
 const _noSpace = '서울특별시강남구테헤란로427위워크타워12층대회의실B동편엘리베이터앞';
@@ -120,7 +121,7 @@ void main() {
             lessThan(PTypography.t5.height! * 16 * scale * 1.5 + 2),
             reason: '제목 한 줄 · 값 $value',
           );
-          final valueRect = tester.getRect(find.textContaining('서울').first);
+          final valueRect = tester.getRect(findTextContaining('서울').first);
           expect(valueRect.right, lessThanOrEqualTo(row.right + 0.5));
           if (scale > 1) {
             // 200% — 줄 안 폭이 16em 보다 좁아 값이 제목 아래로 간다(규칙 그대로)
@@ -151,7 +152,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    final value = tester.getRect(find.textContaining('서울'));
+    final value = tester.getRect(findTextContaining('서울'));
     expect(value.height, greaterThan(40), reason: '남은 폭에서 줄을 바꾼다');
   });
 
@@ -271,8 +272,8 @@ void main() {
       ),
     );
     final title = tester.getRect(_key('plist-title'));
-    final amount = tester.getRect(find.text('-1,234,567원'));
-    final badge = tester.getRect(find.text('총액 제외'));
+    final amount = tester.getRect(findText('-1,234,567원'));
+    final badge = tester.getRect(findText('총액 제외'));
     expect(amount.left, closeTo(title.left, 0.5));
     expect(badge.left, closeTo(title.left, 0.5));
     expect(amount.top, greaterThanOrEqualTo(title.bottom - 0.5));

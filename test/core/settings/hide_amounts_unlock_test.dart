@@ -98,7 +98,7 @@ void main() {
       final auth = _FakeAuth(AppLockAuthResult.success);
       final container = await pumpUnlocker(tester, auth: auth, appLock: true);
 
-      await tester.tap(find.text('풀기'));
+      await tester.tap(findText('풀기'));
       await tester.pumpAndSettle();
 
       expect(auth.calls, 1);
@@ -115,7 +115,7 @@ void main() {
       final auth = _FakeAuth(AppLockAuthResult.failure);
       final container = await pumpUnlocker(tester, auth: auth, appLock: true);
 
-      await tester.tap(find.text('풀기'));
+      await tester.tap(findText('풀기'));
       await tester.pumpAndSettle();
 
       expect(auth.calls, 1);
@@ -133,7 +133,7 @@ void main() {
       final auth = _FakeAuth(AppLockAuthResult.unavailable);
       await pumpUnlocker(tester, auth: auth, appLock: true);
 
-      await tester.tap(find.text('풀기'));
+      await tester.tap(findText('풀기'));
       await tester.pumpAndSettle();
 
       expect(auth.calls, 1);
@@ -144,7 +144,7 @@ void main() {
       final auth = _FakeAuth(AppLockAuthResult.success);
       await pumpUnlocker(tester, auth: auth, appLock: false);
 
-      await tester.tap(find.text('풀기'));
+      await tester.tap(findText('풀기'));
       await tester.pumpAndSettle();
 
       // 켠 적 없는 사람에게 Face ID 를 들이밀지 않는다.
@@ -193,7 +193,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('가리기'));
+      await tester.tap(findText('가리기'));
       await tester.pumpAndSettle();
 
       expect(auth.calls, 0);

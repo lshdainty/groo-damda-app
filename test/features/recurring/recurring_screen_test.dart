@@ -1,9 +1,11 @@
 // 반복 거래 관리(I-20 D 21 ~ 25) — 목록 · 상세 · 일시정지 · 삭제.
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/core/network/api_exception.dart';
+import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/data/recurring_repository.dart';
@@ -12,6 +14,7 @@ import 'package:groo_damda_app/features/recurring/presentation/recurring_screen.
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
 import 'recurring_test_support.dart';
+import '../../support/plain_text.dart';
 
 class _Repo extends RecurringRepository {
   _Repo(this.items, {this.fail = false}) : super(Dio());
@@ -79,9 +82,14 @@ void main() {
 
   testWidgets('줄 설명 — 켜짐 "다음 …" · 쉬는 중 "쉬는 중 · …" + Badge', (tester) async {
     await _pump(tester, items);
-    expect(plainStarts('다음 11월 25일'), findsOneWidget);
+    // 시험 데이터의 다음 날은 둘 다 11월 25일이다 — 주기까지 본다
+    expect(plain('다음 11월 25일 · 매월 25일'), findsOneWidget);
     expect(plainStarts('쉬는 중 · 매월 10일'), findsOneWidget);
-    expect(plain('일시정지'), findsOneWidget); // 쉬는 줄 Badge
+    // 쉬는 줄 Badge — 줄 뒤 밀기 트레이에도 "일시정지" 동작 글이 있어 Badge 로 센다
+    expect(
+      find.byWidgetPredicate((w) => w is PBadge && w.label == '일시정지'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('줄 끝 ⋮ 가 없다 — 줄 누름 = 상세', (tester) async {
@@ -96,8 +104,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(plain('반복 거래 상세'), findsOneWidget);
     expect(find.byIcon(LucideIcons.ellipsisVertical), findsOneWidget);
-    expect(plain('수정'), findsOneWidget);
-    expect(plain('삭제'), findsNothing);
+    // 목록 줄 뒤의 밀기 트레이에도 "수정" · "삭제" 가 늘 그려져 있다 — 상세 바닥 안에서만 센다
+    final footer = find.byKey(const ValueKey('p-bottom-sheet-footer'));
+    expect(find.descendant(of: footer, matching: plain('수정')), findsOneWidget);
+    expect(find.descendant(of: footer, matching: plain('삭제')), findsNothing);
     expect(plainStarts('매월 25일, 끝나는 날 없이 반복해요.'), findsOneWidget);
   });
 
@@ -141,9 +151,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(plain('삭제').last);
     await tester.pumpAndSettle();
-    expect(plain('반복 설정을 삭제하지 못했어요'), findsOneWidget);
+    expect(plain('반복 설정을 삭제하지 못했어요.'), findsOneWidget);
     expect(plain('다시 시도'), findsOneWidget);
-    expect(find.text('이자는 금액보다 클 수 없습니다.'), findsNothing);
+    expect(findText('이자는 금액보다 클 수 없습니다.'), findsNothing);
   });
 
   testWidgets('비면 Result Section — 머리 "추가" 는 없고 본문 버튼이 하나', (tester) async {

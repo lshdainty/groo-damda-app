@@ -10,6 +10,7 @@ import 'package:groo_damda_app/core/lock/app_lock_gate.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/storage/prefs_provider.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 /// OS 프롬프트 없이 정해진 결과만 돌려주는 가짜 인증.
 ///
@@ -156,8 +157,8 @@ void main() {
       final container = await pumpGate(tester, auth);
 
       expect(container.read(appLockedProvider), true);
-      expect(find.text('앱 잠금'), findsOneWidget);
-      expect(find.text('잠금 해제'), findsOneWidget);
+      expect(findText('앱 잠금'), findsOneWidget);
+      expect(findText('잠금 해제'), findsOneWidget);
       expect(auth.calls, 1); // 마운트 시 자동 프롬프트 1회
     });
 
@@ -167,10 +168,10 @@ void main() {
       await pumpGate(tester, auth);
       expect(auth.calls, 1);
 
-      await tester.tap(find.text('잠금 해제'));
+      await tester.tap(findText('잠금 해제'));
       await tester.pumpAndSettle();
       expect(auth.calls, 2);
-      expect(find.text('앱 잠금'), findsOneWidget); // 실패라 여전히 잠김
+      expect(findText('앱 잠금'), findsOneWidget); // 실패라 여전히 잠김
     });
 
     testWidgets('자동 프롬프트가 성공하면 잠금 화면이 걷힌다', (tester) async {
@@ -180,8 +181,8 @@ void main() {
 
       expect(auth.calls, 1);
       expect(container.read(appLockedProvider), false);
-      expect(find.text('앱 잠금'), findsNothing);
-      expect(find.text('콘텐츠'), findsOneWidget);
+      expect(findText('앱 잠금'), findsNothing);
+      expect(findText('콘텐츠'), findsOneWidget);
     });
 
     testWidgets('인증 수단이 사라진 기기는 가두지 않는다 — unavailable 이면 열어 준다', (
@@ -192,7 +193,7 @@ void main() {
       final container = await pumpGate(tester, auth);
 
       expect(container.read(appLockedProvider), false);
-      expect(find.text('앱 잠금'), findsNothing);
+      expect(findText('앱 잠금'), findsNothing);
     });
 
     testWidgets('설정이 꺼져 있으면 프롬프트 없이 콘텐츠가 보인다', (tester) async {
@@ -200,8 +201,8 @@ void main() {
       final auth = _FakeAuth(AppLockAuthResult.success);
       await pumpGate(tester, auth);
 
-      expect(find.text('콘텐츠'), findsOneWidget);
-      expect(find.text('앱 잠금'), findsNothing);
+      expect(findText('콘텐츠'), findsOneWidget);
+      expect(findText('앱 잠금'), findsNothing);
       expect(auth.calls, 0);
     });
   });

@@ -175,7 +175,7 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       final name = tester.getRect(findPlain(longName));
-      final status = tester.getRect(find.textContaining('초과'));
+      final status = tester.getRect(findTextContaining('초과'));
       expect(name.left, 0);
       expect(status.left, greaterThan(name.right - 1), reason: '같은 줄 — 이름 오른쪽');
       expect(status.right, closeTo(360, 1), reason: '오른쪽 끝');
@@ -190,7 +190,7 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       final name = tester.getRect(findPlain('전체 예산'));
-      final status = tester.getRect(find.textContaining('초과'));
+      final status = tester.getRect(findTextContaining('초과'));
       expect(status.top, greaterThanOrEqualTo(name.bottom - 1));
       expect(status.left, name.left);
       expect(

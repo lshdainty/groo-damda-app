@@ -49,11 +49,11 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('홈'), findsAtLeastNWidgets(1));
-    expect(find.text('가계부'), findsAtLeastNWidgets(1));
+    expect(findText('홈'), findsAtLeastNWidgets(1));
+    expect(findText('가계부'), findsAtLeastNWidgets(1));
     // 하단 탭은 홈·가계부·캘린더·전체 — '통계' 는 예전 구성이라 더는 없다.
-    expect(find.text('캘린더'), findsAtLeastNWidgets(1));
-    expect(find.text('전체'), findsAtLeastNWidgets(1));
+    expect(findText('캘린더'), findsAtLeastNWidgets(1));
+    expect(findText('전체'), findsAtLeastNWidgets(1));
     // Dashboard hero
     expect(findPlain('순자산'), findsOneWidget);
     expect(findPlain('자산'), findsAtLeastNWidgets(1));

@@ -107,9 +107,9 @@ double _top(WidgetTester t, String title) => t
       find.byWidgetPredicate(
         (w) =>
             w is Text &&
-            w.data != null &&
-            plainOf(w.data!) == title &&
-            w.key == const ValueKey('plist-header-title'),
+            w.key == const ValueKey('plist-header-title') &&
+            // 목록 제목은 Text.rich 다(075866bc)
+            plainOf(w.data ?? w.textSpan!.toPlainText()) == title,
       ),
     )
     .top;
@@ -188,9 +188,9 @@ void main() {
 
   testWidgets('상단 바 오른쪽은 글 버튼 "추가" 하나', (tester) async {
     await _pump(tester, assets: const [_bank]);
-    expect(find.text('추가'), findsOneWidget);
+    expect(findText('추가'), findsOneWidget);
     expect(
-      find.textContaining('추가'),
+      findTextContaining('추가'),
       findsOneWidget,
       reason: '묶음마다 [○○ 추가] 가 없다',
     );
@@ -230,7 +230,7 @@ void main() {
     final never = Completer<List<Asset>>();
     await _pump(tester, load: () => never.future);
     expect(findPlain('계좌·카드를 불러오지 못했어요'), findsNothing);
-    expect(find.text('추가'), findsOneWidget, reason: '상단 바는 그대로 있다');
+    expect(findText('추가'), findsOneWidget, reason: '상단 바는 그대로 있다');
   });
 
   testWidgets('실패 → Result Section + 다시 시도 · 서버 원문을 그리지 않는다', (tester) async {
@@ -238,14 +238,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(findPlain('계좌·카드를 불러오지 못했어요'), findsOneWidget);
     expect(findPlain('다시 시도'), findsOneWidget);
-    expect(find.textContaining('RAW_SERVER_TEXT'), findsNothing);
+    expect(findTextContaining('RAW_SERVER_TEXT'), findsNothing);
   });
 
   testWidgets('자산 0개 → 빈 Result Section(버튼 없음)', (tester) async {
     await _pump(tester, assets: const []);
     expect(findPlain('아직 등록된 자산이 없어요'), findsOneWidget);
     expect(
-      findPlain('[추가]를 눌러 첫 계좌나 카드를 등록해 보세요.'),
+      findPlain('[추가]를 눌러 첫 계좌나 카드를 등록해보세요.'),
       findsOneWidget,
       reason: '이 화면 전용 안내 — 자산 화면의 "설정 →" 글이 아니다',
     );

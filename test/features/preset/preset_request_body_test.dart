@@ -21,6 +21,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 import '../../support/capture_adapter.dart';
+import '../../support/plain_text.dart';
 
 const _food = ExpenseCategory(
   rowId: 1,
@@ -115,15 +116,16 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     return cap;
   }
 
   Finder t(String s) => find.byWidgetPredicate(
-    (w) => w is Text && (w.data ?? '').replaceAll('⁠', '') == s,
+    (w) =>
+        w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == plainOf(s),
   );
-  Finder btn(String s) => find.widgetWithText(PButton, s).last;
+  Finder btn(String s) => findWidgetWithText(PButton, s).last;
   Future<void> tap(WidgetTester tester, Finder f) async {
     await tester.tap(f.first);
     await tester.pumpAndSettle();
@@ -246,7 +248,8 @@ void main() {
   ) async {
     final cap = await open(tester, _loanPreset);
     await tap(tester, t(l.presetFromAccount));
-    await tap(tester, t('대출'));
+    // 고르기 목록의 "대출" — 뒤 폼의 받는 계좌 값에도 같은 글이 있다
+    await tap(tester, t('대출').last);
     expect(t(l.presetFromAccount), findsOneWidget);
     await tap(tester, btn(l.actionSave));
     expect(t(l.presetToRequired), findsOneWidget);
@@ -345,7 +348,8 @@ void main() {
   testWidgets('D6 수수료 0 은 없음 · null 로 나간다(웹과 같다)', (tester) async {
     final cap = await open(tester, _loanPreset);
     await step(tester, l.presetFeeLabel, '0');
-    expect(t(l.presetNoneValue), findsWidgets);
+    // 빈 값은 "{칸 이름} 없음" 이다(메모 없음과 같은 꼴)
+    expect(t('수수료 없음'), findsOneWidget);
     expect(t('0원'), findsNothing);
     await tap(tester, btn(l.actionSave));
     expect(cap.lastBody!.containsKey('fee'), isTrue);

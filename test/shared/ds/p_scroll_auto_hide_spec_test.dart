@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('scroll-auto-hide');
 
@@ -111,7 +112,7 @@ void main() {
       );
       expect(_dy(tester), 0, reason: '맨 위에서는 다 드러난다');
       expect(
-        tester.getTopLeft(find.text('거래 0')).dy,
+        tester.getTopLeft(findText('거래 0')).dy,
         _headerHeight,
         reason: '목록은 영역 아래에서 시작',
       );
@@ -313,12 +314,12 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    expect(tester.getTopLeft(find.text('끝')).dy, 100);
+    expect(tester.getTopLeft(findText('끝')).dy, 100);
     set(() => height = 160);
     await tester.pump();
     await tester.pump();
     await tester.pump();
-    expect(tester.getTopLeft(find.text('끝')).dy, 160);
+    expect(tester.getTopLeft(findText('끝')).dy, 160);
   });
 
   testWidgets('가장 나쁜 값 — 키 큰 머리 + 짧은 목록(스크롤이 거의 없다)에서도 넘치지 않는다', (

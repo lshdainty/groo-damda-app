@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('bottom-sheet');
 
@@ -606,16 +607,16 @@ void main() {
 
           await trigger();
           expect(find.byType(PAlertDialogView), findsOneWidget);
-          expect(find.text(keepAll('작성한 내용이 사라져요')), findsOneWidget);
+          expect(findText(keepAll('작성한 내용이 사라져요')), findsOneWidget);
           expect(find.byType(PBottomSheetContent), findsOneWidget);
-          await tester.tap(find.widgetWithText(PButton, '계속 작성'));
+          await tester.tap(findWidgetWithText(PButton, '계속 작성'));
           await tester.pumpAndSettle();
           expect(find.byType(PAlertDialogView), findsNothing);
           expect(find.byType(PBottomSheetContent), findsOneWidget);
 
           // 나가기 — 시트도 닫힌다
           await trigger();
-          await tester.tap(find.widgetWithText(PButton, '나가기'));
+          await tester.tap(findWidgetWithText(PButton, '나가기'));
           await tester.pumpAndSettle();
           expect(find.byType(PBottomSheetContent), findsNothing);
         });
@@ -636,11 +637,11 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-close')));
         await tester.pumpAndSettle();
         final leave = tester.widget<PButton>(
-          find.widgetWithText(PButton, '나가기'),
+          findWidgetWithText(PButton, '나가기'),
         );
         expect(leave.variant, PButtonVariant.criticalSolid);
         expect(
-          tester.widget<PButton>(find.widgetWithText(PButton, '계속 작성')).variant,
+          tester.widget<PButton>(findWidgetWithText(PButton, '계속 작성')).variant,
           PButtonVariant.neutralWeak,
         );
       });
@@ -797,7 +798,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.byType(PAlertDialogView), findsOneWidget);
-        await tester.tap(find.widgetWithText(PButton, '계속 작성'));
+        await tester.tap(findWidgetWithText(PButton, '계속 작성'));
         await tester.pumpAndSettle();
         expect(top(tester), closeTo(t0, 0.5));
         unawaited(f);

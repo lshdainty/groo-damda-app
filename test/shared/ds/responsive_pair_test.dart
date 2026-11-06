@@ -6,6 +6,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(double width, double scale, String secondary, String primary) =>
     MaterialApp(
@@ -42,8 +43,8 @@ void main() {
   testWidgets('짧은 라벨은 한 줄에 반씩', (tester) async {
     await tester.pumpWidget(_host(342, 1, '취소', '저장'));
     expect(find.byKey(const ValueKey('pair-row')), findsOneWidget);
-    final a = tester.getRect(find.text('취소'));
-    final b = tester.getRect(find.text('저장'));
+    final a = tester.getRect(findText('취소'));
+    final b = tester.getRect(findText('저장'));
     expect(a.center.dy, b.center.dy);
     expect(a.left, lessThan(b.left), reason: '보조 왼쪽 · 주 오른쪽');
   });
@@ -51,8 +52,8 @@ void main() {
   testWidgets('긴 라벨(360 폭 "엑셀로 내보내기")은 세로로 쌓고 주 버튼이 위다', (tester) async {
     await tester.pumpWidget(_host(312, 1, '취소', '엑셀로 내보내기'));
     expect(find.byKey(const ValueKey('pair-column')), findsOneWidget);
-    final primary = tester.getRect(find.text('엑셀로 내보내기'));
-    final secondary = tester.getRect(find.text('취소'));
+    final primary = tester.getRect(findText('엑셀로 내보내기'));
+    final secondary = tester.getRect(findText('취소'));
     expect(primary.top, lessThan(secondary.top), reason: '주 버튼이 위');
     // 라벨은 한 줄 — 넘치지 않는다
     expect(tester.takeException(), isNull);

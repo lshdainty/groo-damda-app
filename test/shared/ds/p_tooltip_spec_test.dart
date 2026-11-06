@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/help_bubble/help_bubble_layout.dart';
 import 'package:groo_damda_app/shared/ds/tooltip/p_tooltip.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('help-bubble');
 
@@ -515,7 +516,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(_bubble, findsNothing);
       // 이유는 보이는 글로 있다
-      expect(find.text('복사할 지난달 예산이 없어요.'), findsOneWidget);
+      expect(findText('복사할 지난달 예산이 없어요.'), findsOneWidget);
     });
   });
 }

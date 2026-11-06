@@ -863,7 +863,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetManageEmptyHint.
   ///
   /// In ko, this message translates to:
-  /// **'[추가]를 눌러 첫 계좌나 카드를 등록해 보세요.'**
+  /// **'[추가]를 눌러 첫 계좌나 카드를 등록해보세요.'**
   String get assetManageEmptyHint;
 
   /// No description provided for @assetManageLoadFailed.
@@ -15400,7 +15400,7 @@ abstract class AppLocalizations {
   /// No description provided for @stocksConnectEmptyTitle.
   ///
   /// In ko, this message translates to:
-  /// **'증권사를 연결해 주세요'**
+  /// **'증권사를 연결해주세요'**
   String get stocksConnectEmptyTitle;
 
   /// No description provided for @stocksConnectEmptyDesc.
@@ -16042,7 +16042,7 @@ abstract class AppLocalizations {
   /// No description provided for @recMemoPlaceholder.
   ///
   /// In ko, this message translates to:
-  /// **'메모를 적어 주세요'**
+  /// **'메모를 적어주세요'**
   String get recMemoPlaceholder;
 
   /// No description provided for @recRepeatRow.

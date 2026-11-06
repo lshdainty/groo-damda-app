@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/money/presentation/money_bundle_screen.d
 import 'package:groo_damda_app/shared/widgets/branch_back_to_home.dart';
 import 'package:groo_damda_app/shared/widgets/mobile_scaffold.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
+import '../support/plain_text.dart';
 
 /// branch 화면 대역 — 실제 화면은 네트워크 provider 를 물고 있어 셸 동작만 본다.
 /// 시트·다이얼로그를 여는 버튼은 앱과 같은 헬퍼를 쓴다(showPSheet / showDialog).
@@ -236,26 +237,26 @@ void main() {
 
   testWidgets('시트가 열려 있으면 시트만 닫는다 — 홈으로 튀지 않는다', (tester) async {
     final router = await pumpShell(tester, '/expense');
-    await tester.tap(find.text('시트 열기'));
+    await tester.tap(findText('시트 열기'));
     await tester.pumpAndSettle();
-    expect(find.text('시트 내용'), findsOneWidget);
+    expect(findText('시트 내용'), findsOneWidget);
 
     await pressSystemBack(tester);
 
-    expect(find.text('시트 내용'), findsNothing);
+    expect(findText('시트 내용'), findsNothing);
     expect(router.state.matchedLocation, '/expense');
     expect(appExited(), isFalse);
   });
 
   testWidgets('다이얼로그가 열려 있으면 다이얼로그만 닫는다', (tester) async {
     final router = await pumpShell(tester, '/expense');
-    await tester.tap(find.text('다이얼로그 열기'));
+    await tester.tap(findText('다이얼로그 열기'));
     await tester.pumpAndSettle();
-    expect(find.text('다이얼로그 내용'), findsOneWidget);
+    expect(findText('다이얼로그 내용'), findsOneWidget);
 
     await pressSystemBack(tester);
 
-    expect(find.text('다이얼로그 내용'), findsNothing);
+    expect(findText('다이얼로그 내용'), findsNothing);
     expect(router.state.matchedLocation, '/expense');
     expect(appExited(), isFalse);
   });

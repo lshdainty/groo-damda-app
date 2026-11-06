@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(Widget child, {double scale = 1}) => MaterialApp(
   theme: GrooTheme.light(),
@@ -71,7 +72,7 @@ void main() {
         scale: 2,
       ),
     );
-    final link = tester.getSize(find.text('링크')).height;
+    final link = tester.getSize(findText('링크')).height;
     // 링크 Text 는 배율을 다시 받지 않는다 — t4 줄 높이 19 그대로(두 번 받으면 38)
     expect(link, closeTo(19, 0.5));
   });

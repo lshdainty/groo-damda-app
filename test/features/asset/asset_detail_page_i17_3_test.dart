@@ -54,19 +54,19 @@ void main() {
         ),
       ),
     );
-    expect(find.text('거래 기록'), findsOneWidget);
+    expect(findText('거래 기록'), findsOneWidget);
     for (final k in ['종류', '종목', '수량', '단가', '거래대금', '실현손익', '거래 일시']) {
-      expect(find.text(k), findsOneWidget, reason: k);
+      expect(findText(k), findsOneWidget, reason: k);
     }
     // 수수료 0 은 줄을 그리지 않는다
-    expect(find.text('수수료 · 세금'), findsNothing);
-    expect(find.text('70,000원'), findsOneWidget);
-    expect(find.text('+250,000원'), findsOneWidget);
+    expect(findText('수수료 · 세금'), findsNothing);
+    expect(findText('70,000원'), findsOneWidget);
+    expect(findText('+250,000원'), findsOneWidget);
     expect(plainOf('2026-10-09 10:00'), '2026-10-09 10:00');
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(LucideIcons.ellipsisVertical), findsNothing);
     expect(find.byIcon(LucideIcons.ellipsis), findsNothing);
-    await tester.tap(find.text('거래 취소'));
+    await tester.tap(findText('거래 취소'));
     expect(cancelled, isTrue);
   });
 
@@ -74,8 +74,8 @@ void main() {
     await tester.pumpWidget(
       _host(TradeDetailBody(trade: _sell, masked: true, onCancelTrade: () {})),
     );
-    expect(find.text('2,100,000원'), findsNothing);
-    expect(find.text('••••'), findsWidgets);
+    expect(findText('2,100,000원'), findsNothing);
+    expect(findText('••••'), findsWidgets);
   });
 
   testWidgets('없는 id — 자산을 찾을 수 없어요 + [자산으로]', (tester) async {
@@ -88,8 +88,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('자산을 찾을 수 없어요'), findsOneWidget);
-    expect(find.text('자산으로'), findsOneWidget);
+    expect(findText('자산을 찾을 수 없어요'), findsOneWidget);
+    expect(findText('자산으로'), findsOneWidget);
   });
 
   testWidgets('목록 실패 — Result Section + 다시 시도', (tester) async {
@@ -102,7 +102,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('자산을 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(findText('자산을 불러오지 못했어요'), findsOneWidget);
+    expect(findText('다시 시도'), findsOneWidget);
   });
 }

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/toggle/p_toggle.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/semantics.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(Brightness mode, Widget child) => MaterialApp(
   theme: mode == Brightness.dark ? GrooTheme.dark() : GrooTheme.light(),
@@ -71,7 +72,7 @@ void main() {
         await tester.pumpWidget(
           _host(mode, PButton(label: '저장', onPressed: () {})),
         );
-        await tester.tap(find.text('저장'));
+        await tester.tap(findText('저장'));
         await tester.pump();
         expect(_ring, findsNothing, reason: '터치 초점에는 링 없음');
       });

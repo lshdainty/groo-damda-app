@@ -139,7 +139,7 @@ void main() {
     );
     final todayText = find.descendant(
       of: todayCell,
-      matching: find.text('${now.day}'),
+      matching: findText('${now.day}'),
     );
     final text = tester.widget<Text>(todayText.first);
     expect(text.style?.fontWeight, FontWeight.w700);
@@ -155,14 +155,14 @@ void main() {
   testWidgets('22일 일정 다섯 → 칩 둘 + "+3개" (100%)', (tester) async {
     await pump(tester, events: five);
     expect(findPlainContaining('다섯째날일정'), findsNWidgets(2));
-    expect(find.text('+3개'), findsOneWidget);
+    expect(findText('+3개'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('칸은 103 그대로 — 200% 에서 칩이 커지면 보이는 수가 줄고 넘침 0', (tester) async {
     await pump(tester, events: five, scale: 2.0);
     expect(tester.takeException(), isNull);
-    expect(find.text('+5개'), findsOneWidget);
+    expect(findText('+5개'), findsOneWidget);
     for (final c in tester.widgetList(find.byType(CalendarDayCell))) {
       expect(tester.getSize(find.byWidget(c)).height, 103);
     }
@@ -180,7 +180,7 @@ void main() {
     expect(findPlain('큰공휴일'), findsOneWidget);
     // 공휴일 1 + 일정 5 = 6 → 칩 둘(공휴일 + 일정 하나) + "+4개"
     expect(findPlainContaining('다섯째날일정'), findsNWidgets(1));
-    expect(find.text('+4개'), findsOneWidget);
+    expect(findText('+4개'), findsOneWidget);
   });
 
   testWidgets('칸 전체가 누르는 자리 하나 — 칩 · "+N개" 가 따로 서지 않는다', (tester) async {
@@ -201,7 +201,7 @@ void main() {
     final outside = cells.firstWhere((c) => c.cell.isOutside);
     await tester.tap(find.byWidget(outside));
     await tester.pumpAndSettle();
-    expect(find.text('${now.year}년 ${now.month}월'), findsOneWidget);
-    expect(find.text('일정 추가'), findsOneWidget, reason: '그 날 시트가 열렸다');
+    expect(findText('${now.year}년 ${now.month}월'), findsOneWidget);
+    expect(findText('일정 추가'), findsOneWidget, reason: '그 날 시트가 열렸다');
   });
 }

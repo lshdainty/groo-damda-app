@@ -41,7 +41,7 @@ void main() {
       expect(text.style!.color, c.fgNeutralSubtle);
       final box = tester.getRect(find.byType(PDayHeaderRow));
       expect(tester.getTopLeft(findPlain('10월 21일 (수)')).dx, 24);
-      expect(tester.getTopRight(find.text('2/5 완료')).dx, 360 - 24);
+      expect(tester.getTopRight(findText('2/5 완료')).dx, 360 - 24);
       // 위 8 — 글 줄 높이가 머리 높이의 가운데에 선다
       expect(
         tester.getTopLeft(findPlain('10월 21일 (수)')).dy - box.top,
@@ -77,7 +77,7 @@ void main() {
           textScale: scale,
         );
         expect(tester.takeException(), isNull);
-        final text = tester.getRect(find.text('2026년 12월'));
+        final text = tester.getRect(findText('2026년 12월'));
         if (scale == 1.0) {
           expect(text.left, 24);
           oneLine = text.height;
@@ -173,7 +173,7 @@ void main() {
           .first,
     );
     expect((box.decoration! as BoxDecoration).color, c.bgDisabled);
-    expect(tester.widget<Text>(find.text('중요')).style!.color, c.fgDisabled);
+    expect(tester.widget<Text>(findText('중요')).style!.color, c.fgDisabled);
   });
 
   testWidgets('PTagTone.disabled — 항목 글이 fg-disabled', (tester) async {

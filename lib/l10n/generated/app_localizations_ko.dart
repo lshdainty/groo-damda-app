@@ -399,7 +399,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetManageAdd => '추가';
 
   @override
-  String get assetManageEmptyHint => '[추가]를 눌러 첫 계좌나 카드를 등록해 보세요.';
+  String get assetManageEmptyHint => '[추가]를 눌러 첫 계좌나 카드를 등록해보세요.';
 
   @override
   String get assetManageLoadFailed => '계좌·카드를 불러오지 못했어요';
@@ -8560,7 +8560,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksTradesTableName => '체결 표';
 
   @override
-  String get stocksConnectEmptyTitle => '증권사를 연결해 주세요';
+  String get stocksConnectEmptyTitle => '증권사를 연결해주세요';
 
   @override
   String get stocksConnectEmptyDesc =>
@@ -8918,7 +8918,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recMerchantPlaceholderIncome => '예: 월급';
 
   @override
-  String get recMemoPlaceholder => '메모를 적어 주세요';
+  String get recMemoPlaceholder => '메모를 적어주세요';
 
   @override
   String get recRepeatRow => '반복';

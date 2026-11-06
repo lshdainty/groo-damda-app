@@ -20,6 +20,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/stocks/presentation/chart_web_view.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_donut.dart';
+import '../../support/plain_text.dart';
 
 NamuHoldingItem _item(
   String symbol,
@@ -258,7 +259,8 @@ void main() {
     expect(_t('환율(USD)'), findsOneWidget);
     expect(_t('1,385.20원'), findsOneWidget);
     // 장 상태는 대표 종목의 시세에 딸려 온다(13b-1 17) — 나무에 없는 지수 · 발견은 그리지 않는다
-    expect(_tc('장중 · '), findsOneWidget);
+    // 기본 데이터에는 국내 · 미국 보유가 다 있어 시장마다 한 줄씩 둘이다
+    expect(_tc('장중 · '), findsNWidgets(2));
     expect(_t('코스피'), findsNothing);
     expect(_tc('장마감'), findsNothing);
     expect(_chip('발견'), findsNothing);
@@ -344,6 +346,8 @@ void main() {
       );
       expect(quotesAsked, contains('K1'));
       expect(_tc('장중 · '), findsOneWidget);
+      // 먼저 비운다 — 같은 모양이면 ProviderScope 가 재사용돼 받아 둔 대표 시세가 남는다
+      await tester.pumpWidget(const SizedBox());
       await _pump(tester, krw: _h('KRW', const []), usd: _h('USD', const []));
       expect(quotesAsked, isEmpty);
       expect(_tc('장중 · '), findsNothing);
@@ -356,7 +360,7 @@ void main() {
     ) async {
       await _pump(tester, holdingsPending: true, groups: kGroups, fx: 1385.2);
       expect(_t('환율(USD)'), findsOneWidget);
-      expect(find.text('다시 시도'), findsNothing);
+      expect(findText('다시 시도'), findsNothing);
     });
   });
 
@@ -622,11 +626,13 @@ void main() {
         home: const NamuStockDetailPage(symbol: 'A900001'),
         size: const Size(360, 700),
       );
-      await tester.scrollUntilVisible(
-        _t('체결').first,
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
+      // 아래쪽 띠는 지연 목록이라 아직 그려지지 않았다 — 나타날 때까지 내린다(.first 는 빈 찾기에서 멈춘다)
+      for (var i = 0; i < 30 && _t('체결').evaluate().isEmpty; i++) {
+        await tester.drag(find.byType(Scrollable).first, const Offset(0, -200));
+        await tester.pump();
+      }
+      await tester.ensureVisible(_t('체결').first);
+      await tester.pumpAndSettle();
       await tester.tap(_t('체결').first);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
@@ -635,11 +641,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
       await tester.pump(const Duration(milliseconds: 400));
-      await tester.scrollUntilVisible(
-        _t('체결').first,
-        -200,
-        scrollable: find.byType(Scrollable).first,
-      );
+      for (var i = 0; i < 30 && _t('체결').evaluate().isEmpty; i++) {
+        await tester.drag(find.byType(Scrollable).first, const Offset(0, -200));
+        await tester.pump();
+      }
+      await tester.ensureVisible(_t('체결').first);
+      await tester.pumpAndSettle();
       expect(_t('체결 내역이 없어요'), findsOneWidget, reason: '내렸다 올리니 호가 탭으로 돌아갔다');
     });
 
@@ -686,7 +693,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(_t('체결 내역을 불러오지 못했어요'), findsOneWidget);
       final asked = executionsAsked.length;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(executionsAsked.length, greaterThan(asked), reason: '버튼이 죽어 있다');
@@ -705,7 +712,7 @@ void main() {
         reason: '상세 시세 실패는 머리 실패 한 벌이 맡고 호가 띠는 그리지 않는다',
       );
       final asked = detailAsked.length;
-      await tester.tap(find.text('다시 시도').first);
+      await tester.tap(findText('다시 시도').first);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(detailAsked.length, greaterThan(asked));

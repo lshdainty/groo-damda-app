@@ -20,6 +20,7 @@ import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../support/plain_text.dart';
 
 const _food = ExpenseCategory(
   rowId: 1,
@@ -185,15 +186,16 @@ Future<_Repo> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
 
 Finder _t(String s) => find.byWidgetPredicate(
-  (w) => w is Text && (w.data ?? '').replaceAll('⁠', '') == s,
+  (w) =>
+      w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == plainOf(s),
 );
-Finder _btn(String s) => find.widgetWithText(PButton, s).last;
+Finder _btn(String s) => findWidgetWithText(PButton, s).last;
 
 Future<void> _step(WidgetTester tester, String row, String text) async {
   await tester.tap(_t(row).first);
@@ -230,7 +232,7 @@ void main() {
 
   testWidgets('고정 금액 스위치가 없고 금액은 줄 하나다 — 비었으면 "비워 둠"', (tester) async {
     await _open(tester, null);
-    expect(find.text('고정 금액 사용'), findsNothing);
+    expect(findText('고정 금액 사용'), findsNothing);
     expect(_t(l.presetAmountLabel), findsOneWidget);
     expect(_t(l.presetAmountBlank), findsOneWidget);
   });

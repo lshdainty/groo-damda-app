@@ -88,6 +88,8 @@ class _CapturingRepo extends MemoRepository {
     String? color,
   }) async {
     saves++;
+    // 만들기도 gate 를 기다린다 — 저장 중에 닫는 시험(L8)이 새 메모로 돈다
+    await gate?.future;
     if (failSave) {
       throw ApiException(
         code: 'MEMO_500',
@@ -112,8 +114,10 @@ class _CapturingRepo extends MemoRepository {
 Finder _button(String label) =>
     find.byWidgetPredicate((w) => w is PButton && w.label == label);
 
-Finder _row(String title) =>
-    find.ancestor(of: findPlain(title), matching: find.byType(PListItemBase));
+Finder _row(String title) => find.ancestor(
+  of: findPlain(title),
+  matching: find.byWidgetPredicate((w) => w is PListItemBase),
+);
 
 Future<_CapturingRepo> _open(
   WidgetTester tester, {
@@ -143,7 +147,7 @@ Future<_CapturingRepo> _open(
     textScale: textScale,
     snackbarHost: snackbarHost,
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -207,7 +211,8 @@ void main() {
 
   testWidgets('본문을 지우고 저장하면 content 가 명시적 null 로 실린다', (tester) async {
     final repo = await _open(tester);
-    expect(findPlain('지워질 본문'), findsOneWidget);
+    // 본문은 입력칸 안 글이다 — 입력칸도 보는 findText 로
+    expect(findText('지워질 본문'), findsOneWidget);
 
     await tester.enterText(find.byType(PTextarea), '');
     await tester.pumpAndSettle();
@@ -320,7 +325,7 @@ void main() {
       final callout = tester.widget<PCallout>(find.byType(PCallout));
       expect(callout.tone, PCalloutTone.critical);
       expect(callout.description, '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.');
-      expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
+      expect(findTextContaining('RAW_SERVER_TEXT_4471'), findsNothing);
       expect(
         tester.widget<PInput>(find.byType(PInput)).controller!.text,
         '새 메모',
@@ -444,7 +449,7 @@ void main() {
     testWidgets('값 글은 색 이름이다 — hex 가 아니다', (tester) async {
       await _open(tester);
       expect(findPlain('파랑'), findsOneWidget);
-      expect(find.textContaining('#2c70bf'), findsNothing);
+      expect(findTextContaining('#2c70bf'), findsNothing);
     });
 
     testWidgets('팔레트 밖 색은 "지금 색" 이고 고르지 않으면 저장 값이 바뀌지 않는다', (tester) async {
@@ -494,7 +499,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     // 저장이 나간 채로 닫는다 — 바뀐 값이 있어 "작성한 내용이 사라져요" 를 묻는다
     await tester.tap(find.bySemanticsLabel('닫기').first);
-    await tester.pumpAndSettle();
+    // 저장 요청이 나가 있어 [저장] 의 원이 돈다 — 가라앉기를 기다리지 않고 흘린다
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(findPlain(l.sheetLeaveLeave));
     await tester.pumpAndSettle();
     expect(find.byType(PTextarea), findsNothing);

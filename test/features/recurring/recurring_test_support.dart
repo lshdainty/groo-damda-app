@@ -8,17 +8,20 @@ import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.d
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
-/// 줄 안 글에 끼는 보이지 않는 글자(낱말 이음 · 쉼표 뒤 줄바꿈 · 자리 표시)를 뺀 글.
-String plainOf(String s) => s.replaceAll(RegExp('[⁠​￼]'), '');
+import '../../support/plain_text.dart';
+
+// 줄 안 글에 끼는 보이지 않는 글자(낱말 이음 · 쉼표 뒤 줄바꿈 · 자리 표시)를 빼고 반복 줄 설명의 줄바꿈 없는 공백(recNoBreak
+// U+00A0)은 보통 공백으로 — 공용 support/plain_text.dart 의 plainOf 를 쓴다.
+export '../../support/plain_text.dart' show plainOf;
 
 /// 보이는 글이 [s] 와 **같은** 글 — 낱말 이음 문자가 끼어 있어도 찾는다.
 Finder plain(String s) => find.byWidgetPredicate(
-  (w) => w is RichText && plainOf(w.text.toPlainText()) == s,
+  (w) => w is RichText && plainOf(w.text.toPlainText()) == plainOf(s),
 );
 
 /// 보이는 글이 [s] 로 **시작하는** 글.
 Finder plainStarts(String s) => find.byWidgetPredicate(
-  (w) => w is RichText && plainOf(w.text.toPlainText()).startsWith(s),
+  (w) => w is RichText && plainOf(w.text.toPlainText()).startsWith(plainOf(s)),
 );
 
 RecurringTransaction rec(

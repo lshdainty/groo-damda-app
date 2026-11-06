@@ -97,7 +97,7 @@ void main() {
       find
           .descendant(
             of: find.byType(CalendarScreen),
-            matching: find.text('$day'),
+            matching: findText('$day'),
           )
           .first,
     );
@@ -146,13 +146,13 @@ void main() {
   ) async {
     await pump(tester, events: [ev(1, '첫째일정')]);
     await openDay(tester, 22);
-    final add = find.widgetWithText(PButton, '일정 추가');
+    final add = findWidgetWithText(PButton, '일정 추가');
     expect(add, findsOneWidget);
     final r = tester.getRect(add);
     expect(r.left, 24);
     expect(r.right, 336);
     expect(r.height, 48);
-    expect(find.textContaining('건'), findsNothing);
+    expect(findTextContaining('건'), findsNothing);
     expect(find.byIcon(LucideIcons.plus), findsNothing);
   });
 
@@ -160,7 +160,7 @@ void main() {
     await pump(tester, events: [ev(1, '첫째일정')]);
     await openDay(tester, 10);
     expect(findPlain('이 날에 일정이 없어요.'), findsOneWidget);
-    expect(find.widgetWithText(PButton, '일정 추가'), findsOneWidget);
+    expect(findWidgetWithText(PButton, '일정 추가'), findsOneWidget);
   });
 
   testWidgets('가장 나쁜 값 — 50자 제목이 모두 보이고 200% 에서도 넘침 0', (tester) async {
@@ -184,6 +184,12 @@ void main() {
     await openDay(tester, 22);
     await tester.tap(find.byType(PListButtonItem));
     await tester.pumpAndSettle();
-    expect(find.byType(PList), findsNothing, reason: '그날 시트가 닫혔다');
+    // 상세 본문도 PList 다(95b698b3) — 그날 목록 키로 닫힘을 잰다
+    expect(
+      find.byKey(const ValueKey('calendar-day-list')),
+      findsNothing,
+      reason: '그날 시트가 닫혔다',
+    );
+    expect(find.byKey(const ValueKey('calendar-detail-title')), findsOneWidget);
   });
 }

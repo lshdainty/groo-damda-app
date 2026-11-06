@@ -29,6 +29,7 @@ import 'package:groo_damda_app/shared/ds/switch/p_switch.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('list');
 final _headerSpec = DesignSpec.load('list-header');
@@ -1221,7 +1222,7 @@ void _kindTests() {
           ),
         ),
       );
-      await tester.tap(find.text('분류'));
+      await tester.tap(findText('분류'));
       expect((row, small, menu), (0, 1, 0));
       await tester.tap(find.byIcon(LucideIcons.ellipsisVertical));
       expect((row, small, menu), (0, 1, 1));
@@ -1254,7 +1255,7 @@ void _kindTests() {
           ),
         ),
       );
-      var gesture = await _press(tester, find.text('분류'));
+      var gesture = await _press(tester, findText('분류'));
       expect(_decoration(tester, _backgrounds).color!.a, 0);
       expect(_paintedScale(tester, _rows), 1.0);
       await gesture.up();
@@ -1377,7 +1378,7 @@ void _kindTests() {
           ),
         ),
       );
-      final style = _textStyle(tester, find.text('쇼핑 · 10월 2일'));
+      final style = _textStyle(tester, findText('쇼핑 · 10월 2일'));
       expect(style.fontSize, 13);
       expect(sameColor(PColors.light.fgNeutralSubtle, style.color!), isTrue);
     });
@@ -1594,7 +1595,7 @@ void _pressTests() {
       expect(
         sameColor(
           c.fgNeutralMuted,
-          _textStyle(tester, find.text('대한민국 원')).color!,
+          _textStyle(tester, findText('대한민국 원')).color!,
         ),
         isTrue,
       );
@@ -1649,7 +1650,7 @@ void _pressTests() {
         isTrue,
       );
       expect(
-        sameColor(c.fgDisabled, _textStyle(tester, find.text('대한민국 원')).color!),
+        sameColor(c.fgDisabled, _textStyle(tester, findText('대한민국 원')).color!),
         isTrue,
       );
       expect(
@@ -2053,7 +2054,7 @@ void _controlTests() {
         .widget<PRadiomark>(
           find.descendant(
             of: find.ancestor(
-              of: find.text(keepAll(title)),
+              of: findText(keepAll(title)),
               matching: find.byType(PListRadioItem<String>),
             ),
             matching: find.byType(PRadiomark),
@@ -2078,7 +2079,7 @@ void _controlTests() {
       );
       expect(selected(tester, '대한민국 원'), isTrue);
       expect(selected(tester, '미국 달러'), isFalse);
-      await tester.tap(find.text(keepAll('미국 달러')));
+      await tester.tap(findText(keepAll('미국 달러')));
       await tester.pump();
       expect(log, ['USD']);
       expect(selected(tester, '미국 달러'), isTrue);
@@ -2089,7 +2090,7 @@ void _controlTests() {
       await tester.pump();
       expect(log, ['USD', 'JPY']);
       // 고른 줄을 다시 누르면 아무 일도 없다
-      await tester.tap(find.text(keepAll('일본 엔')));
+      await tester.tap(findText(keepAll('일본 엔')));
       await tester.pump();
       expect(log, ['USD', 'JPY']);
     });
@@ -2150,16 +2151,16 @@ void _controlTests() {
           radioRows(value: 'KRW', onChanged: log.add, disabled: 'USD'),
         ),
       );
-      await tester.tap(find.text(keepAll('미국 달러')));
+      await tester.tap(findText(keepAll('미국 달러')));
       await tester.pump();
       expect(log, isEmpty);
-      await tester.tap(find.text(keepAll('일본 엔')));
+      await tester.tap(findText(keepAll('일본 엔')));
       expect(log, ['JPY']);
       log.clear();
       await tester.pumpWidget(
         _host(Brightness.light, radioRows(value: 'KRW', onChanged: null)),
       );
-      await tester.tap(find.text(keepAll('일본 엔')));
+      await tester.tap(findText(keepAll('일본 엔')));
       expect(log, isEmpty);
       final marks = tester
           .widgetList<PRadiomark>(find.byType(PRadiomark))
@@ -2410,7 +2411,7 @@ void _parentTests() {
       await tester.pump();
       expect(edit, 0);
       expect(_childRows, findsNWidgets(2));
-      await tester.tap(find.text(keepAll('지출 · 하위 2개')));
+      await tester.tap(findText(keepAll('지출 · 하위 2개')));
       await tester.pump();
       expect(edit, 1);
       expect(_childRows, findsNWidgets(2), reason: '줄을 눌러도 접히지 않는다');
@@ -2689,7 +2690,7 @@ void _parentTests() {
           _food(defaultOpen: true, onChild: () => child++),
         ),
       );
-      await tester.tap(find.text(keepAll('외식')));
+      await tester.tap(findText(keepAll('외식')));
       expect(child, 1);
     });
 

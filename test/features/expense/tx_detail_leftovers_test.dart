@@ -36,6 +36,8 @@ import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 const _account = Asset(
   rowId: 3,
@@ -98,12 +100,19 @@ Future<void> _pump(WidgetTester tester, Widget home) async {
         dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
         defaultCurrencyProvider.overrideWith((ref) => 'KRW'),
+        // 지우기 · 환불 뒤 그 달 목록을 다시 받을 때까지 기다린다(1a9d9de7) — 가짜 저장소에 list 가 없어 덮는다
+        monthExpensesProvider.overrideWith((ref, key) async => const []),
       ],
       child: MaterialApp(
         theme: GrooTheme.light(),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        // 앱과 같은 자리 — 환불 · 환불 취소 결과 스낵바(ds)가 뜨는 호스트
+        builder: (context, child) => Material(
+          type: MaterialType.transparency,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
+        ),
         home: Scaffold(body: home),
       ),
     ),
@@ -119,26 +128,26 @@ Widget _opener(void Function(BuildContext) open) => Builder(
 void main() {
   testWidgets('상세에서 환불하면 [수정] 이 그 자리에서 사라지고, 취소하면 돌아온다', (tester) async {
     await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, _plain)));
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
-    expect(find.text('수정'), findsOneWidget);
-    expect(find.text('내역 분할'), findsOneWidget, reason: '보통 거래에는 있다');
+    expect(findText('수정'), findsOneWidget);
+    expect(findText('내역 분할'), findsOneWidget, reason: '보통 거래에는 있다');
 
     // 환불은 같은 시트의 한 단계다 — "더 하기" 의 [환불] 줄 → 바닥 [환불 처리] → 상세로 돌아와 "환불됨" Callout
     await tester.tap(find.byKey(const ValueKey('more-refund')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+    await tester.tap(findWidgetWithText(PButton, '환불 처리'));
     await tester.pumpAndSettle();
 
-    expect(find.text('환불 취소'), findsOneWidget, reason: 'Callout 이 떴다');
-    expect(find.text('수정'), findsNothing, reason: 'footer 도 환불된 거래를 본다');
+    expect(findText('환불 취소'), findsOneWidget, reason: 'Callout 이 떴다');
+    expect(findText('수정'), findsNothing, reason: 'footer 도 환불된 거래를 본다');
 
-    await tester.tap(find.widgetWithText(PButton, '환불 취소'));
+    await tester.tap(findWidgetWithText(PButton, '환불 취소'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('환불 취소').last);
+    await tester.tap(findText('환불 취소').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('수정'), findsOneWidget);
+    expect(findText('수정'), findsOneWidget);
   });
 
   // 결제 대기 청구분(CARD_CARRYOVER_DUE, 2026-09-22)도 같은 이월이다.
@@ -149,16 +158,16 @@ void main() {
         autoSource: source,
       );
       await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, carryover)));
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('환불'), findsNothing);
-      expect(find.text('내역 분할'), findsNothing);
+      expect(findText('환불'), findsNothing);
+      expect(findText('내역 분할'), findsNothing);
       expect(
-        find.text('카드를 등록할 때 적은 이전 미결제 사용액이에요. 금액은 카드 수정에서 바꿔요.'),
+        findText('카드를 등록할 때 적은 이전 미결제 사용액이에요. 금액은 카드 수정에서 바꿔요.'),
         findsOneWidget,
       );
-      expect(find.textContaining('원래 거래를 지우면'), findsNothing);
+      expect(findTextContaining('원래 거래를 지우면'), findsNothing);
     });
   }
 
@@ -172,7 +181,7 @@ void main() {
     testWidgets('$source — [반복 설정]·[더치페이] 가 보이되 꺼져 있다', (tester) async {
       final auto = _plain.copyWith(autoSource: source);
       await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, auto)));
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
       // 막힌 줄 — 숨기지 않는다. 누름이 없고(onTap null) 꺾쇠도 없다(비활성 색은 ds 가 입힌다)
@@ -193,7 +202,7 @@ void main() {
 
   testWidgets('보통 거래는 [반복 설정]·[더치페이] 가 켜져 있다', (tester) async {
     await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, _plain)));
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
 
     for (final key in ['more-recurring', 'more-dutch']) {
@@ -227,7 +236,7 @@ void main() {
 
   testWidgets('해외 결제 환산 줄에 원화 단위가 붙는다', (tester) async {
     await _pump(tester, _opener((ctx) => showAddTxSheet(ctx)));
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
 
     // 1단계 통화 칩 → 고르기 시트 → USD → 현지 금액 → [다음] → 2단계 환율 칸
@@ -240,13 +249,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '5.5');
-    await tester.tap(find.text('다음'));
+    await tester.tap(findText('다음'));
     await tester.pumpAndSettle();
     // 2단계: 거래처 칸 다음이 환율 칸
     await tester.enterText(find.byType(EditableText).at(1), '1400');
     await tester.pump();
 
-    expect(find.textContaining('= 7,700원'), findsOneWidget);
+    expect(findTextContaining('= 7,700원'), findsOneWidget);
   });
 
   group('카드 결제 시트 — 금액에 단위(원)', () {
@@ -318,23 +327,24 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('지금 결제'));
+      await tester.tap(findText('지금 결제'));
       await tester.pumpAndSettle();
 
       // 빚(9,000)보다 청구(40,000)가 크다 — 계좌에서는 9,000원만 빠진다.
-      expect(find.textContaining('사용액으로 잡힌 9,000원만 빠져요'), findsOneWidget);
+      expect(findTextContaining('사용액으로 잡힌 9,000원만 빠져요'), findsOneWidget);
 
       await tester.enterText(
         find.byWidgetPredicate(
-          (w) => w is TextField && w.controller?.text == '40000',
+          // 금액 칸은 쉼표를 찍는다(f7aa428c)
+          (w) => w is TextField && w.controller?.text == '40,000',
         ),
         '30000',
       );
       await tester.pump();
-      expect(find.text('남은 10,000원은 결제일에 빠져요'), findsOneWidget);
+      expect(findText('남은 10,000원은 결제일에 빠져요.'), findsOneWidget);
     });
   });
 }

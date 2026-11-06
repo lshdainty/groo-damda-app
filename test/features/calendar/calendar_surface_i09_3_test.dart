@@ -25,6 +25,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
@@ -185,8 +186,16 @@ void main() {
       final head = tester.getRect(
         find.byKey(const ValueKey('plist-header')).at(1),
       );
-      // 내 캘린더 줄 아래 ↔ "공유받은 캘린더" 머리 위: 24 (머리 위 여백)
-      expect(head.top - row.bottom, 24);
+      // 내 캘린더 줄 아래 ↔ "공유받은 캘린더" 머리: 24 는 머리 안의 위 여백(topInset)이다 — 머리는 줄에 바로 붙는다
+      expect(head.top - row.bottom, 0);
+      final title = tester.getRect(
+        find.byKey(const ValueKey('plist-header-title')).at(1),
+      );
+      expect(title.top - row.bottom, greaterThanOrEqualTo(24));
+      expect(
+        tester.widget<PListHeader>(find.byType(PListHeader).at(1)).topInset,
+        24,
+      );
     });
 
     testWidgets('빈 목록은 해요체 한 줄', (tester) async {
@@ -228,10 +237,10 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(PResultSection), findsOneWidget);
-      expect(find.textContaining('서버가 낸 원문'), findsNothing);
-      expect(find.textContaining('StateError'), findsNothing);
+      expect(findTextContaining('서버가 낸 원문'), findsNothing);
+      expect(findTextContaining('StateError'), findsNothing);
       final before = (calendarCalls, labelCalls);
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
       expect(calendarCalls, before.$1 + 1);
       expect(labelCalls, before.$2);
@@ -249,14 +258,15 @@ void main() {
         ]),
       );
       await tester.pumpAndSettle();
-      expect(findRichPlain('가족'), findsOneWidget);
+      // "가족" 은 다른 줄 설명에도 있다 — 제목 글 그대로 찾는다
+      expect(findText('가족'), findsOneWidget);
       fail = true;
       ProviderScope.containerOf(
         tester.element(find.byType(CalendarShareScreen)),
       ).invalidate(userCalendarListProvider);
       await tester.pumpAndSettle();
       expect(find.byType(PResultSection), findsNothing);
-      expect(findRichPlain('가족'), findsOneWidget);
+      expect(findText('가족'), findsOneWidget);
     });
 
     testWidgets('불러오는 중에도 "캘린더 추가" 글 단추가 있다', (tester) async {
@@ -272,7 +282,7 @@ void main() {
         ]),
       );
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('캘린더 추가'), findsOneWidget);
+      expect(findText('캘린더 추가'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 31));
     });
@@ -311,7 +321,7 @@ void main() {
       expect(find.byIcon(LucideIcons.chevronRight), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('cal-share-1')));
       await tester.pumpAndSettle();
-      expect(find.text('manage-1'), findsOneWidget);
+      expect(findText('manage-1'), findsOneWidget);
       expect(find.byType(PBottomSheetContent), findsNothing);
     });
   });
@@ -367,8 +377,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(PResultSection), findsOneWidget);
-      expect(find.textContaining('서버가 낸 원문'), findsNothing);
-      expect(find.text('다시 시도'), findsOneWidget);
+      expect(findTextContaining('서버가 낸 원문'), findsNothing);
+      expect(findText('다시 시도'), findsOneWidget);
     });
 
     testWidgets('다시 받기가 실패해도 받아 둔 라벨이 남는다', (tester) async {
@@ -402,8 +412,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.drag(findPlain('출장').first, const Offset(-250, 0));
       await tester.pumpAndSettle();
-      expect(find.text('수정'), findsWidgets);
-      expect(find.text('삭제'), findsWidgets);
+      expect(findText('수정'), findsWidgets);
+      expect(findText('삭제'), findsWidgets);
     });
 
     testWidgets('편집 시트 바닥에 [삭제] — 수정 폼에만, 추가 폼에는 없다', (tester) async {
@@ -416,17 +426,18 @@ void main() {
       await tester.tap(findPlain('출장').first);
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
-      expect(find.text('삭제'), findsOneWidget);
+      expect(findText('삭제'), findsOneWidget);
 
-      // 추가 폼
+      // 추가 폼 — 먼저 비운다(같은 모양이면 Navigator 가 재사용돼 열린 수정 시트가 남는다)
+      await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(
         app(const CalendarLabelsScreen(), withRepo(repo)),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('라벨 추가'));
+      await tester.tap(findText('라벨 추가'));
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
-      expect(find.text('삭제'), findsNothing);
+      expect(findText('삭제'), findsNothing);
     });
 
     testWidgets('[삭제] → 확인창 → 지움 — 시트가 닫히고 라벨을 다시 받는다', (tester) async {
@@ -438,10 +449,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('출장').first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
       // 확인창의 [삭제]
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
       expect(repo.deletes, 1);
       expect(find.byType(PBottomSheetContent), findsNothing);
@@ -456,16 +467,16 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('출장').first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
       expect(repo.deletes, 1);
-      expect(find.text('라벨을 삭제하지 못했어요.'), findsOneWidget);
-      expect(find.textContaining('서버가 낸 원문'), findsNothing);
+      expect(findText('라벨을 삭제하지 못했어요.'), findsOneWidget);
+      expect(findTextContaining('서버가 낸 원문'), findsNothing);
       // 확인창은 닫혀 있고, [다시 시도] 는 묻지 않고 바로 요청한다
       repo.failDelete = false;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
       expect(repo.deletes, 2);
     });
@@ -479,16 +490,16 @@ void main() {
         app(const CalendarLabelsScreen(), withRepo(repo)),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('라벨 추가'));
+      await tester.tap(findText('라벨 추가'));
       await tester.pumpAndSettle();
-      expect(find.text('0/12'), findsOneWidget);
+      expect(findText('0/12'), findsOneWidget);
       await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타');
       await tester.pumpAndSettle();
-      expect(find.text('12/12'), findsOneWidget);
+      expect(findText('12/12'), findsOneWidget);
       // 13자를 넣어도 12 에서 멈춘다
       await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타파');
       await tester.pumpAndSettle();
-      expect(find.text('12/12'), findsOneWidget);
+      expect(findText('12/12'), findsOneWidget);
       expect(
         tester.widget<EditableText>(find.byType(EditableText)).controller.text,
         '가나다라마바사아자차카타',
@@ -512,7 +523,7 @@ void main() {
       await tester.tap(findPlain('가나다라마바사아자차카타파').first);
       await tester.pumpAndSettle();
       // 안 바꾼 동안: 눌러 저장하면 오류 없이 요청이 나간다(면제 — 색만 고칠 수 있다)
-      await tester.tap(find.text('저장'));
+      await tester.tap(findText('저장'));
       await tester.pumpAndSettle();
       expect(repo.updates, 1);
     });
@@ -544,7 +555,7 @@ void main() {
           '가나다라마바사아자차카타하',
         );
         expect(findRichPlain('13/12'), findsOneWidget);
-        await tester.tap(find.text('저장'));
+        await tester.tap(findText('저장'));
         await tester.pumpAndSettle();
         expect(repo.updates, 0);
         expect(findPlainContaining('12자 이내'), findsOneWidget);
@@ -570,8 +581,8 @@ void main() {
       // 한 글자 지움 → 12자
       await tester.enterText(find.byType(EditableText), '가나다라마바사아자차카타');
       await tester.pumpAndSettle();
-      expect(find.text('12/12'), findsOneWidget);
-      await tester.tap(find.text('저장'));
+      expect(findText('12/12'), findsOneWidget);
+      await tester.tap(findText('저장'));
       await tester.pumpAndSettle();
       expect(repo.updates, 1);
       expect(findPlainContaining('12자 이내'), findsNothing);

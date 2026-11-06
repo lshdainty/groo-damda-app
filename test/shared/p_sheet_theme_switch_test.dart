@@ -9,6 +9,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
+import '../support/plain_text.dart';
 
 void main() {
   final light = GrooTheme.light().extension<GrooTokens>()!;
@@ -46,7 +47,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
       Color sheetColor() => tester

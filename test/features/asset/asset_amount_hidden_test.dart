@@ -80,7 +80,7 @@ void main() {
     testWidgets('숨긴 행에만 배지가 붙는다', (tester) async {
       await _pump(tester, assets: [_shown, _hiddenAsset]);
       expect(
-        find.text(AppLocalizationsKo().assetAmountHiddenBadge),
+        findText(AppLocalizationsKo().assetAmountHiddenBadge),
         findsOneWidget,
       );
     });
@@ -92,7 +92,7 @@ void main() {
       // 줄 둘 + 묶음 합계 둘(계좌·예금, 카드)
       expect(findPlain('••••'), findsNWidgets(4));
       expect(
-        find.text(AppLocalizationsKo().assetAmountHiddenBadge),
+        findText(AppLocalizationsKo().assetAmountHiddenBadge),
         findsOneWidget,
       );
     });

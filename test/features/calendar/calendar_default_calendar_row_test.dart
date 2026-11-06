@@ -137,7 +137,7 @@ void main() {
     WidgetTester tester, {
     required int count,
   }) async {
-    await tester.tap(find.text(l.calCalendarChipCount(count)));
+    await tester.tap(findText(l.calCalendarChipCount(count)));
     await tester.pumpAndSettle();
   }
 
@@ -183,7 +183,7 @@ void main() {
       await openFilterSheet(tester, count: 3);
 
       // 관리 화면·웹이 쓰는 것과 같은 배지 — 칸이 왜 막혔는지를 남긴다.
-      expect(find.text(l.calDefault), findsOneWidget);
+      expect(findText(l.calDefault), findsOneWidget);
     });
 
     testWidgets('체크는 앞 — 기본 줄도 체크 24 → 색 점 → 이름으로 일반 줄과 한 세로선에 선다', (
@@ -279,7 +279,7 @@ void main() {
       await pump(tester, calendars: const [_staleHiddenDefault, _normal]);
 
       expect(
-        find.text('기본일정'),
+        findText('기본일정'),
         findsWidgets,
         reason: '되돌릴 스위치가 없는데 기본 캘린더 일정이 사라졌다',
       );
@@ -289,7 +289,7 @@ void main() {
       await pump(tester, calendars: const [_staleHiddenDefault, _normal]);
 
       // 기본 + 회사 + 공휴일 = 3. 기본이 빠지면 2 가 된다.
-      expect(find.text(l.calCalendarChipCount(3)), findsOneWidget);
+      expect(findText(l.calCalendarChipCount(3)), findsOneWidget);
     });
 
     testWidgets('숨김 값이 와도 필터 시트에서 켜진 것으로 보인다', (tester) async {

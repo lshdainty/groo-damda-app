@@ -10,19 +10,23 @@ import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
 import 'package:groo_damda_app/features/card/domain/card_catalog_page.dart';
 import 'package:groo_damda_app/features/card/presentation/card_benefits_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 CardCatalogPage _page(String name, {int total = 1}) => CardCatalogPage(
   content: [CardCatalogSummary(rowId: 1, cardName: name)],
   totalElements: total,
-  totalPages: 1,
+  // 한 쪽에 한 장 — 전체가 더 많으면 마지막 쪽이 아니다(화면은 last 로 다음 쪽을 정한다)
+  totalPages: total,
   number: 0,
   size: 30,
   first: true,
-  last: true,
+  last: total <= 1,
   empty: false,
 );
 
-String _plain(Widget w) => w is Text ? (w.data ?? '').replaceAll('⁠', '') : '';
+// Text · Text.rich(칩 · 목록 제목) 모두 — 줄바꿈 글자는 벗긴다
+String _plain(Widget w) =>
+    w is Text ? plainOf(w.data ?? w.textSpan!.toPlainText()) : '';
 Finder _text(String s) => find.byWidgetPredicate((w) => _plain(w) == s);
 
 void main() {
@@ -107,7 +111,15 @@ void main() {
     await t.pump();
     await t.pump(const Duration(milliseconds: 50));
     // 끝까지 내려 다음 쪽 요청을 낸다
-    await t.drag(find.byType(Scrollable).first, const Offset(0, -3000));
+    // 첫 Scrollable 은 가로 칩 줄이다 — 세로 목록을 민다
+    await t.drag(
+      find
+          .byWidgetPredicate(
+            (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+          )
+          .first,
+      const Offset(0, -3000),
+    );
     await t.pump(const Duration(milliseconds: 100));
     expect(keys.length, 2);
     expect(keys.last.page, 1);

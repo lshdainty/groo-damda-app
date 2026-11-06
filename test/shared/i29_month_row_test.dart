@@ -9,6 +9,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_header.dart';
 import 'package:groo_damda_app/shared/forms/month_row.dart';
+import '../support/plain_text.dart';
 
 const _key = Key('trailing');
 
@@ -50,7 +51,7 @@ void main() {
   testWidgets('100% — 달 글과 동작이 같은 줄, 동작은 오른쪽 끝(336)', (tester) async {
     await _pump(tester, 1.0);
     final box = tester.getRect(find.byKey(_key));
-    final title = tester.getRect(find.textContaining('2026').first);
+    final title = tester.getRect(findTextContaining('2026').first);
     expect(box.center.dy, closeTo(title.center.dy, 4), reason: '같은 줄');
     expect(box.right, closeTo(336, 0.5));
     expect(title.left, lessThan(40), reason: '달 글은 왼쪽');
@@ -59,7 +60,7 @@ void main() {
   testWidgets('200% — 동작이 아래 줄 오른쪽 끝(336), 달 글은 왼쪽', (tester) async {
     await _pump(tester, 2.0);
     final box = tester.getRect(find.byKey(_key));
-    final title = tester.getRect(find.textContaining('2026').first);
+    final title = tester.getRect(findTextContaining('2026').first);
     expect(box.top, greaterThanOrEqualTo(title.bottom - 1), reason: '아래 줄');
     expect(box.right, closeTo(336, 0.5));
     expect(title.left, lessThan(40), reason: '달 글은 왼쪽');
@@ -67,7 +68,7 @@ void main() {
 
   testWidgets('달 글 숫자 — tabularFigures 켜면 고정폭, 기본(캘린더)은 끔', (tester) async {
     bool tab(WidgetTester t) {
-      final text = t.widget<Text>(find.textContaining('2026').first);
+      final text = t.widget<Text>(findTextContaining('2026').first);
       return text.style?.fontFeatures?.any(
             (f) => f == const FontFeature.tabularFigures(),
           ) ??
@@ -93,7 +94,7 @@ void main() {
       );
     await tester.runAsync(l.load);
     await _pump(tester, 1.0, tabular: true);
-    final w = tester.getSize(find.textContaining('2026').first).width;
+    final w = tester.getSize(findTextContaining('2026').first).width;
     expect(w, closeTo(94.2, 0.5));
   });
 
@@ -113,7 +114,7 @@ void main() {
         ),
       ),
     );
-    final text = tester.widget<Text>(find.text('2026년 10월'));
+    final text = tester.widget<Text>(findText('2026년 10월'));
     expect(
       text.style!.fontFeatures!.contains(const FontFeature.tabularFigures()),
       isTrue,

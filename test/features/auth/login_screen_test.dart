@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
+import '../../support/plain_text.dart';
 
 class _FakeAuth extends AuthNotifier {
   @override
@@ -86,8 +87,8 @@ void main() {
 
   testWidgets('ko 문구 — 그루 계정으로 로그인해주세요. · 그루 계정으로 로그인', (tester) async {
     await _pump(tester);
-    expect(find.text('그루 계정으로 로그인해주세요.'), findsOneWidget);
-    expect(find.text('그루 계정으로 로그인'), findsOneWidget);
+    expect(findText('그루 계정으로 로그인해주세요.'), findsOneWidget);
+    expect(findText('그루 계정으로 로그인'), findsOneWidget);
   });
 
   for (final dark in [false, true]) {
@@ -103,10 +104,10 @@ void main() {
         );
         final tree = tester.getRect(find.byType(GrooTree));
         expect(tree.height, 56);
-        final name = tester.getRect(find.text('그루 담다'));
+        final name = tester.getRect(findText('그루 담다'));
         expect(name.left - tree.right, 8, reason: '나무 ↔ 이름 8');
         // 안내 = t5 · 400 · fg-neutral-muted, 마크 ↔ 안내 8 · 안내 ↔ 버튼 32
-        final promptFinder = find.text('그루 계정으로 로그인해주세요.');
+        final promptFinder = findText('그루 계정으로 로그인해주세요.');
         final prompt = tester.widget<Text>(promptFinder).style!;
         expect(prompt.fontSize, 16);
         expect(prompt.fontWeight, FontWeight.w400);
@@ -147,7 +148,7 @@ void main() {
   testWidgets('이름이 화면 제목(머리말 1단계)이고 나무는 의미 트리에 없다', (tester) async {
     final handle = tester.ensureSemantics();
     await _pump(tester);
-    final node = tester.getSemantics(find.text('그루 담다'));
+    final node = tester.getSemantics(findText('그루 담다'));
     expect(node.hasFlag(SemanticsFlag.isHeader), isTrue);
     expect(find.bySemanticsLabel('그루 담다'), findsOneWidget);
     handle.dispose();
@@ -156,7 +157,7 @@ void main() {
   testWidgets('글자 130% · 폭 360 — 넘치지 않는다', (tester) async {
     await _pump(tester, textScale: 1.3);
     expect(tester.takeException(), isNull);
-    expect(find.text('그루 담다'), findsOneWidget);
+    expect(findText('그루 담다'), findsOneWidget);
   });
 
   // 글자 200% · 폭 360 — ds Button 라벨은 한 줄 고정이라 버튼보다 넓어질 수 있다. 받아들이되 레이아웃 오류가
@@ -164,7 +165,7 @@ void main() {
   testWidgets('글자 200% · 폭 360 — 오류 없이 라벨이 한 줄로 다 그려진다', (tester) async {
     await _pump(tester, textScale: 2);
     expect(tester.takeException(), isNull);
-    final label = find.text('그루 계정으로 로그인');
+    final label = findText('그루 계정으로 로그인');
     expect(label, findsOneWidget);
     expect(tester.getSize(label).height, lessThan(60), reason: '한 줄');
     expect(
@@ -189,8 +190,8 @@ void main() {
     final callout = find.byType(PCallout);
     expect(callout, findsOneWidget);
     expect(tester.widget<PCallout>(callout).tone, PCalloutTone.critical);
-    expect(find.text('로그인하지 못했어요.'), findsOneWidget);
-    expect(find.textContaining('서버가 준'), findsNothing);
+    expect(findText('로그인하지 못했어요.'), findsOneWidget);
+    expect(findTextContaining('서버가 준'), findsNothing);
     expect(
       tester.getRect(callout).bottom,
       lessThan(tester.getRect(find.byType(PButton)).top),

@@ -22,6 +22,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
+import '../../support/plain_text.dart';
 
 typedef _Row = ({String? name, int? userRowId, int amount, bool isPayer});
 
@@ -74,6 +75,8 @@ Future<(_Repo, AppLocalizations)> _open(WidgetTester tester) async {
         authProvider.overrideWith(_Me.new),
         categoriesProvider.overrideWith((ref) async => const []),
         dutchPayRepositoryProvider.overrideWith((ref) async => repo),
+        // 만든 뒤 목록을 다시 받을 때까지 기다린다(7bd39865) — 가짜 저장소에 list 가 없어 덮는다
+        dutchPayListProvider.overrideWith((ref) async => const []),
       ],
       child: MaterialApp(
         theme: GrooTheme.light(),
@@ -98,7 +101,7 @@ Future<(_Repo, AppLocalizations)> _open(WidgetTester tester) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   final l = await AppLocalizations.delegate.load(const Locale('ko'));
   return (repo, l);
@@ -106,12 +109,12 @@ Future<(_Repo, AppLocalizations)> _open(WidgetTester tester) async {
 
 Future<void> _addFriend(WidgetTester tester, AppLocalizations l) async {
   await tester.enterText(find.byType(EditableText).first, '친구A');
-  await tester.tap(find.widgetWithText(PButton, l.dutchAdd));
+  await tester.tap(findWidgetWithText(PButton, l.dutchAdd));
   await tester.pumpAndSettle();
 }
 
 Future<void> _create(WidgetTester tester, AppLocalizations l) async {
-  await tester.tap(find.widgetWithText(PButton, l.dutchCreate));
+  await tester.tap(findWidgetWithText(PButton, l.dutchCreate));
   await tester.pumpAndSettle();
 }
 
@@ -131,7 +134,7 @@ void main() {
   testWidgets('나도 포함 끔: 나를 0원 결제자로 싣고 친구가 총액을 낸다', (tester) async {
     final (repo, l) = await _open(tester);
     await _addFriend(tester, l);
-    await tester.tap(find.text(l.dutchMeIncludeTitle));
+    await tester.tap(findText(l.dutchMeIncludeTitle));
     await tester.pumpAndSettle();
     await _create(tester, l);
 

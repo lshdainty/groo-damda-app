@@ -97,7 +97,7 @@ Future<void> _type(WidgetTester tester, String text) async {
 }
 
 Future<void> _read(WidgetTester tester) async {
-  await tester.tap(find.text('문자 읽기'));
+  await tester.tap(findText('문자 읽기'));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 300));
 }
@@ -121,7 +121,7 @@ void main() {
         null,
       ),
     );
-    await tester.tap(find.text('클립보드에서 붙여넣기'));
+    await tester.tap(findText('클립보드에서 붙여넣기'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(findPlain('클립보드에 텍스트가 없어요.'), findsOneWidget);
@@ -138,7 +138,7 @@ void main() {
     );
     expect(find.byType(PScreenBandBody), findsNothing);
     expect(find.byType(PTopNavigation), findsOneWidget);
-    expect(find.text('결제 문자로 기록'), findsOneWidget);
+    expect(findText('결제 문자로 기록'), findsOneWidget);
     expect(find.byType(PAlert), findsNothing);
   });
 
@@ -224,8 +224,8 @@ void main() {
     final callout = tester.widget<PCallout>(find.byType(PCallout));
     expect(callout.tone, PCalloutTone.critical);
     expect(callout.description, '문자를 읽지 못했어요. 잠시 뒤 다시 시도해주세요.');
-    expect(find.textContaining('upstream'), findsNothing);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('upstream'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     // 설명 아래 · 칸 위
     expect(
       tester.getTopLeft(find.byType(PCallout)).dy,

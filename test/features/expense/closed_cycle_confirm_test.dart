@@ -37,6 +37,7 @@ import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 /// ds 확인창은 글자 사이에 낱말 단위 줄바꿈 U+2060 을 넣는다 — 그 글자를 뺀 글로 찾는다.
 Finder _plain(String needle) => find.byWidgetPredicate(
@@ -185,6 +186,8 @@ Future<void> _pumpApp(
         recurringListProvider.overrideWith((ref) async => const []),
         dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
+        // 지우기 · 환불 뒤 그 달 목록을 다시 받을 때까지 기다린다(1a9d9de7) — 가짜 저장소에 list 가 없어 덮는다
+        monthExpensesProvider.overrideWith((ref, key) async => const []),
       ],
       child: MaterialApp(
         theme: GrooTheme.light(),
@@ -222,9 +225,9 @@ Widget _swipeRow(Expense e) => Consumer(
 );
 
 Future<void> _swipeDelete(WidgetTester tester) async {
-  await tester.drag(find.text('거래 행'), const Offset(-300, 0));
+  await tester.drag(findText('거래 행'), const Offset(-300, 0));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('삭제'));
+  await tester.tap(findText('삭제'));
   await tester.pumpAndSettle();
 }
 
@@ -262,11 +265,11 @@ void main() {
 
       await _swipeDelete(tester);
       // 확인창의 [삭제] — 트레이는 닫혔으니 남은 '삭제' 는 확인 버튼이다.
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
 
       expect(repo.deleted, [78]);
-      expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
+      expect(findText('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
 
@@ -275,11 +278,11 @@ void main() {
       await _pumpApp(tester, _swipeRow(_open), repo: repo);
 
       await _swipeDelete(tester);
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
 
       expect(repo.deleted, [78]);
-      expect(find.textContaining('계좌로 돌아왔어요.'), findsNothing);
+      expect(findTextContaining('계좌로 돌아왔어요.'), findsNothing);
     });
   });
 
@@ -291,17 +294,17 @@ void main() {
         _opener((ctx) => showTxDetailDialog(ctx, _closed)),
         repo: repo,
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('삭제'));
+      await tester.tap(findText('삭제'));
       await tester.pumpAndSettle();
-      expect(find.textContaining(_closedLine), findsOneWidget);
+      expect(findTextContaining(_closedLine), findsOneWidget);
 
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
       expect(repo.deleted, [77]);
-      expect(find.text('미리 낸 돈 중 12,000원이 계좌로 돌아왔어요.'), findsOneWidget);
+      expect(findText('미리 낸 돈 중 12,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
   });
@@ -319,7 +322,7 @@ void main() {
         repo: _FakeRepo(),
         card: card,
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('more-refund')));
       await tester.pumpAndSettle();
@@ -330,10 +333,10 @@ void main() {
     testWidgets('닫힌 회차면 돌아간다는 말 없이 표시만 하고 한 문구를 말한다', (tester) async {
       await openStep(tester, _closed);
 
-      expect(find.text('이 거래를 환불로 표시해요. 합계에서 빠져요.'), findsOneWidget);
-      expect(find.textContaining('돌아가요'), findsNothing);
-      expect(find.text(_closedLine), findsOneWidget);
-      expect(find.text('환불 처리'), findsWidgets, reason: '머리 제목 + 바닥 버튼');
+      expect(findText('이 거래를 환불로 표시해요. 합계에서 빠져요.'), findsOneWidget);
+      expect(findTextContaining('돌아가요'), findsNothing);
+      expect(findText(_closedLine), findsOneWidget);
+      expect(findText('환불 처리'), findsWidgets, reason: '머리 제목 + 바닥 버튼');
       expect(
         find.byType(AlertDialog),
         findsNothing,
@@ -345,8 +348,8 @@ void main() {
       await openStep(tester, _open);
 
       expect(_plain('합계에서 빠지고 40,000원이 현대카드에 돌아가요.'), findsOneWidget);
-      expect(find.textContaining('(으)로'), findsNothing);
-      expect(find.text(_closedLine), findsNothing);
+      expect(findTextContaining('(으)로'), findsNothing);
+      expect(findText(_closedLine), findsNothing);
     });
 
     testWidgets('열린 회차 + 결제계좌 없는 카드는 그 안내만', (tester) async {
@@ -356,8 +359,8 @@ void main() {
         card: _card.copyWith(paymentAssetRowId: null),
       );
 
-      expect(find.text(_closedLine), findsNothing);
-      expect(find.text('결제계좌가 없어 카드 잔액만 정리돼요.'), findsOneWidget);
+      expect(findText(_closedLine), findsNothing);
+      expect(findText('결제계좌가 없어 카드 잔액만 정리돼요.'), findsOneWidget);
     });
 
     testWidgets('환불일은 거래일부터 오늘까지만 고를 수 있다(D16) — 확인창 안 날짜 칸은 없다', (
@@ -401,16 +404,16 @@ void main() {
         _opener((ctx) => showTxDetailDialog(ctx, _open)),
         repo: repo,
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const ValueKey('more-refund')));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+      await tester.tap(findWidgetWithText(PButton, '환불 처리'));
       await tester.pumpAndSettle();
 
       expect(repo.refundedAt, endsWith('T12:00:00'));
-      expect(find.text('미리 낸 돈 중 8,000원이 계좌로 돌아왔어요.'), findsOneWidget);
+      expect(findText('미리 낸 돈 중 8,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
   });
@@ -422,9 +425,9 @@ void main() {
         _opener((ctx) => showTxDetailDialog(ctx, e)),
         repo: _FakeRepo(),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, '환불 취소'));
+      await tester.tap(findWidgetWithText(PButton, '환불 취소'));
       await tester.pumpAndSettle();
     }
 
@@ -437,9 +440,9 @@ void main() {
         ),
       );
 
-      expect(find.textContaining('환급된 금액도 되돌아가요'), findsOneWidget);
+      expect(findTextContaining('환급된 금액도 되돌아가요'), findsOneWidget);
       expect(
-        find.textContaining(_closedLine),
+        findTextContaining(_closedLine),
         findsNothing,
         reason: '그 이체는 통장에서 다시 빠진다 — "잔액 그대로" 는 거짓이 된다',
       );
@@ -451,9 +454,9 @@ void main() {
         _closed.copyWith(refundedAt: '2026-09-15T12:00:00'),
       );
 
-      expect(find.textContaining('환급된 금액도 되돌아가요'), findsNothing);
-      expect(find.textContaining('이 거래가 합계에 다시 들어가요.'), findsOneWidget);
-      expect(find.textContaining(_closedLine), findsOneWidget);
+      expect(findTextContaining('환급된 금액도 되돌아가요'), findsNothing);
+      expect(findTextContaining('이 거래가 합계에 다시 들어가요.'), findsOneWidget);
+      expect(findTextContaining(_closedLine), findsOneWidget);
     });
   });
 
@@ -465,7 +468,7 @@ void main() {
         _opener((ctx) => showAddTxSheet(ctx, defaultDate: date)),
         repo: repo,
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
       await fillNewTx(tester, amount: '13000', asset: '현대카드');
@@ -475,18 +478,18 @@ void main() {
     testWidgets('닫힌 회차 날짜면 한 번 묻고, 물러나면 보내지 않는다', (tester) async {
       final repo = await openAndFill(tester, '2026-08-20');
 
-      await tester.tap(find.text('추가').last);
+      await tester.tap(findText('추가').last);
       await tester.pumpAndSettle();
-      expect(find.text('저장할까요?'), findsOneWidget);
-      expect(find.text(_closedLine), findsOneWidget);
+      expect(findText('저장할까요?'), findsOneWidget);
+      expect(findText(_closedLine), findsOneWidget);
 
-      await tester.tap(find.text('취소').last);
+      await tester.tap(findText('취소').last);
       await tester.pumpAndSettle();
       expect(repo.created, isEmpty);
 
-      await tester.tap(find.text('추가').last);
+      await tester.tap(findText('추가').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
       expect(repo.created.single['assetRowId'], 9);
     });
@@ -494,10 +497,10 @@ void main() {
     testWidgets('열린 회차는 묻지 않고 저장한다', (tester) async {
       final repo = await openAndFill(tester, '2026-09-10');
 
-      await tester.tap(find.text('추가').last);
+      await tester.tap(findText('추가').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('저장할까요?'), findsNothing);
+      expect(findText('저장할까요?'), findsNothing);
       expect(repo.created, hasLength(1));
     });
   });
@@ -510,13 +513,13 @@ void main() {
         _opener((ctx) => showAddTxSheet(ctx, edit: _open)),
         repo: repo,
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
+      expect(findText('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drainToast(tester);
     });
   });

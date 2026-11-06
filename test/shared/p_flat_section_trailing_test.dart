@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/shared/widgets/p_flat_section.dart';
+import '../support/plain_text.dart';
 
 Future<void> _pump(WidgetTester t, PFlatSection section) async {
   await t.pumpWidget(
@@ -52,7 +53,7 @@ void main() {
 
   testWidgets('짧은 제목은 잘리지 않는다', (t) async {
     await _pump(t, cases['짧은 제목']!);
-    final title = t.renderObject<RenderParagraph>(find.text('예산'));
+    final title = t.renderObject<RenderParagraph>(findText('예산'));
     expect(title.didExceedMaxLines, isFalse);
   });
 }

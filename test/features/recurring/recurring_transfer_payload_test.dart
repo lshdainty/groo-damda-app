@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/recurring/data/recurring_repository.dart
 import 'package:groo_damda_app/features/recurring/presentation/recurring_form.dart';
 
 import 'recurring_test_support.dart';
+import '../../support/plain_text.dart';
 
 const _bank = Asset(
   rowId: 7,
@@ -100,11 +101,13 @@ Future<_CapturingRepo> _open(WidgetTester tester, {bool fail = false}) async {
     ),
     [
       recurringRepositoryProvider.overrideWith((ref) async => repo),
+      // 저장 뒤 반복 목록을 다시 받는다 — 가짜 저장소에 list 가 없어 덮는다
+      recurringListProvider.overrideWith((ref) async => const []),
       categoriesProvider.overrideWith((ref) async => const []),
       assetsProvider.overrideWith((ref) async => [_bank, _savings, _card]),
     ],
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -122,8 +125,8 @@ void main() {
     await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '300000');
-    await _pickRow(tester, '출금 계좌', '주거래');
-    await _pickRow(tester, '입금 계좌', '청약');
+    await _pickRow(tester, '보내는 계좌', '주거래');
+    await _pickRow(tester, '받는 계좌', '청약');
     // 수수료는 같은 시트 안 한 단계 — 쓰고 "완료"
     await tester.tap(plain('수수료').last);
     await tester.pumpAndSettle();
@@ -162,7 +165,7 @@ void main() {
     await _open(tester);
     await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
-    await tester.tap(plain('출금 계좌').last);
+    await tester.tap(plain('보내는 계좌').last);
     await tester.pumpAndSettle();
 
     expect(plain('주거래'), findsWidgets);
@@ -175,13 +178,13 @@ void main() {
     await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '300000');
-    await _pickRow(tester, '출금 계좌', '주거래');
-    await _pickRow(tester, '입금 계좌', '청약');
+    await _pickRow(tester, '보내는 계좌', '주거래');
+    await _pickRow(tester, '받는 계좌', '청약');
     await tester.tap(plain('추가').last);
     await tester.pumpAndSettle();
 
     expect(plain('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
-    expect(find.text('이자는 금액보다 클 수 없습니다.'), findsNothing);
+    expect(findText('이자는 금액보다 클 수 없습니다.'), findsNothing);
     expect(plain('반복 거래 추가'), findsOneWidget);
   });
 
@@ -193,6 +196,6 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).last, '999999');
     await tester.pumpAndSettle();
-    expect(find.text('999'), findsOneWidget);
+    expect(findText('999'), findsOneWidget);
   });
 }

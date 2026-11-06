@@ -12,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('avatar');
 const _combo = {'size': '108', 'edit': 'photo'};
@@ -178,9 +179,9 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('사진 바꾸기'));
+      await tester.tap(findText('사진 바꾸기'));
       expect(change, 1);
-      await tester.tap(find.text('사진 지우기'));
+      await tester.tap(findText('사진 지우기'));
       expect(remove, 1);
     });
 
@@ -198,7 +199,7 @@ void main() {
             .every((b) => b.onPressed == null),
         isTrue,
       );
-      await tester.tap(find.text('사진 바꾸기'), warnIfMissed: false);
+      await tester.tap(findText('사진 바꾸기'), warnIfMissed: false);
       expect(change, 0);
       expect(_overlay, findsOneWidget);
       await tester.pumpWidget(_host(Brightness.light, _edit(image: _photo)));

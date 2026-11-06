@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import '../../support/line_breaks.dart';
+import '../../support/plain_text.dart';
 
 class _FakeRepo extends ExpenseRepository {
   _FakeRepo() : super(Dio());
@@ -603,7 +604,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 50));
     expect(_tc('카테고리 0개'), findsNothing);
-    expect(find.text('순서 바꾸기'), findsNothing);
+    expect(findText('순서 바꾸기'), findsNothing);
     c.complete(const []);
     await tester.pumpAndSettle();
   });
@@ -752,7 +753,7 @@ void main() {
     await _open(tester, scale: 2);
     await tester.tap(_t('순서 바꾸기'));
     await tester.pumpAndSettle();
-    final hint = find.text(
+    final hint = findText(
       keepAll('손잡이를 끌어 순서를 바꿔요. 상위는 상위끼리, 하위는 같은 상위 안에서 옮겨요.'),
     );
     expect(hint, findsOneWidget);

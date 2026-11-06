@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import '../support/plain_text.dart';
 
 /// 스와이프는 제스처라 눈으로만 확인하기 어렵다. 특히 <b>안 일어나야 하는 일</b>이
 /// 중요하다 — 끝까지 밀어도 지워지지 않고, 확인을 거치지 않으면 실행되지 않는다.
@@ -32,7 +34,7 @@ Widget _host(List<PSwipeAction> actions, {String label = '행'}) {
 
 /// 트레이가 열릴 만큼 왼쪽으로 민다.
 Future<void> _swipeOpen(WidgetTester tester, String label) async {
-  await tester.drag(find.text(label), const Offset(-250, 0));
+  await tester.drag(findText(label), const Offset(-250, 0));
   await tester.pumpAndSettle();
 }
 
@@ -76,14 +78,14 @@ void main() {
 
     await _swipeOpen(tester, '행');
 
-    expect(find.text('정지'), findsOneWidget);
-    expect(find.text('수정'), findsOneWidget);
-    expect(find.text('삭제'), findsOneWidget);
+    expect(findText('정지'), findsOneWidget);
+    expect(findText('수정'), findsOneWidget);
+    expect(findText('삭제'), findsOneWidget);
 
     // 셋 다 한 줄이어야 한다. 하나라도 접히면 그 슬롯만 키가 커진다.
-    final h = tester.getSize(find.text('삭제')).height;
-    expect(tester.getSize(find.text('정지')).height, h);
-    expect(tester.getSize(find.text('수정')).height, h);
+    final h = tester.getSize(findText('삭제')).height;
+    expect(tester.getSize(findText('정지')).height, h);
+    expect(tester.getSize(findText('수정')).height, h);
   });
 
   testWidgets('밀면 액션이 드러난다', (tester) async {
@@ -93,9 +95,9 @@ void main() {
       ]),
     );
 
-    expect(find.text('편집'), findsNothing); // 접혀 있을 땐 안 보인다
+    expect(findText('편집'), findsNothing); // 접혀 있을 땐 안 보인다
     await _swipeOpen(tester, '행');
-    expect(find.text('편집'), findsOneWidget);
+    expect(findText('편집'), findsOneWidget);
   });
 
   testWidgets('확인 문구가 없는 액션은 바로 실행된다', (tester) async {
@@ -111,7 +113,7 @@ void main() {
     );
 
     await _swipeOpen(tester, '행');
-    await tester.tap(find.text('편집'));
+    await tester.tap(findText('편집'));
     await tester.pumpAndSettle();
 
     expect(ran, isTrue);
@@ -131,11 +133,11 @@ void main() {
     );
 
     await _swipeOpen(tester, '행');
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
 
     // 다이얼로그가 떴을 뿐 아직 안 지워졌다
-    expect(find.text('정말 지울까요?'), findsOneWidget);
+    expect(findText('정말 지울까요?'), findsOneWidget);
     expect(deleted, isFalse);
   });
 
@@ -153,9 +155,9 @@ void main() {
     );
 
     await _swipeOpen(tester, '행');
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
 
     expect(deleted, isFalse);
@@ -175,13 +177,14 @@ void main() {
     );
 
     await _swipeOpen(tester, '행');
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     // 확인 버튼 라벨은 액션 이름이라 트레이의 '삭제' 와 같다 — 다이얼로그 안의 것을 고른다.
+    // 다이얼로그 안에도 제목 "삭제" 와 단추 "삭제" 둘이다 — 단추(PButton)를 누른다.
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findWidgetWithText(PButton, '삭제'),
       ),
     );
     await tester.pumpAndSettle();
@@ -203,11 +206,11 @@ void main() {
     );
 
     // 화면 밖까지 크게 민다 — DismissiblePane 을 썼다면 여기서 지워진다
-    await tester.drag(find.text('행'), const Offset(-2000, 0));
+    await tester.drag(findText('행'), const Offset(-2000, 0));
     await tester.pumpAndSettle();
 
     expect(deleted, isFalse);
-    expect(find.text('행'), findsOneWidget); // 행이 사라지지도 않았다
+    expect(findText('행'), findsOneWidget); // 행이 사라지지도 않았다
   });
 
   testWidgets('enabled=false 면 감싸지 않고 행을 그대로 통과시킨다', (tester) async {
@@ -226,7 +229,7 @@ void main() {
 
     // 데스크톱·태블릿에서 래핑 자체를 걷어내는 경로
     expect(find.byType(Slidable), findsNothing);
-    expect(find.text('행'), findsOneWidget);
+    expect(findText('행'), findsOneWidget);
   });
 
   testWidgets('액션이 없으면 감싸지 않는다', (tester) async {
@@ -279,11 +282,11 @@ void main() {
     );
 
     await _swipeOpen(tester, '첫째');
-    expect(find.text('삭제첫째'), findsOneWidget);
+    expect(findText('삭제첫째'), findsOneWidget);
 
     await _swipeOpen(tester, '둘째');
-    expect(find.text('삭제둘째'), findsOneWidget);
+    expect(findText('삭제둘째'), findsOneWidget);
     // 먼저 연 행은 닫혀 있어야 한다
-    expect(find.text('삭제첫째'), findsNothing);
+    expect(findText('삭제첫째'), findsNothing);
   });
 }

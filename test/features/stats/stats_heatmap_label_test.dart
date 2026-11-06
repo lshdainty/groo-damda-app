@@ -74,7 +74,7 @@ void main() {
     // 열지도 안에는 금액 글이 하나도 없다 — 라벨(아침 · 06~10시)과 요일만
     for (final amountLike in ['5천', '4,900', '4,900원', '—']) {
       expect(
-        find.descendant(of: heat, matching: find.text(amountLike)),
+        find.descendant(of: heat, matching: findText(amountLike)),
         findsNothing,
         reason: "칸 글 \"$amountLike\" 이 남아 있다",
       );
@@ -87,8 +87,8 @@ void main() {
     // 월요일 12시 = 둘째 줄(10~14시) · 첫 칸
     await tester.tap(find.byKey(const ValueKey('chart-heatmap-cell-1-0')));
     await tester.pump();
-    expect(find.text('11,881원'), findsOneWidget);
-    expect(find.text('1.2만'), findsNothing);
+    expect(findText('11,881원'), findsOneWidget);
+    expect(findText('1.2만'), findsNothing);
     expect(findPlainContaining('월 점심'), findsWidgets);
   });
 }

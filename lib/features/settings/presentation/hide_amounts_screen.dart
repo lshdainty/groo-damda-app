@@ -45,6 +45,9 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
   _Tab _tab;
   bool _saving = false;
 
+  /// 저장 흐름 안(본인 확인 시트 포함) — 두 번 누름만 막고 화면에는 드러내지 않는다.
+  bool _busy = false;
+
   /// 서버 저장이 실패했다 — 화면을 닫지 않고 고른 값을 그대로 둔 채 맨 위 Callout 으로 알린다(다시 [저장] 을 누르면 사라진다).
   bool _saveFailed = false;
 
@@ -75,18 +78,18 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
 
   Future<void> _save(Set<String> saved) async {
     final draft = _draft;
-    if (draft == null || _saving) return;
+    if (draft == null || _saving || _busy) return;
     // 푸는 게 하나라도 있으면 본인 확인 — 가리기만 늘리는 저장은 그냥 통과한다.
     final revealing = saved.difference(draft).isNotEmpty;
-    setState(() {
-      _saving = true;
-      _saveFailed = false;
-    });
+    // 본인 확인 시트가 떠 있는 동안은 두 번 누름만 막는다 — [저장] 의 진행 원은 요청이 나간 동안만 돈다(웹과 같다)
+    _busy = true;
+    setState(() => _saveFailed = false);
     try {
       if (revealing) {
         final ok = await confirmHideAmountsUnlock(context, ref);
-        if (!ok) return;
+        if (!ok || !mounted) return;
       }
+      setState(() => _saving = true);
       final saved = await ref
           .read(settingsProvider.notifier)
           .setHideCards(draft);
@@ -97,7 +100,8 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
       }
       context.pop();
     } finally {
-      if (mounted) setState(() => _saving = false);
+      _busy = false;
+      if (mounted && _saving) setState(() => _saving = false);
     }
   }
 

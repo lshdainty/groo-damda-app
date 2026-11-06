@@ -18,6 +18,7 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _parent = ExpenseCategory(
   rowId: 1,
@@ -79,26 +80,23 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
 
     // 1단계 금액 → 2단계 → 카테고리 줄 → 고르기 시트: 하위 있는 상위는 고를 수 없는 목록 제목이고 하위만 줄이다.
     await tester.enterText(find.byType(EditableText).first, '1000');
-    await tester.tap(find.text(l.actionNext));
+    await tester.tap(findText(l.actionNext));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('tx-row-category')));
     await tester.pumpAndSettle();
 
-    expect(find.text('점심'), findsWidgets, reason: '하위 줄이 안 보인다');
-    expect(find.text('저녁'), findsWidgets);
-    expect(find.text(l.expTopCategorySuffix('식비')), findsNothing);
+    expect(findText('점심'), findsWidgets, reason: '하위 줄이 안 보인다');
+    expect(findText('저녁'), findsWidgets);
+    expect(findText(l.expTopCategorySuffix('식비')), findsNothing);
     // 상위 이름은 눌리는 줄이 아니라 목록 제목이다
     expect(
-      find.ancestor(
-        of: find.text('식비'),
-        matching: find.byType(PListButtonItem),
-      ),
+      find.ancestor(of: findText('식비'), matching: find.byType(PListButtonItem)),
       findsNothing,
     );
   });

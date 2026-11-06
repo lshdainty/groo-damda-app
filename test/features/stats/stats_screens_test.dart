@@ -106,7 +106,7 @@ Future<void> _pump(
   );
   await tester.pumpAndSettle();
   if (tab != StatsTab.category) {
-    final f = find.text(_tabLabel[tab]!).first;
+    final f = findText(_tabLabel[tab]!).first;
     await tester.ensureVisible(f);
     await tester.pumpAndSettle();
     await tester.tap(f);
@@ -361,7 +361,7 @@ void main() {
       expect(donut.centerLabel, isNull);
       // 합계 줄 — 줄임 글("24.4억") 없이 원까지
       expect(findPlain('2,435,323,333원'), findsWidgets);
-      expect(find.textContaining('24.4억'), findsNothing);
+      expect(findTextContaining('24.4억'), findsNothing);
       // 13개 → 상위 9 + 기타
       expect(donut.slices.length, 10);
       expect(donut.slices.last.color, PChartColor.gray);
@@ -527,7 +527,7 @@ void main() {
       );
       expect(findPlain('지난 기간과 같아요.'), findsOneWidget);
       expect(findPlain('변화 없음'), findsWidgets);
-      expect(find.textContaining('덜 썼어요'), findsNothing);
+      expect(findTextContaining('덜 썼어요'), findsNothing);
     });
   });
 
@@ -608,14 +608,14 @@ void main() {
       expect(findPlain('카테고리별 지출을 불러오지 못했어요'), findsOneWidget);
       expect(findPlain('요약을 불러오지 못했어요'), findsNothing);
       expect(boxes(tester), 1);
-      expect(find.textContaining('server error'), findsNothing);
+      expect(findTextContaining('server error'), findsNothing);
       expect(_bands(tester).length, 3, reason: '도넛(상자) · TOP 5 · 열지도, 요약 없음');
     });
 
     testWidgets('카테고리 탭: 셋 모두 실패 → 상자 셋(요약은 앞 띠가 말한다)', (tester) async {
       await _pump(tester, fail: {'range', 'merchant', 'heat'});
       expect(boxes(tester), 3);
-      expect(find.textContaining('server error'), findsNothing);
+      expect(findTextContaining('server error'), findsNothing);
     });
 
     testWidgets('추이 탭: 합계 실패 → 첫 띠 상자 하나뿐', (tester) async {
@@ -646,7 +646,7 @@ void main() {
       await _pump(tester, tab: StatsTab.fixed, fail: {'range'});
       expect(boxes(tester), 1);
       expect(findPlain('고정 · 변동 내용을 불러오지 못했어요'), findsOneWidget);
-      expect(find.text('다시 시도'), findsOneWidget);
+      expect(findText('다시 시도'), findsOneWidget);
     });
   });
 
@@ -656,7 +656,7 @@ void main() {
       expect(findPlain('카테고리 데이터가 없어요.'), findsOneWidget);
       expect(findPlain('가맹점 데이터가 없어요.'), findsOneWidget);
       expect(findPlain('이번 달 거래가 아직 적어요.'), findsOneWidget);
-      expect(find.textContaining('없습니다'), findsNothing);
+      expect(findTextContaining('없습니다'), findsNothing);
     });
   });
 

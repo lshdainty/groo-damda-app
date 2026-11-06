@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/session_scope.dart';
+import '../support/plain_text.dart';
 
 /// 컨테이너가 살아 있는 동안 값을 들고 있는 provider — autoDispose 가 아니다.
 /// 앱의 조회 provider 들과 같은 수명이다.
@@ -50,14 +51,14 @@ void main() {
     final first = containerOf(tester);
     first.read(_cached.notifier).put("alice's");
     await tester.pump();
-    expect(find.text("alice's"), findsOneWidget);
+    expect(findText("alice's"), findsOneWidget);
 
     await restart(tester);
 
     final second = containerOf(tester);
     expect(identical(first, second), isFalse);
-    expect(find.text("alice's"), findsNothing);
-    expect(find.text('empty'), findsOneWidget);
+    expect(findText("alice's"), findsNothing);
+    expect(findText('empty'), findsOneWidget);
     expect(_disposed, 1, reason: '옛 컨테이너가 살아 있으면 값도 타이머도 계속 남는다');
   });
 

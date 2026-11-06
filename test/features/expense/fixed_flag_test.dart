@@ -31,6 +31,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import '../../support/add_tx_drive.dart';
+import '../../support/plain_text.dart';
 
 const _category = ExpenseCategory(
   rowId: 11,
@@ -153,12 +154,12 @@ Future<void> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
 Finder _submit(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 const _switchKey = ValueKey('tx-fixed-switch');
 
@@ -237,7 +238,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('tx-type-TRANSFER')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '1000');
-    await tester.tap(find.text('다음'));
+    await tester.tap(findText('다음'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(_switchKey), findsNothing);

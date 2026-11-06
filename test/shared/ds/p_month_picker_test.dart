@@ -7,6 +7,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/shared/ds/wheel_picker/p_wheel_picker.dart';
+import '../../support/plain_text.dart';
 
 DateTime? _result;
 bool _closed = false;
@@ -45,7 +46,7 @@ Future<void> _open(WidgetTester tester, {double scale = 1}) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(_app(scale: scale));
-  await tester.tap(find.text('열기'));
+  await tester.tap(findText('열기'));
   await tester.pumpAndSettle();
 }
 
@@ -62,17 +63,17 @@ void main() {
     expect(tester.getSize(cols.at(0)).width, 120);
     expect(tester.getSize(cols.at(1)).width, 96);
     // 열 때 지금 달에서 시작 — 고른 항목 글
-    expect(find.text('2026년'), findsWidgets);
-    expect(find.text('10월'), findsWidgets);
+    expect(findText('2026년'), findsWidgets);
+    expect(findText('10월'), findsWidgets);
     // 옛 격자의 "오늘로" · 연 ‹ › 는 없다
-    expect(find.text('오늘로'), findsNothing);
+    expect(findText('오늘로'), findsNothing);
     expect(find.byType(GridView), findsNothing);
-    expect(find.text('완료'), findsOneWidget);
+    expect(findText('완료'), findsOneWidget);
   });
 
   testWidgets('완료는 열 때의 달을 1일로 돌려준다', (tester) async {
     await _open(tester);
-    await tester.tap(find.text('완료'));
+    await tester.tap(findText('완료'));
     await tester.pumpAndSettle();
     expect(_closed, isTrue);
     expect(_result, DateTime(2026, 10, 1));
@@ -85,11 +86,11 @@ void main() {
       of: find.byWidgetPredicate(
         (w) => w is PWheelPickerColumn && w.semanticLabel == '월',
       ),
-      matching: find.text('11월'),
+      matching: findText('11월'),
     );
     await tester.tap(next.first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('완료'));
+    await tester.tap(findText('완료'));
     await tester.pumpAndSettle();
     expect(_result, DateTime(2026, 11, 1));
   });
@@ -114,7 +115,7 @@ void main() {
       220,
     );
     expect(tester.takeException(), isNull);
-    expect(find.text('완료'), findsOneWidget);
+    expect(findText('완료'), findsOneWidget);
   });
 
   testWidgets('선택 띠는 휠 끝에서 16 들여 x 40~320 (100% · 200%)', (tester) async {

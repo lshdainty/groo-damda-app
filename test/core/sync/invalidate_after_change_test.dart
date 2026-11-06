@@ -282,7 +282,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text(l.actionDelete),
+        matching: findText(l.actionDelete),
       ),
     );
     await tester.pumpAndSettle();

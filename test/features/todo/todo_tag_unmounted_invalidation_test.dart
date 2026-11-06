@@ -36,6 +36,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import '../../support/plain_text.dart';
 
 /// 할 일 화면이 실제로 보는 필터 — `TodoScreen._allFilter` 와 같은 값.
 const TodoFilter _allFilter = (status: null, priority: null);
@@ -132,7 +133,8 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: Scaffold()),
+        // 새 키 — 같은 모양이면 Navigator 가 재사용돼 열린 시트가 로컬라이제이션 없는 새 앱 아래 남는다
+        child: MaterialApp(key: UniqueKey(), home: const Scaffold()),
       ),
     );
     await tester.pump();
@@ -143,7 +145,7 @@ void main() {
     await open(tester);
 
     // 목록 제목의 글 버튼 "태그 추가" — 새 태그 폼이 시트로 뜬다.
-    await tester.tap(find.text(l.ttagAddCta));
+    await tester.tap(findText(l.ttagAddCta));
     await tester.pumpAndSettle();
     await tester.enterText(_field(), '개인');
     await tester.pumpAndSettle();

@@ -14,6 +14,8 @@ import 'package:groo_damda_app/features/notification/application/notification_pr
 import 'package:groo_damda_app/features/notification/domain/notification.dart';
 import 'package:groo_damda_app/features/notification/presentation/notification_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
+import '../../support/semantics.dart';
 
 // 고정한 '지금' — 2026-10-23(금) 15:00. 알림 시각은 서버 UTC 꼴로 만든다(기기 시간대와 무관하게 같은 날).
 final _now = DateTime(2026, 10, 23, 15);
@@ -110,13 +112,13 @@ void main() {
   testWidgets('바닥 고정 "알림 설정" 띠가 없고 상단 바에 ⚙ 이 있다', (tester) async {
     await _pump(tester, _items());
     expect(find.byIcon(LucideIcons.settings), findsOneWidget);
-    expect(find.text('알림 설정'), findsNothing);
+    expect(findText('알림 설정'), findsNothing);
   });
 
   testWidgets('머리 줄은 서버 수를 쉼표로 쓰고 "모두 읽음" 이 있다', (tester) async {
     await _pump(tester, _items());
-    expect(find.text('읽지 않은 알림 1,234개'), findsOneWidget);
-    expect(find.text('모두 읽음'), findsOneWidget);
+    expect(findText('읽지 않은 알림 1,234개'), findsOneWidget);
+    expect(findText('모두 읽음'), findsOneWidget);
   });
 
   testWidgets('수가 오기 전에는 머리 줄이 없다 — 받은 줄로 세지 않는다', (tester) async {
@@ -142,28 +144,28 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    expect(find.textContaining('읽지 않은 알림'), findsNothing);
+    expect(findTextContaining('읽지 않은 알림'), findsNothing);
   });
 
   testWidgets('수가 0 이면 머리 줄이 없다', (tester) async {
     await _pump(tester, _items(), count: () async => 0);
-    expect(find.textContaining('읽지 않은 알림'), findsNothing);
+    expect(findTextContaining('읽지 않은 알림'), findsNothing);
   });
 
   testWidgets('날짜 묶음 머리 — 오늘 · 어제 · 요일 · 다른 해', (tester) async {
     await _pump(tester, _items());
-    expect(find.text('10월 23일 (금) · 오늘'), findsOneWidget);
-    expect(find.text('10월 22일 (목) · 어제'), findsOneWidget);
-    expect(find.text('10월 18일 (일)'), findsOneWidget);
-    expect(find.text('2025년 12월 3일 (수)'), findsOneWidget);
+    expect(findText('10월 23일 (금) · 오늘'), findsOneWidget);
+    expect(findText('10월 22일 (목) · 어제'), findsOneWidget);
+    expect(findText('10월 18일 (일)'), findsOneWidget);
+    expect(findText('2025년 12월 3일 (수)'), findsOneWidget);
   });
 
   testWidgets('줄 끝 시각 — 오늘 묶음은 지난 시간, 다른 날은 시각', (tester) async {
     await _pump(tester, _items());
-    expect(find.text('3시간 전'), findsOneWidget);
-    expect(find.text('오후 9:00'), findsOneWidget);
-    expect(find.text('오후 2:15'), findsOneWidget);
-    expect(find.text('오전 9:00'), findsOneWidget);
+    expect(findText('3시간 전'), findsOneWidget);
+    expect(findText('오후 9:00'), findsOneWidget);
+    expect(findText('오후 2:15'), findsOneWidget);
+    expect(findText('오전 9:00'), findsOneWidget);
   });
 
   testWidgets('줄은 ds List 줄 — 타일 40 · 안 읽은 줄에 읽는 글 "안 읽음"', (tester) async {
@@ -172,12 +174,12 @@ void main() {
       tester.getSize(find.byKey(const ValueKey('plist-tile')).first),
       const Size(40, 40),
     );
-    expect(find.bySemanticsLabel('안 읽음'), findsOneWidget);
+    expect(findSemanticsContaining('안 읽음'), findsOneWidget);
     expect(find.byKey(const ValueKey('noti-unread-dot')), findsOneWidget);
   });
 
   testWidgets('알림이 없으면 "아직 알림이 없어요"', (tester) async {
     await _pump(tester, const []);
-    expect(find.text('아직 알림이 없어요'), findsOneWidget);
+    expect(findText('아직 알림이 없어요'), findsOneWidget);
   });
 }

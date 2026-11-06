@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
 import 'package:groo_damda_app/features/card/domain/card_catalog_page.dart';
 import 'package:groo_damda_app/features/card/presentation/card_benefits_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 List<CardCatalogSummary> _cards(int from, int count) => [
   for (var i = from; i < from + count; i++)
@@ -81,8 +82,8 @@ void main() {
     );
     await _settle(tester);
     expect(_text('카드를 불러오지 못했어요'), findsOneWidget);
-    expect(find.textContaining('boom'), findsNothing);
-    expect(find.textContaining('Exception'), findsNothing);
+    expect(findTextContaining('boom'), findsNothing);
+    expect(findTextContaining('Exception'), findsNothing);
     expect(_text('다시 시도'), findsOneWidget);
     // 다시 시도 → 목록
     fail = false;
@@ -116,7 +117,7 @@ void main() {
     await tester.drag(find.byType(ListView).first, const Offset(0, -4000));
     await _settle(tester);
     expect(_text('더 불러오지 못했어요.'), findsOneWidget);
-    expect(find.textContaining('boom'), findsNothing);
+    expect(findTextContaining('boom'), findsNothing);
     expect(_text('지어낸 카드 19'), findsOneWidget, reason: '받은 줄은 그대로');
     // 못 불러온 동안 스크롤해도 거듭 부르지 않는다
     expect(asked, [0, 1]);

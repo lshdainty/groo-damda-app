@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/time_picker/time_picker_demo.dart';
 import 'package:groo_damda_app/shared/ds/wheel_picker/p_wheel_picker.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('time-picker');
 
@@ -689,7 +690,7 @@ void main() {
         expect(_centerLabel(tester, '시'), '9');
         expect(_centerLabel(tester, '분'), '15');
         expect(result, isNull, reason: '열기만 했다 — 고른 것처럼 넣지 않는다');
-        await tester.tap(find.widgetWithText(PButton, '완료'));
+        await tester.tap(findWidgetWithText(PButton, '완료'));
         await tester.pumpAndSettle();
         expect(result, const PTimeValue(9, 15));
       },
@@ -713,7 +714,7 @@ void main() {
       await _tab(tester, 3);
       await _key(tester, LogicalKeyboardKey.arrowDown); // 55 → 00
       await _tab(tester, 3); // 오전·오후 → 시 로 돌아와서
-      await tester.tap(find.widgetWithText(PButton, '완료'));
+      await tester.tap(findWidgetWithText(PButton, '완료'));
       await tester.pumpAndSettle();
       expect(result, const PTimeValue(11, 0));
 

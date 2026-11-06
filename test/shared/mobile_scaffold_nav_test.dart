@@ -12,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.d
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/widgets/mobile_scaffold.dart';
+import '../support/plain_text.dart';
 
 class _Screen extends StatelessWidget {
   const _Screen(this.name);
@@ -178,7 +179,7 @@ void main() {
       );
       expect(bar.items.map((i) => i.current), [false, true, false, false]);
     }
-    await tester.tap(find.text('예산').first);
+    await tester.tap(findText('예산').first);
     await tester.pumpAndSettle();
     expect(router.state.uri.queryParameters['tab'], 'budget');
     expect(
@@ -191,18 +192,18 @@ void main() {
     await pump(tester, '/expense');
     await tester.tap(find.byKey(const ValueKey('inc-expense')));
     await tester.pump();
-    expect(find.text('expense:1'), findsOneWidget);
+    expect(findText('expense:1'), findsOneWidget);
 
-    await tester.tap(find.text('통계').first);
+    await tester.tap(findText('통계').first);
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
         of: find.byType(PTabs<MoneyTab>),
-        matching: find.text('가계부'),
+        matching: findText('가계부'),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('expense:1'), findsOneWidget);
+    expect(findText('expense:1'), findsOneWidget);
   });
 
   testWidgets('좌우로 밀면 탭이 옮겨진다', (tester) async {

@@ -132,7 +132,7 @@ Future<_CapturingRepo> _openEdit(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -154,7 +154,7 @@ void main() {
     // 읽기 전용 잔액에 음수 부호가 붙지 않는다 — ASCII 도 U+2212 도(양수로 보인다).
     expect(findPlain('−500,000'), findsNothing);
     expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
+      findTextContaining(RegExp(r'-\d'), findRichText: true),
       findsNothing,
     );
     expect(findRichPlain('지금 미결제 잔액 500,000원'), findsOneWidget);
@@ -385,7 +385,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
       return repo;
     }

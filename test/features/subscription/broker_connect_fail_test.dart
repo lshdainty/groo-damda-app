@@ -67,7 +67,7 @@ Future<_Repo> _run(WidgetTester tester, int status) async {
   );
   await tester.enterText(find.byType(TextField).at(0), 'KEY123');
   await tester.enterText(find.byType(TextField).at(1), 'SECRET456');
-  await tester.tap(find.text('연결하기'));
+  await tester.tap(findText('연결하기'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -85,7 +85,7 @@ void main() {
     expect(repo.silent, [true]);
     expect(find.byType(FormErrorCallout), findsOneWidget);
     expect(findPlain('인증정보가 올바르지 않아요.'), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
   });
 
   testWidgets('5xx — 증권사를 연결하지 못했어요. Callout · 값 유지', (tester) async {

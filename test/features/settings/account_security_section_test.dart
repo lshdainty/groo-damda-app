@@ -16,8 +16,8 @@ import 'package:groo_damda_app/features/settings/presentation/account_screen.dar
 import 'package:groo_damda_app/features/settings/presentation/appearance_section.dart';
 import 'package:groo_damda_app/features/settings/presentation/hide_amounts_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import '../../support/plain_text.dart';
-import 'package:groo_damda_app/shared/widgets/p_switch.dart';
 
 /// OS 프롬프트 없이 정해진 결과만 돌려주는 가짜 인증.
 class _FakeAuth extends AppLockAuth {
@@ -104,19 +104,19 @@ void main() {
       await container.read(settingsProvider.future);
       await tester.pump();
 
-      expect(find.text('앱 잠금'), findsOneWidget);
-      expect(find.text('금액 가리기'), findsOneWidget);
+      expect(findText('앱 잠금'), findsOneWidget);
+      expect(findText('금액 가리기'), findsOneWidget);
       // 가려진 카드 수 / 전체 — 들어가 보지 않아도 상태가 보여야 한다.
-      expect(find.text('0 / ${kAllHideCards.length}'), findsOneWidget);
+      expect(findText('0 / ${kAllHideCards.length}'), findsOneWidget);
       // '준비중' 자리표시 행은 사라졌다.
-      expect(find.text('준비중'), findsNothing);
+      expect(findText('준비중'), findsNothing);
       // [수정] 은 막혀 있고 이유 Callout 이 머리 아래에 선다(D3 B)
-      expect(find.text('프로필 수정은 곧 열려요.'), findsOneWidget);
+      expect(findText('프로필 수정은 곧 열려요.'), findsOneWidget);
       // 누를 수 없던 줄 넷(로그인 기록 · Apple · 카카오 · 네이버)은 걷었다(I-14 9)
-      expect(find.text('로그인 기록'), findsNothing);
-      expect(find.text('Apple ID'), findsNothing);
-      expect(find.text('카카오'), findsNothing);
-      expect(find.text('네이버'), findsNothing);
+      expect(findText('로그인 기록'), findsNothing);
+      expect(findText('Apple ID'), findsNothing);
+      expect(findText('카카오'), findsNothing);
+      expect(findText('네이버'), findsNothing);
     });
 
     testWidgets('2단계 인증 행은 메뉴에 없다', (tester) async {
@@ -130,9 +130,9 @@ void main() {
 
       // 켜도 서버·로컬 어디에도 안 남고 백엔드에 2FA 가 아예 없었다 — 켠 줄 알고
       // 안심하게 만드는 행이라 뺐다(웹은 desk-front #360 에서 먼저 뺐다).
-      expect(find.text('2단계 인증'), findsNothing);
+      expect(findText('2단계 인증'), findsNothing);
       // 바로 아래 앱 잠금은 진짜 기능이다 — 같이 사라지면 안 된다.
-      expect(find.text('앱 잠금'), findsOneWidget);
+      expect(findText('앱 잠금'), findsOneWidget);
     });
 
     testWidgets('앱 잠금 스위치는 인증을 통과해야 켜진다', (tester) async {
@@ -143,10 +143,13 @@ void main() {
       await tester.pump();
 
       // 2단계 인증을 뺀 뒤 보안 섹션의 스위치는 앱 잠금 하나뿐이다.
-      final switches = find.byType(PSwitch);
+      // 스위치 줄은 ds List 스위치 줄이다(옛 shared/widgets PSwitch 아님)
+      final switches = find.byType(PListSwitchItem);
       expect(switches, findsOneWidget);
       await tester.tap(switches.first);
-      await tester.pumpAndSettle();
+      // 계정 화면의 다른 구역(구독 등)은 받는 중이라 Skeleton 이 늘 돈다 — 가라앉기를 기다리지 않는다
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(auth.calls, 1);
       // 인증 실패 → 꺼진 채로 남는다.
@@ -162,7 +165,7 @@ void main() {
       await container.read(settingsProvider.future);
       await tester.pump();
 
-      await tester.tap(find.text('금액 가리기'));
+      await tester.tap(findText('금액 가리기'));
       await tester.pumpAndSettle();
 
       // 전용 화면 — '전체' 탭에서 카드 목록이 바로 보이고, 저장 버튼이 아래 붙는다.
@@ -197,13 +200,13 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.text('테마'), findsOneWidget);
-      expect(find.text('언어'), findsOneWidget);
-      expect(find.text('기준 지역'), findsOneWidget);
-      expect(find.text('기본 통화'), findsOneWidget);
-      expect(find.text('개인정보 보호'), findsNothing);
-      expect(find.text('앱 잠금'), findsNothing);
-      expect(find.text('금액 가리기'), findsNothing);
+      expect(findText('테마'), findsOneWidget);
+      expect(findText('언어'), findsOneWidget);
+      expect(findText('기준 지역'), findsOneWidget);
+      expect(findText('기본 통화'), findsOneWidget);
+      expect(findText('개인정보 보호'), findsNothing);
+      expect(findText('앱 잠금'), findsNothing);
+      expect(findText('금액 가리기'), findsNothing);
     });
   });
 }

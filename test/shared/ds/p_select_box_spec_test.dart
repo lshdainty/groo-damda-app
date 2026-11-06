@@ -23,6 +23,7 @@ import 'package:groo_damda_app/shared/ds/select_box/select_box_demo.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('select-box');
 
@@ -405,7 +406,7 @@ void main() {
       expect(mark.checked, isFalse);
       // 컨트롤이 없어도 읽기는 유지된다 — 고른 상태 · 제목이 상자의 이름
       final handle = tester.ensureSemantics();
-      final node = tester.getSemantics(find.text(keepAll('라')));
+      final node = tester.getSemantics(findText(keepAll('라')));
       expect(node.flagsCollection.isChecked, CheckedState.isTrue);
       expect(node.label, contains('라'));
       handle.dispose();
@@ -441,7 +442,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text(keepAll('무기한')));
+      await tester.tap(findText(keepAll('무기한')));
       await tester.pump();
       expect(picked, isEmpty);
       // 제목이 아니라 상자의 오른쪽 끝(컨트롤 옆 여백)을 눌러도 고른다
@@ -449,7 +450,7 @@ void main() {
       await tester.tapAt(Offset(second.right - 3, second.top + 3));
       await tester.pump();
       expect(picked, ['b']);
-      await tester.tap(find.text(keepAll('횟수 지정')));
+      await tester.tap(findText(keepAll('횟수 지정')));
       await tester.pump();
       expect(picked, ['b']);
     });
@@ -477,10 +478,10 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text(keepAll('막힌 상자')));
+      await tester.tap(findText(keepAll('막힌 상자')));
       await tester.pump();
       expect(picked, isEmpty);
-      await tester.tap(find.text(keepAll('횟수')));
+      await tester.tap(findText(keepAll('횟수')));
       await tester.pump();
       expect(picked, ['c']);
     });
@@ -513,9 +514,9 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text(keepAll('휴가 조회')));
+      await tester.tap(findText(keepAll('휴가 조회')));
       await tester.pump();
-      await tester.tap(find.text(keepAll('휴가 조회')));
+      await tester.tap(findText(keepAll('휴가 조회')));
       await tester.pump();
       expect(seen, [true, false]);
       node.requestFocus();

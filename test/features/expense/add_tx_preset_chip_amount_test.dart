@@ -19,6 +19,7 @@ import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _category = ExpenseCategory(
   rowId: 5,
@@ -67,7 +68,7 @@ Future<void> _open(WidgetTester tester, ExpenseTemplate preset) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -75,22 +76,22 @@ void main() {
   testWidgets('1만 위 프리셋 금액은 `19k` 가 아니라 만 단위로 줄인다', (tester) async {
     await _open(tester, _preset(19900));
 
-    expect(find.textContaining('19k'), findsNothing);
+    expect(findTextContaining('19k'), findsNothing);
     // 소수 첫째 자리까지 반올림하고 `.0` 은 뗀다 — 1.99만 → `2만`.
-    expect(find.textContaining('2만'), findsOneWidget);
+    expect(findTextContaining('2만'), findsOneWidget);
   });
 
   testWidgets('억을 넘겨도 `k` 로 뻗지 않는다', (tester) async {
     // 옛 코드는 1.2억을 `120000k` 라고 했다 — 칩 안에서 읽을 수 있는 숫자가 아니다.
     await _open(tester, _preset(120000000));
 
-    expect(find.textContaining('k'), findsNothing);
-    expect(find.textContaining('1.2억'), findsOneWidget);
+    expect(findTextContaining('k'), findsNothing);
+    expect(findTextContaining('1.2억'), findsOneWidget);
   });
 
   testWidgets('1만 아래는 예전과 같은 글자 — 천단위 콤마 정수', (tester) async {
     await _open(tester, _preset(9900));
 
-    expect(find.textContaining('9,900'), findsOneWidget);
+    expect(findTextContaining('9,900'), findsOneWidget);
   });
 }

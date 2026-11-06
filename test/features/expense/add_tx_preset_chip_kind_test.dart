@@ -20,6 +20,7 @@ import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _category = ExpenseCategory(
   rowId: 5,
@@ -75,7 +76,7 @@ Future<void> _open(WidgetTester tester) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -88,28 +89,28 @@ void main() {
   testWidgets('지출 탭 — 지출 프리셋만', (tester) async {
     await _open(tester);
 
-    expect(find.textContaining('점심'), findsOneWidget);
-    expect(find.textContaining('월급'), findsNothing);
-    expect(find.textContaining('적금이체'), findsNothing);
+    expect(findTextContaining('점심'), findsOneWidget);
+    expect(findTextContaining('월급'), findsNothing);
+    expect(findTextContaining('적금이체'), findsNothing);
   });
 
   testWidgets('수입 탭 — 수입 프리셋만', (tester) async {
     await _open(tester);
-    await tester.tap(find.text(l.expTypeIncome));
+    await tester.tap(findText(l.expTypeIncome));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('월급'), findsOneWidget);
-    expect(find.textContaining('점심'), findsNothing);
-    expect(find.textContaining('적금이체'), findsNothing);
+    expect(findTextContaining('월급'), findsOneWidget);
+    expect(findTextContaining('점심'), findsNothing);
+    expect(findTextContaining('적금이체'), findsNothing);
   });
 
   testWidgets('이체 탭 — 이체 프리셋만. 칩 줄 자체는 뜬다', (tester) async {
     await _open(tester);
-    await tester.tap(find.text(l.expTypeTransfer));
+    await tester.tap(findText(l.expTypeTransfer));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('적금이체'), findsOneWidget);
-    expect(find.textContaining('점심'), findsNothing);
-    expect(find.textContaining('월급'), findsNothing);
+    expect(findTextContaining('적금이체'), findsOneWidget);
+    expect(findTextContaining('점심'), findsNothing);
+    expect(findTextContaining('월급'), findsNothing);
   });
 }

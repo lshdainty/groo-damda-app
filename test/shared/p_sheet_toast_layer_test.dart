@@ -9,6 +9,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import '../support/plain_text.dart';
 
 void main() {
   late BuildContext sheetCtx;
@@ -38,7 +39,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
   }
 
@@ -56,9 +57,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(inSheet(find.text('미리 낸 돈 중 5,000원이 계좌로 돌아왔어요')), findsOneWidget);
+    expect(inSheet(findText('미리 낸 돈 중 5,000원이 계좌로 돌아왔어요')), findsOneWidget);
     // 시트 위의 버튼이 실제로 눌린다 — 모달 장벽 뒤 페이지의 것이 아니다.
-    await tester.tap(inSheet(find.text('잔액 고치기')));
+    await tester.tap(inSheet(findText('잔액 고치기')));
     await tester.pumpAndSettle();
     expect(tapped, 1);
   });
@@ -71,7 +72,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(DraggableScrollableSheet), findsNothing);
-    expect(find.text('저장했어요'), findsOneWidget);
+    expect(findText('저장했어요'), findsOneWidget);
   });
 
   testWidgets('시트 크기와 본문은 그대로다 — 층이 높이를 바꾸지 않는다', (tester) async {
@@ -84,6 +85,6 @@ void main() {
 
     // 기본 initialChildSize 0.85 — 투명 Scaffold 가 끼어도 같은 높이를 받는다.
     expect(sheetHeight, closeTo(screen * 0.85, 2));
-    expect(inSheet(find.text('지출 상세')), findsOneWidget);
+    expect(inSheet(findText('지출 상세')), findsOneWidget);
   });
 }

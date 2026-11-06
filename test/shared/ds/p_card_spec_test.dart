@@ -10,6 +10,7 @@ import 'package:groo_damda_app/shared/ds/card/p_card.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('card');
 
@@ -168,7 +169,7 @@ void main() {
         final header = tester.getRect(
           find.byKey(const ValueKey('card-header')),
         );
-        final tail = tester.getRect(find.text('본문'));
+        final tail = tester.getRect(findText('본문'));
         final isHero = variant == PCardVariant.hero;
         final inset = isHero ? 0.0 : 1.0; // 테두리 1
         // 순자산은 본문 종류와 상관없이 글 카드 여백 24 다(card.json 은 list 규칙의 아래 12 를 그대로 둔다)
@@ -249,7 +250,7 @@ void main() {
         final label = tester.widget<Text>(
           find.descendant(
             of: find.byKey(const ValueKey('text-button-box')),
-            matching: find.text('전체 보기'),
+            matching: findText('전체 보기'),
           ),
         );
         _expectText(failures, where, label.style!, want, 'headerAction', mode);
@@ -263,7 +264,7 @@ void main() {
             .isNotEmpty) {
           failures.add('$where — 글 버튼에 아이콘이 있다');
         }
-        final text = tester.getRect(find.text('전체 보기'));
+        final text = tester.getRect(findText('전체 보기'));
         final boxRect = tester.getRect(
           find.byKey(const ValueKey('text-button-box')),
         );
@@ -507,7 +508,7 @@ void main() {
         ),
       );
       expect(sameColor(plain, _face(tester).color!), isTrue);
-      var g = await press(find.text('식비'));
+      var g = await press(findText('식비'));
       expect(
         sameColor(pressedBg, _face(tester).color!),
         isTrue,
@@ -536,7 +537,7 @@ void main() {
           reduceMotion: true,
         ),
       );
-      g = await press(find.text('식비'));
+      g = await press(findText('식비'));
       expect(scale(), 1);
       expect(sameColor(pressedBg, _face(tester).color!), isTrue);
       await g.up();
@@ -555,7 +556,7 @@ void main() {
         ),
       );
       expect(find.byType(AnimatedScale), findsNothing);
-      g = await press(find.text('메모'));
+      g = await press(findText('메모'));
       expect(
         sameColor(
           specColor(
@@ -602,7 +603,7 @@ void main() {
       );
       expect(find.byType(AnimatedScale), findsNothing);
       expect(
-        tester.getSemantics(find.text('보기')),
+        tester.getSemantics(findText('보기')),
         isNot(matchesSemantics(isButton: true)),
       );
       handle.dispose();
@@ -651,7 +652,7 @@ void main() {
         tester.getSemantics(find.byKey(const ValueKey('card-title'))),
         matchesSemantics(isHeader: true, label: '이번 달 예산'),
       );
-      await tester.tap(find.text('전체 보기'));
+      await tester.tap(findText('전체 보기'));
       expect(taps, 1);
       handle.dispose();
     });
@@ -667,7 +668,7 @@ void main() {
           ),
         ),
       );
-      final g = await tester.startGesture(tester.getCenter(find.text('관리')));
+      final g = await tester.startGesture(tester.getCenter(findText('관리')));
       await tester.pump(const Duration(milliseconds: 150));
       await tester.pump(const Duration(milliseconds: 300));
       final deco =
@@ -738,7 +739,7 @@ void main() {
       expect(find.bySemanticsLabel('장보기 메모 고정'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('star')));
       expect((card, star), (0, 1));
-      await tester.tap(find.text('장보기 메모').first);
+      await tester.tap(findText('장보기 메모').first);
       expect((card, star), (1, 1));
       handle.dispose();
     });
@@ -849,7 +850,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 300));
         // 카드 링크 자리(글 · 빈 곳) — 면 색이 바뀐다(축소는 없다)
         final onLink = await tester.startGesture(
-          tester.getCenter(find.text('장보기 메모')),
+          tester.getCenter(findText('장보기 메모')),
         );
         await tester.pump(const Duration(milliseconds: 150));
         await tester.pump(const Duration(milliseconds: 300));
@@ -947,7 +948,8 @@ void main() {
 
     testWidgets('1억이 넘는 금액도 줄이지 않고 그대로, 칸보다 길면 줄이 바뀐다', (tester) async {
       await tester.pumpWidget(_host(Brightness.light, _statCardWorst()));
-      expect(find.text('−123,456,789,012원'), findsNothing); // 낱말 이음 문자가 끼어 있다
+      // 맨 find.text 로 — 그려진 글에 낱말 이음 문자가 끼어 있어 원래 글로는 맞지 않는다(그것을 잰다)
+      expect(find.text('−123,456,789,012원'), findsNothing);
       expect(tester.takeException(), isNull);
       final value = _text(tester, 'card-stat-value');
       expect(value.semanticsLabel, '−123,456,789,012원');

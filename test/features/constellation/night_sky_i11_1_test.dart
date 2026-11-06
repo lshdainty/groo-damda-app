@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
 import '../todo/todo_test_support.dart';
+import '../../support/plain_text.dart';
 
 // 실제 star_map — groo-sql `desk/data/27. constellation.sql` 에서 뽑은 공용 JSON(웹 · 앱 하네스 · 그리기 시험이 같이 읽는다).
 // 원본 사본: /home/lshdainty/qa/design-work/impl-audit/instructions/I-11-1-star-map-fixture.json — 바꾸면 같이 바꿀 것.
@@ -304,8 +305,8 @@ void main() {
       400,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('NEW'), findsOneWidget);
-    expect(find.text('128회'), findsOneWidget);
+    expect(findText('NEW'), findsOneWidget);
+    expect(findText('128회'), findsOneWidget);
     expect(_t('미수집'), findsWidgets);
     expect(find.bySemanticsLabel('카시오페이아 감상하기'), findsOneWidget);
     expect(find.byType(PBadge), findsWidgets);
@@ -329,8 +330,8 @@ void main() {
     );
     expect(_t('나의 밤하늘을 불러오지 못했어요'), findsOneWidget);
     expect(_t('밤하늘을 불러오지 못했어요'), findsNothing);
-    expect(find.textContaining('Exception'), findsNothing);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(findTextContaining('Exception'), findsNothing);
+    expect(findText('다시 시도'), findsOneWidget);
   });
 
   testWidgets('오늘 질의 실패 — 화면 전체 상자 하나', (tester) async {
@@ -340,7 +341,7 @@ void main() {
       overrides: _ov(failToday: true).cast(),
     );
     expect(_t('밤하늘을 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(findText('다시 시도'), findsOneWidget);
   });
 
   semTest('별자리 상세 — 이름 제목 · 키-값 줄 · 미수집', (tester) async {
@@ -354,7 +355,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     expect(_t('거문고자리'), findsWidgets);
     expect(_t('별 개수'), findsOneWidget);
@@ -392,7 +393,7 @@ void main() {
             stampBox.size.center(Offset.zero),
           );
           for (final t in ['$streak일째', '연속 관측!']) {
-            final box = tester.renderObject<RenderBox>(find.text(t));
+            final box = tester.renderObject<RenderBox>(findText(t));
             final w = box.size.width;
             final h = box.size.height;
             for (final local in [
@@ -450,8 +451,8 @@ void main() {
             RegExp(r'^\d{2}\.\d{2}\.\d{2} .$').hasMatch(w.data ?? ''),
       );
       expect(dateRow, findsOneWidget);
-      expect(find.text('관측 결과'), findsOneWidget);
-      expect(find.text('관측 결과 :'), findsNothing);
+      expect(findText('관측 결과'), findsOneWidget);
+      expect(findText('관측 결과 :'), findsNothing);
     });
 
     semTest('날 줄 ↔ 날짜 줄 틈 — 칸 바닥 ↔ 날짜 글 위 12 ~ 14 (칸 아래 4 + 위 12)', (
@@ -521,7 +522,7 @@ void main() {
         final circle = tester.getSize(
           find
               .ancestor(
-                of: find.text(dow).last,
+                of: findText(dow).last,
                 matching: find.byType(Container),
               )
               .first,
@@ -592,7 +593,7 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       // 오늘의 목표(켄타우루스자리) 줄의 미리보기
-      await tester.tap(find.text('미리보기').first);
+      await tester.tap(findText('미리보기').first);
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('constellation-detail-progress')),
@@ -606,7 +607,7 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.tap(find.text('미리보기').last);
+      await tester.tap(findText('미리보기').last);
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('constellation-detail-progress')),

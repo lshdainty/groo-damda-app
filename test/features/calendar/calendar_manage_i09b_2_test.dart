@@ -150,12 +150,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(findPlain('이름'), findsOneWidget);
       expect(findPlain('색상'), findsOneWidget);
-      expect(find.text('3F9A1C2B'), findsOneWidget);
+      expect(findText('3F9A1C2B'), findsOneWidget);
       expect(find.byType(PAvatar), findsNWidgets(3));
       expect(find.byType(PBadge), findsNWidgets(3));
       expect(findPlain('캘린더 삭제'), findsOneWidget);
       expect(findRichText('초대 코드'), findsOneWidget);
-      expect(find.text('복사'), findsOneWidget);
+      expect(findText('복사'), findsOneWidget);
       // 줄 끝 ⋮ 는 없다 — 내보낼 수 있는 멤버 줄은 누르는 줄이다
       expect(find.byIcon(LucideIcons.ellipsisVertical), findsNothing);
     });
@@ -187,7 +187,7 @@ void main() {
         app(const CalendarManageScreen(calendarId: 99999), _Repo()),
       );
       await tester.pumpAndSettle();
-      expect(find.text('목록'), findsOneWidget);
+      expect(findText('목록'), findsOneWidget);
     });
 
     testWidgets('이름 줄 → 이름 폼 → 이름만 보낸다', (tester) async {
@@ -200,7 +200,7 @@ void main() {
       await tester.tap(findPlain('이름'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(EditableText), '새 이름');
-      await tester.tap(find.text('저장'));
+      await tester.tap(findText('저장'));
       await tester.pumpAndSettle();
       expect(repo.lastUpdateName, '새 이름');
       expect(repo.lastUpdateColor, isNull);
@@ -216,7 +216,7 @@ void main() {
       await tester.tap(findPlain('이름'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(EditableText), '');
-      await tester.tap(find.text('저장'));
+      await tester.tap(findText('저장'));
       await tester.pumpAndSettle();
       expect(findPlain('캘린더 이름을 입력해주세요.'), findsOneWidget);
       expect(repo.lastUpdateName, isNull);
@@ -264,9 +264,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('초대 코드 없음'), findsOneWidget);
-      expect(find.text('복사'), findsNothing);
-      expect(find.text('새로 만들기'), findsOneWidget);
+      expect(findText('초대 코드 없음'), findsOneWidget);
+      expect(findText('복사'), findsNothing);
+      expect(findText('새로 만들기'), findsOneWidget);
     });
 
     testWidgets('캘린더를 지우면 이 페이지 하나만 닫힌다(목록은 남는다)', (tester) async {
@@ -319,11 +319,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(findPlain('캘린더 삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
       expect(repo.deletes, 1);
-      expect(find.text('목록'), findsOneWidget);
-      expect(find.text('설정'), findsNothing);
+      expect(findText('목록'), findsOneWidget);
+      expect(findText('설정'), findsNothing);
     });
   });
 
@@ -342,14 +342,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('열기'));
+      await tester.tap(findText('열기'));
       await tester.pumpAndSettle();
     }
 
     testWidgets('빈 칸으로 참여 — 칸 아래 "초대 코드를 입력해주세요."', (tester) async {
       final repo = _Repo();
       await open(tester, repo);
-      await tester.tap(find.text('참여').last);
+      await tester.tap(findText('참여').last);
       await tester.pumpAndSettle();
       expect(findPlain('초대 코드를 입력해주세요.'), findsOneWidget);
       expect(repo.joins, 0);
@@ -359,17 +359,17 @@ void main() {
       final repo = _Repo()..joinError = 'CAL_012';
       await open(tester, repo);
       await tester.enterText(find.byType(EditableText), 'zzzz');
-      await tester.tap(find.text('참여').last);
+      await tester.tap(findText('참여').last);
       await tester.pumpAndSettle();
       expect(findPlain('초대 코드를 확인해주세요.'), findsOneWidget);
-      expect(find.textContaining('서버 원문'), findsNothing);
+      expect(findTextContaining('서버 원문'), findsNothing);
     });
 
     testWidgets('이미 참여 — 칸 아래 오류', (tester) async {
       final repo = _Repo()..joinError = 'CAL_011';
       await open(tester, repo);
       await tester.enterText(find.byType(EditableText), '3f9a1c2b');
-      await tester.tap(find.text('참여').last);
+      await tester.tap(findText('참여').last);
       await tester.pumpAndSettle();
       expect(findPlain('이미 참여한 캘린더예요.'), findsOneWidget);
     });
@@ -388,7 +388,7 @@ void main() {
       final repo = _Repo();
       await open(tester, repo);
       await tester.enterText(find.byType(EditableText), '3F9A1C2B');
-      await tester.tap(find.text('참여').last);
+      await tester.tap(findText('참여').last);
       await tester.pumpAndSettle();
       expect(repo.joins, 1);
       expect(findPlain('"독서 모임" 캘린더에 참여했어요'), findsOneWidget);

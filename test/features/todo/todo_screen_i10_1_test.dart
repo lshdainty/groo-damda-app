@@ -80,7 +80,7 @@ Future<void> _pickMonth(
     of: find.byWidgetPredicate(
       (w) => w is PWheelPickerColumn && w.semanticLabel == name,
     ),
-    matching: find.text(text),
+    matching: findText(text),
   );
   if (target.year != from.year) {
     await tester.tap(col('연도', '${target.year}년').first);
@@ -88,7 +88,7 @@ Future<void> _pickMonth(
   }
   await tester.tap(col('월', '${target.month}월').first);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('완료'));
+  await tester.tap(findText('완료'));
   if (settle) {
     await tester.pumpAndSettle();
   } else {
@@ -150,7 +150,7 @@ void main() {
         expect(bar, findsOneWidget);
         expect(tester.getSize(bar).height, 56);
         expect(
-          find.descendant(of: bar, matching: find.text('할 일')),
+          find.descendant(of: bar, matching: findText('할 일')),
           findsOneWidget,
         );
         final back = find.byWidgetPredicate(
@@ -278,7 +278,7 @@ void main() {
           ),
         ],
       );
-      await tester.tap(find.text('밤하늘'));
+      await tester.tap(findText('밤하늘'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('night-sky-hero')));
       await tester.pumpAndSettle();
@@ -294,18 +294,18 @@ void main() {
       );
       final handle = tester.ensureSemantics();
       // 밤하늘을 펼치면 두 진입 단추가 뜬다
-      await tester.tap(find.text('밤하늘'));
+      await tester.tap(findText('밤하늘'));
       await tester.pumpAndSettle();
-      expect(find.text('관측 리포트'), findsOneWidget);
+      expect(findText('관측 리포트'), findsOneWidget);
       // 월 달력을 펼치면 밤하늘이 접힌다
       await tester.tap(find.bySemanticsLabel('월 달력'));
       await tester.pumpAndSettle();
-      expect(find.text('관측 리포트'), findsNothing);
+      expect(findText('관측 리포트'), findsNothing);
       expect(find.bySemanticsLabel('월 달력'), findsOneWidget);
       // 밤하늘을 다시 펼치면 달력이 접힌다 — 칸 수가 한 주(7)로 돌아온다
-      await tester.tap(find.text('밤하늘'));
+      await tester.tap(findText('밤하늘'));
       await tester.pumpAndSettle();
-      expect(find.text('관측 리포트'), findsOneWidget);
+      expect(findText('관측 리포트'), findsOneWidget);
       handle.dispose();
     });
   });
@@ -319,7 +319,7 @@ void main() {
     );
     final mark = find.descendant(
       of: find.byType(LedgerCalendarGrid),
-      matching: find.text('1건'),
+      matching: findText('1건'),
     );
     final box = find.ancestor(
       of: mark,
@@ -378,7 +378,7 @@ void main() {
       final next = DateTime(_now.year, _now.month + 1, 1);
       await _pickMonth(tester, _now, next);
       expect(repo.listReads, reads);
-      expect(find.text('${next.year}년 ${next.month}월'), findsWidgets);
+      expect(findText('${next.year}년 ${next.month}월'), findsWidgets);
     });
   });
 
@@ -410,7 +410,7 @@ void main() {
       overrides: todoOverrides(todos: _basic()),
       textScale: 2,
     );
-    await tester.tap(find.text('밤하늘'));
+    await tester.tap(findText('밤하늘'));
     await tester.pumpAndSettle();
     // 히어로(NightSkyHero — 밤하늘 배치 몫)는 200% 에서 main 도 42px 넘친다 — 이 시험은 두 단추만 본다
     tester.takeException();
@@ -446,7 +446,7 @@ void main() {
       // 표시는 aria-hidden 처럼 읽히지 않는다 — 칸 이름 하나로 읽힌다
       final mark = find.descendant(
         of: find.byType(LedgerCalendarGrid),
-        matching: find.text('1건'),
+        matching: findText('1건'),
       );
       expect(mark, findsOneWidget);
       expect(
@@ -472,7 +472,7 @@ void main() {
         overrides: todoOverrides(todos: _basic()),
       );
       final c = tester.element(find.byType(TodoScreen)).colors;
-      final mark = tester.widget<Text>(find.text('1건'));
+      final mark = tester.widget<Text>(findText('1건'));
       expect(mark.style!.color, c.fgBrand);
       expect(mark.style!.fontWeight, FontWeight.w700);
       expect(
@@ -585,8 +585,8 @@ void main() {
       expect(title.maxLines, isNull);
       final size = tester.getSize(findPlainContaining('자동차 보험'));
       expect(size.height, greaterThan(22 * 2 - 1), reason: '두 줄 이상으로 접힌다');
-      expect(find.textContaining('태그 없음'), findsOneWidget);
-      expect(find.textContaining('메모'), findsWidgets);
+      expect(findTextContaining('태그 없음'), findsOneWidget);
+      expect(findTextContaining('메모'), findsWidgets);
     });
 
     testWidgets('우선순위 배지 — 중요만 critical, 보통 · 여유는 neutral', (tester) async {
@@ -602,7 +602,7 @@ void main() {
         ),
       );
       PBadge badge(String label) =>
-          tester.widget<PBadge>(find.widgetWithText(PBadge, label));
+          tester.widget<PBadge>(findWidgetWithText(PBadge, label));
       expect(badge('중요').tone, PBadgeTone.critical);
       expect(badge('보통').tone, PBadgeTone.neutral);
       expect(badge('여유').tone, PBadgeTone.neutral);
@@ -823,15 +823,17 @@ void main() {
         tester,
         const TodoScreen(),
         overrides: todoOverrides(todos: _basic(), repo: repo),
+        // 실패 글은 스낵바다(todo_screen PSnackbar.maybeOf) — 앱처럼 호스트를 둔다
+        snackbarHost: true,
       );
       await tester.tap(_checkOf('보고서 마무리'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpAndSettle();
       expect(tester.widget<PCheckmark>(_checkOf('보고서 마무리')).checked, isFalse);
-      expect(find.text('할 일 상태를 바꾸지 못했어요.'), findsOneWidget);
-      expect(find.text('다시 시도'), findsNothing);
-      expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
+      expect(findText('할 일 상태를 바꾸지 못했어요.'), findsOneWidget);
+      expect(findText('다시 시도'), findsNothing);
+      expect(findTextContaining('RAW_SERVER_TEXT_4471'), findsNothing);
     });
   });
 
@@ -858,11 +860,11 @@ void main() {
         expect(text.style!.fontWeight, FontWeight.w500);
         expect(text.style!.color, c.fgNeutralSubtle);
         // 다 끝낸 날도 오른쪽 "1/1 완료" 는 옅은 회색 하나(초록 없음)
-        final ratio = tester.widget<Text>(find.text('1/1 완료'));
+        final ratio = tester.widget<Text>(findText('1/1 완료'));
         expect(ratio.style!.color, c.fgNeutralSubtle);
         expect(
           tester
-              .getSemantics(find.text(row.text))
+              .getSemantics(findText(row.text))
               .getSemanticsData()
               .headingLevel,
           2,
@@ -972,7 +974,7 @@ void main() {
         settle: false,
       );
       expect(find.byType(PTopNavigation), findsOneWidget);
-      expect(find.text('${_now.year}년 ${_now.month}월'), findsOneWidget);
+      expect(findText('${_now.year}년 ${_now.month}월'), findsOneWidget);
       expect(find.byType(PSkeleton), findsWidgets);
       expect(find.byType(TodoRow), findsNothing);
     });
@@ -991,9 +993,9 @@ void main() {
       expect(r.kind, PResultKind.failure);
       expect(r.title, '할 일을 불러오지 못했어요');
       expect(r.description, '잠시 후 다시 시도해주세요.');
-      expect(find.textContaining('RAW_SERVER_TEXT_9137'), findsNothing);
+      expect(findTextContaining('RAW_SERVER_TEXT_9137'), findsNothing);
       final before = repo.listReads;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
       expect(repo.listReads, greaterThan(before));
     });
