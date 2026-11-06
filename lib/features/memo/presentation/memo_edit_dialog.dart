@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/utf16_limit.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 제목 · 본문 입력 상한 — 서버 `FieldLimits`(TITLE_MAX 200 · CONTENT_MAX 10,000)와 같은 값.
 const int kMemoTitleMax = 200;
@@ -145,6 +146,9 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
   bool _submitting = false;
   bool _titleError = false;
   bool _saveError = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _errorKey = GlobalKey();
   bool get _isEdit => widget.edit != null;
 
@@ -294,7 +298,16 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       saved = await _saveMemo(c, args);
-    } catch (_) {
+    } catch (e) {
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        c
+          ..invalidate(memoListProvider)
+          ..invalidate(dashboardSummaryProvider)
+          ..invalidate(constellationTodayProvider)
+          ..invalidate(constellationSkyProvider)
+          ..invalidate(constellationCollectionProvider);
+      }
       if (!mounted) {
         // 저장 중에 시트를 닫았다 — 실패 Callout 을 둘 자리가 없으니 스낵바 + [다시 시도] 로 알린다(L8 · N4)
         _retrySnack(c, snack, l, args);
@@ -302,6 +315,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       }
       setState(() {
         _saveError = true;
+        _failure = e;
         _submitting = false;
       });
       // 키보드 · 큰 글자로 맨 위 Callout 이 화면 밖이면 올린다(M2)
@@ -369,7 +383,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
               ),
               child: FormErrorCallout(
                 key: _errorKey,
-                message: l.memoSaveFailed,
+                message: saveFailureText(l, _failure, l.memoSaveFailed),
               ),
             ),
           // 제목 — Input large. 위 12 · 좌우 24 · 아래 8

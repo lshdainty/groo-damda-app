@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 일정 추가 · 수정 폼(I-09 21 ~ 30) — ds Bottom Sheet 입력 폼. 제목 입력칸 + List 줄 칸 아홉(캘린더 · 라벨 · 종일 · 시작 · 종료 · 반복 ·
 /// 알림 · 장소 · 설명). 고르는 칸은 그 위에 고르기 시트가 뜨고, 장소 · 설명은 같은 시트 안에서 한 단계 들어간다. 바깥 · 끌기로 닫히지
@@ -527,10 +528,17 @@ class _CalendarEventFormSheetState
         return;
       }
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 시트는 닫히지 않고 쓴 값이 남는다 — 폼 맨 위 Callout(snackbar.md "저장 · 제출이 실패함")
       if (!mounted) return;
-      setState(() => _saveError = l.calFormSaveFailed);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        _invalidateAfterWrite(
+          recurring: _rruleForSave != null || widget.edit?.rrule != null,
+          orig: widget.edit,
+        );
+      }
+      setState(() => _saveError = saveFailureText(l, e, l.calFormSaveFailed));
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);

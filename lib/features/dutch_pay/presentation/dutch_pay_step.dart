@@ -8,7 +8,6 @@ import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
-import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
 import 'package:groo_damda_app/features/dutch_pay/application/dutch_pay_providers.dart';
 import 'package:groo_damda_app/features/dutch_pay/domain/dutch_shares.dart';
@@ -35,6 +34,7 @@ import 'package:groo_damda_app/shared/forms/step_done.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 참여자 이름 길이 상한 — 웹 `PARTICIPANT_NAME_MAX` 와 같은 값.
 const int kDutchParticipantNameMax = 20;
@@ -90,6 +90,9 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
   bool _submitting = false;
   bool _leaving = false;
   bool _saveError = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _saveErrorKey = GlobalKey();
   int _seq = 0;
   late final _Person _me = _Person(id: 'me', name: '');
@@ -272,8 +275,13 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
         : l.dutchSharesOverErr(txMoney(-diff, masked));
   }
 
-  void _showSaveError() {
-    setState(() => _saveError = true);
+  void _showSaveError([Object? error]) {
+    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+    if (isUnconfirmedSave(error)) ref.invalidate(dutchPayListProvider);
+    setState(() {
+      _saveError = true;
+      _failure = error;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _saveErrorKey.currentContext;
       if (ctx == null || !ctx.mounted) return;
@@ -332,10 +340,8 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       } catch (_) {}
       if (!mounted) return;
       widget.onFinished?.call();
-    } on ApiException {
-      if (mounted) _showSaveError();
-    } catch (_) {
-      if (mounted) _showSaveError();
+    } catch (e) {
+      if (mounted) _showSaveError(e);
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
@@ -389,7 +395,9 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
             ),
             child: Container(
               key: _saveErrorKey,
-              child: FormErrorCallout(message: l.dutchSaveFailed),
+              child: FormErrorCallout(
+                message: saveFailureText(l, _failure, l.dutchSaveFailed),
+              ),
             ),
           ),
         PList(

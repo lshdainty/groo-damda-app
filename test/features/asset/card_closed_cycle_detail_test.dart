@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'dart:convert';
@@ -375,26 +376,39 @@ void main() {
   });
 
   testWidgets(
-    '[지금 결제] — 응답 형식이 달라도(TypeError) zone 으로 빠지지 않고 맨 위 Callout · 진행 원이 멈춘다',
+    '[지금 결제] — 응답 형식이 달라(PARSE) 결제됐는지 모르면 실패라 하지 않고 확인 Callout · 청구를 다시 받는다(검수 M3)',
     (tester) async {
       final adapter = _BadBodyAdapter();
       final repo = AssetRepository(Dio()..httpClientAdapter = adapter);
+      var billingReads = 0;
       await _open(
         tester,
         billing: upcomingBilling,
         extraOverrides: [
           assetRepositoryProvider.overrideWith((ref) async => repo),
+          cardBillingProvider.overrideWith((ref, id) async {
+            billingReads++;
+            return upcomingBilling;
+          }),
         ],
       );
       await tester.tap(findText('지금 결제'));
       await tester.pumpAndSettle();
+      final before = billingReads;
       await tester.enterText(find.byType(TextField), '40000');
       await tester.tap(findText('결제하기'));
       await tester.pumpAndSettle();
       expect(adapter.calls, 1);
       expect(tester.takeException(), isNull, reason: 'zone 으로 빠지지 않는다');
-      expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+      expect(findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'), findsOneWidget);
+      expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsNothing);
+      expect(billingReads, greaterThan(before), reason: '성공 때와 같이 청구를 비운다');
       expect(findTextContaining('아흔아홉'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('p-bottom-sheet-root')),
+        findsOneWidget,
+        reason: '폼은 닫지 않는다',
+      );
       final pay = tester.widget<PButton>(
         find.ancestor(of: findText('결제하기'), matching: find.byType(PButton)),
       );
@@ -403,7 +417,7 @@ void main() {
   );
 
   testWidgets(
-    '[지금 결제] — 결제가 무엇을 던져도 진행 원은 멈추고 시트는 남아 Callout(try/catch/finally)',
+    '[지금 결제] — 결제가 무엇을 던져도 진행 원은 멈추고 시트는 남아 확인 Callout(try/catch/finally)',
     (tester) async {
       await _open(
         tester,
@@ -420,7 +434,8 @@ void main() {
       await tester.tap(findText('결제하기'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: 'zone 으로 빠지지 않는다');
-      expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+      // 결제가 됐는지 모르는 오류 — 실패라 하지 않는다(다시 누르면 이체가 두 번 생길 수 있다)
+      expect(findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'), findsOneWidget);
       expect(findTextContaining('형식 밖 오류'), findsNothing);
       final pay = tester.widget<PButton>(
         find.ancestor(of: findText('결제하기'), matching: find.byType(PButton)),
@@ -429,6 +444,29 @@ void main() {
       expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
     },
   );
+
+  testWidgets('[지금 결제] — 서버가 거절하면(ApiException) 지금처럼 "결제하지 못했어요"', (
+    tester,
+  ) async {
+    await _open(
+      tester,
+      billing: upcomingBilling,
+      extraOverrides: [
+        assetRepositoryProvider.overrideWith(
+          (ref) async => _ThrowingPayRepo(
+            ApiException(code: 'CARD_001', message: '서버 원문', statusCode: 400),
+          ),
+        ),
+      ],
+    );
+    await tester.tap(findText('지금 결제'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '40000');
+    await tester.tap(findText('결제하기'));
+    await tester.pumpAndSettle();
+    expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findTextContaining('서버 원문'), findsNothing);
+  });
 
   // 청구를 못 불러오면 "0원" 이 아니라 실패 띠 + 다시 시도.
   testWidgets('청구 조회 실패는 0원이 아니라 실패 띠', (tester) async {

@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// desk-back `DeskErrorCode.USER_PASSWORD_CHANGE_FAILED` — 이 폼에서는 현재 비밀번호 불일치 하나다.
 /// 판정은 문구가 아니라 코드로 한다(문구는 그루 계정 배포 · 언어마다 바뀐다). 웹 `password-change-error.ts` 와 같다.
@@ -64,6 +65,9 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
 
   /// 그 밖 실패 — 본문 맨 위 Callout. 값은 남는다.
   bool _failed = false;
+
+  /// 실패한 요청의 오류 — 응답을 읽지 못했으면(PARSE) 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _failKey = GlobalKey();
 
   @override
@@ -133,6 +137,7 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
           _currentInvalid = true;
         } else {
           _failed = true;
+          _failure = e;
         }
       });
       // 칸이 다시 켜진 뒤(오류를 반영한 프레임 다음)에 초점 — 제출 중에는 칸이 막혀 초점을 받지 못한다
@@ -188,7 +193,11 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
               child: PCallout(
                 tone: PCalloutTone.critical,
                 alert: true,
-                description: l.passwordChangeFailed,
+                description: saveFailureText(
+                  l,
+                  _failure,
+                  l.passwordChangeFailed,
+                ),
               ),
             ),
           // 필수 표시 · 자리 글(placeholder)은 없다 — 세 칸 모두 필수라 표시하지 않고, 조건은 아래 줄이 말한다

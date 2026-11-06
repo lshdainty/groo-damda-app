@@ -42,6 +42,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get queryReferenceFailed => '일부 정보를 불러오지 못했어요.';
 
   @override
+  String get saveUnconfirmed => '저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.';
+
+  @override
+  String get payUnconfirmed => '결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.';
+
+  @override
   String get actionApply => '적용';
 
   @override

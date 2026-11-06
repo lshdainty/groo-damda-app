@@ -11,6 +11,8 @@
   "actionRetry": "Retry",
   "queryRefreshFailed": "Couldn't refresh.",
   "queryReferenceFailed": "Some information couldn't be loaded.",
+  "saveUnconfirmed": "Couldn't confirm it was saved. Please check the list.",
+  "payUnconfirmed": "Couldn't confirm the payment. Please check the billing history.",
   "actionApply": "Apply",
   "actionReset": "Reset",
   "actionSearch": "Search",

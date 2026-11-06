@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/input_button/p_input_button.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 참여자 이름 길이 상한 — 웹 `PARTICIPANT_NAME_MAX` 와 같은 값.
 const int kDutchPersonNameMax = 20;
@@ -86,6 +87,9 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
   bool _attempted2 = false;
   bool _submitting = false;
   bool _saveError = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   String? _nameErr;
 
   /// 참여자(나 제외) — 나는 늘 있다.
@@ -300,10 +304,13 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
         // 저장은 끝났다 — 화면은 보던 목록을 그대로 둔다
       }
       if (mounted) PBottomSheet.of(context).close();
-    } catch (_) {
+    } catch (e) {
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) c.invalidate(dutchPayListProvider);
       if (!mounted) return;
       setState(() {
         _saveError = true;
+        _failure = e;
         _submitting = false;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -335,7 +342,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
               ),
               child: FormErrorCallout(
                 key: _errorKey,
-                message: l.dutchSaveFailed,
+                message: saveFailureText(l, _failure, l.dutchSaveFailed),
               ),
             ),
           step1 ? _step1(l) : _step2(l),

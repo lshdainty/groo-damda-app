@@ -65,6 +65,7 @@ import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/features/category/presentation/category_tile.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 String _formatTime(TimeOfDay t) =>
     '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
@@ -1051,10 +1052,12 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       PSnackbar.maybeOf(
         hostContextOf(context),
       )?.show(message: l.txfPresetSaved(name));
-    } on ApiException {
+    } on ApiException catch (e) {
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) ref.invalidate(presetListProvider);
       // 고칠 수 있는 서버 거절(이름 중복 등)은 위에서 먼저 막았다 — 남는 건 우리 글
-      setState(() => _presetSaveError = l.txfSaveFailed);
+      setState(() => _presetSaveError = saveFailureText(l, e, l.txfSaveFailed));
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _presetSaving = false);
@@ -1191,10 +1194,19 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   }
 
   /// 저장 실패 — 웹과 같은 한 글(서버 원문 없음). 확인창을 거친 저장의 실패도 보이게 본문을 맨 위로 올린다.
+  ///
+  /// 응답만 못 읽었으면(PARSE — 서버는 거래 · 이체를 만들었다) 실패라 하지 않는다: 성공 때처럼 가계부 · 자산 · 홈을 비우고
+  /// "저장됐는지 확인하지 못했어요. 목록에서 확인해주세요." 를 둔다. 폼은 닫지 않는다(검수 M3 — 다시 누르면 두 번 생긴다).
   void _failSave(ApiException e) {
     if (!mounted) return;
     final l = AppLocalizations.of(context);
-    setState(() => _saveError = l.txfSaveFailed);
+    if (isUnconfirmedSave(e)) {
+      ref.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChange(ref);
+      final edited = _edit ?? _replaceOf;
+      if (edited != null) ref.invalidate(expenseSplitsProvider(edited.rowId));
+    }
+    setState(() => _saveError = saveFailureText(l, e, l.txfSaveFailed));
     scrollSheetBodyToTop(context);
   }
 

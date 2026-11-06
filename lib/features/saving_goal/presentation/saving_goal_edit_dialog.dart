@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 이름 길이 상한 — 웹 `GOAL_NAME_MAX` · 카테고리와 같은 값(QA #52).
 const _kNameMax = 12;
@@ -93,6 +94,9 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
 
   bool _submitting = false;
   bool _failed = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _errorKey = GlobalKey();
   String? _nameError;
   String? _amountError;
@@ -317,13 +321,21 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
           // (다시 누르면 같은 목표가 또 생긴다). 닫고 스낵바 + [다시 시도](납입만).
           try {
             await repo.contribute(created.rowId, amount: current, silent: true);
-          } on ApiException {
+          } on ApiException catch (e) {
             ref.invalidate(savingGoalListProvider);
             if (!mounted) return;
             final l = AppLocalizations.of(context);
             final container = ProviderScope.containerOf(context);
             final snack = PSnackbar.of(context);
             PBottomSheet.of(context).close();
+            // 납입 응답만 못 읽었다(서버는 납입했다) — [다시 시도] 를 주면 두 번 납입된다. 확인을 부탁한다(검수 M3)
+            if (isUnconfirmedSave(e)) {
+              snack.show(
+                message: l.saveUnconfirmed,
+                tone: PSnackbarTone.critical,
+              );
+              return;
+            }
             _firstContributionFailed(
               container,
               l,
@@ -338,10 +350,15 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
       ref.invalidate(savingGoalListProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
-      setState(() => _failed = true);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
+      if (isUnconfirmedSave(e)) ref.invalidate(savingGoalListProvider);
+      setState(() {
+        _failed = true;
+        _failure = e;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
@@ -403,7 +420,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
               padding: gutter,
               child: FormErrorCallout(
                 key: _errorKey,
-                message: l.savingGoalSaveFailed,
+                message: saveFailureText(l, _failure, l.savingGoalSaveFailed),
               ),
             ),
           Padding(

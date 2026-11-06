@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 캘린더 이름 최대 글자 수 — 서버 `FieldLimits.NAME_MAX`.
 const int kCalendarNameMax = 50;
@@ -137,9 +138,11 @@ class _CreateFormState extends ConsumerState<_CreateForm> {
       ref.invalidate(userCalendarListProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() => _saveError = l.calCreateFailed);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
+      if (isUnconfirmedSave(e)) ref.invalidate(userCalendarListProvider);
+      setState(() => _saveError = saveFailureText(l, e, l.calCreateFailed));
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
@@ -304,9 +307,11 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
       ref.invalidate(userCalendarListProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() => _saveError = l.calManageSaveFailed);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
+      if (isUnconfirmedSave(e)) ref.invalidate(userCalendarListProvider);
+      setState(() => _saveError = saveFailureText(l, e, l.calManageSaveFailed));
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
@@ -432,6 +437,11 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
       );
     } on ApiException catch (e) {
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        ref.invalidate(userCalendarListProvider);
+        ref.invalidate(monthEventsProvider);
+      }
       setState(() {
         switch (e.code) {
           case 'CAL_012':
@@ -439,7 +449,7 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
           case 'CAL_011':
             _codeError = l.calJoinAlreadyMember;
           default:
-            _saveError = l.calJoinFailed;
+            _saveError = saveFailureText(l, e, l.calJoinFailed);
         }
       });
       if (_codeError != null) widget.codeFocus.requestFocus();

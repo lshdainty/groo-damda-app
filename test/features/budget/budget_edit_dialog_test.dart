@@ -26,6 +26,16 @@ class _FakeRepo extends BudgetRepository {
   final calls = <String>[];
   bool fail = false;
 
+  /// 응답만 못 읽은 쓰기(PARSE) — 서버는 저장했다.
+  bool parseFail = false;
+  int lists = 0;
+
+  @override
+  Future<List<Budget>> list({int? year, int? month}) async {
+    lists++;
+    return const [];
+  }
+
   /// 있으면 응답을 이 값이 끝날 때까지 미룬다 — 저장 중인 시트를 본다.
   Completer<void>? gate;
 
@@ -50,6 +60,9 @@ class _FakeRepo extends BudgetRepository {
     calls.add('update:$id:$budgetAmount');
     if (!silent) calls.add('NOT-SILENT');
     if (gate != null) await gate!.future;
+    if (parseFail) {
+      throw ApiException(code: kApiParseErrorCode, message: '응답 원문');
+    }
     if (fail) throw ApiException(code: 'X', message: '서버 원문');
   }
 }
@@ -333,6 +346,37 @@ void main() {
     expect(_t(l.budgetSaveFailed), findsOneWidget);
     expect(_amount(tester), '600,000');
   });
+
+  testWidgets(
+    '응답만 못 읽은 저장(PARSE)은 실패라 하지 않는다 — 확인 Callout · 목록을 비운다 · 폼은 남는다(검수 M3)',
+    (tester) async {
+      const edit = Budget(
+        rowId: 7,
+        budgetAmount: 500000,
+        budgetYear: 2026,
+        budgetMonth: 10,
+      );
+      final repo = await _open(tester, edit: edit);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TextButton).first),
+      );
+      // 예산 목록을 지켜보는 화면이 있다 — 비우면 다시 받는다
+      final sub = container.listen(
+        monthBudgetsProvider((year: 2026, month: 10)),
+        (_, _) {},
+      );
+      addTearDown(sub.close);
+      await tester.pumpAndSettle();
+      final before = repo.lists;
+      repo.parseFail = true;
+      await _press(tester, l.actionSave);
+      expect(_t(l.saveUnconfirmed), findsOneWidget);
+      expect(_t(l.budgetSaveFailed), findsNothing);
+      expect(findTextContaining('응답 원문'), findsNothing);
+      expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
+      expect(repo.lists, greaterThan(before), reason: '성공 때와 같은 목록을 비운다');
+    },
+  );
 
   testWidgets('바뀐 채 닫으면 확인창 · 안 바뀌면 묻지 않는다', (tester) async {
     await _open(tester, overallNew: true);

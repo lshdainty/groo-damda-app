@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 총 예산 제안 · 카테고리 예산 제안(웹 `MonthlyBudgetDialog` · `PRESETS` 와 같은 값) — 갈래마다 따로다.
 const kBudgetTotalPresets = [1500000, 2000000, 2500000, 3000000];
@@ -124,6 +125,9 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   late final int? _initialCategory;
   bool _submitting = false;
   bool _failed = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _errorKey = GlobalKey();
   String? _catError;
   String? _amountError;
@@ -233,10 +237,20 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       ref.invalidate(budgetComplianceProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
-      setState(() => _failed = true);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
+      if (isUnconfirmedSave(e)) {
+        ref.invalidate(
+          monthBudgetsProvider((year: widget.year, month: widget.month)),
+        );
+        ref.invalidate(budgetComplianceProvider);
+      }
+      setState(() {
+        _failed = true;
+        _failure = e;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
@@ -296,7 +310,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               ),
               child: FormErrorCallout(
                 key: _errorKey,
-                message: l.budgetSaveFailed,
+                message: saveFailureText(l, _failure, l.budgetSaveFailed),
               ),
             ),
           ?categoryRow,

@@ -42,6 +42,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queryReferenceFailed => 'Some information couldn\'t be loaded.';
 
   @override
+  String get saveUnconfirmed =>
+      'Couldn\'t confirm it was saved. Please check the list.';
+
+  @override
+  String get payUnconfirmed =>
+      'Couldn\'t confirm the payment. Please check the billing history.';
+
+  @override
   String get actionApply => 'Apply';
 
   @override

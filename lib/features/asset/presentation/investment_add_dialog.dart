@@ -34,6 +34,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 export 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showInvestmentAddDialog, showInvestmentEditDialog;
@@ -506,6 +507,11 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       // 고쳐 다시 할 수 있는 코드(AST_036 · AST_037)만 다른 고정 글로 가른다(I-13).
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        invalidateAfterAssetChange(ref);
+        ref.invalidate(investmentValuationMapProvider);
+      }
       setState(() {
         _failed = true;
         _failCode = e.code;

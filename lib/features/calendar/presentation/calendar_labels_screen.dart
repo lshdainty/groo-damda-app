@@ -31,6 +31,7 @@ import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 라벨 이름 최대 글자 수 — 카테고리 · 라벨 · 태그 · 목표 이름 12자(웹 d837eedc, 카드 한 줄에 들어가는 길이).
 const int kLabelNameMax = 12;
@@ -335,9 +336,14 @@ class _LabelFormState extends ConsumerState<_LabelForm> {
       ref.invalidate(monthEventsProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() => _saveError = l.calLabelSaveFailed);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        ref.invalidate(eventLabelsProvider);
+        ref.invalidate(monthEventsProvider);
+      }
+      setState(() => _saveError = saveFailureText(l, e, l.calLabelSaveFailed));
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);

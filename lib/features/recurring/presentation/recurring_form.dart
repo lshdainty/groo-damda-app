@@ -44,6 +44,7 @@ import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/forms/step_done.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 거래처(수입이면 수입처) 상한 · 메모 상한 · 끝 횟수 상한 — 웹 `recurring-steps-model.ts` 와 같은 값.
 const int kRecurringMerchantMax = 50;
@@ -211,6 +212,9 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
 
   bool _attempted = false;
   bool _saveError = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _saveErrorKey = GlobalKey();
   bool _submitting = false;
   _Step _step = _Step.none;
@@ -857,8 +861,17 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
 
   // ── 저장 ──────────────────────────────────────────────────
   /// 저장 실패 Callout 을 켜고 보이는 자리로 끌어온다(본문 맨 위라 아래로 내린 뒤엔 가려진다).
-  void _showSaveError() {
-    setState(() => _saveError = true);
+  void _showSaveError([Object? error]) {
+    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+    if (isUnconfirmedSave(error)) {
+      ref.invalidate(recurringListProvider);
+      ref.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChange(ref);
+    }
+    setState(() {
+      _saveError = true;
+      _failure = error;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _saveErrorKey.currentContext;
       if (ctx == null || !ctx.mounted) return;
@@ -993,10 +1006,10 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       } else {
         PBottomSheet.of(context).close();
       }
-    } on ApiException {
+    } on ApiException catch (e) {
       // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글, 서버 원문 없음)
       if (!mounted) return;
-      _showSaveError();
+      _showSaveError(e);
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
@@ -1400,7 +1413,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                 key: _saveErrorKey,
                 tone: PCalloutTone.critical,
                 alert: true,
-                description: l.recSaveFailed,
+                description: saveFailureText(l, _failure, l.recSaveFailed),
               ),
             ),
           // 종류 — 고른 값이 곧 폼의 갈래라 Chip 하나 고르기(좌우 24 · 아래 16)

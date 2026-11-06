@@ -164,6 +164,18 @@ abstract class AppLocalizations {
   /// **'일부 정보를 불러오지 못했어요.'**
   String get queryReferenceFailed;
 
+  /// 저장 응답을 읽지 못했을 때(PARSE — 서버는 처리했다) 폼 맨 위 Callout. 실패라 하지 않는다, 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.'**
+  String get saveUnconfirmed;
+
+  /// 카드 결제 응답을 읽지 못했을 때 결제 폼 맨 위 Callout, 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'**
+  String get payUnconfirmed;
+
   /// No description provided for @actionApply.
   ///
   /// In ko, this message translates to:
