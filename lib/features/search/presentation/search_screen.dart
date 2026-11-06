@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
@@ -84,8 +85,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.dispose();
   }
 
-  void _onChanged(String _) {
+  void _onChanged(String value) {
     _debounce?.cancel();
+    // 비우면(✕ · 다 지움) 기다리지 않고 바로 처음으로 — 지운 검색어의 결과 · 진행 중 요청을 남기지 않는다(옛 화면 동작)
+    if (value.trim().isEmpty) {
+      _runSearch();
+      return;
+    }
     _debounce = Timer(const Duration(milliseconds: 350), _runSearch);
   }
 
@@ -368,11 +374,24 @@ class _AdvancedSheetState extends State<_AdvancedSheet> {
     super.dispose();
   }
 
-  int? get _minValue => int.tryParse(_min.text);
-  int? get _maxValue => int.tryParse(_max.text);
+  int? get _minValue => _tooLarge(_min.text) ? null : int.tryParse(_min.text);
+  int? get _maxValue => _tooLarge(_max.text) ? null : int.tryParse(_max.text);
+
+  /// 금액 상한(100억 — 거래 · 예산 · 목표와 같은 [kAmountMax], 웹 `parseAmount` 와 같다)을 넘었나. 64비트를 넘는 자릿수도 읽어야
+  /// 해서 글자로 견준다 — 칸에 보이는 숫자와 걸리는 조건이 달라지지 않게 넘으면 칸 오류 + [적용] 을 막는다.
+  static bool _tooLarge(String digits) {
+    final d = digits.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+    final limit = kAmountMax.toString();
+    if (d.length != limit.length) return d.length > limit.length;
+    return d.compareTo(limit) > 0;
+  }
+
+  bool get _overAmount => _tooLarge(_min.text) || _tooLarge(_max.text);
 
   bool get _badAmount =>
       _minValue != null && _maxValue != null && _minValue! > _maxValue!;
+
+  bool get _blocked => _overAmount || _badAmount;
 
   Future<void> _pickPeriod() async {
     final result = await showFilterPeriodSheet(
@@ -397,18 +416,20 @@ class _AdvancedSheetState extends State<_AdvancedSheet> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
-    Widget amount(TextEditingController ctrl, String label) => Expanded(
-      child: PInput(
-        controller: ctrl,
-        placeholder: label,
-        semanticLabel: label,
-        suffixText: wonUnit(),
-        keyboardType: TextInputType.number,
-        tabularFigures: true,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: (_) => setState(() {}),
-      ),
-    );
+    // 이름은 "최소 금액" · "최대 금액"(칸마다 다른 이름), 보이는 예시 글은 "최소" · "최대"(웹과 같다)
+    Widget amount(TextEditingController ctrl, String hint, String name) =>
+        Expanded(
+          child: PInput(
+            controller: ctrl,
+            placeholder: hint,
+            semanticLabel: name,
+            suffixText: wonUnit(),
+            keyboardType: TextInputType.number,
+            tabularFigures: true,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (_) => setState(() {}),
+          ),
+        );
     return PBottomSheetContent(
       title: l.searchAdvancedFilter,
       closeLabel: l.actionClose,
@@ -419,11 +440,11 @@ class _AdvancedSheetState extends State<_AdvancedSheet> {
         children: [
           PField(
             label: l.expAmountRange,
-            invalid: _badAmount,
-            errorMessage: l.searchBadAmount,
+            invalid: _blocked,
+            errorMessage: _overAmount ? l.amountTooLarge : l.searchBadAmount,
             child: Row(
               children: [
-                amount(_min, l.expFilterMin),
+                amount(_min, l.expFilterMin, l.expMinAmount),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: PSpacing.x2),
                   child: ExcludeSemantics(
@@ -433,7 +454,7 @@ class _AdvancedSheetState extends State<_AdvancedSheet> {
                     ),
                   ),
                 ),
-                amount(_max, l.expFilterMax),
+                amount(_max, l.expFilterMax, l.expMaxAmount),
               ],
             ),
           ),
@@ -470,7 +491,7 @@ class _AdvancedSheetState extends State<_AdvancedSheet> {
         PButton(
           label: l.actionApply,
           size: PButtonSize.large,
-          onPressed: _badAmount
+          onPressed: _blocked
               ? null
               : () => PBottomSheet.of(context).close((
                   min: _minValue,

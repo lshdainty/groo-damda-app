@@ -10,6 +10,8 @@
 // I-wrap-b1 α — 옛 부품(AppBar · PTabs · PSearchField · PDateInput · PButton · showPSheet)을 ds 로 옮긴 것도 잠근다:
 // 상단 바 제목 자리 검색칸 · 칩 줄(Scroll Auto Hide) · 흰 면 하나 · 실패는 고정 글 + [다시 시도](서버 글 · 예외 글 없음) ·
 // 글자 200% 에서 칩 글이 잘리지 않음 · 고급 필터 시트(ds Bottom Sheet · 최소 > 최대 막음).
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +47,12 @@ class _FakeRepo extends ExpenseRepository {
   String? lastType;
   int? lastMin;
   int? lastMax;
+  String? lastStart;
+  String? lastEnd;
+
+  /// [hold] 면 부를 때마다 답을 기다리는 Completer 를 쌓는다 — 늦게 오는 답을 흉내 낸다.
+  final List<Completer<List<Expense>>> pending = [];
+  bool hold = false;
 
   @override
   Future<List<Expense>> search({
@@ -63,6 +71,13 @@ class _FakeRepo extends ExpenseRepository {
     lastType = expenseType;
     lastMin = minAmount;
     lastMax = maxAmount;
+    lastStart = startDate;
+    lastEnd = endDate;
+    if (hold) {
+      final c = Completer<List<Expense>>();
+      pending.add(c);
+      return c.future;
+    }
     if (fail.isNotEmpty) {
       final e = fail.removeAt(0);
       if (e != null) throw e;
@@ -141,6 +156,16 @@ Future<void> _search(WidgetTester tester, String q) async {
   await tester.pump(const Duration(milliseconds: 400));
   await tester.pumpAndSettle();
 }
+
+Future<void> _openAdvanced(WidgetTester tester) async {
+  await tester.tap(find.byIcon(LucideIcons.slidersHorizontal));
+  await tester.pumpAndSettle();
+}
+
+/// 고급 필터 시트의 금액 칸 — 0 최소 · 1 최대(맨 앞은 바의 검색칸).
+Finder _amountField(int i) => find
+    .descendant(of: find.byType(PInput), matching: find.byType(EditableText))
+    .at(i + 1);
 
 void main() {
   testWidgets('결과 행이 가계부와 같은 ExpenseRow 다', (tester) async {
@@ -254,10 +279,12 @@ void main() {
         await tester.tap(findText('지출'));
         await tester.pumpAndSettle();
         expect(repo.lastType, 'EXPENSE');
+        expect(repo.calls, 1);
         await tester.tap(findText('전체'));
         await tester.pumpAndSettle();
         // 전체로 돌아오고 검색어도 없으면 처음 안내 — 서버를 부르지 않는다
         expect(findText('키워드, 가맹점, 메모로 검색해보세요'), findsOneWidget);
+        expect(repo.calls, 1);
       },
     );
 
@@ -361,6 +388,158 @@ void main() {
         expect(repo.calls, 1);
         expect((repo.lastMin, repo.lastMax), (5000, 9000));
         expect(find.bySemanticsLabel('고급 필터, 적용 중'), findsOneWidget);
+        handle.dispose();
+      },
+    );
+
+    testWidgets('✕ 는 기다리지 않고 바로 비운다 — 지운 검색어의 결과가 남지 않는다', (tester) async {
+      final repo = await _pump(tester, rows);
+      await _search(tester, '커피');
+      expect(find.byType(ExpenseRow), findsNWidgets(2));
+      await tester.tap(find.bySemanticsLabel('지우기'));
+      await tester.pump(); // 디바운스(350ms)를 흘리지 않는다
+      expect(find.byType(ExpenseRow), findsNothing);
+      expect(findText('키워드, 가맹점, 메모로 검색해보세요'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(repo.calls, 1, reason: '비운 뒤 다시 부르지 않는다');
+    });
+
+    testWidgets('늦게 온 앞 요청의 답이 새 결과를 덮지 않는다', (tester) async {
+      final repo = await _pump(tester, const []);
+      repo.hold = true;
+      final field = find.descendant(
+        of: find.byKey(const ValueKey('search-field')),
+        matching: find.byType(EditableText),
+      );
+      await tester.enterText(field, '앞');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.enterText(field, '뒤');
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(repo.pending, hasLength(2));
+      // 새 요청이 먼저 오고, 앞 요청이 늦게 온다
+      repo.pending[1].complete([
+        _e(
+          rowId: 2,
+          amount: 5000,
+          date: '2026-09-11T18:00:00',
+          merchant: '새 답',
+        ),
+      ]);
+      await tester.pump();
+      repo.pending[0].complete([
+        _e(
+          rowId: 1,
+          amount: 3000,
+          date: '2026-09-12T11:20:00',
+          merchant: '옛 답',
+        ),
+      ]);
+      await tester.pumpAndSettle();
+      expect(findText('새 답'), findsOneWidget);
+      expect(findText('옛 답'), findsNothing);
+    });
+
+    testWidgets('[다시 시도] 를 누르면 실패 화면은 그대로 두고 단추에 진행 원', (tester) async {
+      final repo = await _pump(
+        tester,
+        rows,
+        fail: [ApiException(code: 'X', message: 'x', statusCode: 500)],
+      );
+      await _search(tester, '커피');
+      repo.hold = true;
+      await tester.tap(findText('다시 시도'));
+      await tester.pump();
+      final section = tester.widget<PResultSection>(
+        find.byType(PResultSection),
+      );
+      expect(section.kind, PResultKind.failure);
+      expect(section.primaryAction!.loading, isTrue);
+      repo.pending.single.complete(rows);
+      await tester.pumpAndSettle();
+      expect(find.byType(ExpenseRow), findsNWidgets(2));
+    });
+
+    testWidgets('고급 필터 — 기간을 고르면 그 기간으로 검색한다', (tester) async {
+      final repo = await _pump(tester, rows);
+      await _openAdvanced(tester);
+      await tester.tap(find.byKey(const ValueKey('search-period')));
+      await tester.pumpAndSettle();
+      await tester.tap(findText('이번 달').last);
+      await tester.pumpAndSettle();
+      await tester.tap(findText('완료'));
+      await tester.pumpAndSettle();
+      await tester.tap(findText('적용'));
+      await tester.pumpAndSettle();
+      final now = DateTime.now();
+      final ym =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}';
+      expect(repo.lastStart, '$ym-01');
+      expect(repo.lastEnd, startsWith(ym));
+    });
+
+    testWidgets('고급 필터 — [초기화] 는 시트 안 값을 비우고, 적용하면 조건 없이(처음 안내)', (
+      tester,
+    ) async {
+      final repo = await _pump(tester, rows);
+      await _openAdvanced(tester);
+      await tester.enterText(_amountField(0), '1000');
+      await tester.pump();
+      await tester.tap(findText('적용'));
+      await tester.pumpAndSettle();
+      expect(repo.lastMin, 1000);
+      final calls = repo.calls;
+
+      await _openAdvanced(tester);
+      expect(
+        tester.widget<EditableText>(_amountField(0)).controller.text,
+        '1000',
+      );
+      await tester.tap(findText('초기화'));
+      await tester.pump();
+      expect(tester.widget<EditableText>(_amountField(0)).controller.text, '');
+      await tester.tap(findText('적용'));
+      await tester.pumpAndSettle();
+      // 조건이 다 빠졌다 — 서버를 부르지 않고 처음 안내
+      expect(repo.calls, calls);
+      expect(findText('키워드, 가맹점, 메모로 검색해보세요'), findsOneWidget);
+    });
+
+    testWidgets('고급 필터 — 100억을 넘으면 칸 오류 + [적용] 막힘(보이는 숫자와 걸리는 조건이 같다)', (
+      tester,
+    ) async {
+      final repo = await _pump(tester, rows);
+      await _openAdvanced(tester);
+      await tester.enterText(_amountField(0), '99999999999999999999');
+      await tester.pump();
+      expect(findText('금액은 100억원까지 입력할 수 있어요.'), findsOneWidget);
+      await tester.tap(findText('적용'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, 0);
+      await tester.enterText(_amountField(0), '10000000000');
+      await tester.pump();
+      expect(findText('금액은 100억원까지 입력할 수 있어요.'), findsNothing);
+    });
+
+    testWidgets(
+      '이름은 칸마다 다르다 — "거래 검색" · "최소 금액" · "최대 금액", 예시 글이 이름과 같으면 다시 읽지 않는다',
+      (tester) async {
+        final handle = tester.ensureSemantics();
+        await _pump(tester, rows);
+        final node = tester.getSemantics(
+          find.descendant(
+            of: find.byKey(const ValueKey('search-field')),
+            matching: find.byType(EditableText),
+          ),
+        );
+        expect(node.label, contains('거래 검색'));
+        expect(
+          '${node.label}\n${node.hint}'.split('거래 검색').length - 1,
+          1,
+          reason: '이름 "거래 검색" 은 한 번만',
+        );
+        await _openAdvanced(tester);
+        expect(find.bySemanticsLabel(RegExp('^최소 금액')), findsOneWidget);
+        expect(find.bySemanticsLabel(RegExp('^최대 금액')), findsOneWidget);
         handle.dispose();
       },
     );
