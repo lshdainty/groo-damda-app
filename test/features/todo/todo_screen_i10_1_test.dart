@@ -340,17 +340,86 @@ void main() {
         todo(100 + i, '많은 할 일 ${i + 1}번', due: thisMonth(1 + i % 20)),
     ];
 
-    testWidgets('내리면 머리가 위로 숨고, 모션 줄이기면 숨기지 않는다', (tester) async {
+    testWidgets('내리면 오늘 할 일 줄만 숨고 달 줄 · 주 달력 · 꺾쇠는 남는다 · 고른 날이 목록을 따라간다', (
+      tester,
+    ) async {
       await pumpApp(
         tester,
         const TodoScreen(),
         overrides: todoOverrides(todos: many()),
       );
       final nav = find.byType(LedgerMonthNav);
+      final grid = find.byType(LedgerCalendarGrid);
+      final total = find.byType(LedgerTotalRow);
       final before = tester.getTopLeft(nav).dy;
+      final totalBefore = tester.getTopLeft(total).dy;
+      final selBefore = tester.widget<LedgerCalendarGrid>(grid).selected;
       await tester.drag(find.byType(Scrollable).last, const Offset(0, -500));
       await tester.pumpAndSettle();
-      expect(tester.getTopLeft(nav).dy, lessThan(before - 20));
+      expect(tester.getTopLeft(nav).dy, before, reason: '달 줄은 그 자리');
+      expect(tester.getTopLeft(total).dy, lessThan(totalBefore - 20));
+      expect(
+        tester.getTopLeft(grid).dy,
+        moreOrLessEquals(tester.getBottomLeft(nav).dy, epsilon: 0.5),
+        reason: '주 달력이 달 줄 바로 아래에 남는다',
+      );
+      final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+      expect(tester.getBottomLeft(grid).dy, lessThan(size.height));
+      // 고른 날 = 남는 머리 아래 선을 지난 맨 아래 날짜 묶음
+      final line = tester.getBottomLeft(find.byType(LedgerHeaderDivider)).dy;
+      String? best;
+      var bestTop = double.negativeInfinity;
+      for (final e in find.byType(TodoDayGroup).evaluate()) {
+        final top = tester.getTopLeft(find.byWidget(e.widget)).dy;
+        if (top <= line + 28 && top > bestTop) {
+          bestTop = top;
+          best = (e.widget as TodoDayGroup).ymd;
+        }
+      }
+      final selAfter = tester.widget<LedgerCalendarGrid>(grid).selected;
+      expect(selAfter, best);
+      expect(selAfter, isNot(selBefore));
+    });
+
+    testWidgets('펼친 월 달력은 내리면 접히고(튀지 않음), 맨 위 · 20 미만에서는 그대로', (tester) async {
+      await pumpApp(
+        tester,
+        const TodoScreen(),
+        overrides: todoOverrides(todos: many()),
+      );
+      final grid = find.byType(LedgerCalendarGrid);
+      await tester.tap(find.bySemanticsLabel('월 달력'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<LedgerCalendarGrid>(grid).expanded, isTrue);
+      final sel = tester.widget<LedgerCalendarGrid>(grid).selected;
+      double rel() {
+        final line = tester.getBottomLeft(find.byType(LedgerHeaderDivider)).dy;
+        return tester.getTopLeft(find.byType(TodoDayGroup).first).dy - line;
+      }
+
+      final g = await tester.startGesture(const Offset(180, 700));
+      await g.moveBy(const Offset(0, -20));
+      await tester.pump();
+      await g.moveBy(const Offset(0, -10));
+      await tester.pump();
+      expect(
+        tester.widget<LedgerCalendarGrid>(grid).expanded,
+        isTrue,
+        reason: '20 미만',
+      );
+      var prev = rel();
+      for (var i = 0; i < 4; i++) {
+        await g.moveBy(const Offset(0, -10));
+        await tester.pump();
+        await tester.pump();
+        expect((rel() - prev).abs(), lessThanOrEqualTo(10.5), reason: '튐 $i');
+        prev = rel();
+      }
+      await g.up();
+      await tester.pumpAndSettle();
+      expect(tester.widget<LedgerCalendarGrid>(grid).expanded, isFalse);
+      expect(tester.widget<LedgerCalendarGrid>(grid).selected, isNotNull);
+      expect(sel, isNotNull);
     });
 
     testWidgets('모션 줄이기면 머리가 늘 보인다', (tester) async {
@@ -360,7 +429,7 @@ void main() {
         overrides: todoOverrides(todos: many()),
         disableAnimations: true,
       );
-      final nav = find.byType(LedgerMonthNav);
+      final nav = find.byType(LedgerTotalRow);
       final before = tester.getTopLeft(nav).dy;
       await tester.drag(find.byType(Scrollable).last, const Offset(0, -500));
       await tester.pumpAndSettle();

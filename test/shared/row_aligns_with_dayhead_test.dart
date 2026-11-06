@@ -97,7 +97,7 @@ void main() {
         ],
       ),
     );
-    final head = tester.getRect(findTextContaining('26. 9. 12')).left;
+    final head = tester.getRect(findTextContaining('9월 12일')).left;
     expect(head, closeTo(_pagePad, 0.5));
     // 고치기 전에는 34 였다(= 24 + 행이 얹던 10).
     expect(_contentLeft(tester, find.byType(ExpenseRow)), closeTo(head, 0.5));

@@ -15,13 +15,82 @@ import 'package:groo_damda_app/shared/ds/divider/p_divider.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/notification_badge/p_notification_badge.dart';
 import 'package:groo_damda_app/shared/ds/overflow_center/p_overflow_center.dart';
+import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_parts.dart';
 
 /// 가계부 원장 머리 — 달 이동 · 합계 · 인사이트 · 소비 요약 · 주 달력(I-07 7 · 8 · 11).
 ///
-/// 이 머리는 ds Scroll Auto Hide 가 통째로 숨긴다(12). 구조는 그대로 두고 값 · 부품 · 색 역할 이름만 ds 로 옮겼다.
+/// ds Scroll Auto Hide 로 내리면 총액 · 지난달 비교 · 소비 요약만 숨고, 달 이동 줄([LedgerMonthNav]) · 주 달력 · 펼침 꺾쇠 ·
+/// 구분선은 남는다(12 — 페이지 전체를 조절하는 줄은 한 덩어리로 둔다). 할 일 원장도 같다.
+
+/// 남는 머리(주 달력 · 꺾쇠 · 구분선)의 아래 끝 — 목록 맨 위 기준 y. 원장의 스크롤 스파이는 이 선 아래(+28)를 지난 날짜 묶음을
+/// 고른 날로 삼는다. 남는 머리가 없으면(필터) `null`.
+double? pinnedHeaderBottom(GlobalKey key, double listTop) {
+  final box = key.currentContext?.findRenderObject();
+  if (box is! RenderBox || !box.hasSize || !box.attached) return null;
+  return box.localToGlobal(Offset(0, box.size.height)).dy - listTop;
+}
+
+/// 펼친 월 달력을 연 채 목록을 [threshold] 이상 내리면 고른 날이 든 주로 접는다 — 월 달력은 날짜를 고르는 도구이고, 내린다는 건
+/// 고르기를 마치고 목록을 본다는 뜻이다. 맨 위에서 펼친 채 있는 건 그대로, 다시 펴려면 꺾쇠. 날을 눌러 옮겨 가는 동안(스파이
+/// 잠금)은 기준을 그 자리로 옮길 뿐 접지 않는다. 가계부 · 할 일 원장이 같이 쓴다.
+///
+/// 접힐 때 목록이 튀지 않게 — 남는 머리가 줄어든 만큼 목록 위 여백도 줄어 맨 위 묶음은 머리 바로 아래에 그대로 남는다. 다만 그
+/// 여백은 다음 프레임에야 잰다(`PScrollAutoHide`) — 그 한 프레임 동안 묶음이 줄어든 높이만큼 아래에 떠 보이지 않게
+/// [PScrollAutoHideState.holdListThroughShrink] 로 스크롤을 잠깐 맞춘다. 높이는 애니메이션 없이 바로 바뀐다(모션 줄이기도 같다).
+class LedgerAutoCollapse {
+  LedgerAutoCollapse({
+    required this.controller,
+    required this.pinKey,
+    required this.autoHideKey,
+  });
+
+  final ScrollController controller;
+
+  /// 남는 아래 줄(주 달력 · 꺾쇠 · 선).
+  final GlobalKey pinKey;
+  final GlobalKey<PScrollAutoHideState> autoHideKey;
+
+  /// 접기 시작하는 내린 거리.
+  static const double threshold = 20;
+
+  double? _anchor;
+  double _collapsedHeight = 0;
+
+  double _pinHeight() {
+    final box = pinKey.currentContext?.findRenderObject();
+    return box is RenderBox && box.hasSize ? box.size.height : 0;
+  }
+
+  /// 펼치기 직전(접힌 상태)에 부른다 — 접힌 높이와 지금 스크롤을 기억한다.
+  void willExpand() {
+    _collapsedHeight = _pinHeight();
+    _anchor = controller.hasClients ? controller.offset : 0;
+  }
+
+  /// 스크롤마다 — 펼친 뒤 가장 위였던 자리에서 [threshold] 이상 내려왔으면 true.
+  bool shouldCollapse({required bool locked}) {
+    if (!controller.hasClients) return false;
+    final p = controller.offset;
+    final a = _anchor ?? p;
+    if (locked || p < a) {
+      _anchor = p;
+      return false;
+    }
+    _anchor = a;
+    if (p - a < threshold) return false;
+    _anchor = null;
+    return true;
+  }
+
+  /// 접는 `setState` 바로 앞에 부른다.
+  void hold() {
+    final shrink = _pinHeight() - _collapsedHeight;
+    autoHideKey.currentState?.holdListThroughShrink(shrink);
+  }
+}
 
 String ledgerYmd(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-'
@@ -654,6 +723,10 @@ class LedgerCalendarGrid extends StatelessWidget {
     );
   }
 }
+
+/// 남는 덩어리의 끝 — 필터 중 칩 줄 아래 여백 `x3`(12) 다음에 [LedgerHeaderDivider]. 주 달력 덩어리는 꺾쇠 단추(보이는 40 ·
+/// 아이콘 18)가 선 바로 위까지 차 꺾쇠 아이콘 아래가 선까지 11 이다 — 칩 줄은 테두리가 보이는 상자라 가까운 토큰 12 로 둔다.
+const double kLedgerKeepBottom = PSpacing.x3;
 
 /// 머리 아래 선 — Divider 1px `stroke-neutral-subtle` 화면 폭.
 class LedgerHeaderDivider extends StatelessWidget {

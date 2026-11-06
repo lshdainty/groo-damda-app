@@ -72,8 +72,25 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
   final ScrollController _scrollCtrl = ScrollController();
   final GlobalKey _listKey = GlobalKey();
 
-  /// 숨는 머리(Scroll Auto Hide)의 높이 — 목록 맨 위 여백이자 스크롤 스파이가 기준으로 삼는 선.
+  /// 머리(고정 줄 + 숨는 영역)의 높이 — 목록 맨 위 여백. 고정 줄이 없을 때(필터) 스크롤 스파이의 기준선.
   double _headerH = 0;
+
+  /// 남는 머리(주 달력 · 펼침 꺾쇠 · 구분선) — 그 아래 끝이 스크롤 스파이의 기준선이다(숨는 영역이 숨으면 함께 올라간다).
+  final GlobalKey _pinKey = GlobalKey();
+
+  /// 날짜 · 거래로 갈 때 남는 머리 바로 아래에 맞추려고 잡는다(화면 맨 위에 맞추면 주 달력 뒤로 들어간다).
+  final GlobalKey<PScrollAutoHideState> _autoHideKey =
+      GlobalKey<PScrollAutoHideState>();
+
+  /// 펼친 월 달력을 내리면 접는다(목록을 보러 간다는 뜻).
+  late final LedgerAutoCollapse _collapse = LedgerAutoCollapse(
+    controller: _scrollCtrl,
+    pinKey: _pinKey,
+    autoHideKey: _autoHideKey,
+  );
+
+  double? _underPin(BuildContext ctx, {double gap = 0}) =>
+      _autoHideKey.currentState?.scrollTargetFor(ctx, gap: gap);
   bool _lock = false; // 프로그램 스크롤 중 스파이 무시
   Timer? _lockTimer;
 
@@ -102,20 +119,38 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
     _lockTimer = Timer(Duration(milliseconds: ms), () => _lock = false);
   }
 
-  /// 스크롤 스파이 — 맨 위 날짜 그룹을 선택일로 동기. 머리 숨기기는 Scroll Auto Hide 가 맡는다.
+  bool _spyQueued = false;
+
+  /// 스크롤 · 머리 옮김(스냅)마다 다음 프레임에 스파이를 한 번 돌린다 — 그 프레임의 배치로 재야 한 칸씩 밀리지 않는다(스크롤
+  /// 알림은 배치 전에 온다). 스냅은 목록을 스크롤하지 않고 남는 머리 아래 선만 옮기므로 그것도 듣는다.
   void _onScroll() {
+    if (_expanded && _collapse.shouldCollapse(locked: _lock)) {
+      _collapse.hold();
+      setState(() => _expanded = false);
+    }
+    if (_spyQueued) return;
+    _spyQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _spyQueued = false;
+      if (mounted) _spy();
+    });
+  }
+
+  /// 스크롤 스파이 — 맨 위 날짜 그룹을 선택일로 동기. 머리 숨기기는 Scroll Auto Hide 가 맡는다.
+  void _spy() {
     if (!_scrollCtrl.hasClients || _lock) return;
     final listBox = _listKey.currentContext?.findRenderObject() as RenderBox?;
     if (listBox == null) return;
     final listTop = listBox.localToGlobal(Offset.zero).dy;
-    // 머리 아래(+28) 를 지난 그룹 중 화면상 가장 아래 그룹 = 현재 보는 날짜.
+    final line = pinnedHeaderBottom(_pinKey, listTop) ?? _headerH;
+    // 보이는 머리 아래(+28) 를 지난 그룹 중 화면상 가장 아래 그룹 = 현재 보는 날짜.
     double best = double.negativeInfinity;
     String? cur;
     for (final e in _dayKeys.entries) {
       final box = e.value.currentContext?.findRenderObject() as RenderBox?;
       if (box == null) continue;
       final top = box.localToGlobal(Offset.zero).dy - listTop;
-      if (top <= _headerH + 28 && top > best) {
+      if (top <= line + 28 && top > best) {
         best = top;
         cur = e.key;
       }
@@ -231,6 +266,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
         key: _dayKeys[ds],
         index: order.indexOf(ds),
         count: order.length,
+        targetOf: _underPin,
       );
     });
   }
@@ -428,8 +464,9 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
 
     final summaryFlags = ref.watch(maskFlagsProvider('ledger.monthSummary'));
 
-    // ── 머리 — Scroll Auto Hide 가 통째로 숨긴다 ──
-    final header = Column(
+    // ── 머리 — 달 이동 줄 · 주 달력 · 펼침 꺾쇠는 남고(페이지 전체를 조절하는 줄이라 한 덩어리), 총액 · 지난달 비교 ·
+    // [소비 요약](펼친 요약 포함)만 Scroll Auto Hide 로 숨는다. 필터를 걸면 칩 줄이 숨는 자리에 온다(달력은 없다) ──
+    final pinnedTop = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: PSpacing.x2),
@@ -440,14 +477,11 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
           onOpenFilter: _openFilter,
           onAddTx: () => showAddTxSheet(context),
         ),
-        if (filterActive)
-          LedgerFilterChips(
-            filter: _advFilter,
-            assetId: _assetIdFilter,
-            onClearAsset: _clearAssetFilter,
-            onChange: (f) => setState(() => _advFilter = f),
-            categories: categoriesAsync.value ?? const [],
-          ),
+      ],
+    );
+    final header = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         // 총액 + 인사이트 + [소비 요약]. 필터 활성 시 숨김.
         if (!filterActive) ...[
           LedgerTotalRow(
@@ -485,27 +519,56 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
               expense: monthExpense,
               flags: summaryFlags,
             ),
-          // 캘린더 — 필터 적용 시 숨김(리스트만, 사용자 결정·web 정합).
-          LedgerCalendar(
-            month: _month,
-            selected: _selected,
-            expanded: _expanded,
-            byDay: byDay,
-            loading: loading,
-            flags: _calendarFlags(ref),
-            onSelect: (ds) {
-              setState(() => _selected = ds);
-              if (byDay.containsKey(ds)) _scrollToDay(ds, groupKeys);
-            },
-            onToggleExpand: () => setState(() {
-              _expanded = !_expanded;
-              if (_expanded) _sumOpen = false;
-            }),
-          ),
-          const LedgerHeaderDivider(),
         ],
       ],
     );
+    // 남는 아래 줄 — 주 달력(펼친 월 달력) · 꺾쇠 · 선, 필터 중이면 칩 줄. 칩 줄은 무엇이 걸러져 보이는지 말하는 페이지 전체
+    // 조절 줄이라 숨기지 않는다(숨기면 거른 채라는 걸 잊고 "거래가 이것뿐" 으로 읽는다). 캘린더는 필터 중 숨김(사용자 결정 · 웹 정합).
+    final pinnedBottom = filterActive
+        ? Column(
+            key: _pinKey,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 주 달력 덩어리와 같은 끝 — 아래 여백 12 + 구분선. 없으면 목록 줄이 칩 바로 밑으로 잘려 들어간다
+              Padding(
+                padding: const EdgeInsets.only(bottom: kLedgerKeepBottom),
+                child: LedgerFilterChips(
+                  filter: _advFilter,
+                  assetId: _assetIdFilter,
+                  onClearAsset: _clearAssetFilter,
+                  onChange: (f) => setState(() => _advFilter = f),
+                  categories: categoriesAsync.value ?? const [],
+                ),
+              ),
+              const LedgerHeaderDivider(),
+            ],
+          )
+        : Column(
+            key: _pinKey,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              LedgerCalendar(
+                month: _month,
+                selected: _selected,
+                expanded: _expanded,
+                byDay: byDay,
+                loading: loading,
+                flags: _calendarFlags(ref),
+                onSelect: (ds) {
+                  setState(() => _selected = ds);
+                  if (byDay.containsKey(ds)) _scrollToDay(ds, groupKeys);
+                },
+                onToggleExpand: () => setState(() {
+                  _expanded = !_expanded;
+                  if (_expanded) {
+                    _sumOpen = false;
+                    _collapse.willExpand();
+                  }
+                }),
+              ),
+              const LedgerHeaderDivider(),
+            ],
+          );
 
     Widget buildList(
       BuildContext ctx,
@@ -666,16 +729,25 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
             index: groupKeys.indexOf(focusDay),
             count: groupKeys.length,
             alignment: 0.02,
+            targetOf: _underPin,
           );
         }
         // 그룹 이동은 여러 프레임에 걸쳐 끝난다 — 한 프레임 뒤에 한 번만 보면
         // 두 홉 이상 걸린 경우 행이 아직 없어 조용히 건너뛴다(QA 22차 추정).
-        ensureVisibleWhenReady(key: _rowKeys[widget.focusTxId!]);
+        // 거래 줄은 날짜 머리가 보이게 남는 머리 아래 40 에 둔다
+        ensureVisibleWhenReady(
+          key: _rowKeys[widget.focusTxId!],
+          targetOf: (ctx) => _underPin(ctx, gap: PSpacing.x10),
+        );
       });
     }
     return PScrollAutoHide(
+      key: _autoHideKey,
       controller: _scrollCtrl,
+      onMoved: (_) => _onScroll(),
+      pinnedTop: pinnedTop,
       header: header,
+      pinnedBottom: pinnedBottom,
       builder: buildList,
     );
   }
