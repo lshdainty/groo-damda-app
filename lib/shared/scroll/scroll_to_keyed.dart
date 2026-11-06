@@ -16,6 +16,9 @@ import 'package:flutter/widgets.dart';
 /// 항목 높이가 제각각이라 한 번에 못 닿을 수 있어 [maxHops] 번까지 되풀이한다. 못 닿으면
 /// 조용히 포기한다 — 화면이 어디든 멈춰 있는 것이 예외로 죽는 것보다 낫다.
 ///
+/// [targetOf] 를 주면 마지막 맞추기를 `ensureVisible` 대신 그 함수가 돌려준 스크롤 값으로 한다 — 목록 위에 남는 머리가 겹쳐
+/// 있으면(원장의 주 달력) 화면 맨 위가 아니라 그 머리 바로 아래에 맞춰야 한다. `null` 을 돌려주면 그대로 둔다.
+///
 /// **프레임을 `await` 하지 않는다.** 다음 시도를 post-frame 콜백으로 이어 붙인다.
 /// `await WidgetsBinding.instance.endOfFrame` 로 쓰면 위젯 테스트에서 교착에 빠진다 —
 /// 테스트는 `pump` 로 프레임을 돌리는데, 그 `pump` 를 부르는 쪽이 이 함수를 기다리고 있어
@@ -28,13 +31,14 @@ void scrollToKeyedItem({
   double alignment = 0.02,
   Duration duration = const Duration(milliseconds: 300),
   int maxHops = 8,
+  double? Function(BuildContext context)? targetOf,
 }) {
   if (key == null || index < 0 || index >= count) return;
 
   void attempt(int hop) {
     final ctx = key.currentContext;
     if (ctx != null) {
-      Scrollable.ensureVisible(ctx, duration: duration, alignment: alignment);
+      _settle(ctx, alignment, duration, targetOf);
       return;
     }
     if (hop >= maxHops || !controller.hasClients) return;
@@ -79,13 +83,14 @@ void ensureVisibleWhenReady({
   double alignment = 0.2,
   Duration duration = const Duration(milliseconds: 300),
   int maxFrames = 8,
+  double? Function(BuildContext context)? targetOf,
 }) {
   if (key == null) return;
 
   void attempt(int frame) {
     final ctx = key.currentContext;
     if (ctx != null) {
-      Scrollable.ensureVisible(ctx, duration: duration, alignment: alignment);
+      _settle(ctx, alignment, duration, targetOf);
       return;
     }
     if (frame >= maxFrames) return;
@@ -93,4 +98,22 @@ void ensureVisibleWhenReady({
   }
 
   attempt(0);
+}
+
+/// 만들어진 항목을 맞춘다 — [targetOf] 가 있으면 그 값으로, 없으면 `ensureVisible`.
+void _settle(
+  BuildContext ctx,
+  double alignment,
+  Duration duration,
+  double? Function(BuildContext context)? targetOf,
+) {
+  if (targetOf == null) {
+    Scrollable.ensureVisible(ctx, duration: duration, alignment: alignment);
+    return;
+  }
+  final target = targetOf(ctx);
+  if (target == null) return;
+  final position = Scrollable.of(ctx).position;
+  if ((target - position.pixels).abs() < 0.5) return;
+  position.animateTo(target, duration: duration, curve: Curves.ease);
 }

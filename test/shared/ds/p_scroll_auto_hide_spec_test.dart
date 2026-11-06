@@ -362,4 +362,64 @@ void main() {
     // 40 / 240 = 17% 만 숨었다 — 절반보다 덜 숨어 다 드러난다
     expect(tester.getTopLeft(find.byKey(_headerKey)).dy, 0);
   });
+
+  testWidgets('고정 줄 — 위 고정 줄은 그 자리, 아래 고정 줄은 숨는 만큼 올라가 붙고 빈 자리는 목록이 받는다', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    final top = GlobalKey();
+    final bottom = GlobalKey();
+    var tapped = -1;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GrooTheme.light(),
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 390,
+              height: _boxHeight,
+              child: PScrollAutoHide(
+                controller: controller,
+                pinnedTop: SizedBox(key: top, height: 40),
+                header: SizedBox(key: _headerKey, height: _headerHeight),
+                pinnedBottom: SizedBox(key: bottom, height: 60),
+                builder: (context, c, h) => ListView.builder(
+                  controller: c,
+                  padding: EdgeInsets.only(top: h),
+                  itemCount: 40,
+                  itemBuilder: (context, i) => GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => tapped = i,
+                    child: SizedBox(height: 50, child: Text('거래 $i')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    // 목록 위 여백 = 머리 전체(40 + 100 + 60)
+    expect(tester.getTopLeft(findText('거래 0')).dy, 200);
+    expect(tester.getTopLeft(find.byKey(bottom)).dy, 140);
+    await tester.dragFrom(const Offset(100, 300), const Offset(0, -300));
+    await tester.pumpAndSettle();
+    final px = controller.offset;
+    expect(px, greaterThan(_headerHeight));
+    expect(tester.getTopLeft(find.byKey(top)).dy, 0, reason: '위 고정 줄은 그 자리');
+    expect(_dy(tester), 40 - _headerHeight, reason: '숨는 영역만 숨는다');
+    expect(
+      tester.getTopLeft(find.byKey(bottom)).dy,
+      40,
+      reason: '아래 고정 줄이 위 고정 줄 바로 아래로 붙는다',
+    );
+    // 머리 틀 맨 아래의 빈 자리(100 ~ 200)는 목록이 받는다
+    await tester.tapAt(const Offset(100, 150));
+    expect(tapped, ((px + 150 - 200) / 50).floor());
+    // 높이는 그대로 — 목록 길이가 바뀌지 않는다
+    expect(controller.position.maxScrollExtent, 200 + 40 * 50 - _boxHeight);
+  });
 }
