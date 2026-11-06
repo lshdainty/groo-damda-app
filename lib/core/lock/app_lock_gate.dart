@@ -53,6 +53,31 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
     super.dispose();
   }
 
+  /// 아래(라우터)가 마지막으로 알린 "뒤로가기를 받을 수 있나" — 잠긴 동안은 위로 올리지 않고 쥐고 있다가 풀릴 때 돌려준다.
+  bool _childCanHandlePop = false;
+
+  /// 잠긴 동안 기기 뒤로가기(옛 방식 popRoute)는 아무것도 하지 않는다 — 덮개 아래 라우트를 pop 하지 않는다. 게이트는 라우터의
+  /// 조상이라 관찰자로 먼저 등록되어 라우터보다 먼저 묻힌다(binding.handlePopRoute 는 등록 순서로 묻고 true 에서 멈춘다).
+  @override
+  Future<bool> didPopRoute() async => ref.read(appLockedProvider);
+
+  /// 예측형 뒤로가기 — 잠긴 동안은 플랫폼에 "프레임워크가 뒤로가기를 받지 않는다"(canHandlePop false)를 알린다. 그러면 OS 가
+  /// 앱을 내리고(홈 첫 화면의 뒤로가기와 같은 길) Flutter 의 라우트 · 예측형 전환은 불리지 않는다. 풀리면 아래가 마지막으로
+  /// 알린 값을 다시 올린다.
+  bool _onNavigation(NavigationNotification n) {
+    _childCanHandlePop = n.canHandlePop;
+    return ref.read(appLockedProvider);
+  }
+
+  void _reportCanHandlePop(bool locked) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      NavigationNotification(
+        canHandlePop: !locked && _childCanHandlePop,
+      ).dispatch(context);
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_authenticating) return;
@@ -113,6 +138,7 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
       // 잠기는 순간 자동 프롬프트 — 단 포그라운드일 때만. 백그라운드 진입으로 잠긴
       // 경우는 여기서 띄우면 안 되고(화면 밖 프롬프트), resumed 핸들러가 띄운다.
       // null 은 아직 lifecycle 이벤트가 안 온 콜드 스타트 극초반 — 포그라운드로 본다.
+      if (next != prev) _reportCanHandlePop(next);
       final ls = WidgetsBinding.instance.lifecycleState;
       if (next &&
           prev != true &&
@@ -130,7 +156,13 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
         // 잠그고 풀 때 뒤 화면의 상태가 새로 만들어지지 않는다.
         ExcludeSemantics(
           excluding: locked,
-          child: ExcludeFocus(excluding: locked, child: widget.child),
+          child: ExcludeFocus(
+            excluding: locked,
+            child: NotificationListener<NavigationNotification>(
+              onNotification: _onNavigation,
+              child: widget.child,
+            ),
+          ),
         ),
         if (locked)
           _LockScreen(onUnlock: () => _maybeAuthenticate(auto: false)),

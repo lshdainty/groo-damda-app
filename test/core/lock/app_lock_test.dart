@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,7 +25,7 @@ import '../../support/plain_text.dart';
 class _FakeAuth extends AppLockAuth {
   _FakeAuth(this.result) : super(LocalAuthentication());
 
-  final AppLockAuthResult result;
+  AppLockAuthResult result;
   int calls = 0;
 
   @override
@@ -257,6 +258,69 @@ void main() {
       await tester.pumpAndSettle();
       expect(reads('콘텐츠'), isTrue);
       handle.dispose();
+    });
+
+    testWidgets('잠긴 동안 기기 뒤로가기는 덮개 아래 라우트를 pop 하지 않고, 예측형은 플랫폼에 받지 않는다고 알린다', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({PrefsKeys.appLock: true});
+      final auth = _FakeAuth(AppLockAuthResult.success);
+      final container = _container(auth: auth);
+      final reported = <bool>[];
+      // 앱과 같은 MaterialApp.router(go_router) — 뒤로가기는 라우터의 back button dispatcher 가 받는다
+      final router = GoRouter(
+        routes: [
+          GoRoute(path: '/', builder: (_, _) => const Text('첫 화면')),
+          GoRoute(path: '/second', builder: (_, _) => const Text('두 번째 화면')),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: router,
+            theme: GrooTheme.light(),
+            locale: const Locale('ko'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            // 플랫폼으로 올라가는 "뒤로가기를 받을 수 있나"(SystemNavigator.setFrameworkHandlesBack 로 가는 값)
+            onNavigationNotification: (n) {
+              reported.add(n.canHandlePop);
+              return true;
+            },
+            builder: (context, child) =>
+                AppLockGate(child: child ?? const SizedBox()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // 자동 프롬프트 성공 → 풀림
+      router.push('/second');
+      await tester.pumpAndSettle();
+      expect(reported.last, isTrue, reason: '풀린 채 두 번째 화면 — 뒤로가기를 받는다');
+
+      // 잠근다(자동 프롬프트는 실패로 바꿔 잠금을 유지)
+      auth.result = AppLockAuthResult.failure;
+      container.read(appLockedProvider.notifier).lock();
+      await tester.pumpAndSettle();
+      expect(findText('앱 잠금'), findsOneWidget);
+      expect(reported.last, isFalse, reason: '잠긴 동안 예측형 뒤로가기는 OS 가 앱을 내린다');
+
+      // 옛 방식 뒤로가기 — 아무것도 하지 않는다(덮개 아래 라우트 그대로)
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(router.canPop(), isTrue);
+      expect(find.text('두 번째 화면', skipOffstage: false), findsOneWidget);
+      expect(findText('앱 잠금'), findsOneWidget);
+
+      // 풀리면 아래가 알린 값이 돌아오고, 뒤로가기는 다시 라우트를 닫는다
+      container.read(appLockedProvider.notifier).unlock();
+      await tester.pumpAndSettle();
+      expect(reported.last, isTrue);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('두 번째 화면', skipOffstage: false), findsNothing);
+      expect(findText('첫 화면'), findsOneWidget);
     });
 
     testWidgets('자동 프롬프트가 성공하면 잠금 화면이 걷힌다', (tester) async {
