@@ -23,6 +23,7 @@ import 'package:groo_damda_app/features/stocks/presentation/stocks_broker_parts.
 import 'package:groo_damda_app/features/stocks/presentation/stocks_parts.dart';
 import 'package:groo_damda_app/features/stocks/presentation/watch_actions.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -175,15 +176,13 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
     final fxRaw = ref.watch(namuExchangeRateProvider).value;
     final fx = (fxRaw != null && fxRaw > 0) ? fxRaw : null;
     final view = mergeNamuHoldings(krwAsync.value, usdAsync.value, fx);
+    // 둘 다 실패해야 오류다 — 한쪽만 실패하면 남은 통화만 보인다. 다시 받는 동안에도 실패를 그대로 두고 단추에 진행 원
+    final bothFailed = krwAsync.loadFailed && usdAsync.loadFailed;
+    final investRetrying = anyLoadRetrying([krwAsync, usdAsync]);
     final loading =
-        (krwAsync.isLoading && !krwAsync.hasValue) ||
-        (usdAsync.isLoading && !usdAsync.hasValue);
-    // 둘 다 실패해야 오류다 — 한쪽만 실패하면 남은 통화만 보인다.
-    final bothFailed =
-        krwAsync.hasError &&
-        !krwAsync.hasValue &&
-        usdAsync.hasError &&
-        !usdAsync.hasValue;
+        !bothFailed &&
+        ((krwAsync.isLoading && !krwAsync.hasValue) ||
+            (usdAsync.isLoading && !usdAsync.hasValue));
 
     final watchAsync = ref.watch(watchGroupsProvider);
     final groups = watchAsync.value ?? const <StockWatchGroup>[];
@@ -218,6 +217,7 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
         view: view,
         loading: loading,
         failed: bothFailed,
+        retrying: investRetrying,
         masked: masked,
         onRetry: _retryInvest,
       ),
@@ -282,6 +282,7 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
           SliverToBoxAdapter(
             child: StocksFailure(
               title: l.stocksFailWatch,
+              retrying: watchAsync.isLoading,
               onRetry: () => ref.invalidate(watchGroupsProvider),
             ),
           ),
@@ -346,7 +347,14 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
         SliverToBoxAdapter(
           child: ColoredBox(
             color: c.bgLayerDefault,
-            child: _holdingsBand(l, view, loading, bothFailed, masked),
+            child: _holdingsBand(
+              l,
+              view,
+              loading,
+              bothFailed,
+              masked,
+              retrying: investRetrying,
+            ),
           ),
         ),
       );
@@ -371,8 +379,9 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
     NamuMergedView view,
     bool loading,
     bool failed,
-    bool masked,
-  ) {
+    bool masked, {
+    bool retrying = false,
+  }) {
     if (loading) {
       return Semantics(
         label: l.stocksRankingLoading,
@@ -384,6 +393,7 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
     if (failed) {
       return StocksFailure(
         title: l.stocksFailHoldings,
+        retrying: retrying,
         onRetry: _retryInvest,
         description: l.namuFailDesc,
       );
@@ -480,6 +490,7 @@ class NamuInvestBand extends ConsumerWidget {
     required this.failed,
     required this.masked,
     required this.onRetry,
+    this.retrying = false,
   });
 
   final AsyncValue<NamuHoldings> krwAsync;
@@ -489,6 +500,9 @@ class NamuInvestBand extends ConsumerWidget {
   final bool failed;
   final bool masked;
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원.
+  final bool retrying;
 
   List<Widget> _buyingPowerRows(
     BuildContext context,
@@ -535,6 +549,7 @@ class NamuInvestBand extends ConsumerWidget {
         padding: EdgeInsets.zero,
         child: StocksFailure(
           title: l.stocksFailInvest,
+          retrying: retrying,
           onRetry: onRetry,
           description: l.namuFailDesc,
         ),
@@ -778,6 +793,7 @@ class _NamuMarketBandState extends ConsumerState<NamuMarketBand> {
             StocksBandTitle(l.stocksSectionMarket),
             StocksFailure(
               title: l.stocksFailMarket,
+              retrying: anyLoadRetrying([fxAsync, ?quotesAsync]),
               onRetry: () {
                 ref.invalidate(namuQuotesProvider(csv));
                 ref.invalidate(namuExchangeRateProvider);

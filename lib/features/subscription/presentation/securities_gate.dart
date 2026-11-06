@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
@@ -23,8 +24,9 @@ class SecuritiesGate extends ConsumerWidget {
     final features = ref.watch(myFeaturesLoadProvider);
     final value = features.value;
     if (value == null) {
-      if (features.hasError) {
+      if (features.loadFailed) {
         return SecuritiesLoadFailure(
+          retrying: features.loadRetrying,
           onRetry: () => ref.invalidate(myFeaturesLoadProvider),
         );
       }
@@ -42,8 +44,15 @@ class SecuritiesGate extends ConsumerWidget {
 
 /// 증권 권한 · 연결 조회 실패 — 화면 자리에서 말하고 [다시 시도] 를 준다(뒤로 가기는 상단 바).
 class SecuritiesLoadFailure extends StatelessWidget {
-  const SecuritiesLoadFailure({super.key, required this.onRetry});
+  const SecuritiesLoadFailure({
+    super.key,
+    required this.onRetry,
+    this.retrying = false,
+  });
   final VoidCallback onRetry;
+
+  /// 다시 받는 중 — [다시 시도] 에 진행 원.
+  final bool retrying;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +77,7 @@ class SecuritiesLoadFailure extends StatelessWidget {
           description: l.subLoadFailedDesc,
           primaryAction: PResultAction(
             label: l.actionRetry,
+            loading: retrying,
             onPressed: onRetry,
           ),
         ),

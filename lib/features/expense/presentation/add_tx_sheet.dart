@@ -37,6 +37,7 @@ import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
@@ -306,6 +307,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   /// 나눈 내역 조회가 실패했다 — 저장 · 고쳐 쓰기를 막는다(N5). 분할을 모르는 채 보내면 서버가 옛 분할로 판정해 어긋난다.
   bool _splitsFailed = false;
+  bool _splitsRetrying = false;
   List<SplitInput>? _reconciledSplits;
   final StepProbe _splitProbe = StepProbe();
   List<SplitInput> get _effectiveSplits => _reconciledSplits ?? _serverSplits;
@@ -1643,7 +1645,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           spAsync.isLoading &&
           !spAsync.hasValue &&
           !spAsync.hasError;
-      _splitsFailed = spAsync.hasError && !spAsync.hasValue;
+      _splitsFailed = spAsync.loadFailed;
+      _splitsRetrying = spAsync.loadRetrying;
       final sp = spAsync.value;
       _serverSplits = sp == null
           ? const []
@@ -2406,6 +2409,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       // 나눈 내역을 못 받았다 — 그 자리 실패 + [다시 시도](웹 상세 · 나누기 단계 SplitFailure 와 같은 꼴)
       if (_splitsFailed && splitSource != null)
         TxSplitFailure(
+          retrying: _splitsRetrying,
           onRetry: () =>
               ref.invalidate(expenseSplitsProvider(splitSource.rowId)),
         ),

@@ -466,8 +466,15 @@ class TxSplitSection extends StatelessWidget {
 
 /// 나눈 내역을 못 불러왔을 때 — 묶음 자리 Result Section(medium failure). 앱 원문 걷음.
 class TxSplitFailure extends StatelessWidget {
-  const TxSplitFailure({super.key, required this.onRetry});
+  const TxSplitFailure({
+    super.key,
+    required this.onRetry,
+    this.retrying = false,
+  });
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원(skeleton.md:139).
+  final bool retrying;
 
   @override
   Widget build(BuildContext context) {
@@ -478,7 +485,11 @@ class TxSplitFailure extends StatelessWidget {
       size: PResultSize.medium,
       title: l.expSplitLoadFailed,
       description: l.expSplitLoadFailedDesc,
-      primaryAction: PResultAction(label: l.actionRetry, onPressed: onRetry),
+      primaryAction: PResultAction(
+        label: l.actionRetry,
+        loading: retrying,
+        onPressed: onRetry,
+      ),
     );
   }
 }

@@ -86,6 +86,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
 
   WithdrawalCheck? _check;
   bool _loading = true;
+  bool _retrying = false;
   bool _loadFailed = false;
 
   @override
@@ -108,10 +109,15 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
     super.dispose();
   }
 
-  Future<void> _load() async {
+  /// [retry] — 실패 화면의 [다시 시도]. 받는 동안 실패를 그대로 두고 단추에 진행 원(skeleton.md:139).
+  Future<void> _load({bool retry = false}) async {
     setState(() {
-      _loading = true;
-      _loadFailed = false;
+      if (retry) {
+        _retrying = true;
+      } else {
+        _loading = true;
+        _loadFailed = false;
+      }
     });
     try {
       final repo = await ref.read(withdrawalRepositoryProvider.future);
@@ -120,12 +126,15 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
       setState(() {
         _check = res;
         _loading = false;
+        _loadFailed = false;
+        _retrying = false;
       });
     } on ApiException {
       if (!mounted) return;
       setState(() {
         _loadFailed = true;
         _loading = false;
+        _retrying = false;
       });
     }
   }
@@ -283,7 +292,11 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
         size: PResultSize.medium,
         title: l.withdrawLoadFailedTitle,
         description: l.withdrawLoadFailedDescription,
-        primaryAction: PResultAction(label: l.actionRetry, onPressed: _load),
+        primaryAction: PResultAction(
+          label: l.actionRetry,
+          loading: _retrying,
+          onPressed: () => _load(retry: true),
+        ),
       );
     } else if (blocked) {
       body = _blockedBody(l);

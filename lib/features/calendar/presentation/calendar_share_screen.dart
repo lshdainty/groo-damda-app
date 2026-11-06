@@ -78,6 +78,7 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
                 ),
                 error: (e, _) => CalendarSurfaceFailure(
                   title: l.calCalendarLoadError,
+                  retrying: listAsync.isLoading,
                   onRetry: () => ref.invalidate(userCalendarListProvider),
                 ),
                 data: (calendars) => _CalendarSections(

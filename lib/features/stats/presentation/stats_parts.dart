@@ -120,9 +120,10 @@ Widget statsFailureSection({
   required Widget? header,
   required String title,
   required VoidCallback onRetry,
+  bool retrying = false,
 }) => BudgetSection(
   header: header,
-  children: [BudgetFailure(title: title, onRetry: onRetry)],
+  children: [BudgetFailure(title: title, retrying: retrying, onRetry: onRetry)],
 );
 
 /// 차트 자리 스켈레톤 — 높이만 같다.

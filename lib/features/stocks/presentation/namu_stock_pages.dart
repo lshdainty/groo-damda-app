@@ -35,6 +35,7 @@ import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dar
     show StocksQuotesCard, fmtCapKrw, fmtShares;
 import 'package:groo_damda_app/features/stocks/presentation/watch_actions.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -269,6 +270,7 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
                   // 시세 실패는 글 한 줄이 아니라 실패 한 벌 + [다시 시도](M4)
                   StocksFailure(
                     title: l.stocksFailPrice,
+                    retrying: detailAsync.isLoading,
                     onRetry: () => ref.invalidate(namuQuoteDetailProvider(key)),
                   )
                 else if (marketKnown &&
@@ -298,6 +300,7 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
                 if (marketFailed)
                   StocksFailure(
                     title: l.stocksFailInfo,
+                    retrying: searchAsync.isLoading,
                     onRetry: () =>
                         ref.invalidate(stockSearchResultProvider(symbol)),
                   )
@@ -692,6 +695,7 @@ class _NamuDailyBand extends ConsumerWidget {
     if (async.hasError && !async.hasValue) {
       list = StocksFailure(
         title: l.stocksFailDaily,
+        retrying: async.isLoading,
         onRetry: () => ref.invalidate(namuDailyCandlesProvider(symbol)),
       );
     } else if (async.isLoading && !async.hasValue) {
@@ -793,6 +797,7 @@ class NamuPortfolioPage extends ConsumerWidget {
       content = StocksFailure(
         title: l.stocksFailInvest,
         description: l.namuFailDesc,
+        retrying: anyLoadRetrying([krwAsync, usdAsync]),
         onRetry: () {
           ref.invalidate(namuHoldingsProvider('KRW'));
           ref.invalidate(namuHoldingsProvider('USD'));

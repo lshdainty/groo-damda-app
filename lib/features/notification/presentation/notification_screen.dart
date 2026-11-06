@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
@@ -86,6 +87,7 @@ class NotificationScreen extends ConsumerWidget {
                 description: l.notiLoadFailedDesc,
                 primaryAction: PResultAction(
                   label: l.actionRetry,
+                  loading: listAsync.loadRetrying,
                   onPressed: () => ref.invalidate(notificationListProvider),
                 ),
               ),

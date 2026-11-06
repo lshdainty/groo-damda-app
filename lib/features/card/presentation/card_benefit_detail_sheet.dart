@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/card/presentation/card_format.dart';
 import 'package:groo_damda_app/features/card/presentation/widgets/card_row.dart'
     show cardImageProvider;
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/accordion/p_accordion.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
@@ -48,8 +49,7 @@ class CardDetailContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final async = ref.watch(cardCatalogDetailProvider(rowId));
-    // 다시 시도(invalidate) 중에도 옛 오류가 남지 않게 — 받는 중이면 늘 Skeleton
-    if (async.isLoading) return const _DetailSkeleton();
+    // 다시 시도(invalidate) 중에는 실패를 그대로 두고 단추에 진행 원(skeleton.md:139) — 처음 받는 중만 Skeleton
     return async.when(
       loading: () => const _DetailSkeleton(),
       error: (_, _) => PResultSection(
@@ -59,6 +59,7 @@ class CardDetailContent extends ConsumerWidget {
         description: l.cardFailDesc,
         primaryAction: PResultAction(
           label: l.dsCommonRetry,
+          loading: async.loadRetrying,
           onPressed: () => ref.invalidate(cardCatalogDetailProvider(rowId)),
         ),
       ),

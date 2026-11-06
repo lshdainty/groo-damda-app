@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/asset/presentation/asset_edit_dialog.dar
 import 'package:groo_damda_app/features/asset/presentation/asset_parts.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -126,8 +127,8 @@ class _AccountCardManageScreenState
     final masked = ref.watch(hideCardProvider('asset.manage'));
     final assetsAsync = ref.watch(assetsProvider);
     // 값이 아직 없을 때만 "처음 불러오는 중 · 실패" 다 — 다시 받는 동안은 앞 값을 그대로 둔다.
-    final loading = assetsAsync.isLoading && !assetsAsync.hasValue;
-    final failed = assetsAsync.hasError && !assetsAsync.hasValue;
+    final failed = assetsAsync.loadFailed;
+    final loading = !failed && assetsAsync.isLoading && !assetsAsync.hasValue;
 
     return Scaffold(
       // 흰 면 하나(25) — 회색 바닥도 띠도 없다
@@ -160,6 +161,7 @@ class _AccountCardManageScreenState
                 description: l.dashFailDesc,
                 action: PResultAction(
                   label: l.actionRetry,
+                  loading: assetsAsync.loadRetrying,
                   onPressed: () => ref.invalidate(assetsProvider),
                 ),
               );

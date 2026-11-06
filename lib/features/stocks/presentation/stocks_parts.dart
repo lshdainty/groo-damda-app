@@ -183,9 +183,13 @@ class StocksFailure extends StatelessWidget {
     required this.title,
     required this.onRetry,
     this.description,
+    this.retrying = false,
   });
   final String title;
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원(skeleton.md:139).
+  final bool retrying;
 
   /// 설명 — 비우면 "잠시 뒤 다시 시도해주세요.".
   final String? description;
@@ -200,7 +204,11 @@ class StocksFailure extends StatelessWidget {
         size: PResultSize.medium,
         title: title,
         description: description ?? l.stocksFailDesc,
-        primaryAction: PResultAction(label: l.actionRetry, onPressed: onRetry),
+        primaryAction: PResultAction(
+          label: l.actionRetry,
+          loading: retrying,
+          onPressed: onRetry,
+        ),
         headingLevel: 3,
       ),
     );

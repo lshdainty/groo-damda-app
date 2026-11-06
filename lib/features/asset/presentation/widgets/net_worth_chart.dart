@@ -35,6 +35,7 @@ class NetWorthChart extends ConsumerWidget {
       if (trendAsync.hasError) {
         return BudgetFailure(
           title: l.assetLoadFailedTrend,
+          retrying: trendAsync.isLoading,
           onRetry: () => ref.invalidate(netWorthTrendProvider(months)),
         );
       }

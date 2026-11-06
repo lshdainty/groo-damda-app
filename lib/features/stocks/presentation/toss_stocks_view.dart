@@ -23,6 +23,7 @@ import 'package:groo_damda_app/features/stocks/presentation/stocks_broker_parts.
 import 'package:groo_damda_app/features/stocks/presentation/stocks_parts.dart';
 import 'package:groo_damda_app/features/stocks/presentation/watch_actions.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
@@ -251,6 +252,7 @@ class _TossStocksViewState extends ConsumerState<TossStocksView> {
           SliverToBoxAdapter(
             child: StocksFailure(
               title: l.stocksFailWatch,
+              retrying: watchAsync.isLoading,
               onRetry: () => ref.invalidate(watchGroupsProvider),
             ),
           ),
@@ -360,7 +362,11 @@ class _InvestBand extends ConsumerWidget {
     if (holdingsAsync.hasError && !holdingsAsync.hasValue) {
       return PScreenSection(
         padding: EdgeInsets.zero,
-        child: StocksFailure(title: l.stocksFailInvest, onRetry: onRetry),
+        child: StocksFailure(
+          title: l.stocksFailInvest,
+          retrying: holdingsAsync.isLoading,
+          onRetry: onRetry,
+        ),
       );
     }
     if (holdingsAsync.isLoading && !holdingsAsync.hasValue) {
@@ -515,6 +521,7 @@ class _MarketBand extends ConsumerWidget {
             StocksBandTitle(l.stocksSectionMarket),
             StocksFailure(
               title: l.stocksFailMarket,
+              retrying: anyLoadRetrying([pricesAsync, krAsync, usAsync]),
               onRetry: () {
                 ref.invalidate(tossIndicatorPricesProvider);
                 ref.invalidate(tossMarketCalendarKrProvider);
@@ -821,7 +828,11 @@ class _HoldingsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     if (async.hasError && !async.hasValue) {
-      return StocksFailure(title: l.stocksFailHoldings, onRetry: onRetry);
+      return StocksFailure(
+        title: l.stocksFailHoldings,
+        retrying: async.isLoading,
+        onRetry: onRetry,
+      );
     }
     if (async.isLoading && !async.hasValue) {
       return Semantics(
@@ -942,6 +953,7 @@ class _DiscoverPanelState extends ConsumerState<_DiscoverPanel> {
     if (rankingsAsync.hasError && !rankingsAsync.hasValue) {
       body = StocksFailure(
         title: l.stocksFailRanking,
+        retrying: rankingsAsync.isLoading,
         onRetry: () => ref.invalidate(tossRankingsProvider(key)),
       );
     } else if (rankingsAsync.isLoading && !rankingsAsync.hasValue) {
@@ -1196,6 +1208,7 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                   // 웹 BandFailure 와 같은 Result Section(구역 안 = medium): 아이콘 · 제목 · 설명 · [다시 시도]
                   StocksFailure(
                     title: l.stocksFailPrice,
+                    retrying: pricesAsync.isLoading,
                     onRetry: () => ref.invalidate(tossPricesProvider(symbol)),
                   ),
                 ],
@@ -1531,6 +1544,7 @@ class _DailyBand extends ConsumerWidget {
     if (candlesAsync.hasError && !candlesAsync.hasValue) {
       list = StocksFailure(
         title: l.stocksFailDaily,
+        retrying: candlesAsync.isLoading,
         onRetry: () => ref.invalidate(
           tossCandlesProvider((symbol: symbol, interval: '1d')),
         ),
@@ -1684,6 +1698,7 @@ class TossPortfolioPage extends ConsumerWidget {
     if (holdingsAsync.hasError && !holdingsAsync.hasValue) {
       content = StocksFailure(
         title: l.stocksFailInvest,
+        retrying: holdingsAsync.isLoading,
         onRetry: () {
           ref.invalidate(tossAccountsProvider);
           ref.invalidate(tossHoldingsProvider);
@@ -1786,6 +1801,7 @@ class _StockInfoCard extends ConsumerWidget {
     if (failed) {
       return StocksFailure(
         title: l.stocksFailInfo,
+        retrying: ref.watch(tossStockInfoProvider(symbol)).loadRetrying,
         onRetry: () => ref.invalidate(tossStockInfoProvider(symbol)),
       );
     }
@@ -2336,6 +2352,7 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
       } else if (orderbookAsync.hasError && !orderbookAsync.hasValue) {
         content = StocksFailure(
           title: l.stocksFailOrderbook,
+          retrying: orderbookAsync.isLoading,
           onRetry: () => widget.onRetryBook?.call(ref),
         );
       } else {
@@ -2353,6 +2370,7 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
       } else if (tradesAsync.hasError && !tradesAsync.hasValue) {
         content = StocksFailure(
           title: l.stocksFailTrades,
+          retrying: tradesAsync.isLoading,
           onRetry: () => widget.onRetryTrades?.call(ref),
         );
       } else if (fills.isEmpty) {

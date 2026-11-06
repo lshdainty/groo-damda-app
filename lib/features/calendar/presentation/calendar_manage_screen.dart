@@ -157,6 +157,7 @@ class _CalendarManageScreenState extends ConsumerState<CalendarManageScreen> {
               else if (listAsync.hasError && calendars == null)
                 CalendarSurfaceFailure(
                   title: l.calCalendarLoadError,
+                  retrying: listAsync.isLoading,
                   onRetry: () => ref.invalidate(userCalendarListProvider),
                 )
               else if (calendars == null)
@@ -451,6 +452,7 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
               const Column(children: [_MemberSkeleton(), _MemberSkeleton()]),
           error: (e, _) => CalendarSurfaceFailure(
             title: l.calMemberLoadFailed,
+            retrying: membersAsync.isLoading,
             onRetry: () => ref.invalidate(calendarMembersProvider(cal.rowId)),
           ),
           data: (members) => PList(

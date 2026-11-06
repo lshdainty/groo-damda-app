@@ -107,6 +107,7 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
                 ),
                 error: (e, _) => CalendarSurfaceFailure(
                   title: l.calLabelLoadError,
+                  retrying: labelsAsync.isLoading,
                   onRetry: () => ref.invalidate(eventLabelsProvider),
                 ),
                 data: (labels) => Column(

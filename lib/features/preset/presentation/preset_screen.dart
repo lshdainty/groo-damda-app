@@ -14,6 +14,7 @@ import 'package:groo_damda_app/features/preset/presentation/preset_detail_sheet.
 import 'package:groo_damda_app/features/preset/presentation/preset_edit_dialog.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
@@ -108,12 +109,10 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
     final c = context.colors;
     final listAsync = ref.watch(presetListProvider);
     final catsAsync = ref.watch(categoriesProvider);
-    // 두 조회 중 **아직 값도 오류도 없는** 쪽이 있으면 첫 로딩이다 — 다시 받는 중이어도 값이 있으면 그 값을 그린다.
-    // 오류를 든 채 다시 받는 중(AsyncLoading + 이전 오류)은 실패 화면이 아니라 Skeleton 이다(웹과 같다)
-    final loading =
-        (!listAsync.hasValue && (!listAsync.hasError || listAsync.isLoading)) ||
-        (!catsAsync.hasValue && (!catsAsync.hasError || catsAsync.isLoading));
-    final failed = !loading && (!listAsync.hasValue || !catsAsync.hasValue);
+    // 두 조회 중 하나라도 값 없이 실패면 실패 화면이다 — 다시 받는 동안(AsyncLoading + 이전 오류)도 실패를 그대로 두고
+    // [다시 시도] 에 진행 원(skeleton.md:139). 그 밖에 값이 없는 쪽이 있으면 첫 로딩이다.
+    final failed = listAsync.loadFailed || catsAsync.loadFailed;
+    final loading = !failed && (!listAsync.hasValue || !catsAsync.hasValue);
     final items = listAsync.value ?? const <ExpenseTemplate>[];
 
     return Scaffold(
@@ -174,6 +173,10 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
       description: l.dashFailDesc,
       primaryAction: PResultAction(
         label: l.actionRetry,
+        loading: anyLoadRetrying([
+          ref.watch(presetListProvider),
+          ref.watch(categoriesProvider),
+        ]),
         onPressed: () {
           if (!ref.read(presetListProvider).hasValue) {
             ref.invalidate(presetListProvider);

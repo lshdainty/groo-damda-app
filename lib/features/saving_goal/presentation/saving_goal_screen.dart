@@ -116,6 +116,7 @@ class SavingGoalScreen extends ConsumerWidget {
               children: [
                 BudgetFailure(
                   title: l.savingGoalFailTitle,
+                  retrying: listAsync.isLoading,
                   onRetry: () => ref.invalidate(savingGoalListProvider),
                 ),
               ],

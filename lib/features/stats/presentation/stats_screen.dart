@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/stats/presentation/stats_parts.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_range_sheet.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_trend_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
@@ -155,6 +156,7 @@ class _CategoryTab extends ConsumerWidget {
                   ),
                 ),
                 title: l.statsLoadFailedCategory,
+                retrying: rangeAsync.loadRetrying,
                 onRetry: () => ref.invalidate(rangeSummaryProvider(range)),
               )
             : StatsDonutSection(
@@ -170,6 +172,7 @@ class _CategoryTab extends ConsumerWidget {
             ? statsFailureSection(
                 header: BudgetHead(title: l.statsTopMerchantsTitle),
                 title: l.statsLoadFailedMerchant,
+                retrying: merchantAsync.loadRetrying,
                 onRetry: () =>
                     ref.invalidate(merchantSummaryProvider(merchantKey)),
               )
@@ -183,6 +186,7 @@ class _CategoryTab extends ConsumerWidget {
             ? statsFailureSection(
                 header: BudgetHead(title: l.statsPatternTitle),
                 title: l.statsLoadFailedHeatmap,
+                retrying: heatAsync.loadRetrying,
                 onRetry: () => ref.invalidate(heatmapProvider(range)),
               )
             : StatsHeatmapSection(
@@ -268,6 +272,7 @@ class _TrendTab extends ConsumerWidget {
                   ),
                 ),
                 title: l.statsLoadFailedTrend,
+                retrying: anyLoadRetrying([rangeAsync, expensesAsync]),
                 onRetry: () {
                   if (rangeFailed) ref.invalidate(rangeSummaryProvider(range));
                   if (expensesFailed) {
@@ -365,6 +370,7 @@ class _CompareTab extends ConsumerWidget {
             ? statsFailureSection(
                 header: null,
                 title: l.statsLoadFailedCompare,
+                retrying: anyLoadRetrying([rangeAsync, prevAsync]),
                 onRetry: () {
                   if (rangeFailed) ref.invalidate(rangeSummaryProvider(range));
                   if (prevFailed) {
@@ -405,6 +411,7 @@ class _CompareTab extends ConsumerWidget {
             ? statsFailureSection(
                 header: BudgetHead(title: l.statsWeekdayTitle),
                 title: l.statsLoadFailedWeekday,
+                retrying: anyLoadRetrying([nowExpAsync, prevExpAsync]),
                 onRetry: retryExpenses,
               )
             : StatsCompareWeekdaySection(

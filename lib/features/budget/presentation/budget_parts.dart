@@ -444,10 +444,18 @@ class BudgetEmptyLine extends StatelessWidget {
 
 /// 한 질의가 실패한 구역 — 그 안에서 Result Section 으로 알리고 그 질의만 다시 받는다(오류 원문은 그리지 않는다).
 class BudgetFailure extends StatelessWidget {
-  const BudgetFailure({super.key, required this.title, required this.onRetry});
+  const BudgetFailure({
+    super.key,
+    required this.title,
+    required this.onRetry,
+    this.retrying = false,
+  });
 
   final String title;
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원(skeleton.md:139).
+  final bool retrying;
 
   @override
   Widget build(BuildContext context) {
@@ -459,7 +467,11 @@ class BudgetFailure extends StatelessWidget {
       description: l.dashFailDesc,
       headingLevel: 3,
       placement: PResultPlacement.card,
-      primaryAction: PResultAction(label: l.actionRetry, onPressed: onRetry),
+      primaryAction: PResultAction(
+        label: l.actionRetry,
+        loading: retrying,
+        onPressed: onRetry,
+      ),
     );
   }
 }

@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/memo/domain/memo.dart';
 import 'package:groo_damda_app/features/memo/domain/memo_tag.dart';
 import 'package:groo_damda_app/features/memo/presentation/memo_screen.dart';
 import 'package:groo_damda_app/features/memo/presentation/widgets/memo_row.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/floating_action_button/p_floating_action_button.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
@@ -389,7 +390,7 @@ void main() {
   }
 
   testWidgets(
-    'L5 — 목록 실패에서 [다시 시도] 를 누르면 실패 상자가 불러오는 줄 자리로 바뀐다(눌렀는데 그대로가 아니다)',
+    'L5 — 목록 실패에서 [다시 시도] 를 누르면 실패 상자는 그대로 두고 단추가 진행 원이 된다(눌렀는데 그대로가 아니다 · skeleton.md:139)',
     (tester) async {
       var calls = 0;
       await pumpApp(
@@ -410,8 +411,20 @@ void main() {
       await tester.pump();
       expect(
         find.byType(PResultSection),
-        findsNothing,
-        reason: '다시 받는 동안은 줄 자리 Skeleton',
+        findsOneWidget,
+        reason: '다시 받는 동안 실패 상자를 그대로 둔다',
+      );
+      expect(
+        tester
+            .widget<PButton>(
+              find.descendant(
+                of: find.byType(PResultSection),
+                matching: find.byType(PButton),
+              ),
+            )
+            .loading,
+        isTrue,
+        reason: '[다시 시도] 가 진행 원',
       );
     },
   );

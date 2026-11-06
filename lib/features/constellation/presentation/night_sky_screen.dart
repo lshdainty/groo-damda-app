@@ -16,6 +16,7 @@ import 'package:groo_damda_app/features/constellation/presentation/sky_colors.da
 import 'package:groo_damda_app/features/todo/application/todo_providers.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
@@ -56,7 +57,7 @@ class NightSkyScreen extends ConsumerWidget {
     final collection = collectionQ.hasValue ? collectionQ.requireValue : null;
 
     final Widget body;
-    if (today == null && todayQ.hasError) {
+    if (todayQ.loadFailed) {
       body = ListView(
         children: [
           PScreenSection(
@@ -67,6 +68,7 @@ class NightSkyScreen extends ConsumerWidget {
               description: l.constLoadFailedDesc,
               primaryAction: PResultAction(
                 label: l.actionRetry,
+                loading: todayQ.loadRetrying,
                 onPressed: () {
                   ref.invalidate(constellationTodayProvider);
                   ref.invalidate(constellationSkyProvider);
@@ -120,7 +122,8 @@ class NightSkyScreen extends ConsumerWidget {
                 today: today,
                 sky: sky,
                 entries: const [],
-                failed: skyQ.hasError && sky == null,
+                failed: skyQ.loadFailed,
+                retrying: skyQ.loadRetrying,
                 onRetry: () => ref.invalidate(constellationSkyProvider),
               ),
             ),
@@ -136,7 +139,8 @@ class NightSkyScreen extends ConsumerWidget {
             padding: EdgeInsets.zero,
             child: collection == null
                 ? _CollectionBand(
-                    failed: collectionQ.hasError,
+                    failed: collectionQ.loadFailed,
+                    retrying: collectionQ.loadRetrying,
                     onRetry: () =>
                         ref.invalidate(constellationCollectionProvider),
                   )
@@ -183,6 +187,7 @@ class _SkyBand extends StatelessWidget {
     required this.entries,
     required this.failed,
     required this.onRetry,
+    this.retrying = false,
   });
 
   final ConstellationToday? today;
@@ -190,6 +195,7 @@ class _SkyBand extends StatelessWidget {
   final List<CollectionEntry> entries;
   final bool failed;
   final VoidCallback onRetry;
+  final bool retrying;
 
   @override
   Widget build(BuildContext context) {
@@ -219,6 +225,7 @@ class _SkyBand extends StatelessWidget {
             description: l.constLoadFailedDesc,
             primaryAction: PResultAction(
               label: l.actionRetry,
+              loading: retrying,
               onPressed: onRetry,
             ),
           )
@@ -250,10 +257,15 @@ class _SkyBand extends StatelessWidget {
 
 /// 띠 ③ 도감 — 실패 상자 또는 머리 + 줄 스켈레톤 다섯.
 class _CollectionBand extends StatelessWidget {
-  const _CollectionBand({required this.failed, required this.onRetry});
+  const _CollectionBand({
+    required this.failed,
+    required this.onRetry,
+    this.retrying = false,
+  });
 
   final bool failed;
   final VoidCallback onRetry;
+  final bool retrying;
 
   @override
   Widget build(BuildContext context) {
@@ -290,6 +302,7 @@ class _CollectionBand extends StatelessWidget {
             description: l.constLoadFailedDesc,
             primaryAction: PResultAction(
               label: l.actionRetry,
+              loading: retrying,
               onPressed: onRetry,
             ),
           )

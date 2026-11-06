@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/budget/application/budget_providers.dart
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
 import 'package:groo_damda_app/features/budget/domain/budget_compliance.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -127,7 +128,13 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           monthRow,
           BudgetSection(
             topPadding: PSpacing.x3,
-            children: [BudgetFailure(title: l.dashFailBudget, onRetry: retry)],
+            children: [
+              BudgetFailure(
+                title: l.dashFailBudget,
+                retrying: anyLoadRetrying([budgetsAsync, summaryAsync]),
+                onRetry: retry,
+              ),
+            ],
           ),
         ]),
       );
@@ -604,7 +611,11 @@ class _ComplianceSection extends StatelessWidget {
         header: head,
         children: [
           async.hasError
-              ? BudgetFailure(title: l.budgetFailCompliance, onRetry: onRetry)
+              ? BudgetFailure(
+                  title: l.budgetFailCompliance,
+                  retrying: async.isLoading,
+                  onRetry: onRetry,
+                )
               : const PSkeleton(width: double.infinity, height: 180),
         ],
       );

@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/forms/time_sheet.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
@@ -62,6 +63,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
               description: l.notiSettingsLoadFailedDesc,
               primaryAction: PResultAction(
                 label: l.actionRetry,
+                loading: prefsAsync.loadRetrying,
                 onPressed: () => ref.invalidate(userPreferencesProvider),
               ),
             ),

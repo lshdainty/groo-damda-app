@@ -14,6 +14,7 @@ import 'package:groo_damda_app/features/todo/application/todo_providers.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/features/todo/domain/todo_meta.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -90,9 +91,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
     final collection = ref.watch(constellationCollectionProvider).value;
     final today = todayQ.hasValue ? todayQ.requireValue : null;
     final todos = todosQ.hasValue ? todosQ.requireValue : null;
-    final failed =
-        (today == null && todayQ.hasError) ||
-        (todos == null && todosQ.hasError);
+    final failed = todayQ.loadFailed || todosQ.loadFailed;
 
     final todayYmd = _ymd(DateTime.now());
     final days = _weekDays(_week);
@@ -110,6 +109,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
         description: l.constLoadFailedDesc,
         primaryAction: PResultAction(
           label: l.actionRetry,
+          loading: anyLoadRetrying([todayQ, todosQ]),
           onPressed: () {
             ref.invalidate(constellationTodayProvider);
             ref.invalidate(todoListProvider(_allFilter));

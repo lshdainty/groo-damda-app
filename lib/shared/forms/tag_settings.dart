@@ -99,6 +99,7 @@ class TagSettings extends StatefulWidget {
     required this.tags,
     required this.failed,
     required this.onRetry,
+    this.retrying = false,
     required this.create,
     required this.update,
     required this.remove,
@@ -112,6 +113,9 @@ class TagSettings extends StatefulWidget {
   final List<TagItem>? tags;
   final bool failed;
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원.
+  final bool retrying;
 
   /// 만든다 · 고친다 · 지운다 — 던지면 실패다. 목록을 다시 받은 뒤에 끝나야 한다.
   final Future<void> Function(String name, String color) create;
@@ -233,6 +237,7 @@ class _TagSettingsState extends State<TagSettings> {
           description: copy.loadFailedDesc,
           primaryAction: PResultAction(
             label: l.actionRetry,
+            loading: widget.retrying,
             onPressed: widget.onRetry,
           ),
         ),
