@@ -26,9 +26,17 @@ const _conn = BrokerConnection(
 );
 
 class _Repo extends SubscriptionRepository {
-  _Repo(this.status) : super(Dio());
-  final int status;
+  _Repo(this.status, {this.code = 'X'}) : super(Dio());
+  final int? status;
+  final String code;
   final silent = <bool>[];
+  var connectionReads = 0;
+
+  @override
+  Future<List<BrokerConnection>> getBrokerConnections() async {
+    connectionReads++;
+    return const [_conn];
+  }
 
   @override
   Future<void> registerBrokerCredential(
@@ -38,17 +46,28 @@ class _Repo extends SubscriptionRepository {
     bool silent = false,
   }) async {
     this.silent.add(silent);
-    throw ApiException(code: 'X', message: '서버 원문', statusCode: status);
+    throw ApiException(code: code, message: '서버 원문', statusCode: status);
   }
 }
 
-Future<_Repo> _run(WidgetTester tester, int status) async {
-  final repo = _Repo(status);
+Future<_Repo> _run(
+  WidgetTester tester,
+  int? status, {
+  String code = 'X',
+}) async {
+  final repo = _Repo(status, code: code);
+  final container = ProviderContainer(
+    overrides: [
+      subscriptionRepositoryProvider.overrideWith((ref) async => repo),
+    ],
+  );
+  addTearDown(container.dispose);
+  // 연결 상태를 보는 화면이 있는 것처럼 — 무효화되면 다시 받는다
+  container.listen(brokerConnectionsProvider, (_, _) {});
+  await container.read(brokerConnectionsProvider.future);
   await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        subscriptionRepositoryProvider.overrideWith((ref) async => repo),
-      ],
+    UncontrolledProviderScope(
+      container: container,
       child: MaterialApp(
         theme: GrooTheme.light(),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -89,9 +108,26 @@ void main() {
   });
 
   testWidgets('5xx — 증권사를 연결하지 못했어요. Callout · 값 유지', (tester) async {
-    await _run(tester, 500);
+    final repo = await _run(tester, 500);
+    expect(repo.connectionReads, 1, reason: '실패는 다시 받지 않는다');
     expect(findPlain(l.subBrokerConnectFailed), findsOneWidget);
     expect(l.subBrokerConnectFailed, '증권사를 연결하지 못했어요.');
     expect(find.byType(FormErrorCallout), findsOneWidget);
   });
+
+  for (final code in [kApiNoResponseCode, kApiParseErrorCode]) {
+    testWidgets(
+      '응답을 못 받음($code) — 실패가 아니라 "연결됐는지 확인하지 못했어요." · 연결 상태를 다시 받는다(판단 ⑤)',
+      (tester) async {
+        final repo = await _run(tester, null, code: code);
+        expect(findPlain('연결됐는지 확인하지 못했어요.'), findsOneWidget);
+        expect(findPlain(l.subBrokerConnectFailed), findsNothing);
+        expect(
+          repo.connectionReads,
+          2,
+          reason: '처음 한 번 + 연결됐을 수 있어 서버 상태를 다시 받은 한 번',
+        );
+      },
+    );
+  }
 }

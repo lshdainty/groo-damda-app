@@ -11,6 +11,7 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/widgets/p_badge.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_card.dart';
@@ -101,6 +102,8 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
 
   Future<void> _connect(BrokerConnection c, String key, String secret) async {
     final l = AppLocalizations.of(context);
+    // 응답을 못 받은 뒤 다시 받기는 화면이 사라져도 한다 — 컨테이너를 미리 잡는다
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _connectError = null);
     _setBusy(true);
     try {
@@ -114,6 +117,14 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
         )?.show(message: l.subBrokerConnected(c.displayName));
       }
     } catch (e) {
+      // 응답을 못 받았다 — 연결됐을 수 있다. 실패라 하지 않고 연결 상태를 다시 받는다(디자인시스템 판단 ⑤).
+      // 키 등록은 같은 증권사를 덮어쓰므로 다시 눌러도 두 번 생기지 않는다 — 단추는 그대로 둔다
+      final unconfirmed = isUnconfirmedSave(e);
+      if (unconfirmed) {
+        container
+          ..invalidate(myFeaturesLoadProvider)
+          ..invalidate(brokerConnectionsProvider);
+      }
       if (!mounted) return;
       // 4xx = 인증정보를 서버가 거절 — 틀림. 그 밖(서버 · 네트워크)은 연결 실패(웹과 같은 갈래).
       final invalid =
@@ -121,7 +132,9 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
           (e.statusCode ?? 0) >= 400 &&
           (e.statusCode ?? 0) < 500;
       setState(() {
-        _connectError = invalid
+        _connectError = unconfirmed
+            ? l.unconfirmedConnect
+            : invalid
             ? l.subBrokerInvalidCred
             : l.subBrokerConnectFailed;
       });
