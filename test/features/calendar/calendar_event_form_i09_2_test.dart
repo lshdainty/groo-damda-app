@@ -2,7 +2,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show HitTestResult;
-import 'package:flutter/rendering.dart' show RenderBox, RenderPointerListener;
+import 'package:flutter/rendering.dart'
+    show RenderBox, RenderPointerListener, SemanticsAction;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,6 +22,8 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 
 import 'support/event_form_support.dart';
+import '../../support/plain_text.dart';
+import '../../support/real_fonts.dart';
 
 class _Repo extends CalendarRepository {
   _Repo() : super(Dio());
@@ -110,6 +113,8 @@ void main() {
   late AppLocalizations l;
   setUpAll(() async {
     l = await AppLocalizations.delegate.load(const Locale('ko'));
+    // 줄 높이 46 · 넘침은 실제 글꼴로 잰다(T5)
+    await loadRealFonts();
   });
 
   Finder sheetContent() => find.byType(PBottomSheetContent);
@@ -159,22 +164,22 @@ void main() {
         expect(y, greaterThan(last), reason: t);
         last = y;
       }
-      expect(find.text('10월 29일 (목)'), findsNWidgets(2));
+      expect(findText('10월 29일 (목)'), findsNWidgets(2));
       // 종일이라 시각 조각이 없다
-      expect(find.text('오전 9:00'), findsNothing);
+      expect(findText('오전 9:00'), findsNothing);
     });
 
     testWidgets('종일을 끄면 시각 조각이 생기고 누르는 자리는 44 이상이다', (tester) async {
       await openEventForm(tester, repo: _Repo());
       await tapRow(tester, l.calAllDay);
-      expect(find.text('오전 9:00'), findsOneWidget);
-      expect(find.text('오전 10:00'), findsOneWidget);
+      expect(findText('오전 9:00'), findsOneWidget);
+      expect(findText('오전 10:00'), findsOneWidget);
       // 줄 높이는 글 줄 하나(22)지만 누르는 자리는 위아래 11 씩 줄 밖으로 넓어 44 다(웹 Piece -my-[11px] min-h-[44px])
       for (final t in ['10월 29일 (목)', '오전 9:00']) {
         final box = tester.getRect(
           find
               .ancestor(
-                of: find.text(t).first,
+                of: findText(t).first,
                 matching: find.byType(GestureDetector),
               )
               .first,
@@ -220,6 +225,36 @@ void main() {
         find.bySemanticsLabel('${l.calFormEndDay}, 10월 29일 (목)'),
         findsOneWidget,
       );
+      // 줄 이름("시작")에 합쳐지지 않는다 — 조각은 각자 누르는 노드다(P4)
+      expect(
+        find.bySemanticsLabel(RegExp('^${l.calStartDate}\n')),
+        findsNothing,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('종일을 끄면 날짜 · 시각 조각이 각자 누르는 노드다 — 낭독기로 시각을 따로 누른다', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await openEventForm(tester, repo: _Repo());
+      await tapRow(tester, l.calAllDay);
+      for (final name in [
+        '${l.calFormStartDay}, 10월 29일 (목)',
+        '${l.calFormStartTime}, 오전 9:00',
+        '${l.calFormEndDay}, 10월 29일 (목)',
+        '${l.calFormEndTime}, 오전 10:00',
+      ]) {
+        final node = find.bySemanticsLabel(name);
+        expect(node, findsOneWidget, reason: '$name 이 따로 된 노드다');
+        final data = tester.getSemantics(node).getSemanticsData();
+        expect(
+          data.hasAction(SemanticsAction.tap),
+          isTrue,
+          reason: '$name 을 누른다',
+        );
+        expect(data.flagsCollection.isButton, isTrue, reason: '$name 은 단추다');
+      }
       handle.dispose();
     });
 
@@ -239,7 +274,7 @@ void main() {
       await openEventForm(tester, repo: _Repo());
       expect(valueText(l.calNoLabel), findsOneWidget);
       await tapRow(tester, l.calFieldLabel);
-      expect(find.text(l.calFormLabelHint), findsOneWidget);
+      expect(findText(l.calFormLabelHint), findsOneWidget);
     });
 
     testWidgets('고르기 시트는 누르면 바로 닫히고 줄 값이 바뀐다', (tester) async {
@@ -273,7 +308,7 @@ void main() {
   group('날짜 · 시각', () {
     testWidgets('날짜 시트는 2030 이후도 고르는 범위다 — 상한이 없다', (tester) async {
       await openEventForm(tester, repo: _Repo());
-      await tester.tap(find.text('10월 29일 (목)').first);
+      await tester.tap(findText('10월 29일 (목)').first);
       await tester.pumpAndSettle();
       final picker = tester.widget<PDatePicker>(find.byType(PDatePicker));
       expect(picker.max, isNull);
@@ -284,15 +319,15 @@ void main() {
       final repo = _Repo();
       await openEventForm(tester, repo: repo);
       await enterTitle(tester, '출장');
-      await tester.tap(find.text('10월 29일 (목)').first);
+      await tester.tap(findText('10월 29일 (목)').first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('30').first);
+      await tester.tap(findText('30').first);
       await tester.pumpAndSettle();
       // 완료 전에는 줄 값 그대로
-      expect(find.text('10월 29일 (목)'), findsNWidgets(2));
+      expect(findText('10월 29일 (목)'), findsNWidgets(2));
       await tapButton(tester, l.actionDone);
       expect(
-        find.text('10월 30일 (금)'),
+        findText('10월 30일 (금)'),
         findsNWidgets(2),
         reason: '종일이라 끝이 시작 날로 끌려간다',
       );
@@ -304,29 +339,29 @@ void main() {
     testWidgets('시각 시트에서 "완료" 하면 지금 보이던 시각이 들어간다', (tester) async {
       await openEventForm(tester, repo: _Repo());
       await tapRow(tester, l.calAllDay);
-      await tester.tap(find.text('오전 9:00'));
+      await tester.tap(findText('오전 9:00'));
       await tester.pumpAndSettle();
       await tapButton(tester, l.actionDone);
-      expect(find.text('오전 9:00'), findsOneWidget);
-      expect(find.text('오전 10:00'), findsOneWidget);
+      expect(findText('오전 9:00'), findsOneWidget);
+      expect(findText('오전 10:00'), findsOneWidget);
     });
 
     testWidgets('끝을 시작보다 앞 날로 고르고 저장하면 종료 줄 아래 오류가 뜨고 요청은 없다', (tester) async {
       final repo = _Repo();
       await openEventForm(tester, repo: repo);
       await enterTitle(tester, '출장');
-      await tester.tap(find.text('10월 29일 (목)').last);
+      await tester.tap(findText('10월 29일 (목)').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('28').first);
+      await tester.tap(findText('28').first);
       await tester.pumpAndSettle();
       await tapButton(tester, l.actionDone);
       expect(
-        find.text(l.calFormEndBeforeStart),
+        findText(l.calFormEndBeforeStart),
         findsNothing,
         reason: '저장을 누르기 전에는 안 띄운다',
       );
       await tapButton(tester, l.actionSave);
-      expect(find.text(l.calFormEndBeforeStart), findsOneWidget);
+      expect(findText(l.calFormEndBeforeStart), findsOneWidget);
       expect(repo.creates, 0);
     });
   });
@@ -336,11 +371,11 @@ void main() {
       final repo = _Repo();
       await openEventForm(tester, repo: repo);
       await tapButton(tester, l.actionSave);
-      expect(find.text(keepAll(l.calFormTitleRequired)), findsOneWidget);
+      expect(findText(keepAll(l.calFormTitleRequired)), findsOneWidget);
       expect(repo.creates, 0);
       // 치기 시작하면 오류가 걷힌다
       await enterTitle(tester, '출장');
-      expect(find.text(keepAll(l.calFormTitleRequired)), findsNothing);
+      expect(findText(keepAll(l.calFormTitleRequired)), findsNothing);
     });
 
     testWidgets('저장이 실패하면 시트가 열린 채 폼 맨 위 Callout 이 뜨고 쓴 값이 남는다', (
@@ -351,9 +386,9 @@ void main() {
       await enterTitle(tester, '출장');
       await tapButton(tester, l.actionSave);
       expect(find.byType(PCallout), findsOneWidget);
-      expect(find.text(l.calFormSaveFailed), findsOneWidget);
+      expect(findText(l.calFormSaveFailed), findsOneWidget);
       expect(
-        find.text('Server error'),
+        findText('Server error'),
         findsNothing,
         reason: '서버 글을 그대로 내지 않는다',
       );
@@ -384,12 +419,12 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-close')));
       await tester.pumpAndSettle();
       expect(find.byType(PAlertDialogView), findsOneWidget);
-      await tester.tap(find.text(l.sheetLeaveStay));
+      await tester.tap(findText(l.sheetLeaveStay));
       await tester.pumpAndSettle();
       expect(sheetContent(), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-close')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(l.sheetLeaveLeave));
+      await tester.tap(findText(l.sheetLeaveLeave));
       await tester.pumpAndSettle();
       expect(sheetContent(), findsNothing);
     });
@@ -432,7 +467,7 @@ void main() {
       await tester.pumpAndSettle();
       // 들어올 때와 글이 달라 먼저 묻는다(웹 M-7 과 같다) — 계속 작성은 그 단계에 머문다
       expect(find.byType(PAlertDialogView), findsOneWidget);
-      await tester.tap(find.text(l.sheetLeaveStay));
+      await tester.tap(findText(l.sheetLeaveStay));
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('p-bottom-sheet-back-slot')),
@@ -441,7 +476,7 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-back-slot')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(l.sheetLeaveLeave));
+      await tester.tap(findText(l.sheetLeaveLeave));
       await tester.pumpAndSettle();
       expect(valueText('치과 3층'), findsOneWidget);
       expect(valueText('버려질 글'), findsNothing);
@@ -467,7 +502,7 @@ void main() {
       await tester.pumpAndSettle();
       // 바뀐 글이 있어 먼저 묻는다 — 나가면 그 단계만 닫힌다
       expect(find.byType(PAlertDialogView), findsOneWidget);
-      await tester.tap(find.text(l.sheetLeaveLeave));
+      await tester.tap(findText(l.sheetLeaveLeave));
       await tester.pumpAndSettle();
       expect(sheetContent(), findsOneWidget);
       expect(
@@ -608,7 +643,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pumpAndSettle();
@@ -660,7 +695,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text(l.actionDelete),
+          matching: findText(l.actionDelete),
         ),
       );
       await tester.pumpAndSettle();
@@ -685,7 +720,7 @@ void main() {
     );
     expect(sheet.right, lessThanOrEqualTo(360.5));
     for (final t in ['10월 29일 (목)', '오전 9:00']) {
-      final r = tester.getRect(find.text(t).first);
+      final r = tester.getRect(findText(t).first);
       expect(r.right, lessThanOrEqualTo(360 - 24 + 0.5), reason: t);
     }
   });

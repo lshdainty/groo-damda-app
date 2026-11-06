@@ -408,8 +408,10 @@ class _DateRow extends StatelessWidget {
 /// 날짜 줄이 같은 부품을 쓴다(I-21 21-2 · 웹 `PieceGroup`). 조각 묶음도 값이다 — 좁은 줄에서 제목 아래로 내려가고 폭 제한은 ds 가 한다.
 class FormPieceGroup extends PListValue {
   // PListValue 를 이어받아야 줄이 이 묶음을 "값" 으로 읽는다(StatelessWidget 으로 감싸면 조작 요소로 읽혀 200% 에서 넘친다)
+  // 조각은 각자 누르는 노드다 — 줄 이름("시작")과 합치지 않는다(낭독기가 날짜 · 시각을 따로 누른다)
   FormPieceGroup({super.key, required List<Widget> children})
     : super(
+        mergeSemantics: false,
         child: Wrap(
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.center,
