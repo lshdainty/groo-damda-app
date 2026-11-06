@@ -1,6 +1,7 @@
 // 응답 형식 오류(I-wrap-b2b 3) — 저장소 공용 throwAsApiException 이 TypeError · FormatException 을 ApiException(PARSE) 으로
 // 바꾼다. 화면 글은 고정 글이고 원문은 로그에만 남는다. 불러오기 · 저장 모두 zone 으로 빠지지 않는다.
 import 'dart:convert';
+import 'dart:io' show HttpException;
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -76,6 +77,40 @@ void main() {
         _thrown(() => throwAsApiException(state, StackTrace.current)),
         same(state),
       );
+    });
+  });
+
+  group('응답을 받지 못함(NO_RESPONSE) · 연결 못 함(NETWORK)', () {
+    ApiException of(DioExceptionType type, [Object? error]) =>
+        ApiException.fromDio(
+          DioException(
+            requestOptions: RequestOptions(path: '/x'),
+            type: type,
+            error: error,
+          ),
+        );
+
+    test('요청은 나갔는데 응답 전에 끊김 — 응답 시간 초과 · 받는 중 연결 끊김은 NO_RESPONSE', () {
+      expect(of(DioExceptionType.receiveTimeout).code, kApiNoResponseCode);
+      expect(
+        of(
+          DioExceptionType.unknown,
+          const HttpException(
+            'Connection closed before full header was received',
+          ),
+        ).code,
+        kApiNoResponseCode,
+      );
+    });
+
+    test('연결 자체를 못 했으면 NETWORK(실패) — 연결 실패 · 연결 시간 초과 · 보내는 중 시간 초과', () {
+      for (final t in [
+        DioExceptionType.connectionError,
+        DioExceptionType.connectionTimeout,
+        DioExceptionType.sendTimeout,
+      ]) {
+        expect(of(t).code, 'NETWORK', reason: '$t');
+      }
     });
   });
 

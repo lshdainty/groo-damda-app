@@ -64,6 +64,22 @@ class _BadBodyAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+/// 응답 대신 [type] 의 DioException — 응답을 받지 못함(receiveTimeout) · 연결 못 함(connectionTimeout).
+class _DioFailAdapter implements HttpClientAdapter {
+  _DioFailAdapter(this.type);
+  final DioExceptionType type;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async => throw DioException(requestOptions: options, type: type);
+
+  @override
+  void close({bool force = false}) {}
+}
+
 /// 결제가 [error] 를 던진다(ApiException 이 아닌 것 — `_pay` 의 `on ApiException` 밖).
 class _ThrowingPayRepo extends AssetRepository {
   _ThrowingPayRepo(this.error) : super(Dio());
@@ -467,6 +483,55 @@ void main() {
     expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
     expect(findTextContaining('서버 원문'), findsNothing);
   });
+
+  for (final (type, unconfirmed) in [
+    (DioExceptionType.receiveTimeout, true),
+    (DioExceptionType.connectionTimeout, false),
+  ]) {
+    testWidgets(
+      '[지금 결제] — $type 이면 ${unconfirmed ? '확인 Callout · 청구를 다시 받는다' : '결제하지 못했어요'}(M3 확장)',
+      (tester) async {
+        final repo = AssetRepository(
+          Dio()..httpClientAdapter = _DioFailAdapter(type),
+        );
+        var billingReads = 0;
+        await _open(
+          tester,
+          billing: upcomingBilling,
+          extraOverrides: [
+            assetRepositoryProvider.overrideWith((ref) async => repo),
+            cardBillingProvider.overrideWith((ref, id) async {
+              billingReads++;
+              return upcomingBilling;
+            }),
+          ],
+        );
+        await tester.tap(findText('지금 결제'));
+        await tester.pumpAndSettle();
+        final before = billingReads;
+        await tester.enterText(find.byType(TextField), '40000');
+        await tester.tap(findText('결제하기'));
+        await tester.pumpAndSettle();
+        expect(
+          findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'),
+          unconfirmed ? findsOneWidget : findsNothing,
+        );
+        expect(
+          findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'),
+          unconfirmed ? findsNothing : findsOneWidget,
+        );
+        if (unconfirmed) {
+          expect(
+            billingReads,
+            greaterThan(before),
+            reason: '서버가 처리했을 수 있다 — 청구를 비운다',
+          );
+        } else {
+          expect(billingReads, before, reason: '서버에 닿지 않았다');
+        }
+      },
+    );
+  }
 
   // 청구를 못 불러오면 "0원" 이 아니라 실패 띠 + 다시 시도.
   testWidgets('청구 조회 실패는 0원이 아니라 실패 띠', (tester) async {

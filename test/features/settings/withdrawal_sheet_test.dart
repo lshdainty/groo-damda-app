@@ -53,6 +53,9 @@ class _Repo extends WithdrawalRepository {
   int withdrawCalls = 0;
   Completer<void>? withdrawGate;
 
+  /// 해지 요청이 던질 오류(응답을 읽지 못함 · 받지 못함 시험).
+  Object? withdrawError;
+
   @override
   Future<WithdrawalCheck> check() async {
     if (failLoad) throw ApiException(code: 'X', message: '');
@@ -87,6 +90,8 @@ class _Repo extends WithdrawalRepository {
   Future<void> withdraw({required String reauthToken, String? reason}) async {
     withdrawCalls++;
     await withdrawGate?.future;
+    final e = withdrawError;
+    if (e != null) throw e;
   }
 }
 
@@ -384,6 +389,36 @@ void main() {
     expect(_t(_l.withdrawCodeWrong), findsNothing);
     expect(findText('net raw'), findsNothing);
   });
+
+  for (final (code, unconfirmed) in [
+    (kApiParseErrorCode, true),
+    (kApiNoResponseCode, true),
+    ('NETWORK', false),
+  ]) {
+    testWidgets(
+      '해지 요청 $code — ${unconfirmed ? '"해지됐는지 확인하지 못했어요"' : '해지 실패 글'}(판단 6)',
+      (tester) async {
+        final repo = _Repo()
+          ..withdrawError = ApiException(code: code, message: 'raw');
+        await _open(tester, repo);
+        await tester.tap(findText(_l.withdrawNext));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).first, 'secret');
+        await tester.pump();
+        await tester.tap(findText(_l.withdrawConfirm));
+        await tester.pumpAndSettle();
+        expect(repo.withdrawCalls, 1);
+        expect(
+          findTextContaining(_l.withdrawUnconfirmed),
+          unconfirmed ? findsOneWidget : findsNothing,
+        );
+        expect(
+          findText(keepAll(_l.withdrawFailed)),
+          unconfirmed ? findsNothing : findsOneWidget,
+        );
+      },
+    );
+  }
 
   testWidgets('비밀번호 틀림은 화면 글 · 서버 글을 그대로 내지 않는다', (tester) async {
     final repo = _Repo(

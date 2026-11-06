@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 그루 담다 이용 해지 — web `WithdrawDialog` 미러.
 ///
@@ -241,10 +242,13 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
       // 화면이 통째로 사라졌어도 로그아웃은 한다 — 이게 빠지면 이미 없는 계정으로
       // 앱이 계속 돈다.
       auth.logout();
-    } on ApiException {
+    } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _reauthError = l.withdrawFailed;
+        // 응답을 읽지 못했거나 받지 못했다 — 해지됐을 수 있다. 실패라 하지 않는다(디자인시스템 판단 6)
+        _reauthError = isUnconfirmedSave(e)
+            ? l.withdrawUnconfirmed
+            : l.withdrawFailed;
         _submitting = false;
       });
     } finally {

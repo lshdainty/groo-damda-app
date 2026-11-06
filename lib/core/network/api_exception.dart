@@ -1,3 +1,4 @@
+import 'dart:io' show HttpException;
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart' show debugPrint;
@@ -61,12 +62,22 @@ class ApiException implements Exception {
       );
     }
     // 네트워크 무응답 — 서버 응답 자체가 없어 서버 메시지 불가, 로케일 문구.
+    // 요청은 나갔는데 응답 전에 끊겼으면(응답 기다리다 시간 초과 · 받는 중 연결 끊김) 서버가 처리했을 수 있다 —
+    // [kApiNoResponseCode] 로 가른다(쓰기는 "확인하지 못했어요" 쪽, 검수 M3 확장). 연결 자체를 못 했으면(연결 실패 ·
+    // 연결 시간 초과 · 보내는 중 시간 초과) 서버에 닿지 않았다 — NETWORK(실패).
     return ApiException(
-      code: 'NETWORK',
+      code: _sentButNoResponse(e) ? kApiNoResponseCode : 'NETWORK',
       message: _l().apiErrorNetwork,
       cause: e,
     );
   }
+
+  static bool _sentButNoResponse(DioException e) => switch (e.type) {
+    DioExceptionType.receiveTimeout => true,
+    // 헤더를 받기 전에 연결이 닫혔다(dart:io HttpException) — 요청은 이미 나갔다
+    DioExceptionType.unknown => e.error is HttpException,
+    _ => false,
+  };
 
   /// 응답을 읽지 못했다 — 형식이 다른 본문(`fromJson` 의 형 변환 · 날짜 · 숫자 풀기 실패). 서버는 받았을 수 있다.
   /// 화면 글은 고정 글([apiErrorServer] — 원문을 내지 않는다), 원문은 로그에만 남긴다.
@@ -85,6 +96,10 @@ class ApiException implements Exception {
 
 /// 응답 형식 오류의 코드 — [ApiException.parse].
 const String kApiParseErrorCode = 'PARSE';
+
+/// 요청은 나갔는데 응답을 받지 못했다(응답 기다리다 시간 초과 · 받는 중 연결 끊김) — [ApiException.fromDio]. 서버가 처리했을 수
+/// 있어 쓰기에서는 실패가 아니라 "확인하지 못했어요" 다.
+const String kApiNoResponseCode = 'NO_RESPONSE';
 
 /// 저장소 공용 — 요청 · 응답 풀기에서 난 오류를 [ApiException] 하나로 올린다(저장소마다 `catch (e, s)` 에서 부른다).
 ///

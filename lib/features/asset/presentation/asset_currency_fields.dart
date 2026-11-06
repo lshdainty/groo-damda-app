@@ -110,7 +110,7 @@ bool exchangeRateMissing(String currency, TextEditingController rate) {
 /// AST_037 카드는 원화만 · AST_036 외화 자산 환율 필수(I-13, 웹 FormStep `saveFailedText` 와 같다). 그 밖은 "자산을 저장하지 못했어요."
 String assetSaveFailedText(AppLocalizations l, String? code) => switch (code) {
   // 응답만 못 읽었다(서버는 저장했다) — 실패라 하지 않는다(검수 M3)
-  kApiParseErrorCode => l.saveUnconfirmed,
+  kApiParseErrorCode || kApiNoResponseCode => l.saveUnconfirmed,
   'AST_037' => l.assetSaveCardForeign,
   'AST_036' => l.assetSaveRateRequired,
   _ => l.assetSaveFailed,

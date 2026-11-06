@@ -417,7 +417,8 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
                 // 서버 글은 내지 않고 오류 코드로만 가른다(ASSET_012 = 보유 수량 부족).
                 message: _failCode == 'ASSET_012'
                     ? l.tradeSaveInsufficientQty
-                    : _failCode == kApiParseErrorCode
+                    : _failCode == kApiParseErrorCode ||
+                          _failCode == kApiNoResponseCode
                     ? l.saveUnconfirmed
                     : l.tradeSaveFailed,
               ),
