@@ -909,19 +909,9 @@ class _HoldingsList extends StatelessWidget {
           ),
       ],
     );
-    // 받아 둔 보유가 있는 채 다시 받지 못했다 — 줄은 두고 위에 띠 한 줄(I-wrap-b2b 4)
-    if (!async.refreshFailed) return list;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        StocksPriceFailure(
-          stale: true,
-          retrying: async.isLoading,
-          onRetry: onRetry,
-        ),
-        list,
-      ],
-    );
+    // 받아 둔 보유가 있는 채 다시 받지 못했으면 같은 화면 맨 위 내 투자 섹션이 Callout 하나로 말한다 — 같은 실패를 이 탭에서
+    // 또 띄우지 않는다(웹 2차 검수 L5: 같은 시세 실패 하나에 Callout 하나)
+    return list;
   }
 }
 

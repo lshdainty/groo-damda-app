@@ -43,7 +43,25 @@ final _holdings = TossHoldings(
   profitLossRate: '22.31',
   dailyProfitLossAmount: '-1234',
   dailyProfitLossRate: '-0.67',
-  items: const [],
+  items: const [
+    TossHoldingsItem(
+      symbol: 'A100',
+      name: '가람전자',
+      marketCountry: 'KR',
+      currency: 'KRW',
+      quantity: '3',
+      lastPrice: '70000',
+      averagePurchasePrice: '60000',
+      marketValueAmount: '210000',
+      profitLossAmount: '30000',
+      profitLossRate: '16.6',
+      dailyProfitLossAmount: '0',
+      dailyProfitLossRate: '0',
+      purchaseAmount: '180000',
+      commission: '0',
+      tax: '0',
+    ),
+  ],
 );
 
 final _group = StockWatchGroup(
@@ -180,10 +198,12 @@ void main() {
       s.holdingsFail = true;
       s.container.invalidate(tossHoldingsProvider);
       await _settle(tester);
+      expect(findText('가람전자'), findsOneWidget, reason: '보유 탭 줄도 보인다');
       expect(
         _stale,
         findsOneWidget,
-        reason: '보이는 숫자 위에 실패 상자(Result Section)를 얹지 않는다',
+        reason:
+            '보이는 숫자 위에 실패 상자를 얹지 않고, 같은 실패에 Callout 은 맨 위 하나(보유 탭에 또 띄우지 않는다)',
       );
       expect(_band, findsNothing);
       expect(findTextContaining(_fail), findsOneWidget);
