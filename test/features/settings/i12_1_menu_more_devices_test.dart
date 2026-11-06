@@ -463,14 +463,14 @@ void main() {
       expect(badge.variant, PBadgeVariant.outline);
       expect(badge.tone, PBadgeTone.positive);
       final all = tester.widget<PButton>(
-        find.widgetWithText(PButton, '모든 기기에서 로그아웃'),
+        findWidgetWithText(PButton, '모든 기기에서 로그아웃'),
       );
       expect(all.variant, PButtonVariant.ghost);
       expect(all.ghostColor, PButtonGhostColor.critical);
       expect(all.size, PButtonSize.large);
       final lastRow = tester.getRect(find.byType(PListItem).last);
       final allRect = tester.getRect(
-        find.widgetWithText(PButton, '모든 기기에서 로그아웃'),
+        findWidgetWithText(PButton, '모든 기기에서 로그아웃'),
       );
       expect(allRect.top - lastRow.bottom, 24, reason: 'T11 위 24');
       expect(allRect.width, 360 - 48, reason: '화면 폭 − 좌우 24');
@@ -549,7 +549,7 @@ void main() {
           reason: '${e.key} ${e.value}',
         );
         expect(findPlain('Windows 11 · Chrome에서 로그아웃할까요?'), findsOneWidget);
-        await tester.tap(find.widgetWithText(PButton, '취소'));
+        await tester.tap(findWidgetWithText(PButton, '취소'));
         await _go(tester);
         await _go(tester);
         expect(find.byType(PAlertDialogView), findsNothing);
@@ -580,7 +580,7 @@ void main() {
       await tester.tapAt(Offset(next.center.dx, next.top - 3.5));
       await _go(tester);
       expect(findPlain('macOS 15 · Firefox에서 로그아웃할까요?'), findsOneWidget);
-      await tester.tap(find.widgetWithText(PButton, '취소'));
+      await tester.tap(findWidgetWithText(PButton, '취소'));
       await _go(tester);
     });
 
@@ -655,14 +655,14 @@ void main() {
       final confirm = tester.widget<PButton>(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.widgetWithText(PButton, '로그아웃'),
+          matching: findWidgetWithText(PButton, '로그아웃'),
         ),
       );
       expect(confirm.variant, PButtonVariant.criticalSolid);
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.widgetWithText(PButton, '로그아웃'),
+          matching: findWidgetWithText(PButton, '로그아웃'),
         ),
       );
       await _go(tester);
@@ -678,7 +678,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.widgetWithText(PButton, '로그아웃'),
+          matching: findWidgetWithText(PButton, '로그아웃'),
         ),
       );
       await _go(tester);
@@ -692,14 +692,14 @@ void main() {
     testWidgets('모두 로그아웃 확인창 글 · 확정하면 로그아웃', (tester) async {
       final repo = _Repo(devices: _devices());
       await _pump(tester, const DevicesScreen(), repo: repo);
-      await tester.tap(find.widgetWithText(PButton, '모든 기기에서 로그아웃'));
+      await tester.tap(findWidgetWithText(PButton, '모든 기기에서 로그아웃'));
       await _go(tester);
       expect(findPlain('모든 기기에서 로그아웃할까요?'), findsOneWidget);
       expect(findPlain('지금 쓰는 기기도 로그아웃돼요. 다시 로그인해야 해요.'), findsOneWidget);
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.widgetWithText(PButton, '모든 기기에서 로그아웃'),
+          matching: findWidgetWithText(PButton, '모든 기기에서 로그아웃'),
         ),
       );
       await _go(tester);

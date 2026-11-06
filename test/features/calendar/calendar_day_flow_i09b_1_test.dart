@@ -622,6 +622,13 @@ void main() {
       tester,
     ) async {
       final world = await pump(tester, now: nov, day: '1');
+      // 2026-11-01 은 일요일이라 11월 달력은 10월을 받지 않는다 — 10월을 지켜보는 곳(다른 화면)을 하나 둔다
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      final sub = container.listen(monthEventsProvider(octKey), (_, _) {});
+      addTearDown(sub.close);
+      await tester.pumpAndSettle();
       await tapEvent(tester, '걸친 일정');
       final beforeOct = world.builds[octKey]!;
       final beforeNov = world.builds[novKey]!;
@@ -825,8 +832,25 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
       expect(world.deleted, {1});
-      expect(tester.widget<PButton>(button(l.actionDelete)).onPressed, isNull);
-      expect(tester.widget<PButton>(button(l.actionSave)).onPressed, isNull);
+      // 닫히는 중인 확인창의 [삭제] 는 빼고 폼의 단추만 본다
+      bool inDialog(Element e) {
+        var found = false;
+        e.visitAncestorElements((a) {
+          if (a.widget is PAlertDialogView) found = true;
+          return !found;
+        });
+        return found;
+      }
+
+      for (final label in [l.actionDelete, l.actionSave]) {
+        final btns = button(label)
+            .evaluate()
+            .where((e) => !inDialog(e))
+            .map((e) => e.widget as PButton)
+            .toList();
+        expect(btns, isNotEmpty, reason: label);
+        expect(btns.every((b) => b.onPressed == null), isTrue, reason: label);
+      }
       world.gate!.complete();
       await tester.pumpAndSettle();
       expect(rowTitle('내 일정'), findsNothing);

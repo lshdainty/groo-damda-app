@@ -125,7 +125,7 @@ Future<(_Presets, AppLocalizations)> _openSaveDialog(
 }
 
 Finder _saveButton(AppLocalizations l) =>
-    find.widgetWithText(PButton, l.actionSave);
+    findWidgetWithText(PButton, l.actionSave);
 
 void main() {
   testWidgets('이름이 비면 [저장] 은 눌려도 요청 없이 이름 칸 오류를 낸다', (tester) async {

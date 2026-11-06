@@ -195,7 +195,7 @@ Finder _t(String s) => find.byWidgetPredicate(
   (w) =>
       w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == plainOf(s),
 );
-Finder _btn(String s) => find.widgetWithText(PButton, s).last;
+Finder _btn(String s) => findWidgetWithText(PButton, s).last;
 
 Future<void> _step(WidgetTester tester, String row, String text) async {
   await tester.tap(_t(row).first);

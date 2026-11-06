@@ -403,7 +403,7 @@ void main() {
     await tester.tap(findText('지금 결제'));
     await tester.pumpAndSettle();
 
-    final pay = find.widgetWithText(PButton, '결제하기');
+    final pay = findWidgetWithText(PButton, '결제하기');
     expect(pay, findsOneWidget);
     expect(
       tester.widget<PButton>(pay).onPressed,

@@ -109,12 +109,12 @@ Future<(_Repo, AppLocalizations)> _open(WidgetTester tester) async {
 
 Future<void> _addFriend(WidgetTester tester, AppLocalizations l) async {
   await tester.enterText(find.byType(EditableText).first, '친구A');
-  await tester.tap(find.widgetWithText(PButton, l.dutchAdd));
+  await tester.tap(findWidgetWithText(PButton, l.dutchAdd));
   await tester.pumpAndSettle();
 }
 
 Future<void> _create(WidgetTester tester, AppLocalizations l) async {
-  await tester.tap(find.widgetWithText(PButton, l.dutchCreate));
+  await tester.tap(findWidgetWithText(PButton, l.dutchCreate));
   await tester.pumpAndSettle();
 }
 

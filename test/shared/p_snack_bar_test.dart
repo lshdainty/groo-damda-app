@@ -146,7 +146,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    final button = find.widgetWithText(PButton, '잔액 고치기');
+    final button = findWidgetWithText(PButton, '잔액 고치기');
     expect(button, findsOneWidget);
     final pb = tester.widget<PButton>(button);
     expect(pb.size, PButtonSize.sm);

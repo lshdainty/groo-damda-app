@@ -122,7 +122,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     expect(repo.updates, 1);
     final row = tester.widget<PListSwitchItem>(
-      find.widgetWithText(PListSwitchItem, '결제 알림'),
+      findWidgetWithText(PListSwitchItem, '결제 알림'),
     );
     expect(row.checked, isTrue, reason: '낙관 반영이 서버 값으로 되돌아온다');
     expect(findText('알림 설정을 저장하지 못했어요.'), findsOneWidget);

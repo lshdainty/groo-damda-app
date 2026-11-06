@@ -69,8 +69,7 @@ Future<void> _fill(
 }
 
 bool _saveEnabled(WidgetTester tester) =>
-    tester.widget<PButton>(find.widgetWithText(PButton, '저장')).onPressed !=
-    null;
+    tester.widget<PButton>(findWidgetWithText(PButton, '저장')).onPressed != null;
 
 void main() {
   testWidgets('필수 표시 · 자리 글이 없고 네 조건 전에는 [저장] 이 막힌다', (tester) async {
@@ -90,7 +89,7 @@ void main() {
   testWidgets('USER_003 은 현재 칸 오류 · 서버 글은 어디에도 없다', (tester) async {
     await _open(tester, code: 'USER_003');
     await _fill(tester, 'old-one!', 'new-one!!', 'new-one!!');
-    await tester.tap(find.widgetWithText(PButton, '저장'));
+    await tester.tap(findWidgetWithText(PButton, '저장'));
     await tester.pumpAndSettle();
 
     expect(findText('현재 비밀번호가 맞지 않아요'), findsOneWidget);
@@ -103,7 +102,7 @@ void main() {
   testWidgets('그 밖 실패는 본문 맨 위 Callout 이고 값이 남는다', (tester) async {
     await _open(tester, code: 'X_1');
     await _fill(tester, 'old-one!', 'new-one!!', 'new-one!!');
-    await tester.tap(find.widgetWithText(PButton, '저장'));
+    await tester.tap(findWidgetWithText(PButton, '저장'));
     await tester.pumpAndSettle();
 
     expect(findText('비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);

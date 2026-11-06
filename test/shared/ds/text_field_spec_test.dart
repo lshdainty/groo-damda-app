@@ -1757,7 +1757,7 @@ void main() {
           home: const Scaffold(body: SingleChildScrollView(child: FieldDemo())),
         ),
       );
-      final submit = find.widgetWithText(PButton, '신청');
+      final submit = findWidgetWithText(PButton, '신청');
       await tester.ensureVisible(submit);
       await tester.tap(submit);
       await tester.pump(const Duration(milliseconds: 400));

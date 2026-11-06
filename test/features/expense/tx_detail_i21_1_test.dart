@@ -39,6 +39,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import '../../support/plain_text.dart';
 
 const _card = Asset(
@@ -533,7 +534,7 @@ void main() {
       );
       await _openDetail(tester);
       await toRefund(tester);
-      await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+      await tester.tap(findWidgetWithText(PButton, '환불 처리'));
       await tester.pumpAndSettle();
 
       expect(repo.refundedAt, endsWith('T12:00:00'));
@@ -548,11 +549,11 @@ void main() {
       await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, _plain)));
       await _openDetail(tester);
       await toRefund(tester);
-      await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+      await tester.tap(findWidgetWithText(PButton, '환불 처리'));
       await tester.pumpAndSettle();
 
       final box = tester.getRect(find.byKey(const ValueKey('callout-box')));
-      final cancel = tester.getRect(find.widgetWithText(PButton, '환불 취소'));
+      final cancel = tester.getRect(findWidgetWithText(PButton, '환불 취소'));
       expect(box.contains(cancel.topLeft), isTrue);
       expect(box.contains(cancel.bottomRight), isTrue);
       expect(find.byKey(const ValueKey('callout-actions')), findsOneWidget);
@@ -566,7 +567,7 @@ void main() {
       );
       await _openDetail(tester);
       await toRefund(tester);
-      await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+      await tester.tap(findWidgetWithText(PButton, '환불 처리'));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('refund-step')), findsOneWidget);
@@ -586,7 +587,7 @@ void main() {
       );
       await _openDetail(tester);
 
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
       await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
@@ -598,7 +599,7 @@ void main() {
       expect(findText('다시 시도'), findsOneWidget);
       // 시트는 그대로 열려 있고 버튼은 풀려 있다
       expect(
-        tester.widget<PButton>(find.widgetWithText(PButton, '삭제')).onPressed,
+        tester.widget<PButton>(findWidgetWithText(PButton, '삭제')).onPressed,
         isNotNull,
       );
     });
@@ -611,7 +612,7 @@ void main() {
         repo: repo,
       );
       await _openDetail(tester);
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
       await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
@@ -633,7 +634,7 @@ void main() {
         repo: repo,
       );
       await _openDetail(tester);
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
       await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
@@ -672,7 +673,7 @@ void main() {
         repo: repo,
       );
       await _openDetail(tester);
-      await tester.tap(find.widgetWithText(PButton, '환불 취소'));
+      await tester.tap(findWidgetWithText(PButton, '환불 취소'));
       await tester.pumpAndSettle();
       await tester.tap(findText('환불 취소').last);
       await tester.pumpAndSettle();
@@ -701,17 +702,27 @@ void main() {
         repo: repo,
       );
       await _openDetail(tester);
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
       await tester.tap(findText('삭제').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
 
       expect(repo.deleted, [5]);
-      final del = find.widgetWithText(PButton, '삭제');
-      if (del.evaluate().isNotEmpty) {
+      // 닫히는 중인 확인창의 [삭제] 는 빼고 상세 바닥의 단추만 본다
+      bool inDialog(Element e) {
+        var found = false;
+        e.visitAncestorElements((a) {
+          if (a.widget is PAlertDialogView) found = true;
+          return !found;
+        });
+        return found;
+      }
+
+      for (final e in findWidgetWithText(PButton, '삭제').evaluate()) {
+        if (inDialog(e)) continue;
         expect(
-          tester.widget<PButton>(del).onPressed,
+          (e.widget as PButton).onPressed,
           isNull,
           reason: '지운 뒤 닫히는 동안 막는다',
         );
@@ -778,8 +789,8 @@ void main() {
       );
       await _openDetail(tester);
 
-      expect(find.widgetWithText(PButton, '삭제'), findsNothing);
-      expect(find.widgetWithText(PButton, '수정'), findsNothing);
+      expect(findWidgetWithText(PButton, '삭제'), findsNothing);
+      expect(findWidgetWithText(PButton, '수정'), findsNothing);
       expect(find.byKey(const ValueKey('more-recurring')), findsNothing);
       expect(_plainText('따로 고칠 수 없어요.'), findsOneWidget);
     });
@@ -792,7 +803,7 @@ void main() {
         assetRepo: assetRepo,
       );
       await _openDetail(tester);
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
       await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
@@ -819,7 +830,7 @@ void main() {
         repo: repo,
       );
       await _openDetail(tester);
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
       await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
@@ -848,7 +859,7 @@ void main() {
         assetRepo: assetRepo,
       );
       await _openDetail(tester);
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
 
       expect(findText('이체 삭제'), findsOneWidget);
@@ -874,7 +885,7 @@ void main() {
       expect(find.byType(PBottomSheetContent), findsOneWidget);
       expect(findText('지출 상세'), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(PButton, '수정'));
+      await tester.tap(findWidgetWithText(PButton, '수정'));
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
       expect(findText('거래 수정'), findsOneWidget);

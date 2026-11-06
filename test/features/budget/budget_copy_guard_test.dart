@@ -51,7 +51,6 @@ class _Repo extends BudgetRepository {
   /// 모든 쓰기 호출의 silent 값.
   final silents = <bool>[];
 
-  int _nextId = 100;
   int _createCalls = 0;
 
   /// create 를 이 번째(0부터)에서 한 번 실패시킨다.
@@ -65,6 +64,8 @@ class _Repo extends BudgetRepository {
   /// create 를 이 번째(0부터)에서 이 Completer 가 끝날 때까지 붙잡는다.
   int? holdCreateCall;
   Completer<void>? hold;
+
+  int _nextId = 100;
 
   /// 이 번째 create 가 돌려줄 id(서버 upsert 가 이미 있던 행의 id 를 돌려주는 경우).
   final Map<int, int> createReturns = {};
@@ -215,7 +216,9 @@ Future<void> _pump(
 Future<void> _leave(WidgetTester tester) async {
   _navKey.currentState!.pop();
   await tester.pump();
+  // 화면 전환이 끝날 때까지(400ms 로는 아직 떠 있다) — 띠 6초보다는 짧게
   await tester.pump(const Duration(milliseconds: 400));
+  await tester.pump(const Duration(milliseconds: 1000));
 }
 
 PButton _copyBtn(WidgetTester tester) => tester
@@ -301,7 +304,8 @@ void main() {
           if (key.year == next.year && key.month == next.month) {
             return gate.future; // 다음 달 응답 전
           }
-          return _months()(key);
+          // 다음 달의 "지난달" 은 이번 달이다 — 이번 달에도 예산이 있어야 응답 뒤 복사가 켜진다
+          return _months(cur: _prev(_now.year, _now.month))(key);
         },
       );
       expect(_copyBtn(tester).onPressed, isNotNull);
@@ -349,8 +353,8 @@ void main() {
       expect(repo.created.length, 3);
       await tester.tap(findText('되돌리기'));
       await tester.pumpAndSettle();
-      // 새로 만든 100 · 102 만 — 900 은 원래 있던 행
-      expect(repo.deleted, [100, 102]);
+      // 새로 만든 둘만 — 900 은 원래 있던 행(가짜는 900 을 돌려준 차례에 번호를 쓰지 않아 둘째 새 행이 101 이다)
+      expect(repo.deleted, [100, 101]);
       expect(repo.deleted, isNot(contains(900)));
     });
 

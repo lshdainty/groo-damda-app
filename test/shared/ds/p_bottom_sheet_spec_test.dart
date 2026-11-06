@@ -609,14 +609,14 @@ void main() {
           expect(find.byType(PAlertDialogView), findsOneWidget);
           expect(findText(keepAll('작성한 내용이 사라져요')), findsOneWidget);
           expect(find.byType(PBottomSheetContent), findsOneWidget);
-          await tester.tap(find.widgetWithText(PButton, '계속 작성'));
+          await tester.tap(findWidgetWithText(PButton, '계속 작성'));
           await tester.pumpAndSettle();
           expect(find.byType(PAlertDialogView), findsNothing);
           expect(find.byType(PBottomSheetContent), findsOneWidget);
 
           // 나가기 — 시트도 닫힌다
           await trigger();
-          await tester.tap(find.widgetWithText(PButton, '나가기'));
+          await tester.tap(findWidgetWithText(PButton, '나가기'));
           await tester.pumpAndSettle();
           expect(find.byType(PBottomSheetContent), findsNothing);
         });
@@ -637,11 +637,11 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-close')));
         await tester.pumpAndSettle();
         final leave = tester.widget<PButton>(
-          find.widgetWithText(PButton, '나가기'),
+          findWidgetWithText(PButton, '나가기'),
         );
         expect(leave.variant, PButtonVariant.criticalSolid);
         expect(
-          tester.widget<PButton>(find.widgetWithText(PButton, '계속 작성')).variant,
+          tester.widget<PButton>(findWidgetWithText(PButton, '계속 작성')).variant,
           PButtonVariant.neutralWeak,
         );
       });
@@ -798,7 +798,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.byType(PAlertDialogView), findsOneWidget);
-        await tester.tap(find.widgetWithText(PButton, '계속 작성'));
+        await tester.tap(findWidgetWithText(PButton, '계속 작성'));
         await tester.pumpAndSettle();
         expect(top(tester), closeTo(t0, 0.5));
         unawaited(f);

@@ -272,7 +272,7 @@ void main() {
     await tester.enterText(find.byType(TextField).first, '123');
     await tester.pump();
     final confirm = tester.widget<PButton>(
-      find.widgetWithText(PButton, _l.withdrawConfirm),
+      findWidgetWithText(PButton, _l.withdrawConfirm),
     );
     expect(confirm.onPressed, isNotNull, reason: '6자리 전에도 켜 둔다');
     await tester.tap(findText(_l.withdrawConfirm));
@@ -338,7 +338,7 @@ void main() {
     await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
     final link = tester.getRect(
-      find.widgetWithText(PButton, _l.withdrawUseEmailCode),
+      findWidgetWithText(PButton, _l.withdrawUseEmailCode),
     );
     expect(link.right, greaterThan(360 - 24 - 24), reason: '오른쪽 끝에 붙는다');
     await tester.tap(findText(_l.withdrawUseEmailCode));
@@ -349,12 +349,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(_t(_l.withdrawCodeHint), findsOneWidget);
     final resend = tester.getRect(
-      find.widgetWithText(PButton, _l.withdrawResendCooldown(60)),
+      findWidgetWithText(PButton, _l.withdrawResendCooldown(60)),
     );
     final hint = tester.getRect(_t(_l.withdrawCodeHint));
     expect(hint.top - resend.bottom, closeTo(PSpacing.x3, 1), reason: '12');
     final back = tester.getRect(
-      find.widgetWithText(PButton, _l.withdrawUsePassword),
+      findWidgetWithText(PButton, _l.withdrawUsePassword),
     );
     // [비밀번호로 확인하기] 위 틈 = 16(웹 gap-x4 와 같은 값)
     expect(back.top - hint.bottom, closeTo(PSpacing.x4, 1));
@@ -434,7 +434,7 @@ void main() {
     await _open(tester, _Repo(failLoad: true));
     expect(_t(_l.withdrawLoadFailedTitle), findsOneWidget);
     expect(_t(_l.withdrawLoadFailedDescription), findsOneWidget);
-    expect(find.widgetWithText(PButton, _l.actionRetry), findsOneWidget);
+    expect(findWidgetWithText(PButton, _l.actionRetry), findsOneWidget);
   });
 
   testWidgets('글자 200% · 다크 — 오류 없이 그려진다', (tester) async {

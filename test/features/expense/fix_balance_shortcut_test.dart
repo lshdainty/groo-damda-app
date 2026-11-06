@@ -36,6 +36,7 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import '../../support/plain_text.dart';
 
 const _card = Asset(
@@ -310,7 +311,8 @@ void main() {
   });
 
   // 자산 상세의 조회들(추이·최근 거래·이체)을 비워 두고 [수정] 만 누른다.
-  testWidgets('자산 상세 [수정]은 그 자산의 수정 폼 주소로 간다', (tester) async {
+  // 16682210 — 자산 상세의 [수정] 은 연필 아이콘이고 화면을 옮기지 않고 그 자리에서 수정 폼을 연다(주소 이동 아님)
+  testWidgets('자산 상세 [수정]은 그 자리에서 그 자산의 수정 폼을 연다', (tester) async {
     tester.view.physicalSize = const Size(1500, 2600);
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
@@ -331,6 +333,13 @@ void main() {
           path: '/account-card-manage',
           builder: (_, state) => Scaffold(
             body: Text('관리 edit=${state.uri.queryParameters['edit']}'),
+          ),
+        ),
+        // 자산 상세는 화면이다(16682210) — 앱 라우터와 같은 주소
+        GoRoute(
+          path: '/asset/:id',
+          builder: (_, state) => AssetDetailScreen(
+            assetId: int.parse(state.pathParameters['id']!),
           ),
         ),
       ],
@@ -367,9 +376,15 @@ void main() {
     await tester.tap(findText('open'));
     await tester.pumpAndSettle();
 
-    await tester.tap(findText('수정'));
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PTopNavigationIconButton && w.label == '수정',
+      ),
+    );
     await tester.pumpAndSettle();
 
-    expect(findText('관리 edit=3'), findsOneWidget);
+    expect(findPlain('입출금 수정'), findsOneWidget);
+    expect(findText('생활비 통장'), findsWidgets);
+    expect(findText('관리 edit=3'), findsNothing);
   });
 }

@@ -325,7 +325,7 @@ void main() {
         ],
       );
       await tester.pumpAndSettle();
-      final rect = tester.getRect(find.widgetWithText(PButton, _l.exportRun));
+      final rect = tester.getRect(findWidgetWithText(PButton, _l.exportRun));
       expect(rect.bottom, 2400 - 34 - 24);
     });
 
@@ -356,7 +356,7 @@ void main() {
         overrides: [exportRepositoryProvider.overrideWith((ref) async => repo)],
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, _l.exportPreview));
+      await tester.tap(findWidgetWithText(PButton, _l.exportPreview));
       await tester.pumpAndSettle();
       final item = tester
           .widgetList<PListItem>(find.byType(PListItem))
@@ -407,7 +407,7 @@ void main() {
       await tester.tap(_t(_l.exportTypeExpense));
       await tester.tap(_t(_l.exportTypeAsset));
       await tester.pump();
-      await tester.tap(find.widgetWithText(PButton, _l.exportPreview));
+      await tester.tap(findWidgetWithText(PButton, _l.exportPreview));
       await tester.pumpAndSettle();
       expect(findText(_l.exportPreviewFooter(1, 1, 0)), findsOneWidget);
       expect(findText(_l.exportPreviewFooter(1, 1, 99)), findsNothing);
@@ -421,7 +421,7 @@ void main() {
         overrides: [exportRepositoryProvider.overrideWith((ref) async => repo)],
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, _l.exportPreview));
+      await tester.tap(findWidgetWithText(PButton, _l.exportPreview));
       await tester.pumpAndSettle();
       expect(_l.exportPreviewFailed, '미리보기를 불러오지 못했어요.');
       expect(_t(_l.exportPreviewFailed), findsOneWidget);
@@ -444,7 +444,7 @@ void main() {
           ],
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.widgetWithText(PButton, _l.exportRun));
+        await tester.tap(findWidgetWithText(PButton, _l.exportRun));
         await tester.pumpAndSettle();
         expect(repo.downloads, 1);
         expect(_t(stall ? _l.exportStalled : _l.exportFailed), findsOneWidget);
@@ -590,7 +590,7 @@ void main() {
       // 옵션 둘 = ds Checkbox 줄
       expect(find.byType(PListCheckItem), findsNWidgets(2));
 
-      await tester.tap(find.widgetWithText(PButton, _l.importDoImport(8)));
+      await tester.tap(findWidgetWithText(PButton, _l.importDoImport(8)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1100));
       await tester.pump();
@@ -610,12 +610,12 @@ void main() {
       expect(section.kind, PResultKind.done);
       expect(section.size, PResultSize.large);
       final cta = tester.widget<PButton>(
-        find.widgetWithText(PButton, _l.importGoExpense),
+        findWidgetWithText(PButton, _l.importGoExpense),
       );
       expect(cta.size, PButtonSize.large);
       expect(cta.variant, PButtonVariant.neutralSolid);
       final ctaRect = tester.getRect(
-        find.widgetWithText(PButton, _l.importGoExpense),
+        findWidgetWithText(PButton, _l.importGoExpense),
       );
       expect(ctaRect.width, 360 - 48, reason: '바닥 CTA 는 좌우 24 로 폭 가득');
       await tester.tap(findText(_l.importGoExpense));
@@ -678,7 +678,7 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('attachment-pick')));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, _l.importDoImport(8)));
+      await tester.tap(findWidgetWithText(PButton, _l.importDoImport(8)));
       await tester.pumpAndSettle();
       expect(_t(_l.importCreatedCatTitle(5)), findsOneWidget);
       // 만든 카테고리 = List 줄(배지 아님) + "외 3개"

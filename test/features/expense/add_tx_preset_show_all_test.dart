@@ -84,6 +84,14 @@ Future<void> _open(
   await tester.pumpAndSettle();
 }
 
+/// 프리셋 칩 줄 — ListView 가 아니라 끝 흐림 가로 줄(PScrollFog Row, bf4df171)이다.
+Finder _chipRow() => find
+    .descendant(
+      of: find.byKey(const ValueKey('tx-preset-chips')),
+      matching: find.byType(Scrollable),
+    )
+    .first;
+
 void main() {
   late AppLocalizations l;
   setUpAll(
@@ -92,7 +100,7 @@ void main() {
 
   testWidgets('지금 종류가 9개면 "모두 보기" 가 보이고, 누르면 아홉째도 고를 수 있다', (tester) async {
     await _open(tester, _nine());
-    await tester.drag(find.byType(ListView).first, const Offset(-3000, 0));
+    await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
     expect(findText(l.presetShowAll), findsOneWidget);
     await tester.tap(findText(l.presetShowAll));
@@ -108,7 +116,7 @@ void main() {
 
   testWidgets('찾기 0건이면 "찾는 프리셋이 없어요."', (tester) async {
     await _open(tester, _nine());
-    await tester.drag(find.byType(ListView).first, const Offset(-3000, 0));
+    await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
     await tester.tap(findText(l.presetShowAll));
     await tester.pumpAndSettle();
@@ -119,21 +127,22 @@ void main() {
 
   // B2 — 고르기 시트가 카테고리 조회를 스스로 지켜본다: 실패 → [다시 시도] → 받으면 화면이 줄로 바뀐다
   testWidgets('카테고리 조회가 실패하면 실패 화면 · 다시 시도로 받으면 줄이 나온다', (tester) async {
-    var calls = 0;
+    // riverpod 3 은 실패를 스스로 다시 받는다 — [다시 시도] 를 누를 때까지 계속 실패시킨다
+    var down = true;
     await _open(
       tester,
       _nine(),
       categories: () async {
-        calls++;
-        if (calls == 1) throw Exception('x');
+        if (down) throw Exception('x');
         return [_cat];
       },
     );
-    await tester.drag(find.byType(ListView).first, const Offset(-3000, 0));
+    await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
     await tester.tap(findText(l.presetShowAll));
     await tester.pumpAndSettle();
     expect(findText(l.presetCategoryLoadFailed), findsOneWidget);
+    down = false;
     await tester.tap(findText(l.actionRetry));
     await tester.pumpAndSettle();
     expect(findText(l.presetCategoryLoadFailed), findsNothing);

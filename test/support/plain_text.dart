@@ -101,3 +101,13 @@ Finder findRichText(String s) => find.byWidgetPredicate(
       plainOf(w.textSpan!.toPlainText()) == plainOf(s),
   description: 'Text.rich "$s"',
 );
+
+/// `find.widgetWithText` 와 같다 — [widgetType] 형 위젯 중 줄바꿈 글자를 벗긴 글이 [text] 인 후손을 가진 것.
+Finder findWidgetWithText(
+  Type widgetType,
+  String text, {
+  bool skipOffstage = true,
+}) => find.ancestor(
+  of: findText(text, skipOffstage: skipOffstage),
+  matching: find.byType(widgetType, skipOffstage: skipOffstage),
+);

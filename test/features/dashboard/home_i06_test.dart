@@ -348,7 +348,7 @@ void main() {
       expect(find.bySemanticsLabel('최근 할 일 전체 보기'), findsOneWidget);
       // 연체 배지는 제목 줄에 붙고 heading 노드 밖이다
       // 보이는 글 "연체 23", 읽는 글 "연체 23건"(웹 OverdueBadge 와 같다, I-06 home 21)
-      final badge = find.widgetWithText(PBadge, '연체 23');
+      final badge = findWidgetWithText(PBadge, '연체 23');
       expect(badge, findsOneWidget);
       expect(findText('연체 23건'), findsNothing, reason: '보이는 글에는 건이 없다');
       expect(find.bySemanticsLabel(RegExp('연체 23건')), findsOneWidget);

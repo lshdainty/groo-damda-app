@@ -74,9 +74,9 @@ void main() {
     expect(find.byType(PListItem), findsNWidgets(4));
     expect(findPlain('마감일'), findsOneWidget);
     expect(findPlain('업무'), findsOneWidget);
-    expect(find.widgetWithText(PBadge, '중요'), findsOneWidget);
+    expect(findWidgetWithText(PBadge, '중요'), findsOneWidget);
     expect(
-      tester.widget<PBadge>(find.widgetWithText(PBadge, '중요')).tone,
+      tester.widget<PBadge>(findWidgetWithText(PBadge, '중요')).tone,
       PBadgeTone.critical,
     );
     final memo = find.byWidgetPredicate(

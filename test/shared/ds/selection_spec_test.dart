@@ -1973,10 +1973,9 @@ void main() {
         ),
       ),
     );
-    final parent = find.widgetWithText(PCheckbox, keepAll('전체')).last;
-    PCheckbox item(String label) => tester.widget<PCheckbox>(
-      find.widgetWithText(PCheckbox, keepAll(label)),
-    );
+    final parent = findWidgetWithText(PCheckbox, keepAll('전체')).last;
+    PCheckbox item(String label) =>
+        tester.widget<PCheckbox>(findWidgetWithText(PCheckbox, keepAll(label)));
     await tester.ensureVisible(parent);
     await tester.pump();
     expect(tester.widget<PCheckbox>(parent).checked, isNull);
@@ -1984,7 +1983,7 @@ void main() {
     await tester.pump();
     expect(tester.widget<PCheckbox>(parent).checked, isTrue);
     expect(item('예산').checked, isTrue);
-    await tester.tap(find.widgetWithText(PCheckbox, keepAll('메모')));
+    await tester.tap(findWidgetWithText(PCheckbox, keepAll('메모')));
     await tester.pump();
     expect(tester.widget<PCheckbox>(parent).checked, isNull);
     // 넘어간 예외가 없다

@@ -157,7 +157,7 @@ void main() {
   ) async {
     final repo = await _open(tester);
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
-    await tester.tap(find.widgetWithText(PButton, l.recurringAdd));
+    await tester.tap(findWidgetWithText(PButton, l.recurringAdd));
     await tester.pumpAndSettle();
     final c = repo.created!;
     expect(c['sourceExpenseRowId'], 9);
@@ -188,7 +188,7 @@ void main() {
     );
     final repo = await _open(tester, linked: linked);
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
-    await tester.tap(find.widgetWithText(PButton, l.actionSave));
+    await tester.tap(findWidgetWithText(PButton, l.actionSave));
     await tester.pumpAndSettle();
     final u = repo.updated!;
     expect(u['assetRowId'], isNull);

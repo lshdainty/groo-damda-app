@@ -88,6 +88,8 @@ class _CapturingRepo extends MemoRepository {
     String? color,
   }) async {
     saves++;
+    // 만들기도 gate 를 기다린다 — 저장 중에 닫는 시험(L8)이 새 메모로 돈다
+    await gate?.future;
     if (failSave) {
       throw ApiException(
         code: 'MEMO_500',
@@ -209,7 +211,8 @@ void main() {
 
   testWidgets('본문을 지우고 저장하면 content 가 명시적 null 로 실린다', (tester) async {
     final repo = await _open(tester);
-    expect(findPlain('지워질 본문'), findsOneWidget);
+    // 본문은 입력칸 안 글이다 — 입력칸도 보는 findText 로
+    expect(findText('지워질 본문'), findsOneWidget);
 
     await tester.enterText(find.byType(PTextarea), '');
     await tester.pumpAndSettle();
@@ -496,7 +499,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     // 저장이 나간 채로 닫는다 — 바뀐 값이 있어 "작성한 내용이 사라져요" 를 묻는다
     await tester.tap(find.bySemanticsLabel('닫기').first);
-    await tester.pumpAndSettle();
+    // 저장 요청이 나가 있어 [저장] 의 원이 돈다 — 가라앉기를 기다리지 않고 흘린다
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(findPlain(l.sheetLeaveLeave));
     await tester.pumpAndSettle();
     expect(find.byType(PTextarea), findsNothing);

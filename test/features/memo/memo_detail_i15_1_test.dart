@@ -101,6 +101,12 @@ Future<void> _openMenu(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// 메타 줄 글(조각을 " · " 로 이은 하나) — 태그 "아이디어" 로 시작한다.
+String _meta(WidgetTester tester) {
+  final w = tester.widget<Text>(findTextContaining('아이디어 · '));
+  return plainOf(w.data ?? w.textSpan!.toPlainText());
+}
+
 void main() {
   setUpAll(loadRealFonts);
 
@@ -127,9 +133,11 @@ void main() {
 
   testWidgets('메타 — "{태그} · {시각} 수정" · 고정이면 마지막에 "고정"', (tester) async {
     await _open(tester, _memo(pinned: true));
-    expect(findPlain('아이디어'), findsOneWidget);
-    expect(findPlain('고정'), findsOneWidget);
-    expect(findTextContaining('수정'), findsWidgets);
+    // 메타는 PTagGroup — 조각을 " · " 로 이은 Text.rich 하나다
+    final meta = _meta(tester);
+    expect(meta, startsWith('아이디어 · '));
+    expect(meta, contains('수정'));
+    expect(meta, endsWith(' · 고정'));
   });
 
   testWidgets('본문이 없으면 "내용 없음"', (tester) async {
@@ -151,7 +159,7 @@ void main() {
     await tester.tap(findPlain('고정'));
     await tester.pumpAndSettle();
     expect(repo.pinCalls, 1);
-    expect(findPlain('고정'), findsOneWidget, reason: '메타 조각 "고정"');
+    expect(_meta(tester), endsWith(' · 고정'), reason: '메타 조각 "고정"');
     await _openMenu(tester);
     expect(findPlain('고정 해제'), findsOneWidget);
   });

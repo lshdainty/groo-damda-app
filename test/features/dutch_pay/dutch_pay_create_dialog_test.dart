@@ -76,7 +76,8 @@ void main() {
     await _add(tester, l, '철수');
     await _add(tester, l, '철수');
     // 웹은 토글로 빠져 참여자 0명이 됐고, 앱은 조용히 입력칸만 비웠다.
-    expect(findText('철수'), findsOneWidget);
+    // 겹친 이름은 칸에 남는다(웹 DutchCreateDialog 와 같다) — 참여자 줄(글)만 센다
+    expect(findPlain('철수'), findsOneWidget);
     expect(findText(l.dutchNameAlreadyAdded), findsOneWidget);
     expect(tester.widget<PButton>(_button(l.dutchCreate)).onPressed, isNotNull);
   });

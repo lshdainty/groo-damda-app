@@ -25,6 +25,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
@@ -185,8 +186,16 @@ void main() {
       final head = tester.getRect(
         find.byKey(const ValueKey('plist-header')).at(1),
       );
-      // 내 캘린더 줄 아래 ↔ "공유받은 캘린더" 머리 위: 24 (머리 위 여백)
-      expect(head.top - row.bottom, 24);
+      // 내 캘린더 줄 아래 ↔ "공유받은 캘린더" 머리: 24 는 머리 안의 위 여백(topInset)이다 — 머리는 줄에 바로 붙는다
+      expect(head.top - row.bottom, 0);
+      final title = tester.getRect(
+        find.byKey(const ValueKey('plist-header-title')).at(1),
+      );
+      expect(title.top - row.bottom, greaterThanOrEqualTo(24));
+      expect(
+        tester.widget<PListHeader>(find.byType(PListHeader).at(1)).topInset,
+        24,
+      );
     });
 
     testWidgets('빈 목록은 해요체 한 줄', (tester) async {
@@ -249,14 +258,15 @@ void main() {
         ]),
       );
       await tester.pumpAndSettle();
-      expect(findRichPlain('가족'), findsOneWidget);
+      // "가족" 은 다른 줄 설명에도 있다 — 제목 글 그대로 찾는다
+      expect(findText('가족'), findsOneWidget);
       fail = true;
       ProviderScope.containerOf(
         tester.element(find.byType(CalendarShareScreen)),
       ).invalidate(userCalendarListProvider);
       await tester.pumpAndSettle();
       expect(find.byType(PResultSection), findsNothing);
-      expect(findRichPlain('가족'), findsOneWidget);
+      expect(findText('가족'), findsOneWidget);
     });
 
     testWidgets('불러오는 중에도 "캘린더 추가" 글 단추가 있다', (tester) async {
@@ -418,7 +428,8 @@ void main() {
       expect(find.byType(PBottomSheetContent), findsOneWidget);
       expect(findText('삭제'), findsOneWidget);
 
-      // 추가 폼
+      // 추가 폼 — 먼저 비운다(같은 모양이면 Navigator 가 재사용돼 열린 수정 시트가 남는다)
+      await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(
         app(const CalendarLabelsScreen(), withRepo(repo)),
       );

@@ -602,7 +602,7 @@ void main() {
         ),
       );
       PBadge badge(String label) =>
-          tester.widget<PBadge>(find.widgetWithText(PBadge, label));
+          tester.widget<PBadge>(findWidgetWithText(PBadge, label));
       expect(badge('중요').tone, PBadgeTone.critical);
       expect(badge('보통').tone, PBadgeTone.neutral);
       expect(badge('여유').tone, PBadgeTone.neutral);

@@ -36,6 +36,7 @@ import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import '../../support/plain_text.dart';
 
 const _account = Asset(
@@ -107,6 +108,11 @@ Future<void> _pump(WidgetTester tester, Widget home) async {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        // 앱과 같은 자리 — 환불 · 환불 취소 결과 스낵바(ds)가 뜨는 호스트
+        builder: (context, child) => Material(
+          type: MaterialType.transparency,
+          child: PSnackbarHost(closeLabel: '닫기', child: child!),
+        ),
         home: Scaffold(body: home),
       ),
     ),
@@ -130,13 +136,13 @@ void main() {
     // 환불은 같은 시트의 한 단계다 — "더 하기" 의 [환불] 줄 → 바닥 [환불 처리] → 상세로 돌아와 "환불됨" Callout
     await tester.tap(find.byKey(const ValueKey('more-refund')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+    await tester.tap(findWidgetWithText(PButton, '환불 처리'));
     await tester.pumpAndSettle();
 
     expect(findText('환불 취소'), findsOneWidget, reason: 'Callout 이 떴다');
     expect(findText('수정'), findsNothing, reason: 'footer 도 환불된 거래를 본다');
 
-    await tester.tap(find.widgetWithText(PButton, '환불 취소'));
+    await tester.tap(findWidgetWithText(PButton, '환불 취소'));
     await tester.pumpAndSettle();
     await tester.tap(findText('환불 취소').last);
     await tester.pumpAndSettle();
@@ -332,12 +338,13 @@ void main() {
 
       await tester.enterText(
         find.byWidgetPredicate(
-          (w) => w is TextField && w.controller?.text == '40000',
+          // 금액 칸은 쉼표를 찍는다(f7aa428c)
+          (w) => w is TextField && w.controller?.text == '40,000',
         ),
         '30000',
       );
       await tester.pump();
-      expect(findText('남은 10,000원은 결제일에 빠져요'), findsOneWidget);
+      expect(findText('남은 10,000원은 결제일에 빠져요.'), findsOneWidget);
     });
   });
 }

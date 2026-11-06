@@ -43,7 +43,7 @@ Future<void> _open(
   await tester.pumpAndSettle();
 }
 
-Finder _done() => find.widgetWithText(PButton, '완료');
+Finder _done() => findWidgetWithText(PButton, '완료');
 
 void main() {
   final month = StatsPeriod.thisMonth(_today);
@@ -151,7 +151,7 @@ void main() {
       for (final n in ['이번 주', '이번 달', '지난 달', '최근 3개월', '올해']) {
         expect(findText(n), findsOneWidget, reason: n);
       }
-      expect(find.widgetWithText(PButton, '초기화'), findsOneWidget);
+      expect(findWidgetWithText(PButton, '초기화'), findsOneWidget);
       expect(_done(), findsOneWidget);
     });
 
@@ -159,7 +159,7 @@ void main() {
       StatsPeriod? got;
       await _open(tester, month, (p) => got = p);
       expect(tester.widget<PButton>(_done()).onPressed, isNotNull);
-      await tester.tap(find.widgetWithText(PButton, '초기화'));
+      await tester.tap(findWidgetWithText(PButton, '초기화'));
       await tester.pumpAndSettle();
       expect(tester.widget<PButton>(_done()).onPressed, isNull);
       await tester.tap(findText('지난 달'));

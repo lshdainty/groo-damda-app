@@ -125,7 +125,7 @@ void main() {
     (w) =>
         w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == plainOf(s),
   );
-  Finder btn(String s) => find.widgetWithText(PButton, s).last;
+  Finder btn(String s) => findWidgetWithText(PButton, s).last;
   Future<void> tap(WidgetTester tester, Finder f) async {
     await tester.tap(f.first);
     await tester.pumpAndSettle();

@@ -23,6 +23,7 @@ import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import 'package:groo_damda_app/shared/ds/wheel_picker/p_wheel_picker.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('date-picker');
 final _labels = PDatePickerLabels.ko;
@@ -2911,7 +2912,7 @@ void main() {
           _rect(tester, _day(DateTime(2026, 10, 13))).left,
           closeTo(24 + (312 / 7) * 2, 0.01),
         );
-        final done = find.widgetWithText(PButton, '완료');
+        final done = findWidgetWithText(PButton, '완료');
         expect(
           tester.widget<PButton>(done).onPressed,
           isNull,
@@ -2963,8 +2964,8 @@ void main() {
           find.byKey(const ValueKey('p-bottom-sheet-root')),
         );
         expect(sheet.height, closeTo(780 * 0.9, 1));
-        final done = find.widgetWithText(PButton, '완료');
-        final reset = find.widgetWithText(PButton, '초기화');
+        final done = findWidgetWithText(PButton, '완료');
+        final reset = findWidgetWithText(PButton, '초기화');
         expect(tester.widget<PButton>(done).onPressed, isNull);
         await _tap(tester, _day(DateTime(2026, 10, 8)));
         await tester.pumpAndSettle();

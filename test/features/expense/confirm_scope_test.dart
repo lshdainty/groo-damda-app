@@ -38,6 +38,8 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart';
+import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import '../../support/plain_text.dart';
 
 const _closedLine = '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
@@ -177,6 +179,23 @@ Widget _opener(void Function(BuildContext) open) => Builder(
 Finder _fieldWith(String text) =>
     find.byWidgetPredicate((w) => w is TextField && w.controller?.text == text);
 
+/// 거래일을 [d] 로 — 날짜 칸은 입력칸이 아니라 고르는 줄의 날짜 조각이다(9cb9b91d · 95b698b3).
+Future<void> _pickDate(WidgetTester tester, DateTime d) async {
+  await tester.tap(
+    find
+        .descendant(
+          of: find.byKey(const ValueKey('tx-row-date')),
+          matching: find.byType(FormPiece),
+        )
+        .first,
+  );
+  await tester.pumpAndSettle();
+  tester.widget<PDatePicker>(find.byType(PDatePicker)).onSingle!(d);
+  await tester.pump();
+  await tester.tap(findText('완료'));
+  await tester.pumpAndSettle();
+}
+
 Finder _submit(String label) =>
     find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
@@ -215,8 +234,7 @@ void main() {
     testWidgets('열린 회차 거래를 닫힌 회차 날짜로 옮기면 묻는다', (tester) async {
       final repo = await openEdit(tester, _open);
 
-      await tester.enterText(_fieldWith('2026-09-10'), '2026-08-20');
-      await tester.pump();
+      await _pickDate(tester, DateTime(2026, 8, 20));
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
 
@@ -231,8 +249,7 @@ void main() {
     testWidgets('열린 회차 안에서 고치면 묻지 않는다', (tester) async {
       final repo = await openEdit(tester, _open);
 
-      await tester.enterText(_fieldWith('2026-09-10'), '2026-09-15');
-      await tester.pump();
+      await _pickDate(tester, DateTime(2026, 9, 15));
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
 

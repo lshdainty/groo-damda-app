@@ -212,6 +212,9 @@ void main() {
 
   testWidgets('칩을 누르면 그 태그만 거른다 · 전체 건수는 늘 전체 기준', (tester) async {
     await _pump(tester);
+    // 360 폭에서 이 칩은 칩 줄 밖에 있다 — 먼저 보이게 한다
+    await tester.ensureVisible(find.bySemanticsLabel('독서 1'));
+    await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('독서 1'));
     await tester.pumpAndSettle();
     expect(find.byType(MemoRow), findsOneWidget);
@@ -228,6 +231,17 @@ void main() {
 
   testWidgets('끝 칩을 고르면 칩 줄이 그 칩이 화면 여백(24) 안에 들어오게 스크롤된다', (tester) async {
     await _pump(tester);
+    // 끝 칩을 화면 오른쪽 끝(여백 24 밖)까지만 꺼내 놓고 누른다 — 누르면 칩 줄이 여백 안으로 더 민다
+    await Scrollable.ensureVisible(
+      tester.element(find.byType(PChipRadio<String>).last),
+      alignment: 1,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(find.byType(PChipRadio<String>).last).right,
+      greaterThan(360 - 24 + 0.5),
+      reason: '누르기 전에는 여백 밖',
+    );
     await tester.tap(find.bySemanticsLabel('태그 없음 2'));
     await tester.pumpAndSettle();
     final r = tester.getRect(find.byType(PChipRadio<String>).last);
@@ -277,8 +291,20 @@ void main() {
         ),
       );
       expect(long.overflow, isNot(TextOverflow.ellipsis));
-      expect(find.byIcon(LucideIcons.ellipsisVertical), findsNothing);
-      expect(find.byIcon(LucideIcons.pin), findsNothing);
+      // 밀기 트레이(고정 · 삭제)는 줄 뒤에 늘 그려져 있다 — 줄 앞면 안에서만 센다
+      final front = find.byKey(const ValueKey('swipe-row'));
+      expect(front, findsNWidgets(6));
+      expect(
+        find.descendant(
+          of: front,
+          matching: find.byIcon(LucideIcons.ellipsisVertical),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: front, matching: find.byIcon(LucideIcons.pin)),
+        findsNothing,
+      );
       expect(findPlain('제목 없음'), findsOneWidget);
       expect(findPlain('${_y - 1}년 12월 3일'), findsOneWidget);
       final body = tester.widget<Text>(

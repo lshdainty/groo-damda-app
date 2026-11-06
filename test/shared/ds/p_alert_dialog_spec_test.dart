@@ -220,9 +220,9 @@ void main() {
         final direction = want['footer.direction'];
         final cancelRect = copy.cancel == null
             ? null
-            : tester.getRect(find.widgetWithText(PButton, copy.cancel!));
+            : tester.getRect(findWidgetWithText(PButton, copy.cancel!));
         final actionRect = tester.getRect(
-          find.widgetWithText(PButton, copy.action),
+          findWidgetWithText(PButton, copy.action),
         );
         final inner = rect.width - 2 * padding;
         if (layout == 'single') {
@@ -418,14 +418,14 @@ void main() {
         bool? result;
         await open(tester, mode, (f) => f.then((v) => result = v));
         expect(find.byType(PAlertDialogView), findsOneWidget);
-        await tester.tap(find.widgetWithText(PButton, '삭제'));
+        await tester.tap(findWidgetWithText(PButton, '삭제'));
         await tester.pumpAndSettle();
         expect(result, isTrue);
         expect(find.byType(PAlertDialogView), findsNothing);
 
         result = null;
         await open(tester, mode, (f) => f.then((v) => result = v));
-        await tester.tap(find.widgetWithText(PButton, '취소'));
+        await tester.tap(findWidgetWithText(PButton, '취소'));
         await tester.pumpAndSettle();
         expect(result, isFalse);
       });
@@ -486,13 +486,13 @@ void main() {
           return done.future;
         },
       );
-      await tester.tap(find.widgetWithText(PButton, '삭제'));
+      await tester.tap(findWidgetWithText(PButton, '삭제'));
       await tester.pump();
       expect(
-        tester.widget<PButton>(find.widgetWithText(PButton, '삭제')).loading,
+        tester.widget<PButton>(findWidgetWithText(PButton, '삭제')).loading,
         isTrue,
       );
-      await tester.tap(find.widgetWithText(PButton, '삭제'), warnIfMissed: false);
+      await tester.tap(findWidgetWithText(PButton, '삭제'), warnIfMissed: false);
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(PAlertDialogView), findsOneWidget);
       expect(result, isNull);

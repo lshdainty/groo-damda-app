@@ -7,6 +7,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   testWidgets('스낵바 아래 끝은 시트 바닥 버튼 윗변 위 8 이다', (tester) async {
@@ -53,7 +54,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
     final band = tester.getRect(find.byKey(const ValueKey('snackbar-band')));
-    final button = tester.getRect(find.widgetWithText(PButton, '삭제'));
+    final button = tester.getRect(findWidgetWithText(PButton, '삭제'));
     expect(button.top - band.bottom, closeTo(8, 0.5));
   });
 }

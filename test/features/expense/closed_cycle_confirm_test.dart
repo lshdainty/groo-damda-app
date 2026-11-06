@@ -409,7 +409,7 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('more-refund')));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, '환불 처리'));
+      await tester.tap(findWidgetWithText(PButton, '환불 처리'));
       await tester.pumpAndSettle();
 
       expect(repo.refundedAt, endsWith('T12:00:00'));
@@ -427,7 +427,7 @@ void main() {
       );
       await tester.tap(findText('open'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(PButton, '환불 취소'));
+      await tester.tap(findWidgetWithText(PButton, '환불 취소'));
       await tester.pumpAndSettle();
     }
 
