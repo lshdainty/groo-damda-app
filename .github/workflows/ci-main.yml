@@ -52,41 +52,37 @@ jobs:
       - name: Analyze
         run: flutter analyze lib/
 
-      # UI 이관 끝나면 되살림(2026-10-30 사용자): 이관 중에는 시험 파일은 만들되 실행하지 않는다.
-      # 서비스별(그루 담다 · 그루 계정 · 그루 이음) UI 가 끝나면 아래 단계를 되살리고 틀린 케이스를 고친다.
-      # 서식 · 분석(위 두 단계)과 배포 잡(version · build · release)은 그대로 돈다.
-      #
-      # # --machine 은 결과를 JSON 으로 뱉는다. 사람이 읽을 로그는 아래 발행 단계가
-      # # 대신 만들어 주고, 실패 판정은 여기 종료 코드가 그대로 한다.
-      # - name: Test
-      #   run: flutter test --machine --coverage > test-machine.json
-      #
-      # # 아래 셋은 테스트가 깨져도 돌아야 한다(if: always()). 깨졌을 때가 결과를
-      # # 가장 보고 싶은 때다.
-      # - name: Convert test results
-      #   if: always()
-      #   run: |
-      #     dart pub global activate junitreport
-      #     "$HOME/.pub-cache/bin/tojunit" --input test-machine.json --output test-results.xml
-      #
-      # - name: Publish Test Results
-      #   uses: EnricoMi/publish-unit-test-result-action@v2
-      #   if: always()
-      #   with:
-      #     files: test-results.xml
-      #
-      # - name: If the test fails, register a check comment in the failed code line
-      #   uses: mikepenz/action-junit-report@v4
-      #   if: always()
-      #   with:
-      #     report_paths: test-results.xml
-      #     token: ${{ github.token }}
-      #
-      # - name: Upload coverage reports to Codecov
-      #   uses: codecov/codecov-action@v5
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     files: ./coverage/lcov.info
+      # --machine 은 결과를 JSON 으로 뱉는다. 사람이 읽을 로그는 아래 발행 단계가
+      # 대신 만들어 주고, 실패 판정은 여기 종료 코드가 그대로 한다.
+      - name: Test
+        run: flutter test --machine --coverage > test-machine.json
+
+      # 아래 셋은 테스트가 깨져도 돌아야 한다(if: always()). 깨졌을 때가 결과를
+      # 가장 보고 싶은 때다.
+      - name: Convert test results
+        if: always()
+        run: |
+          dart pub global activate junitreport
+          "$HOME/.pub-cache/bin/tojunit" --input test-machine.json --output test-results.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: test-results.xml
+
+      - name: If the test fails, register a check comment in the failed code line
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: test-results.xml
+          token: ${{ github.token }}
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
 
   # ── iOS 를 깨뜨릴 수 있는 PR 인가.
   #
