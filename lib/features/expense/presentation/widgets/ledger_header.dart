@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
-import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
@@ -18,7 +16,6 @@ import 'package:groo_damda_app/shared/ds/overflow_center/p_overflow_center.dart'
 import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
-import 'package:groo_damda_app/shared/ds/chart/p_chart_parts.dart';
 
 /// 가계부 원장 머리 — 달 이동 · 합계 · 인사이트 · 소비 요약 · 주 달력(I-07 7 · 8 · 11).
 ///
@@ -423,15 +420,6 @@ class LedgerSummaryList extends StatelessWidget {
   }
 }
 
-/// 툴팁 머리 — "10월 21일 (목)"(chart.md · 웹과 같은 꼴).
-String _tooltipHead(String ds) {
-  final d = DateTime.parse(ds);
-  final dow = formatDay(d).dow;
-  return localeIsEn()
-      ? DateFormat('MMM d (E)', 'en').format(d)
-      : '${d.month}월 ${d.day}일 ($dow)';
-}
-
 /// 접이식 캘린더 — 가계부 칸 아래는 금액(t1)이다. 격자는 [LedgerCalendarGrid] 가 그린다.
 class LedgerCalendar extends StatelessWidget {
   const LedgerCalendar({
@@ -480,30 +468,26 @@ class LedgerCalendar extends StatelessWidget {
         if (loading) return PSkeleton.text(PTypography.t1, width: 32);
         final data = byDay[ds];
         if (data == null) return const SizedBox(height: PSpacing.x3);
-        return LedgerCellTooltip(
-          title: _tooltipHead(ds),
-          out: data.out,
-          inn: data.inn,
-          flags: flags,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (data.out > 0)
-                Text(
-                  '−${flags.of(MaskKind.expense) ? '••' : krw(data.out)}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: amountStyle(c.fgNeutral),
-                ),
-              if (data.inn > 0)
-                Text(
-                  '+${flags.of(MaskKind.income) ? '••' : krw(data.inn)}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: amountStyle(c.fgBrand),
-                ),
-            ],
-          ),
+        // 칸 글이 좁아 잘린 금액은 날을 누르면 그날 묶음 머리에 다 보인다 — 옛 길게 누르기 툴팁은 걷었다(tooltip.md Q-009-2
+        // "옛 길게 누르기 툴팁은 옮길 때 걷는다", I-wrap-b1 8-6). 칸은 초점을 받지 않아 마우스 · 키보드 툴팁도 두지 않는다.
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (data.out > 0)
+              Text(
+                '−${flags.of(MaskKind.expense) ? '••' : krw(data.out)}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: amountStyle(c.fgNeutral),
+              ),
+            if (data.inn > 0)
+              Text(
+                '+${flags.of(MaskKind.income) ? '••' : krw(data.inn)}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: amountStyle(c.fgBrand),
+              ),
+          ],
         );
       },
     );
@@ -592,56 +576,71 @@ class LedgerCalendarGrid extends StatelessWidget {
                 ? c.fgCritical
                 : (i % 7 == 6 ? c.fgBrand : c.fgNeutral));
       final label = cellLabel?.call(context, cellData.ds);
-      Widget inner = InkWell(
+      // 누르는 자리 — ds PressArea. 누르는 동안 칸 바탕 bg-layer-default-pressed · 모서리 12(웹 `LedgerCell`
+      // active:bg-bg-layer-default-pressed · rounded-r3). Material 물결은 두지 않고, 날짜 칸이라 줄지 않는다(date-picker.md).
+      Widget inner = PressArea(
+        enabled: true,
         onTap: () => onSelect(cellData.ds),
-        borderRadius: BorderRadius.circular(PRounded.r3),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, PSpacing.x1, 0, PSpacing.x2),
-          child: Column(
-            children: [
-              // 원이 칸보다 넓어지면(글자 200%) 가운데 기준으로 이웃 쪽으로 넘친다 — 글자는 줄이지 않고(웹 `LedgerCellNum` 과 같다)
-              // 숫자는 한 줄로 둔다(maxLines 1 · softWrap false)
-              POverflowCenter(
-                child: Container(
-                  // 최소 36 · 좌우 4 — 글자 200% 에서 두 자리 날이 잘리지 않게 글을 따라 늘어난다(웹 `min-w-x9 px-x1`)
-                  constraints: const BoxConstraints(
-                    minWidth: dayCircle,
-                    minHeight: dayCircle,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: PSpacing.x1),
-                  // 고른 날 = 짙은 원(bg-neutral-inverted), 오늘 = 옅은 원(bg-neutral-weak) + 700 (date-picker.md)
-                  decoration: isSel
-                      ? BoxDecoration(
-                          color: c.bgNeutralInverted,
-                          borderRadius: BorderRadius.circular(PRounded.full),
-                        )
-                      : isToday
-                      ? BoxDecoration(
-                          color: c.bgNeutralWeak,
-                          borderRadius: BorderRadius.circular(PRounded.full),
-                        )
-                      : null,
-                  child: Center(
-                    widthFactor: 1,
-                    heightFactor: 1,
-                    child: Text(
-                      '${cellData.d}',
-                      maxLines: 1,
-                      softWrap: false,
-                      style: PTypography.t5.copyWith(
-                        fontWeight: isSel || isToday
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: numColor,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+        touchMin: 0,
+        // 이름이 있으면 아래에서 칸 하나로 묶어 읽는다 — 여기서는 누름만 맡는다
+        semantics: (child, enabled, tap) => label != null
+            ? child
+            : Semantics(button: true, onTap: tap, child: child),
+        builder: (context, pressed, _) => DecoratedBox(
+          decoration: BoxDecoration(
+            color: pressed ? c.bgLayerDefaultPressed : const Color(0x00000000),
+            borderRadius: BorderRadius.circular(PRounded.r3),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, PSpacing.x1, 0, PSpacing.x2),
+            child: Column(
+              children: [
+                // 원이 칸보다 넓어지면(글자 200%) 가운데 기준으로 이웃 쪽으로 넘친다 — 글자는 줄이지 않고(웹 `LedgerCellNum` 과 같다)
+                // 숫자는 한 줄로 둔다(maxLines 1 · softWrap false)
+                POverflowCenter(
+                  child: Container(
+                    // 최소 36 · 좌우 4 — 글자 200% 에서 두 자리 날이 잘리지 않게 글을 따라 늘어난다(웹 `min-w-x9 px-x1`)
+                    constraints: const BoxConstraints(
+                      minWidth: dayCircle,
+                      minHeight: dayCircle,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: PSpacing.x1,
+                    ),
+                    // 고른 날 = 짙은 원(bg-neutral-inverted), 오늘 = 옅은 원(bg-neutral-weak) + 700 (date-picker.md)
+                    decoration: isSel
+                        ? BoxDecoration(
+                            color: c.bgNeutralInverted,
+                            borderRadius: BorderRadius.circular(PRounded.full),
+                          )
+                        : isToday
+                        ? BoxDecoration(
+                            color: c.bgNeutralWeak,
+                            borderRadius: BorderRadius.circular(PRounded.full),
+                          )
+                        : null,
+                    child: Center(
+                      widthFactor: 1,
+                      heightFactor: 1,
+                      child: Text(
+                        '${cellData.d}',
+                        maxLines: 1,
+                        softWrap: false,
+                        style: PTypography.t5.copyWith(
+                          fontWeight: isSel || isToday
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: numColor,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: PSpacing.x1),
-              markBuilder(context, cellData.ds),
-            ],
+                const SizedBox(height: PSpacing.x1),
+                markBuilder(context, cellData.ds),
+              ],
+            ),
           ),
         ),
       );
@@ -734,59 +733,4 @@ class LedgerHeaderDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const PDivider();
-}
-
-/// 칸 금액의 길게 누르기 툴팁 — 지출 · 수입을 차트형 툴팁으로(앱 기존 동작 그대로, 색 역할 이름만 새것).
-class LedgerCellTooltip extends StatelessWidget {
-  const LedgerCellTooltip({
-    super.key,
-    required this.title,
-    required this.out,
-    required this.inn,
-    required this.flags,
-    required this.child,
-  });
-
-  final String title;
-  final int out;
-  final int inn;
-  final MaskFlags flags;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final l = AppLocalizations.of(context);
-    return Tooltip(
-      richMessage: WidgetSpan(
-        child: PChartTooltip(
-          head: title,
-          rows: [
-            PChartTooltipRow(
-              swatch: c.chartRed,
-              name: l.expSummaryExpense,
-              value: krwSigned(
-                out,
-                flags.of(MaskKind.expense),
-                sign: '−',
-                unit: true,
-              ),
-            ),
-            PChartTooltipRow(
-              swatch: c.chartBlue,
-              name: l.expSummaryIncome,
-              value: krwSigned(
-                inn,
-                flags.of(MaskKind.income),
-                sign: '+',
-                unit: true,
-              ),
-            ),
-          ],
-        ),
-      ),
-      decoration: const BoxDecoration(color: Colors.transparent),
-      child: child,
-    );
-  }
 }

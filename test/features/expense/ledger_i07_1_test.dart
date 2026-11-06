@@ -360,7 +360,7 @@ void main() {
     final c = tester.element(find.byType(ExpenseScreen)).colors;
     // 접힌 상태 — 한 주. 다음 달은 모두 오는 날이다
     final dayTexts = find.descendant(
-      of: find.byType(InkWell),
+      of: find.byType(LedgerCalendarGrid),
       matching: findText('1'),
     );
     expect(dayTexts, findsWidgets);
