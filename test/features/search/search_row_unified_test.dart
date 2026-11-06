@@ -543,5 +543,33 @@ void main() {
         handle.dispose();
       },
     );
+
+    testWidgets(
+      '날짜 머리 오른쪽은 원장과 같은 부품(PDayHeader) — "원" 포함 · 지출 fg-neutral · 수입 + fg-brand, 자르지 않음',
+      (tester) async {
+        await _pump(tester, [
+          _e(rowId: 1, amount: 123456789, date: '2026-09-12T11:20:00'),
+          _e(
+            rowId: 2,
+            amount: 5000,
+            date: '2026-09-12T18:00:00',
+            type: 'INCOME',
+          ),
+        ]);
+        await _search(tester, '커피');
+        final head = find.byType(PDayHeader);
+        expect(head, findsOneWidget);
+        final c = tester.element(find.byType(SearchScreen)).colors;
+        final out = tester.widget<Text>(
+          find.descendant(of: head, matching: find.text('−123,456,789원')),
+        );
+        final inn = tester.widget<Text>(
+          find.descendant(of: head, matching: find.text('+5,000원')),
+        );
+        expect(out.style!.color, c.fgNeutral);
+        expect(inn.style!.color, c.fgBrand);
+        expect(out.overflow, isNot(TextOverflow.ellipsis));
+      },
+    );
   });
 }
