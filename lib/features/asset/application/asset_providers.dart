@@ -214,22 +214,27 @@ Set<String> valuationSymbolsOf(Iterable<Asset> investments) {
   return symbols;
 }
 
-/// 평가에 쓰는 시세를 지금 못 받고 있다(처음 · 다시 받기 모두) — 그동안 평가액은 서버 잔액(한 번도 못 받음) 또는 직전 시세다.
-/// 숫자는 두고 그 카드에 "시세를 불러오지 못했어요" 띠를 단다(I-wrap-b2b 4). 시세를 쓰지 않는 사용자(게이트 꺼짐 · 연동 보유
-/// 없음)는 늘 거짓이다. [investmentValuationMapProvider] 와 같은 키를 지켜봐 요청이 더 나가지 않는다.
-final valuationPriceFailedProvider = Provider<bool>((ref) {
+/// 투자 평가에 쓰는 시세 조회의 지금 상태 — 시세를 쓰지 않는 사용자(게이트 꺼짐 · 연동 보유 없음)는 null.
+/// [investmentValuationMapProvider] 와 같은 키를 지켜봐 요청이 더 나가지 않는다.
+final valuationPricesProvider = Provider<AsyncValue<LivePrices>?>((ref) {
   final features = ref.watch(myFeaturesProvider).asData?.value;
   final enabled =
       (features?.hasSecurities ?? false) &&
       (features?.hasBrokerConnection ?? false);
-  if (!enabled) return false;
+  if (!enabled) return null;
   final assets = ref.watch(assetsProvider).value ?? const <Asset>[];
   final symbols = valuationSymbolsOf(
     assets.where((a) => a.assetType == 'INVESTMENT'),
   );
-  if (symbols.isEmpty) return false;
-  return ref.watch(livePricesProvider(livePricesKey(symbols))).hasError;
+  if (symbols.isEmpty) return null;
+  return ref.watch(livePricesProvider(livePricesKey(symbols)));
 });
+
+/// 평가에 쓰는 시세를 지금 못 받고 있다(처음 · 다시 받기 모두) — 그동안 평가액은 서버 잔액(한 번도 못 받음) 또는 직전 시세다.
+/// 숫자는 두고 그 카드에 Callout 을 단다(I-wrap-b2b 4).
+final valuationPriceFailedProvider = Provider<bool>(
+  (ref) => ref.watch(valuationPricesProvider)?.hasError ?? false,
+);
 
 /// 자산 화면의 실시간 평가를 새로 받는다 — **시세 조회까지** 무효화한다.
 ///

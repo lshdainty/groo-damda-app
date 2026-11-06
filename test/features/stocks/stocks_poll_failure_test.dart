@@ -21,12 +21,20 @@ import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dar
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/stale_value_callout.dart';
+import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 import '../../support/plain_text.dart';
 
 const _fail = '시세를 불러오지 못했어요';
+const _staleBody = '보이는 값은 마지막으로 받은 시세예요.';
+
+/// 값이 하나도 없는 처음 실패 — 그 자리 Result Section.
 final _band = find.byKey(const ValueKey('stocks-price-failure'));
+
+/// 받아 둔 값이 보이는 채 실패 — 섹션 머리 아래 Callout critical · actionable(디자인시스템 판단).
+final _stale = find.byKey(const ValueKey('stocks-price-stale'));
 
 final _holdings = TossHoldings(
   totalPurchaseAmount: '1500000',
@@ -166,14 +174,21 @@ void main() {
       tester,
     ) async {
       final s = await _pumpToss(tester);
-      expect(_band, findsNothing);
+      expect(_stale, findsNothing);
       final stat = find.byKey(const ValueKey('card-stat-value'));
       final before = plainOf(tester.widget<Text>(stat).data ?? '');
       s.holdingsFail = true;
       s.container.invalidate(tossHoldingsProvider);
       await _settle(tester);
-      expect(_band, findsOneWidget);
-      expect(findText(_fail), findsOneWidget);
+      expect(
+        _stale,
+        findsOneWidget,
+        reason: '보이는 숫자 위에 실패 상자(Result Section)를 얹지 않는다',
+      );
+      expect(_band, findsNothing);
+      expect(findTextContaining(_fail), findsOneWidget);
+      expect(findTextContaining(_staleBody), findsOneWidget);
+      expect(find.byType(PCallout), findsOneWidget);
       expect(
         plainOf(tester.widget<Text>(stat).data ?? ''),
         before,
@@ -185,14 +200,16 @@ void main() {
       s.holdingsFail = false;
       s.container.invalidate(tossHoldingsProvider);
       await _settle(tester);
-      expect(_band, findsNothing, reason: '다음 받기가 성공하면 저절로 걷힌다');
+      expect(_stale, findsNothing, reason: '다음 받기가 성공하면 저절로 걷힌다');
     });
 
-    testWidgets('시장 — 환율을 못 받으면 그 줄이 조용히 빠지지 않고 섹션 머리 아래 띠', (tester) async {
+    testWidgets('시장 — 환율을 못 받으면 그 줄이 조용히 빠지지 않고 섹션 머리 아래 Callout(지수는 보인다)', (
+      tester,
+    ) async {
       await _pumpToss(tester, state: _Toss()..fxFail = true);
-      expect(_band, findsOneWidget);
+      expect(_stale, findsOneWidget);
       expect(
-        tester.getTopLeft(findText('시장')).dy < tester.getTopLeft(_band).dy,
+        tester.getTopLeft(findText('시장')).dy < tester.getTopLeft(_stale).dy,
         isTrue,
       );
     });
@@ -204,7 +221,9 @@ void main() {
       await _settle(tester);
       await _settle(tester);
       expect(findText('종목 A1'), findsOneWidget);
+      // 값이 하나도 없는 처음 실패(줄이 "—" 만) — 그 자리 Result Section
       expect(_band, findsOneWidget);
+      expect(_stale, findsNothing);
       expect(findText('종목 A1'), findsOneWidget);
     });
   });
@@ -252,8 +271,9 @@ void main() {
         krw: AsyncData(_namu('KRW')),
         usd: AsyncError(StateError('x'), StackTrace.empty),
       );
-      expect(_band, findsOneWidget);
-      expect(findText(_fail), findsOneWidget);
+      // 남은 통화가 보인다 — 섹션 맨 위 Callout 하나
+      expect(_stale, findsOneWidget);
+      expect(findTextContaining(_fail), findsOneWidget);
     });
 
     testWidgets('두 통화 모두 받았으면 띠 없음', (tester) async {
@@ -262,8 +282,36 @@ void main() {
         krw: AsyncData(_namu('KRW')),
         usd: AsyncData(_namu('USD')),
       );
+      expect(_stale, findsNothing);
       expect(_band, findsNothing);
     });
+  });
+
+  testWidgets('Callout 은 상자 전체가 다시 시도 — 다시 받는 동안은 누름을 무시한다(진행 원 없음)', (
+    tester,
+  ) async {
+    var taps = 0;
+    Future<void> show(bool retrying) => tester.pumpWidget(
+      MaterialApp(
+        theme: GrooTheme.light(),
+        home: Scaffold(
+          body: StaleValueCallout(
+            title: _fail,
+            description: _staleBody,
+            retrying: retrying,
+            onRetry: () => taps++,
+          ),
+        ),
+      ),
+    );
+    await show(false);
+    await tester.tap(find.byType(PCallout));
+    await tester.pump();
+    expect(taps, 1);
+    await show(true);
+    await tester.tap(find.byType(PCallout));
+    await tester.pump();
+    expect(taps, 1, reason: '다시 받는 동안은 무시');
   });
 
   group('자산 평가', () {
@@ -323,20 +371,28 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: GrooTheme.light(),
-          locale: const Locale('ko'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: AssetGroupSection(
-                title: '투자',
-                assets: [inv],
-                total: 500000,
-                masked: false,
-                loading: false,
-                notice: AssetPriceFailure(onRetry: () {}),
+        ProviderScope(
+          overrides: [
+            valuationPricesProvider.overrideWith(
+              (ref) =>
+                  AsyncError<LivePrices>(StateError('x'), StackTrace.empty),
+            ),
+          ],
+          child: MaterialApp(
+            theme: GrooTheme.light(),
+            locale: const Locale('ko'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AssetGroupSection(
+                  title: '투자',
+                  assets: [inv],
+                  total: 500000,
+                  masked: false,
+                  loading: false,
+                  notice: AssetPriceFailure(onRetry: () {}),
+                ),
               ),
             ),
           ),
@@ -345,7 +401,10 @@ void main() {
       await tester.pump();
       final band = find.byKey(const ValueKey('asset-price-failure'));
       expect(band, findsOneWidget);
-      expect(findText(_fail), findsOneWidget);
+      expect(findTextContaining(_fail), findsOneWidget);
+      // 한 번도 시세를 못 받았다 — 숫자는 서버 잔액
+      expect(findTextContaining('보이는 값은 시세가 아닌 마지막 잔액이에요.'), findsOneWidget);
+      expect(find.byType(PCallout), findsOneWidget);
       expect(
         tester.getTopLeft(band).dy <
             tester.getTopLeft(find.byKey(const ValueKey('asset-row-1'))).dy,

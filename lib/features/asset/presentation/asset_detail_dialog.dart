@@ -518,6 +518,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               Padding(
                 padding: gutterPad,
                 child: AssetPriceFailure(
+                  gutter: false,
                   onRetry: () => refreshLiveValuation(ref.invalidate),
                 ),
               ),

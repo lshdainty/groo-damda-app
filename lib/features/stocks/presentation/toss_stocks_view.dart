@@ -282,6 +282,8 @@ class _TossStocksViewState extends ConsumerState<TossStocksView> {
           slivers.add(
             SliverToBoxAdapter(
               child: StocksPriceFailure(
+                // 받아 둔 시세가 있으면 Callout(줄은 옛 값), 하나도 없으면(줄이 "—" 만) Result Section
+                stale: watchPrices.any((v) => v.hasValue),
                 retrying: watchPrices.any((v) => v.pollFailed && v.isLoading),
                 onRetry: () => ref.invalidate(tossPricesProvider),
               ),
@@ -429,6 +431,7 @@ class _InvestBand extends ConsumerWidget {
           // 받아 둔 보유가 있는 채 다시 받지 못했다 — 숫자는 두고 띠 한 줄(I-wrap-b2b 4)
           if (holdingsAsync.refreshFailed)
             StocksPriceFailure(
+              stale: true,
               retrying: holdingsAsync.isLoading,
               onRetry: onRetry,
             ),
@@ -565,6 +568,8 @@ class _MarketBand extends ConsumerWidget {
           StocksBandTitle(l.stocksSectionMarket),
           if (priceFailed)
             StocksPriceFailure(
+              // 지수 · 환율 중 보이는 값이 있으면 Callout, 하나도 없으면 Result Section
+              stale: pricesAsync.hasValue || fxAsync.hasValue,
               retrying: pricesAsync.isLoading || fxAsync.isLoading,
               onRetry: () {
                 ref.invalidate(tossIndicatorPricesProvider);
@@ -909,7 +914,11 @@ class _HoldingsList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        StocksPriceFailure(retrying: async.isLoading, onRetry: onRetry),
+        StocksPriceFailure(
+          stale: true,
+          retrying: async.isLoading,
+          onRetry: onRetry,
+        ),
         list,
       ],
     );
@@ -1250,9 +1259,10 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                 // 시세 조회가 실패했고 받아 둔 값도 없으면 실패 안내 + [다시 시도](웹 `detail.priceFail`)
                 // 받아 둔 값(또는 보유 값)이 있으면 숫자는 위에 두고 이 띠가 "지금 시세가 아니다" 를 말한다(I-wrap-b2b 4)
                 if (pricesAsync.pollFailed) ...[
-                  // 웹 BandFailure 와 같은 Result Section(구역 안 = medium): 아이콘 · 제목 · 설명 · [다시 시도]
-                  StocksFailure(
-                    title: l.stocksFailPrice,
+                  // 값이 없으면 Result Section(구역 안 = medium), 위에 숫자가 보이면 Callout(검수 판단)
+                  StocksPriceFailure(
+                    stale: last != null,
+                    gutter: false,
                     retrying: pricesAsync.isLoading,
                     onRetry: () => ref.invalidate(tossPricesProvider(symbol)),
                   ),
@@ -1785,6 +1795,7 @@ class TossPortfolioPage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           StocksPriceFailure(
+            stale: true,
             retrying: holdingsAsync.isLoading,
             onRetry: () {
               ref.invalidate(tossAccountsProvider);
@@ -2417,7 +2428,7 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               StocksPriceFailure(
-                title: l.stocksFailOrderbook,
+                stale: true,
                 retrying: orderbookAsync.isLoading,
                 onRetry: () => widget.onRetryBook?.call(ref),
               ),
@@ -2459,7 +2470,7 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             StocksPriceFailure(
-              title: l.stocksFailTrades,
+              stale: true,
               retrying: tradesAsync.isLoading,
               onRetry: () => widget.onRetryTrades?.call(ref),
             ),

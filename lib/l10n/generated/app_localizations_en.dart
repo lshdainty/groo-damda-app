@@ -43,11 +43,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveUnconfirmed =>
-      'Couldn\'t confirm it was saved. Please check the list.';
+      'We couldn\'t confirm it was saved. Please check the list.';
 
   @override
   String get payUnconfirmed =>
-      'Couldn\'t confirm the payment. Please check the billing history.';
+      'We couldn\'t confirm the payment. Please check the billing history.';
+
+  @override
+  String get stocksStaleLastPrice =>
+      'The values shown are the last prices received.';
+
+  @override
+  String get stocksStaleLastBalance =>
+      'The values shown are the last balance, not live prices.';
+
+  @override
+  String get securitiesLeaveBody => 'What you entered will be discarded.';
+
+  @override
+  String get withdrawUnconfirmed =>
+      'We couldn\'t confirm the cancellation. Please reopen the app to check.';
 
   @override
   String get actionApply => 'Apply';

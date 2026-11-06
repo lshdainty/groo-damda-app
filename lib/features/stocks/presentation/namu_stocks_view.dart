@@ -312,6 +312,7 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
           slivers.add(
             SliverToBoxAdapter(
               child: StocksPriceFailure(
+                stale: watchQuotes.any((v) => v.hasValue),
                 retrying: watchQuotes.any((v) => v.pollFailed && v.isLoading),
                 onRetry: () => ref.invalidate(namuQuotesProvider),
               ),
@@ -654,6 +655,8 @@ class NamuInvestBand extends ConsumerWidget {
         children: [
           if (currencyFailed)
             StocksPriceFailure(
+              // 남은 통화 · 옛 값이 섹션에 보인다 — Callout 하나(합계도 이 섹션 안이라 덮인다)
+              stale: true,
               retrying: [
                 krwAsync,
                 usdAsync,
@@ -837,6 +840,7 @@ class _NamuMarketBandState extends ConsumerState<NamuMarketBand> {
           StocksBandTitle(l.stocksSectionMarket),
           if (priceFailed)
             StocksPriceFailure(
+              stale: (quotesAsync?.hasValue ?? false) || fxAsync.hasValue,
               retrying: (quotesAsync?.isLoading ?? false) || fxAsync.isLoading,
               onRetry: () {
                 ref.invalidate(namuQuotesProvider(csv));

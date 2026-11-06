@@ -48,6 +48,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get payUnconfirmed => '결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.';
 
   @override
+  String get stocksStaleLastPrice => '보이는 값은 마지막으로 받은 시세예요.';
+
+  @override
+  String get stocksStaleLastBalance => '보이는 값은 시세가 아닌 마지막 잔액이에요.';
+
+  @override
+  String get securitiesLeaveBody => '입력한 내용이 사라져요.';
+
+  @override
+  String get withdrawUnconfirmed => '해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.';
+
+  @override
   String get actionApply => '적용';
 
   @override

@@ -176,6 +176,30 @@ abstract class AppLocalizations {
   /// **'결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'**
   String get payUnconfirmed;
 
+  /// 시세 폴링이 받아 둔 값이 있는 채 실패했을 때 섹션 Callout 본문(제목 stocksFailPrice) — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'보이는 값은 마지막으로 받은 시세예요.'**
+  String get stocksStaleLastPrice;
+
+  /// 투자 평가 시세를 못 받아 서버 잔액으로 그린 자리의 Callout 본문 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'보이는 값은 시세가 아닌 마지막 잔액이에요.'**
+  String get stocksStaleLastBalance;
+
+  /// 증권 연결 화면 나가기 확인창 본문(키를 친 화면) — 금액 가리기는 hideAmountsDiscardBody("고른") 그대로
+  ///
+  /// In ko, this message translates to:
+  /// **'입력한 내용이 사라져요.'**
+  String get securitiesLeaveBody;
+
+  /// 이용 해지 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE) — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.'**
+  String get withdrawUnconfirmed;
+
   /// No description provided for @actionApply.
   ///
   /// In ko, this message translates to:

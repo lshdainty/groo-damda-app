@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -20,6 +21,7 @@ import 'package:groo_damda_app/features/asset/presentation/widgets/net_worth_cha
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/saving_goal/domain/saving_goal.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/stale_value_callout.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card.dart';
@@ -666,18 +668,36 @@ class AssetGroupSection extends StatelessWidget {
   }
 }
 
-/// 투자 평가에 쓰는 시세를 못 받고 있다 — 숫자(서버 잔액 · 직전 시세)는 두고 그 카드 머리 아래에 띠 한 줄(I-wrap-b2b 4).
-/// 글은 증권 화면과 같은 "시세를 불러오지 못했어요"(웹 `detail.priceFail`). 다음 받기가 성공하면 저절로 걷힌다.
-class AssetPriceFailure extends StatelessWidget {
-  const AssetPriceFailure({super.key, required this.onRetry});
+/// 투자 평가에 쓰는 시세를 못 받고 있다 — 숫자는 두고 그 카드 머리 아래 Callout critical · actionable(I-wrap-b2b 4, 디자인시스템
+/// 판단). 제목 "시세를 불러오지 못했어요", 본문은 받아 둔 시세가 있으면 "보이는 값은 마지막으로 받은 시세예요.", 한 번도
+/// 못 받아 서버 잔액으로 그렸으면 "보이는 값은 시세가 아닌 마지막 잔액이에요.". 다시 받는 동안은 다시 누름을 무시한다.
+/// 다음 받기가 성공하면 저절로 걷힌다.
+class AssetPriceFailure extends ConsumerWidget {
+  const AssetPriceFailure({
+    super.key,
+    required this.onRetry,
+    this.gutter = true,
+  });
   final VoidCallback onRetry;
 
+  /// 화면 여백 24 를 스스로 둔다 — 이미 여백 안이면 끈다.
+  final bool gutter;
+
   @override
-  Widget build(BuildContext context) => BudgetFailure(
-    key: const ValueKey('asset-price-failure'),
-    title: AppLocalizations.of(context).stocksFailPrice,
-    onRetry: onRetry,
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final prices = ref.watch(valuationPricesProvider);
+    return StaleValueCallout(
+      key: const ValueKey('asset-price-failure'),
+      title: l.stocksFailPrice,
+      description: (prices?.hasValue ?? false)
+          ? l.stocksStaleLastPrice
+          : l.stocksStaleLastBalance,
+      retrying: prices?.isLoading ?? false,
+      onRetry: onRetry,
+      gutter: gutter,
+    );
+  }
 }
 
 // ── 저축 목표 ───────────────────────────────────────────────────
