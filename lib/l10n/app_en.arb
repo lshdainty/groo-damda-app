@@ -21,7 +21,7 @@
   "unconfirmedDelete": "We couldn't confirm it was deleted.",
   "unconfirmedProcess": "We couldn't confirm it went through.",
   "unconfirmedToggle": "We couldn't confirm it changed.",
-  "unconfirmedConnect": "We couldn't confirm it connected.",
+  "unconfirmedConnect": "We couldn't confirm the connection.",
   "actionApply": "Apply",
   "actionReset": "Reset",
   "actionSearch": "Search",

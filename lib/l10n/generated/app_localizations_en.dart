@@ -77,7 +77,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unconfirmedToggle => 'We couldn\'t confirm it changed.';
 
   @override
-  String get unconfirmedConnect => 'We couldn\'t confirm it connected.';
+  String get unconfirmedConnect => 'We couldn\'t confirm the connection.';
 
   @override
   String get actionApply => 'Apply';
