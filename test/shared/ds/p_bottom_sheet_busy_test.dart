@@ -95,6 +95,7 @@ Future<void> _open(
   bool useBusy = true,
   bool form = true,
   bool dirty = true,
+  bool probeDirty = true,
   VoidCallback? onBack,
   ValueSetter<Object?>? onResult,
 }) async {
@@ -107,8 +108,8 @@ Future<void> _open(
               final r = await PBottomSheet.show<Object?>(
                 context,
                 form: form,
-                isDirty: () => dirty,
-                leaveCopy: _leave,
+                isDirty: probeDirty ? () => dirty : null,
+                leaveCopy: probeDirty ? _leave : null,
                 builder: (_) =>
                     _Form(gate: gate, useBusy: useBusy, onBack: onBack),
               );
@@ -219,6 +220,54 @@ void main() {
     pending.complete(true);
     await tester.pumpAndSettle();
     expect(_sheet, findsNothing, reason: '성공하면 폼이 close() 로 닫는다');
+  });
+
+  testWidgets(
+    '바뀐 값을 살피지 않는 시트(isDirty 없음)도 저장 중에는 시스템 뒤로로 닫히지 않는다 — canPop 이 busy 를 본다(검수 L4)',
+    (tester) async {
+      final pending = Completer<bool>();
+      await _open(
+        tester,
+        gate: () => pending,
+        form: false,
+        dirty: false,
+        probeDirty: false,
+      );
+      await tester.tap(findText('저장'));
+      await tester.pump();
+      final route = ModalRoute.of(tester.element(find.byType(_Form)))!;
+      await tester.binding.handlePopRoute();
+      await tester.pump(const Duration(milliseconds: 400));
+      // 닫히는 동안에도 표면은 잠깐 남으니 라우트가 살아 있는지로 본다
+      expect(route.isActive, isTrue, reason: '저장 중 시스템 뒤로는 시트를 내리지 않는다');
+      pending.complete(false);
+      await tester.pumpAndSettle();
+      // 저장이 끝나면 뒤로가 바로 닫는다
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(route.isActive, isFalse);
+    },
+  );
+
+  testWidgets('두 저장이 겹치면 둘 다 끝나야 풀린다 — busy 는 짝으로 센다(검수 L3)', (tester) async {
+    final pending = Completer<bool>();
+    await _open(tester, gate: () => pending);
+    final controller = PBottomSheet.maybeOf(
+      tester.element(find.byType(_Form)),
+    )!;
+    controller
+      ..setBusy(true)
+      ..setBusy(true);
+    await tester.pump();
+    controller.setBusy(false);
+    await tester.pump();
+    expect(controller.busy, isTrue, reason: '먼저 끝난 쪽이 풀지 않는다');
+    await tester.binding.handlePopRoute();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(PAlertDialogView), findsNothing);
+    controller.setBusy(false);
+    await tester.pump();
+    expect(controller.busy, isFalse);
   });
 
   group('확인창이 떠 있는 사이에 저장이 성공하면(조사 a-1 경합)', () {

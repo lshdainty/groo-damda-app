@@ -50,6 +50,7 @@ abstract interface class PBottomSheetController {
   /// 받지 않고 시트 안 누름도 받지 않는다. 닫기 버튼은 흐리게 하지 않고 모양 그대로 둔다(바닥 단추의 로딩이 "기다려라" 를
   /// 말한다). 저장 핸들러가 시작할 때 `setBusy(true)`, `finally` 에서 `setBusy(false)` 를 부른다 — 실패 Callout 을 그릴
   /// 폼이 저장 중에 없어지지 않게 한다. [close] 는 막지 않는다(저장에 성공한 폼이 부른다).
+  /// 켜기 · 끄기는 짝으로 센다 — 한 시트 안의 두 저장이 겹치면 둘 다 끝나야 풀린다.
   void setBusy(bool busy);
 
   /// 지금 저장 중인가([setBusy]).

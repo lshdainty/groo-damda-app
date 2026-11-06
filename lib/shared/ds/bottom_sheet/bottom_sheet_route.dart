@@ -188,20 +188,27 @@ class _SheetHostState extends State<_SheetHost>
   bool _dragReady = false;
   Timer? _readyTimer;
   bool _asking = false;
-  bool _busy = false;
+
+  /// 지금 진행 중인 저장 수 — 한 시트 안의 두 저장(문자 해석 · 프리셋 저장 · 저장)이 겹쳐도 먼저 끝난 쪽이 풀지 않게
+  /// 센다(검수 L3). 0 보다 크면 busy.
+  int _busyCount = 0;
+  bool get _busy => _busyCount > 0;
 
   @override
   bool get busy => _busy;
 
   @override
   void setBusy(bool busy) {
-    if (!mounted || _busy == busy) return;
-    if (busy) {
+    if (!mounted) return;
+    final was = _busy;
+    _busyCount = busy ? _busyCount + 1 : math.max(0, _busyCount - 1);
+    if (_busy == was) return;
+    if (_busy) {
       // 끌던 손짓은 거기서 멈추고 제자리로 — 저장 중에는 끌리지 않는다
       if (_tracking && _sheetMoved) _settleBack();
       _tracking = false;
     }
-    setState(() => _busy = busy);
+    setState(() {});
   }
 
   // 끌기
