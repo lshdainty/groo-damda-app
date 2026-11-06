@@ -948,7 +948,8 @@ void main() {
 
     testWidgets('1억이 넘는 금액도 줄이지 않고 그대로, 칸보다 길면 줄이 바뀐다', (tester) async {
       await tester.pumpWidget(_host(Brightness.light, _statCardWorst()));
-      expect(findText('−123,456,789,012원'), findsNothing); // 낱말 이음 문자가 끼어 있다
+      // 맨 find.text 로 — 그려진 글에 낱말 이음 문자가 끼어 있어 원래 글로는 맞지 않는다(그것을 잰다)
+      expect(find.text('−123,456,789,012원'), findsNothing);
       expect(tester.takeException(), isNull);
       final value = _text(tester, 'card-stat-value');
       expect(value.semanticsLabel, '−123,456,789,012원');

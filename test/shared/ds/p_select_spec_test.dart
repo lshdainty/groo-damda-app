@@ -166,7 +166,7 @@ Finder get _prefix => find.byKey(const ValueKey('select-prefix-icon'));
 Finder get _contentBox => find.byKey(const ValueKey('select-content-box'));
 
 Finder _row(String label) => find.ancestor(
-  of: findText(keepAll(label)),
+  of: find.text(keepAll(label)),
   matching: find.byKey(const ValueKey('select-item')),
 );
 
@@ -512,7 +512,7 @@ void main() {
         if (!sameColor(specColor(descColor), _style(tester, desc).color!)) {
           k.fail('itemDescription.foreground 가 스펙과 다르다');
         }
-        final labelOfSecond = findText(keepAll('국민 주계좌'));
+        final labelOfSecond = find.text(keepAll('국민 주계좌'));
         k.px(
           'itemDescription.gap',
           tester.getTopLeft(desc).dy - tester.getBottomLeft(labelOfSecond).dy,
