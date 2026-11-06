@@ -37,7 +37,6 @@ import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
-import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
@@ -65,6 +64,7 @@ import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/features/category/presentation/category_tile.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 String _formatTime(TimeOfDay t) =>
     '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
@@ -453,13 +453,14 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     }
   }
 
-  /// 저장 중에 닫으면 저장 결과(onSaved · 알림)를 잃는다 — 저장 중에는 바뀐 값으로 보아 닫기 전에 묻는다(L1).
-  bool _dirty() => _submitting || _sig(_input) != _initialSig;
+  /// 저장 중에는 시트가 닫히지 않는다(시트의 busy — [_save]) — 여기서는 입력 값만 본다.
+  bool _dirty() => _sig(_input) != _initialSig;
 
   // ── 단계 ────────────────────────────────────────────────
   /// 기기 뒤로 가기 · Esc — 한 단계 안이면 그 단계만, 2단계면 1단계로(값은 버리지 않는다). 처음 단계면 시트의 닫는 길이 이어받는다.
   bool _intercept() {
-    if (!mounted || _submitting) return _submitting;
+    // 저장 중에는 시트의 busy 가 닫기 청을 먼저 막는다(이 판정까지 오지 않는다)
+    if (!mounted) return false;
     if (_step == _S.reconcile) {
       _splitProbe.interceptClose();
       return true;
@@ -930,6 +931,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _smsBusy = true;
       _smsError = null;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(smsRepositoryProvider.future);
       final parsed = await repo.parse(text, silent: true);
@@ -957,6 +959,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       // 서버 글은 내지 않는다 — 우리 글만
       setState(() => _smsError = l.smsParseFailed);
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _smsBusy = false);
     }
   }
@@ -1015,6 +1018,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _saveError = null;
     });
     final name = _presetNameCtrl.text.trim();
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(presetRepositoryProvider.future);
       await repo.create(
@@ -1047,11 +1051,14 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       PSnackbar.maybeOf(
         hostContextOf(context),
       )?.show(message: l.txfPresetSaved(name));
-    } on ApiException {
+    } on ApiException catch (e) {
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) ref.invalidate(presetListProvider);
       // 고칠 수 있는 서버 거절(이름 중복 등)은 위에서 먼저 막았다 — 남는 건 우리 글
-      setState(() => _presetSaveError = l.txfSaveFailed);
+      setState(() => _presetSaveError = saveFailureText(l, e, l.txfSaveFailed));
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _presetSaving = false);
     }
   }
@@ -1138,9 +1145,12 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   Future<void> _save() async {
     if (_saveBusy || _submitting) return;
     _saveBusy = true;
+    // 저장 중에는 시트를 닫지 않는다 — 실패 Callout 을 그릴 폼이 남아 있게(I-wrap-b2b 1)
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       await _saveInner();
     } finally {
+      sheet?.setBusy(false);
       _saveBusy = false;
       if (mounted && _submitting) setState(() => _submitting = false);
     }
@@ -1183,10 +1193,19 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   }
 
   /// 저장 실패 — 웹과 같은 한 글(서버 원문 없음). 확인창을 거친 저장의 실패도 보이게 본문을 맨 위로 올린다.
+  ///
+  /// 응답만 못 읽었으면(PARSE — 서버는 거래 · 이체를 만들었다) 실패라 하지 않는다: 성공 때처럼 가계부 · 자산 · 홈을 비우고
+  /// "저장됐는지 확인하지 못했어요. 목록에서 확인해주세요." 를 둔다. 폼은 닫지 않는다(검수 M3 — 다시 누르면 두 번 생긴다).
   void _failSave(ApiException e) {
     if (!mounted) return;
     final l = AppLocalizations.of(context);
-    setState(() => _saveError = l.txfSaveFailed);
+    if (isUnconfirmedSave(e)) {
+      ref.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChange(ref);
+      final edited = _edit ?? _replaceOf;
+      if (edited != null) ref.invalidate(expenseSplitsProvider(edited.rowId));
+    }
+    setState(() => _saveError = saveFailureText(l, e, l.txfSaveFailed));
     scrollSheetBodyToTop(context);
   }
 
@@ -1645,8 +1664,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           spAsync.isLoading &&
           !spAsync.hasValue &&
           !spAsync.hasError;
-      _splitsFailed = spAsync.loadFailed;
-      _splitsRetrying = spAsync.loadRetrying;
+      // 분할만은 마지막 받기가 실패면 막는다 — 값이 있어도(캐시) 다른 기기에서 바뀐 분할을 옛 값으로 덮을 수 있다(웹 검수 L4).
+      // 실패 표시는 그 자리 실패 + [다시 시도] 그대로
+      _splitsFailed = spAsync.hasError;
+      _splitsRetrying = spAsync.hasError && spAsync.isLoading;
       final sp = spAsync.value;
       _serverSplits = sp == null
           ? const []

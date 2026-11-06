@@ -22,6 +22,8 @@ import 'package:groo_damda_app/features/asset/presentation/pickers/picker_sheet.
 import 'package:groo_damda_app/features/asset/presentation/pickers/stock_add_picker.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/stocks/application/live_prices.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -34,6 +36,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 export 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showInvestmentAddDialog, showInvestmentEditDialog;
@@ -370,19 +373,31 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   /// 환산 규칙은 [livePricesProvider] 한 곳에 있다 — 자산 목록·상세와 같은 걸 써야
   /// 한 화면에서 총액과 종목별 금액이 어긋나지 않는다(실제로 어긋난 적이 있다).
   Map<String, double?> _unitKrwMap() {
+    final symbols = _linkedSymbols();
+    // 다시 받는 동안·실패한 동안에도 앞 시세를 쓴다 — 자산 목록·상세와 같은 값을 보여야 한다.
+    final live = _livePrices()?.value;
+    if (live == null) return const {};
+    return {for (final s in symbols) s: live.unitKrw(s)};
+  }
+
+  /// 연동 보유의 심볼(정렬) — 게이트(증권 구독 + 연결)가 꺼져 있으면 비어 있다.
+  List<String> _linkedSymbols() {
     final features = ref.watch(myFeaturesProvider).asData?.value;
     final gate =
         (features?.hasSecurities ?? false) &&
         (features?.hasBrokerConnection ?? false);
-    final symbols = {
+    if (!gate) return const [];
+    return {
       for (final h in _holdings)
         if (h.linked && (h.tossSymbol?.isNotEmpty ?? false)) h.tossSymbol!,
     }.toList()..sort();
-    if (!gate || symbols.isEmpty) return const {};
-    // 다시 받는 동안·실패한 동안에도 앞 시세를 쓴다 — 자산 목록·상세와 같은 값을 보여야 한다.
-    final live = ref.watch(livePricesProvider(livePricesKey(symbols))).value;
-    if (live == null) return const {};
-    return {for (final s in symbols) s: live.unitKrw(s)};
+  }
+
+  /// 보유 미리보기의 시세 조회 — 시세를 쓰지 않으면 null.
+  AsyncValue<LivePrices>? _livePrices() {
+    final symbols = _linkedSymbols();
+    if (symbols.isEmpty) return null;
+    return ref.watch(livePricesProvider(livePricesKey(symbols)));
   }
 
   /// 보유 합계(KRW) — manual 합 + 시세 확보된 linked 합.
@@ -454,6 +469,7 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       if (_isEdit) {
@@ -505,6 +521,11 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       // 고쳐 다시 할 수 있는 코드(AST_036 · AST_037)만 다른 고정 글로 가른다(I-13).
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        invalidateAfterAssetChange(ref);
+        ref.invalidate(investmentValuationMapProvider);
+      }
       setState(() {
         _failed = true;
         _failCode = e.code;
@@ -514,6 +535,7 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
@@ -535,6 +557,10 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
     ref.watch(defaultCurrencyProvider);
     final unitMap = _unitKrwMap();
     final total = _totalOf(unitMap, _holdings);
+    // 연동 시세를 처음부터 못 받았다 — 연동 줄 평가액을 모르니 합계도 모른다. 0 이라 하지 않고 "—"(디자인시스템 지시).
+    // 합계는 표시 전용이다 — 저장 본문에 싣지 않는다(보유가 있으면 balance 는 null, 연동 줄은 심볼 · 수량만, 서버가 시세로 셈)
+    final totalUnknown =
+        (_livePrices()?.loadFailed ?? false) && _holdings.any((h) => h.linked);
     final unit = currencyUnit(_currency);
     return AssetFormFrame(
       title: _isEdit
@@ -564,6 +590,28 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
         _HoldingsEditor(
           rows: _rows,
           total: total,
+          totalUnknown: totalUnknown,
+          // 시세를 처음부터 못 받았다 — 연동 보유의 평가액 · 합계가 비어 "평가 0" 처럼 읽히면 안 된다. 그 자리 실패 +
+          // [다시 시도](B2a 분할 실패와 같은 꼴, 디자인시스템 판단 5)
+          pricesFailure: () {
+            final prices = _livePrices();
+            if (prices == null || !prices.loadFailed) return null;
+            final key = livePricesKey(_linkedSymbols());
+            return PResultSection(
+              key: const ValueKey('holdings-price-failure'),
+              kind: PResultKind.failure,
+              size: PResultSize.medium,
+              title: l.stocksFailPrice,
+              description: l.stocksFailDesc,
+              headingLevel: 3,
+              placement: PResultPlacement.card,
+              primaryAction: PResultAction(
+                label: l.actionRetry,
+                loading: prices.loadRetrying,
+                onPressed: () => ref.invalidate(livePricesProvider(key)),
+              ),
+            );
+          }(),
           unitMap: unitMap,
           allowStock: _allowStock,
           manualAddTypes: _manualAddTypes,
@@ -590,10 +638,13 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
             label: l.assetHoldingValueLabel,
             description: l.assetBalanceAutoHelp,
             child: PInput(
-              key: const ValueKey('holdings-total'),
+              // 모름 ↔ 앎이 바뀌면 칸을 새로 그린다(initialValue)
+              key: ValueKey(
+                totalUnknown ? 'holdings-total-unknown' : 'holdings-total',
+              ),
               readOnly: true,
-              initialValue: formatAmountInput(total),
-              suffixText: wonUnit(),
+              initialValue: totalUnknown ? '—' : formatAmountInput(total),
+              suffixText: totalUnknown ? null : wonUnit(),
               tabularFigures: true,
             ),
           ),
@@ -621,6 +672,7 @@ class _HoldingsEditor extends StatelessWidget {
   const _HoldingsEditor({
     required this.rows,
     required this.total,
+    this.totalUnknown = false,
     required this.unitMap,
     required this.allowStock,
     required this.manualAddTypes,
@@ -629,13 +681,20 @@ class _HoldingsEditor extends StatelessWidget {
     required this.onChanged,
     required this.onRemove,
     this.krwHint,
+    this.pricesFailure,
   });
 
   final List<_EditRow> rows;
 
+  /// 연동 시세를 처음부터 못 받았을 때 보유 줄 위에 두는 실패 자리(없으면 null).
+  final Widget? pricesFailure;
+
   /// 외화 계좌의 수동 평가액 · 매수원가 칸 아래 안내 "원화로 입력해요"(I-13). 원화 계좌는 null.
   final String? krwHint;
   final int total;
+
+  /// 연동 시세를 못 받아 합계를 모른다 — 머리 요약을 "—" 로.
+  final bool totalUnknown;
   final Map<String, double?> unitMap;
   final bool allowStock;
   final List<AssetHoldingType> manualAddTypes;
@@ -651,7 +710,11 @@ class _HoldingsEditor extends StatelessWidget {
     return PField(
       label: l.assetHoldings,
       headerTrailing: Text(
-        keepAll(l.assetHoldingsSummary(rows.length, krw(total))),
+        keepAll(
+          totalUnknown
+              ? l.assetHoldingsSummaryUnknown(rows.length)
+              : l.assetHoldingsSummary(rows.length, krw(total)),
+        ),
         textAlign: TextAlign.end,
         // 머리 값 글 — slider.yaml headerValue(t5 · 700 · fg-neutral · 고른 숫자 모양)
         style: PTypography.t5.copyWith(
@@ -691,6 +754,7 @@ class _HoldingsEditor extends StatelessWidget {
                   ),
               ],
             ),
+          ?pricesFailure,
           if (rows.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: PSpacing.x0_5),

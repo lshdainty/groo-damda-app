@@ -18,8 +18,8 @@ class PresetRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/expense-templates');
       return _unwrapList(res, 'templates', ExpenseTemplate.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -68,8 +68,8 @@ class PresetRepository {
         options: _opts(silent),
       );
       return _unwrap(res, ExpenseTemplate.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -134,16 +134,16 @@ class PresetRepository {
         options: _opts(silent),
       );
       return _unwrap(res, ExpenseTemplate.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> delete(int id, {bool silent = false}) async {
     try {
       await _dio.delete<void>('/expense-template/$id', options: _opts(silent));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -154,8 +154,8 @@ class PresetRepository {
         '/expense-template/$id/use',
         data: {'expenseDate': expenseDate},
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -168,8 +168,8 @@ class PresetRepository {
         '/expense-template/$id/touch',
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

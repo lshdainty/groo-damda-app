@@ -7,6 +7,7 @@ import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/dashboard/application/dashboard_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 일정 삭제 — 확인창(ds Alert Dialog) → 확정하면 [deleteCalendarEventRequest]. 실패하면 확인창을 닫고 critical 스낵바 +
 /// [다시 시도](묻지 않고 바로 요청) — 공용 [askConfirmThenRequest]. 상세 [삭제] · 수정 폼 [삭제] 가 같은 길을 쓴다.
@@ -36,6 +37,10 @@ Future<bool> askDeleteCalendarEvent(
     failedMessage: l.calFormDeleteFailed,
     retryLabel: l.actionRetry,
     onRetried: onRetried,
+    kind: WriteKind.delete,
+    // 응답을 못 받았다 — 지워졌을 수 있다. 지운 뒤와 같은 자리를 다시 받는다
+    onUnconfirmed: () =>
+        invalidateAfterCalendarEventDeleteIn(container.invalidate, event),
   );
 }
 

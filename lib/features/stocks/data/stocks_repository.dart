@@ -44,8 +44,8 @@ class StocksRepository {
       return list
           .map((e) => StockMasterItem.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -61,8 +61,8 @@ class StocksRepository {
       return list
           .map((e) => TossPrice.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -73,8 +73,8 @@ class StocksRepository {
         queryParameters: {'symbol': symbol},
       );
       return TossOrderbook.fromJson(_payload(res) as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -88,8 +88,8 @@ class StocksRepository {
       return list
           .map((e) => TossTrade.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -104,8 +104,8 @@ class StocksRepository {
         queryParameters: {'count': count},
       );
       return investorDaysFromJson(_payload(res));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -125,8 +125,8 @@ class StocksRepository {
         currency: currency,
         amount: raw == null ? null : double.tryParse('$raw'),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -145,8 +145,8 @@ class StocksRepository {
         },
       );
       return TossExchangeRate.fromJson(_payload(res) as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -159,8 +159,8 @@ class StocksRepository {
       return list
           .map((e) => TossAccount.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -173,8 +173,8 @@ class StocksRepository {
       return TossHoldings.fromJson(
         _payload(res) as Map<String, dynamic>? ?? {},
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -187,7 +187,7 @@ class StocksRepository {
   }) async {
     try {
       // count 미지정 또는 ≤200 → 단일 요청.
-      // await 를 빼면 Future 가 try 밖에서 완료돼 아래 on DioException 이 놓친다
+      // await 를 빼면 Future 가 try 밖에서 완료돼 아래 catch(throwAsApiException)가 놓친다
       // — 이 경로만 ApiException 이 아니라 DioException 이 그대로 나간다.
       if (count == null || count <= _tossCandleMax) {
         return await _getCandlePage(symbol, interval, size: count);
@@ -218,8 +218,8 @@ class StocksRepository {
         cursor = page.nextBefore;
       }
       return TossCandlePage(candles: merged, nextBefore: nextBefore);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -253,8 +253,8 @@ class StocksRepository {
       return list
           .map((e) => TossStockInfo.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -267,8 +267,8 @@ class StocksRepository {
       return list
           .map((e) => TossStockWarning.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -281,8 +281,8 @@ class StocksRepository {
       return TossPriceLimit.fromJson(
         _payload(res) as Map<String, dynamic>? ?? {},
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -295,8 +295,8 @@ class StocksRepository {
       return TossKrMarketCalendar.fromJson(
         _payload(res) as Map<String, dynamic>? ?? {},
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -309,8 +309,8 @@ class StocksRepository {
       return TossUsMarketCalendar.fromJson(
         _payload(res) as Map<String, dynamic>? ?? {},
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -336,8 +336,8 @@ class StocksRepository {
       return TossRankingResponse.fromJson(
         _payload(res) as Map<String, dynamic>? ?? {},
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -354,8 +354,8 @@ class StocksRepository {
       return list
           .map((e) => TossIndicatorPrice.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -384,8 +384,8 @@ class StocksRepository {
           if (r.$2 != null) r.$2!,
       ];
       return closes.length >= 2 ? closes : const [];
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -398,8 +398,8 @@ class StocksRepository {
       return list
           .map((e) => StockWatchGroup.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -415,8 +415,8 @@ class StocksRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return StockWatchGroup.fromJson(_payload(res) as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -432,8 +432,8 @@ class StocksRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return StockWatchGroup.fromJson(_payload(res) as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -443,8 +443,8 @@ class StocksRepository {
         '/stock-watch/groups/$groupId',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -462,8 +462,8 @@ class StocksRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return WatchItem.fromJson(_payload(res) as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -473,8 +473,8 @@ class StocksRepository {
         '/stock-watch/items/$itemId',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

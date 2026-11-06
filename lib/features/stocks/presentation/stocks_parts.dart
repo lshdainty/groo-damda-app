@@ -10,6 +10,7 @@ import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/stocks/application/stocks_model.dart';
 import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/stale_value_callout.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_donut.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
@@ -211,6 +212,59 @@ class StocksFailure extends StatelessWidget {
         ),
         headingLevel: 3,
       ),
+    );
+  }
+}
+
+/// 시세 조회 실패 — 자리의 값 유무로 모양이 갈린다(I-wrap-b2b 4, 디자인시스템 판단).
+///
+/// - [stale] 참(받아 둔 숫자 · 대신 그린 값이 보인다): 섹션 머리 아래 Callout critical · actionable(상자 전체가 다시 시도)
+///   — 제목 "시세를 불러오지 못했어요", 본문 "보이는 값은 마지막으로 받은 시세예요."([description] 으로 바꿀 수 있다).
+///   이미 보이는 내용 위에 실패 Result Section 을 얹지 않는다(result-section.md:53 · callout.md:3) — 폴링이 실패할 때마다
+///   화면이 밀리지 않게. Callout 은 로딩 상태가 없어 진행 원을 걸지 않고, 다시 받는 동안([retrying]) 다시 누름을 무시한다.
+/// - [stale] 거짓(값이 하나도 없는 처음 실패): 그 자리 Result Section + [다시 시도](진행 원 — B2a).
+///
+/// 다음 받기가 성공하면 부르는 쪽 조건이 거짓이 되어 저절로 걷힌다. 스낵바는 쓰지 않는다.
+class StocksPriceFailure extends StatelessWidget {
+  const StocksPriceFailure({
+    super.key,
+    required this.stale,
+    required this.onRetry,
+    this.retrying = false,
+    this.description,
+    this.gutter = true,
+  });
+
+  final bool stale;
+
+  /// Callout 이 화면 여백을 스스로 두는가 — 머리 칸처럼 이미 여백 안이면 끈다.
+  final bool gutter;
+  final VoidCallback onRetry;
+
+  /// 다시 받는 중 — Result Section 이면 [다시 시도] 에 진행 원, Callout 이면 누름을 무시한다.
+  final bool retrying;
+
+  /// Callout 본문 — 비우면 "보이는 값은 마지막으로 받은 시세예요.".
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    if (!stale) {
+      return StocksFailure(
+        key: const ValueKey('stocks-price-failure'),
+        title: l.stocksFailPrice,
+        retrying: retrying,
+        onRetry: onRetry,
+      );
+    }
+    return StaleValueCallout(
+      key: const ValueKey('stocks-price-stale'),
+      title: l.stocksFailPrice,
+      description: description ?? l.stocksStaleLastPrice,
+      retrying: retrying,
+      onRetry: onRetry,
+      gutter: gutter,
     );
   }
 }

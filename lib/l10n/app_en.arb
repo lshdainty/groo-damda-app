@@ -9,6 +9,19 @@
   "actionConfirm": "Confirm",
   "actionClose": "Close",
   "actionRetry": "Retry",
+  "queryRefreshFailed": "Couldn't refresh.",
+  "queryReferenceFailed": "Some information couldn't be loaded.",
+  "saveUnconfirmed": "We couldn't confirm it was saved. Please check the list.",
+  "payUnconfirmed": "We couldn't confirm the payment. Please check the billing history.",
+  "stocksStaleLastPrice": "The values shown are the last prices received.",
+  "stocksStaleLastBalance": "The values shown are the last balance, not live prices.",
+  "securitiesLeaveBody": "What you entered will be discarded.",
+  "withdrawUnconfirmed": "We couldn't confirm the cancellation. Please reopen the app to check.",
+  "unconfirmedSave": "We couldn't confirm it was saved.",
+  "unconfirmedDelete": "We couldn't confirm it was deleted.",
+  "unconfirmedProcess": "We couldn't confirm it went through.",
+  "unconfirmedToggle": "We couldn't confirm it changed.",
+  "unconfirmedConnect": "We couldn't confirm the connection.",
   "actionApply": "Apply",
   "actionReset": "Reset",
   "actionSearch": "Search",
@@ -177,6 +190,7 @@
   "assetChartTableMonth": "Month",
   "assetChartTableWeek": "Week",
   "assetTxLoadFailed": "Couldn't load the transactions",
+  "assetTradesLoadFailed": "Couldn't load the trade history info",
   "assetMonthTx": "This month",
   "assetHoldingLinkedPending": "awaiting live price",
   "assetPeriodAria": "Trend period",
@@ -478,6 +492,8 @@
     }
   },
   "assetHoldingBalance": "Holdings",
+  "assetHoldingsSummaryUnknown": "{count} holdings · —",
+  "@assetHoldingsSummaryUnknown": {"placeholders": {"count": {"type": "int"}}},
   "assetHoldingsSummary": "{count} holdings · ₩{amount}",
   "@assetHoldingsSummary": {
     "placeholders": {
@@ -3405,7 +3421,7 @@
   "memoSaved": "Saved.",
   "memoSaveFailed": "Could not save. Please try again in a moment.",
   "memoDeleteFailed": "Could not delete. Please try again in a moment.",
-  "memoPinFailed": "Could not change the pin. Please try again in a moment.",
+  "memoPinFailed": "Couldn't change the pin.",
   "memoModifiedAt": "Edited {time}",
   "@memoModifiedAt": {"placeholders": {"time": {"type": "String"}}},
   "memoMoreOf": "More for {name}",
@@ -4942,6 +4958,7 @@
   "expLinked": "Linked",
   "expSplitLoadFailed": "Could not load the split items",
   "expSplitLoadFailedDesc": "Please try again in a moment.",
+  "txHistoryLoadFailed": "Couldn't load the previous transactions info",
   "expRefundDateToday": "{date} · Today",
   "@expRefundDateToday": {
     "placeholders": {

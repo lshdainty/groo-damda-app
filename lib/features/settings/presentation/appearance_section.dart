@@ -9,6 +9,7 @@ import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -107,15 +108,19 @@ class AppearanceSection extends ConsumerWidget {
     UserPreferences Function(UserPreferences prev) optimistic,
   ) async {
     final l = AppLocalizations.of(context);
-    final ok = await ref
+    final outcome = await ref
         .read(userPreferencesProvider.notifier)
         // 실패는 아래에서 고정 글 하나로 알린다 — 서버 글이 전역 알림으로 닿지 않게(I-14 21)
         .patch(fields, optimistic: optimistic, silent: true);
-    if (!ok && context.mounted) {
-      // 바로 바뀌는 값 — 낙관 값은 되돌았다. 스낵바 한 문장, 다시 시도 없음.
-      PSnackbar.maybeOf(
-        context,
-      )?.show(message: l.appearanceSaveFailed, tone: PSnackbarTone.critical);
+    if (outcome != WriteOutcome.done && context.mounted) {
+      // 바로 바뀌는 값 — 실패면 낙관 값은 되돌았다. 응답을 못 받았으면 되돌리지 않고 서버 값을 다시 받는 중이다(판단 ②).
+      // 스낵바 한 문장, 다시 시도 없음.
+      PSnackbar.maybeOf(context)?.show(
+        message: outcome == WriteOutcome.unconfirmed
+            ? l.unconfirmedToggle
+            : l.appearanceSaveFailed,
+        tone: PSnackbarTone.critical,
+      );
     }
   }
 

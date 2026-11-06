@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
@@ -108,6 +109,8 @@ bool exchangeRateMissing(String currency, TextEditingController rate) {
 /// 저장 실패 Callout 의 고정 글 — 서버 원문은 내지 않는다(28-5). 고쳐 다시 할 수 있는 두 코드만 가려 다른 고정 글:
 /// AST_037 카드는 원화만 · AST_036 외화 자산 환율 필수(I-13, 웹 FormStep `saveFailedText` 와 같다). 그 밖은 "자산을 저장하지 못했어요."
 String assetSaveFailedText(AppLocalizations l, String? code) => switch (code) {
+  // 응답만 못 읽었다(서버는 저장했다) — 실패라 하지 않는다(검수 M3)
+  kApiParseErrorCode || kApiNoResponseCode => l.saveUnconfirmed,
   'AST_037' => l.assetSaveCardForeign,
   'AST_036' => l.assetSaveRateRequired,
   _ => l.assetSaveFailed,

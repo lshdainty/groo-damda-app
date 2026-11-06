@@ -23,6 +23,7 @@ import 'package:groo_damda_app/features/todo/presentation/todo_edit_dialog.dart'
 import 'package:groo_damda_app/features/todo/presentation/widgets/todo_filter_sheet.dart';
 import 'package:groo_damda_app/features/todo/presentation/widgets/todo_row.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -223,12 +224,28 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
       } on Object {
         // 목록을 다시 못 받아도 저장은 끝났다 — 화면은 이전 목록을 그대로 둔다.
       }
-    } on ApiException {
-      // 서버 원문을 띄우지 않는다(전역 오류 알림은 이 요청에서 껐다) — 되돌리고 새 글 한 번.
+    } on ApiException catch (e) {
+      final unconfirmed = isUnconfirmedSave(e);
+      if (unconfirmed) {
+        // 응답을 못 받았다 — 바뀌었을 수 있다. 되돌리지 않고 서버 값을 다시 받아 맞춘다(낙관 값은 새 목록이 올 때까지 쥔다 —
+        // 먼저 걷으면 옛 값으로 한 번 깜빡인다). 별빛도 같이 다시 센다(디자인시스템 판단 ②)
+        container
+          ..invalidate(todoListProvider)
+          ..invalidate(constellationTodayProvider)
+          ..invalidate(constellationSkyProvider)
+          ..invalidate(constellationCollectionProvider);
+        try {
+          await container.read(todoListProvider(_allFilter).future);
+        } on Object {
+          // 다시 못 받으면 이전 목록 그대로 — 글이 확인을 부탁한다
+        }
+      }
+      // 서버 원문을 띄우지 않는다(전역 오류 알림은 이 요청에서 껐다) — 실패면 되돌리고 새 글 한 번, 다시 시도 없음.
       if (mounted) {
-        PSnackbar.maybeOf(
-          context,
-        )?.show(message: l.todoToggleFailed, tone: PSnackbarTone.critical);
+        PSnackbar.maybeOf(context)?.show(
+          message: unconfirmed ? l.unconfirmedToggle : l.todoToggleFailed,
+          tone: PSnackbarTone.critical,
+        );
       }
     } finally {
       if (_optimisticToken[x.rowId] == token) {

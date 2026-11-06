@@ -8,6 +8,7 @@ import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_unlock_dialog.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -51,6 +52,9 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
   /// 서버 저장이 실패했다 — 화면을 닫지 않고 고른 값을 그대로 둔 채 맨 위 Callout 으로 알린다(다시 [저장] 을 누르면 사라진다).
   bool _saveFailed = false;
 
+  /// 실패가 응답을 못 받은 것인가 — Callout 글이 "저장됐는지 확인하지 못했어요" 로 바뀐다(서버 값은 다시 받아 맞췄다).
+  bool _saveUnconfirmed = false;
+
   _HideAmountsScreenState() : _tab = null;
 
   /// 탭 순서 — 0 은 '전체', 그 뒤로 화면별.
@@ -90,12 +94,15 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
         if (!ok || !mounted) return;
       }
       setState(() => _saving = true);
-      final saved = await ref
+      final outcome = await ref
           .read(settingsProvider.notifier)
           .setHideCards(draft);
       if (!mounted) return;
-      if (!saved) {
-        setState(() => _saveFailed = true);
+      if (outcome != WriteOutcome.done) {
+        setState(() {
+          _saveFailed = true;
+          _saveUnconfirmed = outcome == WriteOutcome.unconfirmed;
+        });
         return;
       }
       context.pop();
@@ -134,10 +141,12 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
     final dirty = loaded && _dirty(saved);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
+    // 저장 중에는 묻지 않고 막는다(뒤로 · 예측형 뒤로 · 앱바 ←) — 실패 Callout 을 그릴 화면이 남아 있게. 묻는 확인창은 저장 중이
+    // 아닐 때만 뜬다
     return PopScope(
-      canPop: !dirty,
+      canPop: !dirty && !_saving,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop || !mounted) return;
+        if (didPop || !mounted || _saving) return;
         _confirmDiscardAndPop();
       },
       child: Scaffold(
@@ -155,143 +164,154 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
         body: Column(
           children: [
             Expanded(
-              child: ListView(
-                key: const ValueKey('hide-amounts-body'),
-                padding: const EdgeInsets.only(bottom: PSpacing.x6),
-                children: [
-                  if (_saveFailed)
+              child: AbsorbPointer(
+                // 저장 중에는 고르기를 받지 않는다
+                absorbing: _saving,
+                child: ListView(
+                  key: const ValueKey('hide-amounts-body'),
+                  padding: const EdgeInsets.only(bottom: PSpacing.x6),
+                  children: [
+                    if (_saveFailed)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          PSpacing.globalGutter,
+                          PSpacing.x4,
+                          PSpacing.globalGutter,
+                          0,
+                        ),
+                        child: FormErrorCallout(
+                          key: const ValueKey('hide-amounts-save-failed'),
+                          message: _saveUnconfirmed
+                              ? l.saveUnconfirmed
+                              : l.hideAmountsSaveFailed,
+                        ),
+                      ),
+                    // 소개 — 이 화면 전체의 설명(위 16 · 아래 8)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         PSpacing.globalGutter,
                         PSpacing.x4,
                         PSpacing.globalGutter,
-                        0,
+                        PSpacing.x2,
                       ),
-                      child: FormErrorCallout(
-                        key: const ValueKey('hide-amounts-save-failed'),
-                        message: l.hideAmountsSaveFailed,
-                      ),
-                    ),
-                  // 소개 — 이 화면 전체의 설명(위 16 · 아래 8)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      PSpacing.globalGutter,
-                      PSpacing.x4,
-                      PSpacing.globalGutter,
-                      PSpacing.x2,
-                    ),
-                    child: Text(
-                      keepAll(l.hideAmountsSectionDesc),
-                      style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
-                    ),
-                  ),
-                  // 거래 종류 — 화면 축과 다르므로 탭 줄에 끼우지 않고 맨 위 별도 영역에 둔다
-                  PListHeader(
-                    title: l.hideAmountsKindLabel,
-                    variant: PListHeaderVariant.boldSolid,
-                    topInset: PSpacing.x2,
-                    // 아이콘 동작 — 아이콘 끝이 체크 끝선에 서도록 번짐은 아이콘 안쪽 여백만큼
-                    actionBleed: kListHeaderIconActionBleed,
-                    flushAction: true,
-                    action: PHelpBubble(
-                      title: l.hideAmountsKindLabel,
-                      description: l.hideAmountsKindNote,
-                      triggerBuilder: (context, toggle, open) => PButton.icon(
-                        icon: LucideIcons.info,
-                        semanticLabel: l.hideAmountsKindHelp,
-                        variant: PButtonVariant.ghost,
-                        ghostColor: PButtonGhostColor.neutralSubtle,
-                        size: PButtonSize.small,
-                        onPressed: toggle,
-                      ),
-                    ),
-                  ),
-                  if (!loaded)
-                    const _CheckSkeleton(count: 3)
-                  else
-                    _CheckGroup(
-                      label: l.hideAmountsKindLabel,
-                      cards: cardsOfPage(HidePage.kind),
-                      draft: draft,
-                      onToggle: (card) => _toggle(draft, card),
-                    ),
-                  // 탭 — 아래 목록(화면 카드)을 거르는 줄이라 그 목록과 한 덩어리(위 8)
-                  const SizedBox(height: PSpacing.x2),
-                  PTabs<_Tab>(
-                    key: const ValueKey('hide-amounts-tabs'),
-                    value: _tab,
-                    layout: PTabsLayout.hug,
-                    size: PTabsSize.small,
-                    semanticLabel: l.hideAmountsTabsLabel,
-                    items: [
-                      for (final tab in _tabs)
-                        PTab<_Tab>(
-                          value: tab,
-                          label: tab == null
-                              ? l.hideAmountsTabAll
-                              : _pageLabel(l, tab),
+                      child: Text(
+                        keepAll(l.hideAmountsSectionDesc),
+                        style: PTypography.t4.copyWith(
+                          color: c.fgNeutralSubtle,
                         ),
-                    ],
-                    onChanged: (tab) => setState(() => _tab = tab),
-                  ),
-                  PListHeader(
-                    // 읽기 전에는 수를 모른다 — 0 이라 말하지 않고 자리만(스켈레톤)
-                    title: loaded
-                        ? l.hideAmountsScreensCount(onThisTab, tabCards.length)
-                        : l.hideAmountsScreensTitle,
-                    titleSuffix: loaded
-                        ? null
-                        : SizedBox(
-                            width: 40,
-                            child: PSkeleton.text(PTypography.t4),
-                          ),
-                    tabularFigures: true,
-                    flushAction: true,
-                    topInset: PSpacing.x4,
-                    // 읽기 전에도 자리는 같다(머리 높이가 뛰지 않게) — 누르지는 못한다
-                    action: PTextButton(
-                      label: allOnThisTab
-                          ? l.hideAmountsClearAll
-                          : l.hideAmountsSelectAll,
-                      onPressed: loaded
-                          ? () => setState(() {
-                              if (allOnThisTab) {
-                                draft.removeAll(tabCards);
-                              } else {
-                                draft.addAll(tabCards);
-                              }
-                            })
-                          : null,
-                    ),
-                  ),
-                  if (!loaded)
-                    const _CheckSkeleton(count: 6)
-                  else if (_tab == null)
-                    // 전체 — 화면 이름마다 목록 제목 + 그 화면의 체크 줄(첫 묶음 위 4 · 다음 묶음 위 12)
-                    for (final (i, page) in _tabs.skip(1).indexed) ...[
-                      PListHeader(
-                        title: _pageLabel(l, page!),
-                        variant: PListHeaderVariant.boldSolid,
-                        // 화면 묶음은 "가릴 화면" 아래 단계 — 머리말 3
-                        headingLevel: 3,
-                        topInset: i == 0 ? PSpacing.x1 : PSpacing.x3,
                       ),
+                    ),
+                    // 거래 종류 — 화면 축과 다르므로 탭 줄에 끼우지 않고 맨 위 별도 영역에 둔다
+                    PListHeader(
+                      title: l.hideAmountsKindLabel,
+                      variant: PListHeaderVariant.boldSolid,
+                      topInset: PSpacing.x2,
+                      // 아이콘 동작 — 아이콘 끝이 체크 끝선에 서도록 번짐은 아이콘 안쪽 여백만큼
+                      actionBleed: kListHeaderIconActionBleed,
+                      flushAction: true,
+                      action: PHelpBubble(
+                        title: l.hideAmountsKindLabel,
+                        description: l.hideAmountsKindNote,
+                        triggerBuilder: (context, toggle, open) => PButton.icon(
+                          icon: LucideIcons.info,
+                          semanticLabel: l.hideAmountsKindHelp,
+                          variant: PButtonVariant.ghost,
+                          ghostColor: PButtonGhostColor.neutralSubtle,
+                          size: PButtonSize.small,
+                          onPressed: toggle,
+                        ),
+                      ),
+                    ),
+                    if (!loaded)
+                      const _CheckSkeleton(count: 3)
+                    else
                       _CheckGroup(
-                        label: _pageLabel(l, page),
-                        cards: cardsOfPage(page),
+                        label: l.hideAmountsKindLabel,
+                        cards: cardsOfPage(HidePage.kind),
                         draft: draft,
                         onToggle: (card) => _toggle(draft, card),
                       ),
-                    ]
-                  else
-                    // 화면 탭 — 그 화면의 체크 줄만(화면 이름 제목은 탭 이름과 같은 말이라 두지 않는다)
-                    _CheckGroup(
-                      label: _pageLabel(l, _tab!),
-                      cards: tabCards,
-                      draft: draft,
-                      onToggle: (card) => _toggle(draft, card),
+                    // 탭 — 아래 목록(화면 카드)을 거르는 줄이라 그 목록과 한 덩어리(위 8)
+                    const SizedBox(height: PSpacing.x2),
+                    PTabs<_Tab>(
+                      key: const ValueKey('hide-amounts-tabs'),
+                      value: _tab,
+                      layout: PTabsLayout.hug,
+                      size: PTabsSize.small,
+                      semanticLabel: l.hideAmountsTabsLabel,
+                      items: [
+                        for (final tab in _tabs)
+                          PTab<_Tab>(
+                            value: tab,
+                            label: tab == null
+                                ? l.hideAmountsTabAll
+                                : _pageLabel(l, tab),
+                          ),
+                      ],
+                      onChanged: (tab) => setState(() => _tab = tab),
                     ),
-                ],
+                    PListHeader(
+                      // 읽기 전에는 수를 모른다 — 0 이라 말하지 않고 자리만(스켈레톤)
+                      title: loaded
+                          ? l.hideAmountsScreensCount(
+                              onThisTab,
+                              tabCards.length,
+                            )
+                          : l.hideAmountsScreensTitle,
+                      titleSuffix: loaded
+                          ? null
+                          : SizedBox(
+                              width: 40,
+                              child: PSkeleton.text(PTypography.t4),
+                            ),
+                      tabularFigures: true,
+                      flushAction: true,
+                      topInset: PSpacing.x4,
+                      // 읽기 전에도 자리는 같다(머리 높이가 뛰지 않게) — 누르지는 못한다
+                      action: PTextButton(
+                        label: allOnThisTab
+                            ? l.hideAmountsClearAll
+                            : l.hideAmountsSelectAll,
+                        onPressed: loaded
+                            ? () => setState(() {
+                                if (allOnThisTab) {
+                                  draft.removeAll(tabCards);
+                                } else {
+                                  draft.addAll(tabCards);
+                                }
+                              })
+                            : null,
+                      ),
+                    ),
+                    if (!loaded)
+                      const _CheckSkeleton(count: 6)
+                    else if (_tab == null)
+                      // 전체 — 화면 이름마다 목록 제목 + 그 화면의 체크 줄(첫 묶음 위 4 · 다음 묶음 위 12)
+                      for (final (i, page) in _tabs.skip(1).indexed) ...[
+                        PListHeader(
+                          title: _pageLabel(l, page!),
+                          variant: PListHeaderVariant.boldSolid,
+                          // 화면 묶음은 "가릴 화면" 아래 단계 — 머리말 3
+                          headingLevel: 3,
+                          topInset: i == 0 ? PSpacing.x1 : PSpacing.x3,
+                        ),
+                        _CheckGroup(
+                          label: _pageLabel(l, page),
+                          cards: cardsOfPage(page),
+                          draft: draft,
+                          onToggle: (card) => _toggle(draft, card),
+                        ),
+                      ]
+                    else
+                      // 화면 탭 — 그 화면의 체크 줄만(화면 이름 제목은 탭 이름과 같은 말이라 두지 않는다)
+                      _CheckGroup(
+                        label: _pageLabel(l, _tab!),
+                        cards: tabCards,
+                        draft: draft,
+                        onToggle: (card) => _toggle(draft, card),
+                      ),
+                  ],
+                ),
               ),
             ),
             // 저장 — 화면 아래 고정, 위에 끝까지 닿는 선. 고르는 동안에는 아무것도 반영되지 않으므로 여기까지 와야 끝난다.

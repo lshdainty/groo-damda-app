@@ -23,8 +23,8 @@ class AssetRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/assets');
       return _unwrapList(res, 'assets', Asset.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -33,8 +33,8 @@ class AssetRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/asset/$id');
       return _unwrap(res, Asset.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -51,8 +51,8 @@ class AssetRepository {
           ],
         },
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -64,8 +64,8 @@ class AssetRepository {
         queryParameters: {'weeks': weeks},
       );
       return _unwrapList(res, 'trend', AssetBalancePoint.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -77,8 +77,8 @@ class AssetRepository {
         queryParameters: {'months': months},
       );
       return _unwrapList(res, 'trend', NetWorthPoint.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -90,8 +90,8 @@ class AssetRepository {
         queryParameters: {'year': ?year, 'month': ?month},
       );
       return _unwrap(res, AssetSummary.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -149,8 +149,8 @@ class AssetRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Asset.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -235,8 +235,8 @@ class AssetRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Asset.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -283,8 +283,8 @@ class AssetRepository {
         '/asset/$id',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -298,8 +298,8 @@ class AssetRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/asset/$id/billing');
       return _unwrap(res, CardBilling.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -324,8 +324,8 @@ class AssetRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, BillingItem.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -340,8 +340,8 @@ class AssetRepository {
         '/card-billing/$billingRowId',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -357,8 +357,8 @@ class AssetRepository {
         '/asset/$cardId/installments/$expenseId/payoff',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -373,8 +373,8 @@ class AssetRepository {
         '/asset/$cardId/installments/$expenseId/payoff',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -406,8 +406,8 @@ class AssetRepository {
         },
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -439,8 +439,8 @@ class AssetRepository {
         },
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -490,8 +490,8 @@ class AssetRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, AssetTrade.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -535,8 +535,8 @@ class AssetRepository {
         },
       );
       return _unwrap(res, AssetTradePreview.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -557,8 +557,8 @@ class AssetRepository {
       return (body.data ?? const [])
           .map((e) => AssetTrade.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -569,8 +569,8 @@ class AssetRepository {
         '/asset-trade/$id',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -580,8 +580,8 @@ class AssetRepository {
         '/asset-transfer/$id',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -596,8 +596,8 @@ class AssetRepository {
         queryParameters: {'startDate': ?startDate, 'endDate': ?endDate},
       );
       return _unwrapList(res, 'transfers', AssetTransfer.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

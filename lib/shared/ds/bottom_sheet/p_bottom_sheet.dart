@@ -7,7 +7,11 @@ import 'package:groo_damda_app/shared/ds/overlay/p_overlay.dart';
 
 export 'package:groo_damda_app/shared/ds/bottom_sheet/bottom_sheet_parts.dart';
 export 'package:groo_damda_app/shared/ds/bottom_sheet/bottom_sheet_route.dart'
-    show kSheetCloseFraction, kSheetCloseVelocity, kSheetDragDelay;
+    show
+        kSheetCloseFraction,
+        kSheetCloseVelocity,
+        kSheetDragDelay,
+        pBottomSheetOpenCount;
 
 /// Bottom Sheet — 화면 아래에서 올라오는 모달. `PBottomSheet.show(context, builder: …)`.
 ///

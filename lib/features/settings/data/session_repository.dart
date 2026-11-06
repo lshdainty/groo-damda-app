@@ -28,8 +28,8 @@ class SessionRepository {
       return (body.data ?? const [])
           .map((e) => DeviceSession.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -41,8 +41,8 @@ class SessionRepository {
         '/users/me/sessions/$sessionId',
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -53,8 +53,8 @@ class SessionRepository {
         '/users/me/sessions',
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

@@ -17,8 +17,8 @@ class DutchPayRepository {
         options: _quiet(true),
       );
       return _unwrapList(res, 'dutchPays', DutchPay.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -57,8 +57,8 @@ class DutchPayRepository {
         },
       );
       return _unwrap(res, DutchPay.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -76,8 +76,8 @@ class DutchPayRepository {
         '/dutch-pay/$dutchPayId/participant/$participantId/paid',
         options: _quiet(silent),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -87,16 +87,16 @@ class DutchPayRepository {
         '/dutch-pay/$id/settle',
         options: _quiet(silent),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> delete(int id, {bool silent = false}) async {
     try {
       await _dio.delete<void>('/dutch-pay/$id', options: _quiet(silent));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

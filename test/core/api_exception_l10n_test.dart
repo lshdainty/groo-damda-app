@@ -27,7 +27,9 @@ void main() {
         ),
       ),
     );
-    expect(bad.code, 'HTTP_502');
+    // 502 는 게이트웨이 뒤에서 서버가 처리했을 수 있다 — 쓰기에서 "확인하지 못했어요" 쪽(NO_RESPONSE)
+    expect(bad.code, kApiNoResponseCode);
+    expect(bad.statusCode, 502);
     expect(bad.message, '요청을 처리하지 못했어요. 잠시 뒤 다시 시도해주세요.');
     expect(bad.message.contains('502'), isFalse, reason: '코드를 문장에 섞지 않는다');
     final json = ApiException.fromDio(
@@ -41,6 +43,22 @@ void main() {
     );
     expect(json.message, bad.message);
     expect(json.code, 'X_1');
+  });
+
+  test('502 · 504 는 NO_RESPONSE, 503 · 500 은 HTTP_코드(실패 그대로)', () {
+    ApiException of(int status) => ApiException.fromDio(
+      _e(
+        res: Response(
+          requestOptions: RequestOptions(path: '/x'),
+          statusCode: status,
+          data: status == 504 ? <String, dynamic>{'code': 'GW'} : 'x',
+        ),
+      ),
+    );
+    expect(of(502).code, kApiNoResponseCode);
+    expect(of(504).code, kApiNoResponseCode, reason: 'JSON 본문이 와도 게이트웨이 응답이다');
+    expect(of(503).code, 'HTTP_503');
+    expect(of(500).code, 'HTTP_500');
   });
 
   test('영어', () {

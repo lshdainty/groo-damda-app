@@ -45,6 +45,16 @@ abstract interface class PBottomSheetController {
 
   /// 본문 스크롤 — 본문이 스크롤된 동안은 끌어서 닫지 않는다.
   ScrollController get bodyController;
+
+  /// 저장 중 — 참인 동안은 닫는 길(닫기 버튼 · 뒤로 가기 · 예측형 뒤로 · `Esc` · 바깥 누르기 · 끌기 · 손잡이 · 머리 ←)을
+  /// 받지 않고 시트 안 누름도 받지 않는다. 닫기 버튼은 흐리게 하지 않고 모양 그대로 둔다(바닥 단추의 로딩이 "기다려라" 를
+  /// 말한다). 저장 핸들러가 시작할 때 `setBusy(true)`, `finally` 에서 `setBusy(false)` 를 부른다 — 실패 Callout 을 그릴
+  /// 폼이 저장 중에 없어지지 않게 한다. [close] 는 막지 않는다(저장에 성공한 폼이 부른다).
+  /// 켜기 · 끄기는 짝으로 센다 — 한 시트 안의 두 저장이 겹치면 둘 다 끝나야 풀린다.
+  void setBusy(bool busy);
+
+  /// 지금 저장 중인가([setBusy]).
+  bool get busy;
 }
 
 /// 가장 가까운 시트의 닫는 길을 내려준다.
@@ -363,7 +373,14 @@ class PBottomSheetContent extends StatelessWidget {
                 (PTouch.min - kBottomSheetBackSize) / 2,
             width: PTouch.min,
             height: PTouch.min,
-            child: _BackButton(label: backLabel!, onTap: onBack!),
+            // 저장 중에는 누름을 삼킨다 — 앞 단계로 가면 실패 Callout 을 그릴 폼이 없어진다(모양은 그대로)
+            child: _BackButton(
+              label: backLabel!,
+              onTap: () {
+                if (controller?.busy ?? false) return;
+                onBack!();
+              },
+            ),
           ),
         header,
         if (headerAction != null)
@@ -393,7 +410,11 @@ class PBottomSheetContent extends StatelessWidget {
             child: _CloseButton(
               label: closeLabel!,
               pressed: closePressed,
-              onTap: onClose ?? () => controller?.requestClose(),
+              // 저장 중에는 아무 일도 없다 — 덮어쓴 onClose 도 같다
+              onTap: () {
+                if (controller?.busy ?? false) return;
+                (onClose ?? () => controller?.requestClose())();
+              },
             ),
           ),
       ],

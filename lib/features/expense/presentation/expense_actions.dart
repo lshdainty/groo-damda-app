@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/actions/item_actions.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart'
     as ds;
@@ -128,6 +129,12 @@ class ExpenseActions implements ItemActions<Expense> {
                   deleteExpenseRequest(container, host, e, asset: asset),
               failedMessage: l.expTxDeleteFailed,
               retryLabel: l.actionRetry,
+              kind: WriteKind.delete,
+              // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받기만(검수 M3)
+              onUnconfirmed: () {
+                container.invalidate(monthExpensesProvider);
+                invalidateAfterExpenseChangeIn(container);
+              },
             );
           },
         ),
@@ -162,13 +169,22 @@ class ExpenseActions implements ItemActions<Expense> {
     try {
       await request();
       return true;
-    } on ApiException {
+    } on ApiException catch (err) {
       if (throwOnError) rethrow;
+      void refresh() {
+        container.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChangeIn(container);
+      }
+
+      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(검수 M3). 판단은 공용 함수가 한다
       showConfirmFailSnackbar(
         snack,
+        error: err,
         message: l.expTxDeleteFailed,
         retryLabel: l.actionRetry,
         retry: request,
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+        onUnconfirmed: refresh,
       );
       return false;
     }
@@ -220,7 +236,9 @@ class ExpenseActions implements ItemActions<Expense> {
         );
       }
       return updated;
-    } on ApiException {
+    } on ApiException catch (err) {
+      // 응답만 못 받았다 — 환불됐을 수 있다. 목록을 비운다(글은 부르는 쪽이 고른다, 검수 M3)
+      if (isUnconfirmedSave(err)) _invalidateAfterRefund(ref);
       if (throwOnError) rethrow;
       return null;
     }
@@ -239,7 +257,8 @@ class ExpenseActions implements ItemActions<Expense> {
       _invalidateAfterRefund(ref);
       await _refetchMonthOf(ref, e);
       return updated;
-    } on ApiException {
+    } on ApiException catch (err) {
+      if (isUnconfirmedSave(err)) _invalidateAfterRefund(ref);
       if (throwOnError) rethrow;
       return null;
     }

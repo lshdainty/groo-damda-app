@@ -193,8 +193,8 @@ class ImportRepository {
         (o) => (o as Map).cast<String, dynamic>(),
       );
       return ImportAnalyzeResult.fromJson(api.data ?? {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -232,8 +232,8 @@ class ImportRepository {
         (o) => (o as Map).cast<String, dynamic>(),
       );
       return ImportExecuteResult.fromJson(api.data ?? {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

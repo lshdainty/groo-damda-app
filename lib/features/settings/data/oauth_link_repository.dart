@@ -57,8 +57,8 @@ class OAuthLinkRepository {
       return (body.data ?? const [])
           .map((e) => OAuthProviderInfo.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -79,8 +79,8 @@ class OAuthLinkRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return url;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -88,8 +88,8 @@ class OAuthLinkRepository {
   Future<void> unlink(String provider) async {
     try {
       await _dio.delete<void>('/oauth/link/$provider', options: _quiet);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

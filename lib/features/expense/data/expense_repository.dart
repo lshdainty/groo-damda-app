@@ -40,8 +40,8 @@ class ExpenseRepository {
         },
       );
       return _unwrapList(res, 'expenses', Expense.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -84,8 +84,8 @@ class ExpenseRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -155,8 +155,8 @@ class ExpenseRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -220,8 +220,8 @@ class ExpenseRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -249,8 +249,8 @@ class ExpenseRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -265,8 +265,8 @@ class ExpenseRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, Expense.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -284,8 +284,8 @@ class ExpenseRepository {
       return data is Map<String, dynamic>
           ? data['refundedAmount'] as int?
           : null;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -321,8 +321,8 @@ class ExpenseRepository {
         },
       );
       return _unwrapList(res, 'expenses', Expense.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -345,8 +345,8 @@ class ExpenseRepository {
       return data is Map<String, dynamic>
           ? (data['updatedCount'] as num?)?.toInt() ?? 0
           : 0;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -358,8 +358,8 @@ class ExpenseRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/expense/categories');
       return _unwrapList(res, 'categories', ExpenseCategory.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -384,8 +384,8 @@ class ExpenseRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, ExpenseCategory.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -416,8 +416,8 @@ class ExpenseRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, ExpenseCategory.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -427,8 +427,8 @@ class ExpenseRepository {
         '/expense/category/$id',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -448,8 +448,8 @@ class ExpenseRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _movedCount(res.data);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -471,8 +471,8 @@ class ExpenseRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _movedCount(res.data);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -509,8 +509,8 @@ class ExpenseRepository {
         },
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

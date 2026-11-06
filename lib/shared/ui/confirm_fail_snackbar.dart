@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 확인창 뒤 요청이 실패했을 때의 표시 — 디자인 확정(alert-dialog.md): **확인창 닫기 + critical 스낵바(6초) +
 /// [다시 시도](묻지 않고 바로 요청)**. 스낵바 호스트는 길잡이 바깥이라 시트 · 확인창 **위**에 뜬다(snackbar.md).
@@ -18,6 +20,14 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 ///   성공하면 [onRetried] 로 한다. 둘 다 같은 일을 해야 지운 항목을 그린 시트가 남지 않는다.
 ///   [onRetried] 는 시트가 이미 닫힌 뒤에 불릴 수 있다 — 그 안에서 `context` 에 기대지 말고 `ProviderContainer` ·
 ///   미리 쥔 값을 쓴다(`mounted` 확인).
+///
+/// 응답을 읽지 못했거나 받지 못한 실패([isUnconfirmedSave])는 실패가 아니다 — 서버가 처리했을 수 있어 [다시 시도] 없이
+/// [kind] 에 맞는 한 문장([unconfirmedWriteText] — "저장됐는지 · 삭제됐는지 · 처리됐는지 확인하지 못했어요.")을 띄우고
+/// [onUnconfirmed](서버 상태를 다시 받게 하는 무효화 — 성공 알림은 넣지 않는다)를 부른다(검수 M3 — 다시 누르면 두 번 처리된다).
+/// 돌려주는 값은 false 다(성공 알림을 띄우지 않게).
+///
+/// [kind] · [onUnconfirmed] 는 **필수**다 — 기본 글("저장됐는지")이 삭제 · 로그아웃에도 나가고, 다시 받기를 빠뜨린 자리가
+/// 열 곳이었다(디자인시스템 판단 ①). 빠지면 컴파일이 잡는다. [unconfirmedMessage] 는 자기 글이 따로 있는 결제 · 해지만 준다.
 ///
 /// 확인창을 띄우고 확정하면 [request] 를 한다. 돌려주는 값 — 요청까지 성공했으면 true. 취소했거나 실패했으면 false
 /// (실패면 확인창이 닫힌 뒤 스낵바가 떠 있다).
@@ -47,9 +57,13 @@ Future<bool> askConfirmThenRequest(
   required String retryLabel,
   VoidCallback? onRetried,
   bool useRootNavigator = true,
+  required WriteKind kind,
+  required VoidCallback onUnconfirmed,
+  String? unconfirmedMessage,
 }) async {
-  // 확인창이 닫히면 이 context 가 없을 수 있다(시트가 함께 닫힘) — 스낵바 길은 미리 쥔다.
+  // 확인창이 닫히면 이 context 가 없을 수 있다(시트가 함께 닫힘) — 스낵바 길 · 글은 미리 쥔다.
   final snack = PSnackbar.maybeOf(context);
+  final l = AppLocalizations.of(context);
   Object? failure;
   var succeeded = false;
   final confirmed = await PAlertDialog.show(
@@ -73,10 +87,13 @@ Future<bool> askConfirmThenRequest(
   if (confirmed && failure != null) {
     showConfirmFailSnackbar(
       snack,
+      error: failure,
       message: failedMessage,
       retryLabel: retryLabel,
       retry: request,
       onRetried: onRetried,
+      unconfirmedMessage: unconfirmedMessage ?? unconfirmedWriteText(l, kind),
+      onUnconfirmed: onUnconfirmed,
     );
   }
   return confirmed && succeeded;
@@ -86,13 +103,26 @@ Future<bool> askConfirmThenRequest(
 /// [snack] 이 없으면(호스트 밖) 아무것도 하지 않는다 — 시험 · 호스트 없는 화면.
 ///
 /// 다시 시도가 성공했을 때 할 일은 [onRetried] 로 준다(목록 무효화 · 시트 닫기 …). 확인창을 거친 첫 요청의 뒷정리와 같은 일이다.
+///
+/// [error] 는 첫 요청이 던진 것이다. 응답을 못 받은 것([isUnconfirmedSave])이면 실패 띠가 아니라 [onUnconfirmed](다시 받기) +
+/// [unconfirmedMessage] 한 문장만 띄운다 — [다시 시도] 를 주면 두 번 처리된다. 다시 시도가 응답을 못 받아도 같다.
+/// [unconfirmedMessage] · [onUnconfirmed] 는 필수다(보통 `unconfirmedWriteText(l, kind)` · 목록 무효화).
 void showConfirmFailSnackbar(
   PSnackbarApi? snack, {
+  Object? error,
   required String message,
   required String retryLabel,
   required Future<void> Function() retry,
   VoidCallback? onRetried,
+  required String unconfirmedMessage,
+  required VoidCallback onUnconfirmed,
 }) {
+  if (error != null && isUnconfirmedSave(error)) {
+    // 다시 받기는 띠가 없어도 한다(호스트 밖이어도 목록은 서버 값으로 맞춘다)
+    onUnconfirmed();
+    snack?.show(message: unconfirmedMessage, tone: PSnackbarTone.critical);
+    return;
+  }
   if (snack == null) return;
   snack.show(
     message: message,
@@ -103,13 +133,24 @@ void showConfirmFailSnackbar(
         unawaited(() async {
           try {
             await retry();
-          } catch (_) {
+          } catch (e) {
+            if (isUnconfirmedSave(e)) {
+              // 다시 시도의 응답을 못 받았다 — 또 [다시 시도] 를 주지 않는다(두 번 처리 방지)
+              onUnconfirmed();
+              snack.show(
+                message: unconfirmedMessage,
+                tone: PSnackbarTone.critical,
+              );
+              return;
+            }
             showConfirmFailSnackbar(
               snack,
               message: message,
               retryLabel: retryLabel,
               retry: retry,
               onRetried: onRetried,
+              unconfirmedMessage: unconfirmedMessage,
+              onUnconfirmed: onUnconfirmed,
             );
             return;
           }

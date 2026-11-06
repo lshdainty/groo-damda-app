@@ -64,8 +64,8 @@ class SecuritiesRepository {
           .whereType<Map<String, dynamic>>()
           .map(BrokerQuote.fromJson)
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -88,8 +88,8 @@ class SecuritiesRepository {
       );
       final p = _payload(res);
       return TossCandlePage.fromJson(p is Map<String, dynamic> ? p : {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -105,8 +105,8 @@ class SecuritiesRepository {
       final p = _payload(res);
       if (p is! Map<String, dynamic>) return null;
       return (p['rate'] as num?)?.toDouble();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

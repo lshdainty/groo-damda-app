@@ -21,8 +21,8 @@ class MemoRepository {
         queryParameters: {'search': ?search},
       );
       return _unwrapList(res, 'memos', Memo.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -44,8 +44,8 @@ class MemoRepository {
         },
       );
       return _unwrap(res, Memo.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -83,24 +83,24 @@ class MemoRepository {
         },
       );
       return _unwrap(res, Memo.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> delete(int id) async {
     try {
       await _dio.delete<void>('/memo/$id', options: _silent);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> pin(int id) async {
     try {
       await _dio.patch<dynamic>('/memo/$id/pin', options: _silent);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

@@ -22,8 +22,8 @@ class HolidayRepository {
         queryParameters: {'startDate': startDate, 'endDate': endDate},
       );
       return _unwrapList(res, 'holidays', Holiday.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -31,6 +32,8 @@ import 'package:groo_damda_app/features/expense_split/presentation/split_step.da
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/features/recurring/presentation/recurring_form.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
@@ -109,6 +112,9 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   /// 환불일(날짜만) — 처음은 오늘.
   late DateTime _refundDate = _today();
   bool _refundFailed = false;
+
+  /// 환불 실패의 오류 — 응답을 읽지 못했거나 받지 못했으면 실패가 아니라 "확인하지 못했어요"(검수 M3).
+  Object? _refundFailure;
 
   bool _deleting = false;
   bool _refunding = false;
@@ -235,6 +241,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     if (!ok) return;
     // 실패 알림은 미리 쥔 [snack] 으로 띄운다 — 요청이 도는 사이 시트가 내려가도(!mounted) 실패가 보이게 mounted 검사보다 앞에 둔다.
     if (failure != null) {
+      // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받고 확인을 부탁한다([다시 시도] 를 주지 않는다, 검수 M3)
+      if (isUnconfirmedSave(failure)) {
+        _unconfirmed(snack, l, container, WriteKind.delete);
+        return;
+      }
       _deleteFailed(snack, l, container, asset);
       return;
     }
@@ -281,11 +292,29 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
           final err = await _requestDelete(container, asset);
           if (err == null) {
             _finishDelete();
+          } else if (isUnconfirmedSave(err)) {
+            _unconfirmed(snack, l, container, WriteKind.delete);
           } else {
             _deleteFailed(snack, l, container, asset);
           }
         },
       ),
+    );
+  }
+
+  /// 응답을 읽지 못했거나 받지 못한 쓰기(삭제 · 환불 취소) — 서버가 처리했을 수 있다. 가계부 · 자산을 다시 받고 확인을 부탁하는
+  /// 한 줄만(다시 누르면 두 번 처리된다, 검수 M3).
+  void _unconfirmed(
+    PSnackbarApi snack,
+    AppLocalizations l,
+    ProviderContainer container,
+    WriteKind kind,
+  ) {
+    container.invalidate(monthExpensesProvider);
+    invalidateAfterExpenseChangeIn(container);
+    snack.show(
+      message: unconfirmedWriteText(l, kind),
+      tone: PSnackbarTone.critical,
     );
   }
 
@@ -311,8 +340,18 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         if (updated != null) _e = updated;
         _step = _Step.detail;
       });
-    } on ApiException {
-      if (mounted) setState(() => _refundFailed = true);
+    } on ApiException catch (e) {
+      // 응답만 못 받았다 — 환불됐을 수 있다. 다시 받고 "확인하지 못했어요"(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        ref.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChange(ref);
+      }
+      if (mounted) {
+        setState(() {
+          _refundFailed = true;
+          _refundFailure = e;
+        });
+      }
     } finally {
       if (mounted) setState(() => _refunding = false);
     }
@@ -341,7 +380,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       onAction: () async => failure = await _requestCancelRefund(container),
     );
     if (!ok || !mounted) return;
-    if (failure != null) _cancelRefundFailed(snack, l, container);
+    if (failure != null && isUnconfirmedSave(failure)) {
+      _unconfirmed(snack, l, container, WriteKind.process);
+    } else if (failure != null) {
+      _cancelRefundFailed(snack, l, container);
+    }
   }
 
   /// 환불 취소 요청 — 성공하면 응답으로 상세를 다시 그리고(화면이 있을 때) null, 실패하면 그 오류. 화면이 없어도 요청은 나간다.
@@ -371,7 +414,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         onPressed: () async {
           if (mounted && _busy) return;
           final err = await _requestCancelRefund(container);
-          if (err != null) _cancelRefundFailed(snack, l, container);
+          if (err != null && isUnconfirmedSave(err)) {
+            _unconfirmed(snack, l, container, WriteKind.process);
+          } else if (err != null) {
+            _cancelRefundFailed(snack, l, container);
+          }
         },
       ),
     );
@@ -580,7 +627,9 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         asset: _assetOf(_e),
         value: _refundDate,
         masked: masked,
-        failureMessage: _refundFailed ? l.expRefundFailed : null,
+        failureMessage: _refundFailed
+            ? saveFailureText(l, _refundFailure, l.expRefundFailed)
+            : null,
         onChanged: (d) => setState(() {
           _refundDate = DateTime(d.year, d.month, d.day);
           _refundFailed = false;
@@ -843,17 +892,20 @@ class _HistoryHost extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final all =
-        ref
-            .watch(
-              merchantMonthExpensesProvider((
-                merchant: merchant,
-                year: year,
-                month: month,
-              )),
-            )
-            .value ??
-        const <Expense>[];
+    final key = merchantMonthExpensesProvider((
+      merchant: merchant,
+      year: year,
+      month: month,
+    ));
+    final async = ref.watch(key);
+    // 처음 받기 실패가 "처음 이용" 처럼 비어 보이면 안 된다 — 그 자리 실패 + 다시 시도(웹 TxDetailDialog historyQ)
+    if (async.loadFailed) {
+      return TxHistoryFailure(
+        retrying: async.loadRetrying,
+        onRetry: () => ref.invalidate(key),
+      );
+    }
+    final all = async.value ?? const <Expense>[];
     final history = txHistoryOf(all, expense.rowId);
     if (history.rows.isEmpty) return const SizedBox.shrink();
     return TxHistorySection(

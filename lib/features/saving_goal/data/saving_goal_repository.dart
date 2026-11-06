@@ -17,8 +17,8 @@ class SavingGoalRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/saving-goals');
       return _unwrapList(res, 'goals', SavingGoal.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -47,8 +47,8 @@ class SavingGoalRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, SavingGoal.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -86,8 +86,8 @@ class SavingGoalRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, SavingGoal.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -104,8 +104,8 @@ class SavingGoalRepository {
         options: _quiet(silent),
       );
       return _unwrap(res, SavingGoal.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -113,8 +113,8 @@ class SavingGoalRepository {
   Future<void> delete(int id, {bool silent = false}) async {
     try {
       await _dio.delete<void>('/saving-goal/$id', options: _quiet(silent));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -123,8 +123,8 @@ class SavingGoalRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/saving-goal/$id');
       return _unwrap(res, SavingGoal.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -139,8 +139,8 @@ class SavingGoalRepository {
           ],
         },
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

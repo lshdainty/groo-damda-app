@@ -30,8 +30,8 @@ class WithdrawalRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return WithdrawalCheck.fromJson(body.data ?? const {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -45,8 +45,8 @@ class WithdrawalRepository {
         '/users/me/reauth/email-code',
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -79,8 +79,8 @@ class WithdrawalRepository {
         throw ApiException(code: resp.code, message: resp.message);
       }
       return token;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -92,8 +92,8 @@ class WithdrawalRepository {
         data: {if (reason != null && reason.isNotEmpty) 'reason': reason},
         options: Options(headers: {'X-Reauth-Token': reauthToken}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

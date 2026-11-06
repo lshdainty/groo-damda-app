@@ -11,6 +11,7 @@ import 'package:groo_damda_app/features/settings/domain/device_session.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
@@ -74,6 +75,9 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
       failedMessage: l.devicesLogoutFailed,
       retryLabel: l.actionRetry,
       onRetried: () => after(),
+      kind: WriteKind.process,
+      // 응답을 못 받았다 — 끊겼을 수 있다. 목록을 다시 받는다(이 기기가 끊겼으면 그 조회가 401 로 로그인 화면에 보낸다)
+      onUnconfirmed: () => container.invalidate(deviceSessionListProvider),
     );
     if (ok) await after();
   }
@@ -97,6 +101,8 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
       failedMessage: l.devicesLogoutFailed,
       retryLabel: l.actionRetry,
       onRetried: () => container.read(authProvider.notifier).logout(),
+      kind: WriteKind.process,
+      onUnconfirmed: () => container.invalidate(deviceSessionListProvider),
     );
     if (ok) await container.read(authProvider.notifier).logout();
   }
@@ -150,6 +156,8 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               ),
             ),
             listAsync.when(
+              // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+              skipError: true,
               loading: () => const _DevicesSkeleton(),
               error: (e, _) => PResultSection(
                 kind: PResultKind.failure,

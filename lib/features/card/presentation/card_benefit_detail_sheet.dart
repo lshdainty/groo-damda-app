@@ -51,6 +51,8 @@ class CardDetailContent extends ConsumerWidget {
     final async = ref.watch(cardCatalogDetailProvider(rowId));
     // 다시 시도(invalidate) 중에는 실패를 그대로 두고 단추에 진행 원(skeleton.md:139) — 처음 받는 중만 Skeleton
     return async.when(
+      // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+      skipError: true,
       loading: () => const _DetailSkeleton(),
       error: (_, _) => PResultSection(
         kind: PResultKind.failure,

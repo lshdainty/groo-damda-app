@@ -7,6 +7,7 @@ import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_unlock_step.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
@@ -101,22 +102,17 @@ Future<void> setHideCardsWithUnlock(
     final ok = await confirmHideAmountsUnlock(context, ref);
     if (!ok) return;
   }
-  Future<void> apply() async {
-    final saved = hide
-        ? await notifier.hideCards(cards)
-        : await notifier.revealCards(cards);
-    // 서버가 받지 못하면 로컬도 그대로다 — 같은 글 + [다시 시도](본인 확인은 이미 거쳤으니 묻지 않고 다시 올린다).
-    if (!saved) {
-      snack?.show(
-        message: l.hideAmountsSaveFailed,
-        tone: PSnackbarTone.critical,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () => unawaited(apply()),
-        ),
-      );
-    }
+  final outcome = hide
+      ? await notifier.hideCards(cards)
+      : await notifier.revealCards(cards);
+  // 누르는 순간 바뀌는 값 — 한 문장, [다시 시도] 없음(디자인시스템 판단 ②). 서버가 받지 못하면 로컬도 그대로다.
+  // 응답을 못 받았으면 서버 값을 다시 받아 맞췄다 — "바뀌었는지 확인하지 못했어요."
+  final message = switch (outcome) {
+    WriteOutcome.done => null,
+    WriteOutcome.failed => l.hideAmountsSaveFailed,
+    WriteOutcome.unconfirmed => l.unconfirmedToggle,
+  };
+  if (message != null) {
+    snack?.show(message: message, tone: PSnackbarTone.critical);
   }
-
-  await apply();
 }

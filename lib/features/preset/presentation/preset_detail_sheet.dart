@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -10,6 +11,8 @@ import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_actions.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
@@ -64,32 +67,21 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
     }
     if (mounted) setState(() => _busy = false);
     if (r.confirmed && r.failure != null) {
-      _failed(container, snack, l, sheet);
-    }
-  }
-
-  void _failed(
-    ProviderContainer container,
-    PSnackbarApi snack,
-    AppLocalizations l,
-    PBottomSheetController sheet,
-  ) {
-    snack.show(
-      message: l.presetDeleteFailed,
-      tone: PSnackbarTone.critical,
-      action: PSnackbarAction(
-        label: l.actionRetry,
-        onPressed: () async {
-          try {
-            await deletePresetRequest(container, widget.template.rowId);
-            // 시트가 아직 열려 있으면 닫는다(지운 프리셋의 상세가 남지 않게)
-            if (mounted) sheet.close();
-          } catch (_) {
-            _failed(container, snack, l, sheet);
-          }
+      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①)
+      showConfirmFailSnackbar(
+        snack,
+        error: r.failure,
+        message: l.presetDeleteFailed,
+        retryLabel: l.actionRetry,
+        retry: () => deletePresetRequest(container, widget.template.rowId),
+        // 시트가 아직 열려 있으면 닫는다(지운 프리셋의 상세가 남지 않게)
+        onRetried: () {
+          if (mounted) sheet.close();
         },
-      ),
-    );
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+        onUnconfirmed: () => container.invalidate(presetListProvider),
+      );
+    }
   }
 
   List<({String key, String name, String value})> _rows(AppLocalizations l) {

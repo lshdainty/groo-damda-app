@@ -26,8 +26,8 @@ class TodoRepository {
         },
       );
       return _unwrapList(res, 'todos', Todo.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -58,8 +58,8 @@ class TodoRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Todo.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -95,8 +95,8 @@ class TodoRepository {
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
       return _unwrap(res, Todo.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -116,16 +116,16 @@ class TodoRepository {
         return (data['earnedStarlight'] as num?)?.toInt() ?? 0;
       }
       return 0;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> pin(int id) async {
     try {
       await _dio.patch<dynamic>('/todo/$id/pin');
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -135,8 +135,8 @@ class TodoRepository {
         '/todo/$id',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -145,8 +145,8 @@ class TodoRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/todo/$id');
       return _unwrap(res, Todo.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -162,8 +162,8 @@ class TodoRepository {
           ],
         },
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -171,8 +171,8 @@ class TodoRepository {
   Future<void> updateTags(int id, List<int> tagIds) async {
     try {
       await _dio.patch<dynamic>('/todo/$id/tags', data: {'tagIds': tagIds});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -181,8 +181,8 @@ class TodoRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/todos/stats');
       return _unwrap(res, TodoStats.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

@@ -29,6 +29,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 캘린더 관리 — 캘린더 하나 = 페이지(I-09b 22 · 3-B). `/settings/calendar-share/:calendarId`.
 ///
@@ -263,12 +264,16 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
     setState(() => _regenerating = true);
     try {
       await request();
-    } catch (_) {
+    } catch (e) {
       showConfirmFailSnackbar(
         snack,
+        error: e,
         message: l.calRegenerateFailed,
         retryLabel: l.actionRetry,
         retry: request,
+        // 응답을 못 받았다 — 새 코드가 생겼을 수 있다. 다시 받아 보이는 코드를 맞춘다
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.process),
+        onUnconfirmed: () => container.invalidate(userCalendarListProvider),
       );
     } finally {
       if (mounted) setState(() => _regenerating = false);
@@ -296,12 +301,17 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
 
     try {
       await request();
-    } catch (_) {
+    } catch (e) {
       showConfirmFailSnackbar(
         snack,
+        error: e,
         message: l.calRoleChangeFailed,
         retryLabel: l.actionRetry,
         retry: request,
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.save),
+        onUnconfirmed: () => container
+          ..invalidate(calendarMembersProvider(id))
+          ..invalidate(userCalendarListProvider),
       );
     }
   }
@@ -326,6 +336,10 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
       },
       failedMessage: l.calRemoveMemberFailed,
       retryLabel: l.actionRetry,
+      kind: WriteKind.process,
+      onUnconfirmed: () => container
+        ..invalidate(calendarMembersProvider(id))
+        ..invalidate(userCalendarListProvider),
     );
   }
 
@@ -346,6 +360,11 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
       onRetried: () {
         if (mounted) widget.onLeave();
       },
+      kind: WriteKind.delete,
+      // 응답을 못 받았다 — 지워졌을 수 있다. 목록 · 일정만 다시 받는다(화면을 떠나는 성공 뒷정리는 하지 않는다)
+      onUnconfirmed: () => container
+        ..invalidate(userCalendarListProvider)
+        ..invalidate(monthEventsProvider),
     );
     if (ok && mounted) widget.onLeave();
   }

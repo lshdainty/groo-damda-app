@@ -15,6 +15,7 @@ import 'package:groo_damda_app/features/file/domain/file_attachment.dart';
 import 'package:groo_damda_app/shared/widgets/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 첨부 파일 섹션 — 거래/할일/메모/이벤트 상세에 embed.
 ///
@@ -118,6 +119,9 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
         failedMessage: l.fileDeleteFailed,
         retryLabel: l.actionRetry,
         onRetried: () => container.invalidate(filesByReferenceProvider(_key)),
+        kind: WriteKind.delete,
+        onUnconfirmed: () =>
+            container.invalidate(filesByReferenceProvider(_key)),
       );
       if (ok) container.invalidate(filesByReferenceProvider(_key));
     } finally {
@@ -174,6 +178,8 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
         ),
         const SizedBox(height: 6),
         async.when(
+          // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+          skipError: true,
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Center(child: PCircularProgressIndicator()),

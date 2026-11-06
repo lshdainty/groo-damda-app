@@ -23,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/user.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
@@ -64,10 +65,17 @@ class _SlowPrefsRepo extends UserPreferencesRepository {
   final Completer<void> inflight = Completer<void>();
   int threshold = 85;
   bool fail = false;
+
+  /// 서버엔 들어갔는데 응답을 못 받았다(NO_RESPONSE)
+  bool noResponse = false;
+  int gets = 0;
   final List<Map<String, dynamic>> patches = [];
 
   @override
-  Future<UserPreferences> get() async => _prefs(threshold);
+  Future<UserPreferences> get() async {
+    gets++;
+    return _prefs(threshold);
+  }
 
   @override
   Future<UserPreferences> update(
@@ -78,6 +86,9 @@ class _SlowPrefsRepo extends UserPreferencesRepository {
     await inflight.future;
     if (fail) throw Exception('저장 실패');
     threshold = fields['budgetAlertThreshold'] as int? ?? threshold;
+    if (noResponse) {
+      throw ApiException(code: kApiNoResponseCode, message: 'x');
+    }
     return _prefs(threshold);
   }
 }
@@ -173,5 +184,22 @@ void main() {
       reason: 'catch 안의 롤백이 두 번째 예외를 만들면 원래 실패 이유까지 삼킨다',
     );
     expect(repo.threshold, 85, reason: '저장은 실패했으니 서버 값은 그대로다');
+  });
+
+  testWidgets('응답을 못 받으면 되돌리지 않고 서버 값을 다시 받아 맞춘다(판단 ②)', (tester) async {
+    await openSettings(tester);
+    final getsBefore = repo.gets;
+    repo.noResponse = true;
+    await slideTo(tester, 70);
+    repo.inflight.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(repo.gets, getsBefore + 1, reason: '들어갔을 수 있다 — 서버 값을 다시 받는다');
+    expect(
+      container.read(userPreferencesProvider).value?.budgetAlertThreshold,
+      70,
+      reason: '옛 값(85)으로 되돌리지 않고 서버 값(70)에 맞춘다',
+    );
   });
 }

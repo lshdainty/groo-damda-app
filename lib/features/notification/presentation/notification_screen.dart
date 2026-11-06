@@ -12,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart'
     show PTouchTargetScope;
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as ds;
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
@@ -78,6 +79,8 @@ class NotificationScreen extends ConsumerWidget {
       body: PPullToRefresh(
         onRefresh: refresh,
         child: listAsync.when(
+          // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+          skipError: true,
           loading: () => const _NotiSkeleton(),
           error: (e, _) => ListView(
             children: [
@@ -523,6 +526,11 @@ class _NotiRowState extends State<_NotiRow> {
       request: widget.onDelete,
       failedMessage: l.notiDeleteFailed,
       retryLabel: l.actionRetry,
+      kind: WriteKind.delete,
+      // 응답을 못 받았다 — 지워졌을 수 있다. 목록 · 안 읽은 수를 다시 받는다
+      onUnconfirmed: () => ProviderScope.containerOf(context, listen: false)
+        ..invalidate(notificationListProvider)
+        ..invalidate(unreadCountProvider),
     );
   }
 

@@ -205,8 +205,13 @@ class _AssetScreenState extends ConsumerState<AssetScreen> {
               total: investmentsTotal,
               masked: masks.investments,
               loading: false,
-
               valuations: invMap,
+              // 시세를 못 받는 동안 평가액은 서버 잔액 · 직전 시세다 — 숫자는 두고 "지금 시세가 아니다" 를 띠로(I-wrap-b2b 4)
+              notice: ref.watch(valuationPriceFailedProvider)
+                  ? AssetPriceFailure(
+                      onRetry: () => refreshLiveValuation(ref.invalidate),
+                    )
+                  : null,
             ),
           ]),
         if (!assetsFailed)
@@ -257,7 +262,13 @@ class _AssetScreenState extends ConsumerState<AssetScreen> {
           ref.invalidate(netWorthTrendProvider);
           refreshLiveValuation(ref.invalidate); // 당겨서 새로고침도 시세까지 다시 받는다
           ref.invalidate(savingGoalListProvider);
-          await ref.read(assetsProvider.future);
+          // 비운 것을 모두 기다린다 — 하나만 기다리면 늦게 실패한 것이 당겨서 새로 고침이 끝난 뒤 와서 같은 글이 한 번 더
+          // 뜬다(검수 L2). 하나라도 실패하면 던져 그 자리가 한 번 알린다
+          await Future.wait<Object?>([
+            ref.read(assetsProvider.future),
+            ref.read(assetSummaryProvider((year: null, month: null)).future),
+            ref.read(savingGoalListProvider.future),
+          ]);
         },
         child: ListView(
           padding: EdgeInsets.only(

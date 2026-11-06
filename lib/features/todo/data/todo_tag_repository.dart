@@ -19,8 +19,8 @@ class TodoTagRepository {
         options: _silent,
       );
       return _unwrapList(res, 'tags', TodoTag.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -32,8 +32,8 @@ class TodoTagRepository {
         data: {'tagName': tagName, 'color': ?color},
       );
       return _unwrap(res, TodoTag.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -49,16 +49,16 @@ class TodoTagRepository {
         data: {'tagName': tagName, 'color': ?color},
       );
       return _unwrap(res, TodoTag.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> delete(int id) async {
     try {
       await _dio.delete<void>('/todo-tag/$id', options: _silent);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

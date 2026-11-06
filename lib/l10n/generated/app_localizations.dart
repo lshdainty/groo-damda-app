@@ -152,6 +152,84 @@ abstract class AppLocalizations {
   /// **'다시 시도'**
   String get actionRetry;
 
+  /// 보던 내용이 있는 채 다시 받기에 실패했을 때 공용 critical 스낵바 — [다시 시도] 없음, 한 문장(I-wrap-b2b 2-1)
+  ///
+  /// In ko, this message translates to:
+  /// **'새로 고치지 못했어요.'**
+  String get queryRefreshFailed;
+
+  /// 참조 데이터(카테고리 · 계좌 …)를 값 없이 받지 못했을 때 공용 critical 스낵바 + [다시 시도] — 웹 common query.referenceFailed
+  ///
+  /// In ko, this message translates to:
+  /// **'일부 정보를 불러오지 못했어요.'**
+  String get queryReferenceFailed;
+
+  /// 저장 응답을 읽지 못했을 때(PARSE — 서버는 처리했다) 폼 맨 위 Callout. 실패라 하지 않는다, 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.'**
+  String get saveUnconfirmed;
+
+  /// 카드 결제 응답을 읽지 못했을 때 결제 폼 맨 위 Callout, 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'**
+  String get payUnconfirmed;
+
+  /// 시세 폴링이 받아 둔 값이 있는 채 실패했을 때 섹션 Callout 본문(제목 stocksFailPrice) — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'보이는 값은 마지막으로 받은 시세예요.'**
+  String get stocksStaleLastPrice;
+
+  /// 투자 평가 시세를 못 받아 서버 잔액으로 그린 자리의 Callout 본문 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'보이는 값은 시세가 아닌 마지막 잔액이에요.'**
+  String get stocksStaleLastBalance;
+
+  /// 증권 연결 화면 나가기 확인창 본문(키를 친 화면) — 금액 가리기는 hideAmountsDiscardBody("고른") 그대로
+  ///
+  /// In ko, this message translates to:
+  /// **'입력한 내용이 사라져요.'**
+  String get securitiesLeaveBody;
+
+  /// 이용 해지 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE) — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.'**
+  String get withdrawUnconfirmed;
+
+  /// 스낵바 — 저장 · 추가 쓰기의 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE). 한 문장(목록은 저절로 다시 받는다), [다시 시도] 없음 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'저장됐는지 확인하지 못했어요.'**
+  String get unconfirmedSave;
+
+  /// 스낵바 — 삭제 응답을 읽지 못했거나 받지 못했을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제됐는지 확인하지 못했어요.'**
+  String get unconfirmedDelete;
+
+  /// 스낵바 — 그 밖 쓰기(기기 로그아웃 · 캘린더 나가기 · 모두 받음 등)의 응답을 못 받았을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'처리됐는지 확인하지 못했어요.'**
+  String get unconfirmedProcess;
+
+  /// 스낵바 — 누르는 순간 바뀌는 값(고정 · 표시 · 스위치)의 응답을 못 받았을 때. 되돌리지 않고 서버 값을 다시 받는다 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'바뀌었는지 확인하지 못했어요.'**
+  String get unconfirmedToggle;
+
+  /// 증권 키 등록 응답을 못 받았을 때 — 연결 상태를 다시 받는다, 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'연결됐는지 확인하지 못했어요.'**
+  String get unconfirmedConnect;
+
   /// No description provided for @actionApply.
   ///
   /// In ko, this message translates to:
@@ -937,6 +1015,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'내역을 불러오지 못했어요'**
   String get assetTxLoadFailed;
+
+  /// 투자 자산 상세 거래 기록 구역을 처음 받지 못했을 때 Result Section 제목 — 웹 query.failedNamed(name: trade.recordName)
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 기록 정보를 불러오지 못했어요'**
+  String get assetTradesLoadFailed;
 
   /// No description provided for @assetMonthTx.
   ///
@@ -2016,6 +2100,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'평가금액'**
   String get assetHoldingBalance;
+
+  /// 투자 편집 보유 머리 요약 — 연동 시세를 못 받아 합계를 모를 때(0 이라 하지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}종목 · —'**
+  String assetHoldingsSummaryUnknown(int count);
 
   /// No description provided for @assetHoldingsSummary.
   ///
@@ -11446,7 +11536,7 @@ abstract class AppLocalizations {
   /// No description provided for @memoPinFailed.
   ///
   /// In ko, this message translates to:
-  /// **'고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'고정을 바꾸지 못했어요.'**
   String get memoPinFailed;
 
   /// No description provided for @memoModifiedAt.
@@ -14623,7 +14713,7 @@ abstract class AppLocalizations {
   /// **'새로 고치는 중'**
   String get dsPullToRefreshLabel;
 
-  /// 당겨서 새로 고침이 실패했을 때 Snackbar 글 — 보던 내용은 그대로 두고 알린다. 다시 하는 법은 액션(dsCommonRetry — 다시 시도)이 말한다
+  /// 당겨서 새로 고침이 실패했을 때 Snackbar 한 문장 — 보던 내용은 그대로 두고 알린다. [다시 시도] 없음(다시 당기면 된다), 공용 queryRefreshFailed 와 같은 글
   ///
   /// In ko, this message translates to:
   /// **'새로 고치지 못했어요.'**
@@ -16332,6 +16422,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠시 뒤 다시 시도해주세요.'**
   String get expSplitLoadFailedDesc;
+
+  /// 거래 상세 "이 가맹점 이번 달" 구역을 처음 받지 못했을 때 Result Section 제목 — 웹 query.failedNamed(name: txDetail.historyName)
+  ///
+  /// In ko, this message translates to:
+  /// **'이전 거래 정보를 불러오지 못했어요'**
+  String get txHistoryLoadFailed;
 
   /// No description provided for @expRefundDateToday.
   ///

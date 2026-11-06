@@ -252,11 +252,14 @@ class PResultSection extends StatelessWidget {
       );
     }
 
-    return Semantics(
+    final section = Semantics(
       container: true,
       liveRegion: true,
       child: Center(child: content),
     );
+    return kind == PResultKind.failure
+        ? _FailureShown(child: section)
+        : section;
   }
 
   /// 버튼 묶음 — 위아래로, 사이 20. 둘째 버튼이 위아래로 8 블리드해 상자 사이는 12 다.
@@ -311,4 +314,41 @@ class PResultSection extends StatelessWidget {
       ],
     );
   }
+}
+
+/// 지금 화면에 보이는 실패 Result Section 수 — 가려진 탭(TickerMode 꺼짐)은 세지 않는다. 그 화면이 이미 실패를 말하는 동안 앱
+/// 한 자리의 참조 실패 알림이 쉰다(시트 보류와 같은 꼴, I-wrap-b2b 중간 검수 1).
+final ValueNotifier<int> pResultFailureShown = ValueNotifier<int>(0);
+
+class _FailureShown extends StatefulWidget {
+  const _FailureShown({required this.child});
+  final Widget child;
+
+  @override
+  State<_FailureShown> createState() => _FailureShownState();
+}
+
+class _FailureShownState extends State<_FailureShown> {
+  bool _counted = false;
+
+  void _count(bool on) {
+    if (on == _counted) return;
+    _counted = on;
+    pResultFailureShown.value += on ? 1 : -1;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _count(TickerMode.valuesOf(context).enabled);
+  }
+
+  @override
+  void dispose() {
+    _count(false);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

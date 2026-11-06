@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import '../../support/plain_text.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/auth/user.dart';
 import 'package:groo_damda_app/core/format/now_tick.dart';
@@ -77,22 +78,34 @@ const _user = User(
 );
 
 class _Repo extends SessionRepository {
-  _Repo({this.devices = const [], this.fail = false, this.listFails = false})
-    : super(Dio());
+  _Repo({
+    this.devices = const [],
+    this.fail = false,
+    this.listFails = false,
+    this.noResponse = false,
+  }) : super(Dio());
   final List<DeviceSession> devices;
   final bool fail;
   final bool listFails;
+
+  /// 끊기 요청이 나갔는데 응답을 못 받았다(NO_RESPONSE)
+  final bool noResponse;
   final revoked = <String>[];
   int revokeAllCalls = 0;
+  int listCalls = 0;
 
   @override
   Future<List<DeviceSession>> list() async {
+    listCalls++;
     if (listFails) throw Exception('서버 원문 오류 XYZ');
     return devices;
   }
 
   @override
   Future<void> revoke(String sessionId) async {
+    if (noResponse) {
+      throw ApiException(code: kApiNoResponseCode, message: 'x');
+    }
     if (fail) throw Exception('x');
     revoked.add(sessionId);
   }
@@ -688,6 +701,34 @@ void main() {
       expect(findPlain('다시 시도'), findsOneWidget);
       expect(_Auth.loggedOut, isFalse);
     });
+
+    testWidgets(
+      '끊기 응답 없음 — "처리됐는지 확인하지 못했어요." 한 문장 · [다시 시도] 없음 · 목록 다시 받음(판단 ①)',
+      (tester) async {
+        final repo = _Repo(devices: _devices(), noResponse: true);
+        await _pump(tester, const DevicesScreen(), repo: repo);
+        final before = repo.listCalls;
+        await tester.tap(find.bySemanticsLabel('Windows 11 · Chrome 로그아웃'));
+        await _go(tester);
+        await tester.tap(
+          find.descendant(
+            of: find.byType(PAlertDialogView),
+            matching: findWidgetWithText(PButton, '로그아웃'),
+          ),
+        );
+        await _go(tester);
+        expect(find.byType(PAlertDialogView), findsNothing);
+        expect(findPlain('처리됐는지 확인하지 못했어요.'), findsOneWidget);
+        expect(findPlain('로그아웃하지 못했어요.'), findsNothing);
+        expect(findPlainContaining('저장됐는지'), findsNothing);
+        expect(
+          findPlain('다시 시도'),
+          findsNothing,
+          reason: '끊겼을 수 있다 — 다시 누르면 두 번 처리된다',
+        );
+        expect(repo.listCalls, before + 1, reason: '끊겼는지 서버 목록으로 맞춘다');
+      },
+    );
 
     testWidgets('모두 로그아웃 확인창 글 · 확정하면 로그아웃', (tester) async {
       final repo = _Repo(devices: _devices());

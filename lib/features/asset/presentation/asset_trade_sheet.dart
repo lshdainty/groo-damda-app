@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 매수·매도 입력(I-17 56) — 입력 폼 시트. web `AssetTradeDialog` 미러.
 ///
@@ -248,6 +249,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       _failCode = null;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       await repo.createTrade(
@@ -280,6 +282,11 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        invalidateAfterAssetChange(ref);
+        ref.invalidate(assetTradesProvider(widget.asset.rowId));
+      }
       setState(() {
         _failed = true;
         _failCode = e.code;
@@ -289,6 +296,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
@@ -409,6 +417,9 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
                 // 서버 글은 내지 않고 오류 코드로만 가른다(ASSET_012 = 보유 수량 부족).
                 message: _failCode == 'ASSET_012'
                     ? l.tradeSaveInsufficientQty
+                    : _failCode == kApiParseErrorCode ||
+                          _failCode == kApiNoResponseCode
+                    ? l.saveUnconfirmed
                     : l.tradeSaveFailed,
               ),
             ),

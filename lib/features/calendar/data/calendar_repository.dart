@@ -46,8 +46,8 @@ class CalendarRepository {
         queryParameters: {'startDate': startDate, 'endDate': endDate},
       );
       return _unwrapList(res, 'events', CalendarEvent.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -87,8 +87,8 @@ class CalendarRepository {
         },
       );
       return _unwrap(res, CalendarEvent.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -155,16 +155,16 @@ class CalendarRepository {
         },
       );
       return _unwrap(res, CalendarEvent.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> deleteEvent(int id) async {
     try {
       await _dio.delete<void>('/calendar/event/$id', options: _silent);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -174,8 +174,8 @@ class CalendarRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/calendar/labels');
       return _unwrapList(res, 'labels', EventLabel.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -192,8 +192,8 @@ class CalendarRepository {
         options: _silent,
       );
       return _unwrap(res, EventLabel.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -210,8 +210,8 @@ class CalendarRepository {
         options: _silent,
       );
       return _unwrap(res, EventLabel.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -219,8 +219,8 @@ class CalendarRepository {
   Future<void> deleteLabel(int id) async {
     try {
       await _dio.delete<void>('/calendar/label/$id', options: _silent);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

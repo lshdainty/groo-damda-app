@@ -30,8 +30,8 @@ class ExpenseSplitRepository {
       return list
           .map((e) => ExpenseSplit.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -68,8 +68,8 @@ class ExpenseSplitRepository {
       return list
           .map((e) => ExpenseSplit.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -79,8 +79,8 @@ class ExpenseSplitRepository {
         '/expense/$expenseId/splits',
         options: _opts(silent),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

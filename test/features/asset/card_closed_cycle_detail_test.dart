@@ -13,8 +13,12 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:groo_damda_app/features/asset/data/asset_repository.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
@@ -30,6 +34,81 @@ import '../../support/overrides.dart';
 import '../../support/plain_text.dart';
 import '../../support/real_fonts.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+
+/// 서버는 받았지만 응답 본문의 형이 다르다(숫자 자리에 글) — `BillingItem.fromJson` 이 TypeError 를 낸다.
+class _BadBodyAdapter implements HttpClientAdapter {
+  int calls = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    calls++;
+    return ResponseBody.fromString(
+      jsonEncode({
+        'success': true,
+        'code': 'OK',
+        'message': '',
+        'data': {'rowId': '아흔아홉'},
+      }),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// 게이트웨이 [status] 응답(본문은 HTML) — 502 · 504 는 서버가 처리했을 수 있다, 503 은 실패.
+class _StatusAdapter implements HttpClientAdapter {
+  _StatusAdapter(this.status);
+  final int status;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async => ResponseBody.fromString('<html>gateway</html>', status);
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// 응답 대신 [type] 의 DioException — 응답을 받지 못함(receiveTimeout) · 연결 못 함(connectionTimeout).
+class _DioFailAdapter implements HttpClientAdapter {
+  _DioFailAdapter(this.type);
+  final DioExceptionType type;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async => throw DioException(requestOptions: options, type: type);
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// 결제가 [error] 를 던진다(ApiException 이 아닌 것 — `_pay` 의 `on ApiException` 밖).
+class _ThrowingPayRepo extends AssetRepository {
+  _ThrowingPayRepo(this.error) : super(Dio());
+  final Object error;
+
+  @override
+  Future<BillingItem> payCard(
+    int id, {
+    int? amount,
+    String? paymentDate,
+    bool silent = false,
+  }) async => throw error;
+}
 
 /// 결제 요청이 어떤 값으로 나가는지 잡아 둔다.
 class _PayRepo extends AssetRepository {
@@ -327,6 +406,194 @@ void main() {
     expect(repo.calls.single.amount, 40000);
     expect(repo.calls.single.paymentDate, '2026-10-12');
   });
+
+  testWidgets(
+    '[지금 결제] — 응답 형식이 달라(PARSE) 결제됐는지 모르면 실패라 하지 않고 확인 Callout · 청구를 다시 받는다(검수 M3)',
+    (tester) async {
+      final adapter = _BadBodyAdapter();
+      final repo = AssetRepository(Dio()..httpClientAdapter = adapter);
+      var billingReads = 0;
+      await _open(
+        tester,
+        billing: upcomingBilling,
+        extraOverrides: [
+          assetRepositoryProvider.overrideWith((ref) async => repo),
+          cardBillingProvider.overrideWith((ref, id) async {
+            billingReads++;
+            return upcomingBilling;
+          }),
+        ],
+      );
+      await tester.tap(findText('지금 결제'));
+      await tester.pumpAndSettle();
+      final before = billingReads;
+      await tester.enterText(find.byType(TextField), '40000');
+      await tester.tap(findText('결제하기'));
+      await tester.pumpAndSettle();
+      expect(adapter.calls, 1);
+      expect(tester.takeException(), isNull, reason: 'zone 으로 빠지지 않는다');
+      expect(findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'), findsOneWidget);
+      expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsNothing);
+      expect(billingReads, greaterThan(before), reason: '성공 때와 같이 청구를 비운다');
+      expect(findTextContaining('아흔아홉'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('p-bottom-sheet-root')),
+        findsOneWidget,
+        reason: '폼은 닫지 않는다',
+      );
+      final pay = tester.widget<PButton>(
+        find.ancestor(of: findText('결제하기'), matching: find.byType(PButton)),
+      );
+      expect(pay.loading, isFalse, reason: '진행 원이 멈춘다');
+    },
+  );
+
+  testWidgets(
+    '[지금 결제] — 결제가 무엇을 던져도 진행 원은 멈추고 시트는 남아 확인 Callout(try/catch/finally)',
+    (tester) async {
+      await _open(
+        tester,
+        billing: upcomingBilling,
+        extraOverrides: [
+          assetRepositoryProvider.overrideWith(
+            (ref) async => _ThrowingPayRepo(StateError('형식 밖 오류')),
+          ),
+        ],
+      );
+      await tester.tap(findText('지금 결제'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '40000');
+      await tester.tap(findText('결제하기'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'zone 으로 빠지지 않는다');
+      // 결제가 됐는지 모르는 오류 — 실패라 하지 않는다(다시 누르면 이체가 두 번 생길 수 있다)
+      expect(findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'), findsOneWidget);
+      expect(findTextContaining('형식 밖 오류'), findsNothing);
+      final pay = tester.widget<PButton>(
+        find.ancestor(of: findText('결제하기'), matching: find.byType(PButton)),
+      );
+      expect(pay.loading, isFalse, reason: '예전엔 계속 돌았다');
+      expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
+    },
+  );
+
+  testWidgets('[지금 결제] — 서버가 거절하면(ApiException) 지금처럼 "결제하지 못했어요"', (
+    tester,
+  ) async {
+    await _open(
+      tester,
+      billing: upcomingBilling,
+      extraOverrides: [
+        assetRepositoryProvider.overrideWith(
+          (ref) async => _ThrowingPayRepo(
+            ApiException(code: 'CARD_001', message: '서버 원문', statusCode: 400),
+          ),
+        ),
+      ],
+    );
+    await tester.tap(findText('지금 결제'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '40000');
+    await tester.tap(findText('결제하기'));
+    await tester.pumpAndSettle();
+    expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findTextContaining('서버 원문'), findsNothing);
+  });
+
+  for (final (status, unconfirmed) in [
+    (502, true),
+    (504, true),
+    (503, false),
+  ]) {
+    testWidgets(
+      '[지금 결제] — 게이트웨이 $status 면 ${unconfirmed ? '확인 Callout · 청구를 다시 받는다' : '결제하지 못했어요'}(웹 2차 검수 M3)',
+      (tester) async {
+        final repo = AssetRepository(
+          Dio()..httpClientAdapter = _StatusAdapter(status),
+        );
+        var billingReads = 0;
+        await _open(
+          tester,
+          billing: upcomingBilling,
+          extraOverrides: [
+            assetRepositoryProvider.overrideWith((ref) async => repo),
+            cardBillingProvider.overrideWith((ref, id) async {
+              billingReads++;
+              return upcomingBilling;
+            }),
+          ],
+        );
+        await tester.tap(findText('지금 결제'));
+        await tester.pumpAndSettle();
+        final before = billingReads;
+        await tester.enterText(find.byType(TextField), '40000');
+        await tester.tap(findText('결제하기'));
+        await tester.pumpAndSettle();
+        expect(
+          findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'),
+          unconfirmed ? findsOneWidget : findsNothing,
+        );
+        expect(
+          findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'),
+          unconfirmed ? findsNothing : findsOneWidget,
+        );
+        if (unconfirmed) {
+          expect(billingReads, greaterThan(before));
+        } else {
+          expect(billingReads, before);
+        }
+      },
+    );
+  }
+
+  for (final (type, unconfirmed) in [
+    (DioExceptionType.receiveTimeout, true),
+    (DioExceptionType.connectionTimeout, false),
+  ]) {
+    testWidgets(
+      '[지금 결제] — $type 이면 ${unconfirmed ? '확인 Callout · 청구를 다시 받는다' : '결제하지 못했어요'}(M3 확장)',
+      (tester) async {
+        final repo = AssetRepository(
+          Dio()..httpClientAdapter = _DioFailAdapter(type),
+        );
+        var billingReads = 0;
+        await _open(
+          tester,
+          billing: upcomingBilling,
+          extraOverrides: [
+            assetRepositoryProvider.overrideWith((ref) async => repo),
+            cardBillingProvider.overrideWith((ref, id) async {
+              billingReads++;
+              return upcomingBilling;
+            }),
+          ],
+        );
+        await tester.tap(findText('지금 결제'));
+        await tester.pumpAndSettle();
+        final before = billingReads;
+        await tester.enterText(find.byType(TextField), '40000');
+        await tester.tap(findText('결제하기'));
+        await tester.pumpAndSettle();
+        expect(
+          findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'),
+          unconfirmed ? findsOneWidget : findsNothing,
+        );
+        expect(
+          findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'),
+          unconfirmed ? findsNothing : findsOneWidget,
+        );
+        if (unconfirmed) {
+          expect(
+            billingReads,
+            greaterThan(before),
+            reason: '서버가 처리했을 수 있다 — 청구를 비운다',
+          );
+        } else {
+          expect(billingReads, before, reason: '서버에 닿지 않았다');
+        }
+      },
+    );
+  }
 
   // 청구를 못 불러오면 "0원" 이 아니라 실패 띠 + 다시 시도.
   testWidgets('청구 조회 실패는 0원이 아니라 실패 띠', (tester) async {

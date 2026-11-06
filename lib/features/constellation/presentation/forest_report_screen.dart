@@ -87,11 +87,16 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
     final l = AppLocalizations.of(context);
     final todayQ = ref.watch(constellationTodayProvider);
     final todosQ = ref.watch(todoListProvider(_allFilter));
-    final sky = ref.watch(constellationSkyProvider).value ?? const <SkyDay>[];
-    final collection = ref.watch(constellationCollectionProvider).value;
+    final skyQ = ref.watch(constellationSkyProvider);
+    final collectionQ = ref.watch(constellationCollectionProvider);
+    final sky = skyQ.value ?? const <SkyDay>[];
+    final collection = collectionQ.value;
     final today = todayQ.hasValue ? todayQ.requireValue : null;
     final todos = todosQ.hasValue ? todosQ.requireValue : null;
-    final failed = todayQ.loadFailed || todosQ.loadFailed;
+    // 날별 관측(sky) · 모은 별빛(collection)도 이 리포트의 내용이다 — 처음 받기 실패가 "관측 0" · 수집 줄 없음으로 읽히지
+    // 않게 같은 실패 자리로 간다(result-section.md:52)
+    final queries = [todayQ, todosQ, skyQ, collectionQ];
+    final failed = queries.any((q) => q.loadFailed);
 
     final todayYmd = _ymd(DateTime.now());
     final days = _weekDays(_week);
@@ -109,14 +114,19 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
         description: l.constLoadFailedDesc,
         primaryAction: PResultAction(
           label: l.actionRetry,
-          loading: anyLoadRetrying([todayQ, todosQ]),
+          loading: anyLoadRetrying(queries),
           onPressed: () {
             ref.invalidate(constellationTodayProvider);
             ref.invalidate(todoListProvider(_allFilter));
+            ref.invalidate(constellationSkyProvider);
+            ref.invalidate(constellationCollectionProvider);
           },
         ),
       );
-    } else if (today == null || todos == null) {
+    } else if (today == null ||
+        todos == null ||
+        !skyQ.hasValue ||
+        !collectionQ.hasValue) {
       content = const _ReportSkeleton();
     } else {
       content = _Body(

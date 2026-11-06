@@ -486,7 +486,7 @@ void main() {
     });
   });
 
-  testWidgets('L8 — 저장 중에 시트를 닫은 뒤 저장이 실패하면 스낵바 "저장하지 못했어요…" 가 뜬다', (
+  testWidgets('L8 — 저장 중에는 닫기를 눌러도 닫히지 않고, 실패하면 폼 맨 위 Callout · 쓴 값은 남는다', (
     tester,
   ) async {
     final repo = await _open(tester, edit: null, snackbarHost: true);
@@ -497,33 +497,27 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_button('저장'));
     await tester.pump(const Duration(milliseconds: 100));
-    // 저장이 나간 채로 닫는다 — 바뀐 값이 있어 "작성한 내용이 사라져요" 를 묻는다
-    await tester.tap(find.bySemanticsLabel('닫기').first);
+    // 저장이 나간 채 닫기 · 뒤로 가기 — 시트가 busy 라 받지 않는다(묻지도 않는다)
+    await tester.tap(find.bySemanticsLabel('닫기').first, warnIfMissed: false);
+    await tester.binding.handlePopRoute();
     // 저장 요청이 나가 있어 [저장] 의 원이 돈다 — 가라앉기를 기다리지 않고 흘린다
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(findPlain(l.sheetLeaveLeave));
-    await tester.pumpAndSettle();
-    expect(find.byType(PTextarea), findsNothing);
+    expect(findPlain(l.sheetLeaveTitle), findsNothing);
+    expect(find.byType(PTextarea), findsOneWidget);
     repo.gate!.complete();
     await tester.pumpAndSettle();
+    expect(find.byType(PTextarea), findsOneWidget);
     expect(
-      findPlain('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'),
-      findsOneWidget,
-      reason: 'Callout 을 둘 자리가 없으니 스낵바로 알린다',
+      tester.widget<PCallout>(find.byType(PCallout)).tone,
+      PCalloutTone.critical,
+      reason: '실패는 폼 맨 위 Callout 이 말한다',
     );
-    // N4 · N2 — [다시 시도] 는 폼을 건드리지 않고 쓴 값으로 바로 요청한다(성공 · 실패 모두 스낵바)
-    expect(findPlain('다시 시도'), findsOneWidget);
-    repo.failSave = false;
-    await tester.tap(findPlain('다시 시도'));
-    await tester.pumpAndSettle();
-    expect(repo.created, isTrue);
-    expect(repo.title, '새 메모');
-    expect(findPlain('저장했어요.'), findsOneWidget);
+    expect(findPlain('저장했어요.'), findsNothing);
     expect(
-      find.byType(PTextarea),
-      findsNothing,
-      reason: '그새 열린 폼이 없다 — 다시 시도가 폼을 열거나 닫지 않는다',
+      tester.widget<PInput>(find.byType(PInput)).controller!.text,
+      '새 메모',
+      reason: '쓴 값은 남는다',
     );
   });
 

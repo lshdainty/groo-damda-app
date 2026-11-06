@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 새 하위 이름 상한 — 카테고리 이름과 같은 12자(I-20 B 11).
 const int kCategoryChildNameMax = 12;
@@ -97,6 +98,9 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
   bool _showTargetError = false;
   bool _submitting = false;
   bool _failed = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _errorKey = GlobalKey();
 
   /// 하위가 없는 최상위만 "새 하위 만들기" 대상 — 교착이 생기는 자리가 정확히 여기다.
@@ -213,6 +217,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
       final moved = _mode == _Mode.newChild
@@ -238,15 +243,25 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       final snack = PSnackbar.maybeOf(context);
       PBottomSheet.of(context).close();
       snack?.show(message: l.categoryMoveTxDone(moved));
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
-      setState(() => _failed = true);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
+      if (isUnconfirmedSave(e)) {
+        ref.invalidate(categoriesProvider);
+        ref.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChange(ref);
+      }
+      setState(() {
+        _failed = true;
+        _failure = e;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
@@ -271,7 +286,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
               padding: gutter.copyWith(bottom: PSpacing.x4),
               child: FormErrorCallout(
                 key: _errorKey,
-                message: l.categoryMoveTxFailed,
+                message: saveFailureText(l, _failure, l.categoryMoveTxFailed),
               ),
             ),
           if (_canSplit)

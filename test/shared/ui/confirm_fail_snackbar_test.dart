@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import '../../support/plain_text.dart';
 
@@ -32,6 +34,57 @@ Future<void> _mount(WidgetTester tester, Widget Function(BuildContext) body) {
 }
 
 void main() {
+  for (final code in [kApiParseErrorCode, kApiNoResponseCode]) {
+    testWidgets(
+      '응답을 읽지/받지 못한 실패($code)는 [다시 시도] 없이 확인 글 · 다시 받기만 — false(검수 M3)',
+      (tester) async {
+        var calls = 0;
+        var refreshed = 0;
+        var succeeded = 0;
+        bool? result;
+        await _mount(
+          tester,
+          (context) => TextButton(
+            onPressed: () async {
+              result = await askConfirmThenRequest(
+                context,
+                title: '취소할까요?',
+                description: '결제를 취소해요.',
+                actionLabel: '취소하기',
+                request: () async {
+                  calls++;
+                  throw ApiException(code: code, message: 'raw');
+                },
+                failedMessage: '취소하지 못했어요.',
+                retryLabel: '다시 시도',
+                onRetried: () => succeeded++,
+                kind: WriteKind.process,
+                onUnconfirmed: () => refreshed++,
+              );
+            },
+            child: const Text('열기'),
+          ),
+        );
+        await tester.tap(findText('열기'));
+        await tester.pumpAndSettle();
+        await tester.tap(findText('취소하기'));
+        await tester.pumpAndSettle();
+        expect(calls, 1);
+        expect(result, isFalse);
+        expect(refreshed, 1, reason: '서버가 처리했을 수 있다 — 다시 받는다');
+        expect(succeeded, 0, reason: '성공 뒷정리(알림)는 하지 않는다');
+        expect(
+          findText('처리됐는지 확인하지 못했어요.'),
+          findsOneWidget,
+          reason: '스낵바는 한 문장 — kind 대로(판단 ①)',
+        );
+        expect(findText('저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.'), findsNothing);
+        expect(findText('취소하지 못했어요.'), findsNothing);
+        expect(_action, findsNothing, reason: '[다시 시도] 를 주면 두 번 처리된다');
+      },
+    );
+  }
+
   testWidgets('실패하면 확인창을 닫고 critical 스낵바를 띄우며, 다시 시도는 묻지 않고 바로 요청한다', (
     tester,
   ) async {
@@ -52,6 +105,8 @@ void main() {
             },
             failedMessage: '삭제하지 못했어요.',
             retryLabel: '다시 시도',
+            kind: WriteKind.delete,
+            onUnconfirmed: () {},
           );
         },
         child: const Text('열기'),
@@ -94,6 +149,8 @@ void main() {
           },
           failedMessage: '삭제하지 못했어요.',
           retryLabel: '다시 시도',
+          kind: WriteKind.delete,
+          onUnconfirmed: () {},
         ),
         child: const Text('열기'),
       ),
@@ -124,6 +181,8 @@ void main() {
             request: () async => calls++,
             failedMessage: '삭제하지 못했어요.',
             retryLabel: '다시 시도',
+            kind: WriteKind.delete,
+            onUnconfirmed: () {},
           );
         },
         child: const Text('열기'),
@@ -164,6 +223,8 @@ void main() {
           failedMessage: '삭제하지 못했어요.',
           retryLabel: '다시 시도',
           onRetried: () => retried++,
+          kind: WriteKind.delete,
+          onUnconfirmed: () {},
         ),
         child: const Text('열기'),
       ),
@@ -193,6 +254,8 @@ void main() {
           failedMessage: '삭제하지 못했어요.',
           retryLabel: '다시 시도',
           onRetried: () => retried++,
+          kind: WriteKind.delete,
+          onUnconfirmed: () {},
         ),
         child: const Text('열기'),
       ),
@@ -231,6 +294,8 @@ void main() {
                     failedMessage: '삭제하지 못했어요.',
                     retryLabel: '다시 시도',
                     onRetried: () => retried++,
+                    kind: WriteKind.delete,
+                    onUnconfirmed: () {},
                   ),
                   child: const Text('열기'),
                 ),

@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsk;
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
@@ -68,6 +69,8 @@ import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_type_meta.dart';
+import 'package:groo_damda_app/features/asset/presentation/asset_parts.dart'
+    show AssetPriceFailure;
 import 'package:groo_damda_app/features/asset/presentation/asset_actions.dart';
 import 'package:groo_damda_app/features/asset/presentation/holding_format.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
@@ -459,24 +462,21 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     // 한 건이 자산 두 개에 걸치므로 보내는 쪽·받는 쪽 둘 다 확인한다(서버 필터는 기간만 지원).
     final monthPrefix =
         '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}';
-    final assetTransfers =
-        (ref
-                    .watch(
-                      assetTransfersProvider((startDate: null, endDate: null)),
-                    )
-                    .value ??
-                const <AssetTransfer>[])
-            .where(
-              (tr) =>
-                  (tr.fromAssetRowId == asset.rowId ||
-                      tr.toAssetRowId == asset.rowId) &&
-                  // 지출과 같은 규칙 — "최근 거래" 에는 지나간 것만 올린다.
-                  !isScheduledTx(tr.transferDate) &&
-                  // 체크카드 "이번 달 내역" 은 이체도 당월만 — 지출과 기간을 맞춘다.
-                  (!isCheckLinked ||
-                      (tr.transferDate ?? '').startsWith(monthPrefix)),
-            )
-            .toList();
+    final transfersAsync = ref.watch(
+      assetTransfersProvider((startDate: null, endDate: null)),
+    );
+    final assetTransfers = (transfersAsync.value ?? const <AssetTransfer>[])
+        .where(
+          (tr) =>
+              (tr.fromAssetRowId == asset.rowId ||
+                  tr.toAssetRowId == asset.rowId) &&
+              // 지출과 같은 규칙 — "최근 거래" 에는 지나간 것만 올린다.
+              !isScheduledTx(tr.transferDate) &&
+              // 체크카드 "이번 달 내역" 은 이체도 당월만 — 지출과 기간을 맞춘다.
+              (!isCheckLinked ||
+                  (tr.transferDate ?? '').startsWith(monthPrefix)),
+        )
+        .toList();
     // 머리 수 · 빈 판정은 이체까지 센다(웹 relatedItems).
     final relatedCount =
         (recentAsync.value?.length ?? 0) + assetTransfers.length;
@@ -513,6 +513,15 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               padding: gutterPad,
               child: _InvChangeLine(assetRowId: asset.rowId, masked: masked),
             ),
+            // 시세를 못 받는 동안 위 평가액은 서버 잔액 · 직전 시세다 — 숫자는 두고 띠 한 줄(I-wrap-b2b 4)
+            if (ref.watch(valuationPriceFailedProvider))
+              Padding(
+                padding: gutterPad,
+                child: AssetPriceFailure(
+                  gutter: false,
+                  onRetry: () => refreshLiveValuation(ref.invalidate),
+                ),
+              ),
             _HoldingsSection(asset: asset, masked: masked),
           ],
 
@@ -586,11 +595,20 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
             padding: gutterPad,
             child: _RecentExpenses(
               async: recentAsync,
-              onRetry: () => ref.invalidate(
-                isCheckLinked
-                    ? assetPeriodExpensesProvider
-                    : expensesByAssetProvider,
-              ),
+              transfersAsync: transfersAsync,
+              onRetry: () {
+                ref.invalidate(
+                  isCheckLinked
+                      ? assetPeriodExpensesProvider
+                      : expensesByAssetProvider,
+                );
+                // 이체를 못 받았으면 같이 — 웹 retryRelated(내역 · 이체 둘)
+                if (transfersAsync.loadFailed) {
+                  ref.invalidate(
+                    assetTransfersProvider((startDate: null, endDate: null)),
+                  );
+                }
+              },
               emptyText: l.assetNoLinkedTx,
               transfers: assetTransfers,
               perspectiveAssetRowId: asset.rowId,
@@ -750,7 +768,25 @@ class _TradeHistory extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final trades = ref.watch(assetTradesProvider(assetRowId)).value ?? const [];
+    final tradesQ = ref.watch(assetTradesProvider(assetRowId));
+    // 처음 받기 실패가 "기록 없음" 처럼 사라지면 안 된다 — 그 자리 실패 + 다시 시도(웹 HoldingsSection tradesQ)
+    if (tradesQ.loadFailed) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(
+          PSpacing.globalGutter,
+          PSpacing.x4,
+          PSpacing.globalGutter,
+          0,
+        ),
+        child: BudgetFailure(
+          key: const ValueKey('asset-detail-trades-failure'),
+          title: l.assetTradesLoadFailed,
+          retrying: tradesQ.loadRetrying,
+          onRetry: () => ref.invalidate(assetTradesProvider(assetRowId)),
+        ),
+      );
+    }
+    final trades = tradesQ.value ?? const [];
     if (trades.isEmpty) return const SizedBox.shrink();
     final holdings =
         ref
@@ -976,6 +1012,9 @@ Future<void> showTradeDetailSheet(
     failedMessage: l.tradeCancelFailed,
     retryLabel: l.actionRetry,
     onRetried: () => PSnackbar.maybeOf(context)?.show(message: l.tradeDeleted),
+    // 응답을 못 받았다 — 취소됐을 수 있다. 다시 받기만(검수 M3)
+    kind: WriteKind.delete,
+    onUnconfirmed: () => _invalidateAfterTradeChange(container, assetRowId),
   );
   if (ok && context.mounted) {
     PSnackbar.maybeOf(context)?.show(message: l.tradeDeleted);
@@ -990,7 +1029,11 @@ Future<void> _cancelTradeRequest(
 ) async {
   final repo = await container.read(assetRepositoryProvider.future);
   await repo.deleteTrade(trade.rowId, silent: true);
-  // 예수금·평가액이 되돌아간다 — 순자산·추이까지 다시 받는다.
+  _invalidateAfterTradeChange(container, assetRowId);
+}
+
+/// 매매가 바뀐 뒤 — 예수금·평가액이 되돌아간다. 순자산·추이까지 다시 받는다.
+void _invalidateAfterTradeChange(ProviderContainer container, int assetRowId) {
   for (final p in <ProviderOrFamily>[
     assetsProvider,
     assetSummaryProvider,
@@ -1469,11 +1512,15 @@ class _RecentExpenses extends StatelessWidget {
     required this.tokens,
     required this.onRetry,
     required this.emptyText,
+    this.transfersAsync,
     this.transfers = const [],
     this.perspectiveAssetRowId,
     this.currencyOf,
   });
   final AsyncValue<List<Expense>> async;
+
+  /// 이 자산에 걸린 이체를 받는 질의 — 처음 받기 실패면 내역 실패와 한 자리(웹 relatedFailed: 내역 · 이체 어느 쪽이든).
+  final AsyncValue<Object?>? transfersAsync;
 
   /// 계좌 rowId → 통화 — 이체 줄이 보내는 · 받는 계좌 통화로 금액을 찍는다(I-13).
   final String? Function(int assetRowId)? currencyOf;
@@ -1549,10 +1596,11 @@ class _RecentExpenses extends StatelessWidget {
       );
     }
     // 실패가 빈 글로 보이면 안 된다 — 값이 없는 실패는 띠 + 다시 시도.
-    if (async.loadFailed) {
+    final transfersFailed = transfersAsync?.loadFailed ?? false;
+    if (async.loadFailed || transfersFailed) {
       return BudgetFailure(
         title: AppLocalizations.of(context).assetTxLoadFailed,
-        retrying: async.loadRetrying,
+        retrying: async.loadRetrying || (transfersAsync?.loadRetrying ?? false),
         onRetry: onRetry,
       );
     }
@@ -2050,10 +2098,14 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     );
   }
 
-  /// 결제 요청(silent) — 성공이면 true. 실패는 호출한 시트가 맨 위 Callout 으로 보인다.
-  Future<bool> _pay(int amount, String paymentDate) async {
+  /// 결제 요청(silent) — 실패는 호출한 시트가 맨 위 Callout 으로 보인다.
+  ///
+  /// 응답만 못 읽었으면(PARSE — 서버는 결제 · 이체를 만들었다) 실패가 아니다: 성공 때와 같은 청구 · 잔액을 비우고
+  /// [PayOutcome.unconfirmed] — 시트는 "결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요." 를 둔다(검수 M3,
+  /// 다시 누르면 이체가 두 번 생긴다).
+  Future<PayOutcome> _pay(int amount, String paymentDate) async {
     // 진입에서 바로 막는다 — 첫 줄과 setState 사이에 await 가 없어 두 번째 호출은 여기서 끝난다.
-    if (_paying) return false;
+    if (_paying) return PayOutcome.failed;
     setState(() => _paying = true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
@@ -2063,15 +2115,28 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         paymentDate: paymentDate,
         silent: true,
       );
-      ref.invalidate(cardBillingProvider(widget.asset.rowId));
-      // 결제는 이체를 만든다 — 결제 계좌 잔액·홈 순자산·가계부까지 함께 바뀐다.
-      invalidateAfterExpenseChange(ref);
-      return true;
-    } on ApiException {
-      return false;
+      _afterPay();
+      return PayOutcome.paid;
+    } on ApiException catch (e) {
+      if (isUnconfirmedSave(e)) {
+        _afterPay();
+        return PayOutcome.unconfirmed;
+      }
+      return PayOutcome.failed;
+    } catch (e, st) {
+      // ApiException 밖의 오류(요청 뒤 단계 등) — 결제가 됐는지 모른다. 실패라 하지 않고 확인을 부탁한다(돈이 두 번 나가지 않게)
+      debugPrint('카드 결제 뒤 오류: $e\n$st');
+      _afterPay();
+      return PayOutcome.unconfirmed;
     } finally {
       if (mounted) setState(() => _paying = false);
     }
+  }
+
+  void _afterPay() {
+    ref.invalidate(cardBillingProvider(widget.asset.rowId));
+    // 결제는 이체를 만든다 — 결제 계좌 잔액·홈 순자산·가계부까지 함께 바뀐다.
+    invalidateAfterExpenseChange(ref);
   }
 
   /// 되돌릴 수 있는 가장 최근 결제 — 없으면 [결제 취소] 를 숨긴다.
@@ -2121,17 +2186,23 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     required Future<void> Function(AssetRepository repo) call,
     bool destructive = false,
     bool block = false,
+    required WriteKind kind,
+    String? unconfirmedMessage,
   }) async {
     if (_paying) return;
     final l = AppLocalizations.of(context);
     final container = ProviderScope.containerOf(context);
     final id = widget.asset.rowId;
-    Future<void> request() async {
-      final repo = await container.read(assetRepositoryProvider.future);
-      await call(repo);
+    void refresh() {
       // 이체·잔액·청구가 함께 바뀐다 — 가계부도 비운다(이자 지출 등).
       container.invalidate(cardBillingProvider(id));
       invalidateAfterExpenseChangeIn(container);
+    }
+
+    Future<void> request() async {
+      final repo = await container.read(assetRepositoryProvider.future);
+      await call(repo);
+      refresh();
     }
 
     if (block) setState(() => _paying = true);
@@ -2146,6 +2217,10 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         request: request,
         failedMessage: failedMessage,
         retryLabel: l.actionRetry,
+        // 응답을 못 받았다 — 처리됐을 수 있다. 청구 · 잔액을 다시 받고 확인을 부탁한다(검수 M3)
+        kind: kind,
+        onUnconfirmed: refresh,
+        unconfirmedMessage: unconfirmedMessage,
       );
     } finally {
       if (block && mounted) setState(() => _paying = false);
@@ -2161,6 +2236,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         widget.masked ? '••••' : krw(installmentPayoffAmount(due)),
       ),
       failedMessage: l.assetInstallmentPayoffFailed,
+      kind: WriteKind.process,
+      unconfirmedMessage: l.payUnconfirmed,
       call: (repo) => repo.payoffInstallment(
         widget.asset.rowId,
         due.expenseRowId,
@@ -2177,6 +2254,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
       title: l.assetInstallmentPayoffUndo,
       description: l.assetInstallmentPayoffUndoConfirm,
       failedMessage: l.assetInstallmentPayoffUndoFailed,
+      kind: WriteKind.process,
       call: (repo) => repo.cancelInstallmentPayoff(
         widget.asset.rowId,
         due.expenseRowId,
@@ -2195,6 +2273,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         billing.paymentDate,
       ),
       failedMessage: l.assetCancelPaymentFailed,
+      kind: WriteKind.process,
       call: (repo) => repo.cancelCardPayment(billing.rowId, silent: true),
       destructive: true,
       block: true,
@@ -2830,6 +2909,9 @@ class _PayProbe {
 }
 
 /// 지금 결제 = 입력 폼(I-17 53). 안내 글 → (실패 Callout) → (돈이 다 안 움직이는 안내 Callout) → 결제 금액 칸.
+/// 카드 결제 결과 — 결제됨 · 실패 · 응답을 읽지 못해 확인 못 함(검수 M3).
+enum PayOutcome { paid, failed, unconfirmed }
+
 /// 금액 검사(0 < 금액 ≤ 예정액)는 그대로이되 주 버튼을 막지 않고 누르면 칸 아래 오류. 요청은 [onPay] — 실패하면 시트 안에
 /// 맨 위가 아니라 안내 아래 Callout(입력 금액 유지 · 시트 유지 · 스낵바 없음).
 class _PaySheet extends StatefulWidget {
@@ -2850,7 +2932,7 @@ class _PaySheet extends StatefulWidget {
   final int debt;
   final bool hasPayAccount;
   final bool masked;
-  final Future<bool> Function(int amount) onPay;
+  final Future<PayOutcome> Function(int amount) onPay;
 
   @override
   State<_PaySheet> createState() => _PaySheetState();
@@ -2862,6 +2944,9 @@ class _PaySheetState extends State<_PaySheet> {
   final _errorKey = GlobalKey();
   bool _tried = false;
   bool _failed = false;
+
+  /// 응답을 읽지 못한 결제(서버는 결제했을 수 있다) — "결제됐는지 확인하지 못했어요"(검수 M3).
+  bool _unconfirmed = false;
   bool _submitting = false;
 
   @override
@@ -2895,14 +2980,30 @@ class _PaySheetState extends State<_PaySheet> {
       _failed = false;
       _submitting = true;
     });
-    final ok = await widget.onPay(v);
+    // 저장 중에는 시트를 닫지 않는다 — 실패 Callout 을 그릴 폼이 남아 있게
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    PayOutcome outcome;
+    try {
+      outcome = await widget.onPay(v);
+    } catch (e, s) {
+      // 여기까지 던졌으면 결제가 됐는지 모른다 — 실패라 하지 않고 확인을 부탁한다(검수 M3). 원문은 로그에만
+      debugPrint('카드 결제 오류: $e\n$s');
+      outcome = PayOutcome.unconfirmed;
+    } finally {
+      // 결제가 어떤 길로 끝나도(던져도) 진행 원을 멈춘다 — 예전엔 던지면 단추가 계속 돌았다(I-wrap-b2b 3)
+      sheet?.setBusy(false);
+      if (mounted) setState(() => _submitting = false);
+    }
     if (!mounted) return;
-    setState(() => _submitting = false);
-    if (ok) {
+    if (outcome == PayOutcome.paid) {
       PBottomSheet.of(context).close();
       return;
     }
-    setState(() => _failed = true);
+    // 실패든 확인 못 함이든 시트는 닫지 않고 [결제하기] 는 그대로 — 글만 다르다
+    setState(() {
+      _failed = true;
+      _unconfirmed = outcome == PayOutcome.unconfirmed;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final c = _errorKey.currentContext;
       if (c != null) revealBelowFog(c);
@@ -2952,7 +3053,10 @@ class _PaySheetState extends State<_PaySheet> {
             const SizedBox(height: PSpacing.x4),
             // 폼 저장 실패 = 안내 아래 Callout(웹과 같은 자리). 다시 누르면 지워진다.
             if (_failed)
-              FormErrorCallout(key: _errorKey, message: l.assetPayFailed),
+              FormErrorCallout(
+                key: _errorKey,
+                message: _unconfirmed ? l.payUnconfirmed : l.assetPayFailed,
+              ),
             if (moveNote != null) ...[
               PCallout(tone: PCalloutTone.warning, description: moveNote),
               const SizedBox(height: PSpacing.x4),

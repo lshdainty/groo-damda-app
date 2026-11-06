@@ -671,7 +671,9 @@ void main() {
     expect(findText('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsNothing);
   });
 
-  testWidgets('L1 — 저장 중 닫기 원을 누르면 바로 닫지 않고 묻는다', (tester) async {
+  testWidgets('L1 — 저장 중에는 닫기 원 · 뒤로 가기로 닫히지 않고 묻지도 않는다(시트 busy)', (
+    tester,
+  ) async {
     final late = Completer<List<Asset>>();
     await _open(
       tester,
@@ -680,11 +682,19 @@ void main() {
     );
     await tester.tap(findText('저장'));
     await tester.pump();
-    await tester.tap(find.bySemanticsLabel('닫기').first);
+    // 저장 중에는 시트 안 누름을 받지 않는다 — 낭독기 누름(시맨틱 탭)도 아무 일이 없다
+    await tester.tap(find.bySemanticsLabel('닫기').first, warnIfMissed: false);
+    tester
+        .widget<GestureDetector>(
+          find.byKey(const ValueKey('p-bottom-sheet-close')),
+        )
+        .onTap!();
+    await tester.binding.handlePopRoute();
     // 자산 목록을 받는 동안(요청이 나가 있다) [저장] 의 원이 돈다 — 가라앉기를 기다리지 않고 흘린다
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(findText('작성한 내용이 사라져요'), findsOneWidget);
+    expect(findText('작성한 내용이 사라져요'), findsNothing);
+    expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
     late.complete([_bank, _loan, _card]);
     await tester.pumpAndSettle();
   });

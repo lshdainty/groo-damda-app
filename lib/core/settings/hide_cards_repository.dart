@@ -32,8 +32,8 @@ class HideCardsRepository {
       final cards = body.data?['hideCards'];
       if (cards == null) return null;
       return (cards as List<dynamic>).map((e) => e as String).toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -47,8 +47,8 @@ class HideCardsRepository {
         data: {'hideCards': cards.toList()},
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

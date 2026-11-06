@@ -28,6 +28,7 @@ import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.d
 import 'package:groo_damda_app/shared/ds/select/p_select.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/widgets/markdown_preview.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 제목 · 메모 입력 상한 — 서버 `FieldLimits`(TITLE_MAX 200 · CONTENT_MAX 10,000)와 같은 값(웹과 같다).
 const int kTodoTitleMax = 200;
@@ -95,6 +96,9 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
   bool _previewContent = false;
   bool _submitting = false;
   bool _failed = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _errorKey = GlobalKey();
   String? _titleError;
 
@@ -202,6 +206,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(todoRepositoryProvider.future);
       final content = _contentCtrl.text.trim();
@@ -232,15 +237,24 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       ref.invalidate(dashboardSummaryProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
-      setState(() => _failed = true);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
+      if (isUnconfirmedSave(e)) {
+        ref.invalidate(todoListProvider);
+        ref.invalidate(dashboardSummaryProvider);
+      }
+      setState(() {
+        _failed = true;
+        _failure = e;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
@@ -261,7 +275,12 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
         spacing: PSpacing.x4,
         children: [
           if (_failed)
-            field(FormErrorCallout(key: _errorKey, message: l.todoSaveFailed)),
+            field(
+              FormErrorCallout(
+                key: _errorKey,
+                message: saveFailureText(l, _failure, l.todoSaveFailed),
+              ),
+            ),
           field(
             PField(
               label: l.calFieldTitle,

@@ -12,6 +12,13 @@ extension AsyncLoadFailure<T> on AsyncValue<T> {
 
   /// 실패 화면에서 다시 받는 중 — [다시 시도] 를 loading 으로.
   bool get loadRetrying => loadFailed && isLoading;
+
+  /// 받아 둔 값이 있는 채 다시 받기에 실패했다(riverpod 3 은 앞 값을 든 채 오류가 된다). 폴링 자리는 숫자를 두고 그 자리에
+  /// 실패 띠 한 줄을 둔다 — 다음 받기가 성공하면 오류가 걷혀 띠도 사라진다(I-wrap-b2b 4).
+  bool get refreshFailed => hasValue && hasError;
+
+  /// 받아 둔 값이 있든 없든 지금 실패 상태다 — 폴링 자리의 실패 띠 조건(처음 실패 · 다시 받기 실패 모두).
+  bool get pollFailed => hasError;
 }
 
 /// 여러 질의를 한 실패 화면이 맡을 때 — 실패한 것 중 하나라도 다시 받는 중이면 진행 원.

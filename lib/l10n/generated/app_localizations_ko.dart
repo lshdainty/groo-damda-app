@@ -36,6 +36,45 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionRetry => '다시 시도';
 
   @override
+  String get queryRefreshFailed => '새로 고치지 못했어요.';
+
+  @override
+  String get queryReferenceFailed => '일부 정보를 불러오지 못했어요.';
+
+  @override
+  String get saveUnconfirmed => '저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.';
+
+  @override
+  String get payUnconfirmed => '결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.';
+
+  @override
+  String get stocksStaleLastPrice => '보이는 값은 마지막으로 받은 시세예요.';
+
+  @override
+  String get stocksStaleLastBalance => '보이는 값은 시세가 아닌 마지막 잔액이에요.';
+
+  @override
+  String get securitiesLeaveBody => '입력한 내용이 사라져요.';
+
+  @override
+  String get withdrawUnconfirmed => '해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.';
+
+  @override
+  String get unconfirmedSave => '저장됐는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedDelete => '삭제됐는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedProcess => '처리됐는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedToggle => '바뀌었는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedConnect => '연결됐는지 확인하지 못했어요.';
+
+  @override
   String get actionApply => '적용';
 
   @override
@@ -442,6 +481,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetTxLoadFailed => '내역을 불러오지 못했어요';
+
+  @override
+  String get assetTradesLoadFailed => '거래 기록 정보를 불러오지 못했어요';
 
   @override
   String get assetMonthTx => '이번 달 내역';
@@ -1022,6 +1064,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetHoldingBalance => '평가금액';
+
+  @override
+  String assetHoldingsSummaryUnknown(int count) {
+    return '$count종목 · —';
+  }
 
   @override
   String assetHoldingsSummary(int count, String amount) {
@@ -6181,7 +6228,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get memoDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get memoPinFailed => '고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get memoPinFailed => '고정을 바꾸지 못했어요.';
 
   @override
   String memoModifiedAt(String time) {
@@ -9081,6 +9128,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expSplitLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get txHistoryLoadFailed => '이전 거래 정보를 불러오지 못했어요';
 
   @override
   String expRefundDateToday(String date) {

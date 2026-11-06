@@ -177,8 +177,8 @@ class UserPreferencesRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return UserPreferences.fromJson(body.data!);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -205,8 +205,8 @@ class UserPreferencesRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return UserPreferences.fromJson(body.data!);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

@@ -80,6 +80,7 @@ class _HideAmountsUnlockStepState extends ConsumerState<HideAmountsUnlockStep> {
       _pending = true;
       _error = null;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(authRepositoryProvider.future);
       await repo.verifyPassword(_ctrl.text);
@@ -96,6 +97,8 @@ class _HideAmountsUnlockStepState extends ConsumerState<HideAmountsUnlockStep> {
         _ctrl.clear();
       });
       _focus.requestFocus();
+    } finally {
+      sheet?.setBusy(false);
     }
   }
 

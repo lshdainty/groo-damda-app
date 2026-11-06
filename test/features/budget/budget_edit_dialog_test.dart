@@ -1,6 +1,9 @@
 // 예산 폼(I-19 C) — 총 예산 · 카테고리 예산 추가 · 수정 한 시트.
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,6 +26,19 @@ class _FakeRepo extends BudgetRepository {
   final calls = <String>[];
   bool fail = false;
 
+  /// 응답만 못 읽은 쓰기(PARSE) — 서버는 저장했다.
+  bool parseFail = false;
+  int lists = 0;
+
+  @override
+  Future<List<Budget>> list({int? year, int? month}) async {
+    lists++;
+    return const [];
+  }
+
+  /// 있으면 응답을 이 값이 끝날 때까지 미룬다 — 저장 중인 시트를 본다.
+  Completer<void>? gate;
+
   @override
   Future<int?> create({
     int? categoryRowId,
@@ -43,6 +59,10 @@ class _FakeRepo extends BudgetRepository {
   }) async {
     calls.add('update:$id:$budgetAmount');
     if (!silent) calls.add('NOT-SILENT');
+    if (gate != null) await gate!.future;
+    if (parseFail) {
+      throw ApiException(code: kApiParseErrorCode, message: '응답 원문');
+    }
     if (fail) throw ApiException(code: 'X', message: '서버 원문');
   }
 }
@@ -290,6 +310,73 @@ void main() {
     await _press(tester, l.actionSave);
     expect(repo.calls, ['update:5:450000']);
   });
+
+  testWidgets('저장 중에는 X · 뒤로 · Esc 로 닫히지 않고 묻지도 않는다 — 실패하면 맨 위 Callout', (
+    tester,
+  ) async {
+    const edit = Budget(
+      rowId: 7,
+      budgetAmount: 500000,
+      budgetYear: 2026,
+      budgetMonth: 10,
+    );
+    final repo = await _open(tester, edit: edit);
+    await tester.enterText(_inputs().first, '600000');
+    repo
+      ..fail = true
+      ..gate = Completer<void>();
+    await tester.tap(
+      find.ancestor(of: _t(l.actionSave), matching: find.byType(PButton)).last,
+    );
+    await tester.pump();
+    expect(repo.calls, ['update:7:600000']);
+    final close = find.byKey(const ValueKey('p-bottom-sheet-close'));
+    await tester.tap(close, warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.binding.handlePopRoute();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(_t(l.sheetLeaveTitle), findsNothing, reason: '저장 중에는 묻지도 않는다');
+    expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
+
+    repo.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
+    expect(_t(l.budgetSaveFailed), findsOneWidget);
+    expect(_amount(tester), '600,000');
+  });
+
+  testWidgets(
+    '응답만 못 읽은 저장(PARSE)은 실패라 하지 않는다 — 확인 Callout · 목록을 비운다 · 폼은 남는다(검수 M3)',
+    (tester) async {
+      const edit = Budget(
+        rowId: 7,
+        budgetAmount: 500000,
+        budgetYear: 2026,
+        budgetMonth: 10,
+      );
+      final repo = await _open(tester, edit: edit);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TextButton).first),
+      );
+      // 예산 목록을 지켜보는 화면이 있다 — 비우면 다시 받는다
+      final sub = container.listen(
+        monthBudgetsProvider((year: 2026, month: 10)),
+        (_, _) {},
+      );
+      addTearDown(sub.close);
+      await tester.pumpAndSettle();
+      final before = repo.lists;
+      repo.parseFail = true;
+      await _press(tester, l.actionSave);
+      expect(_t(l.saveUnconfirmed), findsOneWidget);
+      expect(_t(l.budgetSaveFailed), findsNothing);
+      expect(findTextContaining('응답 원문'), findsNothing);
+      expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
+      expect(repo.lists, greaterThan(before), reason: '성공 때와 같은 목록을 비운다');
+    },
+  );
 
   testWidgets('바뀐 채 닫으면 확인창 · 안 바뀌면 묻지 않는다', (tester) async {
     await _open(tester, overallNew: true);

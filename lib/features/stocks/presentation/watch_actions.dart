@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 // ---- 관심 그룹 -----------------------------------------------------------------
 
@@ -193,6 +194,9 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
   late final FocusNode _nameFocus = widget.nameFocus;
   bool _busy = false;
   bool _failed = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _errorKey = GlobalKey();
 
   @override
@@ -216,6 +220,7 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
       _failed = false;
       _busy = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(stocksRepositoryProvider.future);
       final g = widget.group;
@@ -229,17 +234,22 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
         widget.probe.dirty = () => false;
         PBottomSheet.of(context).close();
       }
-    } catch (_) {
+    } catch (e) {
       // 시트는 열린 채 쓴 이름이 남는다 — 실패는 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) ref.invalidate(watchGroupsProvider);
       setState(() {
         _busy = false;
         _failed = true;
+        _failure = e;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
+    } finally {
+      sheet?.setBusy(false);
     }
   }
 
@@ -262,7 +272,11 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
             if (_failed) ...[
               FormErrorCallout(
                 key: _errorKey,
-                message: l.stocksWatchGroupSaveFail,
+                message: saveFailureText(
+                  l,
+                  _failure,
+                  l.stocksWatchGroupSaveFail,
+                ),
               ),
               const SizedBox(height: PSpacing.x4),
             ],
@@ -316,6 +330,8 @@ Future<void> confirmDeleteWatchGroup(
     failedMessage: l.stocksWatchGroupDeleteFail,
     retryLabel: l.actionRetry,
     onRetried: () => container.invalidate(watchGroupsProvider),
+    kind: WriteKind.delete,
+    onUnconfirmed: () => container.invalidate(watchGroupsProvider),
   );
   if (ok) container.invalidate(watchGroupsProvider);
 }
@@ -405,13 +421,18 @@ Future<void> toggleWatch(
   try {
     await request();
     container.invalidate(watchGroupsProvider);
-  } catch (_) {
-    showConfirmFailSnackbar(
-      snack,
-      message: removing ? l.stocksWatchRemoveFail : l.stocksWatchAddFail,
-      retryLabel: l.actionRetry,
-      retry: request,
-      onRetried: () => container.invalidate(watchGroupsProvider),
+  } catch (e) {
+    // 별은 누르는 순간 바뀌는 값이다 — 실패하면 한 문장, [다시 시도] 없음(다시 누르면 된다).
+    // 응답을 못 받았으면 담겼거나 빠졌을 수 있다 — 서버 값을 다시 받아 별을 맞추고 "바뀌었는지" 한 문장(판단 ②)
+    final unconfirmed = isUnconfirmedSave(e);
+    if (unconfirmed) container.invalidate(watchGroupsProvider);
+    snack?.show(
+      message: unconfirmed
+          ? l.unconfirmedToggle
+          : removing
+          ? l.stocksWatchRemoveFail
+          : l.stocksWatchAddFail,
+      tone: PSnackbarTone.critical,
     );
   }
 }

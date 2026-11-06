@@ -180,8 +180,8 @@ class NamuRepository {
           .whereType<Map<String, dynamic>>()
           .map(NamuAccount.fromJson)
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -200,8 +200,8 @@ class NamuRepository {
       return p is Map<String, dynamic>
           ? NamuHoldings.fromJson(p)
           : NamuHoldings.empty;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -210,8 +210,8 @@ class NamuRepository {
       final res = await _dio.get<dynamic>(path, queryParameters: query);
       final p = _payload(res);
       return p is Map<String, dynamic> ? BrokerPrice.fromJson(p) : null;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -231,8 +231,8 @@ class NamuRepository {
           .whereType<Map<String, dynamic>>()
           .map(NamuListQuote.fromJson)
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -253,8 +253,8 @@ class NamuRepository {
       );
       final p = _payload(res);
       return TossCandlePage.fromJson(p is Map<String, dynamic> ? p : {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -268,8 +268,8 @@ class NamuRepository {
       final p = _payload(res);
       if (p is! Map<String, dynamic>) return null;
       return (p['rate'] as num?)?.toDouble() ?? double.tryParse('${p['rate']}');
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -285,8 +285,8 @@ class NamuRepository {
       );
       final p = _payload(res);
       return NamuQuoteDetail.fromJson(p is Map<String, dynamic> ? p : {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -302,8 +302,8 @@ class NamuRepository {
         queryParameters: {'symbol': symbol, 'count': count},
       );
       return tradesFromJson(_payload(res));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -318,8 +318,8 @@ class NamuRepository {
         queryParameters: {'symbol': symbol, 'count': count},
       );
       return investorDaysFromJson(_payload(res));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -332,8 +332,8 @@ class NamuRepository {
       final raw = _blankToNull(p['foreignDeposit']);
       if (raw == null) return null;
       return BuyingPower(currency: 'USD', amount: double.tryParse(raw));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

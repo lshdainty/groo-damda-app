@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/select/p_select.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 export 'package:groo_damda_app/features/asset/presentation/asset_form_sheet.dart'
     show showCardAddDialog, showCardEditDialog;
@@ -350,6 +351,7 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       // brand color hex 는 모바일 측에선 별도 파싱이라 institution 으로 추후 매칭.
@@ -427,6 +429,12 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
       // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       // 고쳐 다시 할 수 있는 코드(AST_037 카드는 원화만)만 다른 고정 글로 가른다(I-13).
       if (!mounted) return;
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        invalidateAfterAssetChange(ref);
+        ref.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChange(ref);
+      }
       setState(() {
         _failed = true;
         _failCode = e.code;
@@ -436,6 +444,7 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

@@ -19,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 구독 관리 화면 — 흰 화면 하나(I-14 3-2A · 14-2). 옛 바텀시트(0.92 고정)를 대신한다.
 ///
@@ -71,7 +72,18 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     try {
       final repo = await container.read(subscriptionRepositoryProvider.future);
       await repo.subscribe(planCode, silent: true);
-    } catch (_) {
+    } catch (e) {
+      // 응답을 못 받았다 — 구독됐을 수 있다(결제). [다시 시도] 를 주면 두 번 구독될 수 있어 다시 받고 확인을 부탁한다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        container.invalidate(myFeaturesLoadProvider);
+        container.invalidate(mySubscriptionProvider);
+        snack?.show(
+          message: unconfirmedWriteText(l, WriteKind.process),
+          tone: PSnackbarTone.critical,
+        );
+        if (mounted) setState(() => _busy = false);
+        return;
+      }
       // 서버 글을 내지 않는다 — 정한 글 하나
       // 서버 글을 내지 않는다 — 정한 글 하나 + [다시 시도](같은 요금제로 구독을 다시)
       snack?.show(
@@ -125,6 +137,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         refresh();
         snack?.show(message: l.subCanceled);
       },
+      kind: WriteKind.process,
+      onUnconfirmed: refresh,
     );
     if (!ok) return;
     refresh();

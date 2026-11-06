@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/name_policy.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 태그 설정 본문 — 메모 태그 · 할 일 태그가 한 부품을 쓴다(I-15 20 ~ 24 · I-10 33 ~ 37 · Q4 B). 웹 `TagSettings` 와 같은 짜임이다.
 /// 글은 [TagSettingsCopy] 로 받는다 — 키만 다르고 구조는 같다.
@@ -143,10 +144,16 @@ class _TagSettingsState extends State<TagSettings> {
       tag: tag,
       existing: widget.tags ?? const [],
       onSave: (name, color) async {
-        if (tag == null) {
-          await widget.create(name, color);
-        } else {
-          await widget.update(tag.rowId, name, color);
+        try {
+          if (tag == null) {
+            await widget.create(name, color);
+          } else {
+            await widget.update(tag.rowId, name, color);
+          }
+        } catch (e) {
+          // 응답만 못 읽었다(서버는 저장했다) — 목록을 다시 받는다(검수 M3). 실패 글은 시트가 고른다
+          if (isUnconfirmedSave(e)) widget.onRetry();
+          rethrow;
         }
       },
     );
@@ -458,6 +465,9 @@ class _TagEditSheetState extends State<_TagEditSheet> {
   bool _touched = false;
   bool _submitting = false;
   bool _saveError = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   final _errorKey = GlobalKey();
 
   /// 저장된 색이 팔레트 밖이면 그 값 — "지금 색" 칸이 격자를 고른 뒤에도 남아 되돌릴 수 있다(color-swatch.md)
@@ -525,24 +535,29 @@ class _TagEditSheetState extends State<_TagEditSheet> {
       _submitting = true;
       _saveError = false;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       await widget.onSave(_nameCtrl.text.trim(), _color);
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _saveError = true;
+          _failure = e;
           _submitting = false;
         });
         // 키보드 · 큰 글자로 맨 위 Callout 이 화면 밖이면 올린다
         revealFormError(_errorKey);
       } else {
-        // 저장 중에 시트를 닫았다 — Callout 을 둘 자리가 없으니 스낵바로 알린다
+        // 폼이 사라졌다 — 저장 중에는 시트가 busy 라 닫히지 않으니 화면이 통째로 바뀐 때(라우터 이동 · 계정 전환)뿐이다.
+        // Callout 을 둘 자리가 없으니 스낵바로 알린다
         widget.snack?.show(
           message: widget.copy.saveFailed,
           tone: PSnackbarTone.critical,
         );
       }
       return;
+    } finally {
+      sheet?.setBusy(false);
     }
     if (!mounted) return;
     PBottomSheet.of(context).close(TagEditOutcome.saved);
@@ -572,7 +587,10 @@ class _TagEditSheetState extends State<_TagEditSheet> {
         spacing: PSpacing.x4,
         children: [
           if (_saveError)
-            FormErrorCallout(key: _errorKey, message: copy.saveFailed),
+            FormErrorCallout(
+              key: _errorKey,
+              message: saveFailureText(l, _failure, copy.saveFailed),
+            ),
           // 미리보기 — 색 타일 + 이름.
           Container(
             padding: const EdgeInsets.all(PSpacing.x3_5),

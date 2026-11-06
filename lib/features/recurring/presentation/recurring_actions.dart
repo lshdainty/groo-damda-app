@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.d
 import 'package:groo_damda_app/features/recurring/presentation/recurring_format.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 반복 하나를 켜고 끈다 — 전역 오류 스낵바는 끈다(화면이 고정 글로 알린다). 다시 켤 때 오늘이 회차면 서버가 그 거래를 바로
@@ -104,7 +105,15 @@ Future<bool> _toggleBody(
       }
     }
     await toggleRecurringRequest(container, it.rowId);
-  } catch (_) {
+  } catch (e) {
+    if (isUnconfirmedSave(e)) {
+      // 응답을 못 받았다 — 뒤집혔을 수 있다(API 는 뒤집기만 한다). [다시 시도] 없이 서버 값을 다시 받아 맞추고 한 문장(판단 ②)
+      container.invalidate(recurringListProvider);
+      container.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChangeIn(container);
+      snack.show(message: l.unconfirmedToggle, tone: PSnackbarTone.critical);
+      return false;
+    }
     snack.show(
       message: wantActive ? l.recResumeFailed : l.recPauseFailed,
       tone: PSnackbarTone.critical,
@@ -147,6 +156,8 @@ Future<bool> deleteRecurringWithNotice(
       snack?.show(message: l.recToastDeleted(name));
       onRetried?.call();
     },
+    kind: WriteKind.delete,
+    onUnconfirmed: () => container.invalidate(recurringListProvider),
   );
   if (ok) snack?.show(message: l.recToastDeleted(name));
   return ok;

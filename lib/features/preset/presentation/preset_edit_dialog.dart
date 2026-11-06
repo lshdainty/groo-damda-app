@@ -36,6 +36,7 @@ import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/forms/step_done.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 프리셋 이름 상한 — 카테고리 · 라벨 · 태그와 같은 12자. 목록 줄에 한 줄로 들어간다(웹 `PRESET_NAME_MAX`).
 const int kPresetNameMax = 12;
@@ -141,6 +142,9 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
 
   bool _attempted = false;
   bool _saveError = false;
+
+  /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
+  Object? _failure;
   bool _submitting = false;
   _Step _step = _Step.none;
   String _stepOrigin = '';
@@ -584,6 +588,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     // 요청이 오가는 동안 시트가 닫힐 수 있다 — 닫힌 뒤에는 ref 를 못 쓰므로 컨테이너를 먼저 잡는다
     final container = ProviderScope.containerOf(context);
     setState(() => _submitting = true);
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await container.read(presetRepositoryProvider.future);
       final name = _nameTrim;
@@ -648,10 +653,15 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       } catch (_) {}
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } catch (_) {
+    } catch (e) {
       // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글). 서버가 거절하든 저장소를 못 만들든 같다
       if (!mounted) return;
-      setState(() => _saveError = true);
+      // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+      if (isUnconfirmedSave(e)) container.invalidate(presetListProvider);
+      setState(() {
+        _saveError = true;
+        _failure = e;
+      });
       // 폼을 아래까지 내려 저장했으면 Callout 이 화면 밖이다 — 보이는 자리로 올린다
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final c = _saveErrorKey.currentContext;
@@ -660,6 +670,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         }
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
@@ -887,7 +898,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
                 key: _saveErrorKey,
                 tone: PCalloutTone.critical,
                 alert: true,
-                description: l.presetSaveFailed,
+                description: saveFailureText(l, _failure, l.presetSaveFailed),
               ),
             ),
           // 종류 — 고른 값이 곧 폼의 갈래라 Chip 하나 고르기(좌우 24 · 아래 8)

@@ -7,6 +7,7 @@ import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -43,12 +44,16 @@ class _CalendarFilterSheet extends ConsumerWidget {
         final repo = await ref.read(userCalendarRepositoryProvider.future);
         await repo.toggleVisibility(cal.rowId);
         ref.invalidate(userCalendarListProvider);
-      } catch (_) {
+      } catch (e) {
         // 바로 바뀌는 값 — 서버 값 그대로라 되돌릴 것이 없다. 스낵바 한 문장, 다시 시도 없음(요청은 silent).
+        // 응답을 못 받았으면 뒤집혔을 수 있다 — 목록을 다시 받아 체크를 서버 값에 맞추고 "바뀌었는지" 한 문장(판단 ②)
+        final unconfirmed = isUnconfirmedSave(e);
+        if (unconfirmed) ref.invalidate(userCalendarListProvider);
         if (context.mounted) {
-          PSnackbar.maybeOf(
-            context,
-          )?.show(message: l.calUpdateFailed, tone: PSnackbarTone.critical);
+          PSnackbar.maybeOf(context)?.show(
+            message: unconfirmed ? l.unconfirmedToggle : l.calUpdateFailed,
+            tone: PSnackbarTone.critical,
+          );
         }
       }
     }

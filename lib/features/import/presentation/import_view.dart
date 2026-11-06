@@ -28,6 +28,7 @@ import 'package:groo_damda_app/shared/ds/select_box/p_select_box.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 서버 한도(`application.yml` multipart 10MB) — 고르는 순간 미리 검사한다(서버도 같은 한도로 검사한다).
 const int kImportMaxBytes = 10 * 1024 * 1024;
@@ -220,7 +221,20 @@ class _ImportViewState extends ConsumerState<ImportView> {
         _result = res;
         _step = _Step.done;
       });
-    } on ApiException {
+    } on ApiException catch (e) {
+      // 응답을 못 받았다 — 가져왔을 수 있다(거래 수십 건). [다시 시도] 를 주면 두 번 들어간다 — 다시 받고 확인을
+      // 부탁한다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        ref.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChange(ref);
+        if (mounted) {
+          PSnackbar.maybeOf(context)?.show(
+            message: unconfirmedWriteText(l, WriteKind.save),
+            tone: PSnackbarTone.critical,
+          );
+        }
+        return;
+      }
       // 서버 글은 내지 않는다(요청은 silent) — 흐름은 멈추고 고정 글 한 문장 + [다시 시도].
       if (mounted) {
         PSnackbar.maybeOf(context)?.show(

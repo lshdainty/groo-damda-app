@@ -269,6 +269,7 @@ class _ManageList extends ConsumerWidget {
             debt: _debtGroups.contains(shown[i]),
             masked: masked,
             originals: originals,
+            invest: shown[i] == _Group.invest,
           ),
       ],
     );
@@ -284,9 +285,13 @@ class _GroupSection extends ConsumerWidget {
     required this.debt,
     required this.masked,
     required this.originals,
+    this.invest = false,
   });
 
   final Map<int, Asset> originals;
+
+  /// 투자 묶음 — 평가 시세를 못 받는 동안 머리 아래 띠(I-wrap-b2b 4).
+  final bool invest;
   final double? topInset;
   final String title;
   final List<Asset> items;
@@ -322,6 +327,13 @@ class _GroupSection extends ConsumerWidget {
             ),
           ),
         ),
+        // 시세를 못 받는 동안 평가액은 서버 잔액 · 직전 시세다 — 숫자는 두고 "지금 시세가 아니다" 를 띠로(I-wrap-b2b 4)
+        if (invest &&
+            items.isNotEmpty &&
+            ref.watch(valuationPriceFailedProvider))
+          AssetPriceFailure(
+            onRetry: () => refreshLiveValuation(ref.invalidate),
+          ),
         if (items.isEmpty)
           BudgetEmptyLine(l.assetGroupEmpty)
         else

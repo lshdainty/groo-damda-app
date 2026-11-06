@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/forms/time_sheet.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
@@ -54,6 +55,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
         ),
       ),
       body: prefsAsync.when(
+        // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+        skipError: true,
         loading: () => const _PrefsSkeleton(),
         error: (e, _) => ListView(
           children: [
@@ -108,8 +111,9 @@ class _Content extends ConsumerWidget {
   final String email;
 
   /// 부분 저장(낙관적) — 못 저장하면 알림 설정 저장 실패 글을 띄운다(critical · 고정 글 · [다시 시도] 없음).
+  /// 응답을 못 받았으면 되돌리지 않고 서버 값을 다시 받은 뒤 "바뀌었는지 확인하지 못했어요."(판단 ②).
   /// 띠는 앱 뿌리 호스트에 있어 화면을 닫아도 남으므로 호스트 · 글을 await 앞에서 잡는다.
-  Future<bool> _patch(
+  Future<void> _patch(
     BuildContext context,
     WidgetRef ref,
     Map<String, dynamic> fields,
@@ -117,13 +121,26 @@ class _Content extends ConsumerWidget {
   ) async {
     final snack = PSnackbar.maybeOf(context);
     final l = AppLocalizations.of(context);
-    final saved = await ref
+    final outcome = await ref
         .read(userPreferencesProvider.notifier)
         .patch(fields, optimistic: optimistic, silent: true);
-    if (!saved) {
-      snack?.show(message: l.notiPrefsSaveFailed, tone: PSnackbarTone.critical);
+    _notifyOutcome(snack, l, outcome);
+  }
+
+  /// 바로 바뀌는 값의 결과 알림 — 실패는 저장 실패 글, 응답 없음은 "바뀌었는지 확인하지 못했어요." 둘 다 한 문장 · 다시 시도 없음.
+  static void _notifyOutcome(
+    PSnackbarApi? snack,
+    AppLocalizations l,
+    WriteOutcome outcome,
+  ) {
+    final message = switch (outcome) {
+      WriteOutcome.done => null,
+      WriteOutcome.failed => l.notiPrefsSaveFailed,
+      WriteOutcome.unconfirmed => l.unconfirmedToggle,
+    };
+    if (message != null) {
+      snack?.show(message: message, tone: PSnackbarTone.critical);
     }
-    return saved;
   }
 
   /// 예산 알림 기준만 저장 뒤 한 곳을 더 비운다.
@@ -147,18 +164,18 @@ class _Content extends ConsumerWidget {
     AppLocalizations l,
     int v,
   ) async {
-    final saved = await container
+    final outcome = await container
         .read(userPreferencesProvider.notifier)
         .patch(
           {'budgetAlertThreshold': v},
           optimistic: (p) => p.copyWith(budgetAlertThreshold: v),
           silent: true,
         );
-    if (saved) {
+    // 응답을 못 받았어도 들어갔을 수 있다 — 게이지 쪽도 다시 받는다
+    if (outcome != WriteOutcome.failed) {
       container.invalidate(budgetAlertThresholdProvider);
-    } else {
-      snack?.show(message: l.notiPrefsSaveFailed, tone: PSnackbarTone.critical);
     }
+    _notifyOutcome(snack, l, outcome);
   }
 
   /// 스위치 줄 — 앞 아이콘 22 · 제목 · 설명 · 오른쪽 Switch 32. [enabled] 가 거짓이면 막힌 줄(켜진 모양 그대로 회색).
