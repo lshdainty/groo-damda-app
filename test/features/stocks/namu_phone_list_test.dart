@@ -712,7 +712,10 @@ void main() {
         reason: '상세 시세 실패는 머리 실패 한 벌이 맡고 호가 띠는 그리지 않는다',
       );
       final asked = detailAsked.length;
-      await tester.tap(findText('다시 시도').first);
+      // 보유 잔고 값이 머리에 보이므로 실패는 Callout actionable(상자 전체가 다시 시도) — I-wrap-b2b 4 디자인시스템 판단
+      final stale = find.byKey(const ValueKey('stocks-price-stale'));
+      expect(stale, findsOneWidget);
+      await tester.tap(stale);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(detailAsked.length, greaterThan(asked));
