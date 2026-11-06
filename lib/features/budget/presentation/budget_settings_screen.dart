@@ -33,7 +33,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 /// 예산 설정 화면 — 웹 `BudgetManager.tsx`(설정 > 예산 설정) 미러.
 ///
@@ -367,18 +367,22 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
                     // 지름길이지 유일한 경로가 아니다(spec swipe-actions.md · WCAG 2.1.1).
                     PSwipeActions(
                       key: ValueKey('budget-${b.rowId}'),
-                      groupTag: 'budget-settings-list',
+                      rowLabel: budgetRowName(
+                        l,
+                        categories.byRowId(b.categoryRowId!),
+                        b,
+                      ),
                       actions: [
                         PSwipeAction(
                           label: l.actionEdit,
                           icon: LucideIcons.pencil,
-                          kind: PSwipeKind.primary,
+                          kind: PSwipeActionKind.primary,
                           onSelect: () => _editCategory(b, budgets),
                         ),
                         PSwipeAction(
                           label: l.actionDelete,
                           icon: LucideIcons.trash2,
-                          kind: PSwipeKind.destructive,
+                          kind: PSwipeActionKind.destructive,
                           // 확인은 ds 확인창이 받는다 — 트레이를 먼저 닫은 뒤 화면 context 로 띄운다.
                           onSelect: () => _confirmDeleteCategory(
                             b,
@@ -419,19 +423,21 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
         ),
       ),
       // 흰 면 하나 — 카드 · 줄 사이 선 없음. 구역과 줄이 제 좌우 24 를 갖는다(I-08 18)
-      body: PScreenBandBody(
-        child: PPullToRefresh(
-          onRefresh: () async {
-            ref.invalidate(monthBudgetsProvider(_key));
-            ref.invalidate(
-              rangeSummaryProvider((
-                startDate: _monthStartStr,
-                endDate: _monthEndStr,
-              )),
-            );
-            await ref.read(monthBudgetsProvider(_key).future);
-          },
-          child: ListView(padding: EdgeInsets.zero, children: children),
+      body: PSwipeActionsProvider(
+        child: PScreenBandBody(
+          child: PPullToRefresh(
+            onRefresh: () async {
+              ref.invalidate(monthBudgetsProvider(_key));
+              ref.invalidate(
+                rangeSummaryProvider((
+                  startDate: _monthStartStr,
+                  endDate: _monthEndStr,
+                )),
+              );
+              await ref.read(monthBudgetsProvider(_key).future);
+            },
+            child: ListView(padding: EdgeInsets.zero, children: children),
+          ),
         ),
       ),
     );

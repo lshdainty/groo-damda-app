@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -416,6 +417,37 @@ void main() {
       expect(findText('삭제'), findsWidgets);
     });
 
+    testWidgets('밀기 — 한 줄만 열린다(화면에 Provider) · 두 줄을 차례로 밀면 앞 줄이 닫힌다', (
+      tester,
+    ) async {
+      await size(tester);
+      await tester.pumpWidget(
+        app(const CalendarLabelsScreen(), withRepo(_LabelRepo(labels))),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(PSwipeActionsProvider), findsWidgets);
+      Future<void> swipe(int i) async {
+        await tester.drag(
+          find.byKey(const ValueKey('swipe-row')).at(i),
+          const Offset(-300, 0),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      double x(int i) => tester
+          .widget<AnimatedContainer>(
+            find.byKey(const ValueKey('swipe-row')).at(i),
+          )
+          .transform!
+          .getTranslation()
+          .x;
+      await swipe(0);
+      expect(x(0), lessThan(0));
+      await swipe(1);
+      expect(x(1), lessThan(0));
+      expect(x(0), 0);
+    });
+
     testWidgets('편집 시트 바닥에 [삭제] — 수정 폼에만, 추가 폼에는 없다', (tester) async {
       await size(tester);
       final repo = _LabelRepo(labels);
@@ -426,7 +458,12 @@ void main() {
       await tester.tap(findPlain('출장').first);
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
-      expect(findText('삭제'), findsOneWidget);
+      // 줄 뒤 트레이의 [삭제] 가 아니라 시트 안의 것만 센다
+      Finder inSheet() => find.descendant(
+        of: find.byType(PBottomSheetContent),
+        matching: findText('삭제'),
+      );
+      expect(inSheet(), findsOneWidget);
 
       // 추가 폼 — 먼저 비운다(같은 모양이면 Navigator 가 재사용돼 열린 수정 시트가 남는다)
       await tester.pumpWidget(const SizedBox());
@@ -437,7 +474,7 @@ void main() {
       await tester.tap(findText('라벨 추가'));
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
-      expect(findText('삭제'), findsNothing);
+      expect(inSheet(), findsNothing);
     });
 
     testWidgets('[삭제] → 확인창 → 지움 — 시트가 닫히고 라벨을 다시 받는다', (tester) async {

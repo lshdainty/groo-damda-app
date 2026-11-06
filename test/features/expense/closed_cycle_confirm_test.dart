@@ -10,7 +10,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../support/add_tx_drive.dart';
 
@@ -199,7 +198,7 @@ Future<void> _pumpApp(
           type: MaterialType.transparency,
           child: PSnackbarHost(closeLabel: '닫기', child: child!),
         ),
-        home: Scaffold(body: SlidableAutoCloseBehavior(child: home)),
+        home: Scaffold(body: PSwipeActionsProvider(child: home)),
       ),
     ),
   );

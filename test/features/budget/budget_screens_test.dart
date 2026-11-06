@@ -41,7 +41,7 @@ import '../../support/plain_text.dart';
 import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 class _FakeBudgetRepo extends BudgetRepository {
   _FakeBudgetRepo() : super(Dio());

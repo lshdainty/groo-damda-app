@@ -26,7 +26,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 /// 저축 목표 관리 (설정 > 저축 목표) — design GoalManager 미러 (웹 SavingGoalManager 정합).
 ///
@@ -170,19 +170,19 @@ class SavingGoalScreen extends ConsumerWidget {
                   // (spec swipe-actions.md · WCAG 2.1.1).
                   PSwipeActions(
                     key: ValueKey('saving-goal-${goal.rowId}'),
-                    groupTag: 'saving-goal-list',
+                    rowLabel: goal.title,
                     actions: [
                       PSwipeAction(
                         label: l.actionEdit,
                         icon: LucideIcons.pencil,
-                        kind: PSwipeKind.primary,
+                        kind: PSwipeActionKind.primary,
                         onSelect: () =>
                             showSavingGoalEditDialog(context, edit: goal),
                       ),
                       PSwipeAction(
                         label: l.actionDelete,
                         icon: LucideIcons.trash2,
-                        kind: PSwipeKind.destructive,
+                        kind: PSwipeActionKind.destructive,
                         // 확인은 ds 확인창이 받는다(같은 삭제는 어디서 불러도 같은 글).
                         onSelect: () => _confirmDeleteGoal(context, ref, goal),
                       ),
@@ -214,13 +214,15 @@ class SavingGoalScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: PScreenBandBody(
-        child: PPullToRefresh(
-          onRefresh: () async {
-            ref.invalidate(savingGoalListProvider);
-            await ref.read(savingGoalListProvider.future);
-          },
-          child: ListView(padding: EdgeInsets.zero, children: [content]),
+      body: PSwipeActionsProvider(
+        child: PScreenBandBody(
+          child: PPullToRefresh(
+            onRefresh: () async {
+              ref.invalidate(savingGoalListProvider);
+              await ref.read(savingGoalListProvider.future);
+            },
+            child: ListView(padding: EdgeInsets.zero, children: [content]),
+          ),
         ),
       ),
     );

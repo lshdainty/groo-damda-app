@@ -330,6 +330,30 @@ void main() {
     expect(badge.left - edit.left, 12);
   });
 
+  testWidgets('줄 높이 46(제목만) 이어도 동작 칸이 넘치지 않고 56 이다', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        Brightness.light,
+        PSwipeActionsProvider(
+          child: PSwipeActions(
+            actions: [
+              _action(PSwipeActionKind.primary),
+              _action(PSwipeActionKind.destructive),
+            ],
+            rowLabel: '줄',
+            child: const SizedBox(height: 46, child: Text('제목만')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('swipe-action-수정'))).height,
+      56,
+    );
+    expect(tester.getSize(find.byKey(const ValueKey('swipe-row'))).height, 56);
+  });
+
   group('밀기', () {
     Future<void> pumpList(
       WidgetTester tester, {

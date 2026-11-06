@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:groo_damda_app/core/format/format_locale.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/features/sms/data/sms_android.dart';
@@ -209,19 +208,14 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
     );
   }
 
-  Widget _shell(
-    BuildContext context,
-    Widget? child,
-  ) => SlidableAutoCloseBehavior(
-    child: AppLockGate(
-      // 투명 Material — 호스트가 Navigator 바깥이라 Material 조상이 없으면 띠 글에 노란 이중 밑줄(기본 글 스타일 없음)이 간다.
-      child: Material(
-        type: MaterialType.transparency,
-        child: PSnackbarHost(
-          key: PSnackbar.appHostKey,
-          closeLabel: AppLocalizations.of(context).actionClose,
-          child: child ?? const SizedBox.shrink(),
-        ),
+  Widget _shell(BuildContext context, Widget? child) => AppLockGate(
+    // 투명 Material — 호스트가 Navigator 바깥이라 Material 조상이 없으면 띠 글에 노란 이중 밑줄(기본 글 스타일 없음)이 간다.
+    child: Material(
+      type: MaterialType.transparency,
+      child: PSnackbarHost(
+        key: PSnackbar.appHostKey,
+        closeLabel: AppLocalizations.of(context).actionClose,
+        child: child ?? const SizedBox.shrink(),
       ),
     ),
   );

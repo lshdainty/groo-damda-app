@@ -628,6 +628,8 @@ class _PSwipeActionsState extends State<PSwipeActions> {
                 key: const ValueKey('swipe-row'),
                 // 줄은 목록의 폭 전체다 — 줄이 내용만큼 쪼그라들면 밀 자리도 누를 자리도 좁아진다
                 width: double.infinity,
+                // 줄이 56 보다 낮으면 56 으로 — 동작 칸(56)이 줄 높이에 눌려 넘치지 않게(스펙 swipe-actions.md Size)
+                constraints: const BoxConstraints(minHeight: kSwipeMinHeight),
                 // 끄는 동안에는 손가락을 1:1 로 — 손을 뗀 뒤 자리를 잡을 때만 150ms 감속(모션 줄이기면 바로)
                 duration: dragging || reduceMotion
                     ? Duration.zero
@@ -648,7 +650,13 @@ class _PSwipeActionsState extends State<PSwipeActions> {
                     excludeFromSemantics: true,
                     child: AbsorbPointer(
                       absorbing: open || dragging,
-                      child: widget.child,
+                      // 낮은 줄은 56 안에서 세로 가운데 — 높이는 줄을 따른다(Column min)
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [widget.child],
+                      ),
                     ),
                   ),
                 ),
