@@ -64,6 +64,22 @@ class _BadBodyAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+/// 게이트웨이 [status] 응답(본문은 HTML) — 502 · 504 는 서버가 처리했을 수 있다, 503 은 실패.
+class _StatusAdapter implements HttpClientAdapter {
+  _StatusAdapter(this.status);
+  final int status;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async => ResponseBody.fromString('<html>gateway</html>', status);
+
+  @override
+  void close({bool force = false}) {}
+}
+
 /// 응답 대신 [type] 의 DioException — 응답을 받지 못함(receiveTimeout) · 연결 못 함(connectionTimeout).
 class _DioFailAdapter implements HttpClientAdapter {
   _DioFailAdapter(this.type);
@@ -483,6 +499,52 @@ void main() {
     expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
     expect(findTextContaining('서버 원문'), findsNothing);
   });
+
+  for (final (status, unconfirmed) in [
+    (502, true),
+    (504, true),
+    (503, false),
+  ]) {
+    testWidgets(
+      '[지금 결제] — 게이트웨이 $status 면 ${unconfirmed ? '확인 Callout · 청구를 다시 받는다' : '결제하지 못했어요'}(웹 2차 검수 M3)',
+      (tester) async {
+        final repo = AssetRepository(
+          Dio()..httpClientAdapter = _StatusAdapter(status),
+        );
+        var billingReads = 0;
+        await _open(
+          tester,
+          billing: upcomingBilling,
+          extraOverrides: [
+            assetRepositoryProvider.overrideWith((ref) async => repo),
+            cardBillingProvider.overrideWith((ref, id) async {
+              billingReads++;
+              return upcomingBilling;
+            }),
+          ],
+        );
+        await tester.tap(findText('지금 결제'));
+        await tester.pumpAndSettle();
+        final before = billingReads;
+        await tester.enterText(find.byType(TextField), '40000');
+        await tester.tap(findText('결제하기'));
+        await tester.pumpAndSettle();
+        expect(
+          findText('결제됐는지 확인하지 못했어요. 청구 내역에서 확인해주세요.'),
+          unconfirmed ? findsOneWidget : findsNothing,
+        );
+        expect(
+          findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'),
+          unconfirmed ? findsNothing : findsOneWidget,
+        );
+        if (unconfirmed) {
+          expect(billingReads, greaterThan(before));
+        } else {
+          expect(billingReads, before);
+        }
+      },
+    );
+  }
 
   for (final (type, unconfirmed) in [
     (DioExceptionType.receiveTimeout, true),

@@ -47,15 +47,21 @@ class ApiException implements Exception {
         // 정상 에러는 서버가 로케일(ko/en) 메시지를 body.message 로 내려주므로 그대로 사용.
         // 아래 fallback 은 서버가 message 를 안 준 예외적 경우만 → 로케일 문구(코드는 code 에만, 03F-011a).
         return ApiException(
-          code: body['code']?.toString() ?? 'HTTP_${res.statusCode}',
+          code: _gatewayLost(res.statusCode)
+              ? kApiNoResponseCode
+              : body['code']?.toString() ?? 'HTTP_${res.statusCode}',
           message: body['message']?.toString() ?? _l().apiErrorServer,
           statusCode: res.statusCode,
           cause: e,
         );
       }
       // non-JSON 응답(게이트웨이 502 등) — 서버 메시지 없음. 코드 값은 message 에 섞지 않는다.
+      // 502 · 504 는 게이트웨이 뒤에서 서버가 이미 처리했을 수 있다 — NO_RESPONSE(쓰기는 "확인하지 못했어요", 웹 2차 검수 M3).
+      // 503 · 그 밖 5xx 는 실패 그대로.
       return ApiException(
-        code: 'HTTP_${res.statusCode}',
+        code: _gatewayLost(res.statusCode)
+            ? kApiNoResponseCode
+            : 'HTTP_${res.statusCode}',
         message: _l().apiErrorServer,
         statusCode: res.statusCode,
         cause: e,
@@ -71,6 +77,9 @@ class ApiException implements Exception {
       cause: e,
     );
   }
+
+  /// 게이트웨이가 서버 응답을 잃었다(502 Bad Gateway · 504 Gateway Timeout) — 서버는 처리했을 수 있다.
+  static bool _gatewayLost(int? status) => status == 502 || status == 504;
 
   static bool _sentButNoResponse(DioException e) => switch (e.type) {
     DioExceptionType.receiveTimeout => true,
@@ -97,8 +106,8 @@ class ApiException implements Exception {
 /// 응답 형식 오류의 코드 — [ApiException.parse].
 const String kApiParseErrorCode = 'PARSE';
 
-/// 요청은 나갔는데 응답을 받지 못했다(응답 기다리다 시간 초과 · 받는 중 연결 끊김) — [ApiException.fromDio]. 서버가 처리했을 수
-/// 있어 쓰기에서는 실패가 아니라 "확인하지 못했어요" 다.
+/// 요청은 나갔는데 응답을 받지 못했다(응답 기다리다 시간 초과 · 받는 중 연결 끊김 · 게이트웨이 502 · 504) — [ApiException.fromDio].
+/// 서버가 처리했을 수 있어 쓰기에서는 실패가 아니라 "확인하지 못했어요" 다.
 const String kApiNoResponseCode = 'NO_RESPONSE';
 
 /// 저장소 공용 — 요청 · 응답 풀기에서 난 오류를 [ApiException] 하나로 올린다(저장소마다 `catch (e, s)` 에서 부른다).
