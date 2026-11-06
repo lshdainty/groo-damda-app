@@ -724,6 +724,10 @@ class LedgerCalendarGrid extends StatelessWidget {
   }
 }
 
+/// 남는 덩어리의 끝 — 필터 중 칩 줄 아래 여백 `x3`(12) 다음에 [LedgerHeaderDivider]. 주 달력 덩어리는 꺾쇠 단추(보이는 40 ·
+/// 아이콘 18)가 선 바로 위까지 차 꺾쇠 아이콘 아래가 선까지 11 이다 — 칩 줄은 테두리가 보이는 상자라 가까운 토큰 12 로 둔다.
+const double kLedgerKeepBottom = PSpacing.x3;
+
 /// 머리 아래 선 — Divider 1px `stroke-neutral-subtle` 화면 폭.
 class LedgerHeaderDivider extends StatelessWidget {
   const LedgerHeaderDivider({super.key});

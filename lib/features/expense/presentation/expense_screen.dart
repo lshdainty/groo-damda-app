@@ -525,15 +525,23 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
     // 남는 아래 줄 — 주 달력(펼친 월 달력) · 꺾쇠 · 선, 필터 중이면 칩 줄. 칩 줄은 무엇이 걸러져 보이는지 말하는 페이지 전체
     // 조절 줄이라 숨기지 않는다(숨기면 거른 채라는 걸 잊고 "거래가 이것뿐" 으로 읽는다). 캘린더는 필터 중 숨김(사용자 결정 · 웹 정합).
     final pinnedBottom = filterActive
-        ? KeyedSubtree(
+        ? Column(
             key: _pinKey,
-            child: LedgerFilterChips(
-              filter: _advFilter,
-              assetId: _assetIdFilter,
-              onClearAsset: _clearAssetFilter,
-              onChange: (f) => setState(() => _advFilter = f),
-              categories: categoriesAsync.value ?? const [],
-            ),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 주 달력 덩어리와 같은 끝 — 아래 여백 12 + 구분선. 없으면 목록 줄이 칩 바로 밑으로 잘려 들어간다
+              Padding(
+                padding: const EdgeInsets.only(bottom: kLedgerKeepBottom),
+                child: LedgerFilterChips(
+                  filter: _advFilter,
+                  assetId: _assetIdFilter,
+                  onClearAsset: _clearAssetFilter,
+                  onChange: (f) => setState(() => _advFilter = f),
+                  categories: categoriesAsync.value ?? const [],
+                ),
+              ),
+              const LedgerHeaderDivider(),
+            ],
           )
         : Column(
             key: _pinKey,

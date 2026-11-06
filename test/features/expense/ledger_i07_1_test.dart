@@ -659,6 +659,14 @@ void main() {
       await tester.drag(find.byType(ListView).first, const Offset(0, -600));
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(chips).dy, before, reason: '칩 줄은 숨지 않는다');
+      // 칩 줄 아래 여백 12 + 선 — 목록 줄이 칩 바로 밑으로 잘려 들어가지 않는다
+      final line = find.byType(LedgerHeaderDivider);
+      expect(line, findsOneWidget);
+      expect(
+        tester.getTopLeft(line).dy,
+        tester.getBottomLeft(chips).dy + kLedgerKeepBottom,
+      );
+      expect(kLedgerKeepBottom, PSpacing.x3);
       expect(
         tester.getTopLeft(chips).dy,
         moreOrLessEquals(
