@@ -557,6 +557,10 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
     ref.watch(defaultCurrencyProvider);
     final unitMap = _unitKrwMap();
     final total = _totalOf(unitMap, _holdings);
+    // 연동 시세를 처음부터 못 받았다 — 연동 줄 평가액을 모르니 합계도 모른다. 0 이라 하지 않고 "—"(디자인시스템 지시).
+    // 합계는 표시 전용이다 — 저장 본문에 싣지 않는다(보유가 있으면 balance 는 null, 연동 줄은 심볼 · 수량만, 서버가 시세로 셈)
+    final totalUnknown =
+        (_livePrices()?.loadFailed ?? false) && _holdings.any((h) => h.linked);
     final unit = currencyUnit(_currency);
     return AssetFormFrame(
       title: _isEdit
@@ -586,6 +590,7 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
         _HoldingsEditor(
           rows: _rows,
           total: total,
+          totalUnknown: totalUnknown,
           // 시세를 처음부터 못 받았다 — 연동 보유의 평가액 · 합계가 비어 "평가 0" 처럼 읽히면 안 된다. 그 자리 실패 +
           // [다시 시도](B2a 분할 실패와 같은 꼴, 디자인시스템 판단 5)
           pricesFailure: () {
@@ -633,10 +638,13 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
             label: l.assetHoldingValueLabel,
             description: l.assetBalanceAutoHelp,
             child: PInput(
-              key: const ValueKey('holdings-total'),
+              // 모름 ↔ 앎이 바뀌면 칸을 새로 그린다(initialValue)
+              key: ValueKey(
+                totalUnknown ? 'holdings-total-unknown' : 'holdings-total',
+              ),
               readOnly: true,
-              initialValue: formatAmountInput(total),
-              suffixText: wonUnit(),
+              initialValue: totalUnknown ? '—' : formatAmountInput(total),
+              suffixText: totalUnknown ? null : wonUnit(),
               tabularFigures: true,
             ),
           ),
@@ -664,6 +672,7 @@ class _HoldingsEditor extends StatelessWidget {
   const _HoldingsEditor({
     required this.rows,
     required this.total,
+    this.totalUnknown = false,
     required this.unitMap,
     required this.allowStock,
     required this.manualAddTypes,
@@ -683,6 +692,9 @@ class _HoldingsEditor extends StatelessWidget {
   /// 외화 계좌의 수동 평가액 · 매수원가 칸 아래 안내 "원화로 입력해요"(I-13). 원화 계좌는 null.
   final String? krwHint;
   final int total;
+
+  /// 연동 시세를 못 받아 합계를 모른다 — 머리 요약을 "—" 로.
+  final bool totalUnknown;
   final Map<String, double?> unitMap;
   final bool allowStock;
   final List<AssetHoldingType> manualAddTypes;
@@ -698,7 +710,11 @@ class _HoldingsEditor extends StatelessWidget {
     return PField(
       label: l.assetHoldings,
       headerTrailing: Text(
-        keepAll(l.assetHoldingsSummary(rows.length, krw(total))),
+        keepAll(
+          totalUnknown
+              ? l.assetHoldingsSummaryUnknown(rows.length)
+              : l.assetHoldingsSummary(rows.length, krw(total)),
+        ),
         textAlign: TextAlign.end,
         // 머리 값 글 — slider.yaml headerValue(t5 · 700 · fg-neutral · 고른 숫자 모양)
         style: PTypography.t5.copyWith(

@@ -2071,6 +2071,12 @@ abstract class AppLocalizations {
   /// **'평가금액'**
   String get assetHoldingBalance;
 
+  /// 투자 편집 보유 머리 요약 — 연동 시세를 못 받아 합계를 모를 때(0 이라 하지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}종목 · —'**
+  String assetHoldingsSummaryUnknown(int count);
+
   /// No description provided for @assetHoldingsSummary.
   ///
   /// In ko, this message translates to:

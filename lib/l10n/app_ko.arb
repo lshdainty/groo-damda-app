@@ -523,6 +523,8 @@
     }
   },
   "assetHoldingBalance": "평가금액",
+  "assetHoldingsSummaryUnknown": "{count}종목 · —",
+  "@assetHoldingsSummaryUnknown": {"placeholders": {"count": {"type": "int"}}, "description": "투자 편집 보유 머리 요약 — 연동 시세를 못 받아 합계를 모를 때(0 이라 하지 않는다)"},
   "assetHoldingsSummary": "{count}종목 · {amount}원",
   "@assetHoldingsSummary": {
     "placeholders": {

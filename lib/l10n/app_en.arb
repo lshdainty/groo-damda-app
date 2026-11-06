@@ -487,6 +487,8 @@
     }
   },
   "assetHoldingBalance": "Holdings",
+  "assetHoldingsSummaryUnknown": "{count} holdings · —",
+  "@assetHoldingsSummaryUnknown": {"placeholders": {"count": {"type": "int"}}},
   "assetHoldingsSummary": "{count} holdings · ₩{amount}",
   "@assetHoldingsSummary": {
     "placeholders": {

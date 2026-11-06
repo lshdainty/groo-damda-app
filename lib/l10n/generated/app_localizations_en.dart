@@ -1072,6 +1072,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetHoldingBalance => 'Holdings';
 
   @override
+  String assetHoldingsSummaryUnknown(int count) {
+    return '$count holdings · —';
+  }
+
+  @override
   String assetHoldingsSummary(int count, String amount) {
     return '$count holdings · ₩$amount';
   }

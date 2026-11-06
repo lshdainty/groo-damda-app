@@ -1051,6 +1051,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetHoldingBalance => '평가금액';
 
   @override
+  String assetHoldingsSummaryUnknown(int count) {
+    return '$count종목 · —';
+  }
+
+  @override
   String assetHoldingsSummary(int count, String amount) {
     return '$count종목 · $amount원';
   }
