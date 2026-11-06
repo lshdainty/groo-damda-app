@@ -369,6 +369,24 @@ void main() {
   });
 
   group('관측 리포트', () {
+    for (final (tag, sky, coll) in [
+      ('날별 관측', true, false),
+      ('모은 별빛', false, true),
+    ]) {
+      testWidgets('$tag 를 처음 받지 못하면 "관측 0" 이 아니라 그 자리 실패 + 다시 시도', (
+        tester,
+      ) async {
+        await pumpApp(
+          tester,
+          const ForestReportScreen(),
+          overrides: _ov(failSky: sky, failColl: coll).cast(),
+        );
+        expect(_t('관측 리포트를 불러오지 못했어요'), findsOneWidget);
+        expect(findText('다시 시도'), findsOneWidget);
+        expect(findText('관측 결과'), findsNothing);
+      });
+    }
+
     for (final streak in [128, 1000]) {
       for (final scale in [1.0, 2.0]) {
         semTest('도장 — $streak일째 x$scale 글이 원 안에 든다', (tester) async {

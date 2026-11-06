@@ -12,6 +12,10 @@
   "actionConfirm": "확인",
   "actionClose": "닫기",
   "actionRetry": "다시 시도",
+  "queryRefreshFailed": "새로 고치지 못했어요.",
+  "@queryRefreshFailed": {"description": "보던 내용이 있는 채 다시 받기에 실패했을 때 공용 critical 스낵바 — [다시 시도] 없음, 한 문장(I-wrap-b2b 2-1)"},
+  "queryReferenceFailed": "일부 정보를 불러오지 못했어요.",
+  "@queryReferenceFailed": {"description": "참조 데이터(카테고리 · 계좌 …)를 값 없이 받지 못했을 때 공용 critical 스낵바 + [다시 시도] — 웹 common query.referenceFailed"},
   "actionApply": "적용",
   "actionReset": "초기화",
   "actionSearch": "검색",
@@ -181,6 +185,8 @@
   "assetChartTableMonth": "달",
   "assetChartTableWeek": "주",
   "assetTxLoadFailed": "내역을 불러오지 못했어요",
+  "assetTradesLoadFailed": "거래 기록 정보를 불러오지 못했어요",
+  "@assetTradesLoadFailed": {"description": "투자 자산 상세 거래 기록 구역을 처음 받지 못했을 때 Result Section 제목 — 웹 query.failedNamed(name: trade.recordName)"},
   "assetMonthTx": "이번 달 내역",
   "assetHoldingLinkedPending": "시세 연동 대기",
   "assetPeriodAria": "추이 기간",
@@ -5214,6 +5220,8 @@
   "expLinked": "연결됨",
   "expSplitLoadFailed": "나눈 내역을 불러오지 못했어요",
   "expSplitLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
+  "txHistoryLoadFailed": "이전 거래 정보를 불러오지 못했어요",
+  "@txHistoryLoadFailed": {"description": "거래 상세 \"이 가맹점 이번 달\" 구역을 처음 받지 못했을 때 Result Section 제목 — 웹 query.failedNamed(name: txDetail.historyName)"},
   "expRefundDateToday": "{date} · 오늘",
   "@expRefundDateToday": {
     "placeholders": {

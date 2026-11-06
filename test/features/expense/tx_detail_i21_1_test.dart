@@ -215,6 +215,7 @@ Future<void> _pump(
   List<ExpenseSplit> splits = const [],
   bool splitsFail = false,
   List<Expense> history = const [],
+  bool historyFail = false,
   List<RecurringTransaction> recurring = const [],
   double width = 390,
   double textScale = 1,
@@ -239,7 +240,10 @@ Future<void> _pump(
           if (splitsFail) throw Exception('서버 원문 — 화면에 그리지 않는다');
           return splits;
         }),
-        merchantMonthExpensesProvider.overrideWith((ref, key) async => history),
+        merchantMonthExpensesProvider.overrideWith((ref, key) async {
+          if (historyFail) throw Exception('서버 원문 — 화면에 그리지 않는다');
+          return history;
+        }),
         recurringListProvider.overrideWith((ref) async => recurring),
         dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
@@ -441,6 +445,25 @@ void main() {
 
       expect(find.byType(PResultSection), findsOneWidget);
       expect(findText('나눈 내역을 불러오지 못했어요'), findsOneWidget);
+      expect(findTextContaining('서버 원문'), findsNothing);
+    });
+
+    testWidgets('이 가맹점 이번 달을 처음 받지 못하면 "처음 이용" 처럼 비지 않고 그 자리 실패 + 다시 시도', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _opener((ctx) => showTxDetailDialog(ctx, _worst)),
+        historyFail: true,
+      );
+      await _openDetail(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('tx-detail-history-failure')),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      expect(findText('이전 거래 정보를 불러오지 못했어요'), findsOneWidget);
+      expect(findText('이 가맹점 이번 달'), findsNothing);
       expect(findTextContaining('서버 원문'), findsNothing);
     });
 

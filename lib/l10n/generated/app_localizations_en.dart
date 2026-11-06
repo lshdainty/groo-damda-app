@@ -36,6 +36,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionRetry => 'Retry';
 
   @override
+  String get queryRefreshFailed => 'Couldn\'t refresh.';
+
+  @override
+  String get queryReferenceFailed => 'Some information couldn\'t be loaded.';
+
+  @override
   String get actionApply => 'Apply';
 
   @override
@@ -449,6 +455,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetTxLoadFailed => 'Couldn\'t load the transactions';
+
+  @override
+  String get assetTradesLoadFailed => 'Couldn\'t load the trade history info';
 
   @override
   String get assetMonthTx => 'This month';
@@ -9291,6 +9300,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expSplitLoadFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get txHistoryLoadFailed =>
+      'Couldn\'t load the previous transactions info';
 
   @override
   String expRefundDateToday(String date) {

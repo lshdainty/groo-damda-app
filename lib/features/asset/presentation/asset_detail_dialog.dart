@@ -459,24 +459,21 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     // 한 건이 자산 두 개에 걸치므로 보내는 쪽·받는 쪽 둘 다 확인한다(서버 필터는 기간만 지원).
     final monthPrefix =
         '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}';
-    final assetTransfers =
-        (ref
-                    .watch(
-                      assetTransfersProvider((startDate: null, endDate: null)),
-                    )
-                    .value ??
-                const <AssetTransfer>[])
-            .where(
-              (tr) =>
-                  (tr.fromAssetRowId == asset.rowId ||
-                      tr.toAssetRowId == asset.rowId) &&
-                  // 지출과 같은 규칙 — "최근 거래" 에는 지나간 것만 올린다.
-                  !isScheduledTx(tr.transferDate) &&
-                  // 체크카드 "이번 달 내역" 은 이체도 당월만 — 지출과 기간을 맞춘다.
-                  (!isCheckLinked ||
-                      (tr.transferDate ?? '').startsWith(monthPrefix)),
-            )
-            .toList();
+    final transfersAsync = ref.watch(
+      assetTransfersProvider((startDate: null, endDate: null)),
+    );
+    final assetTransfers = (transfersAsync.value ?? const <AssetTransfer>[])
+        .where(
+          (tr) =>
+              (tr.fromAssetRowId == asset.rowId ||
+                  tr.toAssetRowId == asset.rowId) &&
+              // 지출과 같은 규칙 — "최근 거래" 에는 지나간 것만 올린다.
+              !isScheduledTx(tr.transferDate) &&
+              // 체크카드 "이번 달 내역" 은 이체도 당월만 — 지출과 기간을 맞춘다.
+              (!isCheckLinked ||
+                  (tr.transferDate ?? '').startsWith(monthPrefix)),
+        )
+        .toList();
     // 머리 수 · 빈 판정은 이체까지 센다(웹 relatedItems).
     final relatedCount =
         (recentAsync.value?.length ?? 0) + assetTransfers.length;
@@ -586,11 +583,20 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
             padding: gutterPad,
             child: _RecentExpenses(
               async: recentAsync,
-              onRetry: () => ref.invalidate(
-                isCheckLinked
-                    ? assetPeriodExpensesProvider
-                    : expensesByAssetProvider,
-              ),
+              transfersAsync: transfersAsync,
+              onRetry: () {
+                ref.invalidate(
+                  isCheckLinked
+                      ? assetPeriodExpensesProvider
+                      : expensesByAssetProvider,
+                );
+                // 이체를 못 받았으면 같이 — 웹 retryRelated(내역 · 이체 둘)
+                if (transfersAsync.loadFailed) {
+                  ref.invalidate(
+                    assetTransfersProvider((startDate: null, endDate: null)),
+                  );
+                }
+              },
               emptyText: l.assetNoLinkedTx,
               transfers: assetTransfers,
               perspectiveAssetRowId: asset.rowId,
@@ -750,7 +756,25 @@ class _TradeHistory extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final trades = ref.watch(assetTradesProvider(assetRowId)).value ?? const [];
+    final tradesQ = ref.watch(assetTradesProvider(assetRowId));
+    // 처음 받기 실패가 "기록 없음" 처럼 사라지면 안 된다 — 그 자리 실패 + 다시 시도(웹 HoldingsSection tradesQ)
+    if (tradesQ.loadFailed) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(
+          PSpacing.globalGutter,
+          PSpacing.x4,
+          PSpacing.globalGutter,
+          0,
+        ),
+        child: BudgetFailure(
+          key: const ValueKey('asset-detail-trades-failure'),
+          title: l.assetTradesLoadFailed,
+          retrying: tradesQ.loadRetrying,
+          onRetry: () => ref.invalidate(assetTradesProvider(assetRowId)),
+        ),
+      );
+    }
+    final trades = tradesQ.value ?? const [];
     if (trades.isEmpty) return const SizedBox.shrink();
     final holdings =
         ref
@@ -1469,11 +1493,15 @@ class _RecentExpenses extends StatelessWidget {
     required this.tokens,
     required this.onRetry,
     required this.emptyText,
+    this.transfersAsync,
     this.transfers = const [],
     this.perspectiveAssetRowId,
     this.currencyOf,
   });
   final AsyncValue<List<Expense>> async;
+
+  /// 이 자산에 걸린 이체를 받는 질의 — 처음 받기 실패면 내역 실패와 한 자리(웹 relatedFailed: 내역 · 이체 어느 쪽이든).
+  final AsyncValue<Object?>? transfersAsync;
 
   /// 계좌 rowId → 통화 — 이체 줄이 보내는 · 받는 계좌 통화로 금액을 찍는다(I-13).
   final String? Function(int assetRowId)? currencyOf;
@@ -1549,10 +1577,11 @@ class _RecentExpenses extends StatelessWidget {
       );
     }
     // 실패가 빈 글로 보이면 안 된다 — 값이 없는 실패는 띠 + 다시 시도.
-    if (async.loadFailed) {
+    final transfersFailed = transfersAsync?.loadFailed ?? false;
+    if (async.loadFailed || transfersFailed) {
       return BudgetFailure(
         title: AppLocalizations.of(context).assetTxLoadFailed,
-        retrying: async.loadRetrying,
+        retrying: async.loadRetrying || (transfersAsync?.loadRetrying ?? false),
         onRetry: onRetry,
       );
     }

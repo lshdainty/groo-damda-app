@@ -36,6 +36,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionRetry => '다시 시도';
 
   @override
+  String get queryRefreshFailed => '새로 고치지 못했어요.';
+
+  @override
+  String get queryReferenceFailed => '일부 정보를 불러오지 못했어요.';
+
+  @override
   String get actionApply => '적용';
 
   @override
@@ -442,6 +448,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetTxLoadFailed => '내역을 불러오지 못했어요';
+
+  @override
+  String get assetTradesLoadFailed => '거래 기록 정보를 불러오지 못했어요';
 
   @override
   String get assetMonthTx => '이번 달 내역';
@@ -9081,6 +9090,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expSplitLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get txHistoryLoadFailed => '이전 거래 정보를 불러오지 못했어요';
 
   @override
   String expRefundDateToday(String date) {

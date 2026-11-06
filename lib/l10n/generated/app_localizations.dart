@@ -152,6 +152,18 @@ abstract class AppLocalizations {
   /// **'다시 시도'**
   String get actionRetry;
 
+  /// 보던 내용이 있는 채 다시 받기에 실패했을 때 공용 critical 스낵바 — [다시 시도] 없음, 한 문장(I-wrap-b2b 2-1)
+  ///
+  /// In ko, this message translates to:
+  /// **'새로 고치지 못했어요.'**
+  String get queryRefreshFailed;
+
+  /// 참조 데이터(카테고리 · 계좌 …)를 값 없이 받지 못했을 때 공용 critical 스낵바 + [다시 시도] — 웹 common query.referenceFailed
+  ///
+  /// In ko, this message translates to:
+  /// **'일부 정보를 불러오지 못했어요.'**
+  String get queryReferenceFailed;
+
   /// No description provided for @actionApply.
   ///
   /// In ko, this message translates to:
@@ -937,6 +949,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'내역을 불러오지 못했어요'**
   String get assetTxLoadFailed;
+
+  /// 투자 자산 상세 거래 기록 구역을 처음 받지 못했을 때 Result Section 제목 — 웹 query.failedNamed(name: trade.recordName)
+  ///
+  /// In ko, this message translates to:
+  /// **'거래 기록 정보를 불러오지 못했어요'**
+  String get assetTradesLoadFailed;
 
   /// No description provided for @assetMonthTx.
   ///
@@ -16332,6 +16350,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잠시 뒤 다시 시도해주세요.'**
   String get expSplitLoadFailedDesc;
+
+  /// 거래 상세 "이 가맹점 이번 달" 구역을 처음 받지 못했을 때 Result Section 제목 — 웹 query.failedNamed(name: txDetail.historyName)
+  ///
+  /// In ko, this message translates to:
+  /// **'이전 거래 정보를 불러오지 못했어요'**
+  String get txHistoryLoadFailed;
 
   /// No description provided for @expRefundDateToday.
   ///

@@ -9,6 +9,8 @@
   "actionConfirm": "Confirm",
   "actionClose": "Close",
   "actionRetry": "Retry",
+  "queryRefreshFailed": "Couldn't refresh.",
+  "queryReferenceFailed": "Some information couldn't be loaded.",
   "actionApply": "Apply",
   "actionReset": "Reset",
   "actionSearch": "Search",
@@ -177,6 +179,7 @@
   "assetChartTableMonth": "Month",
   "assetChartTableWeek": "Week",
   "assetTxLoadFailed": "Couldn't load the transactions",
+  "assetTradesLoadFailed": "Couldn't load the trade history info",
   "assetMonthTx": "This month",
   "assetHoldingLinkedPending": "awaiting live price",
   "assetPeriodAria": "Trend period",
@@ -4942,6 +4945,7 @@
   "expLinked": "Linked",
   "expSplitLoadFailed": "Could not load the split items",
   "expSplitLoadFailedDesc": "Please try again in a moment.",
+  "txHistoryLoadFailed": "Couldn't load the previous transactions info",
   "expRefundDateToday": "{date} · Today",
   "@expRefundDateToday": {
     "placeholders": {

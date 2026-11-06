@@ -31,6 +31,7 @@ import 'package:groo_damda_app/features/expense_split/presentation/split_step.da
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
 import 'package:groo_damda_app/features/recurring/presentation/recurring_form.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
@@ -843,17 +844,20 @@ class _HistoryHost extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final all =
-        ref
-            .watch(
-              merchantMonthExpensesProvider((
-                merchant: merchant,
-                year: year,
-                month: month,
-              )),
-            )
-            .value ??
-        const <Expense>[];
+    final key = merchantMonthExpensesProvider((
+      merchant: merchant,
+      year: year,
+      month: month,
+    ));
+    final async = ref.watch(key);
+    // 처음 받기 실패가 "처음 이용" 처럼 비어 보이면 안 된다 — 그 자리 실패 + 다시 시도(웹 TxDetailDialog historyQ)
+    if (async.loadFailed) {
+      return TxHistoryFailure(
+        retrying: async.loadRetrying,
+        onRetry: () => ref.invalidate(key),
+      );
+    }
+    final all = async.value ?? const <Expense>[];
     final history = txHistoryOf(all, expense.rowId);
     if (history.rows.isEmpty) return const SizedBox.shrink();
     return TxHistorySection(

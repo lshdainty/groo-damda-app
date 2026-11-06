@@ -494,6 +494,37 @@ class TxSplitFailure extends StatelessWidget {
   }
 }
 
+/// "이 가맹점 이번 달"(이전 거래)을 처음 받지 못했을 때 — 그 자리 Result Section medium + [다시 시도]. 글은 웹
+/// `query.failedNamed`(name: `txDetail.historyName`) 와 같다.
+class TxHistoryFailure extends StatelessWidget {
+  const TxHistoryFailure({
+    super.key,
+    required this.onRetry,
+    this.retrying = false,
+  });
+  final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원(skeleton.md:139).
+  final bool retrying;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return PResultSection(
+      key: const ValueKey('tx-detail-history-failure'),
+      kind: PResultKind.failure,
+      size: PResultSize.medium,
+      title: l.txHistoryLoadFailed,
+      description: l.expSplitLoadFailedDesc,
+      primaryAction: PResultAction(
+        label: l.actionRetry,
+        loading: retrying,
+        onPressed: onRetry,
+      ),
+    );
+  }
+}
+
 /// 나눈 내역 불러오는 중 — 머리 + 줄 Skeleton 둘.
 class TxSplitSkeleton extends StatelessWidget {
   const TxSplitSkeleton({super.key});
