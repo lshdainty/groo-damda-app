@@ -309,7 +309,8 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
           ..invalidate(constellationCollectionProvider);
       }
       if (!mounted) {
-        // 저장 중에 시트를 닫았다 — 실패 Callout 을 둘 자리가 없으니 스낵바 + [다시 시도] 로 알린다(L8 · N4)
+        // 폼이 사라졌다 — 저장 중에는 시트가 busy 라 닫히지 않으니, 남는 길은 화면이 통째로 바뀐 때(라우터 이동 · 계정 전환)
+        // 뿐이다. 실패 Callout 을 둘 자리가 없으니 스낵바 + [다시 시도] 로 알린다(L8 · N4)
         _retrySnack(c, snack, l, args);
         return;
       }

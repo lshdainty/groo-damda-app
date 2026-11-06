@@ -548,7 +548,8 @@ class _TagEditSheetState extends State<_TagEditSheet> {
         // 키보드 · 큰 글자로 맨 위 Callout 이 화면 밖이면 올린다
         revealFormError(_errorKey);
       } else {
-        // 저장 중에 시트를 닫았다 — Callout 을 둘 자리가 없으니 스낵바로 알린다
+        // 폼이 사라졌다 — 저장 중에는 시트가 busy 라 닫히지 않으니 화면이 통째로 바뀐 때(라우터 이동 · 계정 전환)뿐이다.
+        // Callout 을 둘 자리가 없으니 스낵바로 알린다
         widget.snack?.show(
           message: widget.copy.saveFailed,
           tone: PSnackbarTone.critical,
