@@ -9709,40 +9709,58 @@ abstract class AppLocalizations {
   /// **'고급 필터'**
   String get searchAdvancedFilter;
 
+  /// No description provided for @searchAdvancedOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'고급 필터, 적용 중'**
+  String get searchAdvancedOn;
+
+  /// No description provided for @searchHeading.
+  ///
+  /// In ko, this message translates to:
+  /// **'검색'**
+  String get searchHeading;
+
   /// No description provided for @searchHint.
   ///
   /// In ko, this message translates to:
-  /// **'거래 검색...'**
+  /// **'거래 검색'**
   String get searchHint;
 
-  /// No description provided for @searchStartHint.
+  /// No description provided for @searchTypeGroup.
   ///
   /// In ko, this message translates to:
-  /// **'시작'**
-  String get searchStartHint;
+  /// **'거래 종류'**
+  String get searchTypeGroup;
 
-  /// No description provided for @searchEndHint.
+  /// No description provided for @searchBadAmount.
   ///
   /// In ko, this message translates to:
-  /// **'종료'**
-  String get searchEndHint;
+  /// **'최소 금액을 최대 금액보다 작게 해주세요'**
+  String get searchBadAmount;
 
   /// No description provided for @searchFailed.
   ///
   /// In ko, this message translates to:
-  /// **'검색 실패'**
+  /// **'검색하지 못했어요'**
   String get searchFailed;
+
+  /// No description provided for @searchFailedDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 시도해주세요.'**
+  String get searchFailedDesc;
 
   /// No description provided for @searchEmptyHint.
   ///
   /// In ko, this message translates to:
-  /// **'키워드, 가맹점, 메모로 검색하세요'**
+  /// **'키워드, 가맹점, 메모로 검색해보세요'**
   String get searchEmptyHint;
 
   /// No description provided for @searchNoResults.
   ///
   /// In ko, this message translates to:
-  /// **'결과가 없습니다'**
+  /// **'결과가 없어요'**
   String get searchNoResults;
 
   /// No description provided for @statsTabTrend.
