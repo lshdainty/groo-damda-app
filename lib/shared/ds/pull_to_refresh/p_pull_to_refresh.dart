@@ -168,7 +168,7 @@ class PPullToRefreshState extends State<PPullToRefresh>
     await _refresh();
   }
 
-  /// 새로 고친다 — 내용이 88 에 머물고 [PPullToRefresh.onRefresh] 가 끝나면(성공 · 실패 모두) 제자리로. 실패하면 Snackbar.
+  /// 새로 고친다 — 내용이 88 에 머물고 [PPullToRefresh.onRefresh] 가 끝나면(성공 · 실패 모두) 제자리로. 실패하면 Snackbar 한 문장.
   Future<void> _refresh() async {
     _setState(PPullToRefreshPhase.refreshing);
     _animateTo(kPullToRefreshThreshold);
@@ -189,20 +189,14 @@ class PPullToRefreshState extends State<PPullToRefresh>
     );
   }
 
-  /// 다시 하면 되는 가벼운 실패 — ds Snackbar critical + "다시 시도"(snackbar.md:71). 고정 문구만(서버 글 금지, :128).
-  /// 액션은 같은 새로 고침을 다시 부른다. 호스트가 없는 자리(일부 테스트)는 조용히 둔다.
+  /// 가벼운 실패 — ds Snackbar critical 한 문장 "새로 고치지 못했어요."([다시 시도] 없음 — 다시 당기면 된다). 앱 공용
+  /// 다시 받기 실패 스낵바와 같은 모양 · 같은 글이다(I-wrap-b2b 중간 검수 3). 고정 문구만(서버 글 금지). 호스트가 없는
+  /// 자리(일부 테스트)는 조용히 둔다.
   void _notifyFailed() {
     final l = dsL(context);
     PSnackbar.maybeOf(context)?.show(
       message: l?.dsPullToRefreshFailed ?? '새로 고치지 못했어요.',
       tone: PSnackbarTone.critical,
-      action: PSnackbarAction(
-        label: l?.dsCommonRetry ?? '다시 시도',
-        onPressed: () {
-          // 그 사이 다른 새로 고침이 돌고 있거나 끌고 있으면 겹쳐 돌리지 않는다
-          if (mounted && _state == PPullToRefreshPhase.idle) _refresh();
-        },
-      ),
     );
   }
 

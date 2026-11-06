@@ -14641,7 +14641,7 @@ abstract class AppLocalizations {
   /// **'새로 고치는 중'**
   String get dsPullToRefreshLabel;
 
-  /// 당겨서 새로 고침이 실패했을 때 Snackbar 글 — 보던 내용은 그대로 두고 알린다. 다시 하는 법은 액션(dsCommonRetry — 다시 시도)이 말한다
+  /// 당겨서 새로 고침이 실패했을 때 Snackbar 한 문장 — 보던 내용은 그대로 두고 알린다. [다시 시도] 없음(다시 당기면 된다), 공용 queryRefreshFailed 와 같은 글
   ///
   /// In ko, this message translates to:
   /// **'새로 고치지 못했어요.'**
