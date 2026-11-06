@@ -8,7 +8,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
-import 'package:groo_damda_app/features/subscription/presentation/broker_connect_card.dart';
+import 'package:groo_damda_app/features/subscription/presentation/broker_connect_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 
@@ -65,6 +65,9 @@ Future<_Repo> _run(
   // 연결 상태를 보는 화면이 있는 것처럼 — 무효화되면 다시 받는다
   container.listen(brokerConnectionsProvider, (_, _) {});
   await container.read(brokerConnectionsProvider.future);
+  tester.view.physicalSize = const Size(390 * 2, 1400 * 2);
+  tester.view.devicePixelRatio = 2;
+  addTearDown(tester.view.reset);
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -73,19 +76,13 @@ Future<_Repo> _run(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
-        home: const Scaffold(
-          body: SingleChildScrollView(
-            child: BrokerConnectCard(
-              connection: _conn,
-              showPrimaryAction: false,
-            ),
-          ),
-        ),
+        home: const BrokerConnectScreen(broker: 'NAMU'),
       ),
     ),
   );
   await tester.enterText(find.byType(TextField).at(0), 'KEY123');
   await tester.enterText(find.byType(TextField).at(1), 'SECRET456');
+  await tester.pump(); // 두 칸이 차야 [연결하기] 가 켜진다
   await tester.tap(findText('연결하기'));
   await tester.pumpAndSettle();
   return repo;

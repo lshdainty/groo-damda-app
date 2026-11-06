@@ -52,6 +52,7 @@ import 'package:groo_damda_app/features/stats/presentation/stats_screen.dart';
 import 'package:groo_damda_app/features/stocks/presentation/namu_stock_pages.dart';
 import 'package:groo_damda_app/features/stocks/presentation/stocks_screen.dart';
 import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dart';
+import 'package:groo_damda_app/features/subscription/presentation/broker_connect_screen.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_gate.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_link_screen.dart';
 import 'package:groo_damda_app/features/subscription/presentation/subscription_screen.dart';
@@ -203,6 +204,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings/securities',
         builder: (_, _) => const SecuritiesLinkScreen(),
+      ),
+      // 증권사 한 곳 — 첫 단계(목록)에서 push. 같은 화면 안 교체가 아니라 별도 라우트(예측형 뒤로가기, I-wrap-b1 β)
+      GoRoute(
+        path: '/settings/securities/:broker',
+        builder: (_, state) =>
+            BrokerConnectScreen(broker: state.pathParameters['broker']!),
       ),
       // 구독 관리 — 계정 > 구독·결제 줄에서 push 진입(I-14 3-2A, 옛 바텀시트를 대신한다).
       GoRoute(

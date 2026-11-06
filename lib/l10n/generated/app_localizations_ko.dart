@@ -54,7 +54,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksStaleLastBalance => '보이는 값은 시세가 아닌 마지막 잔액이에요.';
 
   @override
-  String get securitiesLeaveBody => '입력한 내용이 사라져요.';
+  String get securitiesLeaveBody => '작성한 내용이 사라져요.';
 
   @override
   String get withdrawUnconfirmed => '해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.';
@@ -5524,16 +5524,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get stocksChartTokenFailed => '토큰 발급 실패';
-
-  @override
-  String get stocksChartHttpsError => '보안 오류: 차트 WebView 가 HTTPS 가 아닙니다';
-
-  @override
-  String get stocksChartInitFailed => '차트 초기화 실패';
-
-  @override
-  String get stocksChartLoadFailed => '차트를 불러올 수 없어요';
+  String get stocksChartLoadFailed => '차트를 불러오지 못했어요.';
 
   @override
   String get stocksSearch => '종목 검색';
@@ -6139,12 +6130,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subConnected => '연결됨';
 
   @override
-  String subBrokerLastVerified(String date) {
-    return '마지막 검증 · $date';
+  String subBrokerStatusConnectedAt(String date) {
+    return '연결됨 · $date 확인';
   }
 
   @override
-  String get subBrokerCollecting => '보유 주식·시세 자동 수집 중';
+  String get subBrokerStatusNone => '연결 안 됨';
+
+  @override
+  String subBrokerDisconnectConfirmTitle(String broker) {
+    return '$broker 연결을 해제할까요?';
+  }
+
+  @override
+  String get subBrokerDisconnectConfirmBody => '해제하면 보유 주식과 시세를 더 이상 가져오지 않아요.';
 
   @override
   String get subConnecting => '연결 중…';
@@ -7478,24 +7477,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subBrokerSectionTitle => '증권 데이터 연동';
 
   @override
-  String get subBrokerConnectDesc => '본인 API 키를 등록하면 보유 주식·시세를 가져와요';
-
-  @override
   String get subBrokerPrimary => '기본';
 
   @override
-  String get subBrokerUseAsPrimary => '이 증권사 시세로 자산 평가하기';
+  String get subBrokerUseAsPrimary => '기본으로 쓰기';
 
   @override
   String get subBrokerPrimaryNotice => '가계부 자산은 여기서 고른 증권사 시세로 계산해요.';
 
   @override
   String get subBrokerPrimaryFailed => '기본 증권사를 바꾸지 못했어요.';
-
-  @override
-  String subBrokerKeyConnected(String broker) {
-    return '$broker API 키 연결됨';
-  }
 
   @override
   String subBrokerConnected(String broker) {
@@ -7519,7 +7510,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String subBrokerToggleReveal(String field) {
-    return '$field 표시 전환';
+    return '$field 보기';
   }
 
   @override

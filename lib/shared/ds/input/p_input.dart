@@ -119,6 +119,7 @@ class PInput extends PTextControl {
     this.textInputAction,
     this.onSubmitted,
     this.obscureText = false,
+    this.secret = false,
     this.autofillHints,
     this.tabularFigures = false,
     this.placeholderKeepsColorWhenDisabled = false,
@@ -152,6 +153,10 @@ class PInput extends PTextControl {
 
   /// 가린 칸(비밀번호) — 키보드 사전 · 추천 · 학습에 남기지 않는다.
   final bool obscureText;
+
+  /// 자격증명 칸(API 키 · 시크릿) — 눈 Toggle 로 값을 벗겨 보는 동안([obscureText] false)에도 키보드 사전 · 추천 · 학습에
+  /// 남기지 않는다. 가린 칸([obscureText])은 이미 그렇다.
+  final bool secret;
   final Iterable<String>? autofillHints;
 
   /// 고정폭 숫자 — 자리마다 폭이 같은 숫자(인증 코드 칸 · input-otp.yaml value.numerals). 글자 · 예시 글에 건다.
@@ -246,6 +251,7 @@ class _PInputState extends PTextControlState<PInput> {
             textAlign: widget.textAlign,
             textInputAction: widget.textInputAction,
             obscureText: widget.obscureText,
+            secret: widget.secret,
             onSubmitted: widget.onSubmitted,
             autofillHints: widget.autofillHints,
             describedAffixes: [widget.prefixText, widget.suffixText],

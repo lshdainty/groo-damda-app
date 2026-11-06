@@ -15,7 +15,7 @@
   "payUnconfirmed": "We couldn't confirm the payment. Please check the billing history.",
   "stocksStaleLastPrice": "The values shown are the last prices received.",
   "stocksStaleLastBalance": "The values shown are the last balance, not live prices.",
-  "securitiesLeaveBody": "What you entered will be discarded.",
+  "securitiesLeaveBody": "What you wrote will be discarded.",
   "withdrawUnconfirmed": "We couldn't confirm the cancellation. Please reopen the app to check.",
   "unconfirmedSave": "We couldn't confirm it was saved.",
   "unconfirmedDelete": "We couldn't confirm it was deleted.",
@@ -3045,10 +3045,7 @@
   "statsCompareTxCount": "Transactions",
   "statsComparePerTx": "Per transaction",
   "statsCountValue": "{count}",
-  "stocksChartTokenFailed": "Failed to issue token",
-  "stocksChartHttpsError": "Security error: chart WebView is not HTTPS",
-  "stocksChartInitFailed": "Chart initialization failed",
-  "stocksChartLoadFailed": "Couldn't load chart",
+  "stocksChartLoadFailed": "Couldn't load the chart.",
   "stocksSearch": "Search stocks",
   "stocksSearchPlaceholder": "Search stocks",
   "stocksSearchNoResults": "No results for '{query}'",
@@ -3366,15 +3363,24 @@
     }
   },
   "subConnected": "Connected",
-  "subBrokerLastVerified": "Last verified · {date}",
-  "@subBrokerLastVerified": {
+  "subBrokerStatusConnectedAt": "Connected · Checked {date}",
+  "@subBrokerStatusConnectedAt": {
     "placeholders": {
       "date": {
         "type": "String"
       }
     }
   },
-  "subBrokerCollecting": "Auto-collecting holdings and prices",
+  "subBrokerStatusNone": "Not connected",
+  "subBrokerDisconnectConfirmTitle": "Disconnect {broker}?",
+  "@subBrokerDisconnectConfirmTitle": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "subBrokerDisconnectConfirmBody": "Holdings and prices will no longer be imported.",
   "subConnecting": "Connecting…",
   "subConnect": "Connect",
   "subBrokerInvalidCred": "The credentials are not valid.",
@@ -4193,19 +4199,10 @@
   "settingsSecuritiesLinkDesc": "Register your own API key to auto-import holdings and prices. Keys are stored encrypted on the server and used only by you.",
   "securitiesLoadError": "Couldn't load the securities list",
   "subBrokerSectionTitle": "Securities data link",
-  "subBrokerConnectDesc": "Register your API key to import holdings and prices",
   "subBrokerPrimary": "Primary",
-  "subBrokerUseAsPrimary": "Value assets with this provider",
+  "subBrokerUseAsPrimary": "Use as primary",
   "subBrokerPrimaryNotice": "Your assets are valued using the provider selected here.",
   "subBrokerPrimaryFailed": "Couldn't change the primary broker.",
-  "subBrokerKeyConnected": "{broker} API key connected",
-  "@subBrokerKeyConnected": {
-    "placeholders": {
-      "broker": {
-        "type": "String"
-      }
-    }
-  },
   "subBrokerConnected": "Connected your {broker} account.",
   "@subBrokerConnected": {
     "placeholders": {
@@ -4238,7 +4235,7 @@
       }
     }
   },
-  "subBrokerToggleReveal": "Toggle {field} visibility",
+  "subBrokerToggleReveal": "Show {field}",
   "@subBrokerToggleReveal": {
     "placeholders": {
       "field": {
