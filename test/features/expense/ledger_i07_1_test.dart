@@ -560,6 +560,86 @@ void main() {
       );
     });
 
+    /// 남는 머리 아래 끝(구분선 아래)에서 [day] 묶음 윗변까지.
+    double relOf(WidgetTester tester, int day) {
+      final line = tester.getBottomLeft(find.byType(LedgerHeaderDivider)).dy;
+      final g = find.byWidgetPredicate(
+        (w) => w is LedgerDayGroup && w.date.day == day,
+      );
+      return tester.getTopLeft(g).dy - line;
+    }
+
+    testWidgets(
+      '펼친 월 달력은 내리면(20 이상) 고른 날의 주로 접히고, 맨 위 묶음은 머리 바로 아래에 그대로 — 튀지 않는다',
+      (tester) async {
+        await _pump(tester, expenses: only, initialMonth: prevQ);
+        await tester.drag(find.byType(ListView).first, const Offset(0, -400));
+        await tester.pumpAndSettle();
+        final sel = selectedDay(tester)!;
+        await tester.tap(find.bySemanticsLabel('월 달력'));
+        await tester.pumpAndSettle();
+        expect(tester.widget<LedgerCalendarGrid>(grid()).expanded, isTrue);
+        final day = topGroupDay(tester);
+        // 손가락으로 10 씩 — 프레임마다 맨 위 묶음의 머리 기준 자리가 손가락만큼만 움직인다
+        final g = await tester.startGesture(const Offset(180, 700));
+        await g.moveBy(const Offset(0, -20)); // 끌기 시작(슬롭)
+        await tester.pump();
+        var prev = relOf(tester, day);
+        var collapsedAt = -1;
+        for (var i = 0; i < 8; i++) {
+          await g.moveBy(const Offset(0, -10));
+          await tester.pump();
+          final rel = relOf(tester, day);
+          expect(
+            (rel - prev).abs(),
+            lessThanOrEqualTo(10.5),
+            reason: '$i 번째 프레임 — 손가락 10 보다 더 움직이면 튄 것',
+          );
+          prev = rel;
+          if (collapsedAt < 0 &&
+              !tester.widget<LedgerCalendarGrid>(grid()).expanded) {
+            collapsedAt = i;
+            // 접힌 다음 프레임(목록 위 여백이 줄어드는 프레임)도 본다
+            await tester.pump();
+            expect((relOf(tester, day) - prev).abs(), lessThanOrEqualTo(0.5));
+            prev = relOf(tester, day);
+          }
+        }
+        await g.up();
+        await tester.pumpAndSettle();
+        expect(collapsedAt, greaterThanOrEqualTo(0), reason: '20 이상 내리면 접힌다');
+        expect(tester.widget<LedgerCalendarGrid>(grid()).expanded, isFalse);
+        expect(shownDays(tester), contains(selectedDay(tester)));
+        expect(selectedDay(tester), isNotNull);
+        expect((selectedDay(tester)! - sel).abs(), lessThan(7));
+      },
+    );
+
+    testWidgets('20 미만으로 내리거나 맨 위에서는 펼친 월 달력이 그대로다', (tester) async {
+      await _pump(tester, expenses: only, initialMonth: prevQ);
+      await tester.tap(find.bySemanticsLabel('월 달력'));
+      await tester.pumpAndSettle();
+      final pos = tester
+          .state<ScrollableState>(find.byType(Scrollable).first)
+          .position;
+      expect(pos.pixels, 0);
+      expect(tester.widget<LedgerCalendarGrid>(grid()).expanded, isTrue);
+      final g = await tester.startGesture(const Offset(180, 700));
+      await g.moveBy(const Offset(0, -20));
+      await tester.pump();
+      final start = pos.pixels;
+      await g.moveBy(const Offset(0, -15));
+      await tester.pump();
+      expect(pos.pixels - start, lessThan(20));
+      expect(tester.widget<LedgerCalendarGrid>(grid()).expanded, isTrue);
+      // 다시 맨 위로 — 펼친 채
+      await g.moveBy(const Offset(0, 60));
+      await g.up();
+      await tester.pumpAndSettle();
+      expect(pos.pixels, 0);
+      expect(tester.widget<LedgerCalendarGrid>(grid()).expanded, isTrue);
+    });
+
     testWidgets('필터 중에는 내려도 칩 줄이 달 줄 바로 아래 화면 안에 남는다', (tester) async {
       await _pump(
         tester,

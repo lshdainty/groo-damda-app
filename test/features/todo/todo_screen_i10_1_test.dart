@@ -381,6 +381,47 @@ void main() {
       expect(selAfter, isNot(selBefore));
     });
 
+    testWidgets('펼친 월 달력은 내리면 접히고(튀지 않음), 맨 위 · 20 미만에서는 그대로', (tester) async {
+      await pumpApp(
+        tester,
+        const TodoScreen(),
+        overrides: todoOverrides(todos: many()),
+      );
+      final grid = find.byType(LedgerCalendarGrid);
+      await tester.tap(find.bySemanticsLabel('월 달력'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<LedgerCalendarGrid>(grid).expanded, isTrue);
+      final sel = tester.widget<LedgerCalendarGrid>(grid).selected;
+      double rel() {
+        final line = tester.getBottomLeft(find.byType(LedgerHeaderDivider)).dy;
+        return tester.getTopLeft(find.byType(TodoDayGroup).first).dy - line;
+      }
+
+      final g = await tester.startGesture(const Offset(180, 700));
+      await g.moveBy(const Offset(0, -20));
+      await tester.pump();
+      await g.moveBy(const Offset(0, -10));
+      await tester.pump();
+      expect(
+        tester.widget<LedgerCalendarGrid>(grid).expanded,
+        isTrue,
+        reason: '20 미만',
+      );
+      var prev = rel();
+      for (var i = 0; i < 4; i++) {
+        await g.moveBy(const Offset(0, -10));
+        await tester.pump();
+        await tester.pump();
+        expect((rel() - prev).abs(), lessThanOrEqualTo(10.5), reason: '튐 $i');
+        prev = rel();
+      }
+      await g.up();
+      await tester.pumpAndSettle();
+      expect(tester.widget<LedgerCalendarGrid>(grid).expanded, isFalse);
+      expect(tester.widget<LedgerCalendarGrid>(grid).selected, isNotNull);
+      expect(sel, isNotNull);
+    });
+
     testWidgets('모션 줄이기면 머리가 늘 보인다', (tester) async {
       await pumpApp(
         tester,

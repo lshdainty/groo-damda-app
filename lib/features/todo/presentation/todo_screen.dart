@@ -76,6 +76,13 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   /// 날짜로 갈 때 남는 머리 바로 아래에 맞추려고 잡는다(가계부와 같다).
   final GlobalKey<PScrollAutoHideState> _autoHideKey =
       GlobalKey<PScrollAutoHideState>();
+
+  /// 펼친 월 달력을 내리면 접는다(가계부와 같다).
+  late final LedgerAutoCollapse _collapse = LedgerAutoCollapse(
+    controller: _scrollCtrl,
+    pinKey: _pinKey,
+    autoHideKey: _autoHideKey,
+  );
   bool _lock = false;
   Timer? _lockTimer;
 
@@ -121,6 +128,10 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   /// 스크롤 · 머리 옮김(스냅)마다 다음 프레임에 스파이를 한 번 돌린다 — 그 프레임의 배치로 재야 한 칸씩 밀리지 않는다(스크롤
   /// 알림은 배치 전에 온다). 스냅은 목록을 스크롤하지 않고 남는 머리 아래 선만 옮기므로 그것도 듣는다.
   void _onScroll() {
+    if (_expanded && _collapse.shouldCollapse(locked: _lock)) {
+      _collapse.hold();
+      setState(() => _expanded = false);
+    }
     if (_spyQueued) return;
     _spyQueued = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -478,7 +489,10 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
           },
           onToggleExpand: () => setState(() {
             _expanded = !_expanded;
-            if (_expanded) _skyOpen = false;
+            if (_expanded) {
+              _skyOpen = false;
+              _collapse.willExpand();
+            }
           }),
         ),
         const LedgerHeaderDivider(),

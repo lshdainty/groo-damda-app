@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show Drag;
+import 'package:flutter/rendering.dart' show RenderViewportBase;
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -258,6 +259,35 @@ class PScrollAutoHideState extends State<PScrollAutoHide>
           .toDouble();
     }
     return to;
+  }
+
+  /// 고정 줄이 다음 프레임에 [shrink] 만큼 줄어들 때 부른다 — 목록 위 여백은 그 다음 프레임에야 줄어(높이를 배치 뒤에 잰다) 한
+  /// 프레임 동안 목록이 [shrink] 만큼 아래에 떠 보인다. 그 프레임만 스크롤을 [shrink] 만큼 더 내려 두었다가, 여백이 줄어드는
+  /// 프레임에 되돌린다 — 목록은 줄어든 머리 바로 아래에 그대로 남는다. 알림 없이 옮겨(숨김 · 스파이가 움직이지 않는다) 따라가기
+  /// 기준도 같이 옮긴다.
+  void holdListThroughShrink(double shrink) {
+    if (shrink <= 0 || !_controller.hasClients) return;
+    _correctBy(shrink);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _controller.hasClients) _correctBy(-shrink);
+    });
+  }
+
+  void _correctBy(double d) {
+    final p = _controller.position;
+    p.correctPixels(p.pixels + d);
+    _previousPixels += d;
+    // correctPixels 는 다시 배치하라고 알리지 않는다 — 목록 뷰포트를 직접 깨운다
+    void visit(RenderObject o) {
+      if (o is RenderViewportBase) {
+        o.markNeedsLayout();
+        return;
+      }
+      o.visitChildren(visit);
+    }
+
+    final root = p.context.notificationContext?.findRenderObject();
+    if (root != null) visit(root);
   }
 
   void _dragStart(DragStartDetails details) {
