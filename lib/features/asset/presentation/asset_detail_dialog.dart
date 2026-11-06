@@ -10,7 +10,6 @@ import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/radius.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -54,7 +53,6 @@ import 'package:groo_damda_app/core/settings/mask_flags.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
@@ -1563,34 +1561,7 @@ class _RecentExpenses extends StatelessWidget {
                 ],
               ),
             ),
-            for (int i = 0; i < 2; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  children: [
-                    PSkeleton(
-                      width: 36,
-                      height: 36,
-                      borderRadius: PRadius.tile(36),
-                    ),
-                    const SizedBox(width: 12),
-                    // 거래 줄(ExpenseRow = List 줄) — 제목 t5 · 설명 t3 · 금액 t5 줄 높이
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          dsk.PSkeleton.text(PTypography.t5, width: 120),
-                          const SizedBox(height: 4),
-                          dsk.PSkeleton.text(PTypography.t3, width: 80),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    dsk.PSkeleton.text(PTypography.t5, width: 56),
-                  ],
-                ),
-              ),
+            for (int i = 0; i < 2; i++) const _ExpenseRowSkeleton(),
           ],
         ],
       );
@@ -1673,6 +1644,41 @@ class _RecentExpenses extends StatelessWidget {
             ),
         ],
       ],
+    );
+  }
+}
+
+/// 거래 줄(ExpenseRow · 좌우 0 — 이 화면이 좌우 24 를 쥔다) 하나의 자리 — 위아래 12 · 타일 40(모서리 12) · 제목 t5 · 설명 t3 ·
+/// 금액 t5 의 줄 높이(원장 `LedgerDaySkeleton` 의 줄과 같은 값). 데이터가 오면 같은 높이의 줄로 바뀐다.
+class _ExpenseRowSkeleton extends StatelessWidget {
+  const _ExpenseRowSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: PSpacing.x3),
+      child: Row(
+        children: [
+          const dsk.PSkeleton(
+            width: PSpacing.x10,
+            height: PSpacing.x10,
+            radius: dsk.PSkeletonRadius.r12,
+          ),
+          const SizedBox(width: PSpacing.x3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: PSpacing.x0_5,
+              children: [
+                dsk.PSkeleton.text(PTypography.t5, width: 120),
+                dsk.PSkeleton.text(PTypography.t3, width: 80),
+              ],
+            ),
+          ),
+          const SizedBox(width: PSpacing.x2),
+          dsk.PSkeleton.text(PTypography.t5, width: 56),
+        ],
+      ),
     );
   }
 }
@@ -1821,7 +1827,12 @@ class _CardPerfBadge extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              PSkeleton(width: 40, height: 40, borderRadius: PRadius.tile(40)),
+              // 실적 줄 앞 타일 40 — List 타일 모서리 12
+              const dsk.PSkeleton(
+                width: PSpacing.x10,
+                height: PSpacing.x10,
+                radius: dsk.PSkeletonRadius.r12,
+              ),
               const SizedBox(width: PSpacing.x3),
               // 실적 줄(PListItem) — 제목 t5 · 설명 t3 줄 높이
               Expanded(
@@ -2374,29 +2385,44 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
       );
     }
     if (billingAsync.isLoading && b == null) {
-      // 실렌더 미러 — 회차 단추 / 금액 / 키-값 / 동작. 자리를 잡아야 데이터가 오는 순간 아래가 밀리지 않는다.
-      return const ExcludeSemantics(
+      // 실렌더 미러 — 회차 단추(ghost small 36 · 글 t4) / 금액(t9) / 키-값 두 줄(위아래 12 · t5) / 동작(Button medium 40).
+      // 글 자리는 그 글의 줄 높이(skeleton.md — PSkeleton.text), 자리 사이는 실제 화면과 같아 데이터가 와도 아래가 밀리지 않는다.
+      Widget kv() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: PSpacing.x3),
+        child: Row(
+          children: [
+            dsk.PSkeleton.text(PTypography.t5, width: 64),
+            const Spacer(),
+            dsk.PSkeleton.text(PTypography.t5, width: 96),
+          ],
+        ),
+      );
+      return ExcludeSemantics(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
+          key: const ValueKey('card-billing-skeleton'),
+          padding: const EdgeInsets.fromLTRB(
             PSpacing.globalGutter,
-            PSpacing.x3,
+            PSpacing.x2,
             PSpacing.globalGutter,
-            0,
+            PSpacing.x1,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PSkeleton.line(width: 130, height: 20),
-              SizedBox(height: PSpacing.x3),
-              PSkeleton.line(width: 180, height: 32),
-              SizedBox(height: PSpacing.x4),
-              PSkeleton.line(width: double.infinity, height: 20),
-              SizedBox(height: PSpacing.x4),
-              PSkeleton(
-                width: double.infinity,
-                height: 40,
-                borderRadius: PRadius.brMd,
+              SizedBox(
+                height: PSpacing.x9,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: dsk.PSkeleton.text(PTypography.t4, width: 130),
+                ),
               ),
+              const SizedBox(height: PSpacing.x1),
+              dsk.PSkeleton.text(PTypography.t9, width: 180),
+              const SizedBox(height: PSpacing.x1),
+              kv(),
+              kv(),
+              const SizedBox(height: PSpacing.x4),
+              const dsk.PSkeleton(width: double.infinity, height: PSpacing.x10),
             ],
           ),
         ),
@@ -2849,16 +2875,11 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
   ) {
     // 불러오는 중은 Skeleton, 실패는 띠 + 다시 시도 — 둘 다 빈 글로 보이면 안 된다.
     if (usageAsync.isLoading && !usageAsync.hasValue) {
+      // 실제 줄(ExpenseRow — 날짜 묶음 없이 늘어놓는 줄)과 같은 모양 두 줄
       return const ExcludeSemantics(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: PSpacing.x3),
-          child: Column(
-            spacing: PSpacing.x3,
-            children: [
-              PSkeleton.line(width: double.infinity, height: 40),
-              PSkeleton.line(width: double.infinity, height: 40),
-            ],
-          ),
+        child: Column(
+          key: ValueKey('plain-usage-skeleton'),
+          children: [_ExpenseRowSkeleton(), _ExpenseRowSkeleton()],
         ),
       );
     }

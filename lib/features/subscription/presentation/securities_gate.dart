@@ -6,6 +6,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
+import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
@@ -30,7 +31,13 @@ class SecuritiesGate extends ConsumerWidget {
           onRetry: () => ref.invalidate(myFeaturesLoadProvider),
         );
       }
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      // 첫 진입 — 틀(상단 바)을 그리고 콘텐츠 영역 가운데 Progress Circle 40(progress-circle.md "첫 진입" — 틀 없이 가운데
+      // 원 하나는 두지 않는다). Material 기본 원은 쓰지 않는다
+      return const _SecuritiesFrame(
+        body: Center(
+          child: PProgressCircle(key: ValueKey('securities-gate-loading')),
+        ),
+      );
     }
     if (!value.hasSecurities) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -57,6 +64,31 @@ class SecuritiesLoadFailure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    return _SecuritiesFrame(
+      body: PResultSection(
+        key: const ValueKey('securities-load-failed'),
+        kind: PResultKind.failure,
+        title: l.secLoadFailed,
+        description: l.subLoadFailedDesc,
+        primaryAction: PResultAction(
+          label: l.actionRetry,
+          loading: retrying,
+          onPressed: onRetry,
+        ),
+      ),
+    );
+  }
+}
+
+/// 증권 가드의 틀 — 상단 바(← · "증권") + 한 장 흰 띠 본문. 불러오는 중 · 실패가 같은 틀을 쓴다.
+class _SecuritiesFrame extends StatelessWidget {
+  const _SecuritiesFrame({required this.body});
+
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: context.colors.bgLayerBasement,
       appBar: PreferredSize(
@@ -69,19 +101,7 @@ class SecuritiesLoadFailure extends StatelessWidget {
           ),
         ),
       ),
-      body: PScreenBandBody(
-        child: PResultSection(
-          key: const ValueKey('securities-load-failed'),
-          kind: PResultKind.failure,
-          title: l.secLoadFailed,
-          description: l.subLoadFailedDesc,
-          primaryAction: PResultAction(
-            label: l.actionRetry,
-            loading: retrying,
-            onPressed: onRetry,
-          ),
-        ),
-      ),
+      body: PScreenBandBody(child: body),
     );
   }
 }
