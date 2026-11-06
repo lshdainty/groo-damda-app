@@ -6,6 +6,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:groo_damda_app/features/stocks/application/securities_retry.dart';
 
 import 'package:groo_damda_app/core/network/dio_provider.dart';
 import 'package:groo_damda_app/features/stocks/application/stocks_model.dart';
@@ -29,13 +30,13 @@ final tossPricesProvider = FutureProvider.family<List<TossPrice>, String>((
   // 오류는 던진다 — 한 번 실패한 빈 목록이 "토스 시세 미지원 종목" 으로 읽히지 않는다(M8). 화면은 `.value` 로 이전 값을 둔다
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return repo.getPrices(joinedSymbols.split(','));
-});
+}, retry: securitiesNoRetry);
 
 /// USD→KRW 환율. 오류는 던진다 — 삼킨 null 이 캐시돼 복구 못 하던 것을 막는다(H3). 화면 타이머가 60초마다 다시 받는다.
 final tossExchangeRateProvider = FutureProvider<TossExchangeRate?>((ref) async {
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return repo.getExchangeRate();
-});
+}, retry: securitiesNoRetry);
 
 /// 전일 종가. 토스 /prices 엔 기준가·등락률이 없어 일봉으로 도출한다.
 /// 오늘 날짜 캔들을 제외한 마지막 종가 = 전일 종가 (장 시작 전이면 마지막 캔들이 곧 전일).
@@ -61,7 +62,7 @@ final prevCloseProvider = FutureProvider.family<double?, String>((
     }
     return null;
   }
-});
+}, retry: securitiesNoRetry);
 
 /// 전일 종가를 받은 시장 날짜 — 종목별. 성공한 조회만 적는다.
 final prevCloseDayProvider = Provider<Map<String, String>>(
@@ -95,6 +96,7 @@ final tossRankingsProvider = FutureProvider.family<TossRankingResponse, String>(
       duration: parts[2],
     );
   },
+  retry: securitiesNoRetry,
 );
 
 /// 국내 지수 현재가 (KOSPI·KOSDAQ). 오류는 던진다 — 시장 띠가 "시장 정보를 불러오지 못했어요" 를 보인다.
@@ -103,7 +105,7 @@ final tossIndicatorPricesProvider = FutureProvider<List<TossIndicatorPrice>>((
 ) async {
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return repo.getIndicatorPrices(const ['KOSPI', 'KOSDAQ']);
-});
+}, retry: securitiesNoRetry);
 
 /// 관심목록 (서버 stock-watch). 오류는 던진다 — 화면이 "관심 종목을 불러오지 못했어요" 로 보인다.
 final watchGroupsProvider = FutureProvider<List<StockWatchGroup>>((ref) async {
@@ -120,7 +122,7 @@ final tossOrderbookProvider = FutureProvider.family<TossOrderbook?, String>((
   // 던진다 — 호가 표가 "호가를 불러오지 못했어요" 를 보인다(비어 있음과 다르다)
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return await repo.getOrderbook(symbol);
-});
+}, retry: securitiesNoRetry);
 
 /// 종목 체결 내역 (라이브). 오류는 던진다.
 final tossTradesProvider = FutureProvider.family<List<TossTrade>?, String>((
@@ -131,7 +133,7 @@ final tossTradesProvider = FutureProvider.family<List<TossTrade>?, String>((
   // 던진다 — "체결 내역을 불러오지 못했어요"
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return await repo.getTrades(symbol);
-});
+}, retry: securitiesNoRetry);
 
 /// 증권 계좌 목록 (개인 키). 오류는 던진다 — 화면이 "불러오지 못했어요" 로 보이고, 연결 안내와 가른다
 /// (연결 여부는 셸이 먼저 거른다). 계좌가 없으면 빈 목록.
@@ -146,7 +148,7 @@ final tossHoldingsProvider = FutureProvider<TossHoldings?>((ref) async {
   if (accounts.isEmpty) return null;
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return repo.getHoldings(accounts.first.accountSeq);
-});
+}, retry: securitiesNoRetry);
 
 /// 지수 추이선 종가 — 실패해도 화면은 멀쩡하다(추이선만 빠진다).
 final tossIndicatorClosesProvider = FutureProvider.family<List<double>, String>(
@@ -158,6 +160,7 @@ final tossIndicatorClosesProvider = FutureProvider.family<List<double>, String>(
       return const [];
     }
   },
+  retry: securitiesNoRetry,
 );
 
 /// 캔들(차트·일별시세·등락률 실산출). interval '1m'(1D) / '1d'(장기).
@@ -219,7 +222,7 @@ final tossMarketCalendarKrProvider = FutureProvider<TossKrMarketCalendar>((
 ) async {
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return repo.getMarketCalendarKr();
-});
+}, retry: securitiesNoRetry);
 
 /// 미국 장 운영 일정. 오류는 던진다(시장 띠 실패 한 벌).
 final tossMarketCalendarUsProvider = FutureProvider<TossUsMarketCalendar>((
@@ -227,7 +230,7 @@ final tossMarketCalendarUsProvider = FutureProvider<TossUsMarketCalendar>((
 ) async {
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return repo.getMarketCalendarUs();
-});
+}, retry: securitiesNoRetry);
 
 /// 종목 마스터 검색 (서버 stock_master — 국내 + 해외 6개국). 검색어별 캐시.
 /// 에러(미기동 등) 시 빈 목록 → 화면은 코드 직접입력 폴백으로 동작.
@@ -285,6 +288,7 @@ final tossTodayCandlesProvider = FutureProvider.family<TossCandlePage?, String>(
     final repo = await ref.watch(stocksRepositoryProvider.future);
     return repo.getCandles(symbol, '1d', count: 3);
   },
+  retry: securitiesNoRetry,
 );
 
 /// 투자자별 매매동향(토스, 국내 종목만 — 해외는 서버가 빈 목록). 상세를 열 때 한 번 · 5분.
@@ -306,4 +310,4 @@ final tossBuyingPowerProvider = FutureProvider.family<BuyingPower, String>((
   if (accounts.isEmpty) return BuyingPower(currency: currency);
   final repo = await ref.watch(stocksRepositoryProvider.future);
   return repo.getBuyingPower(accounts.first.accountSeq, currency: currency);
-});
+}, retry: securitiesNoRetry);

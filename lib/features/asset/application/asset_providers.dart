@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:groo_damda_app/features/stocks/application/securities_retry.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
 import 'package:groo_damda_app/core/network/dio_provider.dart';
@@ -206,7 +207,7 @@ final investmentValuationMapProvider =
         }
       }
       return map;
-    });
+    }, retry: securitiesNoRetry);
 
 /// 자산 화면의 실시간 평가를 새로 받는다 — **시세 조회까지** 무효화한다.
 ///

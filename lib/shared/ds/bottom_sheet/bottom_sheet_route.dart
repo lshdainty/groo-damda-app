@@ -16,6 +16,9 @@ const double kSheetCloseFraction = 0.25;
 /// 열린 뒤 이 시간 동안은 끌리지 않는다.
 const Duration kSheetDragDelay = Duration(milliseconds: 500);
 
+/// 지금 열려 있는 시트 수 — 앱 한 자리의 참조 실패 알림이 시트가 열린 동안 쉰다(웹 `useHoldReferenceNotice` 와 같다).
+final ValueNotifier<int> pBottomSheetOpenCount = ValueNotifier<int>(0);
+
 /// 시트 라우트 — 딤 · 시트 · 끌기 · 닫는 길은 [_SheetHost] 가 그린다(시트가 라우트 애니메이션과 끄는 위치를 함께 따른다).
 class PBottomSheetRoute<T> extends PopupRoute<T> {
   PBottomSheetRoute({
@@ -239,12 +242,14 @@ class _SheetHostState extends State<_SheetHost>
       });
     }
     _layoutSignal = Listenable.merge([_slide, _repaint]);
+    pBottomSheetOpenCount.value += 1;
     // 열린 뒤 0.5초는 끌리지 않는다
     _readyTimer = Timer(kSheetDragDelay, () => _dragReady = true);
   }
 
   @override
   void dispose() {
+    pBottomSheetOpenCount.value -= 1;
     _readyTimer?.cancel();
     _move.dispose();
     _slide.dispose();

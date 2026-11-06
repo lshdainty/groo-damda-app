@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:groo_damda_app/app/query_failure/query_failure_observer.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // `Override` 는 flutter_riverpod 본체가 아니라 misc 에서 나온다.
@@ -59,6 +60,16 @@ class _SessionScopeState extends State<SessionScope> {
   /// 몇 번째 컨테이너인가 — 키가 바뀌면 [ProviderScope] 가 통째로 갈린다.
   int _generation = 0;
 
+  /// 조회 실패를 앱 한 자리에서 알린다 — 값이 있는 채 다시 받기 실패 · 참조 실패(I-wrap-b2b 2). 컨테이너가 갈려도 같은 것을 쓴다
+  /// (떠 있는 스낵바 · 모으는 시간을 이어 간다).
+  final QueryFailureObserver _failureObserver = QueryFailureObserver();
+
+  @override
+  void dispose() {
+    _failureObserver.reference.dispose();
+    super.dispose();
+  }
+
   void _restart() {
     // 한 박자 미룬다. 인증 상태는 서버 응답 뒤에 바뀌므로 보통은 빌드 밖이지만,
     // 빌드 도중에 불리면 setState 가 그 자리에서 던진다. microtask 는 지금 도는 동기
@@ -76,6 +87,7 @@ class _SessionScopeState extends State<SessionScope> {
       // Riverpod 의 기본 재시도(최대 10회)는 끈다 — 실패 화면이 열 번 다시 해 본 뒤에야 뜬다. 읽기의 10초 한도 · 1초 · 2초 뒤
       // 두 번 다시 시도는 dio 의 ReadRetryInterceptor 한 곳이 맡는다(skeleton.md "요청 제한 10초").
       retry: appProviderRetry,
+      observers: [_failureObserver],
       overrides: [
         ...widget.overrides,
         sessionRestartProvider.overrideWithValue(_restart),
