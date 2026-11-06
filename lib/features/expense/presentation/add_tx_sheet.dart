@@ -2697,11 +2697,12 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                     ? l.txfPresetNoMerchant
                     : merchant,
                 detail: detailParts.isEmpty ? null : detailParts.join(' · '),
+                // 이체 타일 — 프리셋 목록 · 이체 줄과 같은 회색 바탕 · 회색 아이콘(다크에서도 보인다)
                 prefix: isTransfer
-                    ? const PListTile(
-                        background: Color(0x00000000),
-                        color: Color(0xFF000000),
-                        child: Icon(LucideIcons.arrowRightLeft),
+                    ? PListTile(
+                        background: context.colors.chartGrayWeak,
+                        color: context.colors.chartGray,
+                        child: const Icon(LucideIcons.arrowRightLeft),
                       )
                     : (cat == null ? null : categoryTile(context, cat)),
                 suffix: Text(krwSigned(c.amountInt, false, unit: true)),
