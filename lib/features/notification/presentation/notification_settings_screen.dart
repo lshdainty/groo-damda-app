@@ -633,7 +633,8 @@ class _PrefsSkeleton extends StatelessWidget {
   Widget _valueRow(String title) => PListItem(
     prefix: const SizedBox(width: kPListIconSize),
     title: title,
-    suffix: const PSkeleton(width: 64, height: 16),
+    // 값 글(t5) 줄 높이
+    suffix: PSkeleton.text(PTypography.t5, width: 64),
   );
 
   @override
@@ -699,7 +700,8 @@ class _PrefsSkeleton extends StatelessWidget {
                       style: PTypography.t4.copyWith(color: c.fgNeutral),
                     ),
                   ),
-                  const PSkeleton(width: 36, height: 16),
+                  // 머리 값 PSliderValue(t5) 줄 높이
+                  PSkeleton.text(PTypography.t5, width: 36),
                 ],
               ),
               const SizedBox(height: 12),
@@ -752,7 +754,8 @@ class _PrefsSkeleton extends StatelessWidget {
             _row(
               LucideIcons.mail,
               l.notiEmailToggle,
-              detailChild: const PSkeleton(width: 160, height: 14),
+              // 이메일 설명(t3) 줄 높이
+              detailChild: PSkeleton.text(PTypography.t3, width: 160),
             ),
             _valueRow(l.notiEmailFreq),
           ],

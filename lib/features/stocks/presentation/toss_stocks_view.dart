@@ -706,8 +706,16 @@ class _IndexSkeleton extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          PSkeleton(width: 56, height: 22),
-          PSkeleton(width: 84, height: 38),
+          // 이름 t5 · 오른쪽 지수 t5 + 2 + 등락률 t3(_IndexLine 과 같은 줄)
+          PSkeleton.text(PTypography.t5, width: 56),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              PSkeleton.text(PTypography.t5, width: 84),
+              const SizedBox(height: 2),
+              PSkeleton.text(PTypography.t3, width: 52),
+            ],
+          ),
         ],
       ),
     );
@@ -2202,9 +2210,10 @@ class _OrderBookSkeleton extends StatelessWidget {
         child: Row(
           children: [
             Expanded(child: isAsk ? const SizedBox.shrink() : bar),
-            const SizedBox(
+            SizedBox(
               width: 92,
-              child: Center(child: PSkeleton(width: 56, height: 12)),
+              // 가격 13 글자 → t3 줄 높이
+              child: Center(child: PSkeleton.text(PTypography.t3, width: 56)),
             ),
             Expanded(child: isAsk ? bar : const SizedBox.shrink()),
           ],
@@ -2575,26 +2584,26 @@ class _TradeTapeSkeleton extends StatelessWidget {
         const _TradeTapeHead(),
         const SizedBox(height: PSpacing.x1),
         for (var i = 0; i < 12; i++)
-          const SizedBox(
+          SizedBox(
             height: 32,
             child: Row(
               children: [
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: PSkeleton(width: 52, height: 12),
+                    child: PSkeleton.text(PTypography.t3, width: 52),
                   ),
                 ),
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: PSkeleton(width: 48, height: 12),
+                    child: PSkeleton.text(PTypography.t3, width: 48),
                   ),
                 ),
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: PSkeleton(width: 36, height: 12),
+                    child: PSkeleton.text(PTypography.t3, width: 36),
                   ),
                 ),
               ],

@@ -303,11 +303,12 @@ class _NotiSkeleton extends StatelessWidget {
       children: [
         for (var i = 0; i < 5; i++) ...[
           if (i == 0 || i == 3)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: PSkeleton(width: 140, height: 14),
+                // 날짜 머리 = PListHeader t4 줄 높이
+                child: PSkeleton.text(PTypography.t4, width: 140),
               ),
             ),
           Padding(
@@ -325,18 +326,23 @@ class _NotiSkeleton extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      PSkeleton(width: i.isEven ? 140 : 100, height: 14),
+                      // 글 자리 = 그 글의 줄 높이 — 제목 t5 · 본문 t3 두 줄(skeleton.md:40)
+                      PSkeleton.text(
+                        PTypography.t5,
+                        width: i.isEven ? 140 : 100,
+                      ),
                       const SizedBox(height: 4),
-                      const PSkeleton(width: double.infinity, height: 12),
+                      PSkeleton.text(PTypography.t3, width: double.infinity),
                       const SizedBox(height: 4),
-                      const PSkeleton(width: 180, height: 12),
+                      PSkeleton.text(PTypography.t3, width: 180),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Padding(
-                  padding: EdgeInsets.only(top: 2),
-                  child: PSkeleton(width: 36, height: 12),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  // 시각 t3
+                  child: PSkeleton.text(PTypography.t3, width: 36),
                 ),
               ],
             ),

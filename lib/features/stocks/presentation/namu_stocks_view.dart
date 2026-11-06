@@ -813,9 +813,10 @@ class _NamuMarketBandState extends ConsumerState<NamuMarketBand> {
             StocksMarketStatusLine(markets: markets),
             const SizedBox(height: PSpacing.x1),
           ] else if (stateLoading) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: PSpacing.x6),
-              child: PSkeleton(width: 160, height: 18),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
+              // 장 상태 줄(t4) 줄 높이
+              child: PSkeleton.text(PTypography.t4, width: 160),
             ),
             const SizedBox(height: PSpacing.x1),
           ],
@@ -826,7 +827,7 @@ class _NamuMarketBandState extends ConsumerState<NamuMarketBand> {
                 detail: l.stocksFxBasis,
                 suffix: PListValue(
                   child: fxLoading
-                      ? const PSkeleton(width: 80, height: 18)
+                      ? PSkeleton.text(PTypography.t5, width: 80)
                       : (fx != null && fx > 0)
                       ? Text(
                           keepAllAmount(fmtFxRate(fx)),

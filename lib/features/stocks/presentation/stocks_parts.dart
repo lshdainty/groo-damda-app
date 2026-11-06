@@ -232,18 +232,20 @@ class StocksLineSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PSkeleton(width: 120, height: 16),
+                // 글 자리 = 줄 높이 — 이름 t5 · 설명 t3(List 줄과 같다)
+                PSkeleton.text(PTypography.t5, width: 120),
                 const SizedBox(height: 4),
-                PSkeleton(width: 80, height: 13),
+                PSkeleton.text(PTypography.t3, width: 80),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              PSkeleton(width: 84, height: 16),
+              // 금액 t5 · 등락률 t3
+              PSkeleton.text(PTypography.t5, width: 84),
               const SizedBox(height: 4),
-              PSkeleton(width: 52, height: 13),
+              PSkeleton.text(PTypography.t3, width: 52),
             ],
           ),
         ],
