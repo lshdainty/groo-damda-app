@@ -16,8 +16,8 @@ class EventCommentRepository {
         '/calendar/event/$eventId/comments',
       );
       return _unwrapList(res, 'comments', EventComment.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -33,8 +33,8 @@ class EventCommentRepository {
         data: {'content': content, 'parentRowId': ?parentRowId},
       );
       return _unwrap(res, EventComment.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -49,8 +49,8 @@ class EventCommentRepository {
         data: {'content': content},
       );
       return _unwrap(res, EventComment.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -58,8 +58,8 @@ class EventCommentRepository {
   Future<void> delete(int commentId) async {
     try {
       await _dio.delete<void>('/calendar/comment/$commentId');
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

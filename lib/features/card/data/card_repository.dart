@@ -40,8 +40,8 @@ class CardRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return CardCatalogPage.fromJson(body.data!);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -76,8 +76,8 @@ class CardRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return body.data!;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -99,8 +99,8 @@ class CardRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return body.data!;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

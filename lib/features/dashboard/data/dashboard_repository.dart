@@ -21,8 +21,8 @@ class DashboardRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return body.data!;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

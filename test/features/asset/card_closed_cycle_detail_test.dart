@@ -15,6 +15,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:groo_damda_app/features/asset/data/asset_repository.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
@@ -30,6 +33,49 @@ import '../../support/overrides.dart';
 import '../../support/plain_text.dart';
 import '../../support/real_fonts.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+
+/// 서버는 받았지만 응답 본문의 형이 다르다(숫자 자리에 글) — `BillingItem.fromJson` 이 TypeError 를 낸다.
+class _BadBodyAdapter implements HttpClientAdapter {
+  int calls = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    calls++;
+    return ResponseBody.fromString(
+      jsonEncode({
+        'success': true,
+        'code': 'OK',
+        'message': '',
+        'data': {'rowId': '아흔아홉'},
+      }),
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// 결제가 [error] 를 던진다(ApiException 이 아닌 것 — `_pay` 의 `on ApiException` 밖).
+class _ThrowingPayRepo extends AssetRepository {
+  _ThrowingPayRepo(this.error) : super(Dio());
+  final Object error;
+
+  @override
+  Future<BillingItem> payCard(
+    int id, {
+    int? amount,
+    String? paymentDate,
+    bool silent = false,
+  }) async => throw error;
+}
 
 /// 결제 요청이 어떤 값으로 나가는지 잡아 둔다.
 class _PayRepo extends AssetRepository {
@@ -327,6 +373,62 @@ void main() {
     expect(repo.calls.single.amount, 40000);
     expect(repo.calls.single.paymentDate, '2026-10-12');
   });
+
+  testWidgets(
+    '[지금 결제] — 응답 형식이 달라도(TypeError) zone 으로 빠지지 않고 맨 위 Callout · 진행 원이 멈춘다',
+    (tester) async {
+      final adapter = _BadBodyAdapter();
+      final repo = AssetRepository(Dio()..httpClientAdapter = adapter);
+      await _open(
+        tester,
+        billing: upcomingBilling,
+        extraOverrides: [
+          assetRepositoryProvider.overrideWith((ref) async => repo),
+        ],
+      );
+      await tester.tap(findText('지금 결제'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '40000');
+      await tester.tap(findText('결제하기'));
+      await tester.pumpAndSettle();
+      expect(adapter.calls, 1);
+      expect(tester.takeException(), isNull, reason: 'zone 으로 빠지지 않는다');
+      expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+      expect(findTextContaining('아흔아홉'), findsNothing);
+      final pay = tester.widget<PButton>(
+        find.ancestor(of: findText('결제하기'), matching: find.byType(PButton)),
+      );
+      expect(pay.loading, isFalse, reason: '진행 원이 멈춘다');
+    },
+  );
+
+  testWidgets(
+    '[지금 결제] — 결제가 무엇을 던져도 진행 원은 멈추고 시트는 남아 Callout(try/catch/finally)',
+    (tester) async {
+      await _open(
+        tester,
+        billing: upcomingBilling,
+        extraOverrides: [
+          assetRepositoryProvider.overrideWith(
+            (ref) async => _ThrowingPayRepo(StateError('형식 밖 오류')),
+          ),
+        ],
+      );
+      await tester.tap(findText('지금 결제'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '40000');
+      await tester.tap(findText('결제하기'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'zone 으로 빠지지 않는다');
+      expect(findText('결제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+      expect(findTextContaining('형식 밖 오류'), findsNothing);
+      final pay = tester.widget<PButton>(
+        find.ancestor(of: findText('결제하기'), matching: find.byType(PButton)),
+      );
+      expect(pay.loading, isFalse, reason: '예전엔 계속 돌았다');
+      expect(find.byKey(const ValueKey('p-bottom-sheet-root')), findsOneWidget);
+    },
+  );
 
   // 청구를 못 불러오면 "0원" 이 아니라 실패 띠 + 다시 시도.
   testWidgets('청구 조회 실패는 0원이 아니라 실패 띠', (tester) async {

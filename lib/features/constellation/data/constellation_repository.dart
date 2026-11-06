@@ -14,8 +14,8 @@ class ConstellationRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/constellations/today');
       return _unwrap(res, ConstellationToday.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -37,8 +37,8 @@ class ConstellationRepository {
       return list
           .map((e) => SkyDay.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -49,8 +49,8 @@ class ConstellationRepository {
         '/constellations/collection',
       );
       return _unwrap(res, ConstellationCollectionData.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

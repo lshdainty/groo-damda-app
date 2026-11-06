@@ -16,8 +16,8 @@ class NotificationRepository {
         queryParameters: {'unread': ?unread, 'limit': ?limit},
       );
       return _unwrapList(res, 'notifications', AppNotification.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -34,8 +34,8 @@ class NotificationRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return (body.data!['count'] as int?) ?? 0;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -46,8 +46,8 @@ class NotificationRepository {
         '/notification/$id/read',
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -58,8 +58,8 @@ class NotificationRepository {
         '/notifications/read-all',
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -70,8 +70,8 @@ class NotificationRepository {
         '/notification/$id',
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

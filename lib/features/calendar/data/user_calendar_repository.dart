@@ -17,8 +17,8 @@ class UserCalendarRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/calendar/calendars');
       return _unwrapList(res, 'calendars', UserCalendar.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -35,8 +35,8 @@ class UserCalendarRepository {
         options: silent ? _silent : null,
       );
       return _unwrap(res, UserCalendar.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -54,8 +54,8 @@ class UserCalendarRepository {
         options: silent ? _silent : null,
       );
       return _unwrap(res, UserCalendar.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -66,16 +66,16 @@ class UserCalendarRepository {
         options: _silent,
       );
       return _unwrap(res, UserCalendar.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> delete(int id) async {
     try {
       await _dio.delete<void>('/calendar/calendars/$id', options: _silent);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -87,8 +87,8 @@ class UserCalendarRepository {
         '/calendar/calendars/$id/members',
       );
       return _unwrapList(res, 'members', CalendarMember.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -98,8 +98,8 @@ class UserCalendarRepository {
         '/calendar/calendars/$id/regenerate-invite-code',
         options: _silent,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -112,8 +112,8 @@ class UserCalendarRepository {
         options: _silent,
       );
       return _unwrap(res, UserCalendar.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -123,8 +123,8 @@ class UserCalendarRepository {
         '/calendar/calendars/$id/member/$memberId',
         options: _silent,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -135,8 +135,8 @@ class UserCalendarRepository {
         data: {'permission': permission},
         options: _silent,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

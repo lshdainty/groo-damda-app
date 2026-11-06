@@ -172,8 +172,8 @@ class SmsRepository {
         (o) => (o as Map).cast<String, dynamic>(),
       );
       return SmsParseResult.fromJson(api.data ?? {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -227,8 +227,8 @@ class SmsRepository {
         (o) => (o as Map).cast<String, dynamic>(),
       );
       return SmsCommitResult.fromJson(api.data ?? {});
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -246,8 +246,8 @@ class SmsRepository {
             (e) => SmsCardMapping.fromJson((e as Map).cast<String, dynamic>()),
           )
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -255,8 +255,8 @@ class SmsRepository {
   Future<void> deleteCardMapping(int rowId) async {
     try {
       await _dio.delete<Map<String, dynamic>>('/import/sms/cards/$rowId');
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

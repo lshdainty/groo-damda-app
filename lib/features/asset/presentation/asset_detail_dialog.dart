@@ -2926,14 +2926,19 @@ class _PaySheetState extends State<_PaySheet> {
     });
     // 저장 중에는 시트를 닫지 않는다 — 실패 Callout 을 그릴 폼이 남아 있게
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
-    final bool ok;
+    bool ok;
     try {
       ok = await widget.onPay(v);
+    } catch (e, s) {
+      // ApiException 밖의 오류도 실패다 — zone 으로 빠뜨리지 않고 맨 위 Callout(우리 글), 원문은 로그에만
+      debugPrint('카드 결제 실패: $e\n$s');
+      ok = false;
     } finally {
+      // 결제가 어떤 길로 끝나도(던져도) 진행 원을 멈춘다 — 예전엔 던지면 단추가 계속 돌았다(I-wrap-b2b 3)
       sheet?.setBusy(false);
+      if (mounted) setState(() => _submitting = false);
     }
     if (!mounted) return;
-    setState(() => _submitting = false);
     if (ok) {
       PBottomSheet.of(context).close();
       return;

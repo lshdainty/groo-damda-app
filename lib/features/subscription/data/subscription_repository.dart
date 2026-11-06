@@ -215,8 +215,8 @@ class SubscriptionRepository {
       return p is Map<String, dynamic>
           ? MyFeatures.fromJson(p)
           : MyFeatures.empty;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -227,8 +227,8 @@ class SubscriptionRepository {
       return list
           .map((e) => SubscriptionPlanInfo.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -237,8 +237,8 @@ class SubscriptionRepository {
       final res = await _dio.get<dynamic>('/subscriptions/me');
       final p = _payload(res);
       return p is Map<String, dynamic> ? SubscriptionInfo.fromJson(p) : null;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -250,8 +250,8 @@ class SubscriptionRepository {
         data: {'planCode': planCode},
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -262,8 +262,8 @@ class SubscriptionRepository {
         data: {'reason': reason},
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -277,8 +277,8 @@ class SubscriptionRepository {
           .whereType<Map<String, dynamic>>()
           .map(BrokerConnection.fromJson)
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -294,8 +294,8 @@ class SubscriptionRepository {
         data: {'apiKey': apiKey, 'apiSecret': apiSecret},
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -308,8 +308,8 @@ class SubscriptionRepository {
         '/users/me/securities-credentials/$broker',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -320,8 +320,8 @@ class SubscriptionRepository {
         '/users/me/securities-credentials/$broker/primary',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

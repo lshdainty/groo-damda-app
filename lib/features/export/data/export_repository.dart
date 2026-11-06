@@ -91,8 +91,8 @@ class ExportRepository {
             (e) => ExportTypeCount.fromJson((e as Map).cast<String, dynamic>()),
           )
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -114,8 +114,8 @@ class ExportRepository {
                 ExportPreviewTable.fromJson((e as Map).cast<String, dynamic>()),
           )
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

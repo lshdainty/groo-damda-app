@@ -30,8 +30,8 @@ class BudgetRepository {
       return list
           .map((e) => Budget.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -62,8 +62,8 @@ class BudgetRepository {
       final data = body is Map<String, dynamic> ? body['data'] : null;
       final id = data is Map<String, dynamic> ? data['rowId'] : null;
       return id is num ? id.toInt() : null;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -78,16 +78,16 @@ class BudgetRepository {
         data: {'budgetAmount': budgetAmount},
         options: _opts(silent),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
   Future<void> delete(int id, {bool silent = false}) async {
     try {
       await _dio.delete<void>('/expense/budget/$id', options: _opts(silent));
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -109,8 +109,8 @@ class BudgetRepository {
       return list
           .map((e) => BudgetComplianceMonth.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

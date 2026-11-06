@@ -36,8 +36,8 @@ class RecurringRepository {
       return list
           .map((e) => RecurringTransaction.fromJson(e as Map<String, dynamic>))
           .toList(growable: false);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -100,8 +100,8 @@ class RecurringRepository {
           'isFixed': isFixed,
         },
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -165,8 +165,8 @@ class RecurringRepository {
           'isFixed': isFixed,
         },
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -176,8 +176,8 @@ class RecurringRepository {
         '/recurring-transaction/$id',
         options: _opts(silent),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -188,8 +188,8 @@ class RecurringRepository {
         '/recurring-transaction/$id/toggle',
         options: _opts(silent),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

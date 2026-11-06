@@ -1,5 +1,7 @@
 import 'dart:ui' show Locale;
 
+import 'package:flutter/foundation.dart' show debugPrint;
+
 import 'package:dio/dio.dart';
 
 import 'package:groo_damda_app/core/format/format_locale.dart';
@@ -66,8 +68,36 @@ class ApiException implements Exception {
     );
   }
 
+  /// 응답을 읽지 못했다 — 형식이 다른 본문(`fromJson` 의 형 변환 · 날짜 · 숫자 풀기 실패). 서버는 받았을 수 있다.
+  /// 화면 글은 고정 글([apiErrorServer] — 원문을 내지 않는다), 원문은 로그에만 남긴다.
+  factory ApiException.parse(Object error, StackTrace stack) {
+    debugPrint('ApiException.parse — 응답을 읽지 못했다: $error\n$stack');
+    return ApiException(
+      code: kApiParseErrorCode,
+      message: _l().apiErrorServer,
+      cause: error,
+    );
+  }
+
   @override
   String toString() => 'ApiException($code, $statusCode): $message';
+}
+
+/// 응답 형식 오류의 코드 — [ApiException.parse].
+const String kApiParseErrorCode = 'PARSE';
+
+/// 저장소 공용 — 요청 · 응답 풀기에서 난 오류를 [ApiException] 하나로 올린다(저장소마다 `catch (e, s)` 에서 부른다).
+///
+/// - [DioException] → [ApiException.fromDio]
+/// - 응답 형식 오류([TypeError] · [FormatException]) → [ApiException.parse] — 저장 폼의 `on ApiException` 이 맨 위 Callout 으로,
+///   불러오기는 실패 갈래로 받는다. 예전에는 아무도 잡지 않아 zone 으로 빠졌다(I-wrap-b2b 3)
+/// - 그 밖(이미 [ApiException] 인 것 · 다른 오류)은 그대로 다시 던진다(스택 유지)
+Never throwAsApiException(Object error, StackTrace stack) {
+  if (error is DioException) throw ApiException.fromDio(error);
+  if (error is TypeError || error is FormatException) {
+    throw ApiException.parse(error, stack);
+  }
+  Error.throwWithStackTrace(error, stack);
 }
 
 /// 지금 로케일의 문구 — 컨텍스트가 없는 곳이라 앱 로케일 설정으로 고른다(영어를 고른 경우만 en, 아니면 ko).

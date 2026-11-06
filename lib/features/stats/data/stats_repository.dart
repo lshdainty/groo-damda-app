@@ -20,8 +20,8 @@ class StatsRepository {
         queryParameters: {'startDate': startDate, 'endDate': endDate},
       );
       return _unwrap(res, RangeSummary.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -32,8 +32,8 @@ class StatsRepository {
         queryParameters: {'months': months},
       );
       return _unwrapList(res, 'trends', MonthlyTrend.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -47,8 +47,8 @@ class StatsRepository {
         queryParameters: {'startDate': ?startDate, 'endDate': ?endDate},
       );
       return _unwrapList(res, 'merchants', MerchantSummary.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -62,8 +62,8 @@ class StatsRepository {
         queryParameters: {'startDate': ?startDate, 'endDate': ?endDate},
       );
       return _unwrapList(res, 'assets', AssetExpenseSummary.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -77,8 +77,8 @@ class StatsRepository {
         queryParameters: {'startDate': startDate, 'endDate': endDate},
       );
       return _unwrapList(res, 'cells', HeatmapCell.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -90,8 +90,8 @@ class StatsRepository {
         queryParameters: {'date': date},
       );
       return _unwrap(res, DailySummary.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

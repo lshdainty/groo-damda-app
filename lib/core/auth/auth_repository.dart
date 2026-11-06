@@ -35,8 +35,8 @@ class AuthRepository {
         },
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -52,8 +52,8 @@ class AuthRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return body.data!;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -61,8 +61,8 @@ class AuthRepository {
   Future<void> logout() async {
     try {
       await _dio.post<void>('/auth/logout');
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -75,8 +75,8 @@ class AuthRepository {
         // 실패 글은 화면이 코드로 가른 고정 글로 알린다 — 그루 계정이 쓴 글이 전역 알림으로 닿지 않게(I-14 43)
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -97,8 +97,8 @@ class AuthRepository {
         // 실패 글은 화면이 코드로 가른 고정 글로 알린다 — 그루 계정이 쓴 글이 전역 알림으로 닿지 않게(I-14 16)
         options: Options(extra: {kSilentErrorToast: true}),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -115,8 +115,8 @@ class AuthRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return (body.data!['budgetAlertThreshold'] as num?)?.toInt();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -135,8 +135,8 @@ class AuthRepository {
         throw ApiException(code: body.code, message: body.message);
       }
       return (body.data!['budgetAlertThreshold'] as num?)?.toInt();
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 }

@@ -39,8 +39,8 @@ class FileRepository {
         ),
       );
       return _unwrap(res, FileAttachment.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -58,8 +58,8 @@ class FileRepository {
         },
       );
       return _unwrapList(res, 'files', FileAttachment.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -72,8 +72,8 @@ class FileRepository {
         '/files/$id',
         options: silent ? Options(extra: {kSilentErrorToast: true}) : null,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 

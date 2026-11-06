@@ -24,8 +24,8 @@ class MemoTagRepository {
         options: _silent,
       );
       return _unwrapList(res, 'tags', MemoTag.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -37,8 +37,8 @@ class MemoTagRepository {
         data: {'tagName': tagName, 'color': ?color},
       );
       return _unwrap(res, MemoTag.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -54,8 +54,8 @@ class MemoTagRepository {
         data: {'tagName': tagName, 'color': ?color},
       );
       return _unwrap(res, MemoTag.fromJson);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
@@ -64,8 +64,8 @@ class MemoTagRepository {
   Future<void> delete(int id) async {
     try {
       await _dio.delete<void>('/memo-tag/$id', options: _silent);
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
+    } catch (e, s) {
+      throwAsApiException(e, s);
     }
   }
 
