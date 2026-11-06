@@ -33,6 +33,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
@@ -640,6 +641,78 @@ void main() {
       expect(repo.deleted, [2]);
     });
 
+    // 밀기 트레이 [삭제] → 트레이가 먼저 닫히고 확인창 → 지운다 (화면 수준)
+    Future<void> trayDelete(WidgetTester tester) async {
+      final row = tester
+          .widgetList<PSwipeActions>(find.byType(PSwipeActions))
+          .first;
+      await tester.drag(
+        find.byKey(const ValueKey('swipe-row')).first,
+        const Offset(-250, 0),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('삭제: ${row.rowLabel}'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PAlertDialogView), findsOneWidget);
+      final box = tester.widget<AnimatedContainer>(
+        find.byKey(const ValueKey('swipe-row')).first,
+      );
+      expect(box.transform!.getTranslation().x, 0, reason: '트레이를 먼저 닫는다');
+    }
+
+    Future<void> sheetDelete(WidgetTester tester, Finder row) async {
+      await tester.tap(row.first);
+      await tester.pumpAndSettle();
+      final inSheet = find.descendant(
+        of: find.byType(PBottomSheetContent),
+        matching: findText('삭제'),
+      );
+      expect(inSheet, findsOneWidget);
+      await tester.tap(inSheet);
+      await tester.pumpAndSettle();
+      expect(find.byType(PAlertDialogView), findsOneWidget);
+    }
+
+    testWidgets('예산 — 트레이 [삭제] → 확인창 → 지운다', (tester) async {
+      final handle = tester.ensureSemantics();
+      final repo = _FakeBudgetRepo();
+      await _pump(
+        tester,
+        const BudgetSettingsScreen(),
+        overrides: [budgetRepositoryProvider.overrideWith((ref) async => repo)],
+      );
+      await trayDelete(tester);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(PAlertDialogView),
+          matching: findText('삭제'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(repo.deleted, [2]);
+      handle.dispose();
+    });
+
+    testWidgets('예산 — 수정 시트 바닥 [삭제] → 확인창 한 번 → 지우고 시트가 닫힌다', (tester) async {
+      final repo = _FakeBudgetRepo();
+      await _pump(
+        tester,
+        const BudgetSettingsScreen(),
+        overrides: [budgetRepositoryProvider.overrideWith((ref) async => repo)],
+      );
+      await sheetDelete(tester, find.byType(BudgetCategoryRow));
+      expect(repo.deleted, isEmpty);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(PAlertDialogView),
+          matching: findText('삭제'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(repo.deleted, [2]);
+      expect(find.byType(PBottomSheetContent), findsNothing);
+    });
+
     testWidgets('예산 삭제 — 취소하면 지우지 않는다', (tester) async {
       final repo = _FakeBudgetRepo();
       await _pump(
@@ -920,6 +993,53 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(PAlertDialogView), findsNothing);
       expect(repo.deleted, [5]);
+    });
+
+    testWidgets('저축 목표 — 트레이 [삭제] → 확인창 → 지운다 · 수정 시트 바닥 [삭제] 도 같은 길', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      final repo = _FakeGoalRepo();
+      const goals = [
+        SavingGoal(
+          rowId: 5,
+          title: '여행 적금',
+          targetAmount: 1000000,
+          currentAmount: 100000,
+          color: '#3b82f6',
+          isAchieved: 'N',
+        ),
+      ];
+      final overrides = [
+        savingGoalListProvider.overrideWith((ref) async => goals),
+        savingGoalRepositoryProvider.overrideWith((ref) async => repo),
+      ];
+      await _pump(tester, const SavingGoalScreen(), overrides: overrides);
+      await trayDelete(tester);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(PAlertDialogView),
+          matching: findText('삭제'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(repo.deleted, [5]);
+
+      // 수정 시트 바닥 [삭제]
+      repo.deleted.clear();
+      await _pump(tester, const SavingGoalScreen(), overrides: overrides);
+      await sheetDelete(tester, findPlain('여행 적금'));
+      expect(repo.deleted, isEmpty);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(PAlertDialogView),
+          matching: findText('삭제'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(repo.deleted, [5]);
+      expect(find.byType(PBottomSheetContent), findsNothing);
+      handle.dispose();
     });
 
     testWidgets('저축 목표 삭제 — 실패하면 창을 닫고 스낵바 + 다시 시도는 묻지 않고 바로 지운다', (

@@ -3909,7 +3909,7 @@
   "tdmEmptyMonthDesc": "Add one with the + button below.",
   "tdmEmptyFilter": "No to-dos match the filters",
   "tdmEmptyFilterDesc": "Change or clear the conditions.",
-  "tdmStarToastGain": "Starlight +{gain} · {left} to collect",
+  "tdmStarToastGain": "Got {gain} starlight, {left} more to collect the constellation.",
   "@tdmStarToastGain": {
     "placeholders": {
       "gain": {
@@ -3920,7 +3920,7 @@
       }
     }
   },
-  "tdmStarToastCollected": "Starlight +{gain} · today's constellation collected!",
+  "tdmStarToastCollected": "Got {gain} starlight and collected today's constellation.",
   "@tdmStarToastCollected": {
     "placeholders": {
       "gain": {

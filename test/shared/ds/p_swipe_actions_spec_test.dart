@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 import '../../support/design_spec.dart';
@@ -22,13 +23,17 @@ Widget _host(
   bool reduceMotion = false,
   TextDirection direction = TextDirection.ltr,
   double width = 360,
+  double textScale = 1,
 }) => MaterialApp(
   theme: mode == Brightness.dark ? GrooTheme.dark() : GrooTheme.light(),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('ko'),
   home: MediaQuery(
-    data: MediaQueryData(disableAnimations: reduceMotion),
+    data: MediaQueryData(
+      disableAnimations: reduceMotion,
+      textScaler: TextScaler.linear(textScale),
+    ),
     child: Directionality(
       textDirection: direction,
       child: Scaffold(
@@ -330,29 +335,57 @@ void main() {
     expect(badge.left - edit.left, 12);
   });
 
-  testWidgets('줄 높이 46(제목만) 이어도 동작 칸이 넘치지 않고 56 이다', (tester) async {
-    await tester.pumpWidget(
-      _host(
-        Brightness.light,
-        PSwipeActionsProvider(
-          child: PSwipeActions(
-            actions: [
-              _action(PSwipeActionKind.primary),
-              _action(PSwipeActionKind.destructive),
-            ],
-            rowLabel: '줄',
-            child: const SizedBox(height: 46, child: Text('제목만')),
-          ),
-        ),
-      ),
-    );
-    expect(tester.takeException(), isNull);
-    expect(
-      tester.getSize(find.byKey(const ValueKey('swipe-action-수정'))).height,
-      56,
-    );
-    expect(tester.getSize(find.byKey(const ValueKey('swipe-row'))).height, 56);
-  });
+  // 줄 높이 하한 = max(56, 칸 내용) — 글자 배율 × 방향 × (46 줄 · 제목만 있는 줄)
+  for (final scale in [1.0, 1.3, 2.0]) {
+    for (final dir in TextDirection.values) {
+      for (final kind in ['46', '제목만']) {
+        testWidgets(
+          '줄 높이 하한 — $kind · 글자 $scale · ${dir.name}: 넘침 없이 칸이 줄 안에 든다',
+          (tester) async {
+            await tester.pumpWidget(
+              _host(
+                Brightness.light,
+                PSwipeActionsProvider(
+                  child: PSwipeActions(
+                    actions: [
+                      _action(PSwipeActionKind.primary),
+                      _action(PSwipeActionKind.destructive),
+                    ],
+                    rowLabel: '줄',
+                    child: kind == '46'
+                        ? const SizedBox(height: 46, child: Text('제목만'))
+                        : const PListItem(title: '제목만'),
+                  ),
+                ),
+                direction: dir,
+                textScale: scale,
+                width: 360,
+              ),
+            );
+            expect(tester.takeException(), isNull);
+            final row = tester.getSize(find.byKey(const ValueKey('swipe-row')));
+            final cell = tester.getSize(
+              find.byKey(const ValueKey('swipe-action-수정')),
+            );
+            expect(row.height, greaterThanOrEqualTo(56));
+            expect(
+              cell.height,
+              lessThanOrEqualTo(row.height),
+              reason: '트레이 칸이 줄보다 크면 잘린다',
+            );
+            // 라벨 아래가 칸 밖으로 나가지 않는다
+            final label = tester.getRect(
+              find.byKey(const ValueKey('swipe-label-수정')),
+            );
+            final cellRect = tester.getRect(
+              find.byKey(const ValueKey('swipe-action-수정')),
+            );
+            expect(label.bottom, lessThanOrEqualTo(cellRect.bottom));
+          },
+        );
+      }
+    }
+  }
 
   group('밀기', () {
     Future<void> pumpList(
@@ -490,6 +523,23 @@ void main() {
       await drag(tester, 1, [const Offset(-60, 0)]);
       expect(_offset(tester, 0), 0);
       expect(_offset(tester, 1), -104);
+    });
+
+    testWidgets('열린 줄이 있을 때 다른 줄을 누르면 열린 줄을 닫기만 한다 — 그 누름은 먹지 않는다', (
+      tester,
+    ) async {
+      final taps = <int>[];
+      await pumpList(tester, taps: taps);
+      await drag(tester, 0, [const Offset(-60, 0), const Offset(-60, 0)]);
+      expect(_offset(tester, 0), isNot(0));
+      await tester.tap(find.text('줄1'));
+      await tester.pumpAndSettle();
+      expect(taps, isEmpty);
+      expect(_offset(tester, 0), 0);
+      // 닫힌 뒤에는 다시 눌린다
+      await tester.tap(find.text('줄1'));
+      await tester.pumpAndSettle();
+      expect(taps, [1]);
     });
 
     testWidgets('열린 줄을 누르면 닫기만 한다 — 줄은 눌리지 않는다', (tester) async {
