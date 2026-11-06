@@ -21,7 +21,16 @@ import 'package:groo_damda_app/shared/ds/chart/p_chart_parts.dart';
 
 /// 가계부 원장 머리 — 달 이동 · 합계 · 인사이트 · 소비 요약 · 주 달력(I-07 7 · 8 · 11).
 ///
-/// 이 머리는 ds Scroll Auto Hide 가 통째로 숨긴다(12). 구조는 그대로 두고 값 · 부품 · 색 역할 이름만 ds 로 옮겼다.
+/// ds Scroll Auto Hide 로 내리면 총액 · 지난달 비교 · 소비 요약만 숨고, 달 이동 줄([LedgerMonthNav]) · 주 달력 · 펼침 꺾쇠 ·
+/// 구분선은 남는다(12 — 페이지 전체를 조절하는 줄은 한 덩어리로 둔다). 할 일 원장도 같다.
+
+/// 남는 머리(주 달력 · 꺾쇠 · 구분선)의 아래 끝 — 목록 맨 위 기준 y. 원장의 스크롤 스파이는 이 선 아래(+28)를 지난 날짜 묶음을
+/// 고른 날로 삼는다. 남는 머리가 없으면(필터) `null`.
+double? pinnedHeaderBottom(GlobalKey key, double listTop) {
+  final box = key.currentContext?.findRenderObject();
+  if (box is! RenderBox || !box.hasSize || !box.attached) return null;
+  return box.localToGlobal(Offset(0, box.size.height)).dy - listTop;
+}
 
 String ledgerYmd(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-'

@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/expense/domain/expense_filter.dart';
 import 'package:groo_damda_app/features/expense/presentation/expense_screen.dart';
 import 'package:groo_damda_app/features/expense/presentation/filter_dialog.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/filter_bodies.dart';
+import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_day_group.dart';
 import 'package:groo_damda_app/shared/ds/wheel_picker/p_wheel_picker.dart';
 import 'package:groo_damda_app/shared/widgets/p_day_group.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_header.dart';
@@ -156,6 +157,13 @@ Future<void> _pump(
   await tester.pump(const Duration(milliseconds: 100));
   await tester.pump(const Duration(milliseconds: 400));
 }
+
+/// 숨는 영역(총액 · 지난달 비교 · 소비 요약)이 위로 옮겨진 거리.
+double headerDyOf(WidgetTester tester) => tester
+    .widget<Transform>(find.byKey(const ValueKey('pscrollautohide-header')))
+    .transform
+    .getTranslation()
+    .y;
 
 /// 필터 시트가 돌려준 값 — 시트를 닫은 뒤 본다.
 ExpenseFilter? _result;
@@ -404,6 +412,177 @@ void main() {
       await tester.pump();
       expect(headerDy(tester), 0);
     });
+  });
+
+  group('12 내려도 달 줄 · 주 달력 · 꺾쇠는 남고 고른 날이 목록을 따라간다', () {
+    // 지난달(늘 다 지난 날) 1 ~ 28 일, 하루 두 건 — 여러 주에 걸친 긴 목록.
+    final now = DateTime.now();
+    final prev = DateTime(now.year, now.month - 1, 1);
+    final prevQ = '${prev.year}-${prev.month.toString().padLeft(2, '0')}';
+    Expense on(int id, int day) => Expense(
+      rowId: id,
+      expenseType: 'EXPENSE',
+      amount: 1000 + id,
+      merchant: '가게 $id',
+      expenseDate: '${_ymd(DateTime(prev.year, prev.month, day))}T09:00:00',
+      categoryRowId: 1,
+      categoryName: '식비',
+      assetRowId: 1,
+      assetName: '월급 통장',
+    );
+    final long = [
+      for (var d = 1; d <= 28; d++) ...[on(d * 10, d), on(d * 10 + 1, d)],
+    ];
+    Future<List<Expense>> only(MonthKey k) async =>
+        k.year == prev.year && k.month == prev.month ? long : const [];
+
+    Finder grid() => find.byType(LedgerCalendarGrid);
+
+    /// 주 달력에서 고른 날(짙은 원)의 숫자 — 없으면 null.
+    int? selectedDay(WidgetTester tester) {
+      final c = tester.element(find.byType(ExpenseScreen)).colors;
+      final circle = find.descendant(
+        of: grid(),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.decoration is BoxDecoration &&
+              (w.decoration! as BoxDecoration).color == c.bgNeutralInverted,
+        ),
+      );
+      if (circle.evaluate().isEmpty) return null;
+      final t = tester.widget<Text>(
+        find.descendant(of: circle.first, matching: find.byType(Text)).first,
+      );
+      return int.parse(t.data!);
+    }
+
+    /// 주 달력 한 줄에 보이는 날 숫자.
+    Set<int> shownDays(WidgetTester tester) => {
+      for (final t in tester.widgetList<Text>(
+        find.descendant(of: grid(), matching: find.byType(Text)),
+      ))
+        ?int.tryParse(t.data ?? ''),
+    };
+
+    /// 남는 머리 아래(구분선 아래 끝)를 지난 묶음 중 가장 아래 = 지금 보는 날.
+    int topGroupDay(WidgetTester tester) {
+      final line = tester.getBottomLeft(find.byType(LedgerHeaderDivider)).dy;
+      var best = double.negativeInfinity;
+      var day = -1;
+      for (final e in find.byType(LedgerDayGroup).evaluate()) {
+        final top = tester.getTopLeft(find.byWidget(e.widget)).dy;
+        if (top <= line + 28 && top > best) {
+          best = top;
+          day = (e.widget as LedgerDayGroup).date.day;
+        }
+      }
+      return day;
+    }
+
+    testWidgets('내리면 총액만 숨고 달 줄 바로 아래에 주 달력 · 꺾쇠가 화면 안에 남는다', (tester) async {
+      await _pump(tester, expenses: only, initialMonth: prevQ);
+      final nav = find.byType(LedgerMonthNav);
+      final navTop = tester.getTopLeft(nav).dy;
+      await tester.drag(find.byType(ListView).first, const Offset(0, -400));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(nav).dy, navTop, reason: '달 줄은 그 자리');
+      expect(
+        tester.getTopLeft(grid()).dy,
+        moreOrLessEquals(tester.getBottomLeft(nav).dy, epsilon: 0.5),
+        reason: '총액이 숨어 주 달력이 달 줄 바로 아래로 붙는다',
+      );
+      expect(tester.getBottomLeft(grid()).dy, lessThan(780));
+      expect(
+        tester.getTopLeft(find.byIcon(LucideIcons.chevronDown).last).dy,
+        greaterThan(navTop),
+        reason: '펼침 꺾쇠도 화면 안',
+      );
+      // 숨는 영역(총액)은 위로 옮겨졌다
+      final h = tester.getSize(find.byType(LedgerTotalRow)).height;
+      expect(headerDyOf(tester), moreOrLessEquals(-h, epsilon: 0.5));
+    });
+
+    testWidgets('내리는 대로 고른 날이 맨 위 날짜 묶음을 따라가고 다른 주로 넘어가면 주 달력도 바뀐다', (
+      tester,
+    ) async {
+      await _pump(tester, expenses: only, initialMonth: prevQ);
+      await tester.drag(find.byType(ListView).first, const Offset(0, -400));
+      await tester.pumpAndSettle();
+      final first = selectedDay(tester);
+      expect(first, isNotNull);
+      expect(first, topGroupDay(tester));
+      expect(shownDays(tester), contains(first));
+      final weekBefore = shownDays(tester);
+
+      // 목록이 다른 주로 넘어간다(28 일에서 내려가 2 주 넘게)
+      for (var i = 0; i < 4; i++) {
+        await tester.drag(find.byType(ListView).first, const Offset(0, -500));
+        await tester.pumpAndSettle();
+      }
+      final later = selectedDay(tester);
+      expect(later, isNotNull);
+      expect(later, topGroupDay(tester));
+      expect(later, lessThan(first!));
+      expect(shownDays(tester), contains(later));
+      expect(shownDays(tester), isNot(weekBefore), reason: '주 달력이 그 주로 바뀐다');
+    });
+
+    testWidgets('날을 누르면 그 날 묶음이 남는 머리 바로 아래로 오고, 가는 동안 고른 날이 흔들리지 않는다', (
+      tester,
+    ) async {
+      await _pump(tester, expenses: only, initialMonth: prevQ);
+      await tester.drag(find.byType(ListView).first, const Offset(0, -400));
+      await tester.pumpAndSettle();
+      final cur = selectedDay(tester)!;
+      // 같은 주에서 다른 날 — 고른 날보다 앞날(목록 아래쪽)
+      final target = (shownDays(
+        tester,
+      ).where((d) => d < cur).toList()..sort()).first;
+      await tester.tap(
+        find.descendant(of: grid(), matching: find.text('$target')),
+      );
+      for (var i = 0; i < 12; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(selectedDay(tester), target, reason: '스파이가 잠겨 있다 (${i * 50}ms)');
+      }
+      await tester.pumpAndSettle();
+      expect(selectedDay(tester), target);
+      final line = tester.getBottomLeft(find.byType(LedgerHeaderDivider)).dy;
+      final group = find.byWidgetPredicate(
+        (w) => w is LedgerDayGroup && w.date.day == target,
+      );
+      expect(
+        tester.getTopLeft(group).dy,
+        moreOrLessEquals(line, epsilon: 1),
+        reason: '주 달력 뒤로 들어가지 않고 그 바로 아래',
+      );
+    });
+
+    for (final n in [3, 6, 9, 12]) {
+      testWidgets('짧은 목록(하루 $n 건)에서 머리가 깜빡이지 않는다', (tester) async {
+        await _pump(
+          tester,
+          expenses: (_) async => [
+            for (var i = 1; i <= n; i++) _tx(i, '가게 $i', 1000 * i),
+          ],
+        );
+        await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+        await tester.pumpAndSettle();
+        final pos = tester
+            .state<ScrollableState>(find.byType(Scrollable).first)
+            .position;
+        final dy = headerDyOf(tester);
+        final px = pos.pixels;
+        final max = pos.maxScrollExtent;
+        for (var i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          expect(headerDyOf(tester), dy);
+          expect(pos.pixels, px);
+          expect(pos.maxScrollExtent, max, reason: '숨겨도 목록 길이는 그대로');
+        }
+      });
+    }
   });
 
   testWidgets('I-29b 4 펼침 단추 바로 아래가 구분선 · 그 아래 첫 묶음 위 4 에 날짜 머리(웹과 같은 y)', (

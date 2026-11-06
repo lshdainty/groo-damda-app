@@ -67,8 +67,15 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   final ScrollController _scrollCtrl = ScrollController();
   final GlobalKey _listKey = GlobalKey();
 
-  /// 숨는 머리(Scroll Auto Hide)의 높이 — 목록 맨 위 여백이자 스크롤 스파이가 기준으로 삼는 선.
+  /// 머리(고정 줄 + 숨는 영역)의 높이 — 목록 맨 위 여백. 남는 머리를 못 잴 때 스크롤 스파이의 기준선.
   double _headerH = 0;
+
+  /// 남는 머리(주 달력 · 펼침 꺾쇠 · 구분선) — 그 아래 끝이 스크롤 스파이의 기준선이다(가계부와 같다).
+  final GlobalKey _pinKey = GlobalKey();
+
+  /// 날짜로 갈 때 남는 머리 바로 아래에 맞추려고 잡는다(가계부와 같다).
+  final GlobalKey<PScrollAutoHideState> _autoHideKey =
+      GlobalKey<PScrollAutoHideState>();
   bool _lock = false;
   Timer? _lockTimer;
 
@@ -109,19 +116,33 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     _lockTimer = Timer(Duration(milliseconds: ms), () => _lock = false);
   }
 
-  /// 스크롤 스파이 — 맨 위 날짜 그룹을 선택일로 동기. 머리 숨기기는 Scroll Auto Hide 가 맡는다.
+  bool _spyQueued = false;
+
+  /// 스크롤 · 머리 옮김(스냅)마다 다음 프레임에 스파이를 한 번 돌린다 — 그 프레임의 배치로 재야 한 칸씩 밀리지 않는다(스크롤
+  /// 알림은 배치 전에 온다). 스냅은 목록을 스크롤하지 않고 남는 머리 아래 선만 옮기므로 그것도 듣는다.
   void _onScroll() {
+    if (_spyQueued) return;
+    _spyQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _spyQueued = false;
+      if (mounted) _spy();
+    });
+  }
+
+  /// 스크롤 스파이 — 맨 위 날짜 그룹을 선택일로 동기. 머리 숨기기는 Scroll Auto Hide 가 맡는다.
+  void _spy() {
     if (!_scrollCtrl.hasClients || _lock) return;
     final listBox = _listKey.currentContext?.findRenderObject() as RenderBox?;
     if (listBox == null) return;
     final listTop = listBox.localToGlobal(Offset.zero).dy;
+    final line = pinnedHeaderBottom(_pinKey, listTop) ?? _headerH;
     double best = double.negativeInfinity;
     String? cur;
     for (final e in _dayKeys.entries) {
       final box = e.value.currentContext?.findRenderObject() as RenderBox?;
       if (box == null) continue;
       final top = box.localToGlobal(Offset.zero).dy - listTop;
-      if (top <= _headerH + 28 && top > best) {
+      if (top <= line + 28 && top > best) {
         best = top;
         cur = e.key;
       }
@@ -166,6 +187,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
         key: _dayKeys[ds],
         index: order.indexOf(ds),
         count: order.length,
+        targetOf: (ctx) => _autoHideKey.currentState?.scrollTargetFor(ctx),
       );
     });
   }
@@ -355,7 +377,8 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     }
     final left = all == null ? 0 : todayLeft(all, todayYmd);
 
-    final header = Column(
+    // 머리 — 달 이동 줄 · 주 달력 · 펼침 꺾쇠는 남고, 오늘 할 일 · 별빛 한 줄 · [밤하늘](펼친 밤하늘 포함)만 숨는다(가계부와 같다).
+    final pinnedTop = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: PSpacing.x2),
@@ -365,6 +388,11 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
           onOpenFilter: () => _openFilter(all ?? const []),
           filterOn: _filter.active,
         ),
+      ],
+    );
+    final header = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         // 오늘 할 일 + 별빛 한 줄 + [밤하늘]. [밤하늘] 과 월 달력은 하나만 펼친다.
         LedgerTotalRow(
           loading: loading,
@@ -419,6 +447,12 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
               ],
             ),
           ),
+      ],
+    );
+    final pinnedBottom = Column(
+      key: _pinKey,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         // 접이식 캘린더 — 칸 아래 표시: 수집 ★ / 남은 수 / 키운 별자리 ★ / 놓친 날 구름 / 다 끝냄 ✓.
         LedgerCalendarGrid(
           month: _month,
@@ -527,8 +561,12 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     }
 
     return PScrollAutoHide(
+      key: _autoHideKey,
       controller: _scrollCtrl,
+      onMoved: (_) => _onScroll(),
+      pinnedTop: pinnedTop,
       header: header,
+      pinnedBottom: pinnedBottom,
       builder: buildList,
     );
   }
