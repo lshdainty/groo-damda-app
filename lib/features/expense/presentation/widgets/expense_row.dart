@@ -133,7 +133,9 @@ class ExpenseRow extends StatelessWidget {
         // 줄어드는 것은 이름 항목이다 — 카테고리 1 · 자산 2, 할부 · 시각은 줄지 않는다(tag-group.md "줄어드는 정도" — 긴 카테고리에서 시각이
         // 잘리거나 겹치지 않게. 웹 ExpenseRow 와 같은 값)
         PTag(cName, shrink: 1),
-        PTag(expense.assetName ?? '-', shrink: 2),
+        // 자산이 없으면 그 조각을 뺀다 — "-" 를 찍지 않는다(웹 ExpenseRow 와 같은 규칙: "식비 · 08:30")
+        if (expense.assetName case final asset? when asset.trim().isNotEmpty)
+          PTag(asset, shrink: 2),
         if (showInstallment && (expense.installmentMonths ?? 1) > 1)
           PTag(l.assetInstallmentBadge(expense.installmentMonths!), shrink: 0),
         // 시각 — 분류 · 자산 · 시각 차례(tag-group.md:84), 줄지 않는다. 00:00 이면 두지 않는다
