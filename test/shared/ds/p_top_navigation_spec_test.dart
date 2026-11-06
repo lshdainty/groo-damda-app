@@ -889,17 +889,25 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('글자 200% 에서도 칸은 1.2배까지만 따르고 바 높이는 56 그대로', (tester) async {
-      await tester.pumpWidget(searchHost(const TextScaler.linear(2)));
-      final scaler = MediaQuery.textScalerOf(
-        tester.element(find.byType(PInput)),
-      );
-      expect(scaler.scale(10), closeTo(12, 1e-6));
-      expect(
-        tester.getRect(find.byKey(const ValueKey('top-navigation'))).height,
-        56,
-      );
-      expect(tester.takeException(), isNull);
+    testWidgets('글자 크기 설정을 제목과 같은 1.0 ~ 1.2 로만 따르고 바 높이는 56 그대로', (
+      tester,
+    ) async {
+      for (final (scale, expected) in [(0.8, 1.0), (1.1, 1.1), (2.0, 1.2)]) {
+        await tester.pumpWidget(searchHost(TextScaler.linear(scale)));
+        final scaler = MediaQuery.textScalerOf(
+          tester.element(find.byType(PInput)),
+        );
+        expect(
+          scaler.scale(10),
+          closeTo(10 * expected, 1e-6),
+          reason: '배율 $scale',
+        );
+        expect(
+          tester.getRect(find.byKey(const ValueKey('top-navigation'))).height,
+          56,
+        );
+        expect(tester.takeException(), isNull);
+      }
     });
   });
 

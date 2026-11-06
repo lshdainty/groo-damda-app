@@ -199,7 +199,9 @@ class _SearchSlot extends StatelessWidget {
             child: const SizedBox.expand(),
           ),
         ),
+        // 바의 제목 · 글 버튼과 같은 1.0 ~ 1.2 — 글자를 줄인 설정에서도 칸 글만 작아지지 않는다
         MediaQuery.withClampedTextScaling(
+          minScaleFactor: 1,
           maxScaleFactor: kTopNavigationMaxTextScale,
           child: KeyedSubtree(
             key: const ValueKey('top-navigation-search'),
