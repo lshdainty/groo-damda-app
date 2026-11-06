@@ -7,6 +7,7 @@ import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
+import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/recurring/application/recurring_providers.dart';
 import 'package:groo_damda_app/features/recurring/data/recurring_repository.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.dart';
@@ -20,6 +21,16 @@ import 'recurring_test_support.dart';
 import '../../support/plain_text.dart';
 
 const _bank = Asset(rowId: 7, assetName: '주거래', assetType: 'BANK_ACCOUNT');
+
+/// 거래의 카테고리(2) — 목록에 없으면 폼이 "지운 카테고리" 로 보고 비워 저장을 막는다(의도된 규칙)
+const _food = ExpenseCategory(
+  rowId: 2,
+  categoryName: '식비',
+  expenseType: 'EXPENSE',
+  sortOrder: 0,
+  icon: 'utensils',
+  color: '#2c70bf',
+);
 
 const _expense = Expense(
   rowId: 9,
@@ -142,7 +153,7 @@ Future<_Repo> _open(WidgetTester tester, {RecurringTransaction? linked}) async {
       recurringListProvider.overrideWith(
         (ref) async => linked == null ? const [] : [linked],
       ),
-      categoriesProvider.overrideWith((ref) async => const []),
+      categoriesProvider.overrideWith((ref) async => const [_food]),
       assetsProvider.overrideWith((ref) async => [_bank]),
     ],
   );

@@ -116,6 +116,11 @@ String _ymd(DateTime d) =>
     '${d.month.toString().padLeft(2, '0')}-'
     '${d.day.toString().padLeft(2, '0')}';
 
+/// 옛 shared/widgets · 새 ds 스켈레톤 둘 다 — 화면마다 옮긴 정도가 다르다(프리셋은 ds)
+final _anySkeleton = find.byWidgetPredicate(
+  (w) => w is PSkeleton || w is dsskel.PSkeleton,
+);
+
 void main() {
   final now = DateTime.now();
 
@@ -206,7 +211,7 @@ void main() {
       await pump(tester, serveList: false);
       await tester.pump();
 
-      expect(find.byType(PSkeleton), findsWidgets);
+      expect(_anySkeleton, findsWidgets);
     });
 
     testWidgets('재조회 중에도 이전 프리셋이 그대로 보인다', (tester) async {
@@ -221,7 +226,7 @@ void main() {
       );
 
       expect(findText('점심 커피'), findsOneWidget);
-      expect(find.byType(PSkeleton), findsNothing);
+      expect(_anySkeleton, findsNothing);
     });
   });
 
@@ -289,7 +294,7 @@ void main() {
       await open(tester, serve: false);
       await tester.pump();
 
-      expect(find.byType(PSkeleton), findsWidgets);
+      expect(_anySkeleton, findsWidgets);
     });
 
     testWidgets('빈 목록은 스켈레톤이 아니라 빈 상태 문구다', (tester) async {
@@ -297,7 +302,7 @@ void main() {
 
       expect(findText('표시할 데이터가 없어요'), findsOneWidget);
       expect(findText('연결된 거래 내역이 없어요.'), findsOneWidget);
-      expect(find.byType(PSkeleton), findsNothing);
+      expect(_anySkeleton, findsNothing);
     });
 
     testWidgets('재조회 중에도 빈 상태 문구가 그대로 — 스켈레톤이 끼어들지 않는다', (tester) async {
@@ -309,7 +314,7 @@ void main() {
 
       expect(findText('표시할 데이터가 없어요'), findsOneWidget);
       expect(findText('연결된 거래 내역이 없어요.'), findsOneWidget);
-      expect(find.byType(PSkeleton), findsNothing);
+      expect(_anySkeleton, findsNothing);
     });
 
     testWidgets('재조회 중에도 이전 거래가 그대로 보인다', (tester) async {
@@ -337,7 +342,7 @@ void main() {
       await _refetch(tester, container, expensesByAssetProvider);
 
       expect(findPlain('점심값'), findsWidgets);
-      expect(find.byType(PSkeleton), findsNothing);
+      expect(_anySkeleton, findsNothing);
     });
   });
 
@@ -532,7 +537,9 @@ void main() {
           tossCandlesProvider.overrideWith((ref, a) async => candles),
         ]);
         await tester.tap(findPlain('체결'));
-        await tester.pump(Duration.zero);
+        // 탭을 바꾸면 그 탭의 질의를 그때 지켜본다 — 한 프레임으로는 줄이 아직 없다
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(findText('오전 10:11'), findsOneWidget);
         expect(find.byType(dsskel.PSkeleton), findsNothing);
 

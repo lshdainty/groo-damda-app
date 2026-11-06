@@ -103,7 +103,7 @@ Finder _has(String part) => find.byWidgetPredicate((w) {
 
 /// keepAll 이 끼우는 보이지 않는 글자(U+2060)를 빼고 찾는다.
 Finder _t(String part) => find.byWidgetPredicate(
-  (w) => w is Text && (w.data ?? '').replaceAll('\u2060', '') == part,
+  (w) => w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == part,
 );
 
 Future<void> _open(
@@ -344,14 +344,20 @@ void main() {
     await tester.tap(findText(_l.withdrawUseEmailCode));
     await tester.pumpAndSettle();
     // 사용자 결정(10-24) 05-2 Q1 A — 스팸함 안내는 코드를 보낸 뒤에만 보인다
-    expect(_t(_l.withdrawCodeHint), findsNothing, reason: '보내기 전엔 없다');
+    expect(
+      findTextContaining(_l.withdrawCodeHint),
+      findsNothing,
+      reason: '보내기 전엔 없다',
+    );
     await tester.tap(findText(_l.withdrawSendCode));
     await tester.pumpAndSettle();
-    expect(_t(_l.withdrawCodeHint), findsOneWidget);
+    // 보낸 뒤 안내는 "메일로 코드를 보냈어요. {스팸함 안내}" 한 줄이다(2182327a)
+    final hintText = '${_l.withdrawCodeSent} ${_l.withdrawCodeHint}';
+    expect(_t(hintText), findsOneWidget);
     final resend = tester.getRect(
       findWidgetWithText(PButton, _l.withdrawResendCooldown(60)),
     );
-    final hint = tester.getRect(_t(_l.withdrawCodeHint));
+    final hint = tester.getRect(_t(hintText));
     expect(hint.top - resend.bottom, closeTo(PSpacing.x3, 1), reason: '12');
     final back = tester.getRect(
       findWidgetWithText(PButton, _l.withdrawUsePassword),

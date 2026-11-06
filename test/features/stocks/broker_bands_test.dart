@@ -15,6 +15,7 @@ import 'package:groo_damda_app/features/stocks/presentation/stocks_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import '../../support/plain_text.dart';
+import '../../support/real_fonts.dart';
 
 Future<void> _pump(
   WidgetTester tester,
@@ -52,6 +53,9 @@ Finder _t(String s) =>
     find.byWidgetPredicate((w) => w is Text && _plain(w) == s);
 
 void main() {
+  // 200% 넘침 · "이름 값" 한 줄은 실제 글꼴로 잰다(T5)
+  setUpAll(loadRealFonts);
+
   group('호가 · 체결 줄은 큰 글자에서 글자를 따라 늘어난다(앱 검수)', () {
     final book = TossOrderbook(
       currency: 'KRW',

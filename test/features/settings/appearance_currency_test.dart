@@ -110,7 +110,13 @@ Future<_FakePrefsRepo> _pump(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (hang) {
+    // 받는 중이면 Skeleton 이 늘 돈다 — 가라앉기를 기다리지 않는다
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+  } else {
+    await tester.pumpAndSettle();
+  }
   return repo;
 }
 

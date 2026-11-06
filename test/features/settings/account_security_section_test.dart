@@ -147,7 +147,9 @@ void main() {
       final switches = find.byType(PListSwitchItem);
       expect(switches, findsOneWidget);
       await tester.tap(switches.first);
-      await tester.pumpAndSettle();
+      // 계정 화면의 다른 구역(구독 등)은 받는 중이라 Skeleton 이 늘 돈다 — 가라앉기를 기다리지 않는다
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(auth.calls, 1);
       // 인증 실패 → 꺼진 채로 남는다.

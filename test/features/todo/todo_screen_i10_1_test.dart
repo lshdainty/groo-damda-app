@@ -823,6 +823,8 @@ void main() {
         tester,
         const TodoScreen(),
         overrides: todoOverrides(todos: _basic(), repo: repo),
+        // 실패 글은 스낵바다(todo_screen PSnackbar.maybeOf) — 앱처럼 호스트를 둔다
+        snackbarHost: true,
       );
       await tester.tap(_checkOf('보고서 마무리'));
       await tester.pump();

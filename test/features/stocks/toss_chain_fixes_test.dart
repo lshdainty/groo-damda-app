@@ -471,15 +471,20 @@ void main() {
   testWidgets('M13 호가 · 체결의 고른 탭이 스크롤을 오가도 유지된다', (tester) async {
     _tall(tester, h: 700);
     await tester.pumpWidget(
-      _app(
-        const TossStockDetailPage(symbol: 'A1'),
-        _base(
+      _app(const TossStockDetailPage(symbol: 'A1'), [
+        ..._base(
           orderbook: () async => const TossOrderbook(
             asks: [TossOrderbookEntry(price: '75100', volume: '10')],
             bids: [TossOrderbookEntry(price: '75000', volume: '20')],
           ),
         ),
-      ),
+        // 체결이 있어야 체결 탭에 '체결시각' 머리가 선다(없으면 "체결 내역이 없어요")
+        tossTradesProvider.overrideWith(
+          (ref, s) async => const [
+            TossTrade(price: '75100', volume: '3', timestamp: '10:11:12'),
+          ],
+        ),
+      ]),
     );
     await _run(tester, 2);
     await tester.scrollUntilVisible(

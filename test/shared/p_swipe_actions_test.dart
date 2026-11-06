@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
@@ -179,10 +180,11 @@ void main() {
     await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     // 확인 버튼 라벨은 액션 이름이라 트레이의 '삭제' 와 같다 — 다이얼로그 안의 것을 고른다.
+    // 다이얼로그 안에도 제목 "삭제" 와 단추 "삭제" 둘이다 — 단추(PButton)를 누른다.
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: findText('삭제'),
+        matching: findWidgetWithText(PButton, '삭제'),
       ),
     );
     await tester.pumpAndSettle();

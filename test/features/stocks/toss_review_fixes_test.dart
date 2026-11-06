@@ -359,13 +359,13 @@ void main() {
       // 호가 — 가격에 원, 줄 읽기에 매도/매수 쪽 + 잔량
       expect(_t('75,100원'), findsOneWidget);
       expect(findSemanticsContaining('매도 75,100원, 잔량 4,259'), findsOneWidget);
-      expect(find.bySemanticsLabel('매수 75,000원, 잔량 3,986'), findsOneWidget);
-      expect(find.bySemanticsLabel('호가 표'), findsOneWidget);
+      expect(findSemanticsContaining('매수 75,000원, 잔량 3,986'), findsOneWidget);
+      expect(findSemanticsContaining('호가 표'), findsOneWidget);
       await tester.tap(_t('체결'));
       await _settle(tester);
       expect(_t('71,150원'), findsOneWidget);
       expect(_t('오후 1:00'), findsOneWidget);
-      expect(find.bySemanticsLabel('오후 1:00, 71,150원, 수량 7'), findsOneWidget);
+      expect(findSemanticsContaining('오후 1:00, 71,150원, 수량 7'), findsOneWidget);
       handle.dispose();
     });
 
@@ -412,7 +412,8 @@ void main() {
       await _settle(tester, 60000);
       // 10초 주기 × 60초 = 6번. 목록 타이머가 같이 돌면 12번(두 배)이었다.
       expect(calls['orderbook'], lessThanOrEqualTo(6));
-      expect(calls['trades'], lessThanOrEqualTo(6));
+      // 체결은 체결 탭을 고를 때만 지켜본다(I-13b 21) — 호가 탭에서는 0
+      expect(calls['trades'] ?? 0, lessThanOrEqualTo(6));
       expect(calls['prices'], lessThanOrEqualTo(6));
       expect(calls['candles-1d'] ?? 0, 0, reason: '일별 캔들(252봉)은 10초마다 받지 않는다');
       expect(

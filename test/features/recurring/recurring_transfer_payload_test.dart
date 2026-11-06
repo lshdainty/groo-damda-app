@@ -101,6 +101,8 @@ Future<_CapturingRepo> _open(WidgetTester tester, {bool fail = false}) async {
     ),
     [
       recurringRepositoryProvider.overrideWith((ref) async => repo),
+      // 저장 뒤 반복 목록을 다시 받는다 — 가짜 저장소에 list 가 없어 덮는다
+      recurringListProvider.overrideWith((ref) async => const []),
       categoriesProvider.overrideWith((ref) async => const []),
       assetsProvider.overrideWith((ref) async => [_bank, _savings, _card]),
     ],
@@ -123,8 +125,8 @@ void main() {
     await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '300000');
-    await _pickRow(tester, '출금 계좌', '주거래');
-    await _pickRow(tester, '입금 계좌', '청약');
+    await _pickRow(tester, '보내는 계좌', '주거래');
+    await _pickRow(tester, '받는 계좌', '청약');
     // 수수료는 같은 시트 안 한 단계 — 쓰고 "완료"
     await tester.tap(plain('수수료').last);
     await tester.pumpAndSettle();
@@ -163,7 +165,7 @@ void main() {
     await _open(tester);
     await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
-    await tester.tap(plain('출금 계좌').last);
+    await tester.tap(plain('보내는 계좌').last);
     await tester.pumpAndSettle();
 
     expect(plain('주거래'), findsWidgets);
@@ -176,8 +178,8 @@ void main() {
     await tester.tap(plain('이체').last);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '300000');
-    await _pickRow(tester, '출금 계좌', '주거래');
-    await _pickRow(tester, '입금 계좌', '청약');
+    await _pickRow(tester, '보내는 계좌', '주거래');
+    await _pickRow(tester, '받는 계좌', '청약');
     await tester.tap(plain('추가').last);
     await tester.pumpAndSettle();
 

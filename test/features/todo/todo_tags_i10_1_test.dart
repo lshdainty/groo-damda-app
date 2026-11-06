@@ -275,7 +275,9 @@ void main() {
       expect(findPlain('태그 수정'), findsNothing);
       expect(findPlain('태그 삭제'), findsOneWidget);
       expect(
-        findPlain('"업무" 태그를 삭제하면 이 태그를 쓰는 할 일 14건은 태그 없음으로 남아요.'),
+        findPlain(
+          '"업무" 태그를 삭제하면 이 태그를 쓰는 할 일 14건은 태그 없음으로 남아요. 삭제한 태그는 되돌릴 수 없어요.',
+        ),
         findsOneWidget,
       );
       await tester.tap(_button('삭제').last);

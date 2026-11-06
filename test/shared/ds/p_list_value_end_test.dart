@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import '../../support/plain_text.dart';
+import '../../support/real_fonts.dart';
 
 const _long = '서울특별시 강남구 테헤란로 427 위워크타워 12층 대회의실 B';
 
@@ -34,23 +35,31 @@ RenderParagraph _para(WidgetTester t, Finder f) =>
       find.descendant(of: f, matching: find.byType(RichText)).first,
     );
 
-/// 문단의 줄마다 오른쪽 끝(전역 x).
+/// 문단의 줄마다 오른쪽 끝(전역 x) — 보이는 글자만 센다. 줄 끝에 걸린 공백 · 이음 글자(U+2060)는 오른쪽 맞춤에서 줄 밖으로
+/// 늘어지므로(Flutter 는 줄 끝 공백을 맞춤에서 뺀다) 끝으로 치지 않는다.
 List<double> _lineRights(WidgetTester t, Finder f) {
   final p = _para(t, f);
-  final len = p.text.toPlainText().length;
+  final text = p.text.toPlainText();
   final rights = <double, double>{};
-  for (final b in p.getBoxesForSelection(
-    TextSelection(baseOffset: 0, extentOffset: len),
-  )) {
-    final r = b.toRect();
-    final y = p.localToGlobal(Offset(0, r.top)).dy.roundToDouble();
-    final x = p.localToGlobal(Offset(r.right, 0)).dx;
-    if (x > (rights[y] ?? -1)) rights[y] = x;
+  for (var i = 0; i < text.length; i++) {
+    final ch = text[i];
+    if (ch.trim().isEmpty || ch == '\u2060' || ch == '\u200B') continue;
+    for (final b in p.getBoxesForSelection(
+      TextSelection(baseOffset: i, extentOffset: i + 1),
+    )) {
+      final r = b.toRect();
+      final y = p.localToGlobal(Offset(0, r.top)).dy.roundToDouble();
+      final x = p.localToGlobal(Offset(r.right, 0)).dx;
+      if (x > (rights[y] ?? -1)) rights[y] = x;
+    }
   }
   return rights.values.toList();
 }
 
 void main() {
+  // 줄 끝 · 줄바꿈 자리는 실제 글꼴로 잰다 — 시험 글꼴(Ahem)은 이음 글자(U+2060)에도 1em 폭을 준다
+  setUpAll(loadRealFonts);
+
   testWidgets('두 줄 값 — 모든 줄의 오른쪽 끝이 줄 끝 336(= 360 − 24)', (t) async {
     await t.pumpWidget(
       _host(
