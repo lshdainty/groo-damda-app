@@ -22,6 +22,8 @@ import 'package:groo_damda_app/features/asset/presentation/pickers/picker_sheet.
 import 'package:groo_damda_app/features/asset/presentation/pickers/stock_add_picker.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/stocks/application/live_prices.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -371,19 +373,31 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   /// 환산 규칙은 [livePricesProvider] 한 곳에 있다 — 자산 목록·상세와 같은 걸 써야
   /// 한 화면에서 총액과 종목별 금액이 어긋나지 않는다(실제로 어긋난 적이 있다).
   Map<String, double?> _unitKrwMap() {
+    final symbols = _linkedSymbols();
+    // 다시 받는 동안·실패한 동안에도 앞 시세를 쓴다 — 자산 목록·상세와 같은 값을 보여야 한다.
+    final live = _livePrices()?.value;
+    if (live == null) return const {};
+    return {for (final s in symbols) s: live.unitKrw(s)};
+  }
+
+  /// 연동 보유의 심볼(정렬) — 게이트(증권 구독 + 연결)가 꺼져 있으면 비어 있다.
+  List<String> _linkedSymbols() {
     final features = ref.watch(myFeaturesProvider).asData?.value;
     final gate =
         (features?.hasSecurities ?? false) &&
         (features?.hasBrokerConnection ?? false);
-    final symbols = {
+    if (!gate) return const [];
+    return {
       for (final h in _holdings)
         if (h.linked && (h.tossSymbol?.isNotEmpty ?? false)) h.tossSymbol!,
     }.toList()..sort();
-    if (!gate || symbols.isEmpty) return const {};
-    // 다시 받는 동안·실패한 동안에도 앞 시세를 쓴다 — 자산 목록·상세와 같은 값을 보여야 한다.
-    final live = ref.watch(livePricesProvider(livePricesKey(symbols))).value;
-    if (live == null) return const {};
-    return {for (final s in symbols) s: live.unitKrw(s)};
+  }
+
+  /// 보유 미리보기의 시세 조회 — 시세를 쓰지 않으면 null.
+  AsyncValue<LivePrices>? _livePrices() {
+    final symbols = _linkedSymbols();
+    if (symbols.isEmpty) return null;
+    return ref.watch(livePricesProvider(livePricesKey(symbols)));
   }
 
   /// 보유 합계(KRW) — manual 합 + 시세 확보된 linked 합.
@@ -572,6 +586,27 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
         _HoldingsEditor(
           rows: _rows,
           total: total,
+          // 시세를 처음부터 못 받았다 — 연동 보유의 평가액 · 합계가 비어 "평가 0" 처럼 읽히면 안 된다. 그 자리 실패 +
+          // [다시 시도](B2a 분할 실패와 같은 꼴, 디자인시스템 판단 5)
+          pricesFailure: () {
+            final prices = _livePrices();
+            if (prices == null || !prices.loadFailed) return null;
+            final key = livePricesKey(_linkedSymbols());
+            return PResultSection(
+              key: const ValueKey('holdings-price-failure'),
+              kind: PResultKind.failure,
+              size: PResultSize.medium,
+              title: l.stocksFailPrice,
+              description: l.stocksFailDesc,
+              headingLevel: 3,
+              placement: PResultPlacement.card,
+              primaryAction: PResultAction(
+                label: l.actionRetry,
+                loading: prices.loadRetrying,
+                onPressed: () => ref.invalidate(livePricesProvider(key)),
+              ),
+            );
+          }(),
           unitMap: unitMap,
           allowStock: _allowStock,
           manualAddTypes: _manualAddTypes,
@@ -637,9 +672,13 @@ class _HoldingsEditor extends StatelessWidget {
     required this.onChanged,
     required this.onRemove,
     this.krwHint,
+    this.pricesFailure,
   });
 
   final List<_EditRow> rows;
+
+  /// 연동 시세를 처음부터 못 받았을 때 보유 줄 위에 두는 실패 자리(없으면 null).
+  final Widget? pricesFailure;
 
   /// 외화 계좌의 수동 평가액 · 매수원가 칸 아래 안내 "원화로 입력해요"(I-13). 원화 계좌는 null.
   final String? krwHint;
@@ -699,6 +738,7 @@ class _HoldingsEditor extends StatelessWidget {
                   ),
               ],
             ),
+          ?pricesFailure,
           if (rows.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: PSpacing.x0_5),
