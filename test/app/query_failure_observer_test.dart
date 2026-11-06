@@ -410,6 +410,29 @@ void main() {
       expect(findText(_reference), findsNothing);
     });
 
+    testWidgets(
+      '장애 한 번에 스낵바 하나 — 참조 알림이 뜬 4초 창 안의 새로 고침 실패는 띄우지 않는다(웹 검수 L9)',
+      (tester) async {
+        final a = _Q('a');
+        // 같은 장애 — 참조는 처음부터 못 받고(값 없음), 보던 목록은 곧이어 다시 받기에 실패한다
+        catsFail = _api(500);
+        final h = await _pump(
+          tester,
+          watch: [categoriesProvider, a.provider],
+          overrides: overrides,
+        );
+        await tester.pump(kQueryFailureGather);
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(findText(_reference), findsOneWidget);
+        a.fail = _api(500);
+        await _refetch(tester, h, [a]);
+        expect(findText(_refresh), findsNothing);
+        await tester.pump(const Duration(seconds: 7));
+        await tester.pumpAndSettle();
+        expect(findText(_refresh), findsNothing, reason: '창이 지나도 뒤늦게 뜨지 않는다');
+      },
+    );
+
     testWidgets('401 은 참조 알림도 거른다(로그인 흐름, 검수 L1)', (tester) async {
       catsFail = _api(401, 'AUTH_001');
       await _pump(tester, watch: [categoriesProvider], overrides: overrides);

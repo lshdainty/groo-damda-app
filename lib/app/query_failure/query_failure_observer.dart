@@ -44,7 +44,11 @@ final class QueryFailureObserver extends ProviderObserver {
     RefreshFailureNotice? refresh,
     ReferenceFailureNotice? reference,
   }) : refresh = refresh ?? RefreshFailureNotice(),
-       reference = reference ?? ReferenceFailureNotice();
+       reference = reference ?? ReferenceFailureNotice() {
+    // 장애 한 번에 critical 스낵바 둘이 잇따르지 않게 — 참조 알림이 떴거나 뜨려는 4초 창 안에서는 새로 고침 스낵바를 띄우지
+    // 않는다(웹 검수 L9, 웹과 같다)
+    this.refresh.quietWhen = () => this.reference.announcing;
+  }
 
   final RefreshFailureNotice refresh;
   final ReferenceFailureNotice reference;
@@ -149,8 +153,12 @@ class RefreshFailureNotice {
   Timer? _gather;
   Timer? _shown;
 
+  /// 참이면 띄우지 않는다 — 같은 장애로 참조 알림이 막 떴거나 뜨려는 때(관찰자가 잇는다).
+  bool Function() quietWhen = _never;
+  static bool _never() => false;
+
   void notify() {
-    if (_pullToRefresh.value > 0) return;
+    if (_pullToRefresh.value > 0 || quietWhen()) return;
     if (_gather != null || _shown != null) return;
     _gather = Timer(kQueryFailureGather, _show);
   }
@@ -165,6 +173,7 @@ class RefreshFailureNotice {
 
   void _show() {
     _gather = null;
+    if (quietWhen()) return;
     final host = _host.currentState;
     final ctx = _host.currentContext;
     if (host == null || ctx == null || !ctx.mounted) return;
@@ -216,6 +225,10 @@ class ReferenceFailureNotice {
 
   bool get _held => _openSheets.value > 0 || _shownFailures.value > 0;
 
+  /// 막 띄웠거나(4초 창) 띄우려고 모으는 중 — 그동안 공용 새로 고침 스낵바는 쉰다(웹 검수 L9).
+  bool get announcing => _gather != null || _recent != null;
+  Timer? _recent;
+
   void update(
     ProviderContainer container,
     ProviderBase<Object?> provider,
@@ -260,6 +273,8 @@ class ReferenceFailureNotice {
     final ctx = _host.currentContext;
     if (host == null || ctx == null || !ctx.mounted) return;
     _pending.clear();
+    _recent?.cancel();
+    _recent = Timer(PSnackbar.duration, () => _recent = null);
     _shown = Timer(PSnackbar.durationWithAction, () {
       _shown = null;
       // 창 안에 새 실패가 있었으면 창이 닫힐 때 한 번 다시 판단한다
@@ -292,6 +307,8 @@ class ReferenceFailureNotice {
     _gather = null;
     _shown?.cancel();
     _shown = null;
+    _recent?.cancel();
+    _recent = null;
     _failed.clear();
     _pending.clear();
   }
