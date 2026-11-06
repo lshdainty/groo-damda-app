@@ -270,6 +270,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
         transfersAsync: transfersAsync,
         prevAsync: prevAsync,
         failed: true,
+        retrying: expensesAsync.isLoading,
       ),
       data: (raw) => _layout(
         categoriesAsync: categoriesAsync,
@@ -286,6 +287,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
     required AsyncValue<List<Expense>> prevAsync,
     List<Expense>? raw,
     bool failed = false,
+    bool retrying = false,
   }) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
@@ -547,6 +549,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
             description: l.expLoadErrorDesc,
             primaryAction: PResultAction(
               label: l.actionRetry,
+              loading: retrying,
               onPressed: () => ref.invalidate(monthExpensesProvider(_key)),
             ),
           ),

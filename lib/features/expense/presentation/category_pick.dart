@@ -6,6 +6,7 @@ import 'package:groo_damda_app/features/category/presentation/category_tile.dart
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
@@ -53,8 +54,8 @@ class CategoryPickBody extends ConsumerWidget {
     final c = context.colors;
     final async = ref.watch(categoriesProvider);
     if (!async.hasValue) {
-      // 다시 받는 중에는 오류가 남아 있어도 Skeleton 이다(비어 있는 목록 · 이전 실패로 읽히지 않게) — 실패는 받기를 마치고도 실패일 때만
-      if (async.hasError && !async.isLoading) {
+      // 실패면 실패 화면 — 다시 받는 동안은 실패를 그대로 두고 단추에 진행 원(skeleton.md:139). 처음 받는 중만 Skeleton
+      if (async.loadFailed) {
         return Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: PSpacing.globalGutter,
@@ -66,6 +67,7 @@ class CategoryPickBody extends ConsumerWidget {
             description: l.dashFailDesc,
             primaryAction: PResultAction(
               label: l.actionRetry,
+              loading: async.loadRetrying,
               onPressed: () => ref.invalidate(categoriesProvider),
             ),
           ),

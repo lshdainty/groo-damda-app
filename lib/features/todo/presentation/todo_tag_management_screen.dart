@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/todo/application/todo_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/tag_settings.dart';
 
@@ -114,7 +115,8 @@ class _TodoTagManagementScreenState
                     usageCount: t.usageCount,
                   ),
               ],
-        failed: list == null && async.hasError && !async.isLoading,
+        failed: list == null && async.loadFailed,
+        retrying: async.loadRetrying,
         onRetry: () => ref.invalidate(todoTagListProvider),
         create: (name, color) async {
           final repo = await _container.read(todoTagRepositoryProvider.future);

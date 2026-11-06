@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/memo/presentation/memo_detail_dialog.dar
 import 'package:groo_damda_app/features/memo/presentation/memo_edit_dialog.dart';
 import 'package:groo_damda_app/features/memo/presentation/widgets/memo_row.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/floating_action_button/p_floating_action_button.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
@@ -71,7 +72,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
     final tags = ref.watch(memoTagListProvider).value;
     // 다시 받는 동안에도 이전 목록을 그대로 둔다
     final all = async.hasValue ? async.requireValue : null;
-    final failed = all == null && async.hasError && !async.isLoading;
+    final failed = all == null && async.loadFailed;
     final loading = all == null && !failed;
 
     final filtered = all == null
@@ -102,6 +103,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
         description: l.memoLoadFailedDesc,
         primaryAction: PResultAction(
           label: l.actionRetry,
+          loading: async.loadRetrying,
           onPressed: () => ref.invalidate(memoListProvider),
         ),
       );

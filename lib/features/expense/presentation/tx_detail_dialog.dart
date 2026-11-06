@@ -781,6 +781,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
         TxMoreSection(rows: moreRows),
         if (splitsAsync.hasError && splits.isEmpty)
           TxSplitFailure(
+            retrying: splitsAsync.isLoading,
             onRetry: () => ref.invalidate(expenseSplitsProvider(e.rowId)),
           )
         else if (splitsAsync.isLoading && splits.isEmpty)

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/features/stats/presentation/fixed_bulk_page.dart'
 import 'package:groo_damda_app/features/stats/presentation/stats_model.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
@@ -76,6 +77,7 @@ class FixedVariableTab extends ConsumerWidget {
           statsFailureSection(
             header: head(_Kind.expense),
             title: l.statsLoadFailedFixed,
+            retrying: rangeAsync.loadRetrying,
             onRetry: retry,
           ),
         ]),
@@ -452,6 +454,7 @@ class _MonthlyStackState extends ConsumerState<_MonthlyStack> {
       return statsFailureSection(
         header: head,
         title: l.statsLoadFailedFixed,
+        retrying: trendAsync.isLoading,
         onRetry: () => ref.invalidate(monthlyTrendProvider(6)),
       );
     }

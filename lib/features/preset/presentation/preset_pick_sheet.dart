@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -65,7 +66,7 @@ class _PresetPickBodyState extends ConsumerState<PresetPickBody> {
     final catsAsync = ref.watch(categoriesProvider);
     final masked = ref.watch(hideCardProvider('etc.preset'));
     if (!catsAsync.hasValue) {
-      if (catsAsync.hasError && !catsAsync.isLoading) {
+      if (catsAsync.loadFailed) {
         return Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: PSpacing.globalGutter,
@@ -77,6 +78,7 @@ class _PresetPickBodyState extends ConsumerState<PresetPickBody> {
             description: l.dashFailDesc,
             primaryAction: PResultAction(
               label: l.actionRetry,
+              loading: catsAsync.loadRetrying,
               onPressed: () => ref.invalidate(categoriesProvider),
             ),
           ),

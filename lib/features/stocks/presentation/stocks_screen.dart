@@ -11,6 +11,7 @@ import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dar
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_gate.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
@@ -45,8 +46,9 @@ class _StocksScreenState extends ConsumerState<StocksScreen> {
     final features = featuresAsync.value;
     final connected = features?.connectedBrokers ?? const <String>[];
 
-    if (features == null && featuresAsync.hasError) {
+    if (featuresAsync.loadFailed) {
       return SecuritiesLoadFailure(
+        retrying: featuresAsync.loadRetrying,
         onRetry: () => ref.invalidate(myFeaturesLoadProvider),
       );
     }

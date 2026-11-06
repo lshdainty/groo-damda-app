@@ -80,6 +80,7 @@ class _CardProductSheetState extends ConsumerState<CardProductSheet> {
       result = PSearchableListError(
         title: l.assetSearchFailed,
         retryLabel: l.actionRetry,
+        retrying: async.isLoading,
         onRetry: () => ref.invalidate(cardCatalogPageProvider(key)),
       );
     } else if (shown == null) {

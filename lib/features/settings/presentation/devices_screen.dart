@@ -9,6 +9,7 @@ import 'package:groo_damda_app/core/format/now_tick.dart';
 import 'package:groo_damda_app/features/settings/application/session_providers.dart';
 import 'package:groo_damda_app/features/settings/domain/device_session.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -158,6 +159,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                 description: l.devicesLoadErrorHint,
                 primaryAction: PResultAction(
                   label: l.actionRetry,
+                  loading: listAsync.loadRetrying,
                   onPressed: () => ref.invalidate(deviceSessionListProvider),
                 ),
               ),

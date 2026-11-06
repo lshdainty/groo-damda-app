@@ -76,7 +76,12 @@ class StocksTodayBand extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final Widget body;
     if (failTitle != null && rows.isEmpty) {
-      body = StocksFailure(title: failTitle!, onRetry: onRetry ?? () {});
+      // 실패 자리에서 받는 중 = 다시 받는 중 — [다시 시도] 에 진행 원
+      body = StocksFailure(
+        title: failTitle!,
+        retrying: loading,
+        onRetry: onRetry ?? () {},
+      );
     } else if (loading && rows.isEmpty) {
       body = Semantics(
         label: l.stocksTodayQuote,
@@ -149,7 +154,11 @@ class StocksInvestorBand extends StatelessWidget {
     final c = context.colors;
     final Widget body;
     if (failed && days == null) {
-      body = StocksFailure(title: l.stocksFailInvestor, onRetry: onRetry);
+      body = StocksFailure(
+        title: l.stocksFailInvestor,
+        retrying: loading,
+        onRetry: onRetry,
+      );
     } else if (loading && days == null) {
       body = Semantics(
         label: l.stocksInvestorTitle,
@@ -385,7 +394,8 @@ Widget stocksBuyingPowerRow(
   final c = context.colors;
   final Widget value;
   if (state.loading) {
-    value = const PSkeleton(width: 96, height: 18);
+    // 값 글(stocksMoneyStyle = t5) 줄 높이
+    value = PSkeleton.text(PTypography.t5, width: 96);
   } else if (state.failed) {
     value = Text('—', style: stocksMoneyStyle(context));
   } else {

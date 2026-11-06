@@ -14,6 +14,7 @@ import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
+import 'package:groo_damda_app/features/asset/presentation/pickers/asset_pick_gate.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -27,7 +28,6 @@ import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart'
     show Expense;
-import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
@@ -644,9 +644,10 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     prefix: AssetLogo(asset: a),
   );
 
+  /// [pool] 은 받은 계좌 목록에서 후보를 고른다 — 시트 안에서 다시 받아 오면 그 목록으로 다시 거른다(AssetPickGate).
   Future<int?> _pickAsset({
     required String title,
-    required List<Asset> pool,
+    required List<Asset> Function(List<Asset> assets) pool,
     required int? selected,
     required bool withNone,
   }) {
@@ -660,28 +661,11 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           closeLabel: l.actionClose,
           flushBody: true,
           scrollFog: true,
-          body: Consumer(
-            builder: (ctx, ref, _) {
-              final async = ref.watch(assetsProvider);
-              // 실패인데 "고를 수 있는 계좌가 없어요" 로 읽히면 안 된다 — 고정 글 + [다시 시도](조회는 silent)
-              if (!async.hasValue && async.hasError && !async.isLoading) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: PSpacing.globalGutter,
-                  ),
-                  child: PResultSection(
-                    kind: PResultKind.failure,
-                    size: PResultSize.medium,
-                    title: l.recAssetLoadFailed,
-                    description: l.dashFailDesc,
-                    primaryAction: PResultAction(
-                      label: l.actionRetry,
-                      onPressed: () => ref.invalidate(assetsProvider),
-                    ),
-                  ),
-                );
-              }
-              return pool.isEmpty && !withNone
+          // 실패인데 "고를 수 있는 계좌가 없어요" 로 읽히면 안 된다 — 실패 · 받는 중은 AssetPickGate 가 가른다
+          body: AssetPickGate(
+            builder: (_, assets) {
+              final candidates = pool(assets);
+              return candidates.isEmpty && !withNone
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: PSpacing.globalGutter,
@@ -704,7 +688,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                             value: _kNoAsset,
                             title: l.recNoneOf(title),
                           ),
-                        for (final a in pool) _assetItem(a),
+                        for (final a in candidates) _assetItem(a),
                       ],
                     );
             },
@@ -721,8 +705,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
         : l.recurringAssetCard;
     final picked = await _pickAsset(
       title: title,
-      pool: [
-        for (final a in _assets)
+      pool: (assets) => [
+        for (final a in assets)
           if (_allowAsset(a)) a,
       ],
       selected: _assetRowId,
@@ -736,7 +720,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
       title: l.recTransferFrom,
-      pool: transferEligibleAssets(_assets),
+      pool: transferEligibleAssets,
       selected: _assetRowId,
       withNone: false,
     );
@@ -752,8 +736,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
       title: l.recTransferTo,
-      pool: [
-        for (final a in transferEligibleAssets(_assets))
+      pool: (assets) => [
+        for (final a in transferEligibleAssets(assets))
           if (a.rowId != _assetRowId) a,
       ],
       selected: _toAssetRowId,

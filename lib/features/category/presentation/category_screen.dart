@@ -310,6 +310,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         children: [
           BudgetFailure(
             title: l.categoryLoadFailed,
+            retrying: categoriesAsync.isLoading,
             onRetry: () => ref.invalidate(categoriesProvider),
           ),
         ],

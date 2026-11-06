@@ -53,6 +53,9 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   bool _hasMore = true;
   bool _loadingMore = false;
   bool _initialLoading = true;
+
+  /// 첫 쪽 실패에서 [다시 시도] 를 눌러 다시 받는 중 — 실패를 그대로 두고 단추에 진행 원(skeleton.md:139).
+  bool _retryingFirst = false;
   Object? _error;
   int _totalElements = 0;
 
@@ -247,14 +250,21 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
     );
   }
 
+  /// 첫 쪽 실패의 [다시 시도] — 받는 동안 실패 화면을 둔다.
+  Future<void> _retryFirst() async {
+    setState(() => _retryingFirst = true);
+    await _reset();
+    if (mounted) setState(() => _retryingFirst = false);
+  }
+
   /// 결과 영역 — 첫 쪽 Skeleton / 실패 / 0건 / 누적 목록 + 끝 줄.
   List<Widget> _buildResults(AppLocalizations l) {
-    if (_initialLoading) {
+    if (_initialLoading && !_retryingFirst) {
       return [const _RowsSkeleton(count: 6)];
     }
 
     // 첫 쪽을 못 불러왔다 — 목록 자리가 Result Section 의 실패다(예외 · 서버 글은 쓰지 않는다)
-    if (_error != null && _cards.isEmpty) {
+    if ((_error != null || _retryingFirst) && _cards.isEmpty) {
       return [
         PResultSection(
           kind: PResultKind.failure,
@@ -263,7 +273,8 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
           description: l.cardFailDesc,
           primaryAction: PResultAction(
             label: l.dsCommonRetry,
-            onPressed: _reset,
+            loading: _retryingFirst,
+            onPressed: _retryFirst,
           ),
         ),
       ];

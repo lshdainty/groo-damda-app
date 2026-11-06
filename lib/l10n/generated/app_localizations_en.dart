@@ -9105,9 +9105,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recLoadFailed => 'Could not load recurring transactions';
 
   @override
-  String get recAssetLoadFailed => 'Could not load accounts';
-
-  @override
   String get recEmptyTitle => 'No recurring transactions';
 
   @override

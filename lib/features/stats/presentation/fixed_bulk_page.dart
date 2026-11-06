@@ -113,6 +113,7 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
         padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
         child: BudgetFailure(
           title: l.statsFixedBulkLoadFailed,
+          retrying: expensesAsync.isLoading,
           onRetry: () => ref.invalidate(rangeExpensesProvider(widget.range)),
         ),
       );

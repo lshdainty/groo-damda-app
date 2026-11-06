@@ -11,6 +11,7 @@ import 'package:groo_damda_app/features/budget/application/budget_providers.dart
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_edit_dialog.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -302,7 +303,11 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
         BudgetSection(
           topPadding: PSpacing.x3,
           children: [
-            BudgetFailure(title: l.budgetManagerLoadFailed, onRetry: retry),
+            BudgetFailure(
+              title: l.budgetManagerLoadFailed,
+              retrying: anyLoadRetrying([budgetsAsync, summaryAsync]),
+              onRetry: retry,
+            ),
           ],
         ),
       );

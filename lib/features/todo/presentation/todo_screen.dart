@@ -23,6 +23,7 @@ import 'package:groo_damda_app/features/todo/presentation/todo_edit_dialog.dart'
 import 'package:groo_damda_app/features/todo/presentation/widgets/todo_filter_sheet.dart';
 import 'package:groo_damda_app/features/todo/presentation/widgets/todo_row.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/icons/filled_star.dart';
@@ -272,7 +273,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     final listAsync = ref.watch(todoListProvider(_allFilter));
     // 다시 받는 동안에도 이전 목록을 그대로 둔다 — 완료 누름 뒤 스켈레톤으로 돌아가지 않는다.
     final all = listAsync.hasValue ? listAsync.requireValue : null;
-    final failed = all == null && listAsync.hasError;
+    final failed = all == null && listAsync.loadFailed;
     return Scaffold(
       backgroundColor: c.bgLayerDefault,
       // 머리 = ds 상단 바(← + "할 일") — 높이 56, 스크롤해도 선이 없다
@@ -309,6 +310,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   Widget _layout({required List<Todo>? all, required bool failed}) {
     final l = AppLocalizations.of(context);
     final loading = all == null && !failed;
+    final retrying = ref.watch(todoListProvider(_allFilter)).loadRetrying;
     final constToday = ref.watch(constellationTodayProvider).value;
     final sky = ref.watch(constellationSkyProvider).value ?? const <SkyDay>[];
     // 하늘 카드 상세의 "수집" 줄 — 밤하늘을 펼쳤을 때만 도감을 받는다.
@@ -448,6 +450,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
             description: l.tdmLoadFailedDesc,
             primaryAction: PResultAction(
               label: l.actionRetry,
+              loading: retrying,
               onPressed: () => ref.invalidate(todoListProvider(_allFilter)),
             ),
           ),

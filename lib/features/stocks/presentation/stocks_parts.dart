@@ -183,9 +183,13 @@ class StocksFailure extends StatelessWidget {
     required this.title,
     required this.onRetry,
     this.description,
+    this.retrying = false,
   });
   final String title;
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원(skeleton.md:139).
+  final bool retrying;
 
   /// 설명 — 비우면 "잠시 뒤 다시 시도해주세요.".
   final String? description;
@@ -200,7 +204,11 @@ class StocksFailure extends StatelessWidget {
         size: PResultSize.medium,
         title: title,
         description: description ?? l.stocksFailDesc,
-        primaryAction: PResultAction(label: l.actionRetry, onPressed: onRetry),
+        primaryAction: PResultAction(
+          label: l.actionRetry,
+          loading: retrying,
+          onPressed: onRetry,
+        ),
         headingLevel: 3,
       ),
     );
@@ -224,18 +232,20 @@ class StocksLineSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PSkeleton(width: 120, height: 16),
+                // 글 자리 = 줄 높이 — 이름 t5 · 설명 t3(List 줄과 같다)
+                PSkeleton.text(PTypography.t5, width: 120),
                 const SizedBox(height: 4),
-                PSkeleton(width: 80, height: 13),
+                PSkeleton.text(PTypography.t3, width: 80),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              PSkeleton(width: 84, height: 16),
+              // 금액 t5 · 등락률 t3
+              PSkeleton.text(PTypography.t5, width: 84),
               const SizedBox(height: 4),
-              PSkeleton(width: 52, height: 13),
+              PSkeleton.text(PTypography.t3, width: 52),
             ],
           ),
         ],

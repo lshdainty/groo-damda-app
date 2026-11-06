@@ -8897,9 +8897,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recLoadFailed => '반복 거래를 불러오지 못했어요';
 
   @override
-  String get recAssetLoadFailed => '계좌를 불러오지 못했어요';
-
-  @override
   String get recEmptyTitle => '반복 거래가 없어요';
 
   @override

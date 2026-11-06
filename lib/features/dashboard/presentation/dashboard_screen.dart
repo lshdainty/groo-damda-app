@@ -29,6 +29,7 @@ import 'package:groo_damda_app/features/sms/presentation/sms_clipboard_banner.da
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/features/stats/domain/stats_models.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card.dart';
@@ -192,13 +193,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         _band(
           _TextSection(
             header: _head(context, l.dashUpcoming, onAll: goCalendar),
-            body: _Failure(title: l.dashFailUpcoming, onRetry: retryDashboard),
+            body: _Failure(
+              title: l.dashFailUpcoming,
+              retrying: dashboardAsync.loadRetrying,
+              onRetry: retryDashboard,
+            ),
           ),
         ),
         _band(
           _TextSection(
             header: _head(context, l.dashRecentTodos, onAll: goTodos),
-            body: _Failure(title: l.dashFailTodos, onRetry: retryDashboard),
+            body: _Failure(
+              title: l.dashFailTodos,
+              retrying: dashboardAsync.loadRetrying,
+              onRetry: retryDashboard,
+            ),
           ),
         ),
       ] else ...[
@@ -350,10 +359,17 @@ PCardHeader _head(
 
 /// 한 질의가 실패한 구역 — 그 안에서 Result Section 으로 알리고 그 질의만 다시 받는다(0원으로 보이지 않는다).
 class _Failure extends StatelessWidget {
-  const _Failure({required this.title, required this.onRetry});
+  const _Failure({
+    required this.title,
+    required this.onRetry,
+    this.retrying = false,
+  });
 
   final String title;
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원(skeleton.md:139).
+  final bool retrying;
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +381,11 @@ class _Failure extends StatelessWidget {
       description: l.dashFailDesc,
       headingLevel: 3,
       placement: PResultPlacement.card,
-      primaryAction: PResultAction(label: l.actionRetry, onPressed: onRetry),
+      primaryAction: PResultAction(
+        label: l.actionRetry,
+        loading: retrying,
+        onPressed: onRetry,
+      ),
     );
   }
 }
@@ -431,7 +451,11 @@ class _NetWorthBand extends StatelessWidget {
       return _band(
         _TextSection(
           header: PCardHeader(title: l.assetNetWorth),
-          body: _Failure(title: l.dashFailNetWorth, onRetry: onRetry),
+          body: _Failure(
+            title: l.dashFailNetWorth,
+            retrying: summaryAsync.loadRetrying,
+            onRetry: onRetry,
+          ),
         ),
       );
     }
@@ -725,7 +749,11 @@ class _MonthSection extends StatelessWidget {
       if (rangeAsync.hasError) {
         return _TextSection(
           header: head,
-          body: _Failure(title: l.dashFailMonth, onRetry: onRetry),
+          body: _Failure(
+            title: l.dashFailMonth,
+            retrying: rangeAsync.isLoading,
+            onRetry: onRetry,
+          ),
         );
       }
       // 불러오는 중 — 머리는 그대로, 줄 둘 자리만 Skeleton
@@ -875,7 +903,11 @@ class _CategorySection extends StatelessWidget {
       if (rangeAsync.hasError) {
         return _TextSection(
           header: head,
-          body: _Failure(title: l.dashFailCategory, onRetry: onRetry),
+          body: _Failure(
+            title: l.dashFailCategory,
+            retrying: rangeAsync.isLoading,
+            onRetry: onRetry,
+          ),
         );
       }
       // 첫 불러오기 — 도넛 지름 그대로 + 범례 줄 높이(44) 그대로
@@ -1055,7 +1087,11 @@ class _BudgetSection extends StatelessWidget {
       if (budgetsAsync.hasError || rangeAsync.hasError) {
         return _TextSection(
           header: head,
-          body: _Failure(title: l.dashFailBudget, onRetry: onRetry),
+          body: _Failure(
+            title: l.dashFailBudget,
+            retrying: anyLoadRetrying([budgetsAsync, rangeAsync]),
+            onRetry: onRetry,
+          ),
         );
       }
       return _TextSection(
@@ -1487,7 +1523,11 @@ class _TodaySection extends StatelessWidget {
       if (expensesAsync.hasError) {
         return _TextSection(
           header: _head(context, l.dashTodaySpend, onAll: onAll),
-          body: _Failure(title: l.dashFailToday, onRetry: onRetry),
+          body: _Failure(
+            title: l.dashFailToday,
+            retrying: expensesAsync.isLoading,
+            onRetry: onRetry,
+          ),
         );
       }
       return _ListSection(

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_filter_sh
 import 'package:groo_damda_app/features/calendar/presentation/calendar_grid.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_month_row.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -79,7 +80,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
     // 일정 질의가 실패하고 받아 둔 값도 없다 — 빈 격자가 아니라 실패 상자 하나(그 질의만 다시 받는다, I-09 12).
     // 공휴일 · 라벨 질의가 실패하면 상자를 두지 않고 그 없이 격자를 그린다.
-    final eventsFailed = eventsAsync.hasError && !eventsAsync.hasValue;
+    final eventsFailed = eventsAsync.loadFailed;
 
     // 첫 로딩(이벤트/캘린더 아직 없음) — 웹 CalendarMonthViewSkeleton 정합.
     final firstLoading =
@@ -121,6 +122,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         description: AppLocalizations.of(context).dashFailDesc,
                         primaryAction: PResultAction(
                           label: AppLocalizations.of(context).actionRetry,
+                          loading: eventsAsync.loadRetrying,
                           onPressed: () =>
                               ref.invalidate(monthEventsProvider(_key)),
                         ),

@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_create_
 import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_detail_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
 import 'package:groo_damda_app/shared/ds/floating_action_button/p_floating_action_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -53,7 +54,7 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
     final l = AppLocalizations.of(context);
     final async = ref.watch(dutchPayListProvider);
     final items = async.hasValue ? async.requireValue : null;
-    final failed = items == null && async.hasError && !async.isLoading;
+    final failed = items == null && async.loadFailed;
     final masked = ref.watch(hideCardProvider('dutchpay.sessions'));
     // 요약 띠는 "더치페이 요약" 스위치를 따로 읽는다
     final maskedSummary = ref.watch(hideCardProvider('dutchpay.summary'));
@@ -75,6 +76,7 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
         description: l.dutchLoadFailedDesc,
         primaryAction: PResultAction(
           label: l.actionRetry,
+          loading: async.loadRetrying,
           onPressed: () => ref.invalidate(dutchPayListProvider),
         ),
       );

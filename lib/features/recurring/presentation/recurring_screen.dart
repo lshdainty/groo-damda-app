@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/recurring/presentation/recurring_form.da
 import 'package:groo_damda_app/features/recurring/presentation/recurring_format.dart';
 import 'package:groo_damda_app/features/recurring/presentation/recurring_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
@@ -117,6 +118,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
         description: l.dashFailDesc,
         primaryAction: PResultAction(
           label: l.actionRetry,
+          loading: ref.watch(recurringListProvider).loadRetrying,
           onPressed: () => ref.invalidate(recurringListProvider),
         ),
       ),

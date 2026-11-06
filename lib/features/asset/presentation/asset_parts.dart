@@ -164,6 +164,8 @@ class AssetSummarySection extends StatelessWidget {
           title: assetsFailed
               ? l.assetLoadFailedAssets
               : l.assetLoadFailedSummary,
+          // 실패 자리에서 받는 중 = 다시 받는 중 — [다시 시도] 에 진행 원
+          retrying: loading,
           onRetry: onRetry,
         ),
       );
@@ -590,9 +592,13 @@ class _SkeletonRow extends StatelessWidget {
 // ── 구역 틀 ─────────────────────────────────────────────────────
 
 /// 한 질의가 실패한 구역 안 — 제 좌우 24 · 아래 12.
-Widget _failureBody(String title, VoidCallback onRetry) => Padding(
+Widget _failureBody(
+  String title,
+  VoidCallback onRetry, {
+  bool retrying = false,
+}) => Padding(
   padding: const EdgeInsets.fromLTRB(PSpacing.x6, 0, PSpacing.x6, PSpacing.x3),
-  child: BudgetFailure(title: title, onRetry: onRetry),
+  child: BudgetFailure(title: title, retrying: retrying, onRetry: onRetry),
 );
 
 /// 자산 묶음(56) — 머리(R4 제목 + 오른쪽 합계 R13 줄 금액) 아래 줄. 합계 색은 중립이고 빼기 부호가 말한다(D1).
@@ -761,7 +767,7 @@ class AssetSavingGoalsSection extends StatelessWidget {
       ),
       children: [
         if (failed)
-          _failureBody(l.assetLoadFailedGoals, onRetry)
+          _failureBody(l.assetLoadFailedGoals, onRetry, retrying: loading)
         else if (loading)
           const _GoalRowsSkeleton()
         else if (goals.isEmpty)

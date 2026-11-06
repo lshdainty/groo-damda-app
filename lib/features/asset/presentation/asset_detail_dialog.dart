@@ -14,6 +14,7 @@ import 'package:groo_damda_app/app/theme/radius.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
@@ -170,8 +171,8 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
     final Asset? asset = list
         ?.where((a) => a.rowId == widget.assetId)
         .firstOrNull;
-    final loading = list == null && async.isLoading;
-    final failed = list == null && async.hasError;
+    final failed = list == null && async.loadFailed;
+    final loading = list == null && async.isLoading && !failed;
 
     final title = asset == null ? l.assetDetailTitle : _titleFor(l, asset);
     final Widget body;
@@ -189,6 +190,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
         description: l.dashFailDesc,
         action: PResultAction(
           label: l.actionRetry,
+          loading: async.loadRetrying,
           onPressed: () => ref.invalidate(assetsProvider),
         ),
       );
@@ -282,18 +284,41 @@ class _DetailSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(PSpacing.x6, PSpacing.x4, PSpacing.x6, 0),
+    // 글 자리 = 그 글의 줄 높이(skeleton.md:40) — 머리(Logo 48 + 이름 t6 · 설명 t3) · 라벨 t3 · 금액 t9(_HeroCard 와 같은 줄)
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        PSpacing.x6,
+        PSpacing.x4,
+        PSpacing.x6,
+        0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          dsk.PSkeleton(width: 200, height: 48),
-          SizedBox(height: PSpacing.x4),
-          dsk.PSkeleton(width: 120, height: 20),
-          SizedBox(height: PSpacing.x2),
-          dsk.PSkeleton(width: 220, height: 32),
-          SizedBox(height: PSpacing.x6),
-          dsk.PSkeleton(width: double.infinity, height: 140),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const dsk.PSkeleton(
+                width: 48,
+                height: 48,
+                radius: dsk.PSkeletonRadius.r12,
+              ),
+              const SizedBox(width: PSpacing.x3),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  dsk.PSkeleton.text(PTypography.t6, width: 140),
+                  dsk.PSkeleton.text(PTypography.t3, width: 80),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: PSpacing.x4),
+          dsk.PSkeleton.text(PTypography.t3, width: 120),
+          const SizedBox(height: PSpacing.x2),
+          dsk.PSkeleton.text(PTypography.t9, width: 220),
+          const SizedBox(height: PSpacing.x6),
+          const dsk.PSkeleton(width: double.infinity, height: 140),
         ],
       ),
     );
@@ -1376,7 +1401,11 @@ class _BalanceTrendChart extends StatelessWidget {
     final list = async.value;
     if (list == null) {
       if (async.hasError) {
-        return BudgetFailure(title: l.assetTrendLoadError, onRetry: onRetry);
+        return BudgetFailure(
+          title: l.assetTrendLoadError,
+          retrying: async.isLoading,
+          onRetry: onRetry,
+        );
       }
       return dsk.PSkeleton(height: height);
     }
@@ -1476,13 +1505,14 @@ class _RecentExpenses extends StatelessWidget {
           for (int g = 0; g < 2; g++) ...[
             Padding(
               padding: EdgeInsets.only(top: g == 0 ? 0 : PSpacing.x4),
-              child: const Row(
+              // 날짜 머리 — 날짜 · 요일 bodySm · 일 합계 caption 의 줄 높이(_DayGroupHeader 와 같다)
+              child: Row(
                 children: [
-                  PSkeleton.line(width: 56, height: 14),
-                  SizedBox(width: PSpacing.x2),
-                  PSkeleton.line(width: 20, height: 14),
-                  Spacer(),
-                  PSkeleton.line(width: 72, height: 14),
+                  dsk.PSkeleton.text(PTypo.bodySm, width: 56),
+                  const SizedBox(width: PSpacing.x2),
+                  dsk.PSkeleton.text(PTypo.bodySm, width: 20),
+                  const Spacer(),
+                  dsk.PSkeleton.text(PTypo.caption, width: 72),
                 ],
               ),
             ),
@@ -1497,19 +1527,20 @@ class _RecentExpenses extends StatelessWidget {
                       borderRadius: PRadius.tile(36),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    // 거래 줄(ExpenseRow = List 줄) — 제목 t5 · 설명 t3 · 금액 t5 줄 높이
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          PSkeleton.line(width: 120, height: 14),
-                          SizedBox(height: 4),
-                          PSkeleton.line(width: 80, height: 11),
+                          dsk.PSkeleton.text(PTypography.t5, width: 120),
+                          const SizedBox(height: 4),
+                          dsk.PSkeleton.text(PTypography.t3, width: 80),
                         ],
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const PSkeleton.line(width: 56, height: 14),
+                    dsk.PSkeleton.text(PTypography.t5, width: 56),
                   ],
                 ),
               ),
@@ -1518,9 +1549,10 @@ class _RecentExpenses extends StatelessWidget {
       );
     }
     // 실패가 빈 글로 보이면 안 된다 — 값이 없는 실패는 띠 + 다시 시도.
-    if (async.hasError && !async.hasValue) {
+    if (async.loadFailed) {
       return BudgetFailure(
         title: AppLocalizations.of(context).assetTxLoadFailed,
+        retrying: async.loadRetrying,
         onRetry: onRetry,
       );
     }
@@ -1743,14 +1775,15 @@ class _CardPerfBadge extends ConsumerWidget {
             children: [
               PSkeleton(width: 40, height: 40, borderRadius: PRadius.tile(40)),
               const SizedBox(width: PSpacing.x3),
-              const Expanded(
+              // 실적 줄(PListItem) — 제목 t5 · 설명 t3 줄 높이
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PSkeleton.line(width: 110, height: 16),
-                    SizedBox(height: 4),
-                    PSkeleton.line(width: 160, height: 12),
+                    dsk.PSkeleton.text(PTypography.t5, width: 110),
+                    const SizedBox(height: 4),
+                    dsk.PSkeleton.text(PTypography.t3, width: 160),
                   ],
                 ),
               ),
@@ -2257,6 +2290,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     if (billingAsync.hasError && b == null) {
       return BudgetFailure(
         title: l.assetBillingLoadError,
+        retrying: billingAsync.isLoading,
         onRetry: () => ref.invalidate(cardBillingProvider(asset.rowId)),
       );
     }
@@ -2749,8 +2783,12 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         ),
       );
     }
-    if (usageAsync.hasError && !usageAsync.hasValue) {
-      return BudgetFailure(title: l.assetTxLoadFailed, onRetry: _retryUsage);
+    if (usageAsync.loadFailed) {
+      return BudgetFailure(
+        title: l.assetTxLoadFailed,
+        retrying: usageAsync.loadRetrying,
+        onRetry: _retryUsage,
+      );
     }
     final list = [...(usageAsync.value ?? const <Expense>[])];
     if (list.isEmpty) {

@@ -22,6 +22,7 @@ import 'package:groo_damda_app/features/expense_split/data/expense_split_reposit
 import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart';
 import 'package:groo_damda_app/features/expense_split/domain/split_math.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -454,7 +455,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
         } else {
           return _frame(
             l,
-            body: async.hasError && !async.isLoading
+            body: async.loadFailed
                 ? PResultSection(
                     kind: PResultKind.failure,
                     size: PResultSize.medium,
@@ -462,6 +463,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
                     description: l.expSplitLoadFailedDesc,
                     primaryAction: PResultAction(
                       label: l.actionRetry,
+                      loading: async.loadRetrying,
                       onPressed: () =>
                           ref.invalidate(expenseSplitsProvider(_e.rowId)),
                     ),

@@ -79,10 +79,14 @@ class CalendarSurfaceFailure extends StatelessWidget {
     super.key,
     required this.title,
     required this.onRetry,
+    this.retrying = false,
   });
 
   final String title;
   final VoidCallback onRetry;
+
+  /// 실패 뒤 다시 받는 중 — [다시 시도] 에 진행 원(skeleton.md:139).
+  final bool retrying;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +96,11 @@ class CalendarSurfaceFailure extends StatelessWidget {
       size: PResultSize.medium,
       title: title,
       description: l.dashFailDesc,
-      primaryAction: PResultAction(label: l.actionRetry, onPressed: onRetry),
+      primaryAction: PResultAction(
+        label: l.actionRetry,
+        loading: retrying,
+        onPressed: onRetry,
+      ),
     );
   }
 }

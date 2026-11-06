@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/budget/domain/budget.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -376,7 +377,7 @@ class _CategoryPickSheet extends ConsumerWidget {
     final async = ref.watch(categoriesProvider);
 
     Widget body;
-    if (async.hasError && !async.hasValue) {
+    if (async.loadFailed) {
       body = Padding(
         padding: const EdgeInsets.symmetric(horizontal: PSpacing.globalGutter),
         child: PResultSection(
@@ -386,6 +387,7 @@ class _CategoryPickSheet extends ConsumerWidget {
           description: l.budgetPickLoadFailDesc,
           primaryAction: PResultAction(
             label: l.actionRetry,
+            loading: async.loadRetrying,
             onPressed: () => ref.invalidate(categoriesProvider),
           ),
         ),
