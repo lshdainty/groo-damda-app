@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/expense/data/expense_repository.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
+import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
@@ -31,6 +32,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/plain_text.dart';
 
 const _cat = ExpenseCategory(
   rowId: 5,
@@ -244,16 +246,23 @@ Future<_Repo> _open(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        categoriesProvider.overrideWith((ref) async => [_cat]),
+        categoriesProvider.overrideWith(
+          (ref) => categoriesLate ?? Future.value([_cat]),
+        ),
         assetsProvider.overrideWith(
-          (ref) async =>
-              assetsFail ? throw Exception('network') : [_bank, _loan],
+          (ref) =>
+              assetsLate ??
+              (assetsFail
+                  ? Future<List<Asset>>.error(Exception('network'))
+                  : Future.value([_bank, _loan])),
         ),
         presetListProvider.overrideWith((ref) async => presets),
         expenseRepositoryProvider.overrideWith((ref) async => repo),
         assetRepositoryProvider.overrideWith(
           (ref) async => AssetRepository(Dio()),
         ),
+        // 수정 · 고쳐 쓰기는 나눈 내역을 받은 뒤에 저장한다(d9d91e73) — 덮지 않으면 진짜 저장소를 타 응답이 오지 않는다
+        expenseSplitsProvider.overrideWith((ref, id) async => const []),
       ],
       child: MaterialApp(
         theme: GrooTheme.light(),
@@ -271,7 +280,7 @@ Future<_Repo> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -279,24 +288,25 @@ Future<_Repo> _open(
 void main() {
   testWidgets('빈 금액에서 [다음] 은 칸 오류를 내고 2단계로 가지 않는다', (tester) async {
     await _open(tester, (c) => showAddTxSheet(c));
-    expect(find.text('1 / 2단계'), findsOneWidget);
-    await tester.tap(find.text('다음'));
+    expect(findText('1 / 2단계'), findsOneWidget);
+    await tester.tap(findText('다음'));
     await tester.pumpAndSettle();
-    expect(find.text('금액을 입력해주세요.'), findsOneWidget);
-    expect(find.text('1 / 2단계'), findsOneWidget);
+    expect(findText('금액을 입력해주세요.'), findsOneWidget);
+    expect(findText('1 / 2단계'), findsOneWidget);
   });
 
   testWidgets('금액을 치고 [다음] → 2단계 제목 · ← 는 1단계로(값 유지)', (tester) async {
     await _open(tester, (c) => showAddTxSheet(c));
     await tester.enterText(find.byType(EditableText).first, '12000');
-    await tester.tap(find.text('다음'));
+    await tester.tap(findText('다음'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('지출 12'), findsOneWidget);
-    expect(find.text('2 / 2단계'), findsOneWidget);
+    expect(findTextContaining('지출 12'), findsOneWidget);
+    expect(findText('2 / 2단계'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('뒤로').first);
     await tester.pumpAndSettle();
-    expect(find.text('1 / 2단계'), findsOneWidget);
-    expect(find.text('12000'), findsOneWidget);
+    expect(findText('1 / 2단계'), findsOneWidget);
+    // 금액 칸은 쉼표를 찍는다(f7aa428c)
+    expect(findText('12,000'), findsOneWidget);
   });
 
   testWidgets('프리셋 — 금액 있음은 2단계로, 빈 금액은 1단계에 남고 금액 칸이 잠기지 않는다', (tester) async {
@@ -315,16 +325,17 @@ void main() {
     expect(chips.every((c) => c.variant == PChipVariant.outlineWeak), isTrue);
     await tester.tap(find.byKey(const ValueKey('tx-preset-chip-2')));
     await tester.pumpAndSettle();
-    expect(find.text('1 / 2단계'), findsOneWidget);
-    expect(find.textContaining('금액이 비어 있어요'), findsOneWidget);
+    expect(findText('1 / 2단계'), findsOneWidget);
+    expect(findTextContaining('금액이 비어 있어요'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('tx-preset-chip-1')));
     await tester.pumpAndSettle();
-    expect(find.text('2 / 2단계'), findsOneWidget);
+    expect(findText('2 / 2단계'), findsOneWidget);
     // 금액을 고치러 ← — 금액 칸은 잠기지 않았다
     await tester.tap(find.bySemanticsLabel('뒤로').first);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '12000');
-    expect(find.text('12000'), findsOneWidget);
+    await tester.pump();
+    expect(findText('12,000'), findsOneWidget);
     // 적용한 칩만 selected
     final after = tester
         .widgetList<PChip>(
@@ -347,9 +358,9 @@ void main() {
     // 현지 금액 칸이 아니라 원화 전용 칸 — 통화 칩이 없다
     expect(find.byKey(const ValueKey('tx-currency-chip')), findsNothing);
     await tester.enterText(find.byType(EditableText).first, '7500');
-    await tester.tap(find.text('완료'));
+    await tester.tap(findText('완료'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pumpAndSettle();
     final c = repo.calls.single;
     expect(c['amount'], 7500);
@@ -364,11 +375,11 @@ void main() {
       (c) => showAddTxSheet(c, edit: _foreignTx),
     );
     repo.fail = true;
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pumpAndSettle();
-    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findText('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
     expect(repo.calls.single['silent'], isTrue);
-    expect(find.text('거래 수정'), findsOneWidget);
+    expect(findText('거래 수정'), findsOneWidget);
   });
 
   testWidgets('M3 — 바뀐 채 닫으면 묻는다', (tester) async {
@@ -376,20 +387,20 @@ void main() {
     await tester.enterText(find.byType(EditableText).first, '500');
     await tester.tap(find.bySemanticsLabel('닫기').first);
     await tester.pumpAndSettle();
-    expect(find.text('작성한 내용이 사라져요'), findsOneWidget);
+    expect(findText('작성한 내용이 사라져요'), findsOneWidget);
   });
 
   testWidgets('M3 — 안 바꿨으면 바로 닫힌다', (tester) async {
     await _open(tester, (c) => showAddTxSheet(c));
     await tester.tap(find.bySemanticsLabel('닫기').first);
     await tester.pumpAndSettle();
-    expect(find.text('1 / 2단계'), findsNothing);
+    expect(findText('1 / 2단계'), findsNothing);
   });
 
   testWidgets('수정은 2단계로 바로 열리고 종류 칩은 지금 종류 하나다', (tester) async {
     await _open(tester, (c) => showAddTxSheet(c, edit: _foreignTx));
-    expect(find.text('거래 수정'), findsOneWidget);
-    expect(find.text('1 / 2단계'), findsNothing);
+    expect(findText('거래 수정'), findsOneWidget);
+    expect(findText('1 / 2단계'), findsNothing);
     expect(
       tester
           .widget<PChip>(find.byKey(const ValueKey('tx-type-INCOME')))
@@ -411,7 +422,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, '98765.43');
-    await tester.tap(find.text('다음'));
+    await tester.tap(findText('다음'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).at(1), '1388.75');
     await tester.pump();
@@ -423,7 +434,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('추가'));
+    await tester.tap(findText('추가'));
     await tester.pumpAndSettle();
 
     final c = repo.calls.single;
@@ -438,7 +449,7 @@ void main() {
   ) async {
     await _open(tester, (c) => showAddTxSheet(c));
     await tester.enterText(find.byType(EditableText).first, '9000');
-    await tester.tap(find.text('다음'));
+    await tester.tap(findText('다음'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('tx-row-category')));
     await tester.pumpAndSettle();
@@ -450,18 +461,18 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('뒤로').first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('현재 입력값 저장'));
+    await tester.tap(findText('현재 입력값 저장'));
     await tester.pumpAndSettle();
     // 금액 › → 완료 → 프리셋 저장 단계로 돌아온다
     await tester.tap(find.byKey(const ValueKey('tx-preset-amount-row')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('완료'));
+    await tester.tap(findText('완료'));
     await tester.pumpAndSettle();
-    expect(find.text('프리셋으로 저장'), findsOneWidget);
+    expect(findText('프리셋으로 저장'), findsOneWidget);
     // ← → 연 단계(1단계)
     await tester.tap(find.bySemanticsLabel('뒤로').first);
     await tester.pumpAndSettle();
-    expect(find.text('1 / 2단계'), findsOneWidget);
+    expect(findText('1 / 2단계'), findsOneWidget);
   });
 
   testWidgets('N1 — 자산 목록을 못 받으면 저장 요청을 보내지 않고 Callout 을 낸다', (tester) async {
@@ -470,10 +481,10 @@ void main() {
       (c) => showAddTxSheet(c, edit: _foreignTx),
       assetsFail: true,
     );
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pumpAndSettle();
     expect(repo.calls, isEmpty, reason: '값을 추측해 보내지 않는다');
-    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findText('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
   });
 
   testWidgets('N1 — 자산 목록이 오기 전에 이체 수정을 저장해도 이자가 본문에 남는다', (tester) async {
@@ -507,10 +518,13 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(findText('open'));
+    // 시트가 다 올라온 뒤에 [저장] 을 누른다 — 500ms 에는 아직 화면 밖(y 1418)이다
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 250));
+    }
     // 목록이 오기 전에 [저장]
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pump();
     late.complete([_bank, _loan]);
     await tester.pumpAndSettle();
@@ -530,14 +544,14 @@ void main() {
       (c) => showAddTxSheet(c, edit: _installTx),
       assetsLate: late.future,
     );
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pump();
     late.complete([_bank, _loan, _card]);
     await tester.pumpAndSettle();
     // 닫힌 회차 확인창이 뜰 수 있다 — 뜨면 [저장]
-    if (find.text('저장할까요?').evaluate().isNotEmpty ||
-        find.text('거래 수정').evaluate().length > 1) {
-      await tester.tap(find.text('저장').last);
+    if (findText('저장할까요?').evaluate().isNotEmpty ||
+        findText('거래 수정').evaluate().length > 1) {
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
     }
     final c = repo.calls.single;
@@ -552,11 +566,11 @@ void main() {
       (c) => showAddTxSheet(c, edit: _foreignTx),
       categoriesLate: late.future,
     );
-    expect(find.text('지운 카테고리'), findsNothing);
+    expect(findText('지운 카테고리'), findsNothing);
     late.complete([_cat]);
     await tester.pumpAndSettle();
-    expect(find.text('지운 카테고리'), findsNothing);
-    expect(find.textContaining('식비'), findsWidgets);
+    expect(findText('지운 카테고리'), findsNothing);
+    expect(findTextContaining('식비'), findsWidgets);
   });
 
   testWidgets('M1 — 내려간 채 저장이 실패하면 본문이 맨 위로 올라가 Callout 이 보인다', (tester) async {
@@ -578,10 +592,10 @@ void main() {
       greaterThan(0),
     );
     repo.fail = true;
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pumpAndSettle();
     expect(tester.state<ScrollableState>(scrollable).position.pixels, 0);
-    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findText('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
   });
 
   testWidgets('자산 목록을 기다리는 동안 [추가] 를 두 번 눌러도 요청은 한 번이다', (tester) async {
@@ -591,9 +605,9 @@ void main() {
       (c) => showAddTxSheet(c, edit: _foreignTx),
       assetsLate: late.future,
     );
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pump();
-    await tester.tap(find.text('저장'), warnIfMissed: false);
+    await tester.tap(findText('저장'), warnIfMissed: false);
     await tester.pump();
     late.complete([_bank, _loan, _card]);
     await tester.pumpAndSettle();
@@ -631,11 +645,14 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('open'));
+    // 시트가 다 올라온 뒤에 [저장] 을 누른다 — 500ms 에는 아직 화면 밖이다
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 250));
+    }
+    await tester.tap(findText('저장'));
     await tester.pump();
-    await tester.tap(find.text('저장'), warnIfMissed: false);
+    await tester.tap(findText('저장'), warnIfMissed: false);
     await tester.pump();
     late.complete([_bank, _loan]);
     await tester.pumpAndSettle();
@@ -645,13 +662,13 @@ void main() {
   testWidgets('N6 — [고쳐 쓰기] 로 갈아 끼우면 지난 저장 실패 Callout 이 사라진다', (tester) async {
     final repo = await _open(tester, (c) => showAddTxSheet(c, edit: _lockedTx));
     repo.fail = true;
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pumpAndSettle();
-    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findText('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
 
-    await tester.tap(find.text('고쳐 쓰기'));
+    await tester.tap(findText('고쳐 쓰기'));
     await tester.pumpAndSettle();
-    expect(find.text('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsNothing);
+    expect(findText('저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsNothing);
   });
 
   testWidgets('L1 — 저장 중 닫기 원을 누르면 바로 닫지 않고 묻는다', (tester) async {
@@ -661,11 +678,13 @@ void main() {
       (c) => showAddTxSheet(c, edit: _foreignTx),
       assetsLate: late.future,
     );
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pump();
     await tester.tap(find.bySemanticsLabel('닫기').first);
-    await tester.pumpAndSettle();
-    expect(find.text('작성한 내용이 사라져요'), findsOneWidget);
+    // 자산 목록을 받는 동안(요청이 나가 있다) [저장] 의 원이 돈다 — 가라앉기를 기다리지 않고 흘린다
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(findText('작성한 내용이 사라져요'), findsOneWidget);
     late.complete([_bank, _loan, _card]);
     await tester.pumpAndSettle();
   });

@@ -22,6 +22,7 @@ import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/features/stats/domain/stats_models.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_screen.dart';
+import '../../support/plain_text.dart';
 
 /// 오늘(이번 달 안) 지출 한 건. 기본 기간이 이번 달이라 추이 축의 최대값이 된다.
 ///
@@ -82,7 +83,7 @@ Future<void> _pumpTrend(WidgetTester tester, int expenseAmount) async {
   await tester.pumpAndSettle();
 
   // 카테고리 → 추이(칩 탭은 눌러서만 바뀐다)
-  await tester.tap(find.text('추이'));
+  await tester.tap(findText('추이'));
   await tester.pumpAndSettle();
 }
 
@@ -91,18 +92,18 @@ void main() {
     // 12,340,000 → nice ceil 5틱: 0 / 500만 / 1,000만 / 1,500만 / 2,000만
     await _pumpTrend(tester, 12340000);
 
-    expect(find.text('1,000만'), findsWidgets);
-    expect(find.text('1000만'), findsNothing);
-    expect(find.text('500만'), findsWidgets);
+    expect(findText('1,000만'), findsWidgets);
+    expect(findText('1000만'), findsNothing);
+    expect(findText('500만'), findsWidgets);
   });
 
   testWidgets('1만 아래 눈금에도 콤마가 붙는다 — 웹 `8,000` 과 같은 글자', (tester) async {
     // 8,000 → nice ceil 5틱: 0 / 2,000 / 4,000 / 6,000 / 8,000
     await _pumpTrend(tester, 8000);
 
-    expect(find.text('8,000'), findsWidgets);
-    expect(find.text('8000'), findsNothing);
-    expect(find.text('2,000'), findsWidgets);
+    expect(findText('8,000'), findsWidgets);
+    expect(findText('8000'), findsNothing);
+    expect(findText('2,000'), findsWidgets);
   });
 
   testWidgets('만 눈금의 소수 첫째 자리를 깎지 않는다 — `2.5만` 이지 `3만` 이 아니다', (tester) async {
@@ -111,30 +112,30 @@ void main() {
     // 2.5만인데 라벨은 3-5-8-10 으로 뛰어 축을 읽으면 값이 틀린다.
     await _pumpTrend(tester, 100000);
 
-    expect(find.text('2.5만'), findsWidgets);
-    expect(find.text('7.5만'), findsWidgets);
-    expect(find.text('3만'), findsNothing);
-    expect(find.text('8만'), findsNothing);
+    expect(findText('2.5만'), findsWidgets);
+    expect(findText('7.5만'), findsWidgets);
+    expect(findText('3만'), findsNothing);
+    expect(findText('8만'), findsNothing);
   });
 
   testWidgets('억 눈금에 `.0` 을 남기지 않는다 — 도넛 중앙과 같은 `5억`', (tester) async {
     // 2,000,000,000 → nice ceil 5틱: 0 / 5억 / 10억 / 15억 / 20억
     await _pumpTrend(tester, 2000000000);
 
-    expect(find.text('5억'), findsWidgets);
-    expect(find.text('5.0억'), findsNothing);
-    expect(find.text('20억'), findsWidgets);
-    expect(find.text('20.0억'), findsNothing);
+    expect(findText('5억'), findsWidgets);
+    expect(findText('5.0억'), findsNothing);
+    expect(findText('20억'), findsWidgets);
+    expect(findText('20.0억'), findsNothing);
   });
 
   testWidgets('조 단위를 억으로 늘려 쓰지 않는다 — `1조` 이지 `10000.0억` 이 아니다', (tester) async {
     // 4,000,000,000,000 → nice ceil 5틱: 0 / 1조 / 2조 / 3조 / 4조
     await _pumpTrend(tester, 4000000000000);
 
-    expect(find.text('1조'), findsWidgets);
-    expect(find.text('4조'), findsWidgets);
-    expect(find.text('10000.0억'), findsNothing);
-    expect(find.text('40000.0억'), findsNothing);
+    expect(findText('1조'), findsWidgets);
+    expect(findText('4조'), findsWidgets);
+    expect(findText('10000.0억'), findsNothing);
+    expect(findText('40000.0억'), findsNothing);
   });
 
   group('축 라벨 폭 — reservedSize 44 안에 들어가는 길이인가', () {

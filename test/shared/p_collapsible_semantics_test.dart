@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/shared/widgets/p_collapsible.dart';
+import '../support/plain_text.dart';
 
 void main() {
   testWidgets('트리거는 버튼이고 펼침 전후 expanded 가 바뀐다', (tester) async {
@@ -30,14 +31,14 @@ void main() {
       ),
     );
     SemanticsData data() =>
-        tester.getSemantics(find.text('혜택 상세')).getSemanticsData();
+        tester.getSemantics(findText('혜택 상세')).getSemanticsData();
     expect(data().flagsCollection.isButton, isTrue);
     expect(data().flagsCollection.isExpanded, Tristate.isFalse, reason: '접힘');
-    await tester.tap(find.text('혜택 상세'));
+    await tester.tap(findText('혜택 상세'));
     await tester.pumpAndSettle();
     expect(data().flagsCollection.isExpanded, Tristate.isTrue, reason: '펼침');
-    expect(find.text('상세 내용'), findsOneWidget);
-    await tester.tap(find.text('혜택 상세'));
+    expect(findText('상세 내용'), findsOneWidget);
+    await tester.tap(findText('혜택 상세'));
     await tester.pumpAndSettle();
     expect(
       data().flagsCollection.isExpanded,

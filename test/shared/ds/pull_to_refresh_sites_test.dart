@@ -18,14 +18,15 @@ void main() {
         final seg = s.substring(i, end);
         final awaits = seg.contains('await ');
         final returnsFuture = RegExp(
-          r'onRefresh:\s*(_\w+|\(\)\s*=>\s*\w+\(\))\s*,',
+          // 함수를 그대로 넘긴 것(`_reload` · `refresh`)은 Future 를 돌려준다
+          r'onRefresh:\s*(\w+|\(\)\s*=>\s*\w+\(\))\s*,',
         ).hasMatch(seg);
         if (!awaits && !returnsFuture)
           bad.add('${f.path}: ${seg.split('\n').take(3).join(' ')}');
         i = s.indexOf('PPullToRefresh(', i + 1);
       }
     }
-    expect(sites, 20);
+    expect(sites, 21);
     expect(bad, isEmpty);
   });
 }

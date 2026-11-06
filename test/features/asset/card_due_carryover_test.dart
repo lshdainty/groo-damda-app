@@ -238,7 +238,7 @@ Future<_Repo> _host(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -520,7 +520,7 @@ void main() {
 
       expect(fieldWithLabel('12월 7일에 결제될 금액'), findsOneWidget);
       expect(findRichPlain('지난 청구 뒤로 쓴 금액이에요. 1월 7일에 결제돼요.'), findsOneWidget);
-      expect(find.textContaining('2027년'), findsNothing);
+      expect(findTextContaining('2027년'), findsNothing);
     });
 
     testWidgets('결제일 변경 확인창: "12월분은 1월 25일에 결제돼요"', (tester) async {

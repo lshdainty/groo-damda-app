@@ -18,6 +18,7 @@ import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(Widget child) => MaterialApp(
   theme: GrooTheme.light(),
@@ -260,12 +261,12 @@ void main() {
         tester,
         _expense.copyWith(cardSettledThrough: '2026-08-31'),
       );
-      expect(find.text('기록만'), findsOneWidget);
+      expect(findText('기록만'), findsOneWidget);
     });
 
     testWidgets('정상 거래에는 없다', (tester) async {
       await pumpRow(tester, _expense);
-      expect(find.text('기록만'), findsNothing);
+      expect(findText('기록만'), findsNothing);
     });
 
     // 할부의 지난 회차분만 기록용이면 남은 회차는 정상 청구된다 — 행 배지는 통째로
@@ -280,7 +281,7 @@ void main() {
           recordOnlyAmount: 30000,
         ),
       );
-      expect(find.text('기록만'), findsNothing);
+      expect(findText('기록만'), findsNothing);
     });
 
     testWidgets('기록만 금액이 거래 금액과 같으면 단다', (tester) async {
@@ -291,7 +292,7 @@ void main() {
           recordOnlyAmount: 25000,
         ),
       );
-      expect(find.text('기록만'), findsOneWidget);
+      expect(findText('기록만'), findsOneWidget);
     });
 
     testWidgets('환불된 거래는 환불됨만 — 합계에서 빠진 쪽이 먼저다', (tester) async {
@@ -302,8 +303,8 @@ void main() {
           refundedAt: '2026-09-15T12:00:00',
         ),
       );
-      expect(find.text('기록만'), findsNothing);
-      expect(find.text('환불됨'), findsOneWidget);
+      expect(findText('기록만'), findsNothing);
+      expect(findText('환불됨'), findsOneWidget);
     });
   });
 }

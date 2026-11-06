@@ -201,7 +201,7 @@ Future<_CapturingRepo> _host(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }

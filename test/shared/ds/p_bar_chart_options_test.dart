@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(Widget child, {Brightness mode = Brightness.light}) => MaterialApp(
   theme: mode == Brightness.dark ? GrooTheme.dark() : GrooTheme.light(),
@@ -93,8 +94,8 @@ void main() {
       testWidgets('강조 칸의 가로축 글만 700 · fg-neutral', (tester) async {
         await tester.pumpWidget(_host(_chart(emphasized: 2), mode: mode));
         await tester.pump(const Duration(seconds: 1));
-        final on = tester.widget<Text>(find.text('9월'));
-        final off = tester.widget<Text>(find.text('8월'));
+        final on = tester.widget<Text>(findText('9월'));
+        final off = tester.widget<Text>(findText('8월'));
         expect(on.style!.fontWeight, FontWeight.w700);
         expect(on.style!.color, c.fgNeutral);
         expect(off.style!.fontWeight, isNot(FontWeight.w700));
@@ -120,6 +121,6 @@ void main() {
     );
     expect(find.byKey(const ValueKey('chart-tooltip-swatch')), findsOneWidget);
     expect(find.byKey(const ValueKey('chart-tooltip-row')), findsNWidgets(2));
-    expect(find.text('지출'), findsOneWidget);
+    expect(findText('지출'), findsOneWidget);
   });
 }

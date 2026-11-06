@@ -29,6 +29,7 @@ import 'package:groo_damda_app/features/stocks/data/broker_detail_dto.dart';
 import 'package:groo_damda_app/features/stocks/data/watch_dto.dart';
 import 'package:groo_damda_app/features/stocks/presentation/namu_stocks_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   // ─── 관심 시세 ──────────────────────────────────────────────
@@ -118,7 +119,7 @@ void main() {
       tester,
     ) async {
       final h = await _pumpView(tester);
-      expect(find.textContaining('보유화학 1차'), findsWidgets);
+      expect(findTextContaining('보유화학 1차'), findsWidgets);
 
       h.namu.failHoldings = true;
       await h.background();
@@ -127,11 +128,11 @@ void main() {
 
       expect(h.namu.calls('KRW'), 2, reason: '다시 받으러 갔는지');
       expect(
-        find.textContaining('보유화학 1차'),
+        findTextContaining('보유화학 1차'),
         findsWidgets,
         reason: '재조회 실패가 보던 값을 지웠다',
       );
-      expect(find.text('내 투자를 불러오지 못했어요'), findsNothing);
+      expect(findText('내 투자를 불러오지 못했어요'), findsNothing);
     });
 
     testWidgets('H3 환율은 10분마다 다시 받는다 — 그 전에는 안 받는다', (tester) async {

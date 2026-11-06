@@ -179,7 +179,7 @@ Future<_CapturingRepo> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -271,7 +271,7 @@ void main() {
     expect(findPlain('-50,000'), findsNothing);
     expect(findPlain('−50,000'), findsNothing);
     expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
+      findTextContaining(RegExp(r'-\d'), findRichText: true),
       findsNothing,
     );
   });

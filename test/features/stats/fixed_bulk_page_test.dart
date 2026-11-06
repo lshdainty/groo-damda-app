@@ -121,9 +121,9 @@ void main() {
     await _pump(tester, fail: true);
     expect(find.byType(PResultSection), findsOneWidget);
     expect(findPlain('거래를 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
-    expect(find.textContaining('정리할 거래가 없어요'), findsNothing);
-    expect(find.textContaining('server error'), findsNothing);
+    expect(findText('다시 시도'), findsOneWidget);
+    expect(findTextContaining('정리할 거래가 없어요'), findsNothing);
+    expect(findTextContaining('server error'), findsNothing);
   });
 
   testWidgets('적용이 실패하면 페이지는 그대로, 맨 위에 우리 글 Callout, 요청은 silent', (
@@ -157,7 +157,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.sawSilent, isTrue);
     expect(findPlain('고정 표시를 바꾸지 못했어요.'), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     expect(find.byType(FixedBulkPage), findsOneWidget);
   });
 }

@@ -25,6 +25,7 @@ import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 const _category = ExpenseCategory(
   rowId: 5,
@@ -111,14 +112,14 @@ Future<(_Presets, AppLocalizations)> _openSaveDialog(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   final l = await AppLocalizations.delegate.load(const Locale('ko'));
   // 프리셋 저장은 카테고리가 있어야 한다 — 금액 → 2단계 카테고리, 계좌는 비워 둔다. 1단계로 돌아와 "현재 입력값 저장" 을 누른다.
   await fillNewTx(tester, amount: '13000');
   await tester.tap(find.bySemanticsLabel(l.actionBack).first);
   await tester.pumpAndSettle();
-  await tester.tap(find.text(l.expPresetSaveCurrent));
+  await tester.tap(findText(l.expPresetSaveCurrent));
   await tester.pumpAndSettle();
   return (presets, l);
 }
@@ -134,7 +135,7 @@ void main() {
     await tester.tap(_saveButton(l));
     await tester.pumpAndSettle();
 
-    expect(find.text(l.txfPresetNameRequired), findsOneWidget);
+    expect(findText(l.txfPresetNameRequired), findsOneWidget);
     expect(presets.created, isNull);
   });
 
@@ -149,6 +150,6 @@ void main() {
     expect(presets.created!['templateName'], '점심 정식');
     expect(presets.created!['assetRowId'], isNull);
     // 저장 알림은 ds 스낵바(neutral) — 시트 위 호스트에 한 문장 + 마침표
-    expect(find.text(l.txfPresetSaved('점심 정식')), findsOneWidget);
+    expect(findText(l.txfPresetSaved('점심 정식')), findsOneWidget);
   });
 }

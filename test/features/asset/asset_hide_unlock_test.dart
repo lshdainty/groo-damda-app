@@ -186,7 +186,7 @@ Future<_Host> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return (repo: repo, auth: auth, bio: bio);
 }
@@ -280,7 +280,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(findRichPlain(l.unlockMismatch), findsOneWidget);
-      expect(find.textContaining('RAW_SERVER_TEXT_9137'), findsNothing);
+      expect(findTextContaining('RAW_SERVER_TEXT_9137'), findsNothing);
       expect(h.repo.updateCalled, isFalse);
       expect(
         tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -302,7 +302,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(findRichPlain(l.unlockVerifyFailed), findsOneWidget);
-      expect(find.textContaining('RAW_SERVER_TEXT_9137'), findsNothing);
+      expect(findTextContaining('RAW_SERVER_TEXT_9137'), findsNothing);
       expect(h.repo.updateCalled, isFalse);
     });
 

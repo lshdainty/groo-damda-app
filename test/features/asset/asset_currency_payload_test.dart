@@ -207,7 +207,7 @@ Future<_CapturingRepo> _host(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -334,7 +334,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.created, isNull, reason: '환율 없는 외화 자산은 서버가 400 으로 막는다');
-      expect(find.text(l.assetExchangeRateRequired), findsOneWidget);
+      expect(findText(l.assetExchangeRateRequired), findsOneWidget);
     });
   });
 

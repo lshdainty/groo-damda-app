@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/auth/presentation/splash_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/brand/groo_tree.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
+import '../../support/plain_text.dart';
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -49,7 +50,7 @@ void main() {
             c.bgLayerDefault,
           );
           final tree = tester.getRect(find.byType(GrooTree));
-          final name = tester.getRect(find.text('그루 담다'));
+          final name = tester.getRect(findText('그루 담다'));
           expect(tree.height, 96);
           expect(name.top - tree.bottom, closeTo(16, 1), reason: '나무 ↔ 이름 16');
           // 묶음 = 나무 위 ~ 이름 아래
@@ -67,7 +68,7 @@ void main() {
           final screenH = tester.view.physicalSize.height / 3;
           final textBox = tester.getRect(
             find
-                .ancestor(of: find.text('그루 담다'), matching: find.byType(Column))
+                .ancestor(of: findText('그루 담다'), matching: find.byType(Column))
                 .first,
           );
           expect(

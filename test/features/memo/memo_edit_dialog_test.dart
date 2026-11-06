@@ -112,8 +112,10 @@ class _CapturingRepo extends MemoRepository {
 Finder _button(String label) =>
     find.byWidgetPredicate((w) => w is PButton && w.label == label);
 
-Finder _row(String title) =>
-    find.ancestor(of: findPlain(title), matching: find.byType(PListItemBase));
+Finder _row(String title) => find.ancestor(
+  of: findPlain(title),
+  matching: find.byWidgetPredicate((w) => w is PListItemBase),
+);
 
 Future<_CapturingRepo> _open(
   WidgetTester tester, {
@@ -143,7 +145,7 @@ Future<_CapturingRepo> _open(
     textScale: textScale,
     snackbarHost: snackbarHost,
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -320,7 +322,7 @@ void main() {
       final callout = tester.widget<PCallout>(find.byType(PCallout));
       expect(callout.tone, PCalloutTone.critical);
       expect(callout.description, '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.');
-      expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
+      expect(findTextContaining('RAW_SERVER_TEXT_4471'), findsNothing);
       expect(
         tester.widget<PInput>(find.byType(PInput)).controller!.text,
         '새 메모',
@@ -444,7 +446,7 @@ void main() {
     testWidgets('값 글은 색 이름이다 — hex 가 아니다', (tester) async {
       await _open(tester);
       expect(findPlain('파랑'), findsOneWidget);
-      expect(find.textContaining('#2c70bf'), findsNothing);
+      expect(findTextContaining('#2c70bf'), findsNothing);
     });
 
     testWidgets('팔레트 밖 색은 "지금 색" 이고 고르지 않으면 저장 값이 바뀌지 않는다', (tester) async {

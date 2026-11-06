@@ -8,6 +8,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import '../../support/plain_text.dart';
 
 final _action = find.byKey(const ValueKey('snackbar-action'));
 
@@ -57,16 +58,16 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
     expect(find.byType(PAlertDialogView), findsOneWidget);
 
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
 
     // 확인창은 닫혔고, 스낵바가 떠 있다
     expect(find.byType(PAlertDialogView), findsNothing);
-    expect(find.text('삭제하지 못했어요.'), findsOneWidget);
+    expect(findText('삭제하지 못했어요.'), findsOneWidget);
     expect(result, isFalse);
     expect(calls, 1);
 
@@ -84,6 +85,7 @@ void main() {
       (context) => TextButton(
         onPressed: () => askConfirmThenRequest(
           context,
+          title: '삭제할까요?',
           description: '지울까요?',
           actionLabel: '삭제',
           request: () async {
@@ -96,14 +98,14 @@ void main() {
         child: const Text('열기'),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     await tester.tap(_action);
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(calls, 2);
-    expect(find.text('삭제하지 못했어요.'), findsOneWidget);
+    expect(findText('삭제하지 못했어요.'), findsOneWidget);
   });
 
   testWidgets('성공하면 스낵바 없이 true, 취소하면 요청하지 않고 false', (tester) async {
@@ -115,6 +117,7 @@ void main() {
         onPressed: () async {
           result = await askConfirmThenRequest(
             context,
+            title: '삭제할까요?',
             description: '지울까요?',
             cancelLabel: '취소',
             actionLabel: '삭제',
@@ -127,20 +130,20 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
     expect(result, isFalse);
     expect(calls, 0);
 
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     expect(result, isTrue);
     expect(calls, 1);
-    expect(find.text('삭제하지 못했어요.'), findsNothing);
+    expect(findText('삭제하지 못했어요.'), findsNothing);
   });
 
   testWidgets('실패 → 다시 시도 성공이면 onRetried 가 한 번 불린다', (tester) async {
@@ -151,6 +154,7 @@ void main() {
       (context) => TextButton(
         onPressed: () => askConfirmThenRequest(
           context,
+          title: '삭제할까요?',
           description: '지울까요?',
           actionLabel: '삭제',
           request: () async {
@@ -164,9 +168,9 @@ void main() {
         child: const Text('열기'),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     expect(retried, 0);
     await tester.tap(_action);
@@ -182,6 +186,7 @@ void main() {
       (context) => TextButton(
         onPressed: () => askConfirmThenRequest(
           context,
+          title: '삭제할까요?',
           description: '지울까요?',
           actionLabel: '삭제',
           request: () async => throw StateError('boom'),
@@ -192,13 +197,13 @@ void main() {
         child: const Text('열기'),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     await tester.tap(_action);
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.text('삭제하지 못했어요.'), findsOneWidget);
+    expect(findText('삭제하지 못했어요.'), findsOneWidget);
     expect(retried, 0);
   });
 
@@ -216,6 +221,7 @@ void main() {
                 builder: (context) => TextButton(
                   onPressed: () => askConfirmThenRequest(
                     context,
+                    title: '삭제할까요?',
                     description: '지울까요?',
                     actionLabel: '삭제',
                     request: () async {
@@ -232,14 +238,14 @@ void main() {
             : const SizedBox.shrink(),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
     // 시트(호출한 위젯)가 닫힌다
     show.value = false;
     await tester.pumpAndSettle();
-    expect(find.text('열기'), findsNothing);
+    expect(findText('열기'), findsNothing);
     await tester.tap(_action);
     await tester.pumpAndSettle();
     expect(calls, 2);

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/plain_text.dart';
 
 const _long = '서울특별시 강남구 테헤란로 427 위워크타워 12층 대회의실 B';
 
@@ -27,9 +28,15 @@ Widget _host(Widget child, {double scale = 1}) => MaterialApp(
   ),
 );
 
+/// [f] 가 가리키는 Text 의 문단 — 목록 값 Text 는 semanticsLabel 이 붙어 바로 아래 렌더 객체가 의미 상자다(12979a71).
+RenderParagraph _para(WidgetTester t, Finder f) =>
+    t.renderObject<RenderParagraph>(
+      find.descendant(of: f, matching: find.byType(RichText)).first,
+    );
+
 /// 문단의 줄마다 오른쪽 끝(전역 x).
 List<double> _lineRights(WidgetTester t, Finder f) {
-  final p = t.renderObject<RenderParagraph>(f);
+  final p = _para(t, f);
   final len = p.text.toPlainText().length;
   final rights = <double, double>{};
   for (final b in p.getBoxesForSelection(
@@ -53,7 +60,7 @@ void main() {
         ),
       ),
     );
-    final rights = _lineRights(t, find.text(_long));
+    final rights = _lineRights(t, findText(_long));
     expect(rights.length, greaterThan(1));
     for (final r in rights) {
       expect(r, closeTo(336, 0.6));
@@ -70,7 +77,7 @@ void main() {
         scale: 2,
       ),
     );
-    final p = t.renderObject<RenderParagraph>(find.text(_long));
+    final p = _para(t, findText(_long));
     expect(p.localToGlobal(Offset.zero).dx, closeTo(24, 0.6));
   });
 
@@ -103,7 +110,8 @@ void main() {
       ),
     );
     expect(t.takeException(), isNull);
-    final p = t.renderObject<RenderParagraph>(
+    final p = _para(
+      t,
       find.byWidgetPredicate(
         (x) => x is Text && (x.data ?? '').replaceAll('\u2060', '') == noSpace,
       ),

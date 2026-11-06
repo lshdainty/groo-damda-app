@@ -484,7 +484,7 @@ void main() {
             if (status == 'error') {
               expect(_retry, findsOneWidget);
               final txt = tester.widget<Text>(
-                find.descendant(of: _retry, matching: find.text('다시 시도')),
+                find.descendant(of: _retry, matching: findText('다시 시도')),
               );
               k.typo('actionButton.typography', txt.style!);
               k.weight('actionButton.fontWeight', txt.style!);
@@ -503,7 +503,7 @@ void main() {
                         .getTopLeft(
                           find.descendant(
                             of: _retry,
-                            matching: find.text('다시 시도'),
+                            matching: findText('다시 시도'),
                           ),
                         )
                         .dy -
@@ -1705,7 +1705,7 @@ void main() {
         );
         expect(label.left - field.left, 26);
         final description = tester.getRect(
-          find.text(keepAll('사진 · PDF 를 10MB 까지 올려요.')),
+          findText(keepAll('사진 · PDF 를 10MB 까지 올려요.')),
         );
         expect(description.left - field.left, 26);
       },
@@ -2048,7 +2048,7 @@ void main() {
       expect(tester.takeException(), isNull);
       final retry = tester.getRect(_retry);
       expect(retry.size, const Size.square(160));
-      final label = tester.getRect(find.text('다시 시도'));
+      final label = tester.getRect(findText('다시 시도'));
       expect(label.left, greaterThanOrEqualTo(retry.left));
       expect(label.right, lessThanOrEqualTo(retry.right));
       // × 의 누르는 자리 = 44 × 2, 가운데는 오른쪽 위 모서리에서 안쪽 12

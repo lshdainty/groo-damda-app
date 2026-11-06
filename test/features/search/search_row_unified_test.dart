@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/widgets/p_day_group.dart';
 import 'package:groo_damda_app/shared/widgets/p_divider.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row.dart';
 import 'package:groo_damda_app/shared/widgets/p_tabs.dart';
+import '../../support/plain_text.dart';
 
 /// 검색만 답하는 대역 — 나머지 메서드는 이 화면이 안 부른다.
 class _FakeRepo extends ExpenseRepository {
@@ -116,7 +117,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(ExpenseRow),
-        matching: find.textContaining('원'),
+        matching: findTextContaining('원'),
       ),
       findsWidgets,
     );
@@ -141,8 +142,8 @@ void main() {
 
     // 날짜가 둘이면 헤더도 둘 — 부제에 날짜를 넣던 옛 방식이면 0 이다.
     expect(find.byType(PDayHeader), findsNWidgets(2));
-    expect(find.textContaining('26. 9. 12'), findsOneWidget);
-    expect(find.textContaining('26. 9. 11'), findsOneWidget);
+    expect(findTextContaining('26. 9. 12'), findsOneWidget);
+    expect(findTextContaining('26. 9. 11'), findsOneWidget);
   });
 
   testWidgets('같은 날이면 헤더 하나로 묶인다', (tester) async {
@@ -154,7 +155,7 @@ void main() {
 
     expect(find.byType(PDayHeader), findsOneWidget);
     // 헤더에 그날 합계(8,000원)가 선다.
-    expect(find.textContaining('8,000'), findsOneWidget);
+    expect(findTextContaining('8,000'), findsOneWidget);
   });
 
   testWidgets('상단 탭(전체·지출·수입)의 좌측 여백이 24 다', (tester) async {

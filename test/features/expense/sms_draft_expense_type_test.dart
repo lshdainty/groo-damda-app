@@ -34,6 +34,7 @@ import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../support/plain_text.dart';
 
 const _expenseCategory = ExpenseCategory(
   rowId: 5,
@@ -152,7 +153,7 @@ Future<(_CapturingSmsRepo, AppLocalizations)> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return (repo, await AppLocalizations.delegate.load(const Locale('ko')));
 }
@@ -162,16 +163,16 @@ void main() {
   testWidgets('문자 초안에서 수입으로 바꿀 수 있다', (tester) async {
     final (_, l) = await _open(tester, draft: _draft);
 
-    expect(find.text(l.expPayee), findsOneWidget);
+    expect(findText(l.expPayee), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('tx-type-INCOME')));
     await tester.pumpAndSettle();
 
     expect(
-      find.text(l.expIncomeSource),
+      findText(l.expIncomeSource),
       findsOneWidget,
       reason: '잠겨 있으면 환불·입금 문자를 수입으로 남길 방법이 없다',
     );
-    expect(find.text(l.expPayee), findsNothing);
+    expect(findText(l.expPayee), findsNothing);
   });
 
   testWidgets('수입으로 바꾸면 지출 카테고리를 놓는다', (tester) async {
@@ -182,15 +183,12 @@ void main() {
     // 카테고리를 놓았으니 [추가] 는 요청 없이 카테고리 오류를 낸다 — 지출 카테고리를 든 채 저장하면 서버가 400 으로 막는다
     await tester.tap(
       find
-          .ancestor(
-            of: find.text(l.expAddShort),
-            matching: find.byType(PButton),
-          )
+          .ancestor(of: findText(l.expAddShort), matching: find.byType(PButton))
           .first,
     );
     await tester.pumpAndSettle();
 
-    expect(find.text(l.txfErrCategory), findsOneWidget);
+    expect(findText(l.txfErrCategory), findsOneWidget);
     expect(repo.called, isFalse);
   });
 
@@ -201,14 +199,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('tx-row-category')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('급여').last);
+    await tester.tap(findText('급여').last);
     await tester.pumpAndSettle();
     await tester.tap(
       find
-          .ancestor(
-            of: find.text(l.expAddShort),
-            matching: find.byType(PButton),
-          )
+          .ancestor(of: findText(l.expAddShort), matching: find.byType(PButton))
           .first,
     );
     await tester.pumpAndSettle();
@@ -227,10 +222,7 @@ void main() {
 
     await tester.tap(
       find
-          .ancestor(
-            of: find.text(l.expAddShort),
-            matching: find.byType(PButton),
-          )
+          .ancestor(of: findText(l.expAddShort), matching: find.byType(PButton))
           .first,
     );
     await tester.pumpAndSettle();
@@ -254,7 +246,7 @@ void main() {
 
   testWidgets('일반 추가에는 이체가 그대로 있다', (tester) async {
     final (_, l) = await _open(tester);
-    expect(find.text(l.expTypeTransfer), findsOneWidget);
+    expect(findText(l.expTypeTransfer), findsOneWidget);
   });
 
   // ─── 리포지토리 본문 ──────────────────────────────

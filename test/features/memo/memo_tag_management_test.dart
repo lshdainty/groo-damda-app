@@ -139,7 +139,7 @@ void main() {
 
   testWidgets('새 태그를 만들면 create 가 불리고 목록을 다시 받은 뒤 시트가 닫힌다', (tester) async {
     final repo = await _open(tester);
-    await tester.tap(find.text('태그 추가'));
+    await tester.tap(findText('태그 추가'));
     await tester.pumpAndSettle();
     expect(_button('삭제'), findsNothing);
     await tester.enterText(find.byType(PInput).first, '아이디어');
@@ -172,7 +172,7 @@ void main() {
   ) async {
     final repo = await _open(tester);
     repo.fail = true;
-    await tester.tap(find.text('태그 추가'));
+    await tester.tap(findText('태그 추가'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(PInput).first, '아이디어');
     await tester.pumpAndSettle();
@@ -183,7 +183,7 @@ void main() {
         .toList();
     final fail = callouts.firstWhere((c) => c.tone == PCalloutTone.critical);
     expect(fail.description, '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.');
-    expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
+    expect(findTextContaining('RAW_SERVER_TEXT_4471'), findsNothing);
     expect(
       tester.widget<PInput>(find.byType(PInput).first).controller!.text,
       '아이디어',
@@ -206,7 +206,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findText('삭제'),
       ),
     );
     await tester.pumpAndSettle();
@@ -223,12 +223,12 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findText('삭제'),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.byType(PAlertDialogView), findsNothing);
-    expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
+    expect(findTextContaining('RAW_SERVER_TEXT_4471'), findsNothing);
     expect(_tagRow('회의록'), findsOneWidget);
   });
 
@@ -257,7 +257,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findText('삭제'),
       ),
     );
     await tester.pumpAndSettle();
@@ -311,7 +311,7 @@ void main() {
   ) async {
     final repo = await _open(tester);
     repo.gate = Completer<void>();
-    await tester.tap(find.text('태그 추가'));
+    await tester.tap(findText('태그 추가'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(PInput).first, '아이디어');
     await tester.pumpAndSettle();

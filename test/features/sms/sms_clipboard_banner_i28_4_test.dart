@@ -97,7 +97,7 @@ void main() {
     final ctx = t.element(row);
     expect(icon.color, ctx.colors.fgBrand);
     // 옛 알림 상자 · 작은 [기록하기] 버튼은 없다
-    expect(find.text('기록하기'), findsNothing);
+    expect(findText('기록하기'), findsNothing);
     expect(find.byIcon(LucideIcons.chevronRight), findsOneWidget);
   });
 
@@ -123,7 +123,7 @@ void main() {
     await t.tap(findPlain('복사한 결제 문자가 있어요'));
     await t.pump();
     await t.pump(const Duration(milliseconds: 400));
-    expect(find.text('paste-screen'), findsOneWidget);
+    expect(findText('paste-screen'), findsOneWidget);
     expect(pushed, [_sms]);
   });
 

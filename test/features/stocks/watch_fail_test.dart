@@ -112,7 +112,7 @@ void main() {
         child: const Text('open'),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, '배당');
     await tester.pumpAndSettle();
@@ -122,8 +122,8 @@ void main() {
     expect(l.stocksWatchGroupSaveFail, '그룹을 저장하지 못했어요.');
     expect(findPlain(l.stocksWatchGroupSaveFail), findsOneWidget);
     expect(find.byType(FormErrorCallout), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
-    expect(find.text('배당'), findsWidgets);
+    expect(findTextContaining('서버 원문'), findsNothing);
+    expect(findText('배당'), findsWidgets);
   });
 
   testWidgets('그룹 삭제 실패 — 확인창 뒤 스낵바 + 다시 시도(묻지 않고 한 번 더)', (tester) async {
@@ -134,14 +134,14 @@ void main() {
         child: const Text('open'),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     await tester.tap(findPlain(l.stocksWatchGroupDelete).last);
     await tester.pumpAndSettle();
     expect(repo.deletes, 1);
     expect(l.stocksWatchGroupDeleteFail, '그룹을 삭제하지 못했어요.');
     expect(findPlain(l.stocksWatchGroupDeleteFail), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     await tester.tap(findPlain(l.actionRetry));
     await tester.pumpAndSettle();
     expect(repo.deletes, 2);
@@ -155,13 +155,13 @@ void main() {
         child: const Text('open'),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     expect(repo.adds, 1);
     expect(repo.silent, ['add']);
     expect(l.stocksWatchAddFail, '관심 종목에 넣지 못했어요.');
     expect(findPlain(l.stocksWatchAddFail), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     await tester.tap(findPlain(l.actionRetry));
     await tester.pumpAndSettle();
     expect(repo.adds, 2);

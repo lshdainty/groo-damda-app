@@ -32,6 +32,9 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations_ko.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_donut.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import '../../support/overrides.dart';
+import '../../support/plain_text.dart';
+import '../../support/semantics.dart';
 
 // ── 공용 ────────────────────────────────────────────────────────────────────
 String _plain(Text w) => (w.data ?? w.textSpan?.toPlainText() ?? '')
@@ -162,7 +165,8 @@ List<Override> _base({
 ];
 
 Widget _app(Widget home, List<Override> overrides) => ProviderScope(
-  overrides: overrides,
+  // 시험이 _base 뒤에 붙인 덮개가 이긴다 — riverpod 3 은 같은 provider 를 두 번 덮으면 멈춘다
+  overrides: lastOverrideWins(overrides),
   child: MaterialApp(
     theme: GrooTheme.light(),
     locale: const Locale('ko'),
@@ -354,7 +358,7 @@ void main() {
       await _settle(tester);
       // 호가 — 가격에 원, 줄 읽기에 매도/매수 쪽 + 잔량
       expect(_t('75,100원'), findsOneWidget);
-      expect(find.bySemanticsLabel('매도 75,100원, 잔량 4,259'), findsOneWidget);
+      expect(findSemanticsContaining('매도 75,100원, 잔량 4,259'), findsOneWidget);
       expect(find.bySemanticsLabel('매수 75,000원, 잔량 3,986'), findsOneWidget);
       expect(find.bySemanticsLabel('호가 표'), findsOneWidget);
       await tester.tap(_t('체결'));
@@ -384,12 +388,12 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
+          overrides: lastOverrideWins([
             ..._base(onCall: hit),
             watchGroupsProvider.overrideWith(
               (ref) async => [_group(1, '반도체', 3)],
             ),
-          ],
+          ]),
           child: MaterialApp.router(
             routerConfig: router,
             theme: GrooTheme.light(),
@@ -667,7 +671,7 @@ void main() {
       ]),
     );
     await _settle(tester);
-    expect(_t('증권사를 연결해 주세요'), findsOneWidget);
+    expect(_t('증권사를 연결해주세요'), findsOneWidget);
     expect(_t('토스증권 · 나무증권 키를 연결하면 시세와 보유 종목을 볼 수 있어요.'), findsOneWidget);
     expect(_t('증권사 연결하기'), findsOneWidget);
     expect(find.byIcon(LucideIcons.plug), findsOneWidget);
@@ -750,7 +754,7 @@ void main() {
           o,
         ),
       );
-      await tester.tap(find.text('열기'));
+      await tester.tap(findText('열기'));
       await _settle(tester, 800);
     }
 
@@ -825,7 +829,7 @@ void main() {
           _base(),
         ),
       );
-      await tester.tap(find.text('열기'));
+      await tester.tap(findText('열기'));
       await _settle(tester, 800);
       expect(_t('그룹 추가'), findsWidgets);
       expect(_t('그룹 삭제'), findsNothing);
@@ -878,7 +882,7 @@ void main() {
           _base(),
         ),
       );
-      await tester.tap(find.text('삼'));
+      await tester.tap(findText('삼'));
       await _settle(tester, 800);
       expect(
         _tc('"반도체" 그룹과 담긴 종목 3개가 함께 삭제돼요. 삭제한 그룹은 되돌릴 수 없어요.'),
@@ -886,7 +890,7 @@ void main() {
       );
       await tester.tap(_t('취소'));
       await _settle(tester, 800);
-      await tester.tap(find.text('영'));
+      await tester.tap(findText('영'));
       await _settle(tester, 800);
       expect(_tc('"빈" 그룹을 삭제해요. 삭제한 그룹은 되돌릴 수 없어요.'), findsOneWidget);
     });

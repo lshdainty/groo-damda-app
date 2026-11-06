@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/wheel_picker/p_wheel_picker.dart';
 import 'package:groo_damda_app/shared/ds/wheel_picker/wheel_picker_demo.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('wheel-picker');
 
@@ -108,7 +109,7 @@ Finder _layerB(String name) => find.descendant(
   matching: find.byKey(const ValueKey('wheel-selected-layer')),
 );
 Finder _textA(String name, String label) =>
-    find.descendant(of: _layerA(name), matching: find.text(label));
+    find.descendant(of: _layerA(name), matching: findText(label));
 Finder _wheelRoot() => find.byKey(const ValueKey('wheel-root'));
 
 /// 띠(가운데 줄)에 놓인 항목의 글 — 휠 가운데 높이에 가운데가 오는 글.
@@ -271,7 +272,7 @@ void main() {
           // 띠에 걸친 글자 — 띠 높이만 잘라 그린 고른 색(막히면 흐리게)
           final selected = find.descendant(
             of: _layerB('연도'),
-            matching: find.text('2026년'),
+            matching: findText('2026년'),
           );
           k.color('item.selectedForeground', _styleOf(tester, selected).color!);
           m(['item.selectedForeground']);
@@ -600,10 +601,7 @@ void main() {
       expect(calls.last, (12, -1));
       // 끝 → 처음이 이어져 위아래 어디서든 아래 항목은 다음 값이다 — 1 이 12 아래로 이어진다
       expect(_centerLabel(tester, '월'), '12월');
-      final below = find.descendant(
-        of: _layerA('월'),
-        matching: find.text('1월'),
-      );
+      final below = find.descendant(of: _layerA('월'), matching: findText('1월'));
       final belowY = (below.evaluate().first.renderObject! as RenderBox)
           .localToGlobal(Offset.zero)
           .dy;
@@ -618,7 +616,7 @@ void main() {
       expect(_centerLabel(tester, '연도'), '2031년');
       // 2021 이 2031 아래에 이어지지 않는다
       expect(
-        find.descendant(of: _layerA('연도'), matching: find.text('2021년')),
+        find.descendant(of: _layerA('연도'), matching: findText('2021년')),
         findsNothing,
       );
     });

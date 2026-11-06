@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
 import 'package:groo_damda_app/features/card/domain/card_catalog_page.dart';
 import 'package:groo_damda_app/features/card/presentation/card_benefits_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 CardCatalogPage _page(String name, {int total = 1}) => CardCatalogPage(
   content: [CardCatalogSummary(rowId: 1, cardName: name)],
@@ -22,7 +23,9 @@ CardCatalogPage _page(String name, {int total = 1}) => CardCatalogPage(
   empty: false,
 );
 
-String _plain(Widget w) => w is Text ? (w.data ?? '').replaceAll('⁠', '') : '';
+// Text · Text.rich(칩 · 목록 제목) 모두 — 줄바꿈 글자는 벗긴다
+String _plain(Widget w) =>
+    w is Text ? plainOf(w.data ?? w.textSpan!.toPlainText()) : '';
 Finder _text(String s) => find.byWidgetPredicate((w) => _plain(w) == s);
 
 void main() {

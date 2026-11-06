@@ -21,6 +21,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_snack_bar.dart';
+import '../support/plain_text.dart';
 
 Future<void> _loadPretendard() async {
   final bytes = File('assets/fonts/PretendardVariable.ttf').readAsBytesSync();
@@ -64,7 +65,7 @@ Future<void> _show(
 }
 
 int _lines(WidgetTester tester, String message) {
-  final p = tester.renderObject<RenderParagraph>(find.text(message));
+  final p = tester.renderObject<RenderParagraph>(findText(message));
   final boxes = p.getBoxesForSelection(
     TextSelection(baseOffset: 0, extentOffset: message.length),
   );
@@ -97,7 +98,7 @@ void main() {
       actionLabel: l.expFixBalance,
     );
     final p = tester.renderObject<RenderParagraph>(
-      find.text(l.expClosedCycleLine),
+      findText(l.expClosedCycleLine),
     );
     expect(p.text.style?.letterSpacing, 0);
   });
@@ -110,7 +111,7 @@ void main() {
       actionLabel: l.expFixBalance,
     );
     final icon = tester.getRect(find.byIcon(LucideIcons.info));
-    final text = tester.getRect(find.text(l.expClosedCycleLine));
+    final text = tester.getRect(findText(l.expClosedCycleLine));
     // 첫 줄 높이 16 × 1.4 = 22.4 안에 아이콘(20)이 든다 — margin-top 2.
     expect(icon.top, moreOrLessEquals(text.top + 2, epsilon: 0.5));
   });
@@ -122,7 +123,7 @@ void main() {
         '반복·프리셋 이체에는 카드를 고를 수 없어요. 카드 결제는 카드 설정의 자동 결제가 맡아요. '
         '카드로 나갈 돈은 카드 청구 화면에서 확인해 주세요.';
     await _show(tester, 360, long, actionLabel: l.expFixBalance);
-    final p = tester.renderObject<RenderParagraph>(find.text(long));
+    final p = tester.renderObject<RenderParagraph>(findText(long));
     expect(p.maxLines, isNull);
     expect(p.overflow, isNot(TextOverflow.ellipsis));
     expect(p.didExceedMaxLines, isFalse);

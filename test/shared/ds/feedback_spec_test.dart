@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/snackbar_demo.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _snackbar = DesignSpec.load('snackbar');
 final _callout = DesignSpec.load('callout');
@@ -747,12 +748,12 @@ void main() {
       await tester.pump();
       // 내보내는 중 — 띠는 하나, 첫째
       expect(bandFinder, findsOneWidget);
-      expect(find.text(keepAll('첫째')), findsOneWidget);
+      expect(findText(keepAll('첫째')), findsOneWidget);
       await advance(tester, 150);
       await advance(tester, 200);
       expect(bandFinder, findsOneWidget);
-      expect(find.text(keepAll('둘째')), findsNothing);
-      expect(find.text(keepAll('셋째')), findsOneWidget);
+      expect(findText(keepAll('둘째')), findsNothing);
+      expect(findText(keepAll('셋째')), findsOneWidget);
       await unmount(tester);
     });
 
@@ -770,12 +771,12 @@ void main() {
       api.show(message: '새 띠');
       await tester.pump();
       await advance(tester, 500);
-      expect(find.text(keepAll('삭제했어요.')), findsOneWidget, reason: '액션 띠를 지킨다');
-      expect(find.text(keepAll('새 띠')), findsNothing);
+      expect(findText(keepAll('삭제했어요.')), findsOneWidget, reason: '액션 띠를 지킨다');
+      expect(findText(keepAll('새 띠')), findsNothing);
       await advance(tester, 6000);
       await advance(tester, 300);
-      expect(find.text(keepAll('삭제했어요.')), findsNothing);
-      expect(find.text(keepAll('새 띠')), findsOneWidget);
+      expect(findText(keepAll('삭제했어요.')), findsNothing);
+      expect(findText(keepAll('새 띠')), findsOneWidget);
       await unmount(tester);
     });
 
@@ -794,12 +795,12 @@ void main() {
       api.show(message: '둘째');
       api.show(message: '셋째');
       await tester.pump();
-      await tester.tap(find.text('되돌리기'));
+      await tester.tap(findText('되돌리기'));
       await advance(tester, 200);
       await advance(tester, 300);
       expect(done, 1);
-      expect(find.text(keepAll('둘째')), findsNothing);
-      expect(find.text(keepAll('셋째')), findsOneWidget);
+      expect(findText(keepAll('둘째')), findsNothing);
+      expect(findText(keepAll('셋째')), findsOneWidget);
       await unmount(tester);
     });
 
@@ -811,8 +812,8 @@ void main() {
       await tester.pump();
       await advance(tester, 150);
       await advance(tester, 200);
-      expect(find.text(keepAll('첫째')), findsNothing);
-      expect(find.text(keepAll('둘째')), findsOneWidget);
+      expect(findText(keepAll('첫째')), findsNothing);
+      expect(findText(keepAll('둘째')), findsOneWidget);
       await unmount(tester);
     });
 
@@ -823,7 +824,7 @@ void main() {
       await tester.pump();
       await advance(tester, 200);
       expect(bandFinder, findsOneWidget);
-      expect(find.text(keepAll('둘째')), findsOneWidget);
+      expect(findText(keepAll('둘째')), findsOneWidget);
       await unmount(tester);
     });
 
@@ -1029,9 +1030,9 @@ void main() {
           ),
         ),
       );
-      await tester.ensureVisible(find.text('결과 — 4초'));
+      await tester.ensureVisible(findText('결과 — 4초'));
       await tester.pump();
-      await tester.tap(find.text('결과 — 4초'));
+      await tester.tap(findText('결과 — 4초'));
       await tester.pump();
       await advance(tester, 300);
       final frame = tester.getRect(
@@ -1049,13 +1050,13 @@ void main() {
       expect(live, findsOneWidget);
       // 틀 아래 8 — 틀의 안전 영역은 0 이다
       expect(frame.bottom - tester.getRect(live).bottom, 8 + 1);
-      await tester.tap(find.text('탭 바 켜기'));
+      await tester.tap(findText('탭 바 켜기'));
       await tester.pump();
       await tester.pump();
       await advance(tester, 300);
       // 탭 바 66 위 8
       expect(frame.bottom - tester.getRect(live).bottom, 66 + 8 + 1);
-      await tester.tap(find.text('홈 표시줄 켜기'));
+      await tester.tap(findText('홈 표시줄 켜기'));
       await tester.pump();
       await tester.pump();
       await advance(tester, 300);
@@ -1253,7 +1254,7 @@ void main() {
           home: const PSnackbarAvoidOverlap(child: Text('탭 바')),
         ),
       );
-      expect(find.text('탭 바'), findsOneWidget);
+      expect(findText('탭 바'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -1277,7 +1278,7 @@ void main() {
             const SizedBox(height: 300, child: Center(child: Text('시트 내용'))),
       );
       await tester.pumpAndSettle();
-      expect(find.text('시트 내용'), findsOneWidget);
+      expect(findText('시트 내용'), findsOneWidget);
 
       var restored = 0;
       await show(
@@ -1292,17 +1293,17 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('snackbar-message')));
       await advance(tester, 300);
-      expect(find.text('시트 내용'), findsOneWidget);
+      expect(findText('시트 내용'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('snackbar-action')));
       await advance(tester, 300);
       expect(restored, 1);
-      expect(find.text('시트 내용'), findsOneWidget);
+      expect(findText('시트 내용'), findsOneWidget);
 
       // 시트 바깥(진짜 바깥 누르기)은 시트를 닫는다 — 막힌 것이 아니라 띠가 바깥이 아니었던 것
       await tester.tapAt(const Offset(195, 100));
       await tester.pumpAndSettle();
-      expect(find.text('시트 내용'), findsNothing);
+      expect(findText('시트 내용'), findsNothing);
       await unmount(tester);
     });
   });
@@ -1405,7 +1406,7 @@ void main() {
             k.weight('description.fontWeight', description);
             k.color('root.foreground', description.color!);
             if (interaction != PCalloutInteraction.actionable) {
-              final link = tester.widget<Text>(find.text('자세히')).style!;
+              final link = tester.widget<Text>(findText('자세히')).style!;
               k.typo('link.typography', link);
               k.weight('link.fontWeight', link);
               k.color('root.foreground', link.color!);
@@ -1666,7 +1667,7 @@ void main() {
       expect(node.label, contains('저장했어요.'));
       expect(node.label, isNot(contains('⁠')));
       expect(node.getSemanticsData().flagsCollection.isButton, isFalse);
-      final link = tester.getSemantics(find.text('자세히'));
+      final link = tester.getSemantics(findText('자세히'));
       expect(link.getSemanticsData().flagsCollection.isLink, isTrue);
       semantics.dispose();
     });
@@ -1682,7 +1683,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('자세히'));
+      await tester.tap(findText('자세히'));
       expect(count, 1);
     });
 
@@ -2790,7 +2791,7 @@ void main() {
       );
       expect(find.byKey(primary), findsNothing);
       expect(find.byKey(secondary), findsNothing);
-      expect(find.text(keepAll('페이지를 찾을 수 없어요')), findsOneWidget);
+      expect(findText(keepAll('페이지를 찾을 수 없어요')), findsOneWidget);
     });
 
     testWidgets('버튼을 누르면 그 일을 하고, 로딩 중인 첫 버튼은 누르기를 삼킨다', (tester) async {
@@ -2808,8 +2809,8 @@ void main() {
           secondaryAction: PResultAction(label: '홈으로', onPressed: () => home++),
         ),
       );
-      await tester.tap(find.text('다시 시도'));
-      await tester.tap(find.text('홈으로'));
+      await tester.tap(findText('다시 시도'));
+      await tester.tap(findText('홈으로'));
       expect(retry, 1);
       expect(home, 1);
 

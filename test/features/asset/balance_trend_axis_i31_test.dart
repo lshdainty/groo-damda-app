@@ -14,6 +14,7 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
+import '../../support/plain_text.dart';
 
 const _loan = Asset(
   rowId: 10,
@@ -66,7 +67,7 @@ Future<void> _open(WidgetTester tester, double scale) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -82,7 +83,7 @@ void main() {
       final axis = tester
           .widget<PLineChart>(find.byType(PLineChart))
           .axisFormatter!;
-      expect(find.text(axis(-25000000)), findsOneWidget);
+      expect(findText(axis(-25000000)), findsOneWidget);
     });
   }
 

@@ -37,6 +37,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 /// 결제일 12일 카드 — 8월분(9/12 결제)까지 닫혔다.
 const _card = Asset(
@@ -197,7 +198,7 @@ Future<_FakeRepo> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -225,12 +226,12 @@ Future<void> _setAmount(WidgetTester tester, String v) async {
   await tester.pumpAndSettle();
   await tester.enterText(find.byType(EditableText).first, v);
   await tester.pump();
-  await tester.tap(find.text('완료'));
+  await tester.tap(findText('완료'));
   await tester.pumpAndSettle();
 }
 
 Finder _submit(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 void main() {
   group('잠긴 거래의 편집 시트(D12)', () {
@@ -246,18 +247,15 @@ void main() {
       expect(_rowLocked(tester, 'category'), isFalse);
       expect(tester.widget<EditableText>(_fieldWith('버스')).readOnly, isFalse);
 
-      expect(
-        find.text('결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요'),
-        findsOneWidget,
-      );
-      expect(find.text('고쳐 쓰기'), findsOneWidget);
+      expect(findText('결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요'), findsOneWidget);
+      expect(findText('고쳐 쓰기'), findsOneWidget);
     });
 
     testWidgets('서버 플래그가 없어도 닫힌 회차 카드 거래면 잠근다', (tester) async {
       await _open(tester, _locked.copyWith(moneyLocked: false));
 
       expect(_rowLocked(tester, 'amount'), isTrue);
-      expect(find.text('고쳐 쓰기'), findsOneWidget);
+      expect(findText('고쳐 쓰기'), findsOneWidget);
     });
 
     testWidgets('열린 회차 거래는 지금처럼 고친다', (tester) async {
@@ -270,7 +268,7 @@ void main() {
       );
 
       expect(_rowLocked(tester, 'amount'), isFalse);
-      expect(find.text('고쳐 쓰기'), findsNothing);
+      expect(findText('고쳐 쓰기'), findsNothing);
     });
 
     // 잠긴 거래는 카테고리·가맹점·메모만 바뀐다 — 통장에 일어나는 일이 없으니 묻지
@@ -283,7 +281,7 @@ void main() {
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('이미 결제가 끝난 회차예요'), findsNothing);
+      expect(findTextContaining('이미 결제가 끝난 회차예요'), findsNothing);
       expect(repo.calls, hasLength(1));
 
       final args = repo.calls.single.args;
@@ -305,7 +303,7 @@ void main() {
 
   group('[고쳐 쓰기](D13)', () {
     Future<void> openRewrite(WidgetTester tester) async {
-      await tester.tap(find.text('고쳐 쓰기'));
+      await tester.tap(findText('고쳐 쓰기'));
       await tester.pumpAndSettle();
     }
 
@@ -314,8 +312,8 @@ void main() {
       await openRewrite(tester);
 
       // 편집 시트는 닫히고 고쳐 쓰기 시트가 열렸다(제목 + 버튼 라벨이 같은 말).
-      expect(find.text('거래 수정'), findsNothing);
-      expect(find.text('고쳐 쓰기'), findsOneWidget);
+      expect(findText('거래 수정'), findsNothing);
+      expect(findText('고쳐 쓰기'), findsOneWidget);
       expect(_rowLocked(tester, 'amount'), isFalse);
       expect(_fieldWith('버스'), findsOneWidget);
       expect(find.byType(FormPiece), findsWidgets, reason: '날짜 조각이 열린다');
@@ -338,10 +336,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('원래 거래는 지워지고 새 거래로 바뀌어요. 기록만 바뀌고 계좌 잔액은 그대로예요.'),
+        findText('원래 거래는 지워지고 새 거래로 바뀌어요. 기록만 바뀌고 계좌 잔액은 그대로예요.'),
         findsOneWidget,
       );
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
 
       final call = repo.calls.single;
@@ -353,8 +351,8 @@ void main() {
       expect(call.args['paymentMethod'], 'CARD');
       expect(call.args['splits'], isNull, reason: '분할이 없으면 키를 빼고 서버가 옮긴다');
       // 결제가 끝난 회차 거래를 고쳐 썼다 — 결제계좌 잔액을 고칠 길을 준다(D9).
-      expect(find.text('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsOneWidget);
-      expect(find.text('잔액 고치기'), findsOneWidget);
+      expect(findText('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsOneWidget);
+      expect(findText('잔액 고치기'), findsOneWidget);
       await tester.pump(const Duration(seconds: 7));
       await tester.pumpAndSettle();
     });
@@ -367,7 +365,7 @@ void main() {
 
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('취소').last);
+      await tester.tap(findText('취소').last);
       await tester.pumpAndSettle();
 
       expect(repo.calls, isEmpty);
@@ -400,7 +398,7 @@ void main() {
 
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
 
       final splits = repo.calls.single.args['splits']! as List<SplitInput>;
@@ -429,7 +427,7 @@ void main() {
 
       // 저장은 켜 둔다 — 누르면 요청 없이 "나눈 내역 맞추기" 로 간다(Callout 이 먼저 말한다)
       expect(find.byKey(const ValueKey('tx-split-mismatch')), findsOneWidget);
-      expect(find.text('나눈 내역 맞추고 저장'), findsOneWidget);
+      expect(findText('나눈 내역 맞추고 저장'), findsOneWidget);
     });
   });
 

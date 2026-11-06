@@ -124,6 +124,8 @@ Future<void> _pumpRouted(
         recurringListProvider.overrideWith((ref) async => const []),
         dutchPayListProvider.overrideWith((ref) async => const []),
         hideCardProvider.overrideWith((ref, card) => false),
+        // 지우기 · 환불 뒤 그 달 목록을 다시 받을 때까지 기다린다(1a9d9de7) — 가짜 저장소에 list 가 없어 덮는다
+        monthExpensesProvider.overrideWith((ref, key) async => const []),
       ],
       child: MaterialApp.router(
         theme: GrooTheme.light(),
@@ -154,11 +156,11 @@ Widget _swipeRow(Expense e, Asset asset) => Consumer(
 );
 
 Future<void> _swipeDeleteAndConfirm(WidgetTester tester) async {
-  await tester.drag(find.text('거래 행'), const Offset(-300, 0));
+  await tester.drag(findText('거래 행'), const Offset(-300, 0));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('삭제'));
+  await tester.tap(findText('삭제'));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('삭제').last);
+  await tester.tap(findText('삭제').last);
   await tester.pumpAndSettle();
 }
 
@@ -172,13 +174,13 @@ void main() {
       await _pumpRouted(tester, _swipeRow(_closed, _card));
 
       await _swipeDeleteAndConfirm(tester);
-      expect(find.text('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsOneWidget);
+      expect(findText('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsOneWidget);
 
-      await tester.tap(find.text('잔액 고치기'));
+      await tester.tap(findText('잔액 고치기'));
       await tester.pumpAndSettle();
 
       // push 라 기준 주소는 그대로고, 그 위에 관리 화면이 `?edit=3` 으로 올라온다.
-      expect(find.text('관리 edit=3'), findsOneWidget);
+      expect(findText('관리 edit=3'), findsOneWidget);
     });
 
     testWidgets('결제계좌가 없는 카드면 버튼도 토스트도 없다', (tester) async {
@@ -191,8 +193,8 @@ void main() {
 
       await _swipeDeleteAndConfirm(tester);
 
-      expect(find.text('잔액 고치기'), findsNothing);
-      expect(find.text('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsNothing);
+      expect(findText('잔액 고치기'), findsNothing);
+      expect(findText('결제가 끝난 회차라 기록만 바뀌고 계좌 잔액은 그대로예요.'), findsNothing);
     });
 
     testWidgets('열린 회차 거래는 버튼이 없다', (tester) async {
@@ -201,7 +203,7 @@ void main() {
 
       await _swipeDeleteAndConfirm(tester);
 
-      expect(find.text('잔액 고치기'), findsNothing);
+      expect(findText('잔액 고치기'), findsNothing);
     });
   });
 
@@ -218,15 +220,15 @@ void main() {
         tester,
         opener(_closed.copyWith(refundedAt: '2026-09-15T12:00:00')),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('환불 취소'), findsOneWidget);
-      await tester.tap(find.text('잔액 고치기'));
+      expect(findText('환불 취소'), findsOneWidget);
+      await tester.tap(findText('잔액 고치기'));
       await tester.pumpAndSettle();
 
-      expect(find.text('관리 edit=3'), findsOneWidget);
-      expect(find.text('환불 취소'), findsNothing, reason: '상세 시트는 닫혔다');
+      expect(findText('관리 edit=3'), findsOneWidget);
+      expect(findText('환불 취소'), findsNothing, reason: '상세 시트는 닫혔다');
     });
 
     testWidgets('열린 회차 환불이면 배너에 없다', (tester) async {
@@ -239,11 +241,11 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('환불 취소'), findsOneWidget);
-      expect(find.text('잔액 고치기'), findsNothing);
+      expect(findText('환불 취소'), findsOneWidget);
+      expect(findText('잔액 고치기'), findsNothing);
     });
   });
 
@@ -284,7 +286,7 @@ void main() {
       await pumpManage(tester, editAssetId: 3);
 
       expect(findPlain('입출금 수정'), findsOneWidget);
-      expect(find.text('1,200,000'), findsOneWidget, reason: '잔액 칸이 채워져 있다');
+      expect(findText('1,200,000'), findsOneWidget, reason: '잔액 칸이 채워져 있다');
     });
 
     testWidgets('카드면 카드 폼을 연다(탭이 없다)', (tester) async {
@@ -362,12 +364,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('수정'));
+    await tester.tap(findText('수정'));
     await tester.pumpAndSettle();
 
-    expect(find.text('관리 edit=3'), findsOneWidget);
+    expect(findText('관리 edit=3'), findsOneWidget);
   });
 }

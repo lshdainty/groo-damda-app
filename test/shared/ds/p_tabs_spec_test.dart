@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/tabs/tabs_demo.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('tabs');
 final _chipTabsSpec = DesignSpec.load('chip-tabs');
@@ -81,7 +82,7 @@ Finder get _chipBox => find.byKey(const ValueKey('chip-box'));
 
 /// 이름으로 탭 하나(읽는 말이 붙은 칸).
 Finder _tabOf(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PressArea));
+    find.ancestor(of: findText(label), matching: find.byType(PressArea));
 
 BoxDecoration _decoration(WidgetTester tester, Finder finder) =>
     tester.widget<DecoratedBox>(finder).decoration as BoxDecoration;
@@ -226,7 +227,7 @@ void main() {
           // 놓인 자리는 누르기 전에 잰다 — 누르면 탭이 줄어 그려진 사각형이 작아진다
           final list = tester.getRect(_list);
           final tab = tester.getRect(_tabOf('추이'));
-          final label = tester.getRect(find.text('추이'));
+          final label = tester.getRect(findText('추이'));
           final tab0 = tester.getRect(_tabOf('카테고리'));
           final tab2 = tester.getRect(_tabOf('비교'));
           final barRect = tester.getRect(_bar);
@@ -311,7 +312,7 @@ void main() {
           ]);
 
           // 글 — t4 14 / 19 · t5 16 / 22 · 700 · 색은 고름 · 막힘이 정한다
-          final text = tester.widget<Text>(find.text('추이'));
+          final text = tester.widget<Text>(findText('추이'));
           k.typo('label.typography', text.style!);
           k.weight('label.fontWeight', text.style!);
           k.color('label.foreground', text.style!.color!);
@@ -357,7 +358,7 @@ void main() {
 
           // 알림 점 — 첫 탭(안 고른 탭)의 글 끝에서 2 · 글 위쪽, 6px 원 · 브랜드 글자색
           final dot = tester.getRect(_lineDot);
-          final label0 = tester.getRect(find.text('카테고리'));
+          final label0 = tester.getRect(findText('카테고리'));
           k.px('notification.size', dot.width);
           k.px('notification.size', dot.height);
           k.px('notification.gap', dot.left - label0.right);
@@ -613,7 +614,7 @@ void main() {
           tester.getSize(_tabOf(names[0])).width,
         );
         // Hug 의 첫 글은 26 에서 시작한다(목록 16 + 탭 10)
-        expect(tester.getRect(find.text(names[0])).left, 26);
+        expect(tester.getRect(findText(names[0])).left, 26);
       },
     );
 
@@ -645,7 +646,7 @@ void main() {
         );
         await tester.pump(const Duration(milliseconds: 400));
         final start = tester.getRect(_bar).left;
-        await tester.tap(find.text('비교'));
+        await tester.tap(findText('비교'));
         await tester.pump();
         await tester.pump();
         await tester.pump(duration ~/ 2);
@@ -681,12 +682,12 @@ void main() {
       final c = GrooTheme.light().extension<PColors>()!;
       final width = tester.getSize(_tabOf('추이')).width;
       expect(
-        tester.widget<Text>(find.text('추이')).style!.color,
+        tester.widget<Text>(findText('추이')).style!.color,
         c.fgNeutralSubtle,
       );
       await tester.pumpWidget(build('trend'));
       // 한 프레임 만에
-      expect(tester.widget<Text>(find.text('추이')).style!.color, c.fgNeutral);
+      expect(tester.widget<Text>(findText('추이')).style!.color, c.fgNeutral);
       expect(tester.getSize(_tabOf('추이')).width, width);
     });
 
@@ -705,9 +706,9 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('비교'));
-      await tester.tap(find.text('카테고리'));
-      await tester.tap(find.text('추이'));
+      await tester.tap(findText('비교'));
+      await tester.tap(findText('카테고리'));
+      await tester.tap(findText('추이'));
       expect(calls, ['compare']);
       calls.clear();
       await tester.pumpWidget(
@@ -722,7 +723,7 @@ void main() {
         ),
       );
       for (final t in ['카테고리', '추이', '비교']) {
-        await tester.tap(find.text(t));
+        await tester.tap(findText(t));
       }
       expect(calls, isEmpty);
       // 목록 전체가 막혀 고른 탭이 막히면 막대도 전용 색
@@ -806,7 +807,7 @@ void main() {
       // 첫 탭으로 돌아오면 처음으로 돌아간다
       set(() => value = 'v0');
       await tester.pumpAndSettle();
-      expect(tester.getRect(find.text(names[0])).left, 26);
+      expect(tester.getRect(findText(names[0])).left, 26);
     });
 
     testWidgets(
@@ -846,7 +847,7 @@ void main() {
         // 칸을 나누지 않는다 — 탭 폭은 글 + 좌우 10
         for (final n in names) {
           final tab = tester.getRect(_tabOf(n));
-          final label = tester.getRect(find.text(n));
+          final label = tester.getRect(findText(n));
           expect(tab.width, closeTo(label.width + 20, 0.5), reason: n);
         }
         // 첫 탭에서 시작 — 내용 폭이 줄 폭보다 크다
@@ -906,7 +907,7 @@ void main() {
       expect(b, greaterThan(120), reason: '그 탭만 넓어진다');
       expect(a, lessThan(120));
       expect(
-        tester.getSize(find.text('Long label')).width,
+        tester.getSize(findText('Long label')).width,
         lessThanOrEqualTo(b - 20 + 0.5),
         reason: '글이 칸 안에 든다',
       );
@@ -983,14 +984,14 @@ void main() {
         await tester.pump(const Duration(milliseconds: 400));
         // 기준 max(40, 120 ÷ 4, 24) = 40
         expect(
-          _paintedScale(tester, find.text('추이')),
+          _paintedScale(tester, findText('추이')),
           closeTo(reduce ? 1 : 38 / 40, 1e-3),
           reason: 'reduce=$reduce',
         );
         expect(tester.getRect(_bar), bar);
         // 누르는 동안 색은 그대로(손을 떼기 전에 고른 것처럼 보이지 않는다)
         expect(
-          tester.widget<Text>(find.text('추이')).style!.color,
+          tester.widget<Text>(findText('추이')).style!.color,
           c.fgNeutralSubtle,
         );
         await g.up();
@@ -1257,14 +1258,14 @@ void main() {
       );
       final withDot = tester.getSize(_chipBox.first).width;
       expect(_chipDot, findsOneWidget);
-      await tester.tap(find.text('전체'));
+      await tester.tap(findText('전체'));
       await tester.pump(const Duration(milliseconds: 400));
       expect(calls, ['all']);
       expect(_chipDot, findsNothing);
       // 점이 있을 때는 글 뒤 6 + 점 6 만큼 넓었다
       expect(withDot - tester.getSize(_chipBox.first).width, closeTo(12, 0.01));
       // 고른 칩을 다시 눌러도 부르지 않는다
-      await tester.tap(find.text('전체'));
+      await tester.tap(findText('전체'));
       expect(calls, ['all']);
       set(() => value = 'holding');
     });
@@ -1329,7 +1330,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('완료'), warnIfMissed: false);
+      await tester.tap(findText('완료'), warnIfMissed: false);
       expect(calls, isEmpty);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -1375,19 +1376,19 @@ void main() {
 
     testWidgets('고른 칸만 보이고 바로 바뀐다 · 칸마다 상태를 남긴다(다녀와도 그대로)', (tester) async {
       await tester.pumpWidget(panels(value: 'a'));
-      expect(find.text('A 0'), findsOneWidget);
+      expect(findText('A 0'), findsOneWidget);
       // 고르지 않은 칸은 그려 두되 보이지 않는다(상태를 남긴다)
-      expect(find.text('B 0', skipOffstage: false), findsOneWidget);
-      expect(find.text('B 0'), findsNothing);
-      await tester.tap(find.text('A 0'));
+      expect(findText('B 0', skipOffstage: false), findsOneWidget);
+      expect(findText('B 0'), findsNothing);
+      await tester.tap(findText('A 0'));
       await tester.pump();
-      expect(find.text('A 1'), findsOneWidget);
+      expect(findText('A 1'), findsOneWidget);
       await tester.pumpWidget(panels(value: 'b'));
       // 애니메이션 없이 바로
-      expect(find.text('B 0'), findsOneWidget);
-      expect(find.text('A 1'), findsNothing);
+      expect(findText('B 0'), findsOneWidget);
+      expect(findText('A 1'), findsNothing);
       await tester.pumpWidget(panels(value: 'a'));
-      expect(find.text('A 1'), findsOneWidget);
+      expect(findText('A 1'), findsOneWidget);
     });
 
     testWidgets('고른 칸이 높이를 정한다 — 다른 칸의 높이는 상관없다', (tester) async {
@@ -1450,13 +1451,13 @@ void main() {
       await g.moveBy(const Offset(-30, 0));
       await tester.pump();
       // 끄는 동안 이웃이 옆에서 들어온다
-      expect(tester.getRect(find.text('칸 B')).left, closeTo(300, 12));
+      expect(tester.getRect(findText('칸 B')).left, closeTo(300, 12));
       await tester.pump(const Duration(milliseconds: 300));
       await g.up();
       await tester.pumpAndSettle();
       expect(calls, isEmpty);
-      expect(find.text('칸 A'), findsOneWidget);
-      expect(find.text('칸 B'), findsNothing);
+      expect(findText('칸 A'), findsOneWidget);
+      expect(findText('칸 B'), findsNothing);
       // 멈춰 놓고(속도 없이) 100 을 끌고 놓으면 넘어간다
       g = await tester.startGesture(const Offset(300, 100));
       await g.moveBy(const Offset(-50, 0));
@@ -1467,9 +1468,9 @@ void main() {
       // 값은 손을 뗄 때 바뀐다
       expect(calls, ['b']);
       await tester.pumpAndSettle();
-      expect(find.text('칸 B'), findsOneWidget);
-      expect(find.text('칸 A'), findsNothing);
-      expect(tester.getRect(find.text('칸 B')).left, closeTo(0, 0.01));
+      expect(findText('칸 B'), findsOneWidget);
+      expect(findText('칸 A'), findsNothing);
+      expect(tester.getRect(findText('칸 B')).left, closeTo(0, 0.01));
       set(() => value = 'a');
     });
 
@@ -1506,11 +1507,11 @@ void main() {
         ),
       );
       // 짧게(40) 빠르게 — 오른쪽으로 튕기면 이전 칸
-      await tester.fling(find.text('칸 B'), const Offset(40, 0), 1500);
+      await tester.fling(findText('칸 B'), const Offset(40, 0), 1500);
       await tester.pumpAndSettle();
       expect(calls, ['a']);
       // 20 만 튕기면 거리가 모자란다
-      await tester.fling(find.text('칸 A'), const Offset(-20, 0), 1500);
+      await tester.fling(findText('칸 A'), const Offset(-20, 0), 1500);
       await tester.pumpAndSettle();
       expect(calls, ['a']);
     });
@@ -1550,14 +1551,14 @@ void main() {
       await g.moveBy(const Offset(60, 0));
       await tester.pump();
       // 10 의 slop 을 넘긴 만큼부터 센다 — 끌린 양의 1/3 이하
-      final moved = tester.getRect(find.text('칸 A')).left;
+      final moved = tester.getRect(findText('칸 A')).left;
       expect(moved, lessThan(60));
       expect(moved, greaterThan(0));
       await g.up();
       await tester.pumpAndSettle();
       expect(calls, isEmpty);
       // 왼쪽으로 크게 — 막힌 b 를 건너뛰어 c 로
-      await tester.fling(find.text('칸 A'), const Offset(-200, 0), 1000);
+      await tester.fling(findText('칸 A'), const Offset(-200, 0), 1000);
       await tester.pumpAndSettle();
       expect(calls, ['c']);
     });
@@ -1587,11 +1588,11 @@ void main() {
           reduceMotion: true,
         ),
       );
-      await tester.fling(find.text('칸 A'), const Offset(-250, 0), 1500);
+      await tester.fling(findText('칸 A'), const Offset(-250, 0), 1500);
       await tester.pump();
       await tester.pump();
-      expect(find.text('칸 B'), findsOneWidget);
-      expect(tester.getRect(find.text('칸 B')).left, closeTo(0, 0.01));
+      expect(findText('칸 B'), findsOneWidget);
+      expect(tester.getRect(findText('칸 B')).left, closeTo(0, 0.01));
     });
 
     testWidgets('쓰는 쪽이 값을 받지 않으면 제자리로 돌아온다', (tester) async {
@@ -1616,12 +1617,12 @@ void main() {
           ),
         ),
       );
-      await tester.fling(find.text('칸 A'), const Offset(-250, 0), 1500);
+      await tester.fling(findText('칸 A'), const Offset(-250, 0), 1500);
       await tester.pumpAndSettle();
       expect(calls, ['b']);
-      expect(find.text('칸 A'), findsOneWidget);
-      expect(find.text('칸 B'), findsNothing);
-      expect(tester.getRect(find.text('칸 A')).left, closeTo(0, 0.01));
+      expect(findText('칸 A'), findsOneWidget);
+      expect(findText('칸 B'), findsNothing);
+      expect(tester.getRect(findText('칸 A')).left, closeTo(0, 0.01));
     });
 
     testWidgets('가로로 스크롤하는 칸 안에서 시작한 끌기는 그 칸이 맡는다 · 세로 스크롤은 그대로', (

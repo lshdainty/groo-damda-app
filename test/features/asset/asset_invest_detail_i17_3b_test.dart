@@ -11,6 +11,7 @@ import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_detail_dialog.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _holding = AssetHolding(
   linked: false,
@@ -71,7 +72,7 @@ Future<void> _open(WidgetTester tester) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -79,21 +80,21 @@ void main() {
   testWidgets('보유 종목 · 거래 기록은 목록 제목 + List 줄이고 차례가 맞다', (tester) async {
     await _open(tester);
 
-    expect(find.text('보유 종목 · 1'), findsOneWidget);
-    expect(find.text('가람전자'), findsOneWidget);
-    expect(find.text('10주 · 직접 입력'), findsOneWidget);
-    expect(find.text('매수'), findsOneWidget);
-    expect(find.text('매도'), findsOneWidget);
+    expect(findText('보유 종목 · 1'), findsOneWidget);
+    expect(findText('가람전자'), findsOneWidget);
+    expect(findText('10주 · 직접 입력'), findsOneWidget);
+    expect(findText('매수'), findsOneWidget);
+    expect(findText('매도'), findsOneWidget);
 
-    expect(find.text('거래 기록 · 1'), findsOneWidget);
-    expect(find.text('매수 · 가람전자 10주'), findsOneWidget);
-    expect(find.text('2026-10-19'), findsOneWidget);
+    expect(findText('거래 기록 · 1'), findsOneWidget);
+    expect(findText('매수 · 가람전자 10주'), findsOneWidget);
+    expect(findText('2026-10-19'), findsOneWidget);
 
     // 거래 기록은 보유 종목 아래, 최근 거래 위
-    final holdings = tester.getTopLeft(find.text('보유 종목 · 1')).dy;
-    final trend = tester.getTopLeft(find.textContaining('평가액 추이').first).dy;
-    final trades = tester.getTopLeft(find.text('거래 기록 · 1')).dy;
-    final recent = tester.getTopLeft(find.text('최근 거래')).dy;
+    final holdings = tester.getTopLeft(findText('보유 종목 · 1')).dy;
+    final trend = tester.getTopLeft(findTextContaining('평가액 추이').first).dy;
+    final trades = tester.getTopLeft(findText('거래 기록 · 1')).dy;
+    final recent = tester.getTopLeft(findText('최근 거래')).dy;
     // 보유 종목 → 추이 → 거래 기록 → 최근 거래 (거래 기록은 추이 뒤)
     expect(trend, greaterThan(holdings));
     expect(trades, greaterThan(trend));

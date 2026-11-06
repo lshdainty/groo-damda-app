@@ -206,8 +206,8 @@ void main() {
     final r = tester.widget<PResultSection>(find.byType(PResultSection));
     expect(r.kind, PResultKind.failure);
     expect(r.title, '태그를 불러오지 못했어요');
-    expect(find.textContaining('RAW_SERVER_TEXT_9137'), findsNothing);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(findTextContaining('RAW_SERVER_TEXT_9137'), findsNothing);
+    expect(findText('다시 시도'), findsOneWidget);
     // 불러오는 동안에도 "태그 추가" 는 진짜 버튼이다
     expect(find.byType(PTextButton), findsOneWidget);
   });
@@ -252,7 +252,7 @@ void main() {
         const TodoTagManagementScreen(),
         overrides: [..._overrides(_Repo())].cast(),
       );
-      await tester.tap(find.text('태그 추가'));
+      await tester.tap(findText('태그 추가'));
       await tester.pumpAndSettle();
       expect(_button('삭제'), findsNothing);
       expect(_button('저장'), findsOneWidget);
@@ -306,11 +306,11 @@ void main() {
         const TodoTagManagementScreen(),
         overrides: [..._overrides(repo)].cast(),
       );
-      await tester.tap(find.text('태그 추가'));
+      await tester.tap(findText('태그 추가'));
       await tester.pumpAndSettle();
       await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
-      expect(find.text(keepAll('이름을 입력해주세요.')), findsOneWidget);
+      expect(findText(keepAll('이름을 입력해주세요.')), findsOneWidget);
       expect(repo.saved, isEmpty);
       await tester.enterText(find.byType(PInput).first, '새 태그');
       await tester.pumpAndSettle();
@@ -334,15 +334,15 @@ void main() {
         const TodoTagManagementScreen(),
         overrides: [..._overrides(repo)].cast(),
       );
-      await tester.tap(find.text('태그 추가'));
+      await tester.tap(findText('태그 추가'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(PInput).first, '업무');
       await tester.pumpAndSettle();
-      expect(find.text(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
+      expect(findText(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
       await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
       expect(repo.saved, isEmpty);
-      expect(find.text(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
+      expect(findText(keepAll('같은 이름의 태그가 이미 있어요.')), findsOneWidget);
     });
 
     testWidgets('고칠 때 자기 이름은 겹침이 아니다', (tester) async {
@@ -384,7 +384,7 @@ void main() {
         const TodoTagManagementScreen(),
         overrides: [..._overrides(_Repo())].cast(),
       );
-      await tester.tap(find.text('태그 추가'));
+      await tester.tap(findText('태그 추가'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(PInput).first, '가나다라마바사아자차카타파하');
       await tester.pumpAndSettle();
@@ -396,7 +396,7 @@ void main() {
             .length,
         12,
       );
-      expect(find.text('12/12'), findsOneWidget);
+      expect(findText('12/12'), findsOneWidget);
     });
 
     testWidgets('이름이 비면 "이름을 입력해주세요." — 서버 원문은 없다', (tester) async {
@@ -405,11 +405,11 @@ void main() {
         const TodoTagManagementScreen(),
         overrides: [..._overrides(_Repo())].cast(),
       );
-      await tester.tap(find.text('태그 추가'));
+      await tester.tap(findText('태그 추가'));
       await tester.pumpAndSettle();
       await tester.tap(_button('저장'));
       await tester.pumpAndSettle();
-      expect(find.text(keepAll('이름을 입력해주세요.')), findsOneWidget);
+      expect(findText(keepAll('이름을 입력해주세요.')), findsOneWidget);
     });
   });
 

@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/stocks/data/watch_dto.dart';
 import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   testWidgets('매도 · 매수는 막혀 있고 이유 줄과 읽기 힌트가 있다', (tester) async {
@@ -53,17 +54,17 @@ void main() {
         .toList();
     expect(buttons, hasLength(2));
     expect(buttons.every((b) => b.onPressed == null), isTrue);
-    expect(find.text('주문은 곧 열려요.'), findsOneWidget);
+    expect(findText('주문은 곧 열려요.'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('매도')), findsWidgets);
     expect(
-      tester.getSemantics(find.text('매도')).getSemanticsData().hint +
-          tester.getSemantics(find.text('매도')).parent!.getSemanticsData().hint,
+      tester.getSemantics(findText('매도')).getSemanticsData().hint +
+          tester.getSemantics(findText('매도')).parent!.getSemanticsData().hint,
       contains('주문은 곧 열려요.'),
     );
-    await tester.tap(find.text('매도'), warnIfMissed: false);
+    await tester.tap(findText('매도'), warnIfMissed: false);
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.textContaining('아직 지원하지'), findsNothing);
-    expect(find.textContaining('Open API 연동 시 동작'), findsNothing);
+    expect(findTextContaining('아직 지원하지'), findsNothing);
+    expect(findTextContaining('Open API 연동 시 동작'), findsNothing);
     handle.dispose();
   });
 }

@@ -265,7 +265,7 @@ void main() {
       ],
     );
     final textFinder = find.byWidgetPredicate(
-      (w) => w is Text && w.data != null && plainOf(w.data!) == name,
+      (w) => w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == name,
     );
     final para = tester.renderObject<RenderParagraph>(
       find.descendant(of: textFinder, matching: find.byType(RichText)),

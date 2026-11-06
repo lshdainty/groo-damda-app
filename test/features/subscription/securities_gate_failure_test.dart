@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/subscription/application/subscription_pr
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_gate.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 Future<void> _open(
   WidgetTester tester,
@@ -36,9 +37,9 @@ void main() {
   testWidgets('조회 실패 — 실패 문구 + 다시 시도, 홈으로 보내지 않고 본문도 안 연다', (tester) async {
     await _open(tester, () => throw Exception('boom'));
 
-    expect(find.text('증권 정보를 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
-    expect(find.text('증권 본문'), findsNothing);
+    expect(findText('증권 정보를 불러오지 못했어요'), findsOneWidget);
+    expect(findText('다시 시도'), findsOneWidget);
+    expect(findText('증권 본문'), findsNothing);
   });
 
   testWidgets('다시 시도가 성공하면 본문을 연다', (tester) async {
@@ -52,10 +53,10 @@ void main() {
         primaryBroker: 'TOSS',
       );
     });
-    await tester.tap(find.text('다시 시도'));
+    await tester.tap(findText('다시 시도'));
     await tester.pumpAndSettle();
 
-    expect(find.text('증권 정보를 불러오지 못했어요'), findsNothing);
-    expect(find.text('증권 본문'), findsOneWidget);
+    expect(findText('증권 정보를 불러오지 못했어요'), findsNothing);
+    expect(findText('증권 본문'), findsOneWidget);
   });
 }

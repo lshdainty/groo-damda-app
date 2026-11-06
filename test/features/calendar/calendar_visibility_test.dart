@@ -146,8 +146,8 @@ void main() {
     testWidgets('월 그리드에 숨긴 캘린더의 일정이 그려지지 않는다', (tester) async {
       await pump(tester);
 
-      expect(find.text('보이는일정'), findsWidgets);
-      expect(find.text('숨긴일정'), findsNothing);
+      expect(findText('보이는일정'), findsWidgets);
+      expect(findText('숨긴일정'), findsNothing);
     });
 
     /// 달 줄 필터 칩의 8×8 색 점 — 칩 앞 점 묶음 안의 점이다.
@@ -171,7 +171,7 @@ void main() {
     testWidgets('날짜 시트에도 숨긴 캘린더의 일정이 올라오지 않는다', (tester) async {
       await pump(tester);
 
-      await tester.tap(find.text('15'));
+      await tester.tap(findText('15'));
       await tester.pumpAndSettle();
 
       // 시트가 실제로 열렸는지 — 보이는 일정이 그리드 + 시트 두 곳에 있다.

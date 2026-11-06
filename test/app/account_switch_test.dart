@@ -111,7 +111,8 @@ void main() {
       reason: 'Bob 이 읽지도 않은 보유 종목이 컨테이너에 있다 — Alice 가 받아 둔 값이다',
     );
     expect(
-      h.container.exists(myFeaturesProvider),
+      h.container.exists(myFeaturesProvider) ||
+          h.container.exists(myFeaturesLoadProvider),
       isFalse,
       reason: 'Alice 의 기능권한이 남아 Bob 에게 어느 증권사 화면을 띄울지 정한다',
     );
@@ -149,6 +150,7 @@ void main() {
     );
     final reported = <ProviderBase<Object?>>[
       myFeaturesProvider,
+      myFeaturesLoadProvider,
       brokerConnectionsProvider,
       mySubscriptionProvider,
       namuHoldingsProvider('KRW'),
@@ -270,13 +272,13 @@ void main() {
       ),
     );
     await h.settle();
-    expect(find.text('앨리스전자 3주를 담았어요'), findsOneWidget);
+    expect(findText('앨리스전자 3주를 담았어요'), findsOneWidget);
 
     // 사라지는 애니메이션 동안에도 글자는 읽힌다 — 바뀐 뒤 첫 프레임부터 없어야 한다.
     await h.signIn(
       _bob,
       everyFrame: () => expect(
-        find.text('앨리스전자 3주를 담았어요'),
+        findText('앨리스전자 3주를 담았어요'),
         findsNothing,
         reason: 'Alice 화면의 토스트가 Bob 에게 비쳤다',
       ),
@@ -357,7 +359,7 @@ void main() {
     final lock = _FakeLock();
     final h = await _pumpApp(tester, signedInAs: _alice, appLock: lock);
     expect(lock.prompts, 1, reason: '앱을 켤 때 본인 확인을 한 번 받는다');
-    expect(find.text(_lockedNotice), findsNothing, reason: '확인을 통과해 열려 있다');
+    expect(findText(_lockedNotice), findsNothing, reason: '확인을 통과해 열려 있다');
 
     // 다음 확인은 통과하지 못한다 — 잠금 화면이 남아 있어야 한다.
     lock.result = AppLockAuthResult.failure;
@@ -365,7 +367,7 @@ void main() {
 
     expect(lock.prompts, 2, reason: '사람이 바뀐 뒤 본인 확인을 다시 받아야 한다');
     expect(
-      find.text(_lockedNotice),
+      findText(_lockedNotice),
       findsOneWidget,
       reason: '새 컨테이너가 잠금 없이 열렸다',
     );
@@ -777,8 +779,8 @@ class _Harness {
     expect(failure, isNull);
   }
 
-  /// 지금 컨테이너가 들고 있는 기능권한.
-  MyFeatures? get features => container.read(myFeaturesProvider).value;
+  /// 지금 컨테이너가 들고 있는 기능권한 — 증권 화면은 실패를 그대로 던지는 원본(myFeaturesLoadProvider)을 읽는다.
+  MyFeatures? get features => container.read(myFeaturesLoadProvider).value;
 
   /// 지금 컨테이너가 들고 있는 국내 보유 종목 이름들.
   List<String>? get holdingNames => container

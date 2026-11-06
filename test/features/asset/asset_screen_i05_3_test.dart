@@ -272,10 +272,10 @@ void main() {
       final t = tester.widget<Text>(findPlain('−12,345,678,901원'));
       expect(t.style?.fontSize, 32);
       expect(t.style?.fontWeight, FontWeight.w700);
-      expect(find.text('—'), findsNothing);
-      expect(find.textContaining('-1'), findsNothing, reason: '하이픈 부호 없음');
+      expect(findText('—'), findsNothing);
+      expect(findTextContaining('-1'), findsNothing, reason: '하이픈 부호 없음');
       expect(
-        find.textContaining('−1', findRichText: true),
+        findTextContaining('−1', findRichText: true),
         findsWidgets,
         reason: 'U+2212 부호가 있다',
       );
@@ -284,7 +284,7 @@ void main() {
     testWidgets('불러오는 중은 Skeleton — "—" 가 아니다', (tester) async {
       await _pump(tester, summary: () => Completer<AssetSummary>().future);
       expect(find.byType(PSkeleton), findsWidgets);
-      expect(find.text('—'), findsNothing);
+      expect(findText('—'), findsNothing);
       expect(findPlain('−12,345,678,901원'), findsNothing);
     });
 
@@ -344,7 +344,7 @@ void main() {
     testWidgets('외화는 환산액 주 표기 + 아래 원 통화 · 총액 제외 · 가림 배지', (tester) async {
       await _pump(tester);
       expect(findPlain('1,385,000원'), findsOneWidget);
-      expect(find.textContaining('1,000'), findsWidgets);
+      expect(findTextContaining('1,000'), findsWidgets);
       expect(findPlain('총액 제외'), findsOneWidget);
       expect(findPlain('금액 숨김'), findsOneWidget);
       expect(findPlain('5,000원'), findsNothing, reason: '이 자산만 가린다');
@@ -448,7 +448,7 @@ void main() {
       expect(bar.dotData.show, isTrue);
       expect(bar.belowBarData.show, isFalse);
       expect(bar.color, PColors.light.chartBlue);
-      expect(find.textContaining('−'), findsWidgets);
+      expect(findTextContaining('−'), findsWidgets);
     });
 
     testWidgets('차트 실패는 그 자리만 — 줄 · 목표는 그대로', (tester) async {
@@ -470,7 +470,7 @@ void main() {
         findsOneWidget,
       );
       expect(findPlain('기한 없음 · 100원 / 4,900원'), findsOneWidget);
-      expect(find.textContaining('만'), findsNothing);
+      expect(findTextContaining('만'), findsNothing);
       expect(findPlain('12%'), findsOneWidget);
       expect(findPlain('달성'), findsWidgets, reason: '배지 + 막대 값 글');
     });
@@ -498,7 +498,7 @@ void main() {
       await _pump(tester, assets: () async => throw Exception('원문'));
       expect(findPlain('자산을 불러오지 못했어요'), findsOneWidget);
       expect(findPlain('순자산을 불러오지 못했어요'), findsNothing);
-      expect(find.textContaining('원문'), findsNothing, reason: '오류 원문을 그리지 않는다');
+      expect(findTextContaining('원문'), findsNothing, reason: '오류 원문을 그리지 않는다');
       expect(findPlain('계좌 · 예금'), findsNothing);
       expect(
         findPlain('2028년 12월 · 1,234,567,890원 / 9,999,999,999원'),

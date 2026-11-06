@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import '../support/plain_text.dart';
 
 Widget _host(Widget child) => MaterialApp(
   theme: GrooTheme.light(),
@@ -16,7 +17,7 @@ Widget _host(Widget child) => MaterialApp(
 );
 
 Color _labelColor(WidgetTester tester, String label) =>
-    tester.widget<Text>(find.text(label)).style!.color!;
+    tester.widget<Text>(findText(label)).style!.color!;
 
 Color _iconColor(WidgetTester tester) =>
     tester.widget<Icon>(find.byIcon(LucideIcons.eyeOff)).color!;
@@ -53,7 +54,7 @@ void main() {
       ),
     );
     final gesture = await tester.startGesture(
-      tester.getCenter(find.text('금액 가리기')),
+      tester.getCenter(findText('금액 가리기')),
     );
     await tester.pump(const Duration(milliseconds: 120));
 

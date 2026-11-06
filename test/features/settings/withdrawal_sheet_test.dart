@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/input_otp/p_input_otp.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
+import '../../support/plain_text.dart';
 
 const _user = User(
   rowId: 1,
@@ -156,7 +157,7 @@ Future<void> _open(
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -171,7 +172,7 @@ void main() {
     expect(buttons.single.label, _l.withdrawNext);
     expect(buttons.single.variant, PButtonVariant.criticalSolid);
     expect(buttons.single.size, PButtonSize.large);
-    expect(find.text(_l.actionCancel), findsNothing);
+    expect(findText(_l.actionCancel), findsNothing);
     // 잃는 것 두 줄 + 되돌릴 수 없어요 Callout(warning)
     expect(_t(_l.withdrawImpactCalendarsOwned(2)), findsOneWidget);
     expect(_t(_l.withdrawImpactDutchPayParticipations(1)), findsOneWidget);
@@ -195,7 +196,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_t(_l.withdrawIntro), findsNothing);
 
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, '써 보니 어려웠어요');
     await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-close')));
@@ -237,7 +238,7 @@ void main() {
   ) async {
     final repo = _Repo();
     await _open(tester, repo);
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
     final pair = tester.widgetList<PButton>(find.byType(PButton)).toList();
     expect(pair.map((b) => b.label), contains(_l.actionBack));
@@ -250,16 +251,16 @@ void main() {
       PButtonVariant.neutralWeak,
     );
 
-    await tester.tap(find.text(_l.withdrawUseEmailCode));
+    await tester.tap(findText(_l.withdrawUseEmailCode));
     await tester.pumpAndSettle();
-    expect(find.text(keepAll(_l.withdrawCodeDescription)), findsOneWidget);
+    expect(findText(keepAll(_l.withdrawCodeDescription)), findsOneWidget);
     expect(find.byType(PInputOtp), findsOneWidget);
 
     // 코드를 보내기 전 — [코드 받기]
-    await tester.tap(find.text(_l.withdrawSendCode));
+    await tester.tap(findText(_l.withdrawSendCode));
     await tester.pumpAndSettle();
     expect(repo.sent, 1);
-    expect(find.text(_l.withdrawResendCooldown(60)), findsOneWidget);
+    expect(findText(_l.withdrawResendCooldown(60)), findsOneWidget);
 
     await tester.enterText(find.byType(TextField).first, '인증 코드: 123456');
     await tester.pump();
@@ -274,9 +275,9 @@ void main() {
       find.widgetWithText(PButton, _l.withdrawConfirm),
     );
     expect(confirm.onPressed, isNotNull, reason: '6자리 전에도 켜 둔다');
-    await tester.tap(find.text(_l.withdrawConfirm));
+    await tester.tap(findText(_l.withdrawConfirm));
     await tester.pumpAndSettle();
-    expect(find.text(keepAll(_l.withdrawCodeIncomplete)), findsOneWidget);
+    expect(findText(keepAll(_l.withdrawCodeIncomplete)), findsOneWidget);
     expect(repo.withdrawCalls, 0);
   });
 
@@ -286,15 +287,15 @@ void main() {
           throw ApiException(code: 'AUTH_021', message: 'server raw'),
     );
     await _open(tester, repo);
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(_l.withdrawUseEmailCode));
+    await tester.tap(findText(_l.withdrawUseEmailCode));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, '123456');
-    await tester.tap(find.text(_l.withdrawConfirm));
+    await tester.tap(findText(_l.withdrawConfirm));
     await tester.pumpAndSettle();
-    expect(find.text(keepAll(_l.withdrawCodeWrong)), findsOneWidget);
-    expect(find.text('server raw'), findsNothing);
+    expect(findText(keepAll(_l.withdrawCodeWrong)), findsOneWidget);
+    expect(findText('server raw'), findsNothing);
     expect(find.byType(PBusyScrimLayer), findsNothing);
     expect(find.byType(PProgressCircle), findsNothing);
   });
@@ -304,11 +305,11 @@ void main() {
     final gate = Completer<void>();
     final repo = _Repo()..withdrawGate = gate;
     await _open(tester, repo);
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'secret');
     await tester.pump();
-    await tester.tap(find.text(_l.withdrawConfirm));
+    await tester.tap(findText(_l.withdrawConfirm));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byKey(const ValueKey('busy-scrim-circle')), findsNothing);
@@ -327,24 +328,24 @@ void main() {
     expect(labels.any((s) => s.contains(_l.withdrawConfirm)), isFalse);
     gate.complete();
     await tester.pumpAndSettle();
-    expect(find.text('DONE'), findsOneWidget);
+    expect(findText('DONE'), findsOneWidget);
     expect(find.byType(PBusyScrimLayer), findsNothing);
     sem.dispose();
   });
 
   testWidgets('전환 링크는 칸 아래 줄 끝(오른쪽) · 스팸함 안내는 다시 받기 아래', (tester) async {
     await _open(tester, _Repo());
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
     final link = tester.getRect(
       find.widgetWithText(PButton, _l.withdrawUseEmailCode),
     );
     expect(link.right, greaterThan(360 - 24 - 24), reason: '오른쪽 끝에 붙는다');
-    await tester.tap(find.text(_l.withdrawUseEmailCode));
+    await tester.tap(findText(_l.withdrawUseEmailCode));
     await tester.pumpAndSettle();
     // 사용자 결정(10-24) 05-2 Q1 A — 스팸함 안내는 코드를 보낸 뒤에만 보인다
     expect(_t(_l.withdrawCodeHint), findsNothing, reason: '보내기 전엔 없다');
-    await tester.tap(find.text(_l.withdrawSendCode));
+    await tester.tap(findText(_l.withdrawSendCode));
     await tester.pumpAndSettle();
     expect(_t(_l.withdrawCodeHint), findsOneWidget);
     final resend = tester.getRect(
@@ -366,16 +367,16 @@ void main() {
           throw ApiException(code: 'NETWORK', message: 'net raw'),
     );
     await _open(tester, repo);
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(_l.withdrawUseEmailCode));
+    await tester.tap(findText(_l.withdrawUseEmailCode));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, '123456');
-    await tester.tap(find.text(_l.withdrawConfirm));
+    await tester.tap(findText(_l.withdrawConfirm));
     await tester.pumpAndSettle();
-    expect(find.text(keepAll(_l.withdrawFailed)), findsOneWidget);
+    expect(findText(keepAll(_l.withdrawFailed)), findsOneWidget);
     expect(_t(_l.withdrawCodeWrong), findsNothing);
-    expect(find.text('net raw'), findsNothing);
+    expect(findText('net raw'), findsNothing);
   });
 
   testWidgets('비밀번호 틀림은 화면 글 · 서버 글을 그대로 내지 않는다', (tester) async {
@@ -384,7 +385,7 @@ void main() {
           throw ApiException(code: 'AUTH_021', message: 'raw pw'),
     );
     await _open(tester, repo);
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
     // 비밀번호 칸 자리 글 = 웹과 같은 글
     expect(
@@ -393,10 +394,10 @@ void main() {
     );
     await tester.enterText(find.byType(TextField).first, 'wrong');
     await tester.pump();
-    await tester.tap(find.text(_l.withdrawConfirm));
+    await tester.tap(findText(_l.withdrawConfirm));
     await tester.pumpAndSettle();
-    expect(find.text(keepAll(_l.withdrawPasswordWrong)), findsOneWidget);
-    expect(find.text('raw pw'), findsNothing);
+    expect(findText(keepAll(_l.withdrawPasswordWrong)), findsOneWidget);
+    expect(findText('raw pw'), findsNothing);
   });
 
   for (final code in [true, false]) {
@@ -409,10 +410,10 @@ void main() {
         verifyPw: (_) async => throw locked,
       );
       await _open(tester, repo);
-      await tester.tap(find.text(_l.withdrawNext));
+      await tester.tap(findText(_l.withdrawNext));
       await tester.pumpAndSettle();
       if (code) {
-        await tester.tap(find.text(_l.withdrawUseEmailCode));
+        await tester.tap(findText(_l.withdrawUseEmailCode));
         await tester.pumpAndSettle();
       }
       await tester.enterText(
@@ -420,12 +421,12 @@ void main() {
         code ? '123456' : 'secret',
       );
       await tester.pump();
-      await tester.tap(find.text(_l.withdrawConfirm));
+      await tester.tap(findText(_l.withdrawConfirm));
       await tester.pumpAndSettle();
       expect(_has(_l.withdrawLocked), findsWidgets);
       expect(_l.withdrawLocked, '5번 틀렸어요. 코드를 다시 받아주세요.');
-      expect(find.text('raw lock'), findsNothing);
-      expect(find.text(keepAll(_l.withdrawFailed)), findsNothing);
+      expect(findText('raw lock'), findsNothing);
+      expect(findText(keepAll(_l.withdrawFailed)), findsNothing);
     });
   }
 
@@ -439,7 +440,7 @@ void main() {
   testWidgets('글자 200% · 다크 — 오류 없이 그려진다', (tester) async {
     await _open(tester, _Repo(), dark: true, textScale: 2);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });

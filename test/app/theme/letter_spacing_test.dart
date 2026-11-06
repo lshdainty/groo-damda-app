@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   for (final (name, theme) in [
@@ -65,7 +66,7 @@ void main() {
         ),
       ),
     );
-    final text = tester.element(find.text('기본 글자'));
+    final text = tester.element(findText('기본 글자'));
     expect(DefaultTextStyle.of(text).style.letterSpacing, 0);
     await tester.enterText(find.byType(TextField), '입력');
     final editable = tester.widget<EditableText>(find.byType(EditableText));

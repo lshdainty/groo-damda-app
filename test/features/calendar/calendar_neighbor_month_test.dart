@@ -14,6 +14,7 @@ import 'package:groo_damda_app/features/calendar/domain/holiday.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _cal = UserCalendar(rowId: 1, calendarName: '개인', isDefault: true);
 
@@ -73,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 일정은 이웃 달 칸에도 그려지고, 불투명도(Opacity)로 흐리지 않는다
-    final title = find.text('이웃달일정');
+    final title = findText('이웃달일정');
     expect(title, findsWidgets);
     expect(
       find.ancestor(
@@ -86,7 +87,7 @@ void main() {
     // 이웃 달 숫자는 fg-disabled(불투명도 없는 색)
     final disabled = PColors.light.fgDisabled;
     final numbers = tester
-        .widgetList<Text>(find.text('${outside.day}'))
+        .widgetList<Text>(findText('${outside.day}'))
         .where((t) => t.style?.color == disabled);
     expect(numbers, isNotEmpty, reason: '이웃 달 ${outside.day}일 숫자가 fg-disabled');
     expect(disabled.a, 1.0, reason: '색에 알파를 섞지 않는다');

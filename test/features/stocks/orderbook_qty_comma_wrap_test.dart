@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/stocks/data/toss_dto.dart';
 import 'package:groo_damda_app/features/stocks/presentation/toss_stocks_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   test('호가 표 소스에 FittedBox · scaleDown 이 없다', () {
@@ -60,14 +61,14 @@ void main() {
     expect(find.byType(FittedBox), findsNothing);
     final want = keepAllAmount('12,345,678');
     expect(want.contains(',​'), isTrue);
-    final t = tester.widget<Text>(find.text(want));
+    final t = tester.widget<Text>(findText(want));
     expect(t.softWrap, isNot(false));
     expect(t.maxLines, isNull);
     // 줄이 늘면 칸(행)이 따라 커진다 — 한 줄 글(345)보다 세 줄 글이 더 높다
     expect(
-      tester.getSize(find.text(want)).height,
+      tester.getSize(findText(want)).height,
       greaterThan(
-        tester.getSize(find.text(keepAllAmount('1,234,567'))).height - 1,
+        tester.getSize(findText(keepAllAmount('1,234,567'))).height - 1,
       ),
     );
   });

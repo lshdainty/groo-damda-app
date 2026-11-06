@@ -10,13 +10,14 @@ import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_create_
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
+import '../../support/plain_text.dart';
 
 // ds PInput 은 TextField.decoration 이 없고 자리 글을 따로 그린다 — PInput.placeholder 로 찾는다
 Finder _field(String hint) =>
     find.byWidgetPredicate((w) => w is PInput && w.placeholder == hint);
 
 Finder _button(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 /// step1 을 채우고 참여자 단계까지 넘어간다.
 Future<AppLocalizations> _openStep2(WidgetTester tester) async {
@@ -45,7 +46,7 @@ Future<AppLocalizations> _openStep2(WidgetTester tester) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   await tester.enterText(_field(l.dutchNamePlaceholder), '회식');
   await tester.enterText(_field('0'), '30000');
@@ -66,8 +67,8 @@ void main() {
   testWidgets('직접 추가한 이름이 참여자로 들어간다', (tester) async {
     final l = await _openStep2(tester);
     await _add(tester, l, '철수');
-    expect(find.text('철수'), findsOneWidget);
-    expect(find.text(l.dutchNameAlreadyAdded), findsNothing);
+    expect(findText('철수'), findsOneWidget);
+    expect(findText(l.dutchNameAlreadyAdded), findsNothing);
   });
 
   testWidgets('같은 이름을 또 추가해도 사라지지 않고 안내가 뜬다', (tester) async {
@@ -75,8 +76,8 @@ void main() {
     await _add(tester, l, '철수');
     await _add(tester, l, '철수');
     // 웹은 토글로 빠져 참여자 0명이 됐고, 앱은 조용히 입력칸만 비웠다.
-    expect(find.text('철수'), findsOneWidget);
-    expect(find.text(l.dutchNameAlreadyAdded), findsOneWidget);
+    expect(findText('철수'), findsOneWidget);
+    expect(findText(l.dutchNameAlreadyAdded), findsOneWidget);
     expect(tester.widget<PButton>(_button(l.dutchCreate)).onPressed, isNotNull);
   });
 
@@ -87,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_button(l.dutchCreate));
     await tester.pumpAndSettle();
-    expect(find.text(l.dutchNeedOne), findsOneWidget);
+    expect(findText(l.dutchNeedOne), findsOneWidget);
   });
 
   testWidgets('1단계에서 이름을 비우면 다음으로 안 넘어간다', (tester) async {
@@ -98,14 +99,14 @@ void main() {
     await tester.enterText(_field(l.dutchNamePlaceholder), '');
     await tester.tap(_button(l.dutchNext));
     await tester.pumpAndSettle();
-    expect(find.text(l.dutchTitleRequired), findsOneWidget);
+    expect(findText(l.dutchTitleRequired), findsOneWidget);
   });
 
   testWidgets('참여자 이름은 20자에서 잘린다', (tester) async {
     final l = await _openStep2(tester);
     await tester.enterText(_field(l.dutchAddNamePlaceholder), 'ㄱ' * 25);
     await tester.pumpAndSettle();
-    expect(find.text('ㄱ' * 20), findsOneWidget);
-    expect(find.text('ㄱ' * 25), findsNothing);
+    expect(findText('ㄱ' * 20), findsOneWidget);
+    expect(findText('ㄱ' * 25), findsNothing);
   });
 }

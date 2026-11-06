@@ -97,7 +97,7 @@ void main() {
       find
           .descendant(
             of: find.byType(CalendarScreen),
-            matching: find.text('$day'),
+            matching: findText('$day'),
           )
           .first,
     );
@@ -152,7 +152,7 @@ void main() {
     expect(r.left, 24);
     expect(r.right, 336);
     expect(r.height, 48);
-    expect(find.textContaining('건'), findsNothing);
+    expect(findTextContaining('건'), findsNothing);
     expect(find.byIcon(LucideIcons.plus), findsNothing);
   });
 

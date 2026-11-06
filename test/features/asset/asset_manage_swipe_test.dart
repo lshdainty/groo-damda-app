@@ -60,22 +60,22 @@ void main() {
 
     await _swipeOpen(tester);
 
-    expect(find.text('수정'), findsOneWidget);
-    expect(find.text('삭제'), findsOneWidget);
+    expect(findText('수정'), findsOneWidget);
+    expect(findText('삭제'), findsOneWidget);
   });
 
   testWidgets('삭제는 확인을 거친다 — 누른다고 바로 지워지지 않는다', (tester) async {
     await _pump(tester);
     await _swipeOpen(tester);
 
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
 
     // 확인 다이얼로그가 떴을 뿐 아직 아무것도 지워지지 않았다.
     // (repository 를 주지 않았으므로 실제로 호출됐다면 여기서 터진다)
     expect(
       findPlain(
-        '"주거래 통장"을(를) 목록에서 지워요. 연결된 거래 내역은 그대로 남아요. 삭제한 자산은 되돌릴 수 없어요.',
+        '"주거래 통장"을(를) 목록에서 삭제해요. 연결된 거래 내역은 그대로 남아요. 삭제한 자산은 되돌릴 수 없어요.',
       ),
       findsOneWidget,
     );
@@ -85,7 +85,7 @@ void main() {
     await _pump(tester);
     await _swipeOpen(tester);
 
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pumpAndSettle();
 
     // spec alert-dialog: 같은 동작이면 어디서 불렀든 제목·설명이 같다.
@@ -105,7 +105,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 확인 다이얼로그가 뜨지 않았다 = 삭제가 실행되지 않았다.
-    expect(find.text('계좌 삭제'), findsNothing);
+    expect(findText('계좌 삭제'), findsNothing);
     expect(findPlain('주거래 통장'), findsOneWidget);
   });
 }

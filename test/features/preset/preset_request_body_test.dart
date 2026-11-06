@@ -21,6 +21,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 import '../../support/capture_adapter.dart';
+import '../../support/plain_text.dart';
 
 const _food = ExpenseCategory(
   rowId: 1,
@@ -115,13 +116,14 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     return cap;
   }
 
   Finder t(String s) => find.byWidgetPredicate(
-    (w) => w is Text && (w.data ?? '').replaceAll('⁠', '') == s,
+    (w) =>
+        w is Text && plainOf(w.data ?? w.textSpan!.toPlainText()) == plainOf(s),
   );
   Finder btn(String s) => find.widgetWithText(PButton, s).last;
   Future<void> tap(WidgetTester tester, Finder f) async {

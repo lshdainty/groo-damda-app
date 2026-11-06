@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
+import '../support/plain_text.dart';
 
 void main() {
   testWidgets('드래그 핸들은 전체 폭으로 늘어나지 않는다', (tester) async {
@@ -26,7 +27,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
 
     final handle = find.byWidgetPredicate(

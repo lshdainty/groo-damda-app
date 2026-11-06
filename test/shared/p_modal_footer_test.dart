@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
+import '../support/plain_text.dart';
 
 Widget _host(Widget child) => MaterialApp(
   theme: GrooTheme.light(),
@@ -23,8 +24,8 @@ void main() {
     await tester.pumpWidget(_host(PViewFooter(onDelete: () {}, onEdit: () {})));
 
     // 라벨은 그대로 있다.
-    expect(find.text('삭제'), findsOneWidget);
-    expect(find.text('수정'), findsOneWidget);
+    expect(findText('삭제'), findsOneWidget);
+    expect(findText('수정'), findsOneWidget);
 
     // 아이콘은 없다.
     expect(find.byIcon(LucideIcons.trash2), findsNothing);
@@ -39,8 +40,8 @@ void main() {
       _host(PSheetFooter(controller: controller, submitLabel: '저장')),
     );
 
-    expect(find.text('삭제'), findsOneWidget);
-    expect(find.text('저장'), findsOneWidget);
+    expect(findText('삭제'), findsOneWidget);
+    expect(findText('저장'), findsOneWidget);
 
     expect(find.byIcon(LucideIcons.trash2), findsNothing);
   });

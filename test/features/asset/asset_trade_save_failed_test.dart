@@ -86,7 +86,7 @@ class _FailingRepo extends AssetRepository {
 }
 
 Finder _submitButton(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 void main() {
   testWidgets('매매 저장 실패 — 맨 위 Callout · silent · 값 유지 · 서버 글 없음', (
@@ -120,7 +120,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).at(0), '3');
     await tester.enterText(find.byType(TextField).at(1), '150000');
@@ -134,10 +134,10 @@ void main() {
     expect(l.tradeSaveFailed, '매매를 처리하지 못했어요.');
     expect(findPlain(l.tradeSaveFailed), findsOneWidget);
     expect(find.byType(FormErrorCallout), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     // 시트는 닫히지 않았고 쓴 값이 남는다.
     expect(_submitButton(l.actionSave), findsOneWidget);
-    expect(find.text('3'), findsWidgets);
+    expect(findText('3'), findsWidgets);
   });
 
   testWidgets('매매 저장 실패 ASSET_012 — 수량 부족 문장 · 서버 글 없음', (tester) async {
@@ -169,7 +169,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).at(0), '3');
     await tester.enterText(find.byType(TextField).at(1), '150000');
@@ -184,9 +184,9 @@ void main() {
     expect(findPlain(l.tradeSaveInsufficientQty), findsOneWidget);
     expect(findPlain(l.tradeSaveFailed), findsNothing);
     expect(find.byType(FormErrorCallout), findsOneWidget);
-    expect(find.textContaining('서버 원문'), findsNothing);
+    expect(findTextContaining('서버 원문'), findsNothing);
     // 시트는 닫히지 않았고 쓴 값이 남는다.
     expect(_submitButton(l.actionSave), findsOneWidget);
-    expect(find.text('3'), findsWidgets);
+    expect(findText('3'), findsWidgets);
   });
 }

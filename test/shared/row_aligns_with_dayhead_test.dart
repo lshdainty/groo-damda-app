@@ -97,7 +97,7 @@ void main() {
         ],
       ),
     );
-    final head = tester.getRect(find.textContaining('26. 9. 12')).left;
+    final head = tester.getRect(findTextContaining('26. 9. 12')).left;
     expect(head, closeTo(_pagePad, 0.5));
     // 고치기 전에는 34 였다(= 24 + 행이 얹던 10).
     expect(_contentLeft(tester, find.byType(ExpenseRow)), closeTo(head, 0.5));
@@ -225,7 +225,7 @@ void main() {
       ),
     );
     expect(findPlain('−3,000원'), findsNWidgets(2)); // U+2212 가 있다 — 헤더 합계 + 행
-    expect(find.textContaining('-3,000'), findsNothing); // ASCII 하이픈
+    expect(findTextContaining('-3,000'), findsNothing); // ASCII 하이픈
   });
 
   testWidgets('수입은 +, 0 원은 부호 없음', (tester) async {

@@ -12,6 +12,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('swipe-actions');
 
@@ -560,7 +561,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 40));
       // 그려진 자리 — 목표(transform)가 아니라 지금 자리
-      final mid = -tester.getTopLeft(find.text('줄1')).dx;
+      final mid = -tester.getTopLeft(findText('줄1')).dx;
       expect(mid, greaterThan(60));
       expect(mid, lessThan(104));
       await tester.pumpAndSettle();
@@ -611,8 +612,8 @@ void main() {
         ),
       );
       expect(find.byKey(const ValueKey('swipe-actions')), findsNothing);
-      expect(find.text('끔'), findsOneWidget);
-      expect(find.text('성립 안 함'), findsOneWidget);
+      expect(findText('끔'), findsOneWidget);
+      expect(findText('성립 안 함'), findsOneWidget);
     });
   });
 

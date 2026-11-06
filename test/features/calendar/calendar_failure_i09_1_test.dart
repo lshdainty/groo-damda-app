@@ -55,12 +55,12 @@ void main() {
     expect(find.byType(PResultSection), findsOneWidget);
     expect(find.byType(CalendarMonthGrid), findsNothing);
     expect(findPlain('일정을 불러오지 못했어요'), findsOneWidget);
-    expect(find.textContaining('서버가 낸 원문'), findsNothing);
-    expect(find.textContaining('StateError'), findsNothing);
+    expect(findTextContaining('서버가 낸 원문'), findsNothing);
+    expect(findTextContaining('StateError'), findsNothing);
 
     // 다시 시도 — 일정 질의만 다시 받는다(캘린더 목록은 그대로)
     final before = (eventCalls, calendarCalls);
-    await tester.tap(find.text('다시 시도'));
+    await tester.tap(findText('다시 시도'));
     await tester.pumpAndSettle();
     expect(eventCalls, before.$1 + 1);
     expect(calendarCalls, before.$2);
@@ -83,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(PResultSection), findsOneWidget);
     fail = false;
-    await tester.tap(find.text('다시 시도'));
+    await tester.tap(findText('다시 시도'));
     await tester.pumpAndSettle();
     expect(find.byType(PResultSection), findsNothing);
     expect(find.byType(CalendarMonthGrid), findsOneWidget);

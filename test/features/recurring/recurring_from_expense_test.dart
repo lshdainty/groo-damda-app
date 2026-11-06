@@ -17,6 +17,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 
 import 'recurring_test_support.dart';
+import '../../support/plain_text.dart';
 
 const _bank = Asset(rowId: 7, assetName: '주거래', assetType: 'BANK_ACCOUNT');
 
@@ -145,7 +146,7 @@ Future<_Repo> _open(WidgetTester tester, {RecurringTransaction? linked}) async {
       assetsProvider.overrideWith((ref) async => [_bank]),
     ],
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/update/presentation/release_notes_view.dart';
+import '../../support/plain_text.dart';
 
 const _notes = '''
 새 기능
@@ -26,14 +27,14 @@ Future<void> _pump(WidgetTester tester, String notes) async {
 }
 
 TextStyle _styleOf(WidgetTester tester, String text) =>
-    tester.widget<Text>(find.text(text)).style!;
+    tester.widget<Text>(findText(text)).style!;
 
 void main() {
   testWidgets('그룹 제목은 굵게, 항목은 본문 무게로', (tester) async {
     await _pump(tester, _notes);
 
-    expect(find.text('새 기능'), findsOneWidget);
-    expect(find.text('버그 수정'), findsOneWidget);
+    expect(findText('새 기능'), findsOneWidget);
+    expect(findText('버그 수정'), findsOneWidget);
 
     final header = _styleOf(tester, '새 기능');
     final item = _styleOf(tester, '계좌 행을 밀면 수정·삭제');
@@ -48,10 +49,10 @@ void main() {
     await _pump(tester, _notes);
 
     // 원문 그대로는 안 나온다.
-    expect(find.text('- 계좌 행을 밀면 수정·삭제'), findsNothing);
-    expect(find.text('계좌 행을 밀면 수정·삭제'), findsOneWidget);
+    expect(findText('- 계좌 행을 밀면 수정·삭제'), findsNothing);
+    expect(findText('계좌 행을 밀면 수정·삭제'), findsOneWidget);
     // 글머리는 항목 수만큼.
-    expect(find.text('· '), findsNWidgets(2));
+    expect(findText('· '), findsNWidgets(2));
   });
 
   testWidgets('빈 노트는 아무것도 그리지 않는다', (tester) async {

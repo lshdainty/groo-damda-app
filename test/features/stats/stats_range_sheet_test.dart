@@ -9,6 +9,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
+import '../../support/plain_text.dart';
 
 final _today = DateTime(2026, 10, 29, 13);
 
@@ -38,7 +39,7 @@ Future<void> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -141,14 +142,14 @@ void main() {
       await _open(tester, month, (_) {});
       expect(find.byType(PDatePicker), findsOneWidget);
       expect(find.byType(PDateInput), findsNothing);
-      expect(find.text('분기'), findsNothing);
-      expect(find.text('직접'), findsNothing);
+      expect(findText('분기'), findsNothing);
+      expect(findText('직접'), findsNothing);
     });
 
     testWidgets('빠른 기간 칩 다섯(내보내기 시트와 같게) · 바닥 "초기화" + "완료"', (tester) async {
       await _open(tester, month, (_) {});
       for (final n in ['이번 주', '이번 달', '지난 달', '최근 3개월', '올해']) {
-        expect(find.text(n), findsOneWidget, reason: n);
+        expect(findText(n), findsOneWidget, reason: n);
       }
       expect(find.widgetWithText(PButton, '초기화'), findsOneWidget);
       expect(_done(), findsOneWidget);
@@ -161,7 +162,7 @@ void main() {
       await tester.tap(find.widgetWithText(PButton, '초기화'));
       await tester.pumpAndSettle();
       expect(tester.widget<PButton>(_done()).onPressed, isNull);
-      await tester.tap(find.text('지난 달'));
+      await tester.tap(findText('지난 달'));
       await tester.pumpAndSettle();
       await tester.tap(_done());
       await tester.pumpAndSettle();
@@ -176,7 +177,7 @@ void main() {
     testWidgets('완료 없이 닫으면 null — 고르던 것은 버린다', (tester) async {
       StatsPeriod? got = month;
       await _open(tester, month, (p) => got = p);
-      await tester.tap(find.text('지난 달'));
+      await tester.tap(findText('지난 달'));
       await tester.pumpAndSettle();
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();

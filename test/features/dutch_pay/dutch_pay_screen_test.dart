@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_screen.
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import '../../support/plain_text.dart';
 
 DutchPayParticipant _p(
   int id,
@@ -61,8 +62,8 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(_app([_d(1)], const DutchPayScreen()));
     await tester.pumpAndSettle();
-    expect(find.textContaining('122,666'), findsWidgets);
-    expect(find.textContaining('2명에게서'), findsOneWidget);
+    expect(findTextContaining('122,666'), findsWidgets);
+    expect(findTextContaining('2명에게서'), findsOneWidget);
   });
 
   testWidgets('친구 탭에 결제자(나)가 없다', (tester) async {
@@ -71,10 +72,10 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(_app([_d(1)], const DutchPayScreen()));
     await tester.pumpAndSettle();
-    await tester.tap(find.textContaining('친구'));
+    await tester.tap(findTextContaining('친구'));
     await tester.pumpAndSettle();
-    expect(find.text('철수'), findsOneWidget);
-    expect(find.text('나'), findsNothing);
+    expect(findText('철수'), findsOneWidget);
+    expect(findText('나'), findsNothing);
   });
 
   testWidgets('정산 일곱 개 — 마지막 줄까지 스크롤된다', (tester) async {
@@ -87,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
     await tester.pumpAndSettle();
-    expect(find.text('회식 1'), findsOneWidget);
+    expect(findText('회식 1'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -109,16 +110,16 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
     expect(find.byType(PCallout), findsOneWidget);
-    expect(find.text('송금 요청은 곧 열려요.'), findsOneWidget);
+    expect(findText('송금 요청은 곧 열려요.'), findsOneWidget);
     final disabled = tester
         .widgetList<PButton>(find.byType(PButton))
         .where((b) => b.label == '요청' || b.label == '일괄 요청');
     expect(disabled, isNotEmpty);
     expect(disabled.every((b) => b.onPressed == null), isTrue);
     // 1인당 줄: 나머지 1원은 몫이 큰 사람(나)
-    expect(find.textContaining('1원은 나'), findsWidgets);
+    expect(findTextContaining('1원은 나'), findsWidgets);
   });
 }

@@ -12,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/slider/p_slider.dart';
 
 import '../../support/design_spec.dart';
 import '../../support/spec_check.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(
   Brightness mode,
@@ -753,7 +754,7 @@ void main() {
         expect(
           find.descendant(
             of: find.byKey(const ValueKey('slider-markers')),
-            matching: find.text('3점'),
+            matching: findText('3점'),
           ),
           findsOneWidget,
         );
@@ -761,7 +762,7 @@ void main() {
         final mid = tester.getCenter(
           find.descendant(
             of: find.byKey(const ValueKey('slider-markers')),
-            matching: find.text('3점'),
+            matching: findText('3점'),
           ),
         );
         expect(mid.dx, closeTo(c.left + sliderCenterOf(0.5, c.width), 0.5));
@@ -841,7 +842,7 @@ void main() {
             'headerValue ${mode.name}',
           );
           await tester.pumpWidget(_host(mode, const PSliderValue('80%')));
-          final style = tester.widget<Text>(find.text('80%')).style!;
+          final style = tester.widget<Text>(findText('80%')).style!;
           check.typo('headerValue.typography', style);
           check.weight('headerValue.fontWeight', style);
           _tabular(check, 'headerValue.numerals', style);
@@ -849,7 +850,7 @@ void main() {
           expect(check.failures, isEmpty);
           expect(
             find.ancestor(
-              of: find.text('80%'),
+              of: findText('80%'),
               matching: find.byType(ExcludeSemantics),
             ),
             findsOneWidget,
@@ -865,7 +866,7 @@ void main() {
                 'headerValue disabled ${mode.name}',
               )..color(
                 'headerValue.foreground',
-                tester.widget<Text>(find.text('80%')).style!.color!,
+                tester.widget<Text>(findText('80%')).style!.color!,
               );
           expect(off.failures, isEmpty);
         });

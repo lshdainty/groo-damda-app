@@ -19,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/overlay/p_overlay.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('alert-dialog');
 
@@ -138,8 +139,8 @@ void main() {
 
         // 안쪽 20
         final padding = want['root.padding'] as num;
-        final title = find.text(keepAll(copy.title));
-        final description = find.text(keepAll(copy.description));
+        final title = findText(keepAll(copy.title));
+        final description = findText(keepAll(copy.description));
         expect(
           tester.getTopLeft(title) - rect.topLeft,
           Offset(padding.toDouble(), padding.toDouble()),
@@ -283,8 +284,8 @@ void main() {
       _app(Brightness.light, Scaffold(body: _view('vertical'))),
     );
     expect(
-      tester.getTopLeft(find.text('저장하지 않고 나가기')).dy,
-      lessThan(tester.getTopLeft(find.text('계속 작성하기')).dy),
+      tester.getTopLeft(findText('저장하지 않고 나가기')).dy,
+      lessThan(tester.getTopLeft(findText('계속 작성하기')).dy),
     );
   });
 
@@ -335,12 +336,12 @@ void main() {
     );
     expect(scrollable, findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('삭제'),
+      findText('삭제'),
       200,
       scrollable: scrollable,
     );
     expect(
-      tester.getRect(find.text('삭제')).bottom,
+      tester.getRect(findText('삭제')).bottom,
       lessThanOrEqualTo(rect.bottom),
     );
   });
@@ -364,7 +365,7 @@ void main() {
       ),
     );
     final card = tester.getRect(_card(PColors.light));
-    final description = find.text(keepAll('삭제한 거래는 되돌릴 수 없어요.'));
+    final description = findText(keepAll('삭제한 거래는 되돌릴 수 없어요.'));
     expect(tester.getTopLeft(description) - card.topLeft, const Offset(20, 20));
     expect(tester.getSemantics(find.byType(PAlertDialogView).first), isNotNull);
     expect(find.bySemanticsLabel('거래를 삭제할까요?'), findsOneWidget);

@@ -154,7 +154,7 @@ void main() {
     await _pump(tester, _summary(fixedExpense: 0));
 
     expect(findPlainContaining('고정으로 표시하면 여기서 따로 볼 수 있어요'), findsWidgets);
-    expect(find.text('거래를 고정으로 정리하기'), findsWidgets);
+    expect(findText('거래를 고정으로 정리하기'), findsWidgets);
     expect(findRichPlain('지출의 0%가 고정이에요'), findsNothing);
   });
 
@@ -165,7 +165,7 @@ void main() {
 
   testWidgets('"거래를 고정으로 정리하기" 는 시트가 아니라 페이지를 연다', (tester) async {
     await _pump(tester, _summary(fixedExpense: 0));
-    await tester.tap(find.text('거래를 고정으로 정리하기').first);
+    await tester.tap(findText('거래를 고정으로 정리하기').first);
     await tester.pumpAndSettle();
     expect(find.byType(FixedBulkPage), findsOneWidget);
     expect(find.byType(DraggableScrollableSheet), findsNothing);

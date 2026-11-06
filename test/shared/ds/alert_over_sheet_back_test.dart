@@ -6,6 +6,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   testWidgets('뒤로 가기 한 번은 확인창만 닫고 취소와 같다 · 두 번째가 시트를 닫는다', (tester) async {
@@ -46,20 +47,20 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('삭제하기'));
+    await tester.tap(findText('삭제하기'));
     await tester.pumpAndSettle();
     expect(find.byType(PAlertDialogView), findsOneWidget);
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.byType(PAlertDialogView), findsNothing);
-    expect(find.text('이체 상세'), findsOneWidget, reason: '시트는 남아야 한다');
+    expect(findText('이체 상세'), findsOneWidget, reason: '시트는 남아야 한다');
     expect(result, isFalse);
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(find.text('이체 상세'), findsNothing);
+    expect(findText('이체 상세'), findsNothing);
   });
 }

@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/recurring/presentation/recurring_screen.
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
 import 'recurring_test_support.dart';
+import '../../support/plain_text.dart';
 
 class _Repo extends RecurringRepository {
   _Repo(this.items, {this.fail = false}) : super(Dio());
@@ -143,7 +144,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(plain('반복 설정을 삭제하지 못했어요'), findsOneWidget);
     expect(plain('다시 시도'), findsOneWidget);
-    expect(find.text('이자는 금액보다 클 수 없습니다.'), findsNothing);
+    expect(findText('이자는 금액보다 클 수 없습니다.'), findsNothing);
   });
 
   testWidgets('비면 Result Section — 머리 "추가" 는 없고 본문 버튼이 하나', (tester) async {

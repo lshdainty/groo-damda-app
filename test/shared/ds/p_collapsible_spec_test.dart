@@ -12,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/collapsible/p_collapsible.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('collapsible');
 
@@ -234,7 +235,7 @@ void main() {
             failures,
             '$where — 내용 시작',
             want['panel.paddingX']! as num,
-            tester.getRect(find.text('내용')).left - trigger.left,
+            tester.getRect(findText('내용')).left - trigger.left,
           );
         } else {
           expect(panel, findsNothing, reason: '$where — 접힌 내용은 그리지 않는다');
@@ -561,10 +562,10 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text(keepAll('내역 분할')));
+      await tester.tap(findText(keepAll('내역 분할')));
       await tester.pumpAndSettle();
       expect(seen, [true]);
-      expect(find.text('내용'), findsNothing);
+      expect(findText('내용'), findsNothing);
     });
 
     testWidgets('Enter · Space 로 열고 닫는다', (tester) async {
@@ -583,10 +584,10 @@ void main() {
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pumpAndSettle();
-      expect(find.text('내용'), findsOneWidget);
+      expect(findText('내용'), findsOneWidget);
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pumpAndSettle();
-      expect(find.text('내용'), findsNothing);
+      expect(findText('내용'), findsNothing);
     });
   });
 

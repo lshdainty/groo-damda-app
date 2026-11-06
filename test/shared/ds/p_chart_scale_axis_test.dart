@@ -50,7 +50,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     final shown = [
       for (var i = 1; i <= 31; i++)
-        if (find.text('10/$i').evaluate().isNotEmpty) i,
+        if (findText('10/$i').evaluate().isNotEmpty) i,
     ];
     expect(shown.length, lessThan(12), reason: '31칸 글을 다 그리면 겹친다');
     expect(shown.first, 1);

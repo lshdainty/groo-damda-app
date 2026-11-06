@@ -13,6 +13,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/update/app_update.dart';
 import 'package:groo_damda_app/features/update/presentation/update_gate_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 AppRelease _release({required int build, int minBuild = 0}) => AppRelease(
   version: '9.9.9',
@@ -79,7 +80,7 @@ void main() {
 
     expect(container.read(updateStatusProvider).value!.mustUpdate, isTrue);
 
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
 
     // 왜 못 넘어가는지 알린다.
@@ -90,7 +91,7 @@ void main() {
 
   testWidgets('강제 — 기록이 없으니 다시 켜도 막힌다', (tester) async {
     final container = await _pumpGate(tester, forced: true);
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
 
     final status = container.read(updateStatusProvider).value!;
@@ -100,12 +101,12 @@ void main() {
   testWidgets('일반 — 취소하면 그 빌드를 건너뛴다', (tester) async {
     final container = await _pumpGate(tester, forced: false);
 
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
 
     expect(container.read(skippedBuildProvider), 101);
     // 경고 다이얼로그는 안 뜬다 — 넘어가도 되는 업데이트다. 게이트를 빠져나간다.
     expect(_text('꼭 필요한 업데이트가 들어 있어요.'), findsNothing);
-    expect(find.text('홈'), findsOneWidget);
+    expect(findText('홈'), findsOneWidget);
   });
 }

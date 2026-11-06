@@ -38,6 +38,7 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import '../../support/plain_text.dart';
 
 const _closedLine = '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
 
@@ -177,7 +178,7 @@ Finder _fieldWith(String text) =>
     find.byWidgetPredicate((w) => w is TextField && w.controller?.text == text);
 
 Finder _submit(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 /// 기기 날짜 기준 [days] 날 뒤(음수면 앞)의 `yyyy-MM-dd`.
 String _dayKey(int days) {
@@ -194,7 +195,7 @@ void main() {
         tester,
         _opener((ctx) => showAddTxSheet(ctx, edit: e)),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
       return repo;
     }
@@ -207,7 +208,7 @@ void main() {
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
 
-      expect(find.text(_closedLine), findsNothing);
+      expect(findText(_closedLine), findsNothing);
       expect(repo.updates, hasLength(1));
     });
 
@@ -219,10 +220,10 @@ void main() {
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
 
-      expect(find.text(_closedLine), findsOneWidget);
+      expect(findText(_closedLine), findsOneWidget);
       expect(repo.updates, isEmpty, reason: '확인 전에는 보내지 않는다');
 
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
       expect(repo.updates.single, startsWith('2026-08-20'));
     });
@@ -235,7 +236,7 @@ void main() {
       await tester.tap(_submit('저장'));
       await tester.pumpAndSettle();
 
-      expect(find.text(_closedLine), findsNothing);
+      expect(findText(_closedLine), findsNothing);
       expect(repo.updates.single, startsWith('2026-09-15'));
     });
 
@@ -244,15 +245,15 @@ void main() {
         tester,
         _opener((ctx) => showAddTxSheet(ctx, defaultDate: '2026-08-20')),
       );
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
       await fillNewTx(tester, amount: '13000', asset: '현대카드');
 
       await tester.tap(_submit('추가'));
       await tester.pumpAndSettle();
 
-      expect(find.text(_closedLine), findsOneWidget);
-      await tester.tap(find.text('저장').last);
+      expect(findText(_closedLine), findsOneWidget);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
       expect(repo.creates, hasLength(1));
     });
@@ -298,7 +299,7 @@ void main() {
 
     Future<void> openDetail(WidgetTester tester, Expense e) async {
       await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, e)));
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
     }
 
@@ -308,8 +309,8 @@ void main() {
         _open.copyWith(expenseDate: '${_dayKey(2)}T09:00:00'),
       );
 
-      expect(find.text('환불'), findsNothing);
-      expect(find.text('내역 분할'), findsOneWidget, reason: '다른 동작은 그대로');
+      expect(findText('환불'), findsNothing);
+      expect(findText('내역 분할'), findsOneWidget, reason: '다른 동작은 그대로');
     });
 
     testWidgets('상세 — 오늘 거래는 시각이 뒤여도 [환불] 이 있다', (tester) async {
@@ -318,7 +319,7 @@ void main() {
         _open.copyWith(expenseDate: '${_dayKey(0)}T23:59:59'),
       );
 
-      expect(find.text('환불'), findsOneWidget);
+      expect(findText('환불'), findsOneWidget);
     });
 
     testWidgets('상세 — 지난 거래는 [환불] 이 있다', (tester) async {
@@ -327,7 +328,7 @@ void main() {
         _open.copyWith(expenseDate: '${_dayKey(-3)}T09:00:00'),
       );
 
-      expect(find.text('환불'), findsOneWidget);
+      expect(findText('환불'), findsOneWidget);
     });
 
     testWidgets('스와이프 — [환불] 은 없다(수정·삭제뿐), 예정 거래도 같다', (tester) async {

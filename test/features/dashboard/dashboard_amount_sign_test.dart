@@ -89,7 +89,7 @@ void main() {
     expect(findPlain('-0원'), findsNothing);
     expect(findPlain('−0원'), findsNothing);
     expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
+      findTextContaining(RegExp(r'-\d'), findRichText: true),
       findsNothing,
     );
     // 총자산·총부채·지출 모두 부호 없는 '0'.
@@ -102,9 +102,9 @@ void main() {
     expect(findPlain('−356,800원'), findsOneWidget);
     expect(findPlain('-356,800원'), findsNothing);
     // 없는 것만 보지 않는다 — 부호는 U+2212 로 있고, 숫자 앞 ASCII 하이픈은 어디에도 없다.
-    expect(find.textContaining('−', findRichText: true), findsWidgets);
+    expect(findTextContaining('−', findRichText: true), findsWidgets);
     expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
+      findTextContaining(RegExp(r'-\d'), findRichText: true),
       findsNothing,
     );
   });
@@ -117,7 +117,7 @@ void main() {
     // 옛 코드는 부호 글자와 값의 부호가 겹쳐 `--356,800` 을 냈다.
     expect(findPlain('--356,800원'), findsNothing);
     expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
+      findTextContaining(RegExp(r'-\d'), findRichText: true),
       findsNothing,
     );
     expect(findPlain('−-356,800원'), findsNothing);
@@ -128,9 +128,9 @@ void main() {
 
     expect(findPlain('−123,456원'), findsOneWidget);
     expect(findPlain('-123,456원'), findsNothing);
-    expect(find.textContaining('−', findRichText: true), findsWidgets);
+    expect(findTextContaining('−', findRichText: true), findsWidgets);
     expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
+      findTextContaining(RegExp(r'-\d'), findRichText: true),
       findsNothing,
     );
     // 수입은 웹과 같이 늘 `+`.
@@ -156,9 +156,9 @@ void main() {
     // (QA #22 는 한 카드에서 `−`/`-` 가 섞여 정렬이 어긋난 걸 잡았다).
     expect(findPlain('−7,560원'), findsNWidgets(2));
     expect(findPlain('-7,560원'), findsNothing);
-    expect(find.textContaining('−', findRichText: true), findsWidgets);
+    expect(findTextContaining('−', findRichText: true), findsWidgets);
     expect(
-      find.textContaining(RegExp(r'-\d'), findRichText: true),
+      findTextContaining(RegExp(r'-\d'), findRichText: true),
       findsNothing,
     );
   });

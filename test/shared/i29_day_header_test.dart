@@ -6,6 +6,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_day_group.dart';
+import '../support/plain_text.dart';
 
 void main() {
   testWidgets('오늘 머리 — 점 앞뒤가 비분리 공백이라 쪼개지지 않는다', (tester) async {
@@ -34,7 +35,7 @@ void main() {
       ),
     );
     final text = tester
-        .widgetList<Text>(find.textContaining('·'))
+        .widgetList<Text>(findTextContaining('·'))
         .map((t) => t.data!)
         .first;
     expect(text, contains(' · '));

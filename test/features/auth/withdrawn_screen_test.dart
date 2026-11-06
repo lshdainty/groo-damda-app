@@ -34,6 +34,7 @@ import 'package:groo_damda_app/features/settings/presentation/withdrawal_sheet.d
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import '../../support/plain_text.dart';
 
 const _user = User(
   rowId: 1,
@@ -135,7 +136,7 @@ void main() {
   testWidgets('해지한 계정으로 로그인하면 로그인 에러 글이 아니라 해지 완료 화면이다', (tester) async {
     final auth = _FakeAuth(null);
     await _pumpRealRouter(tester, auth);
-    expect(find.text(_l.authSsoLogin), findsOneWidget, reason: '로그아웃 → 로그인 화면');
+    expect(findText(_l.authSsoLogin), findsOneWidget, reason: '로그아웃 → 로그인 화면');
 
     auth.failLogin(withdrawnError);
     await tester.pumpAndSettle();
@@ -145,8 +146,8 @@ void main() {
     expect(_body(_l.withdrawnBody), findsOneWidget);
     expect(_body('감사했습니다'), findsOneWidget);
     expect(_body(_l.withdrawIrreversibleRejoin), findsOneWidget);
-    expect(find.text(_l.withdrawnToLogin), findsOneWidget);
-    expect(find.text(_l.authSsoLogin), findsNothing);
+    expect(findText(_l.withdrawnToLogin), findsOneWidget);
+    expect(findText(_l.authSsoLogin), findsNothing);
   });
 
   testWidgets('[로그인 화면으로] 는 에러를 걷고 로그인 화면으로 — 다시 튕기지 않는다', (tester) async {
@@ -155,11 +156,11 @@ void main() {
     auth.failLogin(withdrawnError);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text(_l.withdrawnToLogin));
+    await tester.tap(findText(_l.withdrawnToLogin));
     await tester.pumpAndSettle();
 
     expect(find.byType(WithdrawnScreen), findsNothing);
-    expect(find.text(_l.authSsoLogin), findsOneWidget);
+    expect(findText(_l.authSsoLogin), findsOneWidget);
     expect(container.read(authProvider).hasError, isFalse);
   });
 
@@ -190,7 +191,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text(_l.authSsoLogin), findsOneWidget);
+    expect(findText(_l.authSsoLogin), findsOneWidget);
     expect(
       platformCalls.any((c) => c.method == 'SystemNavigator.pop'),
       isFalse,
@@ -210,7 +211,7 @@ void main() {
     await auth.logout();
     await tester.pumpAndSettle();
     expect(find.byType(WithdrawnScreen), findsOneWidget);
-    expect(find.text(_l.authSsoLogin), findsNothing);
+    expect(findText(_l.authSsoLogin), findsNothing);
   });
 
   testWidgets('해지를 마치면 토스트가 아니라 완료 화면이 뜨고 로그아웃한다', (tester) async {
@@ -247,13 +248,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(_l.withdrawNext));
+    await tester.tap(findText(_l.withdrawNext));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'secret');
     await tester.pumpAndSettle();
-    await tester.tap(find.text(_l.withdrawConfirm));
+    await tester.tap(findText(_l.withdrawConfirm));
     await tester.pumpAndSettle();
 
     expect(find.byType(WithdrawnScreen), findsOneWidget);
@@ -340,7 +341,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.text(_l.withdrawnToLogin), findsOneWidget);
+    expect(findText(_l.withdrawnToLogin), findsOneWidget);
   });
 
   testWidgets('두 문단 사이 8 · 결과와 버튼 사이는 결과의 안쪽 16 만', (tester) async {

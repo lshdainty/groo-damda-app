@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/stocks/presentation/stocks_screen.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations_ko.dart';
+import '../../support/plain_text.dart';
 
 void main() {
   testWidgets('조회 실패 — 실패 문구 + 다시 시도, 연결 유도 화면은 띄우지 않는다', (tester) async {
@@ -32,8 +33,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('증권 정보를 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('다시 시도'), findsOneWidget);
-    expect(find.text(ko.stocksConnectEmptyTitle), findsNothing);
+    expect(findText('증권 정보를 불러오지 못했어요'), findsOneWidget);
+    expect(findText('다시 시도'), findsOneWidget);
+    expect(findText(ko.stocksConnectEmptyTitle), findsNothing);
   });
 }

@@ -26,6 +26,7 @@ import 'package:groo_damda_app/features/settings/presentation/devices_screen.dar
 import 'package:groo_damda_app/features/todo/presentation/todo_tag_management_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import '../../support/plain_text.dart';
 
 /// 화면 · 제목 글(웹 SECTIONS labelKey 와 같다 — 결과표 18).
 final _screens = <(String, Widget Function(), String)>[
@@ -107,7 +108,7 @@ void main() {
         expect(bar, findsOneWidget);
         expect(tester.getSize(bar).height, 56);
         expect(
-          find.descendant(of: bar, matching: find.text(title)),
+          find.descendant(of: bar, matching: findText(title)),
           findsOneWidget,
         );
         final back = find.byWidgetPredicate(
@@ -117,14 +118,20 @@ void main() {
         expect(tester.getSize(back).width, 44, reason: '← 상자 44');
         // T1 — 머리 바로 아래부터 본문 면(틈 0)
         // 기기 · 할 일 태그 화면은 흰 면 하나가 되어 띠 본문이 없다 — 본문 목록이 머리 바로 아래
-        final body = find.byKey(
-          ValueKey(switch (name) {
-            '로그인된 기기' => 'devices-body',
-            // 할 일 태그도 I-10 에서 흰 면 하나가 되어 띠 본문이 없다
-            '할 일 태그' => 'todo-tags-body',
-            _ => 'screen-band-body',
-          }),
-        );
+        // 메모 태그 · 알림 설정도 흰 면 하나가 되었다(f294089b · c6d4945a) — 알림 설정은 본문 키가 없어 Scaffold 본문으로 잰다
+        final body = name == '알림 설정'
+            ? find.byWidget(
+                tester.widget<Scaffold>(find.byType(Scaffold).last).body!,
+              )
+            : find.byKey(
+                ValueKey(switch (name) {
+                  '로그인된 기기' => 'devices-body',
+                  // 할 일 태그도 I-10 에서 흰 면 하나가 되어 띠 본문이 없다
+                  '할 일 태그' => 'todo-tags-body',
+                  '메모 태그' => 'memo-tags-body',
+                  _ => 'screen-band-body',
+                }),
+              );
         expect(
           tester.getRect(body).top,
           tester.getRect(bar).bottom,
@@ -162,14 +169,14 @@ void main() {
       find.descendant(of: bar, matching: find.byType(PTopNavigationTextButton)),
       findsOneWidget,
     );
-    expect(find.descendant(of: bar, matching: find.text('추가')), findsOneWidget);
+    expect(find.descendant(of: bar, matching: findText('추가')), findsOneWidget);
     // 아이콘 버튼은 ← 하나뿐 — 글 버튼과 섞지 않는다
     expect(
       find.descendant(of: bar, matching: find.byType(PTopNavigationIconButton)),
       findsOneWidget,
     );
     final barRect = tester.getRect(bar);
-    final tabs = find.textContaining('지출');
+    final tabs = findTextContaining('지출');
     expect(tabs, findsWidgets);
     expect(
       tester.getRect(tabs.first).top,

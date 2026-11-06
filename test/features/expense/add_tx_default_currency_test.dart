@@ -32,6 +32,7 @@ import 'package:groo_damda_app/features/sms/data/sms_repository.dart';
 import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/plain_text.dart';
 
 /// 테스트가 손으로 미는 기본 통화 — 늦게 도착하는 상황을 그대로 만든다.
 class _DefaultCurrencyStub extends Notifier<String> {
@@ -135,7 +136,7 @@ Future<AppLocalizations> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return AppLocalizations.delegate.load(const Locale('ko'));
 }
@@ -145,7 +146,7 @@ const _chipKey = ValueKey('tx-currency-chip');
 /// 1단계 금액을 치고 [다음] — 외화면 2단계에 환율 칸 · 원화 금액 줄이 열린다.
 Future<void> _toStepTwo(WidgetTester tester, String amount) async {
   await tester.enterText(find.byType(EditableText).first, amount);
-  await tester.tap(find.text('다음'));
+  await tester.tap(findText('다음'));
   await tester.pumpAndSettle();
 }
 
@@ -153,10 +154,10 @@ void main() {
   testWidgets('새 거래는 설정의 기본 통화로 열린다', (tester) async {
     final l = await _open(tester, showAddTxSheet, defaultCurrency: 'USD');
 
-    expect(find.text('\$ USD'), findsOneWidget);
+    expect(findText('\$ USD'), findsOneWidget);
     await _toStepTwo(tester, '5.5');
     expect(
-      find.text(l.expExchangeRate),
+      findText(l.expExchangeRate),
       findsOneWidget,
       reason: '외화면 환율 칸 · 원화 금액 줄이 열려야 원 통화 기록이 남는다',
     );
@@ -166,9 +167,9 @@ void main() {
   testWidgets('설정이 원화면 종전 그대로 원화다', (tester) async {
     final l = await _open(tester, showAddTxSheet);
 
-    expect(find.text('₩ KRW'), findsOneWidget);
+    expect(findText('₩ KRW'), findsOneWidget);
     await _toStepTwo(tester, '5500');
-    expect(find.text(l.expExchangeRate), findsNothing);
+    expect(findText(l.expExchangeRate), findsNothing);
     expect(find.byKey(const ValueKey('tx-row-krw')), findsNothing);
   });
 
@@ -182,7 +183,7 @@ void main() {
       defaultCurrency: 'USD',
     );
 
-    expect(find.text(l.expExchangeRate), findsNothing);
+    expect(findText(l.expExchangeRate), findsNothing);
     expect(find.byKey(const ValueKey('tx-row-krw')), findsNothing);
   });
 
@@ -194,13 +195,13 @@ void main() {
       defaultCurrency: 'USD',
     );
 
-    expect(find.text(l.expExchangeRate), findsNothing);
+    expect(findText(l.expExchangeRate), findsNothing);
     expect(find.byKey(const ValueKey('tx-row-krw')), findsNothing);
   });
 
   testWidgets('기본 통화가 시트보다 늦게 와도 반영된다', (tester) async {
     await _open(tester, showAddTxSheet);
-    expect(find.text('₩ KRW'), findsOneWidget);
+    expect(findText('₩ KRW'), findsOneWidget);
 
     ProviderScope.containerOf(
       tester.element(find.byType(MaterialApp)),
@@ -208,7 +209,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('\$ USD'),
+      findText('\$ USD'),
       findsOneWidget,
       reason: '열 때 한 번만 읽어 굳히면 첫 렌더의 원화에 잠긴다',
     );
@@ -226,7 +227,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('¥ JPY'), findsOneWidget);
-    expect(find.text('\$ USD'), findsNothing);
+    expect(findText('¥ JPY'), findsOneWidget);
+    expect(findText('\$ USD'), findsNothing);
   });
 }

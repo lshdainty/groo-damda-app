@@ -82,7 +82,7 @@ void main() {
     final repo = await _open(tester, plans: [_monthly, _yearly]);
     await tester.tap(findPlain(l.subCycleYearlyOff(17)));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l.subStartPro));
+    await tester.tap(findText(l.subStartPro));
     await tester.pumpAndSettle();
     expect(repo.sent, 'Y');
     expect(repo.sentSilent, isTrue, reason: '서버 글을 내지 않는다 — 요청은 silent');
@@ -90,7 +90,7 @@ void main() {
 
   testWidgets('처음은 월간 — 월간 planCode', (tester) async {
     final repo = await _open(tester, plans: [_monthly, _yearly]);
-    await tester.tap(find.text(l.subStartPro));
+    await tester.tap(findText(l.subStartPro));
     await tester.pumpAndSettle();
     expect(repo.sent, 'M');
   });
@@ -154,12 +154,12 @@ void main() {
       ],
     );
     expect(findPlain(l.subCycleYearly), findsOneWidget);
-    expect(find.textContaining('%'), findsNothing);
+    expect(findTextContaining('%'), findsNothing);
   });
 
   testWidgets('요금제가 0개면 시작 단추 대신 실패 화면', (tester) async {
     await _open(tester, plans: const []);
     expect(findPlain(l.subLoadFailed), findsOneWidget);
-    expect(find.text(l.subStartPro), findsNothing);
+    expect(findText(l.subStartPro), findsNothing);
   });
 }

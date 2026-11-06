@@ -20,6 +20,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations_ko.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import '../../support/overrides.dart';
 
 String _plain(Text w) => (w.data ?? w.textSpan?.toPlainText() ?? '')
     .replaceAll('⁠', '')
@@ -118,7 +119,8 @@ List<Override> _base({
 ];
 
 Widget _app(Widget home, List<Override> o) => ProviderScope(
-  overrides: o,
+  // 시험이 _base 뒤에 붙인 덮개가 이긴다 — riverpod 3 은 같은 provider 를 두 번 덮으면 멈춘다
+  overrides: lastOverrideWins(o),
   child: MaterialApp(
     theme: GrooTheme.light(),
     locale: const Locale('ko'),

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/presentation/transfer_account_fields.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
+import '../../support/plain_text.dart';
 
 const _bank = Asset(
   rowId: 1,
@@ -101,7 +102,7 @@ Future<void> _openSelect(WidgetTester tester, int index) async {
 /// 열린 메뉴 **안의** 항목만 본다. 전역 `find.text` 는 셀렉트 트리거에 그려진
 /// "고른 값" 까지 잡아서, 보내는 계좌가 받는 목록에서 빠졌는지 가릴 수 없다.
 Finder _menuOption(String label) =>
-    find.descendant(of: find.byType(ListView), matching: find.text(label));
+    find.descendant(of: find.byType(ListView), matching: findText(label));
 
 void main() {
   late AppLocalizations l;
@@ -131,19 +132,19 @@ void main() {
   testWidgets('받는 계좌가 대출이면 이자 칸이 뜬다', (tester) async {
     await _pump(tester, fromAssetRowId: 1, toAssetRowId: 3);
 
-    expect(find.text(l.expInterest), findsOneWidget);
+    expect(findText(l.expInterest), findsOneWidget);
   });
 
   testWidgets('받는 계좌가 대출이 아니면 이자 칸이 없다', (tester) async {
     await _pump(tester, fromAssetRowId: 1, toAssetRowId: 2);
 
-    expect(find.text(l.expInterest), findsNothing);
+    expect(findText(l.expInterest), findsNothing);
   });
 
   testWidgets('금액이 없으면 이자 안내를 쪼개지 않는다 — 프리셋은 금액이 없는 게 정상', (tester) async {
     await _pump(tester, fromAssetRowId: 1, toAssetRowId: 3);
 
-    expect(find.text(l.expInterestHint), findsOneWidget);
+    expect(findText(l.expInterestHint), findsOneWidget);
   });
 
   testWidgets('금액이 있으면 원금·이자로 쪼개 보여 준다', (tester) async {
@@ -154,8 +155,8 @@ void main() {
       amountForHint: 100000,
     );
 
-    expect(find.text(l.expInterestHint), findsNothing);
-    expect(find.text(l.expInterestSplit('80,000', '20,000')), findsOneWidget);
+    expect(findText(l.expInterestHint), findsNothing);
+    expect(findText(l.expInterestSplit('80,000', '20,000')), findsOneWidget);
   });
 
   group('이자 칸 조건은 호스트가 정한다 (2026-09-15)', () {
@@ -166,7 +167,7 @@ void main() {
     // 것으로 기록된다. 그래서 기본은 켜짐이고 프리셋 폼만 끈다.
     testWidgets('인자를 안 주면 켜진다 — 거래 시트·반복 설정이 쓰는 기본값', (tester) async {
       await _pump(tester, fromAssetRowId: 1, toAssetRowId: 3);
-      expect(find.text(l.expInterest), findsOneWidget);
+      expect(findText(l.expInterest), findsOneWidget);
     });
 
     testWidgets('호스트가 끄면 대출이어도 안 뜬다 — 프리셋 폼이 금액 미고정일 때', (tester) async {
@@ -176,7 +177,7 @@ void main() {
         toAssetRowId: 3,
         interestEnabled: false,
       );
-      expect(find.text(l.expInterest), findsNothing);
+      expect(findText(l.expInterest), findsNothing);
     });
   });
 
@@ -222,23 +223,23 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text(l.expInterest), findsOneWidget);
+      expect(findText(l.expInterest), findsOneWidget);
       expect(interest.text, '20000');
 
       // 적금으로 바꾼다 — 이자 칸이 사라진다.
       await tester.tap(find.byType(PSelect<int>).at(1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('신한 · QA적금').last);
+      await tester.tap(findText('신한 · QA적금').last);
       await tester.pumpAndSettle();
-      expect(find.text(l.expInterest), findsNothing);
+      expect(findText(l.expInterest), findsNothing);
       expect(interest.text, '', reason: '칸만 감추고 값을 두면 다시 대출로 바꿀 때 되살아난다');
 
       // 다시 대출로 — 빈 칸으로 열려야 한다.
       await tester.tap(find.byType(PSelect<int>).at(1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('신한 · QA대출').last);
+      await tester.tap(findText('신한 · QA대출').last);
       await tester.pumpAndSettle();
-      expect(find.text(l.expInterest), findsOneWidget);
+      expect(findText(l.expInterest), findsOneWidget);
       expect(interest.text, '');
     });
 
@@ -281,7 +282,7 @@ void main() {
 
       await tester.tap(find.byType(PSelect<int>).at(1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('신한 · QA적금').last);
+      await tester.tap(findText('신한 · QA적금').last);
       await tester.pumpAndSettle();
 
       expect(fee.text, '500');

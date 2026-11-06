@@ -19,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('chip');
 
@@ -796,7 +797,7 @@ void main() {
         ),
       );
       // 칩 글을 눌러도 아무 일이 없다
-      await tester.tap(find.text('김하나'));
+      await tester.tap(findText('김하나'));
       expect(removed, 0);
       // 지우기 아이콘(14) 둘레 24 × 24 까지 받는다
       final c = tester.getCenter(_remove);
@@ -1089,7 +1090,7 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, PChip(label: '10만', onPressed: () => taps++)),
       );
-      await tester.tap(find.text('10만'));
+      await tester.tap(findText('10만'));
       expect(taps, 1);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
@@ -1099,7 +1100,7 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, const PChip(label: '10만', onPressed: null)),
       );
-      await tester.tap(find.text('10만'), warnIfMissed: false);
+      await tester.tap(findText('10만'), warnIfMissed: false);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(taps, 3);
       // 막힌 칩은 포커스를 받지 않는다(Tab 에서 빠진다) — Space · Enter 도 닿지 않는다
@@ -1142,9 +1143,9 @@ void main() {
             ),
           ),
         );
-        await tester.tap(find.text('당일'));
+        await tester.tap(findText('당일'));
         await tester.pump(const Duration(milliseconds: 400));
-        await tester.tap(find.text('당일'));
+        await tester.tap(findText('당일'));
         await tester.pump(const Duration(milliseconds: 400));
         expect(calls, [true, false]);
         // 칩마다 Tab 이 선다
@@ -1198,7 +1199,7 @@ void main() {
         ),
       );
       // 고른 칩을 다시 눌러도 그대로 — 부르지 않는다
-      await tester.tap(find.text('수입'));
+      await tester.tap(findText('수입'));
       await tester.pump(const Duration(milliseconds: 400));
       expect(calls, isEmpty);
       // Tab 은 고른 칩 하나에 선다
@@ -1241,7 +1242,7 @@ void main() {
             ],
           );
       await tester.pumpWidget(_host(Brightness.light, group(disabled: true)));
-      await tester.tap(find.text('수입'));
+      await tester.tap(findText('수입'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump(const Duration(milliseconds: 400));
@@ -1253,7 +1254,7 @@ void main() {
           PField(label: '거래 종류', disabled: true, child: group()),
         ),
       );
-      await tester.tap(find.text('수입'));
+      await tester.tap(findText('수입'));
       expect(calls, isEmpty);
       await tester.pumpWidget(
         _host(
@@ -1261,7 +1262,7 @@ void main() {
           PField(label: '거래 종류', disabled: true, child: group(disabled: false)),
         ),
       );
-      await tester.tap(find.text('수입'));
+      await tester.tap(findText('수입'));
       expect(calls, ['b']);
       semantics.dispose();
     });

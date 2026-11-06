@@ -14,6 +14,7 @@ import 'package:groo_damda_app/features/stats/presentation/stats_model.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
+import '../../support/plain_text.dart';
 
 Future<void> _pumpStats(WidgetTester tester) async {
   tester.view.physicalSize = const Size(390 * 3, 844 * 3);
@@ -93,16 +94,16 @@ void main() {
     final l = await AppLocalizations.delegate.load(const Locale('ko'));
     final first = _selected(tester);
 
-    await tester.tap(find.text(l.statsTabCompare));
+    await tester.tap(findText(l.statsTabCompare));
     await tester.pumpAndSettle();
     final compare = _selected(tester);
     expect(compare, isNot(first));
 
-    await tester.tap(find.text(l.statsTabFixed));
+    await tester.tap(findText(l.statsTabFixed));
     await tester.pumpAndSettle();
     expect(_selected(tester), isNot(compare));
 
-    await tester.tap(find.text(l.expCategory).first);
+    await tester.tap(findText(l.expCategory).first);
     await tester.pumpAndSettle();
     expect(_selected(tester), first);
   });

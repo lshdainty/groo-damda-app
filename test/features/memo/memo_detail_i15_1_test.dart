@@ -91,7 +91,7 @@ Future<_Repo> _open(
     textScale: textScale,
     snackbarHost: snackbarHost,
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -129,7 +129,7 @@ void main() {
     await _open(tester, _memo(pinned: true));
     expect(findPlain('아이디어'), findsOneWidget);
     expect(findPlain('고정'), findsOneWidget);
-    expect(find.textContaining('수정'), findsWidgets);
+    expect(findTextContaining('수정'), findsWidgets);
   });
 
   testWidgets('본문이 없으면 "내용 없음"', (tester) async {
@@ -161,7 +161,7 @@ void main() {
     (tester) async {
       final repo = await _open(tester, _memo());
       await _openMenu(tester);
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
       expect(find.byType(PAlertDialogView), findsOneWidget);
       expect(findPlain('메모 삭제'), findsOneWidget);
@@ -173,7 +173,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(PAlertDialogView),
-          matching: find.text('삭제'),
+          matching: findText('삭제'),
         ),
       );
       await tester.pumpAndSettle();
@@ -187,18 +187,18 @@ void main() {
     final repo = await _open(tester, _memo());
     repo.failDelete = true;
     await _openMenu(tester);
-    await tester.tap(find.text('삭제').last);
+    await tester.tap(findText('삭제').last);
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findText('삭제'),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.byType(PAlertDialogView), findsNothing);
     expect(_button('수정'), findsOneWidget);
-    expect(find.textContaining('RAW_SERVER_TEXT_4471'), findsNothing);
+    expect(findTextContaining('RAW_SERVER_TEXT_4471'), findsNothing);
   });
 
   testWidgets('x2 글자 — 넘침 오류 0', (tester) async {
@@ -211,18 +211,18 @@ void main() {
   ) async {
     await _open(tester, _memo());
     await _openMenu(tester);
-    await tester.tap(find.text('삭제').last);
+    await tester.tap(findText('삭제').last);
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findText('삭제'),
       ),
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(
-      find.text('open'),
+      findText('open'),
       findsOneWidget,
       reason: '두 번 닫히면 시트 밑 화면까지 pop 된다',
     );
@@ -248,12 +248,12 @@ void main() {
     final repo = await _open(tester, _memo(), snackbarHost: true);
     repo.failDelete = true;
     await _openMenu(tester);
-    await tester.tap(find.text('삭제').last);
+    await tester.tap(findText('삭제').last);
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findText('삭제'),
       ),
     );
     await tester.pumpAndSettle();
@@ -263,11 +263,7 @@ void main() {
     await tester.tap(findPlain('다시 시도'));
     await tester.pumpAndSettle();
     expect(repo.deleted, [7]);
-    expect(
-      find.text('open'),
-      findsOneWidget,
-      reason: '다시 시도로 지워도 시트는 한 번만 닫힌다',
-    );
+    expect(findText('open'), findsOneWidget, reason: '다시 시도로 지워도 시트는 한 번만 닫힌다');
   });
 
   testWidgets('L1 — 본문은 16 / 24 이고 앞뒤 공백 · 빈 줄을 지키며, 공백뿐이면 "내용 없음"', (

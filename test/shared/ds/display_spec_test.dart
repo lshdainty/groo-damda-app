@@ -13,6 +13,7 @@ import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 Widget _host(Brightness mode, Widget child) => MaterialApp(
   theme: mode == Brightness.dark ? GrooTheme.dark() : GrooTheme.light(),
@@ -127,7 +128,7 @@ void main() {
           } else if (border != null) {
             k.failures.add('${k.where} — 스펙에 없는 테두리');
           }
-          final text = tester.widget<Text>(find.text('연체'));
+          final text = tester.widget<Text>(findText('연체'));
           k.typo('label.typography', text.style!);
           k.weight('label.fontWeight', text.style!);
           k.color('root.foreground', text.style!.color!);
@@ -232,7 +233,7 @@ void main() {
             k.px('root.minHeight', rect.height);
             k.px('root.paddingX', (pill.padding! as EdgeInsets).left);
             k.px('root.paddingX', (pill.padding! as EdgeInsets).right);
-            final label = tester.widget<Text>(find.text('8'));
+            final label = tester.widget<Text>(findText('8'));
             k.typo('label.typography', label.style!);
             k.weight('label.fontWeight', label.style!);
             k.color('label.foreground', label.style!.color!);
@@ -324,10 +325,8 @@ void main() {
           final TextStyle item;
           final TextStyle separator;
           if (truncate) {
-            item = tester.widget<Text>(find.text('식비')).style!;
-            separator = tester
-                .widget<Text>(find.text(tagGroupSeparator))
-                .style!;
+            item = tester.widget<Text>(findText('식비')).style!;
+            separator = tester.widget<Text>(findText(tagGroupSeparator)).style!;
           } else {
             final rich = tester.widget<Text>(
               find
@@ -395,7 +394,7 @@ void main() {
         ),
       );
       double w(WidgetTester tester, String text) =>
-          tester.getSize(find.text(text)).width;
+          tester.getSize(findText(text)).width;
 
       testWidgets('넉넉하면 모두 글만큼이다', (tester) async {
         await tester.pumpWidget(
@@ -418,7 +417,7 @@ void main() {
           b: w(tester, '식비'),
           c: w(tester, amount),
         );
-        final sep = tester.getSize(find.text(tagGroupSeparator).first).width;
+        final sep = tester.getSize(findText(tagGroupSeparator).first).width;
         final width = natural.long + natural.b + natural.c + 2 * sep - 40;
         await tester.pumpWidget(
           group(width, const [PTag(long), PTag('식비'), PTag(amount, shrink: 0)]),
@@ -478,7 +477,7 @@ void main() {
         );
         final a = w(tester, long);
         final b = w(tester, other);
-        final sep = tester.getSize(find.text(tagGroupSeparator).first).width;
+        final sep = tester.getSize(findText(tagGroupSeparator).first).width;
         const over = 50.0;
         await tester.pumpWidget(
           group(a + b + sep - over, const [PTag(long), PTag(other, shrink: 3)]),
@@ -532,7 +531,7 @@ void main() {
           final rect = tester.getSize(find.byType(PAvatar));
           k.px('root.size', rect.width);
           k.px('root.size', rect.height);
-          final initial = tester.widget<Text>(find.text('김')).style!;
+          final initial = tester.widget<Text>(findText('김')).style!;
           k.px('initial.fontSize', initial.fontSize!);
           k.weight('initial.fontWeight', initial);
           k.color('initial.foreground', initial.color!);
@@ -556,7 +555,7 @@ void main() {
               .widget<ColoredBox>(
                 find
                     .ancestor(
-                      of: find.text('김'),
+                      of: findText('김'),
                       matching: find.byType(ColoredBox),
                     )
                     .first,
@@ -654,7 +653,7 @@ void main() {
           k.color('overflow.outlineColor', moreRing.color);
           k.color('overflow.background', moreDeco.color!);
           k.px('overflow.size', tester.getSize(more).width);
-          final moreText = tester.widget<Text>(find.text('+2')).style!;
+          final moreText = tester.widget<Text>(findText('+2')).style!;
           k.px('overflow.fontSize', moreText.fontSize!);
           k.weight('overflow.fontWeight', moreText);
           k.color('overflow.foreground', moreText.color!);
@@ -748,7 +747,7 @@ void main() {
         final semantics = tester.ensureSemantics();
         await pump(312);
         expect(find.byType(PAvatar), findsNWidgets(2));
-        expect(find.text('+4'), findsOneWidget);
+        expect(findText('+4'), findsOneWidget);
         // 원 3 개의 폭 — 묶음 안의 겹친 상자
         expect(
           tester
@@ -766,14 +765,14 @@ void main() {
         expect(find.bySemanticsLabel('참여자 6명: 김민수, 이서연 외 4명'), findsOneWidget);
         await pump(600);
         expect(find.byType(PAvatar), findsNWidgets(4));
-        expect(find.text('+2'), findsOneWidget);
+        expect(findText('+2'), findsOneWidget);
         expect(
           find.bySemanticsLabel('참여자 6명: 김민수, 이서연, 박지훈, 최유진 외 2명'),
           findsOneWidget,
         );
         await pump(100);
         expect(find.byType(PAvatar), findsNWidgets(1));
-        expect(find.text('+5'), findsOneWidget);
+        expect(findText('+5'), findsOneWidget);
         semantics.dispose();
       });
     });
@@ -783,7 +782,7 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, PAvatarStack(people: many)),
       );
-      expect(find.text('+99'), findsOneWidget);
+      expect(findText('+99'), findsOneWidget);
       await tester.pumpWidget(
         _host(Brightness.light, PAvatarStack(people: people.take(4).toList())),
       );

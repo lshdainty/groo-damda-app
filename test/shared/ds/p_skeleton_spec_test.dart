@@ -10,6 +10,7 @@ import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart'
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('skeleton');
 
@@ -214,9 +215,9 @@ void main() {
       expect(vis().visible, isFalse);
       await tester.pump(const Duration(milliseconds: 2));
       expect(vis().visible, isTrue);
-      expect(find.text('평소보다 오래 걸리고 있어요.'), findsNothing);
+      expect(findText('평소보다 오래 걸리고 있어요.'), findsNothing);
       await tester.pump(const Duration(seconds: 4));
-      final slow = find.text('평소보다 오래 걸리고 있어요.');
+      final slow = findText('평소보다 오래 걸리고 있어요.');
       expect(slow, findsOneWidget);
 
       // 오래 걸림 글 — t4 · 400 · fg-neutral-muted, 스켈레톤 위 16
@@ -252,19 +253,19 @@ void main() {
           _host(Brightness.light, skeletonRegion(pending: true)),
         );
         await tester.pump(const Duration(milliseconds: 9990));
-        expect(find.text('실패'), findsNothing);
+        expect(findText('실패'), findsNothing);
         expect(find.byType(PSkeleton), findsOneWidget);
         await tester.pump(const Duration(milliseconds: 20));
-        expect(find.text('실패'), findsOneWidget);
+        expect(findText('실패'), findsOneWidget);
         expect(find.byType(PSkeleton), findsNothing);
-        expect(find.text('내용'), findsNothing);
+        expect(findText('내용'), findsNothing);
         // 늦게라도 내용이 오면 내용을 보인다
         await tester.pumpWidget(
           _host(Brightness.light, skeletonRegion(pending: false)),
         );
         await tester.pump(const Duration(seconds: 1));
-        expect(find.text('내용'), findsOneWidget);
-        expect(find.text('실패'), findsNothing);
+        expect(findText('내용'), findsOneWidget);
+        expect(findText('실패'), findsNothing);
       },
     );
 
@@ -292,8 +293,8 @@ void main() {
         _host(Brightness.light, skeletonRegion(pending: false)),
       );
       await tester.pump(const Duration(seconds: 3));
-      expect(find.text('내용'), findsOneWidget);
-      expect(find.text('실패'), findsNothing);
+      expect(findText('내용'), findsOneWidget);
+      expect(findText('실패'), findsNothing);
     });
 
     testWidgets('실패 화면의 다시 시도로 pending 이 다시 켜지면 시간표를 처음부터 센다', (tester) async {
@@ -301,7 +302,7 @@ void main() {
         _host(Brightness.light, skeletonRegion(pending: true)),
       );
       await tester.pump(const Duration(seconds: 10, milliseconds: 100));
-      expect(find.text('실패'), findsOneWidget);
+      expect(findText('실패'), findsOneWidget);
       // 다시 시도 — 요청이 끝났다가(pending false 한 프레임) 다시 시작한다
       await tester.pumpWidget(
         _host(Brightness.light, skeletonRegion(pending: false, failed: true)),
@@ -310,9 +311,9 @@ void main() {
         _host(Brightness.light, skeletonRegion(pending: true)),
       );
       await tester.pump(const Duration(seconds: 5));
-      expect(find.text('실패'), findsNothing);
+      expect(findText('실패'), findsNothing);
       await tester.pump(const Duration(seconds: 5, milliseconds: 100));
-      expect(find.text('실패'), findsOneWidget);
+      expect(findText('실패'), findsOneWidget);
     });
 
     testWidgets('원 모드 — 가운데 원(40), 오래 걸림 글은 원 아래', (tester) async {
@@ -329,7 +330,7 @@ void main() {
         PProgressCircleSize.s40,
       );
       expect(
-        tester.getTopLeft(find.text('평소보다 오래 걸리고 있어요.')).dy,
+        tester.getTopLeft(findText('평소보다 오래 걸리고 있어요.')).dy,
         greaterThan(tester.getTopLeft(find.byType(PProgressCircle)).dy),
       );
     });
@@ -353,7 +354,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 60));
       final mid = tester
           .widget<Opacity>(
-            find.ancestor(of: find.text('내용'), matching: find.byType(Opacity)),
+            find.ancestor(of: findText('내용'), matching: find.byType(Opacity)),
           )
           .opacity;
       expect(mid, inExclusiveRange(0, 1));
@@ -361,10 +362,7 @@ void main() {
       expect(
         tester
             .widget<Opacity>(
-              find.ancestor(
-                of: find.text('내용'),
-                matching: find.byType(Opacity),
-              ),
+              find.ancestor(of: findText('내용'), matching: find.byType(Opacity)),
             )
             .opacity,
         1,
@@ -375,7 +373,7 @@ void main() {
         _host(Brightness.light, skeletonRegion(pending: false)),
       );
       expect(
-        find.ancestor(of: find.text('내용'), matching: find.byType(Opacity)),
+        find.ancestor(of: findText('내용'), matching: find.byType(Opacity)),
         findsNothing,
       );
     });
@@ -384,7 +382,7 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, skeletonRegion(pending: true, failed: true)),
       );
-      expect(find.text('실패'), findsOneWidget);
+      expect(findText('실패'), findsOneWidget);
       expect(find.byType(PSkeleton), findsNothing);
     });
 

@@ -155,9 +155,9 @@ void main() {
     expect(scaffold.backgroundColor, c.bgLayerDefault);
     expect(find.byType(PScreenBandBody), findsNothing);
     expect(find.byType(PTopNavigation), findsOneWidget);
-    expect(find.text('결제 알림 수신함'), findsOneWidget);
+    expect(findText('결제 알림 수신함'), findsOneWidget);
     expect(find.byType(PTopNavigationTextButton), findsOneWidget);
-    expect(find.text('비우기'), findsOneWidget);
+    expect(findText('비우기'), findsOneWidget);
   });
 
   testWidgets('문자가 없으면 [비우기] 도 없고 Result Section empty 가 선다', (tester) async {
@@ -183,7 +183,7 @@ void main() {
     await tester.pump();
     expect(fake.calls, contains('openNotificationAccessSettings'));
     // 옛 PAlert 의 [켜기] 버튼은 없다
-    expect(find.text('켜기'), findsNothing);
+    expect(findText('켜기'), findsNothing);
   });
 
   testWidgets('알림 권한 꺼짐은 같은 모양에 톤만 informative · 누르면 권한 요청', (tester) async {
@@ -287,7 +287,7 @@ void main() {
       findsOneWidget,
     );
     expect(fake.calls, isNot(contains('removeFromInbox')));
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
     expect(fake.entries, hasLength(4));
     expect(fake.calls, isNot(contains('removeFromInbox')));
@@ -304,7 +304,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('삭제'),
+        matching: findText('삭제'),
       ),
     );
     await tester.pumpAndSettle();
@@ -322,7 +322,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(findPlain('문자를 삭제할까요?'), findsOneWidget);
     expect(fake.entries, hasLength(4));
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
     expect(fake.entries, hasLength(4));
   });
@@ -331,22 +331,22 @@ void main() {
     tester,
   ) async {
     final fake = await _pump(tester);
-    await tester.tap(find.text('비우기'));
+    await tester.tap(findText('비우기'));
     await tester.pumpAndSettle();
     expect(findPlain('문자를 모두 삭제할까요?'), findsOneWidget);
     expect(findPlain('수신함의 문자 4건을 모두 삭제해요. 기록으로 남기지 않아요.'), findsOneWidget);
-    await tester.tap(find.text('취소'));
+    await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
     expect(fake.calls, isNot(contains('clearInbox')));
     expect(fake.entries, hasLength(4));
 
-    await tester.tap(find.text('비우기'));
+    await tester.tap(findText('비우기'));
     await tester.pumpAndSettle();
     // 확인창의 확정 버튼도 "비우기" — 머리 글 버튼은 가려져 있으니 대화상자 안의 것을 누른다
     await tester.tap(
       find.descendant(
         of: find.byType(PAlertDialogView),
-        matching: find.text('비우기'),
+        matching: findText('비우기'),
       ),
     );
     await tester.pumpAndSettle();

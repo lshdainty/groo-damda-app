@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('bottom-sheet');
 
@@ -606,7 +607,7 @@ void main() {
 
           await trigger();
           expect(find.byType(PAlertDialogView), findsOneWidget);
-          expect(find.text(keepAll('작성한 내용이 사라져요')), findsOneWidget);
+          expect(findText(keepAll('작성한 내용이 사라져요')), findsOneWidget);
           expect(find.byType(PBottomSheetContent), findsOneWidget);
           await tester.tap(find.widgetWithText(PButton, '계속 작성'));
           await tester.pumpAndSettle();

@@ -15,6 +15,7 @@ import 'package:groo_damda_app/features/stocks/presentation/watch_actions.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/features/todo/presentation/todo_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../support/plain_text.dart';
 
 const _cat = ExpenseCategory(
   rowId: 1,
@@ -48,7 +49,7 @@ Future<bool> _inputFocused(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   for (var i = 0; i < 40; i++) {
     await tester.pump(const Duration(milliseconds: 50));
   }

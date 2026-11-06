@@ -20,6 +20,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/stocks/presentation/chart_web_view.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_donut.dart';
+import '../../support/plain_text.dart';
 
 NamuHoldingItem _item(
   String symbol,
@@ -356,7 +357,7 @@ void main() {
     ) async {
       await _pump(tester, holdingsPending: true, groups: kGroups, fx: 1385.2);
       expect(_t('환율(USD)'), findsOneWidget);
-      expect(find.text('다시 시도'), findsNothing);
+      expect(findText('다시 시도'), findsNothing);
     });
   });
 
@@ -686,7 +687,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(_t('체결 내역을 불러오지 못했어요'), findsOneWidget);
       final asked = executionsAsked.length;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(executionsAsked.length, greaterThan(asked), reason: '버튼이 죽어 있다');
@@ -705,7 +706,7 @@ void main() {
         reason: '상세 시세 실패는 머리 실패 한 벌이 맡고 호가 띠는 그리지 않는다',
       );
       final asked = detailAsked.length;
-      await tester.tap(find.text('다시 시도').first);
+      await tester.tap(findText('다시 시도').first);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(detailAsked.length, greaterThan(asked));

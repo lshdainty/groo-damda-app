@@ -311,7 +311,7 @@ void main() {
     );
     expect(fab.label, '메모 추가');
     expect(fab.icon, LucideIcons.plus500);
-    expect(find.text('추가'), findsNothing);
+    expect(findText('추가'), findsNothing);
   });
 
   testWidgets(
@@ -343,8 +343,8 @@ void main() {
     final r = tester.widget<PResultSection>(find.byType(PResultSection));
     expect(r.kind, PResultKind.failure);
     expect(r.title, '메모를 불러오지 못했어요');
-    expect(find.textContaining('RAW_SERVER_TEXT_9137'), findsNothing);
-    expect(find.text('다시 시도'), findsOneWidget);
+    expect(findTextContaining('RAW_SERVER_TEXT_9137'), findsNothing);
+    expect(findText('다시 시도'), findsOneWidget);
   });
 
   for (final scale in [1.0, 2.0]) {
@@ -380,7 +380,7 @@ void main() {
         ].cast(),
       );
       expect(find.byType(PResultSection), findsOneWidget);
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pump();
       expect(
         find.byType(PResultSection),

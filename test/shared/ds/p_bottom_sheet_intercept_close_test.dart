@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import '../../support/plain_text.dart';
 
 Widget _app(Widget home) => MaterialApp(
   theme: GrooTheme.light(),
@@ -54,15 +55,15 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
-    expect(find.text('본문'), findsOneWidget);
+    expect(findText('본문'), findsOneWidget);
 
     // 1. Esc — 단계만 닫힌다(시트는 남고, 묻지 않는다)
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(intercepted, 1);
-    expect(find.text('본문'), findsOneWidget);
+    expect(findText('본문'), findsOneWidget);
     expect(find.byType(PAlertDialogView), findsNothing);
 
     // 2. 그 뒤 Esc — 가로채지 않으니 바뀐 값을 묻는다
@@ -99,15 +100,15 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(find.text('본문'), findsOneWidget, reason: '첫 뒤로 가기는 단계만 닫는다');
+    expect(findText('본문'), findsOneWidget, reason: '첫 뒤로 가기는 단계만 닫는다');
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(find.text('본문'), findsNothing, reason: '그다음에는 시트가 닫힌다');
+    expect(findText('본문'), findsNothing, reason: '그다음에는 시트가 닫힌다');
   });
 }

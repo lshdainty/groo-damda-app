@@ -39,6 +39,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 const _card = Asset(
   rowId: 9,
@@ -270,7 +271,7 @@ Widget _opener(void Function(BuildContext) open) => Builder(
 );
 
 Future<void> _openDetail(WidgetTester tester) async {
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -330,14 +331,14 @@ void main() {
       await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, _plain)));
       await _openDetail(tester);
 
-      expect(find.text('지출 상세'), findsOneWidget);
+      expect(findText('지출 상세'), findsOneWidget);
       expect(find.byKey(const ValueKey('tx-detail-head')), findsOneWidget);
       expect(find.byKey(const ValueKey('tx-detail-name')), findsOneWidget);
       // 머리와 같은 값 두 번 — 키-값 줄에 금액 · 날짜 · 시간이 없다
-      expect(find.text('금액'), findsNothing);
-      expect(find.text('날짜·시간'), findsNothing);
-      expect(find.text('메모'), findsNothing, reason: '값이 없는 줄은 그리지 않는다');
-      expect(find.text('쇼핑 · 가전·가구'), findsOneWidget);
+      expect(findText('금액'), findsNothing);
+      expect(findText('날짜·시간'), findsNothing);
+      expect(findText('메모'), findsNothing, reason: '값이 없는 줄은 그리지 않는다');
+      expect(findText('쇼핑 · 가전·가구'), findsOneWidget);
     });
 
     testWidgets('금액은 쉼표 뒤에서만 줄이 바뀌고 자르지 않는다(360 · 200%)', (tester) async {
@@ -369,7 +370,7 @@ void main() {
       for (final k in ['refund', 'split', 'recurring', 'dutch']) {
         expect(find.byKey(ValueKey('more-$k')), findsOneWidget, reason: k);
       }
-      expect(find.text('더 하기'), findsOneWidget);
+      expect(findText('더 하기'), findsOneWidget);
     });
 
     testWidgets('"더 하기" 줄 — 수입은 환불 · 분할 없이 셋', (tester) async {
@@ -382,7 +383,7 @@ void main() {
       await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, income)));
       await _openDetail(tester);
 
-      expect(find.text('수입 상세'), findsOneWidget);
+      expect(findText('수입 상세'), findsOneWidget);
       expect(find.byKey(const ValueKey('more-refund')), findsNothing);
       expect(find.byKey(const ValueKey('more-split')), findsOneWidget);
       expect(find.byKey(const ValueKey('more-recurring')), findsOneWidget);
@@ -421,10 +422,10 @@ void main() {
       );
       await _openDetail(tester);
 
-      expect(find.text('2개로 나눔'), findsOneWidget);
-      expect(find.text('연결됨'), findsOneWidget);
+      expect(findText('2개로 나눔'), findsOneWidget);
+      expect(findText('연결됨'), findsOneWidget);
       // 나눈 내역 묶음 — 접기 없음, 줄을 누르지 않는다
-      expect(find.text('내역 분할 2개'), findsOneWidget);
+      expect(findText('내역 분할 2개'), findsOneWidget);
       expect(find.byIcon(LucideIcons.chevronUp), findsNothing);
       expect(find.byIcon(LucideIcons.chevronDown), findsNothing);
     });
@@ -438,8 +439,8 @@ void main() {
       await _openDetail(tester);
 
       expect(find.byType(PResultSection), findsOneWidget);
-      expect(find.text('나눈 내역을 불러오지 못했어요'), findsOneWidget);
-      expect(find.textContaining('서버 원문'), findsNothing);
+      expect(findText('나눈 내역을 불러오지 못했어요'), findsOneWidget);
+      expect(findTextContaining('서버 원문'), findsNothing);
     });
 
     testWidgets('이 가맹점: 다른 거래 3건이면 보조 글 없음, 9건이면 줄 5 + "최근 5건만 보여요"', (
@@ -451,7 +452,7 @@ void main() {
         history: [_worst, _other(0), _other(1), _other(2)],
       );
       await _openDetail(tester);
-      expect(find.text('이 가맹점 이번 달'), findsOneWidget);
+      expect(findText('이 가맹점 이번 달'), findsOneWidget);
       expect(find.byKey(const ValueKey('tx-detail-recent-only')), findsNothing);
     });
 
@@ -468,7 +469,7 @@ void main() {
         scrollable: find.byType(Scrollable).last,
       );
 
-      expect(find.text('최근 5건만 보여요'), findsOneWidget);
+      expect(findText('최근 5건만 보여요'), findsOneWidget);
       expect(
         find.byType(PListButtonItem),
         findsWidgets,
@@ -509,7 +510,7 @@ void main() {
       expect(sentence.textSpan!.toPlainText(), isNot(contains('\u200B')));
       expect(find.byType(AlertDialog), findsNothing);
       expect(find.byType(TextField), findsNothing);
-      expect(find.text('지출 상세'), findsNothing, reason: '같은 시트의 머리가 바뀐다');
+      expect(findText('지출 상세'), findsNothing, reason: '같은 시트의 머리가 바뀐다');
     });
 
     testWidgets('← 는 상세로 — 바꾼 값이 없으면 묻지 않는다', (tester) async {
@@ -519,8 +520,8 @@ void main() {
 
       await tester.tap(find.bySemanticsLabel('뒤로'));
       await tester.pumpAndSettle();
-      expect(find.text('지출 상세'), findsOneWidget);
-      expect(find.text('작성한 내용이 사라져요'), findsNothing);
+      expect(findText('지출 상세'), findsOneWidget);
+      expect(findText('작성한 내용이 사라져요'), findsNothing);
     });
 
     testWidgets('[환불 처리] → 정오로 보내고, 상세로 돌아와 "환불됨" Callout', (tester) async {
@@ -537,8 +538,8 @@ void main() {
 
       expect(repo.refundedAt, endsWith('T12:00:00'));
       expect(repo.silentFlags, [true], reason: '전역 스낵바와 겹치지 않게 조용히');
-      expect(find.text('지출 상세'), findsOneWidget);
-      expect(find.textContaining('합계에서 빠져 있어요.'), findsOneWidget);
+      expect(findText('지출 상세'), findsOneWidget);
+      expect(findTextContaining('합계에서 빠져 있어요.'), findsOneWidget);
       expect(find.byKey(const ValueKey('more-refund')), findsNothing);
       expect(find.byKey(const ValueKey('more-split')), findsNothing);
     });
@@ -569,7 +570,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('refund-step')), findsOneWidget);
-      expect(find.text('환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
+      expect(findText('환불하지 못했어요. 잠시 뒤에 다시 시도해주세요.'), findsOneWidget);
     });
   });
 
@@ -587,14 +588,14 @@ void main() {
 
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
 
       expect(repo.silentFlags, [true], reason: '전역 오류 알림은 끄고 화면이 말한다');
       expect(find.byType(AlertDialog), findsNothing, reason: '확인창은 닫혔다');
       expect(find.byKey(const ValueKey('tx-detail-failure')), findsNothing);
-      expect(find.text('거래를 삭제하지 못했어요.'), findsOneWidget);
-      expect(find.text('다시 시도'), findsOneWidget);
+      expect(findText('거래를 삭제하지 못했어요.'), findsOneWidget);
+      expect(findText('다시 시도'), findsOneWidget);
       // 시트는 그대로 열려 있고 버튼은 풀려 있다
       expect(
         tester.widget<PButton>(find.widgetWithText(PButton, '삭제')).onPressed,
@@ -612,16 +613,16 @@ void main() {
       await _openDetail(tester);
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
 
       repo.failDelete = false;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsNothing, reason: '다시 묻지 않는다');
       expect(repo.deleted, [5]);
-      expect(find.text('지출 상세'), findsNothing, reason: '지운 뒤 시트가 닫힌다');
+      expect(findText('지출 상세'), findsNothing, reason: '지운 뒤 시트가 닫힌다');
     });
 
     testWidgets('시트를 닫은 뒤 [다시 시도] 를 눌러도 요청이 나가고 목록이 갱신된다', (tester) async {
@@ -634,9 +635,9 @@ void main() {
       await _openDetail(tester);
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
-      expect(find.text('다시 시도'), findsOneWidget);
+      expect(findText('다시 시도'), findsOneWidget);
 
       // 스낵바가 떠 있는 동안 시트를 닫는다(State 가 사라진다)
       Navigator.of(
@@ -644,12 +645,12 @@ void main() {
         rootNavigator: true,
       ).pop();
       await tester.pumpAndSettle();
-      expect(find.text('지출 상세'), findsNothing);
-      expect(find.text('다시 시도'), findsOneWidget, reason: '스낵바는 시트 밖이라 남아 있다');
+      expect(findText('지출 상세'), findsNothing);
+      expect(findText('다시 시도'), findsOneWidget, reason: '스낵바는 시트 밖이라 남아 있다');
 
       repo.failDelete = false;
       final before = repo.listCalls;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
 
       expect(repo.deleted, [5], reason: '시트가 없어도 요청이 나간다');
@@ -673,9 +674,9 @@ void main() {
       await _openDetail(tester);
       await tester.tap(find.widgetWithText(PButton, '환불 취소'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('환불 취소').last);
+      await tester.tap(findText('환불 취소').last);
       await tester.pumpAndSettle();
-      expect(find.text('환불을 취소하지 못했어요.'), findsOneWidget);
+      expect(findText('환불을 취소하지 못했어요.'), findsOneWidget);
 
       Navigator.of(
         tester.element(find.byType(PBottomSheetContent)),
@@ -685,7 +686,7 @@ void main() {
 
       repo.failCancel = false;
       final before = repo.listCalls;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
 
       expect(repo.cancelled, [5]);
@@ -702,7 +703,7 @@ void main() {
       await _openDetail(tester);
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
 
@@ -716,7 +717,7 @@ void main() {
         );
       }
       await tester.pumpAndSettle();
-      expect(find.text('지출 상세'), findsNothing);
+      expect(findText('지출 상세'), findsNothing);
     });
   });
 
@@ -742,17 +743,17 @@ void main() {
       );
       await _openDetail(tester);
 
-      expect(find.text('이체 상세'), findsOneWidget);
-      expect(find.text('보내는 계좌'), findsOneWidget);
-      expect(find.text('받는 계좌'), findsOneWidget);
-      expect(find.text('보낼 자산'), findsNothing);
+      expect(findText('이체 상세'), findsOneWidget);
+      expect(findText('보내는 계좌'), findsOneWidget);
+      expect(findText('받는 계좌'), findsOneWidget);
+      expect(findText('보낼 자산'), findsNothing);
       expect(find.byType(PLogoTile), findsNWidgets(2));
-      expect(find.text('수수료'), findsOneWidget);
-      expect(find.text('출금 합계'), findsOneWidget);
-      expect(find.text('이자'), findsOneWidget);
-      expect(find.text('원금'), findsOneWidget);
-      expect(find.text('금액'), findsNothing);
-      expect(find.text('날짜'), findsNothing);
+      expect(findText('수수료'), findsOneWidget);
+      expect(findText('출금 합계'), findsOneWidget);
+      expect(findText('이자'), findsOneWidget);
+      expect(findText('원금'), findsOneWidget);
+      expect(findText('금액'), findsNothing);
+      expect(findText('날짜'), findsNothing);
       expect(find.byKey(const ValueKey('more-recurring')), findsOneWidget);
     });
 
@@ -793,19 +794,19 @@ void main() {
       await _openDetail(tester);
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsNothing);
-      expect(find.text('이체를 삭제하지 못했어요.'), findsOneWidget);
+      expect(findText('이체를 삭제하지 못했어요.'), findsOneWidget);
       expect(assetRepo.deleted, isEmpty);
 
       assetRepo.fail = false;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
       expect(find.byType(AlertDialog), findsNothing, reason: '다시 묻지 않는다');
       expect(assetRepo.deleted, [7001]);
-      expect(find.text('이체 상세'), findsNothing);
+      expect(findText('이체 상세'), findsNothing);
     });
 
     testWidgets('이체: 시트를 닫은 뒤 [다시 시도] 도 요청이 나가고 목록이 갱신된다', (tester) async {
@@ -820,7 +821,7 @@ void main() {
       await _openDetail(tester);
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
 
       Navigator.of(
@@ -828,11 +829,11 @@ void main() {
         rootNavigator: true,
       ).pop();
       await tester.pumpAndSettle();
-      expect(find.text('이체 상세'), findsNothing);
+      expect(findText('이체 상세'), findsNothing);
 
       assetRepo.fail = false;
       final before = repo.listCalls;
-      await tester.tap(find.text('다시 시도'));
+      await tester.tap(findText('다시 시도'));
       await tester.pumpAndSettle();
 
       expect(assetRepo.deleted, [7001]);
@@ -850,12 +851,12 @@ void main() {
       await tester.tap(find.widgetWithText(PButton, '삭제'));
       await tester.pumpAndSettle();
 
-      expect(find.text('이체 삭제'), findsOneWidget);
+      expect(findText('이체 삭제'), findsOneWidget);
       expect(
         _plainText('양쪽 계좌 잔액이 이체 전으로 돌아가요. 삭제한 이체는 되돌릴 수 없어요.'),
         findsOneWidget,
       );
-      await tester.tap(find.text('삭제').last);
+      await tester.tap(findText('삭제').last);
       await tester.pumpAndSettle();
       expect(assetRepo.deleted, [7001]);
       expect(assetRepo.silent, isTrue);
@@ -871,17 +872,17 @@ void main() {
       );
       await _openDetail(tester);
       expect(find.byType(PBottomSheetContent), findsOneWidget);
-      expect(find.text('지출 상세'), findsOneWidget);
+      expect(findText('지출 상세'), findsOneWidget);
 
       await tester.tap(find.widgetWithText(PButton, '수정'));
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
-      expect(find.text('거래 수정'), findsOneWidget);
+      expect(findText('거래 수정'), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel('뒤로').first);
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
-      expect(find.text('지출 상세'), findsOneWidget);
+      expect(findText('지출 상세'), findsOneWidget);
     });
   });
 }

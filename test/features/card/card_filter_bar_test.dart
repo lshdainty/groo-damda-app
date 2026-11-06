@@ -4,8 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/card/presentation/widgets/card_filter_bar.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
-String _plain(Widget w) => w is Text ? (w.data ?? '').replaceAll('⁠', '') : '';
+// Text · Text.rich(칩 · 목록 제목) 모두 — 줄바꿈 글자는 벗긴다
+String _plain(Widget w) =>
+    w is Text ? plainOf(w.data ?? w.textSpan!.toPlainText()) : '';
 Finder _text(String s) => find.byWidgetPredicate((w) => _plain(w) == s);
 
 Widget _app(

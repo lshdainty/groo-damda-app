@@ -1089,10 +1089,10 @@ void main() {
                     LucideIcons.info,
                   );
             if (invalid &&
-                find.text(keepAll(description)).evaluate().isNotEmpty) {
+                findText(keepAll(description)).evaluate().isNotEmpty) {
               k.fail('오류가 설명을 대신하지 않았다');
             }
-            final message = find.text(keepAll(text));
+            final message = findText(keepAll(text));
             final messageStyle = tester.widget<Text>(message).style!;
             k.typo('$slot.typography', messageStyle);
             k.color('$slot.foreground', messageStyle.color!);
@@ -1141,7 +1141,7 @@ void main() {
             _field.resolve(combo, 'enabled'),
             '${mode.name} $combo 선택',
           );
-          final optional = find.text('선택');
+          final optional = findText('선택');
           final optionalStyle = tester.widget<Text>(optional).style!;
           // 줄 높이는 라벨과 같은 22 가 t4 의 19 를 덮는다
           k.typo(
@@ -1334,7 +1334,7 @@ void main() {
       await tester.pumpWidget(field('이름을 입력해주세요.'));
       expect(said, isEmpty);
       expect(
-        tester.getSemantics(find.text(keepAll('이름을 입력해주세요.'))),
+        tester.getSemantics(findText(keepAll('이름을 입력해주세요.'))),
         containsSemantics(label: '이름을 입력해주세요.', isLiveRegion: true),
       );
       semantics.dispose();
@@ -1628,7 +1628,7 @@ void main() {
         ),
       );
       // 보이는 크기 — 자리째 라벨 배율로 커진다(앞 4 → 8 · 줄 높이 22 → 44). 글자는 한 번만 커진다(두 번이면 88)
-      final optional = find.text('선택');
+      final optional = findText('선택');
       final slot = find
           .ancestor(of: optional, matching: find.byType(SizedBox))
           .first;
@@ -1761,10 +1761,10 @@ void main() {
       await tester.ensureVisible(submit);
       await tester.tap(submit);
       await tester.pump(const Duration(milliseconds: 400));
-      expect(find.text(keepAll('제목을 입력해주세요.')), findsOneWidget);
-      expect(find.text(keepAll('휴가 사유를 입력해주세요.')), findsOneWidget);
+      expect(findText(keepAll('제목을 입력해주세요.')), findsOneWidget);
+      expect(findText(keepAll('휴가 사유를 입력해주세요.')), findsOneWidget);
       final title = find.ancestor(
-        of: find.text(keepAll('제목을 입력해주세요.')),
+        of: findText(keepAll('제목을 입력해주세요.')),
         matching: find.byType(PField),
       );
       expect(_editable(tester, title).focusNode.hasFocus, isTrue);
@@ -1808,7 +1808,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         final shown = invalid ? error : help;
-        final finder = find.text(keepAll(shown));
+        final finder = findText(keepAll(shown));
         expect(finder, findsOneWidget);
         expect(tester.widget<Text>(finder).semanticsLabel, shown);
         final lines = tester.renderObject<RenderParagraph>(

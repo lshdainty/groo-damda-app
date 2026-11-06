@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _category = ExpenseCategory(
   rowId: 5,
@@ -116,7 +117,7 @@ Future<_FakeAssetRepo> _openEdit(WidgetTester tester) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -132,7 +133,7 @@ void main() {
 
     // build 가 죽으면 여기서 잡힌다 — 릴리스에서는 그 자리가 회색 사각형이 된다.
     expect(tester.takeException(), isNull);
-    expect(find.text(l.expEdit), findsOneWidget);
+    expect(findText(l.expEdit), findsOneWidget);
     // 본문이 실제로 그려졌나 — 제목·푸터는 시트 껍데기라 살아 있다.
     expect(find.byKey(const ValueKey('tx-row-amount')), findsOneWidget);
   });
@@ -141,16 +142,16 @@ void main() {
     await _openEdit(tester);
 
     // 2단계 줄에 실린 값 — 금액 · 수수료 · 날짜 · 메모(값은 줄 끝에 쉼표 · 단위로 보인다)
-    expect(find.textContaining('120,000'), findsWidgets, reason: '금액');
-    expect(find.textContaining('500'), findsWidgets, reason: '수수료');
+    expect(findTextContaining('120,000'), findsWidgets, reason: '금액');
+    expect(findTextContaining('500'), findsWidgets, reason: '수수료');
     expect(find.byKey(const ValueKey('tx-row-date')), findsOneWidget);
-    expect(find.textContaining('적금 이체'), findsWidgets, reason: '메모');
+    expect(findTextContaining('적금 이체'), findsWidgets, reason: '메모');
   });
 
   testWidgets('그대로 저장하면 같은 값이 PUT 으로 나간다', (tester) async {
     final repo = await _openEdit(tester);
 
-    await tester.tap(find.text(l.actionSave).last);
+    await tester.tap(findText(l.actionSave).last);
     await tester.pumpAndSettle();
 
     expect(repo.updated, isNotNull, reason: '저장이 나가지 않았다');

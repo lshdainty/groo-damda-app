@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import '../support/plain_text.dart';
 
 Widget _app(Widget home) => MaterialApp(
   theme: GrooTheme.light(),
@@ -33,13 +34,13 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('저장'));
-    await tester.tap(find.text('저장')); // pump 없이 — 같은 프레임
+    await tester.tap(findText('저장'));
+    await tester.tap(findText('저장')); // pump 없이 — 같은 프레임
     await tester.pump(const Duration(seconds: 1));
     expect(calls, 1);
 
     // 끝난 뒤엔 다시 눌린다 — 검증 실패로 요청이 안 나간 경우 재시도가 돼야 한다.
-    await tester.tap(find.text('저장'));
+    await tester.tap(findText('저장'));
     await tester.pump(const Duration(seconds: 1));
     expect(calls, 2);
   });
@@ -59,8 +60,8 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('삭제'));
-    await tester.tap(find.text('삭제'));
+    await tester.tap(findText('삭제'));
+    await tester.tap(findText('삭제'));
     await tester.pump(const Duration(seconds: 1));
     expect(calls, 1);
   });
@@ -87,10 +88,10 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(findText('open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('확인'));
-    await tester.tap(find.text('확인'));
+    await tester.tap(findText('확인'));
+    await tester.tap(findText('확인'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(calls, 1);

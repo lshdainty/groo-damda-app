@@ -26,6 +26,7 @@ import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_trade_sheet.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import '../../support/plain_text.dart';
 
 const _invest = Asset(
   rowId: 12,
@@ -112,7 +113,7 @@ class _CapturingRepo extends AssetRepository {
 }
 
 Finder _submitButton(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 Future<_CapturingRepo> _openSheet(WidgetTester tester) async {
   final repo = _CapturingRepo();
@@ -142,7 +143,7 @@ Future<_CapturingRepo> _openSheet(WidgetTester tester) async {
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -184,8 +185,8 @@ void main() {
     await tester.tap(_submitButton(l.actionSave));
     await tester.pumpAndSettle();
 
-    expect(find.text('수량을 넣어주세요.'), findsOneWidget);
-    expect(find.text('거래대금을 넣어주세요.'), findsOneWidget);
+    expect(findText('수량을 넣어주세요.'), findsOneWidget);
+    expect(findText('거래대금을 넣어주세요.'), findsOneWidget);
     expect(repo.createCalled, isFalse);
   });
 }

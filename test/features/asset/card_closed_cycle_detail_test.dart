@@ -26,7 +26,9 @@ import 'package:groo_damda_app/features/card/domain/card_performance.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/overrides.dart';
 import '../../support/plain_text.dart';
+import '../../support/real_fonts.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 
 /// 결제 요청이 어떤 값으로 나가는지 잡아 둔다.
@@ -106,8 +108,8 @@ Future<void> _open(
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        ...extraOverrides,
+      // 시험이 준 덮개가 이긴다 — 같은 provider 를 두 번 덮으면 riverpod 3 이 멈춘다
+      overrides: withOverrides([
         assetsProvider.overrideWith((ref) async => [card]),
         hideCardProvider.overrideWith((ref, c) => false),
         cardBillingProvider.overrideWith((ref, id) async => billing),
@@ -127,7 +129,7 @@ Future<void> _open(
         ),
         expensesByAssetProvider.overrideWith((ref, key) async => usage),
         assetPeriodExpensesProvider.overrideWith((ref, key) async => usage),
-      ],
+      ], extraOverrides),
       child: MaterialApp(
         theme: GrooTheme.light(),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -150,7 +152,7 @@ Future<void> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -160,6 +162,9 @@ Finder _head(String amount) => find.byWidgetPredicate(
 );
 
 void main() {
+  // 200% 넘침은 실제 글꼴로 잰다(T5)
+  setUpAll(loadRealFonts);
+
   group('닫힌 회차 머리 — 지금 기록 합', () {
     testWidgets('기록이 더 많으면 나간 돈과 나머지를 말한다', (tester) async {
       await _open(
@@ -172,9 +177,9 @@ void main() {
       );
 
       expect(_head('155,000'), findsOneWidget);
-      expect(find.text('결제 완료'), findsOneWidget);
+      expect(findText('결제 완료'), findsOneWidget);
       expect(
-        find.text('계좌에서 나간 돈은 100,000원이에요. 나머지 55,000원은 기록만 남긴 금액이에요'),
+        findText('계좌에서 나간 돈은 100,000원이에요. 나머지 55,000원은 기록만 남긴 금액이에요'),
         findsOneWidget,
       );
     });
@@ -190,7 +195,7 @@ void main() {
       );
 
       expect(_head('70,000'), findsOneWidget);
-      expect(find.text('기록은 70,000원인데 계좌에서는 100,000원이 나갔어요'), findsOneWidget);
+      expect(findText('기록은 70,000원인데 계좌에서는 100,000원이 나갔어요'), findsOneWidget);
     });
 
     testWidgets('낸 돈이 0 이면 "결제 완료" 대신 "기록 회차"', (tester) async {
@@ -204,14 +209,14 @@ void main() {
       );
 
       expect(_head('25,000'), findsOneWidget);
-      expect(find.text('기록 회차'), findsOneWidget);
-      expect(find.text('결제 완료'), findsNothing);
+      expect(findText('기록 회차'), findsOneWidget);
+      expect(findText('결제 완료'), findsNothing);
       // "계좌에서 나간 돈은 0원이에요…" 는 "기록 회차" 와 같은 말이라 붙이지 않는다.
       expect(
         find.byKey(const ValueKey('closed-cycle-paid-line')),
         findsNothing,
       );
-      expect(find.textContaining('0원이에요'), findsNothing);
+      expect(findTextContaining('0원이에요'), findsNothing);
     });
 
     testWidgets('같으면 아래 한 줄이 없다', (tester) async {
@@ -228,7 +233,7 @@ void main() {
         find.byKey(const ValueKey('closed-cycle-paid-line')),
         findsNothing,
       );
-      expect(find.text('결제 완료'), findsOneWidget);
+      expect(findText('결제 완료'), findsOneWidget);
     });
 
     testWidgets('옛 서버(기록 합 없음)면 결제액 + 기록만 금액이 머리다', (tester) async {
@@ -263,9 +268,9 @@ void main() {
       ),
     );
 
-    expect(find.text('지금 결제'), findsNothing);
+    expect(findText('지금 결제'), findsNothing);
     // 한도 · 결제 설정 타일은 없다 — 수정은 머리 하나(I-17 47)
-    expect(find.text('한도 · 결제 설정'), findsNothing);
+    expect(findText('한도 · 결제 설정'), findsNothing);
   });
 
   const upcomingBilling = CardBilling(
@@ -279,21 +284,21 @@ void main() {
   // I-17 53 — 주 버튼을 막지 않고, 누르면 칸 아래에 오류가 뜬다.
   testWidgets('[지금 결제] 시트 — 0 원 · 예정액 초과는 누르면 칸 아래 오류', (tester) async {
     await _open(tester, billing: upcomingBilling);
-    await tester.tap(find.text('지금 결제'));
+    await tester.tap(findText('지금 결제'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('결제 예정액 40,000원을 지금 결제할까요?'), findsOneWidget);
-    expect(find.textContaining('10월 12일 결제 예정분이에요.'), findsOneWidget);
+    expect(findTextContaining('결제 예정액 40,000원을 지금 결제할까요?'), findsOneWidget);
+    expect(findTextContaining('10월 12일 결제 예정분이에요.'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), '0');
-    await tester.tap(find.text('결제하기'));
+    await tester.tap(findText('결제하기'));
     await tester.pumpAndSettle();
-    expect(find.text('결제 금액을 넣어주세요.'), findsOneWidget);
+    expect(findText('결제 금액을 넣어주세요.'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), '50000');
-    await tester.tap(find.text('결제하기'));
+    await tester.tap(findText('결제하기'));
     await tester.pumpAndSettle();
-    expect(find.text('결제 금액은 40,000원까지예요.'), findsOneWidget);
+    expect(findText('결제 금액은 40,000원까지예요.'), findsOneWidget);
   });
 
   // 요청은 그대로 — 잘못된 금액은 나가지 않고, 맞는 금액은 payCard(amount, paymentDate) 로 나간다.
@@ -306,16 +311,16 @@ void main() {
         assetRepositoryProvider.overrideWith((ref) async => repo),
       ],
     );
-    await tester.tap(find.text('지금 결제'));
+    await tester.tap(findText('지금 결제'));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), '50000');
-    await tester.tap(find.text('결제하기'));
+    await tester.tap(findText('결제하기'));
     await tester.pumpAndSettle();
     expect(repo.calls, isEmpty);
 
     await tester.enterText(find.byType(TextField), '40000');
-    await tester.tap(find.text('결제하기'));
+    await tester.tap(findText('결제하기'));
     await tester.pumpAndSettle();
     expect(repo.calls, hasLength(1));
     expect(repo.calls.single.id, 9);
@@ -332,8 +337,8 @@ void main() {
         cardBillingProvider.overrideWith((ref, id) async => throw Exception()),
       ],
     );
-    expect(find.text('청구 정보를 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('0원'), findsNothing);
+    expect(findText('청구 정보를 불러오지 못했어요'), findsOneWidget);
+    expect(findText('0원'), findsNothing);
   });
 
   // (10-30) 글자 200% 에서 넘침이 없다.
@@ -350,16 +355,21 @@ void main() {
   // I-17 54 — 고르기 시트: 연도 머리 + 라디오 줄, 누르면 바로 고르고 닫힌다.
   testWidgets('회차 단추는 결제 회차 고르기 시트를 연다', (tester) async {
     await _open(tester, billing: upcomingBilling);
-    await tester.tap(find.text('10월 12일 결제'));
+    await tester.tap(findText('10월 12일 결제'));
     await tester.pumpAndSettle();
 
-    expect(find.text('결제 회차'), findsOneWidget);
-    expect(find.text('2026년'), findsOneWidget);
-    expect(find.text('예정'), findsWidgets);
+    expect(findText('결제 회차'), findsOneWidget);
+    expect(findText('2026년'), findsOneWidget);
+    expect(findText('예정'), findsWidgets);
 
-    await tester.tap(find.text('10월 12일 결제').last);
+    // 회차가 하나뿐이다 — 고른 줄을 다시 누르면 고름이 바뀌지 않아 시트는 그대로다(ds 라디오 · 웹 ListRadioGroup 과 같다)
+    await tester.tap(findText('10월 12일 결제').last);
     await tester.pumpAndSettle();
-    expect(find.text('결제 회차'), findsNothing);
+    expect(findText('결제 회차'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('닫기').last);
+    await tester.pumpAndSettle();
+    expect(findText('결제 회차'), findsNothing);
   });
 
   testWidgets('다가오는 회차에서는 [지금 결제] 가 있다', (tester) async {
@@ -374,7 +384,7 @@ void main() {
       ),
     );
 
-    expect(find.text('지금 결제'), findsOneWidget);
+    expect(findText('지금 결제'), findsOneWidget);
   });
 
   // 금액 칸에 남은 청구액이 채워져 있는데 [결제하기] 가 꺼져 있었다 — 금액 칸을 한 번
@@ -390,7 +400,7 @@ void main() {
         upcomingPeriodEnd: '2026-09-30',
       ),
     );
-    await tester.tap(find.text('지금 결제'));
+    await tester.tap(findText('지금 결제'));
     await tester.pumpAndSettle();
 
     final pay = find.widgetWithText(PButton, '결제하기');
@@ -428,9 +438,9 @@ void main() {
       ),
     );
 
-    expect(find.text('QC90000 2/3회차'), findsOneWidget);
-    expect(find.text('원금 90,000원 · 기록만'), findsOneWidget);
-    expect(find.text('남은 할부 한 번에 정리'), findsNothing);
+    expect(findText('QC90000 2/3회차'), findsOneWidget);
+    expect(findText('원금 90,000원 · 기록만'), findsOneWidget);
+    expect(findText('남은 할부 한 번에 정리'), findsNothing);
   });
 
   group('[결제 취소] — 닫힌 회차·환급 나간 회차는 숨긴다(D6)', () {
@@ -457,7 +467,7 @@ void main() {
         ]),
       );
 
-      expect(find.text('결제 취소'), findsOneWidget);
+      expect(findText('결제 취소'), findsOneWidget);
     });
 
     testWidgets('결제일이 된 회차의 결제면 숨는다', (tester) async {
@@ -473,7 +483,7 @@ void main() {
         ]),
       );
 
-      expect(find.text('결제 취소'), findsNothing);
+      expect(findText('결제 취소'), findsNothing);
     });
 
     // 가장 최근 결제가 닫힌 회차의 자동 결제여도, 그 앞의 열린 회차 선결제는 무를 수
@@ -497,11 +507,11 @@ void main() {
         ]),
       );
 
-      expect(find.text('결제 취소'), findsOneWidget);
-      await tester.tap(find.text('결제 취소'));
+      expect(findText('결제 취소'), findsOneWidget);
+      await tester.tap(findText('결제 취소'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('2026-09-05에 낸'), findsOneWidget);
-      expect(find.textContaining('2026-09-12에 낸'), findsNothing);
+      expect(findTextContaining('2026-09-05에 낸'), findsOneWidget);
+      expect(findTextContaining('2026-09-12에 낸'), findsNothing);
     });
 
     testWidgets('서버가 닫힌 회차로 내려 준 회차의 결제는 고르지 않는다', (tester) async {
@@ -526,7 +536,7 @@ void main() {
         ),
       );
 
-      expect(find.text('결제 취소'), findsNothing);
+      expect(findText('결제 취소'), findsNothing);
     });
 
     testWidgets('그 회차에 환급이 나갔으면 숨는다', (tester) async {
@@ -549,7 +559,7 @@ void main() {
         ]),
       );
 
-      expect(find.text('결제 취소'), findsNothing);
+      expect(findText('결제 취소'), findsNothing);
     });
   });
 
@@ -596,12 +606,12 @@ void main() {
         ],
       );
 
-      expect(find.text('환불됨'), findsOneWidget);
-      expect(find.text('기록만'), findsOneWidget);
+      expect(findText('환불됨'), findsOneWidget);
+      expect(findText('기록만'), findsOneWidget);
       final refunded = tester.widget<Text>(findPlain('−11,000원'));
       expect(refunded.style?.decoration, TextDecoration.lineThrough);
       // 할부는 보조 줄에 개월 수를 붙인다 — 회차 청구와 행 금액이 왜 다른지.
-      expect(find.textContaining('할부 3개월'), findsOneWidget);
+      expect(findTextContaining('할부 3개월'), findsOneWidget);
       // 환불만 있는 날(8/10)은 일 합계가 없다 — 환불은 합계에서 빠진다.
       expect(findPlain('−11,000원'), findsOneWidget, reason: '행 금액 하나뿐');
     });
@@ -620,6 +630,6 @@ void main() {
       billing: const CardBilling(cardAssetRowId: 9, upcomingAmount: 125000),
     );
 
-    expect(find.text('결제일을 넣어주세요'), findsOneWidget);
+    expect(findText('결제일을 넣어주세요'), findsOneWidget);
   });
 }

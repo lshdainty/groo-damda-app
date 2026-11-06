@@ -37,7 +37,7 @@ Future<FakeTodoRepo> _open(
     textScale: scale,
     brightness: brightness,
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }

@@ -31,6 +31,7 @@ import 'package:groo_damda_app/features/sms/domain/sms_draft.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../../support/plain_text.dart';
 
 const _closedLine = '이미 결제가 끝난 회차예요. 기록만 바뀌고 계좌 잔액은 그대로예요.';
 
@@ -173,7 +174,7 @@ Future<void> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
 }
 
@@ -186,12 +187,12 @@ Future<void> _fill(WidgetTester tester) async {
 Future<void> _pickCard(WidgetTester tester) async {
   await tester.tap(find.byKey(const ValueKey('tx-row-asset')));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('현대카드').last);
+  await tester.tap(findText('현대카드').last);
   await tester.pumpAndSettle();
 }
 
 Finder _submit(String label) =>
-    find.ancestor(of: find.text(label), matching: find.byType(PButton)).last;
+    find.ancestor(of: findText(label), matching: find.byType(PButton)).last;
 
 /// 토스트가 스스로 닫히게 둔다 — 남은 타이머가 있으면 테스트가 끝나며 실패한다.
 Future<void> _drain(WidgetTester tester) async {
@@ -209,8 +210,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.created, 1);
-    expect(find.text('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
-    expect(find.text('잔액 고치기'), findsNothing, reason: '열린 회차 — 통장이 이미 맞다');
+    expect(findText('미리 낸 돈 중 30,000원이 계좌로 돌아왔어요.'), findsOneWidget);
+    expect(findText('잔액 고치기'), findsNothing, reason: '열린 회차 — 통장이 이미 맞다');
     await _drain(tester);
   });
 
@@ -223,8 +224,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.created, 1);
-    expect(find.textContaining('계좌로 돌아왔어요.'), findsNothing);
-    expect(find.text(_closedLine), findsNothing);
+    expect(findTextContaining('계좌로 돌아왔어요.'), findsNothing);
+    expect(findText(_closedLine), findsNothing);
   });
 
   testWidgets('닫힌 회차 새 입력은 저장 전 확인창만 — 저장 뒤 토스트·[잔액 고치기] 없음', (tester) async {
@@ -235,13 +236,13 @@ void main() {
     await tester.tap(_submit('추가'));
     await tester.pumpAndSettle();
     // 저장 전 확인창(같은 한 문구) — 저장.
-    expect(find.text(_closedLine), findsOneWidget);
-    await tester.tap(find.text('저장').last);
+    expect(findText(_closedLine), findsOneWidget);
+    await tester.tap(findText('저장').last);
     await tester.pumpAndSettle();
 
     expect(repo.created, 1);
-    expect(find.text(_closedLine), findsNothing, reason: '저장 뒤 토스트 없음');
-    expect(find.text('잔액 고치기'), findsNothing);
+    expect(findText(_closedLine), findsNothing, reason: '저장 뒤 토스트 없음');
+    expect(findText('잔액 고치기'), findsNothing);
   });
 
   testWidgets('결제계좌 없는 카드의 닫힌 회차 입력은 버튼도 토스트도 없다', (tester) async {
@@ -256,12 +257,12 @@ void main() {
 
     await tester.tap(_submit('추가'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('저장').last);
+    await tester.tap(findText('저장').last);
     await tester.pumpAndSettle();
 
     expect(repo.created, 1);
-    expect(find.text(_closedLine), findsNothing);
-    expect(find.text('잔액 고치기'), findsNothing);
+    expect(findText(_closedLine), findsNothing);
+    expect(findText('잔액 고치기'), findsNothing);
   });
 
   group('문자 저장', () {
@@ -288,12 +289,12 @@ void main() {
 
       await tester.tap(_submit('추가'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('저장').last);
+      await tester.tap(findText('저장').last);
       await tester.pumpAndSettle();
 
       expect(sms.committed, 1);
-      expect(find.text(_closedLine), findsNothing);
-      expect(find.text('잔액 고치기'), findsNothing);
+      expect(findText(_closedLine), findsNothing);
+      expect(findText('잔액 고치기'), findsNothing);
     });
 
     testWidgets('응답에 환급액이 실리면 알린다', (tester) async {
@@ -324,7 +325,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(sms.committed, 1);
-      expect(find.text('미리 낸 돈 중 4,000원이 계좌로 돌아왔어요.'), findsOneWidget);
+      expect(findText('미리 낸 돈 중 4,000원이 계좌로 돌아왔어요.'), findsOneWidget);
       await _drain(tester);
     });
   });

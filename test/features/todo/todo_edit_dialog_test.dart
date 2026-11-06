@@ -34,6 +34,7 @@ import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/input_button/p_input_button.dart';
 import 'package:groo_damda_app/shared/ds/select/p_select.dart';
+import '../../support/plain_text.dart';
 
 const _todo = Todo(rowId: 7, title: 'QA 할 일', category: '개인');
 const _untagged = Todo(rowId: 8, title: '태그 없는 할 일');
@@ -148,7 +149,7 @@ Future<_CapturingRepo> _openEdit(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return repo;
 }
@@ -344,7 +345,7 @@ void main() {
       expect(_t(l.sheetLeaveTitle), findsNothing);
       expect(_t(l.todoAdd), findsNothing, reason: '시트가 닫혔다');
 
-      await tester.tap(find.text('open'));
+      await tester.tap(findText('open'));
       await tester.pumpAndSettle();
       await tester.enterText(_titleField(), '쓰던 글');
       await tester.pumpAndSettle();

@@ -19,6 +19,7 @@ import 'package:groo_damda_app/features/preset/application/preset_providers.dart
 import 'package:groo_damda_app/features/preset/data/preset_repository.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import '../../support/plain_text.dart';
 
 const _category = ExpenseCategory(
   rowId: 5,
@@ -114,7 +115,7 @@ Future<(_FakeAssetRepo, _CapturingPresetRepo)> _open(
       ),
     ),
   );
-  await tester.tap(find.text('open'));
+  await tester.tap(findText('open'));
   await tester.pumpAndSettle();
   return (assetRepo, presetRepo);
 }
@@ -128,17 +129,17 @@ void main() {
   testWidgets('이체 칩으로 채워 저장하면 사용 기록이 오른다', (tester) async {
     final (assetRepo, presetRepo) = await _open(tester);
 
-    await tester.tap(find.text(l.expTypeTransfer));
+    await tester.tap(findText(l.expTypeTransfer));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('적금이체'));
+    await tester.tap(findText('적금이체'));
     await tester.pumpAndSettle();
 
     // 이 프리셋은 금액이 없다 — 1단계에 남아 금액 칸에 이번 달 금액을 적고 [다음] → [추가]
     await tester.enterText(find.byType(EditableText).first, '12345');
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l.actionNext));
+    await tester.tap(findText(l.actionNext));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(l.expAddShort).last);
+    await tester.tap(findText(l.expAddShort).last);
     await tester.pumpAndSettle();
 
     expect(assetRepo.created, isTrue, reason: '이체가 저장되지 않았다');

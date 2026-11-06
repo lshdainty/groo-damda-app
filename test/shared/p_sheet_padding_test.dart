@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/shared/widgets/p_modal.dart';
+import '../support/plain_text.dart';
 
 void main() {
   testWidgets('시트 제목은 좌 24 에서 시작한다', (tester) async {
@@ -47,14 +48,14 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('열기'));
+    await tester.tap(findText('열기'));
     await tester.pumpAndSettle();
 
-    final titleLeft = tester.getTopLeft(find.text('기간 선택')).dx;
+    final titleLeft = tester.getTopLeft(findText('기간 선택')).dx;
     expect(titleLeft, closeTo(PSpace.xl, 0.5));
 
     // 본문도 같은 지점에서 시작해야 제목과 한 줄로 맞는다.
-    final bodyLeft = tester.getTopLeft(find.text('본문')).dx;
+    final bodyLeft = tester.getTopLeft(findText('본문')).dx;
     expect(bodyLeft, closeTo(titleLeft, 0.5));
   });
 }

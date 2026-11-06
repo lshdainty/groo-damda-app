@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/ds/input_otp/p_input_otp.dart';
 
 import '../../support/design_spec.dart';
 import '../../support/spec_check.dart';
+import '../../support/plain_text.dart';
 
 const _description = '10분 안에 입력해주세요 · 5번 틀리면 다시 받아요.';
 const _error = '코드가 맞지 않거나 시간이 지났어요. 확인하거나 다시 받아주세요.';
@@ -222,11 +223,11 @@ void main() {
             if (want['description.content'] != text) {
               k.fail('description.content: 스펙 ${want['description.content']}');
             }
-            final desc = tester.widget<Text>(find.text(keepAll(text))).style!;
+            final desc = tester.widget<Text>(findText(keepAll(text))).style!;
             k.typo('description.typography', desc);
             k.color('description.foreground', desc.color!);
             expect(
-              find.text(keepAll(state == 'invalid' ? _description : _error)),
+              findText(keepAll(state == 'invalid' ? _description : _error)),
               findsNothing,
             );
 
@@ -238,7 +239,7 @@ void main() {
             k.px('resend.marginTop', b.top - fieldBottom);
             final label = want['resend.label'] as String;
             final shown = label.replaceAll('{n}', '52');
-            if (find.text(shown).evaluate().isEmpty) {
+            if (findText(shown).evaluate().isEmpty) {
               k.fail('resend.label: 기대 "$shown"');
             }
             expect(
@@ -303,8 +304,8 @@ void main() {
         final want = spec.resolve({'size': 'large'}, 'enabled');
         final k = SpecCheck(mode, want, 'placeholder ${mode.name}');
         await tester.pumpWidget(_host(mode, _Sample(clock: _Clock())));
-        expect(find.text('${want['placeholder.content']}'), findsOneWidget);
-        final style = tester.widget<Text>(find.text('6자리 숫자')).style!;
+        expect(findText('${want['placeholder.content']}'), findsOneWidget);
+        final style = tester.widget<Text>(findText('6자리 숫자')).style!;
         k.color('placeholder.foreground', style.color!);
         expect(k.failures, isEmpty);
       });
@@ -318,7 +319,7 @@ void main() {
         await tester.pumpWidget(
           _host(mode, _Sample(clock: _Clock(), disabled: true)),
         );
-        final style = tester.widget<Text>(find.text('6자리 숫자')).style!;
+        final style = tester.widget<Text>(findText('6자리 숫자')).style!;
         k.color('placeholder.foreground', style.color!);
         expect(k.failures, isEmpty);
         final tokens = mode == Brightness.dark
@@ -435,23 +436,23 @@ void main() {
       await tester.pumpWidget(
         _host(Brightness.light, _Sample(clock: clock, onResend: () => sent++)),
       );
-      expect(find.text('코드 받기'), findsOneWidget);
+      expect(findText('코드 받기'), findsOneWidget);
       await tester.tap(find.byType(PButton));
       await tester.pump();
       expect(sent, 1);
-      expect(find.text('다시 받기(60초)'), findsOneWidget);
+      expect(findText('다시 받기(60초)'), findsOneWidget);
       expect(tester.widget<PButton>(find.byType(PButton)).onPressed, isNull);
       // 1초마다 줄어든다
       clock.advance(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
-      expect(find.text('다시 받기(59초)'), findsOneWidget);
+      expect(findText('다시 받기(59초)'), findsOneWidget);
       clock.advance(const Duration(seconds: 58));
       await tester.pump(const Duration(seconds: 58));
-      expect(find.text('다시 받기(1초)'), findsOneWidget);
+      expect(findText('다시 받기(1초)'), findsOneWidget);
       // 0 이 되면 풀린다
       clock.advance(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
-      expect(find.text('다시 받기'), findsOneWidget);
+      expect(findText('다시 받기'), findsOneWidget);
       expect(tester.widget<PButton>(find.byType(PButton)).onPressed, isNotNull);
     });
 
@@ -546,7 +547,7 @@ void main() {
           ),
         );
         expect(tester.takeException(), isNull);
-        expect(find.text('다시 받기(5초)'), findsOneWidget);
+        expect(findText('다시 받기(5초)'), findsOneWidget);
         expect(tester.getSize(_frame).height, 52);
       });
     }

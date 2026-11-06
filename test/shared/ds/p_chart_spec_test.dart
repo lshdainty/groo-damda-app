@@ -17,6 +17,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
 
 import '../../support/design_spec.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('chart');
 
@@ -631,10 +632,10 @@ void main() {
       expect(fill.colors.first.a, closeTo(0.25, 0.01));
       expect(fill.colors.last.a, 0);
       // 눈금 글자 11 / 15 · 고정폭 · fg-neutral-subtle(축 하나)
-      final tick = _style(tester, find.text('1일'));
+      final tick = _style(tester, findText('1일'));
       _expectType(tick, want['tickLabel.typography'], tabular: true, why: '눈금');
       _expectColor(want['tickLabel.foreground'], mode, tick.color!, '눈금 색');
-      final yTick = _style(tester, find.text('0'));
+      final yTick = _style(tester, findText('0'));
       _expectColor(want['tickLabel.foreground'], mode, yTick.color!, '세로 눈금 색');
     });
 
@@ -645,7 +646,7 @@ void main() {
       await tester.pumpWidget(_host(mode, _line(dual: true), width: 400));
       await tester.pump(const Duration(seconds: 1));
       // 왼쪽 수입 blue · 오른쪽 지출 red · 가로축은 fg-neutral-subtle 그대로
-      final zeros = find.text('0');
+      final zeros = findText('0');
       expect(zeros, findsNWidgets(2));
       final colors = {
         for (final z in zeros.evaluate())
@@ -660,7 +661,7 @@ void main() {
             ? _spec.resolve({}, 'enabled')['tickLabel.foreground']
             : null,
         mode,
-        _style(tester, find.text('1일')).color!,
+        _style(tester, findText('1일')).color!,
         '가로축',
       );
       // 두 축의 0 이 같은 자리 · 같은 칸 수 — 기울기가 서로 다른 크기를 같은 높이에 그린다
@@ -1159,23 +1160,23 @@ void main() {
       await tester.tapAt(Offset(chart.left + 45, chart.center.dy));
       await tester.pump();
       expect(find.byKey(const ValueKey('chart-tooltip')), findsOneWidget);
-      expect(find.text('10월 1일'), findsOneWidget, reason: '머리');
-      expect(find.text('수입'), findsOneWidget);
-      expect(find.text('지출'), findsOneWidget);
-      expect(find.text('0원'), findsOneWidget);
-      expect(find.text('18,000원'), findsOneWidget);
+      expect(findText('10월 1일'), findsOneWidget, reason: '머리');
+      expect(findText('수입'), findsOneWidget);
+      expect(findText('지출'), findsOneWidget);
+      expect(findText('0원'), findsOneWidget);
+      expect(findText('18,000원'), findsOneWidget);
       // 가리킨 점 — 지금 가리킨 자리가 데이터에 실린다
       expect(_lineData(tester).lineBarsData.first.showingIndicators, [0]);
       // 오른쪽 끝 — 다른 날짜로 옮긴다
       await tester.tapAt(Offset(chart.right - 20, chart.center.dy));
       await tester.pump();
-      expect(find.text('10월 8일'), findsOneWidget);
-      expect(find.text('64,500원'), findsOneWidget);
+      expect(findText('10월 8일'), findsOneWidget);
+      expect(findText('64,500원'), findsOneWidget);
       // 손을 뗀 뒤에도 남는다
       await tester.pump(const Duration(seconds: 2));
       expect(find.byKey(const ValueKey('chart-tooltip')), findsOneWidget);
       // 다른 곳을 누르면 닫힌다
-      await tester.tap(find.text('바깥'));
+      await tester.tap(findText('바깥'));
       await tester.pump();
       expect(find.byKey(const ValueKey('chart-tooltip')), findsNothing);
       expect(_lineData(tester).lineBarsData.first.showingIndicators, isEmpty);
@@ -1360,8 +1361,8 @@ void main() {
       await tester.tapAt(Offset(pie.right - 10, pie.center.dy));
       await tester.pump();
       expect(find.byKey(const ValueKey('chart-tooltip')), findsOneWidget);
-      expect(find.text('식비'), findsOneWidget);
-      expect(find.text('700,000원'), findsOneWidget);
+      expect(findText('식비'), findsOneWidget);
+      expect(findText('700,000원'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('chart-tooltip-head')),
         findsNothing,
@@ -1470,12 +1471,12 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('chart-heatmap-cell-4-0')));
       await tester.pump();
-      expect(find.text('수요일 저녁 18~22시'), findsOneWidget);
-      expect(find.text('지출'), findsOneWidget);
+      expect(findText('수요일 저녁 18~22시'), findsOneWidget);
+      expect(findText('지출'), findsOneWidget);
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('chart-tooltip')),
-          matching: find.text('35,000원'),
+          matching: findText('35,000원'),
         ),
         findsOneWidget,
       );
@@ -1499,7 +1500,7 @@ void main() {
         findsOneWidget,
         reason: '손을 떼도 남는다',
       );
-      await tester.tap(find.text('바깥'));
+      await tester.tap(findText('바깥'));
       await tester.pump();
       expect(find.byKey(const ValueKey('chart-tooltip')), findsNothing);
     });
@@ -1573,8 +1574,8 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('chart-heatmap-cell-0-0')));
       await tester.pump();
-      expect(find.text('없음'), findsOneWidget);
-      expect(find.text('월 밤'), findsOneWidget);
+      expect(findText('없음'), findsOneWidget);
+      expect(findText('월 밤'), findsOneWidget);
     });
   });
 
@@ -1716,12 +1717,12 @@ void main() {
           ),
         ),
       );
-      expect(find.text('4,200,000원'), findsOneWidget);
-      expect(find.text('날짜'), findsOneWidget);
+      expect(findText('4,200,000원'), findsOneWidget);
+      expect(findText('날짜'), findsOneWidget);
       // 첫 열은 왼쪽 · 나머지는 오른쪽(숫자)
       expect(
-        tester.getTopLeft(find.text('10월 1일')).dx,
-        lessThan(tester.getTopLeft(find.text('18,000원')).dx),
+        tester.getTopLeft(findText('10월 1일')).dx,
+        lessThan(tester.getTopLeft(findText('18,000원')).dx),
       );
       handle.dispose();
     });
@@ -1919,7 +1920,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(seconds: 1));
-      final tick = find.text('−3,000만');
+      final tick = findText('−3,000만');
       expect(tick, findsOneWidget);
       expect(tester.getRect(tick).left, greaterThanOrEqualTo(0));
     });
@@ -1937,7 +1938,7 @@ void main() {
       final chart = tester.getRect(find.byType(LineChart));
       await tester.tapAt(Offset(chart.left + 100, chart.center.dy));
       await tester.pump();
-      expect(find.textContaining('126,000,000원'), findsOneWidget);
+      expect(findTextContaining('126,000,000원'), findsOneWidget);
     });
   });
 }

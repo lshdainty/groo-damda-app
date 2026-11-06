@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 import '../../support/design_spec.dart';
 import '../../support/spec_check.dart';
+import '../../support/plain_text.dart';
 
 final _spec = DesignSpec.load('floating-action-button');
 
@@ -310,7 +311,7 @@ void main() {
           hasTapAction: true,
         ),
       );
-      expect(find.text('할 일 추가'), findsNothing, reason: '보이는 글이 없다');
+      expect(findText('할 일 추가'), findsNothing, reason: '보이는 글이 없다');
       handle.dispose();
     });
 
