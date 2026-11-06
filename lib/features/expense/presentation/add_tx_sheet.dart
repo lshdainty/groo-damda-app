@@ -19,6 +19,7 @@ import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_krw.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
+import 'package:groo_damda_app/features/asset/presentation/pickers/asset_pick_gate.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_form_rows.dart';
@@ -758,20 +759,17 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final l = AppLocalizations.of(context);
     FocusScope.of(context).unfocus();
     final c = _input;
-    final assets = ref.read(assetsProvider).value ?? const <Asset>[];
     final bool transfer = c.type == 'TRANSFER';
-    final List<Asset> list;
-    if (transfer) {
-      list = [
-        for (final a in transferEligibleAssets(assets))
-          if (!to ? true : a.rowId != c.assetRowId) a,
-      ];
-    } else {
-      list = [
-        for (final a in assets)
-          if (allowTxAsset(a, c.paymentMethod, c.type)) a,
-      ];
-    }
+    // 후보는 시트 안에서 받은 목록으로 거른다 — 못 받았다가 [다시 시도] 로 받아 오면 시트를 닫지 않아도 채워진다
+    List<Asset> pool(List<Asset> assets) => transfer
+        ? [
+            for (final a in transferEligibleAssets(assets))
+              if (!to ? true : a.rowId != c.assetRowId) a,
+          ]
+        : [
+            for (final a in assets)
+              if (allowTxAsset(a, c.paymentMethod, c.type)) a,
+          ];
     final title = transfer
         ? (to ? l.transferToLabel : l.transferFromLabel)
         : (income ? l.expDepositAccount : l.expAccountCard);
@@ -780,20 +778,20 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         : (c.assetRowId ?? -1);
     final v = await _sheet<int>(
       title,
-      _AssetPickBody(
-        assets: list,
-        selected: selected,
-        label: title,
-        withNone: !transfer,
-        noneLabel: l.txfNoAccountOption,
-        emptyText: !transfer && c.paymentMethod.isNotEmpty && list.isEmpty
-            ? l.txfNoPickableAsset
-            : null,
-        failed:
-            ref.read(assetsProvider).hasError &&
-            !ref.read(assetsProvider).hasValue,
-        failedText: l.txfAssetLoadFailed,
-        onRetry: () => ref.invalidate(assetsProvider),
+      AssetPickGate(
+        builder: (_, assets) {
+          final list = pool(assets);
+          return _AssetPickBody(
+            assets: list,
+            selected: selected,
+            label: title,
+            withNone: !transfer,
+            noneLabel: l.txfNoAccountOption,
+            emptyText: !transfer && c.paymentMethod.isNotEmpty && list.isEmpty
+                ? l.txfNoPickableAsset
+                : null,
+          );
+        },
       ),
     );
     if (v == null || !mounted) return;
@@ -802,6 +800,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         if (to) {
           c.toAssetRowId = v;
           // 받는 자산이 대출이 아니게 되면 이자는 버린다
+          final assets = ref.read(assetsProvider).value ?? const <Asset>[];
           if (!isLoanTarget(assets, v)) c.interestCtrl.clear();
           _errs.to = null;
         } else {
@@ -2764,7 +2763,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
 // ─── 고르기 본문 — 카테고리 · 프리셋은 20-2 의 부품(CategoryPickBody · PresetPickBody)이다 ───
 
-/// 계좌 · 카드 고르기 — 줄 = Logo Tile 40 + 이름 + 설명 기관. 맨 앞 "계좌·카드 없음"(지출 · 수입).
+/// 계좌 · 카드 고르기 — 받은 뒤의 본문(실패 · 받는 중은 AssetPickGate). 줄 = Logo Tile 40 + 이름 + 설명 기관. 맨 앞 "계좌·카드 없음"(지출 · 수입).
 class _AssetPickBody extends StatelessWidget {
   const _AssetPickBody({
     required this.assets,
@@ -2772,9 +2771,6 @@ class _AssetPickBody extends StatelessWidget {
     required this.label,
     required this.withNone,
     required this.noneLabel,
-    required this.failed,
-    required this.failedText,
-    required this.onRetry,
     this.emptyText,
   });
 
@@ -2784,22 +2780,10 @@ class _AssetPickBody extends StatelessWidget {
   final bool withNone;
   final String noneLabel;
   final String? emptyText;
-  final bool failed;
-  final String failedText;
-  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    if (failed) {
-      return Padding(
-        padding: const EdgeInsets.all(PSpacing.globalGutter),
-        child: Text(
-          failedText,
-          style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
-        ),
-      );
-    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

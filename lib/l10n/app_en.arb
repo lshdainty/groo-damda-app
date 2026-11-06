@@ -4865,7 +4865,6 @@
   "recResumeFailed": "Couldn't turn the recurrence back on.",
   "recDeleteFailed": "Couldn't delete the recurring setting.",
   "recLoadFailed": "Could not load recurring transactions",
-  "recAssetLoadFailed": "Could not load accounts",
   "recEmptyTitle": "No recurring transactions",
   "recEmptyDesc": "Register money that moves on set days, like subscriptions or rent, and it records itself that day.",
   "recAddButton": "Add recurring transaction",

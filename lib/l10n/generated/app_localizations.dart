@@ -15997,12 +15997,6 @@ abstract class AppLocalizations {
   /// **'반복 거래를 불러오지 못했어요'**
   String get recLoadFailed;
 
-  /// No description provided for @recAssetLoadFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'계좌를 불러오지 못했어요'**
-  String get recAssetLoadFailed;
-
   /// No description provided for @recEmptyTitle.
   ///
   /// In ko, this message translates to:

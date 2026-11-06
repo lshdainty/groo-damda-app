@@ -12,6 +12,7 @@ import 'package:groo_damda_app/core/network/patch.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
+import 'package:groo_damda_app/features/asset/presentation/pickers/asset_pick_gate.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -440,9 +441,10 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
   );
 
   /// 계좌 · 카드 고르기 — 지금 규칙 그대로 전체 자산이다(거르지 않는다). 이체는 카드를 뺀 자산 · 받는 계좌는 보내는 계좌를 뺀다.
+  /// [pool] 은 받은 계좌 목록에서 후보를 고른다 — 시트 안에서 다시 받아 오면 그 목록으로 다시 거른다(AssetPickGate).
   Future<int?> _pickAsset({
     required String title,
-    required List<Asset> pool,
+    required List<Asset> Function(List<Asset> assets) pool,
     required int? selected,
     required bool withNone,
   }) {
@@ -455,14 +457,16 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
           title: title,
           closeLabel: l.actionClose,
           flushBody: true,
-          body: PickList<int>(
-            label: title,
-            selected: selected ?? (withNone ? _kNoAsset : null),
-            items: [
-              if (withNone)
-                PickItem<int>(value: _kNoAsset, title: l.presetNoAccount),
-              for (final a in pool) _assetItem(a),
-            ],
+          body: AssetPickGate(
+            builder: (_, assets) => PickList<int>(
+              label: title,
+              selected: selected ?? (withNone ? _kNoAsset : null),
+              items: [
+                if (withNone)
+                  PickItem<int>(value: _kNoAsset, title: l.presetNoAccount),
+                for (final a in pool(assets)) _assetItem(a),
+              ],
+            ),
           ),
         );
       },
@@ -473,7 +477,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
       title: l.presetAssetCard,
-      pool: _assets,
+      pool: (assets) => assets,
       selected: _assetRowId,
       withNone: true,
     );
@@ -488,7 +492,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
       title: l.presetFromAccount,
-      pool: transferEligibleAssets(_assets),
+      pool: transferEligibleAssets,
       selected: _assetRowId,
       withNone: false,
     );
@@ -508,8 +512,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
       title: l.presetToAccount,
-      pool: [
-        for (final a in transferEligibleAssets(_assets))
+      pool: (assets) => [
+        for (final a in transferEligibleAssets(assets))
           if (a.rowId != _assetRowId) a,
       ],
       selected: _toAssetRowId,

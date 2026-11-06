@@ -5137,7 +5137,6 @@
   "recResumeFailed": "반복을 다시 켜지 못했어요.",
   "recDeleteFailed": "반복 설정을 삭제하지 못했어요.",
   "recLoadFailed": "반복 거래를 불러오지 못했어요",
-  "recAssetLoadFailed": "계좌를 불러오지 못했어요",
   "recEmptyTitle": "반복 거래가 없어요",
   "recEmptyDesc": "구독 · 월세처럼 정해진 날 오가는 돈을 등록해 두면 그날 저절로 기록해요.",
   "recAddButton": "반복 거래 추가",
