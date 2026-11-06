@@ -66,7 +66,7 @@ class _SessionScopeState extends State<SessionScope> {
 
   @override
   void dispose() {
-    _failureObserver.reference.dispose();
+    _failureObserver.dispose();
     super.dispose();
   }
 
@@ -76,7 +76,10 @@ class _SessionScopeState extends State<SessionScope> {
     // 구간(빌드 포함)이 끝난 직후에 돌고, 다음 프레임보다는 늘 먼저다 — 앞사람
     // 컨테이너로 그려지는 프레임이 하나 더 끼지 않는다.
     scheduleMicrotask(() {
-      if (mounted) setState(() => _generation++);
+      if (!mounted) return;
+      // 앞 컨테이너의 실패 · 타이머를 새 계정 화면으로 끌고 가지 않는다(검수 L5)
+      _failureObserver.reset();
+      setState(() => _generation++);
     });
   }
 

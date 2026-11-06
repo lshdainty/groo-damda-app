@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/misc.dart'
     show ProviderBase, ProviderException;
 
 import 'package:groo_damda_app/app/query_failure/query_failure_marks.dart';
+import 'package:groo_damda_app/core/lifecycle/screen_visibility.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
@@ -33,6 +34,9 @@ const Duration kQueryFailureGather = Duration(milliseconds: 300);
 ///
 /// 값 없는 처음 받기 실패(참조가 아닌 것)는 여기서 말하지 않는다 — 그 자리 Result Section 이 맡는다.
 ///
+/// 같은 조회(provider · family 인자 단위)가 연달아 실패하면 첫 실패만 알린다 — 한 번 성공하면 다시 센다(디자인시스템 판단 가,
+/// 웹과 같은 규칙). 폴링은 지금처럼 빠진다(단계 4 띠가 맡는다).
+///
 /// 한 조회의 실패를 받아 만드는 조회(`ref.watch(x.future)`)는 같은 오류를 [ProviderException] 으로 감싸 한 번 더 실패한다 —
 /// 감싼 원래 오류로 보고, 원래 조회가 폴링 · 참조였으면 그 갈래를 따른다(폴링 값으로 만든 평가액이 스낵바를 띄우지 않게).
 final class QueryFailureObserver extends ProviderObserver {
@@ -48,16 +52,45 @@ final class QueryFailureObserver extends ProviderObserver {
   /// 폴링 · 참조 조회가 낸 오류 — 그 값을 받아 만드는 조회가 같은 오류로 실패하면 같은 갈래로 본다.
   final Expando<bool> _quietErrors = Expando<bool>('query-failure-quiet');
 
+  /// 지금 실패해 있는 조회 — 한 번 알린 조회는 성공할 때까지 다시 알리지 않는다(판단 가).
+  final Set<ProviderBase<Object?>> _failing = {};
+
+  /// 컨테이너를 갈 때(계정 전환 · 세션 재생성) — 떠 있는 타이머 · 붙잡은 실패를 끊는다(검수 L5).
+  void reset() {
+    _failing.clear();
+    refresh.cancel();
+    reference.cancel();
+  }
+
+  void dispose() {
+    refresh.cancel();
+    reference.dispose();
+  }
+
   @override
   void didUpdateProvider(
     ProviderObserverContext context,
     Object? previousValue,
     Object? newValue,
   ) {
+    // 탭(화면)이 바뀌었다 — 앞 화면에서 붙잡은 참조 실패를 버린다(검수 M1: 지켜보는 조회만 다시 알린다, 구독자 수를 묻는
+    // 공개 API 가 없어 화면이 바뀌는 때로 대신한다)
+    if (identical(context.provider, activeShellRouteProvider)) {
+      reference.clearPending();
+      return;
+    }
     if (newValue is! AsyncValue<Object?>) return;
     final provider = context.provider;
+    // 성공하면 다시 센다(판단 가)
+    if (!newValue.hasError && !newValue.isLoading) _failing.remove(provider);
+    final error = newValue.hasError ? _origin(newValue.error) : null;
     if (isReferenceProvider(provider)) {
       _markQuiet(newValue);
+      // 401 은 로그인 흐름이 맡는다 — 참조 알림도 거른다(검수 L1)
+      if (error is ApiException && error.isUnauthorized) {
+        reference.forget(provider);
+        return;
+      }
       reference.update(context.container, provider, newValue);
       return;
     }
@@ -66,18 +99,17 @@ final class QueryFailureObserver extends ProviderObserver {
       _markQuiet(newValue);
       return;
     }
-    final error = _origin(newValue.error);
     if (error != null && (_quietErrors[error] ?? false)) return;
     // 값이 없는 처음 받기 실패는 그 자리 Result Section 이 맡는다
     if (!newValue.hasValue) return;
     if (error is ApiException && error.isUnauthorized) return;
+    // 같은 조회가 연달아 실패하면 첫 실패만(판단 가)
+    if (!_failing.add(provider)) return;
     refresh.notify();
   }
 
-  @override
-  void didDisposeProvider(ProviderObserverContext context) {
-    reference.forget(context.provider);
-  }
+  // didDisposeProvider 는 쓰지 않는다 — riverpod 3 은 invalidate(다시 받기)에도 부른다. 거기서 비우면 "연달아 실패" 를 세지
+  // 못한다(판단 가). 붙잡은 실패는 성공 · 탭 이동 · 컨테이너 교체(reset)로 비운다.
 
   void _markQuiet(AsyncValue<Object?> value) {
     if (!value.hasError) return;
@@ -123,6 +155,14 @@ class RefreshFailureNotice {
     _gather = Timer(kQueryFailureGather, _show);
   }
 
+  /// 떠 있는 타이머를 끊는다(컨테이너를 갈 때 · 끝낼 때).
+  void cancel() {
+    _gather?.cancel();
+    _gather = null;
+    _shown?.cancel();
+    _shown = null;
+  }
+
   void _show() {
     _gather = null;
     final host = _host.currentState;
@@ -142,7 +182,9 @@ class RefreshFailureNotice {
 /// - [kQueryFailureGather] 동안 모아 한 번. 그사이 다시 받아 성공한 것은 알리지 않는다.
 /// - 떠 있는 동안([PSnackbar.durationWithAction] 6초)은 다시 띄우지 않는다. 그 창 안에 새 실패가 있었으면 창이 닫힐 때 한 번
 ///   다시 판단한다.
-/// - 시트가 열려 있거나 화면에 실패 Result Section 이 보이면 쉰다(그 자리가 맡는다) — 모두 사라지면 한 번 다시 판단한다.
+/// - 시트가 열려 있거나 화면에 실패 Result Section 이 보이면 쉰다(그 자리가 맡는다) — 모두 사라지면 그동안 들어온 새 실패가
+///   있을 때만 띄운다. 탭(화면)이 바뀌면 붙잡은 실패를 버린다(검수 M1).
+/// - 같은 조회가 연달아 실패하면 첫 실패만(판단 가). 401 은 거른다(검수 L1).
 /// - [다시 시도] 는 값 없이 실패해 있는 참조 조회만 다시 받는다(지켜보는 화면이 없는 것은 비워 두기만 하고 다음에 읽을 때 받는다).
 class ReferenceFailureNotice {
   ReferenceFailureNotice({
@@ -164,9 +206,13 @@ class ReferenceFailureNotice {
 
   /// 값 없이 실패해 있는 참조 조회 → 그 컨테이너.
   final Map<ProviderBase<Object?>, ProviderContainer> _failed = {};
+
+  /// 아직 알리지 않은 새 실패 — 알리면 비운다. 보류가 풀릴 때 · 6초 창이 닫힐 때 이것이 있을 때만 다시 띄운다(검수 M1 —
+  /// 앞서 알린 · 다른 화면의 실패로 시트를 닫을 때마다 다시 뜨지 않게). 같은 조회가 연달아 실패해도 처음 한 번만 들어온다
+  /// (판단 가 — 성공하면 [_failed] 에서 빠져 다시 센다).
+  final Set<ProviderBase<Object?>> _pending = {};
   Timer? _gather;
   Timer? _shown;
-  bool _missed = false;
 
   bool get _held => _openSheets.value > 0 || _shownFailures.value > 0;
 
@@ -177,31 +223,47 @@ class ReferenceFailureNotice {
   ) {
     if (value.hasValue) {
       _failed.remove(provider);
+      _pending.remove(provider);
       return;
     }
     if (!value.hasError) return;
-    _failed[provider] = container;
     // 다시 받는 중(앞 오류를 든 로딩)은 새 실패가 아니다
-    if (value.isLoading) return;
-    if (_shown != null) {
-      _missed = true;
+    if (value.isLoading) {
+      _failed[provider] = container;
       return;
     }
+    // 이미 실패해 있던 조회가 또 실패했다 — 첫 실패만 알린다(판단 가)
+    if (_failed.containsKey(provider)) return;
+    _failed[provider] = container;
+    _pending.add(provider);
+    if (_shown != null || _held) return;
     _gather ??= Timer(kQueryFailureGather, _show);
   }
 
-  void forget(ProviderBase<Object?> provider) => _failed.remove(provider);
+  void forget(ProviderBase<Object?> provider) {
+    _failed.remove(provider);
+    _pending.remove(provider);
+  }
+
+  /// 화면(탭)이 바뀌었다 — 앞 화면의 실패는 다시 알리지 않는다(검수 M1).
+  void clearPending() {
+    _pending.clear();
+    _failed.clear();
+    _gather?.cancel();
+    _gather = null;
+  }
 
   void _show() {
     _gather = null;
-    if (_shown != null || _held || _failed.isEmpty) return;
+    if (_shown != null || _held || _pending.isEmpty) return;
     final host = _host.currentState;
     final ctx = _host.currentContext;
     if (host == null || ctx == null || !ctx.mounted) return;
+    _pending.clear();
     _shown = Timer(PSnackbar.durationWithAction, () {
       _shown = null;
-      if (_missed && _gather == null) {
-        _missed = false;
+      // 창 안에 새 실패가 있었으면 창이 닫힐 때 한 번 다시 판단한다
+      if (_pending.isNotEmpty && _gather == null) {
         _gather = Timer(kQueryFailureGather, _show);
       }
     });
@@ -220,14 +282,23 @@ class ReferenceFailureNotice {
   }
 
   void _onSheetsChanged() {
-    if (_held || _gather != null || _shown != null || _failed.isEmpty) return;
+    if (_held || _gather != null || _shown != null || _pending.isEmpty) return;
     _gather = Timer(kQueryFailureGather, _show);
+  }
+
+  /// 타이머 · 붙잡은 실패를 끊는다(컨테이너를 갈 때, 검수 L5).
+  void cancel() {
+    _gather?.cancel();
+    _gather = null;
+    _shown?.cancel();
+    _shown = null;
+    _failed.clear();
+    _pending.clear();
   }
 
   void dispose() {
     _openSheets.removeListener(_onSheetsChanged);
     _shownFailures.removeListener(_onSheetsChanged);
-    _gather?.cancel();
-    _shown?.cancel();
+    cancel();
   }
 }

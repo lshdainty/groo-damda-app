@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/query_failure/query_failure_marks.dart';
 import 'package:groo_damda_app/app/query_failure/query_failure_observer.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/lifecycle/screen_visibility.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -45,6 +46,7 @@ ApiException _api(int status, [String code = 'X']) =>
 
 class _Harness {
   late ProviderContainer container;
+  late QueryFailureObserver observer;
 }
 
 Future<_Harness> _pump(
@@ -64,7 +66,8 @@ Future<_Harness> _pump(
       shownFailures: shownFailures ?? ValueNotifier(0),
     ),
   );
-  addTearDown(observer.reference.dispose);
+  addTearDown(observer.dispose);
+  h.observer = observer;
   await tester.pumpWidget(
     ProviderScope(
       // 앱과 같다 — riverpod 기본 재시도를 끈다(app/session_scope.dart appProviderRetry)
@@ -133,6 +136,50 @@ void main() {
       pPullToRefreshInFlight.value += 1;
       addTearDown(() => pPullToRefreshInFlight.value = 0);
       await _refetch(tester, h, [a]);
+      expect(findText(_refresh), findsNothing);
+    });
+
+    testWidgets('같은 조회가 연달아 실패하면 첫 실패만 — 성공하면 다시 센다, 다른 조회는 따로(판단 가)', (
+      tester,
+    ) async {
+      final a = _Q('a');
+      final b = _Q('b');
+      final h = await _pump(tester, watch: [a.provider, b.provider]);
+      a.fail = _api(500);
+      await _refetch(tester, h, [a]);
+      expect(findText(_refresh), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      expect(findText(_refresh), findsNothing);
+      // 같은 a 가 또 실패 — 띄우지 않는다
+      await _refetch(tester, h, [a]);
+      expect(findText(_refresh), findsNothing);
+      // 다른 b 의 첫 실패 — 띄운다
+      b.fail = _api(500);
+      await _refetch(tester, h, [b]);
+      expect(findText(_refresh), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      // a 가 한 번 성공한 뒤 다시 실패 — 다시 센다
+      a.fail = null;
+      await _refetch(tester, h, [a]);
+      a.fail = _api(500);
+      await _refetch(tester, h, [a]);
+      expect(findText(_refresh), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('컨테이너를 갈면(reset) 모으던 알림을 끊는다(검수 L5)', (tester) async {
+      final a = _Q('a');
+      final h = await _pump(tester, watch: [a.provider]);
+      a.fail = _api(500);
+      h.container.invalidate(a.provider);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 10));
+      h.observer.reset();
+      await tester.pump(kQueryFailureGather);
+      await tester.pump(const Duration(milliseconds: 400));
       expect(findText(_refresh), findsNothing);
     });
 
@@ -318,6 +365,58 @@ void main() {
         expect(pResultFailureShown.value, 0);
       },
     );
+
+    testWidgets('앞서 알린 실패로는 시트를 닫을 때 다시 뜨지 않는다(검수 M1)', (tester) async {
+      final open = ValueNotifier<int>(0);
+      catsFail = _api(500);
+      await _pump(
+        tester,
+        watch: [categoriesProvider],
+        overrides: overrides,
+        openSheets: open,
+      );
+      await tester.pump(kQueryFailureGather);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(findText(_reference), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 7));
+      expect(findText(_reference), findsNothing);
+      // 다른 화면에서 시트를 열고 닫는다 — 새 실패가 없으니 띄우지 않는다
+      open.value = 1;
+      await tester.pump();
+      open.value = 0;
+      await tester.pump(kQueryFailureGather);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(findText(_reference), findsNothing);
+    });
+
+    testWidgets('캘린더에서 실패(시트 보류 중) → 탭을 옮기고 시트를 닫으면 뜨지 않는다(검수 M1)', (
+      tester,
+    ) async {
+      final open = ValueNotifier<int>(1);
+      catsFail = _api(500);
+      final h = await _pump(
+        tester,
+        watch: [categoriesProvider, activeShellRouteProvider],
+        overrides: overrides,
+        openSheets: open,
+      );
+      await tester.pump(kQueryFailureGather);
+      // 탭 이동(가계부로)
+      h.container.read(activeShellRouteProvider.notifier).setPath('/expense');
+      await tester.pump();
+      open.value = 0;
+      await tester.pump(kQueryFailureGather);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(findText(_reference), findsNothing);
+    });
+
+    testWidgets('401 은 참조 알림도 거른다(로그인 흐름, 검수 L1)', (tester) async {
+      catsFail = _api(401, 'AUTH_001');
+      await _pump(tester, watch: [categoriesProvider], overrides: overrides);
+      await tester.pump(kQueryFailureGather);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(findText(_reference), findsNothing);
+    });
 
     testWidgets('시트 수는 PBottomSheet 가 센다(열면 1 · 닫으면 0)', (tester) async {
       expect(pBottomSheetOpenCount.value, 0);
