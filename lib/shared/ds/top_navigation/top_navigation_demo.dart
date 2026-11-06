@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/catalog/demo_kit.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 /// 바를 화면 위에 놓은 모양 — 위 안전 영역([top])을 흉내 낸다. 가장자리가 보이게 1px 틀을 두른다(틀은 견본 것).
@@ -71,7 +72,7 @@ class _HideAmountState extends State<_HideAmount> {
   }
 }
 
-/// 카탈로그(/dev/ds) — Root(큰 제목 + 검색 · 알림 점) · Standard(← + 제목 + 글 버튼 · ✕ · ☰), 오른쪽 아이콘 0 ~ 3개 · 글 버튼,
+/// 카탈로그(/dev/ds) — Root(큰 제목 + 검색 · 알림 점) · Standard(← + 제목 + 글 버튼 · ✕ · ☰ · 제목 자리 검색칸), 오른쪽 아이콘 0 ~ 3개 · 글 버튼,
 /// 켜고 끄는 단추(금액 가리기 — 눌러 본다), 막힘, 안전 영역(위 47), 가장 나쁜 값(아주 긴 제목 + 아이콘 셋 · 글 버튼, 폰 폭).
 /// 누름(상자 바탕 + 2px 축소)은 직접 눌러 본다.
 class TopNavigationDemo extends StatelessWidget {
@@ -126,6 +127,30 @@ class TopNavigationDemo extends StatelessWidget {
                 ),
                 actions: [
                   PTopNavigationTextButton(label: '완료', onPressed: noop),
+                ],
+              ),
+            ),
+            // 거래 검색 — 제목 자리에 검색칸(상자형 medium 40), 화면 이름 "검색" 은 보이지 않는 머리말
+            _Frame(
+              child: PTopNavigation.search(
+                title: '검색',
+                leading: PTopNavigationIconButton.back(
+                  label: '뒤로',
+                  onPressed: noop,
+                ),
+                search: const PInput(
+                  size: PInputSize.medium,
+                  semanticLabel: '거래 검색',
+                  placeholder: '거래 검색',
+                  prefixIcon: LucideIcons.search,
+                  clearable: true,
+                ),
+                actions: [
+                  PTopNavigationIconButton(
+                    icon: LucideIcons.slidersHorizontal,
+                    label: '고급 필터',
+                    onPressed: noop,
+                  ),
                 ],
               ),
             ),

@@ -1,7 +1,7 @@
 // 4 텍스트 필드(Field · Input · Textarea)가 스펙 값(test/fixtures/design_spec/{field,input,textarea}.json)대로인지 —
 // 조합 × 상태 × 라이트 · 다크를 모두 돈다. 웹은 같은 JSON 을 크로미움에서 잰다(desk-front `npm run ds:check`).
 //
-// 앱은 늘 large 다 — medium · responsive(1280 이상 데스크톱 웹)는 재지 않는다. 문장으로 된 값은 아래 동작 테스트가
+// 앱은 늘 large 다 — medium 은 상단 바 검색칸에서만 쓰고(같이 잰다), responsive(1280 이상 데스크톱 웹)는 재지 않는다. 문장으로 된 값은 아래 동작 테스트가
 // 본다 — Textarea 의 maxHeight("자리마다") · resize(손잡이 없음). Field 의 form(사이 24 · 16 · 열)은 Field 를 쌓는
 // 화면의 값이라 재지 않는다(웹 검사기도 같다).
 import 'package:flutter/material.dart';
@@ -292,6 +292,7 @@ void main() {
       List<String> failures,
     ) async {
       final variant = PInputVariant.values.byName(combo['variant']!);
+      final size = PInputSize.values.byName(combo['size']!);
       final underline = variant == PInputVariant.underline;
       final disabled = state == 'disabled';
       final readOnly = state == 'readonly';
@@ -307,6 +308,7 @@ void main() {
               PInput(
                 key: empty,
                 variant: variant,
+                size: size,
                 semanticLabel: '금액',
                 placeholder: '금액',
                 prefixIcon: LucideIcons.search,
@@ -318,6 +320,7 @@ void main() {
               PInput(
                 key: filled,
                 variant: variant,
+                size: size,
                 semanticLabel: '금액',
                 initialValue: '12,000',
                 suffixText: '원',
@@ -432,18 +435,22 @@ void main() {
     }
 
     for (final mode in Brightness.values) {
-      testWidgets('${mode.name} — 모양 × 크기(large) × 상태가 스펙 값이다', (tester) async {
+      testWidgets('${mode.name} — 모양 × 크기(large · medium) × 상태가 스펙 값이다', (
+        tester,
+      ) async {
         final failures = <String>[];
-        // 앱은 늘 large — medium · responsive 는 데스크톱 웹 몫
+        // 앱은 늘 large — medium 은 상단 바 검색칸 한 자리(top-navigation.md 검색칸), responsive 는 데스크톱 웹 몫
         for (final combo in _input.combos(['variant'])) {
-          for (final state in _input.states) {
-            await check(
-              tester,
-              mode,
-              {...combo, 'size': 'large'},
-              state,
-              failures,
-            );
+          for (final size in ['large', 'medium']) {
+            for (final state in _input.states) {
+              await check(
+                tester,
+                mode,
+                {...combo, 'size': size},
+                state,
+                failures,
+              );
+            }
           }
         }
         if (failures.isNotEmpty) {
