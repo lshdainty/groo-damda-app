@@ -244,6 +244,67 @@ void main() {
     }
   }
 
+  for (final mode in [Brightness.light, Brightness.dark]) {
+    testWidgets(
+      '${mode.name} — 로딩이 막힘보다 먼저다: 저장 중 onPressed 를 비워도 누름 색 위 진행 원(비활성 색 아님)',
+      (tester) async {
+        Future<Color?> bgOf(PButton b) async {
+          await tester.pumpWidget(
+            _host(mode, KeyedSubtree(key: UniqueKey(), child: b)),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+          final box = find.descendant(
+            of: find.byType(PButton),
+            matching: find.byType(Container),
+          );
+          return (tester
+                      .widget<DecoratedBox>(
+                        find
+                            .descendant(
+                              of: box,
+                              matching: find.byType(DecoratedBox),
+                            )
+                            .last,
+                      )
+                      .decoration
+                  as BoxDecoration)
+              .color;
+        }
+
+        for (final variant in PButtonVariant.values) {
+          final withTap = await bgOf(
+            PButton(
+              label: '저장',
+              variant: variant,
+              loading: true,
+              onPressed: () {},
+            ),
+          );
+          final noTap = await bgOf(
+            PButton(
+              label: '저장',
+              variant: variant,
+              loading: true,
+              onPressed: null,
+            ),
+          );
+          final disabled = await bgOf(
+            PButton(label: '저장', variant: variant, onPressed: null),
+          );
+          expect(noTap, withTap, reason: '$variant — 로딩 색');
+          // 바탕을 칠하는 변형만 — 테두리 · ghost 는 로딩 · 비활성 모두 바탕이 없다(button.yaml)
+          if (!{
+            PButtonVariant.ghost,
+            PButtonVariant.brandOutline,
+            PButtonVariant.neutralOutline,
+          }.contains(variant)) {
+            expect(noTap == disabled, isFalse, reason: '$variant — 비활성 색이 아니다');
+          }
+        }
+      },
+    );
+  }
+
   testWidgets('로딩이면 누르기를 삼킨다 — 두 번 제출 방지', (tester) async {
     var taps = 0;
     await tester.pumpWidget(

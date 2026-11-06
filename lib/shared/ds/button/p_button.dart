@@ -403,10 +403,12 @@ class _PButtonState extends State<PButton> {
     final c = context.colors;
     final s = _sizes[widget.size]!;
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    final state = !_enabled
-        ? PButtonState.disabled
-        : widget.loading
+    // 로딩이 막힘보다 먼저다 — 저장 중 호출처가 onPressed 를 비워도(막힘) 누름 색 위 진행 원으로 그린다(button.yaml:76 ·
+    // 134). 누르기는 로딩이 이미 막는다
+    final state = widget.loading
         ? PButtonState.loading
+        : !_enabled
+        ? PButtonState.disabled
         : _pressed
         ? PButtonState.pressed
         : PButtonState.enabled;
