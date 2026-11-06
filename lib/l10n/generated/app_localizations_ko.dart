@@ -5240,22 +5240,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get searchAdvancedFilter => '고급 필터';
 
   @override
-  String get searchHint => '거래 검색...';
+  String get searchAdvancedOn => '고급 필터, 적용 중';
 
   @override
-  String get searchStartHint => '시작';
+  String get searchHeading => '검색';
 
   @override
-  String get searchEndHint => '종료';
+  String get searchHint => '거래 검색';
 
   @override
-  String get searchFailed => '검색 실패';
+  String get searchTypeGroup => '거래 종류';
 
   @override
-  String get searchEmptyHint => '키워드, 가맹점, 메모로 검색하세요';
+  String get searchBadAmount => '최소 금액을 최대 금액보다 작게 해주세요';
 
   @override
-  String get searchNoResults => '결과가 없습니다';
+  String get searchFailed => '검색하지 못했어요';
+
+  @override
+  String get searchFailedDesc => '잠시 뒤 다시 시도해주세요.';
+
+  @override
+  String get searchEmptyHint => '키워드, 가맹점, 메모로 검색해보세요';
+
+  @override
+  String get searchNoResults => '결과가 없어요';
 
   @override
   String get statsTabTrend => '추이';

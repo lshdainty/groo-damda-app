@@ -59,7 +59,7 @@ TextStyle topNavigationTitleStyle(PTopNavigationType type, Color color) =>
 /// 하나에 모은다(Menu Sheet — 이름 "{화면 이름} 더보기").
 ///
 /// 뒤로 가기는 스스로 처리하지 않는다 — 왼쪽 버튼의 콜백만 받는다(셸이 pop · 상위 화면 이동을 정한다). 제목은
-/// `Semantics(header: true)` — 화면 이름을 머리로 읽는다.
+/// `Semantics(header: true)` — 화면 이름을 머리로 읽는다. 거래 검색 화면은 제목 자리에 검색칸을 둔다([PTopNavigation.search]).
 class PTopNavigation extends StatelessWidget {
   PTopNavigation({
     super.key,
@@ -71,6 +71,7 @@ class PTopNavigation extends StatelessWidget {
          type == PTopNavigationType.standard || leading == null,
          'root(탭 첫 화면)에는 왼쪽 버튼이 없다',
        ),
+       search = null,
        assert(
          actions.every((a) => a is PTopNavigationIconButton)
              ? actions.length <= 3
@@ -79,7 +80,27 @@ class PTopNavigation extends StatelessWidget {
          '오른쪽은 아이콘 버튼 3개까지(2개 권장) 또는 글 버튼 하나 — 섞지 않는다',
        );
 
+  /// 제목 자리에 검색칸을 두는 standard 바 — 거래 검색 화면(top-navigation.md "검색칸" · Migration notes "Desk 앱 — 제목 위젯
+  /// 슬롯 + 보이지 않는 머리말"). 칸([search] — Text Field 상자형 medium 40 · 앞 돋보기 · 지우기)은 ← 다음 6 에서 시작해 오른쪽
+  /// 자리 앞 8 까지 늘어나고 바 56 의 가운데(위아래 8)에 선다. 화면 이름 대신 칸이 서므로 [title]("검색")은 보이지 않는 머리말
+  /// (`header` · `headingLevel 1`)로만 읽힌다. 칸의 글자도 바처럼 1.2배까지만 따른다.
+  PTopNavigation.search({
+    super.key,
+    required this.title,
+    required Widget this.search,
+    this.leading,
+    this.actions = const [],
+  }) : type = PTopNavigationType.standard,
+       assert(
+         actions.every((a) => a is PTopNavigationIconButton) &&
+             actions.length <= 3,
+         '검색 바의 오른쪽은 아이콘 버튼 3개까지(2개 권장)',
+       );
+
   final PTopNavigationType type;
+
+  /// 제목 자리의 검색칸 — [PTopNavigation.search] 만. 있으면 [title] 은 보이지 않는 머리말이다.
+  final Widget? search;
 
   /// 화면 이름 — 짧은 명사("알림" · "카드 혜택"), 마침표 없이.
   final String title;
@@ -117,25 +138,33 @@ class PTopNavigation extends StatelessWidget {
         child: Row(
           children: [
             ?leading,
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(left: titleLeft),
-                child: Semantics(
-                  header: true,
-                  // 안드로이드는 headingLevel > 0 일 때만 머리말로 잡는다(제목 이동) — 화면 제목은 1단계
-                  headingLevel: 1,
-                  child: Text(
-                    title,
-                    key: const ValueKey('top-navigation-title'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                    textScaler: _scaler(context),
-                    style: topNavigationTitleStyle(type, c.fgNeutral),
+            if (search != null)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: titleLeft),
+                  child: _SearchSlot(heading: title, child: search!),
+                ),
+              )
+            else
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: titleLeft),
+                  child: Semantics(
+                    header: true,
+                    // 안드로이드는 headingLevel > 0 일 때만 머리말로 잡는다(제목 이동) — 화면 제목은 1단계
+                    headingLevel: 1,
+                    child: Text(
+                      title,
+                      key: const ValueKey('top-navigation-title'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      textScaler: _scaler(context),
+                      style: topNavigationTitleStyle(type, c.fgNeutral),
+                    ),
                   ),
                 ),
               ),
-            ),
             if (actions.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(left: kTopNavigationTitleGap),
@@ -144,6 +173,42 @@ class PTopNavigation extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 검색칸 자리 — 보이지 않는 머리말(화면 이름) 위에 칸을 세운다. 머리말은 칸과 같은 자리를 차지해 읽는 순서가 바의 ← 다음이다.
+class _SearchSlot extends StatelessWidget {
+  const _SearchSlot({required this.heading, required this.child});
+
+  final String heading;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: Semantics(
+            key: const ValueKey('top-navigation-search-heading'),
+            container: true,
+            header: true,
+            headingLevel: 1,
+            label: heading,
+            child: const SizedBox.expand(),
+          ),
+        ),
+        // 바의 제목 · 글 버튼과 같은 1.0 ~ 1.2 — 글자를 줄인 설정에서도 칸 글만 작아지지 않는다
+        MediaQuery.withClampedTextScaling(
+          minScaleFactor: 1,
+          maxScaleFactor: kTopNavigationMaxTextScale,
+          child: KeyedSubtree(
+            key: const ValueKey('top-navigation-search'),
+            child: child,
+          ),
+        ),
+      ],
     );
   }
 }

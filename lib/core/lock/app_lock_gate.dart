@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import 'package:groo_damda_app/app/theme/spacing.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
-import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 
 /// 앱 잠금 게이트 — `MaterialApp.router` 의 builder 로 라우터 전체를 감싼다.
 ///
@@ -52,6 +51,31 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  /// 아래(라우터)가 마지막으로 알린 "뒤로가기를 받을 수 있나" — 잠긴 동안은 위로 올리지 않고 쥐고 있다가 풀릴 때 돌려준다.
+  bool _childCanHandlePop = false;
+
+  /// 잠긴 동안 기기 뒤로가기(옛 방식 popRoute)는 아무것도 하지 않는다 — 덮개 아래 라우트를 pop 하지 않는다. 게이트는 라우터의
+  /// 조상이라 관찰자로 먼저 등록되어 라우터보다 먼저 묻힌다(binding.handlePopRoute 는 등록 순서로 묻고 true 에서 멈춘다).
+  @override
+  Future<bool> didPopRoute() async => ref.read(appLockedProvider);
+
+  /// 예측형 뒤로가기 — 잠긴 동안은 플랫폼에 "프레임워크가 뒤로가기를 받지 않는다"(canHandlePop false)를 알린다. 그러면 OS 가
+  /// 앱을 내리고(홈 첫 화면의 뒤로가기와 같은 길) Flutter 의 라우트 · 예측형 전환은 불리지 않는다. 풀리면 아래가 마지막으로
+  /// 알린 값을 다시 올린다.
+  bool _onNavigation(NavigationNotification n) {
+    _childCanHandlePop = n.canHandlePop;
+    return ref.read(appLockedProvider);
+  }
+
+  void _reportCanHandlePop(bool locked) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      NavigationNotification(
+        canHandlePop: !locked && _childCanHandlePop,
+      ).dispatch(context);
+    });
   }
 
   @override
@@ -114,6 +138,7 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
       // 잠기는 순간 자동 프롬프트 — 단 포그라운드일 때만. 백그라운드 진입으로 잠긴
       // 경우는 여기서 띄우면 안 되고(화면 밖 프롬프트), resumed 핸들러가 띄운다.
       // null 은 아직 lifecycle 이벤트가 안 온 콜드 스타트 극초반 — 포그라운드로 본다.
+      if (next != prev) _reportCanHandlePop(next);
       final ls = WidgetsBinding.instance.lifecycleState;
       if (next &&
           prev != true &&
@@ -127,7 +152,18 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
     return Stack(
       fit: StackFit.expand,
       children: [
-        widget.child,
+        // 잠긴 동안 뒤 화면은 보조 기술 · 키보드 초점에서 뺀다 — 덮개 아래 내용을 읽거나 누르지 못하게. 감싸는 틀은 늘 두어
+        // 잠그고 풀 때 뒤 화면의 상태가 새로 만들어지지 않는다.
+        ExcludeSemantics(
+          excluding: locked,
+          child: ExcludeFocus(
+            excluding: locked,
+            child: NotificationListener<NavigationNotification>(
+              onNotification: _onNavigation,
+              child: widget.child,
+            ),
+          ),
+        ),
         if (locked)
           _LockScreen(onUnlock: () => _maybeAuthenticate(auto: false)),
       ],
@@ -135,10 +171,13 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
   }
 }
 
-/// 잠금 화면 — 콘텐츠 전체를 덮는 불투명 표면.
+/// 잠금 화면 — 콘텐츠 전체를 덮는 불투명 표면. 해지 완료 화면과 같은 틀(셸 밖 흰 면 하나 · DESIGN.desk.md 셸 밖 화면): 가운데
+/// Result Section(자물쇠 · 화면 제목 머리말 1단계 · 설명) + 바닥 [잠금 해제] Button large 전체 폭(지문 아이콘) — 이 화면의 일은
+/// 잠금을 푸는 것 하나이고 그게 다음 여정의 핵심 행동이라 바닥 버튼이다(result-section.md "버튼의 위계" Bottom CTA, I-wrap-b1
+/// 결정 안 A). 폭 420 까지.
 ///
 /// 프롬프트는 게이트가 자동으로 띄우고, 취소·불일치로 닫힌 뒤에는 이 화면의
-/// 버튼으로 다시 부른다.
+/// 버튼으로 다시 부른다. 셸(라우터) 밖이라 화면 제목은 이 머리말이 맡는다.
 class _LockScreen extends StatelessWidget {
   const _LockScreen({required this.onUnlock});
 
@@ -146,44 +185,46 @@ class _LockScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: t.bgSurface,
+      key: const ValueKey('app-lock-screen'),
+      backgroundColor: context.colors.bgLayerDefault,
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: PSpace.x24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: t.bgBrandSubtle,
-                    shape: BoxShape.circle,
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: PResultSection(
+                        icon: LucideIcons.lock300,
+                        // 화면 제목이라 머리말 1단계
+                        headingLevel: 1,
+                        title: l.appLockTitle,
+                        description: l.appLockLockedDesc,
+                      ),
+                    ),
                   ),
-                  alignment: Alignment.center,
-                  child: Icon(LucideIcons.lock, size: 28, color: t.fgBrand),
                 ),
-                const SizedBox(height: PSpace.x20),
-                Text(
-                  l.appLockTitle,
-                  style: PTypo.h3.copyWith(color: t.fgPrimary),
-                ),
-                const SizedBox(height: PSpace.x8),
-                Text(
-                  l.appLockLockedDesc,
-                  textAlign: TextAlign.center,
-                  style: PTypo.bodySm.copyWith(color: t.fgSecondary),
-                ),
-                const SizedBox(height: PSpace.x32),
-                PButton(
-                  label: l.appLockUnlockAction,
-                  icon: LucideIcons.fingerprint,
-                  size: PButtonSize.lg,
-                  onPressed: onUnlock,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    PSpacing.x6,
+                    0, // 결과 ↔ 버튼은 결과의 아래 안쪽 16 만(해지 완료 화면과 같다)
+                    PSpacing.x6,
+                    PSpacing.x6,
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: PButton(
+                      key: const ValueKey('app-lock-unlock'),
+                      label: l.appLockUnlockAction,
+                      size: PButtonSize.large,
+                      prefixIcon: LucideIcons.fingerprint,
+                      onPressed: onUnlock,
+                    ),
+                  ),
                 ),
               ],
             ),

@@ -10,6 +10,8 @@ import 'package:groo_damda_app/features/subscription/application/subscription_pr
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_gate.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import '../../support/plain_text.dart';
 
 Future<void> _open(
@@ -59,4 +61,41 @@ void main() {
     expect(findText('증권 정보를 불러오지 못했어요'), findsNothing);
     expect(findText('증권 본문'), findsOneWidget);
   });
+
+  testWidgets(
+    '불러오는 중 — 틀(상단 바 "증권") + 가운데 ds Progress Circle 40, Material 원 없음',
+    (tester) async {
+      final pending = Completer<MyFeatures>();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            myFeaturesLoadProvider.overrideWith((ref) => pending.future),
+          ],
+          child: MaterialApp(
+            theme: GrooTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('ko'),
+            home: const SecuritiesGate(child: Text('증권 본문')),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      final circle = find.byKey(const ValueKey('securities-gate-loading'));
+      expect(circle, findsOneWidget);
+      expect(
+        tester.widget<PProgressCircle>(circle).size,
+        PProgressCircleSize.s40,
+      );
+      expect(find.byType(PTopNavigation), findsOneWidget);
+      expect(findText('증권'), findsOneWidget);
+      // 콘텐츠 영역(상단 바 아래)의 가운데
+      final body = tester.getRect(
+        find.byKey(const ValueKey('screen-band-body')),
+      );
+      expect(tester.getCenter(circle).dy, closeTo(body.center.dy, 0.5));
+    },
+  );
 }

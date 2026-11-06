@@ -13,7 +13,11 @@ const List<FontFeature> _tabular = [FontFeature.tabularFigures()];
 /// 모양 — 상자(기본) · 밑줄(화면에 입력이 하나뿐일 때 — 금액을 먼저 받는 화면 · 목록 위 검색 · 초대 코드 · 잠금 해제).
 enum PInputVariant { outline, underline }
 
-/// 모양마다의 값(input.yaml 모양 × 크기). 앱은 늘 large — medium(40) · responsive 는 1280 이상 데스크톱 웹 몫이다.
+/// 크기 — large(기본, 상자 52 · 밑줄 40) · medium(상자 40 · 밑줄 34). 앱은 늘 large 이고 medium 은 상단 바 검색칸(바 56 안 —
+/// top-navigation.md "검색칸") 한 자리만 쓴다. responsive(1280 이상 데스크톱 웹)는 앱에 없다.
+enum PInputSize { large, medium }
+
+/// 모양마다의 값(input.yaml 모양 × 크기).
 typedef _InputSize = ({
   double minHeight,
   double radius,
@@ -36,6 +40,17 @@ const _InputSize _outlineLarge = (
   clear: 22,
 );
 
+const _InputSize _outlineMedium = (
+  minHeight: 40,
+  radius: PRounded.r2,
+  paddingX: PSpacing.x3_5,
+  paddingY: 0,
+  gap: PSpacing.x2,
+  text: PTypography.t4,
+  icon: 16,
+  clear: 18,
+);
+
 // 밑줄 — 글자가 한 단계 크고(t6) 좌우 여백 · 모서리가 없다
 const _InputSize _underlineLarge = (
   minHeight: 40,
@@ -48,6 +63,17 @@ const _InputSize _underlineLarge = (
   clear: 22,
 );
 
+const _InputSize _underlineMedium = (
+  minHeight: 34,
+  radius: 0,
+  paddingX: 0,
+  paddingY: PSpacing.x1_5,
+  gap: PSpacing.x2,
+  text: PTypography.t5,
+  icon: 20,
+  clear: 18,
+);
+
 /// Input(Text Input) — 한 줄 글 · 숫자를 직접 치는 입력칸. 구조는 SEED Text Input(2026-10-01), 수치 원본은
 /// groo-design `specs/components/input.yaml`(값은 `test/fixtures/design_spec/input.json`). 웹(desk-front
 /// `src/shared/ds/input`)과 같은 값이다. 옛 위젯(lib/shared/widgets/p_text_input.dart)과는 따로다.
@@ -55,7 +81,8 @@ const _InputSize _underlineLarge = (
 /// 라벨 · 설명 · 오류 · 글자 수는 [PField] 가 둘레에서 그린다 — Field 안에 두면 이름 · 설명 · 상태를 받는다.
 /// Field 밖(목록 위 검색칸)이면 [semanticLabel] 이 이름이다.
 ///
-/// 크기 — 앱은 늘 large: 상자 52(모서리 12 · 좌우 16 · 사이 10 · 글자 t5) · 밑줄 40(위아래 8 · 글자 t6).
+/// 크기 — 앱은 늘 large: 상자 52(모서리 12 · 좌우 16 · 사이 10 · 글자 t5) · 밑줄 40(위아래 8 · 글자 t6). 상단 바 검색칸만
+///   [size] medium: 상자 40(모서리 8 · 좌우 14 · 사이 8 · 글자 t4 · 아이콘 16 · 지우기 18).
 /// 상태 — 투명 바탕 · 안쪽 1px stroke-neutral-weak. 포커스는 안쪽 2px stroke-neutral-contrast(터치로 눌러도),
 ///   오류는 안쪽 2px stroke-critical-solid(포커스해도 그대로) — 굵어져도 내용이 밀리지 않고 색만 d2 로 나타난다.
 ///   비활성 · 읽기 전용은 bg-disabled 바탕(흐리게 하지 않는다), 비활성 글자 · 아이콘은 fg-disabled, 읽기 전용은
@@ -81,6 +108,7 @@ class PInput extends PTextControl {
     super.autofocus,
     super.inputFormatters,
     this.variant = PInputVariant.outline,
+    this.size = PInputSize.large,
     this.prefixText,
     this.prefixIcon,
     this.suffixText,
@@ -97,6 +125,9 @@ class PInput extends PTextControl {
   });
 
   final PInputVariant variant;
+
+  /// 크기 — 기본 large. medium 은 상단 바 검색칸만([PInputSize]).
+  final PInputSize size;
 
   /// 앞 글자 — https:// · 만 · −.
   final String? prefixText;
@@ -159,7 +190,10 @@ class _PInputState extends PTextControlState<PInput> {
     final c = context.colors;
     final l10n = AppLocalizations.of(context);
     final underline = widget.variant == PInputVariant.underline;
-    final s = underline ? _underlineLarge : _outlineLarge;
+    final medium = widget.size == PInputSize.medium;
+    final s = underline
+        ? (medium ? _underlineMedium : _underlineLarge)
+        : (medium ? _outlineMedium : _outlineLarge);
     final disabled = this.disabled;
     final readOnly = this.readOnly;
 

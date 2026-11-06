@@ -230,8 +230,14 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
     final max = maxGraphemeCount;
     final placeholder = widget.placeholder;
     final message = field?.message;
+    final name = widget.semanticLabel ?? field?.label;
     final parts = <String>[
-      if (_empty && placeholder != null && placeholder.isNotEmpty) placeholder,
+      // 예시 글이 이름과 같으면 다시 싣지 않는다 — "거래 검색, 편집 상자, 거래 검색" 처럼 두 번 읽히지 않게
+      if (_empty &&
+          placeholder != null &&
+          placeholder.isNotEmpty &&
+          placeholder != name)
+        placeholder,
       for (final affix in affixes)
         if (affix != null && affix.isNotEmpty) affix,
       if (message != null && message.isNotEmpty) message,

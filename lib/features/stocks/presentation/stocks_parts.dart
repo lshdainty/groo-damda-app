@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/async/stale_value_callout.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_donut.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
+import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
@@ -353,18 +354,30 @@ class StocksSearchEntry extends StatelessWidget {
         PSpacing.x6,
         0,
       ),
-      child: Semantics(
-        button: true,
-        label: l.stocksSearch,
-        excludeSemantics: true,
+      // 누르는 자리 — ds PressArea. 누르는 동안 바탕 bg-layer-default-pressed + 내용 2px 축소(Input Button 의 누름과 같다).
+      // Material 물결은 두지 않는다
+      child: PressArea(
+        key: const ValueKey('stocks-search-entry'),
+        enabled: true,
         onTap: onTap,
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: c.strokeNeutralWeak)),
-            ),
+        touchMin: 0,
+        semantics: (child, enabled, tap) => Semantics(
+          container: true,
+          button: true,
+          label: l.stocksSearch,
+          excludeSemantics: true,
+          onTap: tap,
+          child: child,
+        ),
+        builder: (context, pressed, size) => Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: pressed ? c.bgLayerDefaultPressed : const Color(0x00000000),
+            border: Border(bottom: BorderSide(color: c.strokeNeutralWeak)),
+          ),
+          child: PressScale(
+            pressed: pressed,
+            size: size,
             child: Row(
               children: [
                 Icon(LucideIcons.search, size: 24, color: c.fgNeutralSubtle),

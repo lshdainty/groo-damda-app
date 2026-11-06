@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_month_model.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_tone.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 
 /// 폰 달력 격자 — 칸 높이 103 고정 · 칸마다 위 1px 선 · 칸 안 글자 칩(I-09 9 10).
 /// 격자가 화면보다 길면 화면이 스크롤하고, 마지막 주 아래에 탭 바 보상을 둔다.
@@ -314,55 +315,59 @@ class CalendarDayCell extends StatelessWidget {
       ),
     );
 
-    return Semantics(
-      container: true,
-      button: true,
-      excludeSemantics: true,
-      label: '${monthDayDow(day)}, ${l.calEventTotalCount(cell.total)}',
+    // 누르는 자리 — ds PressArea(누름 · 키보드). 누르는 동안 칸 바탕이 bg-layer-default-pressed(DESIGN.md 눌림 = 역할의
+    // -pressed 색, 원장 주 띠 날짜 칸과 같다). Material 물결은 두지 않는다. 날짜 칸이라 줄지 않는다(date-picker.md).
+    return PressArea(
+      key: const ValueKey('calendar-day-cell'),
+      enabled: true,
       onTap: onTap,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: onTap,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: c.strokeNeutralSubtle)),
-            ),
-            // 위 2 = 선 1 + 1
-            child: Padding(
-              padding: const EdgeInsets.only(top: kCalendarCellTopPad),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(child: dayNumber),
-                  const SizedBox(height: kCalendarChipGap),
-                  for (final slot in cell.slots)
-                    slot == null
-                        // 띠가 줄을 맞추려고 남긴 빈 줄 — 칩과 같은 높이
-                        ? SizedBox(height: metrics.chip + metrics.gap)
-                        : _EventChip(slot: slot, height: metrics.chip),
-                  if (cell.hidden > 0)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: _chipPadX,
-                      ),
-                      // 개수라 말줄임 대신 칸 폭에 맞춰 줄여 보인다(글자 200% 에서도 "+3개" 가 읽힌다)
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          l.calMoreEvents(cell.hidden),
-                          maxLines: 1,
-                          softWrap: false,
-                          style: PTypography.t2.copyWith(
-                            color: c.fgNeutralMuted,
-                            fontWeight: FontWeight.w700,
-                          ),
+      touchMin: 0,
+      semantics: (child, enabled, tap) => Semantics(
+        container: true,
+        button: true,
+        excludeSemantics: true,
+        label: '${monthDayDow(day)}, ${l.calEventTotalCount(cell.total)}',
+        onTap: tap,
+        child: child,
+      ),
+      builder: (context, pressed, _) => ColoredBox(
+        color: pressed ? c.bgLayerDefaultPressed : const Color(0x00000000),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: c.strokeNeutralSubtle)),
+          ),
+          // 위 2 = 선 1 + 1
+          child: Padding(
+            padding: const EdgeInsets.only(top: kCalendarCellTopPad),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(child: dayNumber),
+                const SizedBox(height: kCalendarChipGap),
+                for (final slot in cell.slots)
+                  slot == null
+                      // 띠가 줄을 맞추려고 남긴 빈 줄 — 칩과 같은 높이
+                      ? SizedBox(height: metrics.chip + metrics.gap)
+                      : _EventChip(slot: slot, height: metrics.chip),
+                if (cell.hidden > 0)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: _chipPadX),
+                    // 개수라 말줄임 대신 칸 폭에 맞춰 줄여 보인다(글자 200% 에서도 "+3개" 가 읽힌다)
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        l.calMoreEvents(cell.hidden),
+                        maxLines: 1,
+                        softWrap: false,
+                        style: PTypography.t2.copyWith(
+                          color: c.fgNeutralMuted,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
         ),

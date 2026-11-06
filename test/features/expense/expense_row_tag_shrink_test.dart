@@ -50,4 +50,69 @@ void main() {
     expect(items.map((t) => t.shrink).toList(), [1, 2, 0, 0]);
     expect(items.last.label, '09:30');
   });
+
+  Future<List<PTag>> tagsOf(WidgetTester tester, Expense e) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [hideCardProvider.overrideWith((ref, card) => false)],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: Scaffold(
+            body: Consumer(
+              builder: (c, ref, _) => ExpenseRow(
+                expense: e,
+                category: null,
+                flags: ref.watch(maskFlagsProvider('ledger.list')),
+                interactive: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    return tester.widget<PTagGroup>(find.byType(PTagGroup)).items;
+  }
+
+  testWidgets(
+    '계좌가 없으면 "-" 를 찍지 않고 그 조각을 뺀다 — "식비 · 08:30"(웹 ExpenseRow 와 같다)',
+    (tester) async {
+      for (final asset in [null, '', ' ']) {
+        final items = await tagsOf(
+          tester,
+          Expense(
+            rowId: 1,
+            categoryName: '식비',
+            assetName: asset,
+            expenseType: 'EXPENSE',
+            amount: 4500,
+            merchant: '숲길 커피',
+            expenseDate: '2026-11-05T08:30:00',
+          ),
+        );
+        expect(items.map((t) => t.label).toList(), [
+          '식비',
+          '08:30',
+        ], reason: '계좌 $asset');
+      }
+    },
+  );
+
+  testWidgets('계좌가 있으면 분류 · 계좌 · 시각 차례', (tester) async {
+    final items = await tagsOf(
+      tester,
+      const Expense(
+        rowId: 1,
+        categoryName: '식비',
+        assetName: '숲빛은행 입출금',
+        expenseType: 'EXPENSE',
+        amount: 4500,
+        merchant: '숲길 커피',
+        expenseDate: '2026-11-05T08:30:00',
+      ),
+    );
+    expect(items.map((t) => t.label).toList(), ['식비', '숲빛은행 입출금', '08:30']);
+  });
 }

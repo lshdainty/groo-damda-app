@@ -5349,19 +5349,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchAdvancedFilter => 'Advanced filter';
 
   @override
-  String get searchHint => 'Search transactions...';
+  String get searchAdvancedOn => 'Advanced filter, applied';
 
   @override
-  String get searchStartHint => 'Start';
+  String get searchHeading => 'Search';
 
   @override
-  String get searchEndHint => 'End';
+  String get searchHint => 'Search transactions';
+
+  @override
+  String get searchTypeGroup => 'Transaction type';
+
+  @override
+  String get searchBadAmount => 'Make the minimum smaller than the maximum';
 
   @override
   String get searchFailed => 'Search failed';
 
   @override
-  String get searchEmptyHint => 'Search by keyword, merchant, or note';
+  String get searchFailedDesc => 'Please try again in a moment.';
+
+  @override
+  String get searchEmptyHint => 'Search by keyword, merchant, or memo';
 
   @override
   String get searchNoResults => 'No results';

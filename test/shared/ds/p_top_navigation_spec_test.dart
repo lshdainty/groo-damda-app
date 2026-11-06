@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/notification_badge/p_notification_badge.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/top_navigation_demo.dart';
@@ -37,6 +39,10 @@ Widget _host(
 }) {
   return MaterialApp(
     theme: mode == Brightness.dark ? GrooTheme.dark() : GrooTheme.light(),
+    // 견본의 검색칸(PInput)이 지우기 이름을 번역 문구에서 읽는다
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('ko'),
     builder: (context, app) => MediaQuery(
       data: MediaQuery.of(context).copyWith(
         padding: padding,
@@ -803,6 +809,105 @@ void main() {
         tester.widget<PNotificationBadge>(find.byType(PNotificationBadge)).size,
         PNotificationBadgeSize.small,
       );
+    });
+  });
+
+  group('검색칸(제목 자리)', () {
+    Widget searchHost(TextScaler scaler, {List<Widget>? actions}) =>
+        MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          builder: (context, app) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: scaler),
+            child: app!,
+          ),
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 390,
+                child: PTopNavigation.search(
+                  title: '검색',
+                  leading: PTopNavigationIconButton.back(
+                    label: '뒤로',
+                    onPressed: () {},
+                  ),
+                  search: const PInput(
+                    size: PInputSize.medium,
+                    semanticLabel: '거래 검색',
+                    placeholder: '거래 검색',
+                    prefixIcon: LucideIcons.search,
+                    clearable: true,
+                  ),
+                  actions:
+                      actions ??
+                      [
+                        PTopNavigationIconButton(
+                          icon: LucideIcons.slidersHorizontal,
+                          label: '고급 필터',
+                          onPressed: () {},
+                        ),
+                      ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+    testWidgets('칸은 ← 다음 6(화면 끝 56)부터 오른쪽 버튼 앞 8 까지 · 높이 40 · 바 가운데', (
+      tester,
+    ) async {
+      await tester.pumpWidget(searchHost(TextScaler.noScaling));
+      final want = _spec.resolve(const {}, 'enabled');
+      final field = tester.getRect(find.byType(PInput));
+      final bar = tester.getRect(find.byKey(const ValueKey('top-navigation')));
+      final action = tester.getRect(_iconButtonBox.last);
+      expect(field.left, closeTo(56, 0.5));
+      expect(field.right, closeTo(action.left - kTopNavigationTitleGap, 0.5));
+      expect(field.height, closeTo(want['searchField.height']! as num, 0.5));
+      expect(field.center.dy, closeTo(bar.center.dy, 0.5));
+      expect(bar.height, 56);
+      // 칸은 Text Field 상자형 medium(40) 이다
+      final input = tester.widget<PInput>(find.byType(PInput));
+      expect(input.size, PInputSize.medium);
+      expect(input.variant, PInputVariant.outline);
+    });
+
+    testWidgets('화면 이름은 보이지 않는 머리말 1단계 "검색" — 글은 그리지 않는다', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(searchHost(TextScaler.noScaling));
+      expect(
+        tester.getSemantics(
+          find.byKey(const ValueKey('top-navigation-search-heading')),
+        ),
+        isSemantics(label: '검색', isHeader: true),
+      );
+      expect(findText('검색'), findsNothing);
+      expect(find.byKey(const ValueKey('top-navigation-title')), findsNothing);
+      handle.dispose();
+    });
+
+    testWidgets('글자 크기 설정을 제목과 같은 1.0 ~ 1.2 로만 따르고 바 높이는 56 그대로', (
+      tester,
+    ) async {
+      for (final (scale, expected) in [(0.8, 1.0), (1.1, 1.1), (2.0, 1.2)]) {
+        await tester.pumpWidget(searchHost(TextScaler.linear(scale)));
+        final scaler = MediaQuery.textScalerOf(
+          tester.element(find.byType(PInput)),
+        );
+        expect(
+          scaler.scale(10),
+          closeTo(10 * expected, 1e-6),
+          reason: '배율 $scale',
+        );
+        expect(
+          tester.getRect(find.byKey(const ValueKey('top-navigation'))).height,
+          56,
+        );
+        expect(tester.takeException(), isNull);
+      }
     });
   });
 
