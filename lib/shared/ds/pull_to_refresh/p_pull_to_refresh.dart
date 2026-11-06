@@ -13,6 +13,10 @@ const double kPullToRefreshThreshold = 88;
 /// 당긴 거리 = 손가락 이동 × 0.75. pull-to-refresh.yaml `root.multiplier`.
 const double kPullToRefreshMultiplier = 0.75;
 
+/// 지금 돌고 있는 당겨서 새로 고침 수 — 그동안 난 조회 실패는 이 자리가 스낵바 "새로 고치지 못했어요." + [다시 시도] 로
+/// 알리므로, 앱 공용 "새로 고치지 못했어요." 는 띄우지 않는다(같은 글이 두 번 뜨지 않게, I-wrap-b2b 2-1).
+final ValueNotifier<int> pPullToRefreshInFlight = ValueNotifier<int>(0);
+
 /// 지금 어디까지 왔는가 — 테스트와 호출부가 읽는다.
 enum PPullToRefreshPhase { idle, pulling, ready, refreshing }
 
@@ -168,10 +172,13 @@ class PPullToRefreshState extends State<PPullToRefresh>
   Future<void> _refresh() async {
     _setState(PPullToRefreshPhase.refreshing);
     _animateTo(kPullToRefreshThreshold);
+    pPullToRefreshInFlight.value += 1;
     try {
       await widget.onRefresh();
     } catch (_) {
       if (mounted) _notifyFailed();
+    } finally {
+      pPullToRefreshInFlight.value -= 1;
     }
     if (!mounted) return;
     _animateTo(

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/features/stocks/application/securities_retry.dart
 import 'package:groo_damda_app/features/stocks/application/stocks_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import '../support/plain_text.dart';
 
@@ -118,6 +119,18 @@ void main() {
       await _refetch(tester, h, [a]);
       expect(findText(_refresh), findsOneWidget);
       await tester.pumpAndSettle(const Duration(seconds: 5));
+    });
+
+    testWidgets('당겨서 새로 고침이 도는 동안의 실패는 그 자리가 알린다 — 공용 글은 띄우지 않는다', (
+      tester,
+    ) async {
+      final a = _Q('a');
+      final h = await _pump(tester, watch: [a.provider]);
+      a.fail = _api(500);
+      pPullToRefreshInFlight.value += 1;
+      addTearDown(() => pPullToRefreshInFlight.value = 0);
+      await _refetch(tester, h, [a]);
+      expect(findText(_refresh), findsNothing);
     });
 
     testWidgets('값이 없는 처음 받기 실패는 띄우지 않는다(그 자리 Result Section)', (tester) async {

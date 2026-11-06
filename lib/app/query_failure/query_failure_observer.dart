@@ -10,6 +10,7 @@ import 'package:groo_damda_app/app/query_failure/query_failure_marks.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
+import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 같은 순간 여러 조회가 함께 실패해도(망 끊김) 한 번만 알리려고 모으는 시간 — 웹 ReferenceFailureNotice GATHER_MS 와 같다.
@@ -100,15 +101,23 @@ final class QueryFailureObserver extends ProviderObserver {
 ///
 /// 여러 조회가 함께 실패해도 하나 — [kQueryFailureGather] 동안 모아 한 번 띄우고, 떠 있는 동안([PSnackbar.duration])은
 /// 다시 띄우지 않는다.
+///
+/// 당겨서 새로 고침이 도는 동안([pPullToRefreshInFlight])의 실패는 그 자리가 같은 글 + [다시 시도] 로 알린다 — 여기서는 띄우지
+/// 않는다.
 class RefreshFailureNotice {
-  RefreshFailureNotice({GlobalKey<PSnackbarHostState>? host})
-    : _host = host ?? PSnackbar.appHostKey;
+  RefreshFailureNotice({
+    GlobalKey<PSnackbarHostState>? host,
+    ValueListenable<int>? pullToRefresh,
+  }) : _host = host ?? PSnackbar.appHostKey,
+       _pullToRefresh = pullToRefresh ?? pPullToRefreshInFlight;
 
   final GlobalKey<PSnackbarHostState> _host;
+  final ValueListenable<int> _pullToRefresh;
   Timer? _gather;
   Timer? _shown;
 
   void notify() {
+    if (_pullToRefresh.value > 0) return;
     if (_gather != null || _shown != null) return;
     _gather = Timer(kQueryFailureGather, _show);
   }
