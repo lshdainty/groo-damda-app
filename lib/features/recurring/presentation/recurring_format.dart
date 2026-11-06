@@ -142,9 +142,10 @@ List<String> recRowDetailParts(AppLocalizations l, RecurringTransaction it) {
 /// 줄 안에서 끊기지 않게 항목 안 공백을 줄이 안 바뀌는 공백(U+00A0)으로.
 String recNoBreak(String s) => s.replaceAll(' ', ' ');
 
-/// 금액 글 — 지출 "−" · 수입 "+" · 이체는 부호 없음. 원까지. 가림이 켜지면 점.
+/// 금액 글 — 지출 "−" · 수입 "+" · 이체 · 0 은 부호 없음("0원" — 서버가 금액을 안 주면 모델 기본값 0 으로 온다).
+/// 원까지. 가림이 켜지면 점.
 String recAmountText(RecurringTransaction it, {bool masked = false}) {
-  final sign = it.expenseType == 'TRANSFER'
+  final sign = it.expenseType == 'TRANSFER' || it.amount == 0
       ? ''
       : (it.expenseType == 'EXPENSE' ? kMinus : '+');
   return krwSigned(it.amount.abs(), masked, sign: sign, unit: true);
