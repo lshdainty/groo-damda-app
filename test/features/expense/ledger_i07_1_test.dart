@@ -540,9 +540,15 @@ void main() {
       final target = (shownDays(
         tester,
       ).where((d) => d < cur).toList()..sort()).first;
-      await tester.tap(
-        find.descendant(of: grid(), matching: find.text('$target')),
-      );
+      // 숨은 채 칸을 눌러도 머리가 드러나 칸이 밀리지 않는다(누르는 순간 · 다음 프레임 모두 같은 자리)
+      final cell = find.descendant(of: grid(), matching: find.text('$target'));
+      final cellY = tester.getCenter(cell).dy;
+      final hidden = headerDyOf(tester);
+      expect(hidden, lessThan(0));
+      await tester.tap(cell);
+      await tester.pump();
+      expect(headerDyOf(tester), hidden, reason: '누른 것만으로 머리가 드러나지 않는다');
+      expect(tester.getCenter(cell).dy, cellY);
       for (var i = 0; i < 12; i++) {
         await tester.pump(const Duration(milliseconds: 50));
         expect(selectedDay(tester), target, reason: '스파이가 잠겨 있다 (${i * 50}ms)');
