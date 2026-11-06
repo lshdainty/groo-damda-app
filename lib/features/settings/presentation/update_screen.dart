@@ -47,6 +47,8 @@ class UpdateScreen extends ConsumerWidget {
       ),
       body: PScreenBandBody(
         child: statusAsync.when(
+          // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+          skipError: true,
           loading: () => const Center(child: PProgressCircle()),
           // 서버를 못 읽어도 화면은 뜬다 — 지금 버전만이라도 보여 준다.
           error: (_, _) => const _Body(status: null),

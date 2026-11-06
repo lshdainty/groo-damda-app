@@ -8,12 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/app/query_failure/query_failure_observer.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/format/now_tick.dart';
 import 'package:groo_damda_app/features/notification/application/notification_providers.dart';
 import 'package:groo_damda_app/features/notification/domain/notification.dart';
 import 'package:groo_damda_app/features/notification/presentation/notification_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import '../../support/plain_text.dart';
 import '../../support/semantics.dart';
 
@@ -145,6 +148,69 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(findTextContaining('읽지 않은 알림'), findsNothing);
+  });
+
+  testWidgets('목록이 있는 채 다시 받기에 실패하면 목록은 남고 스낵바 하나만 — 실패 화면으로 바뀌지 않는다(검수 M2)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+    var fail = false;
+    final host = GlobalKey<PSnackbarHostState>();
+    final observer = QueryFailureObserver(
+      refresh: RefreshFailureNotice(host: host),
+      reference: ReferenceFailureNotice(
+        host: host,
+        openSheets: ValueNotifier(0),
+        shownFailures: ValueNotifier(0),
+      ),
+    );
+    addTearDown(observer.dispose);
+    late ProviderContainer container;
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        observers: [observer],
+        overrides: [
+          nowTickProvider.overrideWith(_FixedNow.new),
+          notificationListProvider.overrideWith(
+            (ref) async => fail ? throw StateError('x') : _items(),
+          ),
+          unreadCountProvider.overrideWith((ref) async => 1),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          builder: (c, child) =>
+              PSnackbarHost(key: host, closeLabel: '닫기', child: child!),
+          home: Consumer(
+            builder: (context, ref, _) {
+              container = ProviderScope.containerOf(context);
+              return const NotificationScreen();
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(findText('오늘 알림'), findsOneWidget);
+    fail = true;
+    container.invalidate(notificationListProvider);
+    await tester.pump();
+    await tester.pump(kQueryFailureGather);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(findText('오늘 알림'), findsOneWidget, reason: '보던 목록은 그대로');
+    expect(
+      find.byType(PResultSection),
+      findsNothing,
+      reason: '실패 화면으로 바뀌지 않는다',
+    );
+    expect(findText('새로 고치지 못했어요.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('수가 0 이면 머리 줄이 없다', (tester) async {

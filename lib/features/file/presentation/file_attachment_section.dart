@@ -174,6 +174,8 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
         ),
         const SizedBox(height: 6),
         async.when(
+          // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+          skipError: true,
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Center(child: PCircularProgressIndicator()),

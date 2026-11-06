@@ -96,6 +96,8 @@ class TransferAccountFields extends StatelessWidget {
     final t = context.tokens;
     final l = AppLocalizations.of(context);
     return assets.when(
+      // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+      skipError: true,
       loading: () => const PSkeleton(width: double.infinity, height: 40),
       error: (e, _) => loadErrorText == null
           ? const SizedBox.shrink()

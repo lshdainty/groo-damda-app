@@ -86,6 +86,8 @@ class _SecuritiesLinkScreenState extends ConsumerState<SecuritiesLinkScreen> {
         ),
         body: PScreenBandBody(
           child: connectionsAsync.when(
+            // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+            skipError: true,
             loading: () => const _LoadingList(),
             error: (_, _) => Center(
               child: PEmptyState(

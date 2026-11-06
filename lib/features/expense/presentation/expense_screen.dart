@@ -260,6 +260,8 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
 
     // 불러오는 중 · 실패에도 같은 틀(머리 + 목록 자리)을 그린다 — 달 이름은 바로 바뀌고 숫자 · 목록 자리만 기다린다.
     return expensesAsync.when(
+      // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+      skipError: true,
       loading: () => _layout(
         categoriesAsync: categoriesAsync,
         transfersAsync: transfersAsync,
