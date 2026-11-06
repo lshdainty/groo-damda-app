@@ -469,7 +469,7 @@ class LedgerCalendar extends StatelessWidget {
         final data = byDay[ds];
         if (data == null) return const SizedBox(height: PSpacing.x3);
         // 칸 글이 좁아 잘린 금액은 날을 누르면 그날 묶음 머리에 다 보인다 — 옛 길게 누르기 툴팁은 걷었다(tooltip.md Q-009-2
-        // "옛 길게 누르기 툴팁은 옮길 때 걷는다", I-wrap-b1 8-6). 칸은 초점을 받지 않아 마우스 · 키보드 툴팁도 두지 않는다.
+        // "옛 길게 누르기 툴팁은 옮길 때 걷는다", I-wrap-b1 8-6). 웹처럼 마우스 · 키보드 초점에만 뜨는 툴팁은 두지 않았다(결정 대기).
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
