@@ -471,14 +471,6 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
     final header = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (filterActive)
-          LedgerFilterChips(
-            filter: _advFilter,
-            assetId: _assetIdFilter,
-            onClearAsset: _clearAssetFilter,
-            onChange: (f) => setState(() => _advFilter = f),
-            categories: categoriesAsync.value ?? const [],
-          ),
         // 총액 + 인사이트 + [소비 요약]. 필터 활성 시 숨김.
         if (!filterActive) ...[
           LedgerTotalRow(
@@ -519,9 +511,19 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
         ],
       ],
     );
-    // 캘린더 — 필터 적용 시 숨김(리스트만, 사용자 결정·web 정합). 내려도 남는다.
+    // 남는 아래 줄 — 주 달력(펼친 월 달력) · 꺾쇠 · 선, 필터 중이면 칩 줄. 칩 줄은 무엇이 걸러져 보이는지 말하는 페이지 전체
+    // 조절 줄이라 숨기지 않는다(숨기면 거른 채라는 걸 잊고 "거래가 이것뿐" 으로 읽는다). 캘린더는 필터 중 숨김(사용자 결정 · 웹 정합).
     final pinnedBottom = filterActive
-        ? null
+        ? KeyedSubtree(
+            key: _pinKey,
+            child: LedgerFilterChips(
+              filter: _advFilter,
+              assetId: _assetIdFilter,
+              onClearAsset: _clearAssetFilter,
+              onChange: (f) => setState(() => _advFilter = f),
+              categories: categoriesAsync.value ?? const [],
+            ),
+          )
         : Column(
             key: _pinKey,
             crossAxisAlignment: CrossAxisAlignment.stretch,

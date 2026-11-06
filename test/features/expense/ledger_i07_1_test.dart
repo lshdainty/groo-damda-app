@@ -25,6 +25,7 @@ import 'package:groo_damda_app/features/expense/presentation/expense_screen.dart
 import 'package:groo_damda_app/features/expense/presentation/filter_dialog.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/filter_bodies.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_day_group.dart';
+import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_filter_chips.dart';
 import 'package:groo_damda_app/shared/ds/wheel_picker/p_wheel_picker.dart';
 import 'package:groo_damda_app/shared/widgets/p_day_group.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_header.dart';
@@ -556,6 +557,28 @@ void main() {
         tester.getTopLeft(group).dy,
         moreOrLessEquals(line, epsilon: 1),
         reason: '주 달력 뒤로 들어가지 않고 그 바로 아래',
+      );
+    });
+
+    testWidgets('필터 중에는 내려도 칩 줄이 달 줄 바로 아래 화면 안에 남는다', (tester) async {
+      await _pump(
+        tester,
+        expenses: only,
+        initialMonth: prevQ,
+        initialAssetId: 1,
+      );
+      final chips = find.byType(LedgerFilterChips);
+      expect(chips, findsOneWidget);
+      final before = tester.getTopLeft(chips).dy;
+      await tester.drag(find.byType(ListView).first, const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(chips).dy, before, reason: '칩 줄은 숨지 않는다');
+      expect(
+        tester.getTopLeft(chips).dy,
+        moreOrLessEquals(
+          tester.getBottomLeft(find.byType(LedgerMonthNav)).dy,
+          epsilon: 0.5,
+        ),
       );
     });
 
