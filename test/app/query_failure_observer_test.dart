@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/stocks/application/stocks_providers.dart
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import '../support/plain_text.dart';
 
@@ -51,6 +52,7 @@ Future<_Harness> _pump(
   required List<ProviderListenable<Object?>> watch,
   List<Override> overrides = const [],
   ValueNotifier<int>? openSheets,
+  ValueNotifier<int>? shownFailures,
 }) async {
   final host = GlobalKey<PSnackbarHostState>();
   final h = _Harness();
@@ -59,6 +61,7 @@ Future<_Harness> _pump(
     reference: ReferenceFailureNotice(
       host: host,
       openSheets: openSheets ?? ValueNotifier(0),
+      shownFailures: shownFailures ?? ValueNotifier(0),
     ),
   );
   addTearDown(observer.reference.dispose);
@@ -269,6 +272,52 @@ void main() {
       expect(findText(_reference), findsOneWidget);
       await tester.pumpAndSettle(const Duration(seconds: 7));
     });
+
+    testWidgets('화면에 실패 Result Section 이 보이는 동안은 쉬고, 사라지면 띄운다(중간 검수 1)', (
+      tester,
+    ) async {
+      final shown = ValueNotifier<int>(1);
+      catsFail = _api(500);
+      await _pump(
+        tester,
+        watch: [categoriesProvider],
+        overrides: overrides,
+        shownFailures: shown,
+      );
+      await tester.pump(kQueryFailureGather);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(findText(_reference), findsNothing);
+      shown.value = 0;
+      await tester.pump(kQueryFailureGather);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(findText(_reference), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 7));
+    });
+
+    testWidgets(
+      '보이는 실패 Result Section 수 — failure 만, 가려진 탭(TickerMode 꺼짐)은 세지 않는다',
+      (tester) async {
+        Widget section(PResultKind kind) =>
+            PResultSection(kind: kind, icon: Icons.info, title: '제목');
+        Future<void> show(Widget w) => tester.pumpWidget(
+          MaterialApp(
+            theme: GrooTheme.light(),
+            home: Scaffold(body: w),
+          ),
+        );
+        expect(pResultFailureShown.value, 0);
+        await show(section(PResultKind.empty));
+        expect(pResultFailureShown.value, 0);
+        await show(section(PResultKind.failure));
+        expect(pResultFailureShown.value, 1);
+        await show(
+          TickerMode(enabled: false, child: section(PResultKind.failure)),
+        );
+        expect(pResultFailureShown.value, 0);
+        await show(const SizedBox());
+        expect(pResultFailureShown.value, 0);
+      },
+    );
 
     testWidgets('시트 수는 PBottomSheet 가 센다(열면 1 · 닫으면 0)', (tester) async {
       expect(pBottomSheetOpenCount.value, 0);

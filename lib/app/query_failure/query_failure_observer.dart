@@ -11,6 +11,7 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 같은 순간 여러 조회가 함께 실패해도(망 끊김) 한 번만 알리려고 모으는 시간 — 웹 ReferenceFailureNotice GATHER_MS 와 같다.
@@ -141,19 +142,25 @@ class RefreshFailureNotice {
 /// - [kQueryFailureGather] 동안 모아 한 번. 그사이 다시 받아 성공한 것은 알리지 않는다.
 /// - 떠 있는 동안([PSnackbar.durationWithAction] 6초)은 다시 띄우지 않는다. 그 창 안에 새 실패가 있었으면 창이 닫힐 때 한 번
 ///   다시 판단한다.
-/// - 시트가 열려 있으면 쉰다(그 안이 맡는다) — 모두 닫히면 한 번 다시 판단한다.
+/// - 시트가 열려 있거나 화면에 실패 Result Section 이 보이면 쉰다(그 자리가 맡는다) — 모두 사라지면 한 번 다시 판단한다.
 /// - [다시 시도] 는 값 없이 실패해 있는 참조 조회만 다시 받는다(지켜보는 화면이 없는 것은 비워 두기만 하고 다음에 읽을 때 받는다).
 class ReferenceFailureNotice {
   ReferenceFailureNotice({
     GlobalKey<PSnackbarHostState>? host,
     ValueListenable<int>? openSheets,
+    ValueListenable<int>? shownFailures,
   }) : _host = host ?? PSnackbar.appHostKey,
-       _openSheets = openSheets ?? pBottomSheetOpenCount {
+       _openSheets = openSheets ?? pBottomSheetOpenCount,
+       _shownFailures = shownFailures ?? pResultFailureShown {
     _openSheets.addListener(_onSheetsChanged);
+    _shownFailures.addListener(_onSheetsChanged);
   }
 
   final GlobalKey<PSnackbarHostState> _host;
   final ValueListenable<int> _openSheets;
+
+  /// 화면에 보이는 실패 Result Section 수 — 그 화면이 이미 실패를 말하는 동안은 쉰다(중간 검수 1).
+  final ValueListenable<int> _shownFailures;
 
   /// 값 없이 실패해 있는 참조 조회 → 그 컨테이너.
   final Map<ProviderBase<Object?>, ProviderContainer> _failed = {};
@@ -161,7 +168,7 @@ class ReferenceFailureNotice {
   Timer? _shown;
   bool _missed = false;
 
-  bool get _held => _openSheets.value > 0;
+  bool get _held => _openSheets.value > 0 || _shownFailures.value > 0;
 
   void update(
     ProviderContainer container,
@@ -219,6 +226,7 @@ class ReferenceFailureNotice {
 
   void dispose() {
     _openSheets.removeListener(_onSheetsChanged);
+    _shownFailures.removeListener(_onSheetsChanged);
     _gather?.cancel();
     _shown?.cancel();
   }
