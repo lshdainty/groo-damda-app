@@ -477,6 +477,10 @@ Future<bool> _confirmDelete(
     failedMessage: l.calLabelDeleteFailed,
     retryLabel: l.actionRetry,
     onRetried: onRetried,
+    kind: WriteKind.delete,
+    onUnconfirmed: () => container
+      ..invalidate(eventLabelsProvider)
+      ..invalidate(monthEventsProvider),
   );
 }
 

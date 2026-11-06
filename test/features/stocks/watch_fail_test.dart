@@ -147,23 +147,29 @@ void main() {
     expect(repo.deletes, 2);
   });
 
-  testWidgets('관심 종목 담기 실패 — 스낵바 + 다시 시도 · silent · 서버 글 없음', (tester) async {
-    final repo = await _pump(
-      tester,
-      (c, ref) => TextButton(
-        onPressed: () => toggleWatch(c, ref, '000660'),
-        child: const Text('open'),
-      ),
-    );
-    await tester.tap(findText('open'));
-    await tester.pumpAndSettle();
-    expect(repo.adds, 1);
-    expect(repo.silent, ['add']);
-    expect(l.stocksWatchAddFail, '관심 종목에 넣지 못했어요.');
-    expect(findPlain(l.stocksWatchAddFail), findsOneWidget);
-    expect(findTextContaining('서버 원문'), findsNothing);
-    await tester.tap(findPlain(l.actionRetry));
-    await tester.pumpAndSettle();
-    expect(repo.adds, 2);
-  });
+  testWidgets(
+    '관심 종목 담기 실패 — 스낵바 한 문장 · 다시 시도 없음(별은 토글, 판단 ②) · silent · 서버 글 없음',
+    (tester) async {
+      final repo = await _pump(
+        tester,
+        (c, ref) => TextButton(
+          onPressed: () => toggleWatch(c, ref, '000660'),
+          child: const Text('open'),
+        ),
+      );
+      await tester.tap(findText('open'));
+      await tester.pumpAndSettle();
+      expect(repo.adds, 1);
+      expect(repo.silent, ['add']);
+      expect(l.stocksWatchAddFail, '관심 종목에 넣지 못했어요.');
+      expect(findPlain(l.stocksWatchAddFail), findsOneWidget);
+      expect(findTextContaining('서버 원문'), findsNothing);
+      expect(
+        findPlain(l.actionRetry),
+        findsNothing,
+        reason: '누르는 순간 바뀌는 값 — 다시 누르면 된다',
+      );
+      expect(repo.adds, 1);
+    },
+  );
 }

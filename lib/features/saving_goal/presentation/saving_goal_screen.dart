@@ -11,6 +11,8 @@ import 'package:groo_damda_app/features/saving_goal/application/saving_goal_prov
 import 'package:groo_damda_app/features/saving_goal/domain/saving_goal.dart';
 import 'package:groo_damda_app/features/saving_goal/presentation/saving_goal_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -61,34 +63,15 @@ class SavingGoalScreen extends ConsumerWidget {
       },
     );
     if (ok && failure != null) {
-      snack.show(
+      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①)
+      showConfirmFailSnackbar(
+        snack,
+        error: failure,
         message: l.savingGoalDeleteFailed,
-        tone: PSnackbarTone.critical,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () => _deleteDetached(container, l, snack, goal),
-        ),
-      );
-    }
-  }
-
-  /// 삭제 "다시 시도" — 묻지 않고 지우고, 또 실패하면 같은 띠를 다시 띄운다.
-  Future<void> _deleteDetached(
-    ProviderContainer container,
-    AppLocalizations l,
-    PSnackbarApi snack,
-    SavingGoal goal,
-  ) async {
-    try {
-      await _deleteGoal(container, goal);
-    } catch (_) {
-      snack.show(
-        message: l.savingGoalDeleteFailed,
-        tone: PSnackbarTone.critical,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () => _deleteDetached(container, l, snack, goal),
-        ),
+        retryLabel: l.actionRetry,
+        retry: () => _deleteGoal(container, goal),
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+        onUnconfirmed: () => container.invalidate(savingGoalListProvider),
       );
     }
   }

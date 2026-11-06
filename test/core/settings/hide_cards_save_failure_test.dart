@@ -11,6 +11,7 @@ import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/storage/prefs_provider.dart';
 import 'package:groo_damda_app/features/settings/presentation/hide_amounts_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 import '../../support/plain_text.dart';
 
@@ -42,7 +43,7 @@ ProviderContainer _container(_Repo repo) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('저장 요청이 실패하면 false 를 돌려주고 로컬은 그대로다', () async {
+  test('저장 요청이 실패하면 failed 를 돌려주고 로컬은 그대로다', () async {
     SharedPreferences.setMockInitialValues({
       PrefsKeys.hideCards: ['asset.netWorth'],
     });
@@ -51,7 +52,7 @@ void main() {
 
     final ok = await c.read(settingsProvider.notifier).setHideCards({});
 
-    expect(ok, isFalse);
+    expect(ok, WriteOutcome.failed);
     expect(c.read(settingsProvider).value!.hideCards, {'asset.netWorth'});
   });
 
@@ -71,7 +72,7 @@ void main() {
     expect(c.read(settingsProvider).value!.hideCards, {'asset.netWorth'});
   });
 
-  test('저장이 받아지면 true 이고 로컬에 반영된다', () async {
+  test('저장이 받아지면 done 이고 로컬에 반영된다', () async {
     SharedPreferences.setMockInitialValues({});
     final repo = _Repo(failPut: false, server: <String>[]);
     final c = _container(repo);
@@ -81,7 +82,7 @@ void main() {
       'stats.trend',
     });
 
-    expect(ok, isTrue);
+    expect(ok, WriteOutcome.done);
     expect(c.read(settingsProvider).value!.hideCards, {'stats.trend'});
     expect(repo.pushed.single, {'stats.trend'});
   });

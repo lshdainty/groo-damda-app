@@ -11,6 +11,8 @@ import 'package:groo_damda_app/features/budget/application/budget_providers.dart
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_edit_dialog.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -175,35 +177,18 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
       },
     );
     if (ok && failure != null) {
-      snack.show(
+      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①). 아니면 실패 띠 + [다시 시도]
+      // (묻지 않고 바로 지운다, 또 실패하면 같은 띠)
+      showConfirmFailSnackbar(
+        snack,
+        error: failure,
         message: l.budgetDeleteFailed,
-        tone: PSnackbarTone.critical,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () => _deleteDetached(container, key, l, snack, budget),
-        ),
-      );
-    }
-  }
-
-  /// 삭제 "다시 시도" — 묻지 않고 지우고, 또 실패하면 같은 띠를 다시 띄운다.
-  static Future<void> _deleteDetached(
-    ProviderContainer container,
-    BudgetMonthKey key,
-    AppLocalizations l,
-    PSnackbarApi snack,
-    Budget budget,
-  ) async {
-    try {
-      await _deleteBudget(container, key, budget);
-    } catch (_) {
-      snack.show(
-        message: l.budgetDeleteFailed,
-        tone: PSnackbarTone.critical,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () => _deleteDetached(container, key, l, snack, budget),
-        ),
+        retryLabel: l.actionRetry,
+        retry: () => _deleteBudget(container, key, budget),
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+        onUnconfirmed: () => container
+          ..invalidate(monthBudgetsProvider(key))
+          ..invalidate(budgetComplianceProvider),
       );
     }
   }

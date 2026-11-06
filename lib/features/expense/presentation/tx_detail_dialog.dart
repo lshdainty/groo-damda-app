@@ -243,7 +243,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     if (failure != null) {
       // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받고 확인을 부탁한다([다시 시도] 를 주지 않는다, 검수 M3)
       if (isUnconfirmedSave(failure)) {
-        _unconfirmed(snack, l, container);
+        _unconfirmed(snack, l, container, WriteKind.delete);
         return;
       }
       _deleteFailed(snack, l, container, asset);
@@ -293,7 +293,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
           if (err == null) {
             _finishDelete();
           } else if (isUnconfirmedSave(err)) {
-            _unconfirmed(snack, l, container);
+            _unconfirmed(snack, l, container, WriteKind.delete);
           } else {
             _deleteFailed(snack, l, container, asset);
           }
@@ -308,10 +308,14 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     PSnackbarApi snack,
     AppLocalizations l,
     ProviderContainer container,
+    WriteKind kind,
   ) {
     container.invalidate(monthExpensesProvider);
     invalidateAfterExpenseChangeIn(container);
-    snack.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
+    snack.show(
+      message: unconfirmedWriteText(l, kind),
+      tone: PSnackbarTone.critical,
+    );
   }
 
   /// 환불 처리 — 요청이 끝나고 목록을 다시 받은 뒤에 상세로 돌아온다("환불됨" Callout 이 바로 보인다).
@@ -377,7 +381,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     );
     if (!ok || !mounted) return;
     if (failure != null && isUnconfirmedSave(failure)) {
-      _unconfirmed(snack, l, container);
+      _unconfirmed(snack, l, container, WriteKind.process);
     } else if (failure != null) {
       _cancelRefundFailed(snack, l, container);
     }
@@ -411,7 +415,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
           if (mounted && _busy) return;
           final err = await _requestCancelRefund(container);
           if (err != null && isUnconfirmedSave(err)) {
-            _unconfirmed(snack, l, container);
+            _unconfirmed(snack, l, container, WriteKind.process);
           } else if (err != null) {
             _cancelRefundFailed(snack, l, container);
           }

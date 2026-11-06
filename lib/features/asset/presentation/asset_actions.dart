@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/asset/presentation/asset_edit_dialog.dar
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/actions/item_actions.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart'
     as ds;
 
@@ -74,6 +75,7 @@ class AssetActions implements ItemActions<Asset> {
       retryLabel: l.actionRetry,
       onRetried: onRetried,
       // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받기만(검수 M3)
+      kind: WriteKind.delete,
       onUnconfirmed: () => _refresh(container, a),
     );
   }

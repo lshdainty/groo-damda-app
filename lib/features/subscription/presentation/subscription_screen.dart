@@ -77,7 +77,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       if (isUnconfirmedSave(e)) {
         container.invalidate(myFeaturesLoadProvider);
         container.invalidate(mySubscriptionProvider);
-        snack?.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
+        snack?.show(
+          message: unconfirmedWriteText(l, WriteKind.process),
+          tone: PSnackbarTone.critical,
+        );
         if (mounted) setState(() => _busy = false);
         return;
       }
@@ -134,6 +137,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         refresh();
         snack?.show(message: l.subCanceled);
       },
+      kind: WriteKind.process,
       onUnconfirmed: refresh,
     );
     if (!ok) return;

@@ -330,6 +330,8 @@ Future<void> confirmDeleteWatchGroup(
     failedMessage: l.stocksWatchGroupDeleteFail,
     retryLabel: l.actionRetry,
     onRetried: () => container.invalidate(watchGroupsProvider),
+    kind: WriteKind.delete,
+    onUnconfirmed: () => container.invalidate(watchGroupsProvider),
   );
   if (ok) container.invalidate(watchGroupsProvider);
 }
@@ -419,13 +421,18 @@ Future<void> toggleWatch(
   try {
     await request();
     container.invalidate(watchGroupsProvider);
-  } catch (_) {
-    showConfirmFailSnackbar(
-      snack,
-      message: removing ? l.stocksWatchRemoveFail : l.stocksWatchAddFail,
-      retryLabel: l.actionRetry,
-      retry: request,
-      onRetried: () => container.invalidate(watchGroupsProvider),
+  } catch (e) {
+    // 별은 누르는 순간 바뀌는 값이다 — 실패하면 한 문장, [다시 시도] 없음(다시 누르면 된다).
+    // 응답을 못 받았으면 담겼거나 빠졌을 수 있다 — 서버 값을 다시 받아 별을 맞추고 "바뀌었는지" 한 문장(판단 ②)
+    final unconfirmed = isUnconfirmedSave(e);
+    if (unconfirmed) container.invalidate(watchGroupsProvider);
+    snack?.show(
+      message: unconfirmed
+          ? l.unconfirmedToggle
+          : removing
+          ? l.stocksWatchRemoveFail
+          : l.stocksWatchAddFail,
+      tone: PSnackbarTone.critical,
     );
   }
 }

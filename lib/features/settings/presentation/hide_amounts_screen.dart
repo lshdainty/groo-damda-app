@@ -8,6 +8,7 @@ import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_unlock_dialog.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -51,6 +52,9 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
   /// 서버 저장이 실패했다 — 화면을 닫지 않고 고른 값을 그대로 둔 채 맨 위 Callout 으로 알린다(다시 [저장] 을 누르면 사라진다).
   bool _saveFailed = false;
 
+  /// 실패가 응답을 못 받은 것인가 — Callout 글이 "저장됐는지 확인하지 못했어요" 로 바뀐다(서버 값은 다시 받아 맞췄다).
+  bool _saveUnconfirmed = false;
+
   _HideAmountsScreenState() : _tab = null;
 
   /// 탭 순서 — 0 은 '전체', 그 뒤로 화면별.
@@ -90,12 +94,15 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
         if (!ok || !mounted) return;
       }
       setState(() => _saving = true);
-      final saved = await ref
+      final outcome = await ref
           .read(settingsProvider.notifier)
           .setHideCards(draft);
       if (!mounted) return;
-      if (!saved) {
-        setState(() => _saveFailed = true);
+      if (outcome != WriteOutcome.done) {
+        setState(() {
+          _saveFailed = true;
+          _saveUnconfirmed = outcome == WriteOutcome.unconfirmed;
+        });
         return;
       }
       context.pop();
@@ -174,7 +181,9 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                         ),
                         child: FormErrorCallout(
                           key: const ValueKey('hide-amounts-save-failed'),
-                          message: l.hideAmountsSaveFailed,
+                          message: _saveUnconfirmed
+                              ? l.saveUnconfirmed
+                              : l.hideAmountsSaveFailed,
                         ),
                       ),
                     // 소개 — 이 화면 전체의 설명(위 16 · 아래 8)

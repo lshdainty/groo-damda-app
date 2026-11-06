@@ -14,6 +14,8 @@ import 'package:groo_damda_app/features/preset/presentation/preset_detail_sheet.
 import 'package:groo_damda_app/features/preset/presentation/preset_edit_dialog.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
@@ -76,31 +78,18 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
     final container = ProviderScope.containerOf(context);
     final r = await askDeletePreset(context, p);
     if (r.confirmed && r.failure != null) {
-      _deleteFailed(container, snack, l, p);
+      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①). 아니면 실패 띠 + [다시 시도]
+      // (묻지 않고 바로 지운다 — 이미 확인창에서 한 번 확정한 삭제다)
+      showConfirmFailSnackbar(
+        snack,
+        error: r.failure,
+        message: l.presetDeleteFailed,
+        retryLabel: l.actionRetry,
+        retry: () => deletePresetRequest(container, p.rowId),
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+        onUnconfirmed: () => container.invalidate(presetListProvider),
+      );
     }
-  }
-
-  static void _deleteFailed(
-    ProviderContainer container,
-    PSnackbarApi snack,
-    AppLocalizations l,
-    ExpenseTemplate p,
-  ) {
-    snack.show(
-      message: l.presetDeleteFailed,
-      tone: PSnackbarTone.critical,
-      action: PSnackbarAction(
-        label: l.actionRetry,
-        // 다시 시도는 묻지 않고 바로 지운다 — 이미 확인창에서 한 번 확정한 삭제다
-        onPressed: () async {
-          try {
-            await deletePresetRequest(container, p.rowId);
-          } catch (_) {
-            _deleteFailed(container, snack, l, p);
-          }
-        },
-      ),
-    );
   }
 
   @override

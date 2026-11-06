@@ -331,7 +331,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             // 납입 응답만 못 읽었다(서버는 납입했다) — [다시 시도] 를 주면 두 번 납입된다. 확인을 부탁한다(검수 M3)
             if (isUnconfirmedSave(e)) {
               snack.show(
-                message: l.saveUnconfirmed,
+                message: unconfirmedWriteText(l, WriteKind.save),
                 tone: PSnackbarTone.critical,
               );
               return;
@@ -395,7 +395,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             if (isUnconfirmedSave(e)) {
               container.invalidate(savingGoalListProvider);
               snack.show(
-                message: l.saveUnconfirmed,
+                message: unconfirmedWriteText(l, WriteKind.save),
                 tone: PSnackbarTone.critical,
               );
               return;

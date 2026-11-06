@@ -14,3 +14,39 @@ bool isUnconfirmedSave(Object? error) =>
 /// 그 폼의 실패 글([fallback]).
 String saveFailureText(AppLocalizations l, Object? error, String fallback) =>
     isUnconfirmedSave(error) ? l.saveUnconfirmed : fallback;
+
+/// 쓰기의 종류 — 응답을 못 받았을 때 스낵바 한 문장을 고른다([unconfirmedWriteText]).
+///
+/// 확인창 뒤 쓰기([askConfirmThenRequest])는 종류를 **반드시** 준다 — 기본 글을 두지 않는다. 기본 글이 "저장" 이던 동안
+/// 삭제 · 기기 로그아웃에도 "저장됐는지" 가 나갔다(I-wrap-b2b 디자인시스템 판단 ①). 결제 · 해지는 자기 글이 따로 있다.
+enum WriteKind {
+  /// 저장 · 추가 · 바꾸기 — "저장됐는지 확인하지 못했어요."
+  save,
+
+  /// 삭제 · 빼기 — "삭제됐는지 확인하지 못했어요."
+  delete,
+
+  /// 그 밖(기기 로그아웃 · 캘린더 나가기 · 모두 받음 · 구독 해지 …) — "처리됐는지 확인하지 못했어요."
+  process,
+}
+
+/// 응답을 못 받은 쓰기의 스낵바 글 — 한 문장. 목록은 저절로 다시 받으므로 "목록에서 확인해주세요" 를 붙이지 않는다
+/// (스낵바는 한 문장 규칙, 폼 Callout 의 [saveFailureText] 는 두 문장 그대로).
+String unconfirmedWriteText(AppLocalizations l, WriteKind kind) =>
+    switch (kind) {
+      WriteKind.save => l.unconfirmedSave,
+      WriteKind.delete => l.unconfirmedDelete,
+      WriteKind.process => l.unconfirmedProcess,
+    };
+
+/// 쓰기 한 번의 결과 — 누르는 순간 바뀌는 값(토글)이 실패를 가를 때 쓴다.
+///
+/// - [done] — 서버가 받았다
+/// - [failed] — 서버에 닿지 않았거나 거절했다. 되돌리고 실패 글(다시 시도 없음)
+/// - [unconfirmed] — 응답을 못 받았다([isUnconfirmedSave]). **되돌리지 않고** 서버 값을 다시 받아 맞춘 뒤
+///   "바뀌었는지 확인하지 못했어요." 한 문장(I-wrap-b2b 디자인시스템 판단 ②)
+enum WriteOutcome { done, failed, unconfirmed }
+
+/// 던진 오류를 [WriteOutcome] 으로 — 응답을 못 받았으면 [WriteOutcome.unconfirmed], 아니면 [WriteOutcome.failed].
+WriteOutcome writeOutcomeOf(Object? error) =>
+    isUnconfirmedSave(error) ? WriteOutcome.unconfirmed : WriteOutcome.failed;

@@ -50,6 +50,7 @@ Future<bool> deleteDutchWithConfirm(BuildContext context, DutchPay dp) {
     request: () => dutchDeleteRequest(c, dp.rowId),
     failedMessage: l.dutchDeleteFailed,
     retryLabel: l.actionRetry,
+    kind: WriteKind.delete,
     // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받기만(검수 M3)
     onUnconfirmed: () => c.invalidate(dutchPayListProvider),
   );
@@ -89,7 +90,10 @@ Future<bool> _runWithRetry(
       // 응답을 못 받았다 — 처리됐을 수 있다. [다시 시도] 없이 다시 받고 확인을 부탁한다(검수 M3)
       if (isUnconfirmedSave(e)) {
         c.invalidate(dutchPayListProvider);
-        snack?.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
+        snack?.show(
+          message: unconfirmedWriteText(l, WriteKind.process),
+          tone: PSnackbarTone.critical,
+        );
         return false;
       }
       snack?.show(

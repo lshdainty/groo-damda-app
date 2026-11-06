@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/network/dio_provider.dart';
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 final userPreferencesRepositoryProvider =
     FutureProvider<UserPreferencesRepository>((ref) async {
@@ -32,7 +33,13 @@ class UserPreferencesNotifier extends AsyncNotifier<UserPreferences> {
   /// 부분 갱신 — 낙관적. [optimistic] 으로 즉시 로컬 반영 후 PATCH.
   /// 실패 시 이전 값으로 롤백.
   ///
-  /// **서버에 실제로 들어갔으면 `true`.** 이 값을 이 provider 밖에서도 읽는 화면이
+  /// 돌려주는 값([WriteOutcome]):
+  /// - [WriteOutcome.done] — 서버에 들어갔다
+  /// - [WriteOutcome.failed] — 닿지 않았거나 거절됐다. 이전 값으로 롤백
+  /// - [WriteOutcome.unconfirmed] — 응답을 못 받았다([isUnconfirmedSave]). 들어갔을 수 있으니 **롤백하지 않고** 서버 값을
+  ///   다시 받는다(`invalidateSelf`). 알리는 글("바뀌었는지 확인하지 못했어요.")은 부른 쪽 몫(디자인시스템 판단 ②)
+  ///
+  /// **서버에 실제로 들어갔으면 [WriteOutcome.done].** 이 값을 이 provider 밖에서도 읽는 화면이
   /// 있으면(예산 경고선의 `budgetAlertThresholdProvider`) 저장이 끝난 뒤 그쪽을
   /// 비워야 하는데, 롤백된 저장까지 비우면 바뀌지도 않은 값을 다시 물어보게 된다.
   /// 낙관적 반영은 여기 결과와 무관하게 이미 화면에 나가 있다.
@@ -46,13 +53,13 @@ class UserPreferencesNotifier extends AsyncNotifier<UserPreferences> {
   ///
   /// **catch 안에서도 본다.** 롤백이 두 번째 예외를 만들면 원래 실패 이유까지 삼킨다.
   /// 어차피 폐기된 상태는 아무도 안 읽고, 재진입 때 `build` 가 다시 GET 한다.
-  Future<bool> patch(
+  Future<WriteOutcome> patch(
     Map<String, dynamic> fields, {
     required UserPreferences Function(UserPreferences prev) optimistic,
     bool silent = false,
   }) async {
     final prev = state.value;
-    if (prev == null) return false;
+    if (prev == null) return WriteOutcome.failed;
 
     // 낙관적 즉시 반영.
     state = AsyncData(optimistic(prev));
@@ -62,11 +69,18 @@ class UserPreferencesNotifier extends AsyncNotifier<UserPreferences> {
       // 서버엔 들어갔다 — 화면이 사라졌어도 `true` 다. 이 값을 밖에서 읽는
       // 화면(예산 경고선)은 컨테이너로 비우므로 여기 수명과 무관하다.
       if (ref.mounted) state = AsyncData(updated);
-      return true;
-    } catch (_) {
-      // 조용히 롤백.
-      if (ref.mounted) state = AsyncData(prev);
-      return false;
+      return WriteOutcome.done;
+    } catch (e) {
+      final outcome = writeOutcomeOf(e);
+      if (!ref.mounted) return outcome;
+      if (outcome == WriteOutcome.unconfirmed) {
+        // 들어갔을 수 있다 — 되돌리지 않고 서버 값을 다시 받는다(받는 동안은 낙관 값이 그대로 보인다)
+        ref.invalidateSelf();
+      } else {
+        // 조용히 롤백.
+        state = AsyncData(prev);
+      }
+      return outcome;
     }
   }
 }

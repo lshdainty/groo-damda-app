@@ -7,6 +7,8 @@ import 'package:groo_damda_app/features/memo/application/memo_providers.dart';
 import 'package:groo_damda_app/features/memo/domain/memo.dart';
 import 'package:groo_damda_app/features/memo/presentation/memo_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/actions/item_actions.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
@@ -71,7 +73,9 @@ class MemoActions implements ItemActions<Memo> {
     }
   }
 
-  /// 고정 / 고정 해제 — 실패하면 critical 스낵바 + [다시 시도]. 끝났으면 true.
+  /// 고정 / 고정 해제 — 누르는 순간 바뀌는 값이라 실패하면 critical 스낵바 한 문장, **[다시 시도] 없음**(서버가 뒤집기만
+  /// 하는 요청이라 응답만 놓친 뒤 다시 누르면 한 번 더 뒤집힌다 — 디자인시스템 판단 ②). 응답을 못 받았으면 목록을 다시 받아
+  /// 서버 값으로 맞추고 "바뀌었는지 확인하지 못했어요." 끝났으면 true.
   /// 띠는 앱 뿌리 호스트에 있어 화면을 나가도 남으므로 컨테이너 · 호스트 · 글을 미리 잡아 둔다.
   Future<bool> pin(BuildContext context, Memo m) async {
     final c = ProviderScope.containerOf(context, listen: false);
@@ -89,14 +93,15 @@ class MemoActions implements ItemActions<Memo> {
     try {
       await togglePinRaw(c, m);
       return true;
-    } catch (_) {
+    } catch (e) {
+      final unconfirmed = isUnconfirmedSave(e);
+      if (unconfirmed) {
+        c.invalidate(memoListProvider);
+        await _refetch(c);
+      }
       snack?.show(
-        message: l.memoPinFailed,
+        message: unconfirmed ? l.unconfirmedToggle : l.memoPinFailed,
         tone: PSnackbarTone.critical,
-        action: PSnackbarAction(
-          label: l.actionRetry,
-          onPressed: () => pinDetached(c, snack, l, m),
-        ),
       );
       return false;
     }
@@ -126,32 +131,21 @@ class MemoActions implements ItemActions<Memo> {
     );
     if (!ok) return false;
     if (failure != null) {
-      _deleteFailed(c, snack, l, m);
+      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①). 아니면 실패 띠 + [다시 시도]
+      showConfirmFailSnackbar(
+        snack,
+        error: failure,
+        message: l.memoDeleteFailed,
+        retryLabel: l.actionRetry,
+        retry: () => remove(c, m),
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+        onUnconfirmed: () => c
+          ..invalidate(memoListProvider)
+          ..invalidate(dashboardSummaryProvider),
+      );
       return false;
     }
     return true;
-  }
-
-  void _deleteFailed(
-    ProviderContainer c,
-    PSnackbarApi? snack,
-    AppLocalizations l,
-    Memo m,
-  ) {
-    snack?.show(
-      message: l.memoDeleteFailed,
-      tone: PSnackbarTone.critical,
-      action: PSnackbarAction(
-        label: l.actionRetry,
-        onPressed: () async {
-          try {
-            await remove(c, m);
-          } catch (_) {
-            _deleteFailed(c, snack, l, m);
-          }
-        },
-      ),
-    );
   }
 
   @override

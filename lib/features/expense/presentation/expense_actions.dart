@@ -129,6 +129,7 @@ class ExpenseActions implements ItemActions<Expense> {
                   deleteExpenseRequest(container, host, e, asset: asset),
               failedMessage: l.expTxDeleteFailed,
               retryLabel: l.actionRetry,
+              kind: WriteKind.delete,
               // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받기만(검수 M3)
               onUnconfirmed: () {
                 container.invalidate(monthExpensesProvider);
@@ -175,17 +176,14 @@ class ExpenseActions implements ItemActions<Expense> {
         invalidateAfterExpenseChangeIn(container);
       }
 
-      // 응답을 못 받았다 — 지워졌을 수 있다. [다시 시도] 없이 다시 받고 확인을 부탁한다(검수 M3)
-      if (isUnconfirmedSave(err)) {
-        refresh();
-        snack?.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
-        return false;
-      }
+      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(검수 M3). 판단은 공용 함수가 한다
       showConfirmFailSnackbar(
         snack,
+        error: err,
         message: l.expTxDeleteFailed,
         retryLabel: l.actionRetry,
         retry: request,
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
         onUnconfirmed: refresh,
       );
       return false;

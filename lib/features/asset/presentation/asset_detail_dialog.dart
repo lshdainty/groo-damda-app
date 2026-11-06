@@ -1013,6 +1013,7 @@ Future<void> showTradeDetailSheet(
     retryLabel: l.actionRetry,
     onRetried: () => PSnackbar.maybeOf(context)?.show(message: l.tradeDeleted),
     // 응답을 못 받았다 — 취소됐을 수 있다. 다시 받기만(검수 M3)
+    kind: WriteKind.delete,
     onUnconfirmed: () => _invalidateAfterTradeChange(container, assetRowId),
   );
   if (ok && context.mounted) {
@@ -2185,6 +2186,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     required Future<void> Function(AssetRepository repo) call,
     bool destructive = false,
     bool block = false,
+    required WriteKind kind,
     String? unconfirmedMessage,
   }) async {
     if (_paying) return;
@@ -2216,6 +2218,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         failedMessage: failedMessage,
         retryLabel: l.actionRetry,
         // 응답을 못 받았다 — 처리됐을 수 있다. 청구 · 잔액을 다시 받고 확인을 부탁한다(검수 M3)
+        kind: kind,
         onUnconfirmed: refresh,
         unconfirmedMessage: unconfirmedMessage,
       );
@@ -2233,6 +2236,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         widget.masked ? '••••' : krw(installmentPayoffAmount(due)),
       ),
       failedMessage: l.assetInstallmentPayoffFailed,
+      kind: WriteKind.process,
       unconfirmedMessage: l.payUnconfirmed,
       call: (repo) => repo.payoffInstallment(
         widget.asset.rowId,
@@ -2250,6 +2254,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
       title: l.assetInstallmentPayoffUndo,
       description: l.assetInstallmentPayoffUndoConfirm,
       failedMessage: l.assetInstallmentPayoffUndoFailed,
+      kind: WriteKind.process,
       call: (repo) => repo.cancelInstallmentPayoff(
         widget.asset.rowId,
         due.expenseRowId,
@@ -2268,6 +2273,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         billing.paymentDate,
       ),
       failedMessage: l.assetCancelPaymentFailed,
+      kind: WriteKind.process,
       call: (repo) => repo.cancelCardPayment(billing.rowId, silent: true),
       destructive: true,
       block: true,

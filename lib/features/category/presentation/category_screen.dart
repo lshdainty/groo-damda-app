@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/recurring/application/recurring_provider
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -229,6 +230,9 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
       failedMessage: l.categoryDeleteFailed,
       retryLabel: l.actionRetry,
       onRetried: refresh,
+      kind: WriteKind.delete,
+      // 응답을 못 받았다 — 지워졌을 수 있다. 목록만 다시 받는다(포커스 이동 같은 성공 뒷정리는 하지 않는다)
+      onUnconfirmed: refresh,
     );
     if (!mounted) return;
     if (deleted) {

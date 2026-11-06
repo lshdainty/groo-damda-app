@@ -228,9 +228,10 @@ class _ImportViewState extends ConsumerState<ImportView> {
         ref.invalidate(monthExpensesProvider);
         invalidateAfterExpenseChange(ref);
         if (mounted) {
-          PSnackbar.maybeOf(
-            context,
-          )?.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
+          PSnackbar.maybeOf(context)?.show(
+            message: unconfirmedWriteText(l, WriteKind.save),
+            tone: PSnackbarTone.critical,
+          );
         }
         return;
       }

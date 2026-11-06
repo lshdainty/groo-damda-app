@@ -446,6 +446,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
         container.invalidate(expenseSplitsProvider(e.rowId));
         if (mounted) widget.onFinished?.call();
       },
+      kind: WriteKind.delete,
       // 응답을 못 받았다 — 풀렸을 수 있다. 다시 받기만(검수 M3)
       onUnconfirmed: () {
         container.invalidate(monthExpensesProvider);

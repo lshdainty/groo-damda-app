@@ -65,6 +65,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn\'t confirm the cancellation. Please reopen the app to check.';
 
   @override
+  String get unconfirmedSave => 'We couldn\'t confirm it was saved.';
+
+  @override
+  String get unconfirmedDelete => 'We couldn\'t confirm it was deleted.';
+
+  @override
+  String get unconfirmedProcess => 'We couldn\'t confirm it went through.';
+
+  @override
+  String get unconfirmedToggle => 'We couldn\'t confirm it changed.';
+
+  @override
+  String get unconfirmedConnect => 'We couldn\'t confirm it connected.';
+
+  @override
   String get actionApply => 'Apply';
 
   @override
@@ -6333,8 +6348,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not delete. Please try again in a moment.';
 
   @override
-  String get memoPinFailed =>
-      'Could not change the pin. Please try again in a moment.';
+  String get memoPinFailed => 'Couldn\'t change the pin.';
 
   @override
   String memoModifiedAt(String time) {

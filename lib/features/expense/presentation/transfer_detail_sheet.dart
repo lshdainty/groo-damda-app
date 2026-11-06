@@ -174,7 +174,10 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     if (isUnconfirmedSave(failure)) {
       container.invalidate(monthExpensesProvider);
       invalidateAfterExpenseChangeIn(container);
-      snack.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
+      snack.show(
+        message: unconfirmedWriteText(l, WriteKind.delete),
+        tone: PSnackbarTone.critical,
+      );
       return;
     }
     _deleteFailed(snack, l, container);

@@ -60,6 +60,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get withdrawUnconfirmed => '해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.';
 
   @override
+  String get unconfirmedSave => '저장됐는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedDelete => '삭제됐는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedProcess => '처리됐는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedToggle => '바뀌었는지 확인하지 못했어요.';
+
+  @override
+  String get unconfirmedConnect => '연결됐는지 확인하지 못했어요.';
+
+  @override
   String get actionApply => '적용';
 
   @override
@@ -6213,7 +6228,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get memoDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get memoPinFailed => '고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get memoPinFailed => '고정을 바꾸지 못했어요.';
 
   @override
   String memoModifiedAt(String time) {

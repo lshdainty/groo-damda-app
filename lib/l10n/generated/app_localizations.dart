@@ -200,6 +200,36 @@ abstract class AppLocalizations {
   /// **'해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.'**
   String get withdrawUnconfirmed;
 
+  /// 스낵바 — 저장 · 추가 쓰기의 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE). 한 문장(목록은 저절로 다시 받는다), [다시 시도] 없음 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'저장됐는지 확인하지 못했어요.'**
+  String get unconfirmedSave;
+
+  /// 스낵바 — 삭제 응답을 읽지 못했거나 받지 못했을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제됐는지 확인하지 못했어요.'**
+  String get unconfirmedDelete;
+
+  /// 스낵바 — 그 밖 쓰기(기기 로그아웃 · 캘린더 나가기 · 모두 받음 등)의 응답을 못 받았을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'처리됐는지 확인하지 못했어요.'**
+  String get unconfirmedProcess;
+
+  /// 스낵바 — 누르는 순간 바뀌는 값(고정 · 표시 · 스위치)의 응답을 못 받았을 때. 되돌리지 않고 서버 값을 다시 받는다 — 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'바뀌었는지 확인하지 못했어요.'**
+  String get unconfirmedToggle;
+
+  /// 증권 키 등록 응답을 못 받았을 때 — 연결 상태를 다시 받는다, 웹과 같은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'연결됐는지 확인하지 못했어요.'**
+  String get unconfirmedConnect;
+
   /// No description provided for @actionApply.
   ///
   /// In ko, this message translates to:
@@ -11506,7 +11536,7 @@ abstract class AppLocalizations {
   /// No description provided for @memoPinFailed.
   ///
   /// In ko, this message translates to:
-  /// **'고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'고정을 바꾸지 못했어요.'**
   String get memoPinFailed;
 
   /// No description provided for @memoModifiedAt.

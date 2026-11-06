@@ -8,6 +8,7 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import '../../support/plain_text.dart';
 
@@ -57,6 +58,7 @@ void main() {
                 failedMessage: '취소하지 못했어요.',
                 retryLabel: '다시 시도',
                 onRetried: () => succeeded++,
+                kind: WriteKind.process,
                 onUnconfirmed: () => refreshed++,
               );
             },
@@ -71,7 +73,12 @@ void main() {
         expect(result, isFalse);
         expect(refreshed, 1, reason: '서버가 처리했을 수 있다 — 다시 받는다');
         expect(succeeded, 0, reason: '성공 뒷정리(알림)는 하지 않는다');
-        expect(findText('저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.'), findsOneWidget);
+        expect(
+          findText('처리됐는지 확인하지 못했어요.'),
+          findsOneWidget,
+          reason: '스낵바는 한 문장 — kind 대로(판단 ①)',
+        );
+        expect(findText('저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.'), findsNothing);
         expect(findText('취소하지 못했어요.'), findsNothing);
         expect(_action, findsNothing, reason: '[다시 시도] 를 주면 두 번 처리된다');
       },
@@ -98,6 +105,8 @@ void main() {
             },
             failedMessage: '삭제하지 못했어요.',
             retryLabel: '다시 시도',
+            kind: WriteKind.delete,
+            onUnconfirmed: () {},
           );
         },
         child: const Text('열기'),
@@ -140,6 +149,8 @@ void main() {
           },
           failedMessage: '삭제하지 못했어요.',
           retryLabel: '다시 시도',
+          kind: WriteKind.delete,
+          onUnconfirmed: () {},
         ),
         child: const Text('열기'),
       ),
@@ -170,6 +181,8 @@ void main() {
             request: () async => calls++,
             failedMessage: '삭제하지 못했어요.',
             retryLabel: '다시 시도',
+            kind: WriteKind.delete,
+            onUnconfirmed: () {},
           );
         },
         child: const Text('열기'),
@@ -210,6 +223,8 @@ void main() {
           failedMessage: '삭제하지 못했어요.',
           retryLabel: '다시 시도',
           onRetried: () => retried++,
+          kind: WriteKind.delete,
+          onUnconfirmed: () {},
         ),
         child: const Text('열기'),
       ),
@@ -239,6 +254,8 @@ void main() {
           failedMessage: '삭제하지 못했어요.',
           retryLabel: '다시 시도',
           onRetried: () => retried++,
+          kind: WriteKind.delete,
+          onUnconfirmed: () {},
         ),
         child: const Text('열기'),
       ),
@@ -277,6 +294,8 @@ void main() {
                     failedMessage: '삭제하지 못했어요.',
                     retryLabel: '다시 시도',
                     onRetried: () => retried++,
+                    kind: WriteKind.delete,
+                    onUnconfirmed: () {},
                   ),
                   child: const Text('열기'),
                 ),
