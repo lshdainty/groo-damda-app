@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/subscription/application/subscription_pr
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/presentation/broker_connect_card.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/widgets/p_back_button.dart';
 import 'package:groo_damda_app/shared/widgets/p_empty_state.dart';
 import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
@@ -22,36 +23,82 @@ import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 /// 되면 그 자리에 카드를 쌓을 수 없어 화면으로 분리했다.
 ///
 /// **목록은 서버가 준다.** 미연결 증권사까지 내려오므로 증권사가 늘어도 앱 배포 없이 나타난다.
-class SecuritiesLinkScreen extends ConsumerWidget {
+///
+/// 키 · 시크릿 칸에 친 값이 있으면 나가기 전에 묻는다(안드로이드 뒤로 · 예측형 뒤로 · 앱바 ←, I-wrap-b2b 5) — 금액 가리기 화면과
+/// 같은 확인창 · 같은 PopScope 방식이다. 요청이 나가 있는 동안은 묻지 않고 막는다.
+class SecuritiesLinkScreen extends ConsumerStatefulWidget {
   const SecuritiesLinkScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SecuritiesLinkScreen> createState() =>
+      _SecuritiesLinkScreenState();
+}
+
+class _SecuritiesLinkScreenState extends ConsumerState<SecuritiesLinkScreen> {
+  /// 친 값이 있는 증권사 · 요청이 나가 있는 증권사.
+  final Set<String> _dirty = {};
+  final Set<String> _busy = {};
+
+  void _mark(Set<String> set, String broker, bool on) {
+    if (!mounted) return;
+    setState(() => on ? set.add(broker) : set.remove(broker));
+  }
+
+  /// 저장하지 않고 나가려 할 때 — 친 값이 사라지는 걸 알리고, 확인하면 화면을 닫는다(금액 가리기와 같은 글).
+  Future<void> _confirmDiscardAndPop() async {
+    final l = AppLocalizations.of(context);
+    final router = GoRouter.of(context);
+    final ok = await PAlertDialog.show(
+      context,
+      title: l.hideAmountsDiscardTitle,
+      description: l.hideAmountsDiscardBody,
+      actionLabel: l.hideAmountsDiscardConfirm,
+      destructive: true,
+      cancelLabel: l.actionCancel,
+    );
+    if (ok && mounted) router.pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final t = context.tokens;
     final l = AppLocalizations.of(context);
     final connectionsAsync = ref.watch(brokerConnectionsProvider);
 
-    return Scaffold(
-      backgroundColor: context.colors.bgLayerBasement,
-      appBar: AppBar(
-        leadingWidth: PBackButton.leadingWidth,
-        titleSpacing: 0,
-        leading: PBackButton(onPressed: () => context.pop()),
-        title: Text(l.settingsSecuritiesLink),
-        backgroundColor: t.bgSurface,
-        foregroundColor: t.fgPrimary,
-        elevation: 0,
-      ),
-      body: PScreenBandBody(
-        child: connectionsAsync.when(
-          loading: () => const _LoadingList(),
-          error: (_, _) => Center(
-            child: PEmptyState(
-              icon: LucideIcons.unplug,
-              message: l.securitiesLoadError,
+    return PopScope(
+      canPop: _dirty.isEmpty && _busy.isEmpty,
+      onPopInvokedWithResult: (didPop, _) {
+        // 요청이 나가 있는 동안은 묻지 않고 막는다 — 묻는 확인창은 그 뒤에만
+        if (didPop || !mounted || _busy.isNotEmpty) return;
+        _confirmDiscardAndPop();
+      },
+      child: Scaffold(
+        backgroundColor: context.colors.bgLayerBasement,
+        appBar: AppBar(
+          leadingWidth: PBackButton.leadingWidth,
+          titleSpacing: 0,
+          // 화면의 PopScope 를 지나게 — 친 값이 있으면 묻는다
+          leading: PBackButton(onPressed: () => Navigator.maybePop(context)),
+          title: Text(l.settingsSecuritiesLink),
+          backgroundColor: t.bgSurface,
+          foregroundColor: t.fgPrimary,
+          elevation: 0,
+        ),
+        body: PScreenBandBody(
+          child: connectionsAsync.when(
+            loading: () => const _LoadingList(),
+            error: (_, _) => Center(
+              child: PEmptyState(
+                icon: LucideIcons.unplug,
+                message: l.securitiesLoadError,
+              ),
+            ),
+            data: (connections) => _List(
+              connections: connections,
+              onDirty: (b, on) => _mark(_dirty, b, on),
+              onBusy: (b, on) => _mark(_busy, b, on),
             ),
           ),
-          data: (connections) => _List(connections: connections),
         ),
       ),
     );
@@ -59,9 +106,15 @@ class SecuritiesLinkScreen extends ConsumerWidget {
 }
 
 class _List extends StatelessWidget {
-  const _List({required this.connections});
+  const _List({
+    required this.connections,
+    required this.onDirty,
+    required this.onBusy,
+  });
 
   final List<BrokerConnection> connections;
+  final void Function(String broker, bool on) onDirty;
+  final void Function(String broker, bool on) onBusy;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +140,8 @@ class _List extends StatelessWidget {
           BrokerConnectCard(
             connection: c,
             showPrimaryAction: connectedCount > 1,
+            onDirtyChanged: (on) => onDirty(c.broker, on),
+            onBusyChanged: (on) => onBusy(c.broker, on),
           ),
           const SizedBox(height: PSpace.x12),
         ],

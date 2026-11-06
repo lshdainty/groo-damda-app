@@ -29,9 +29,17 @@ class BrokerConnectCard extends ConsumerStatefulWidget {
     super.key,
     required this.connection,
     required this.showPrimaryAction,
+    this.onDirtyChanged,
+    this.onBusyChanged,
   });
 
   final BrokerConnection connection;
+
+  /// 키 · 시크릿 칸에 친 값이 있는가가 바뀌면 — 화면이 나가기 전에 묻는다(I-wrap-b2b 5).
+  final ValueChanged<bool>? onDirtyChanged;
+
+  /// 연결 · 해제 · 기본 변경 요청이 나가 있는가가 바뀌면 — 그동안 화면은 나가지 않는다.
+  final ValueChanged<bool>? onBusyChanged;
 
   /// 기본 시세 소스 지정 버튼 노출 여부. 연결이 하나뿐이면 고를 게 없어 감춘다.
   final bool showPrimaryAction;
@@ -52,6 +60,38 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
   String? _connectError;
   final _errorKey = GlobalKey();
 
+  bool _dirty = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _keyCtrl.addListener(_reportDirty);
+    _secretCtrl.addListener(_reportDirty);
+  }
+
+  @override
+  void didUpdateWidget(BrokerConnectCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 연결되면 칸이 사라진다 — 친 값은 저장된 것이다
+    if (oldWidget.connection.connected != widget.connection.connected) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _reportDirty());
+    }
+  }
+
+  void _reportDirty() {
+    final dirty =
+        !widget.connection.connected &&
+        (_keyCtrl.text.isNotEmpty || _secretCtrl.text.isNotEmpty);
+    if (dirty == _dirty) return;
+    _dirty = dirty;
+    widget.onDirtyChanged?.call(dirty);
+  }
+
+  void _setBusy(bool busy) {
+    setState(() => _busy = busy);
+    widget.onBusyChanged?.call(busy);
+  }
+
   @override
   void dispose() {
     _keyCtrl.dispose();
@@ -61,10 +101,8 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
 
   Future<void> _connect(BrokerConnection c, String key, String secret) async {
     final l = AppLocalizations.of(context);
-    setState(() {
-      _busy = true;
-      _connectError = null;
-    });
+    setState(() => _connectError = null);
+    _setBusy(true);
     try {
       final repo = await ref.read(subscriptionRepositoryProvider.future);
       await repo.registerBrokerCredential(c.broker, key, secret, silent: true);
@@ -92,7 +130,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) _setBusy(false);
     }
   }
 
@@ -101,7 +139,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
     String okMsg,
     String Function(Object error) errMsg,
   ) async {
-    setState(() => _busy = true);
+    _setBusy(true);
     try {
       final repo = await ref.read(subscriptionRepositoryProvider.future);
       await action(repo);
@@ -121,7 +159,7 @@ class _BrokerConnectCardState extends ConsumerState<BrokerConnectCard> {
         );
       }
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) _setBusy(false);
     }
   }
 
