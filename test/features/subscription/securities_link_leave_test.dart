@@ -109,7 +109,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_dialog, findsOneWidget);
     expect(findText('저장하지 않고 나가기'), findsOneWidget);
-    expect(findText('고른 내용이 사라져요.'), findsOneWidget);
+    expect(findText('입력한 내용이 사라져요.'), findsOneWidget);
     await tester.tap(findText('취소'));
     await tester.pumpAndSettle();
     expect(_screen, findsOneWidget);

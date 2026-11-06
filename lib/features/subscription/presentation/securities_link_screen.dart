@@ -51,7 +51,7 @@ class _SecuritiesLinkScreenState extends ConsumerState<SecuritiesLinkScreen> {
     final ok = await PAlertDialog.show(
       context,
       title: l.hideAmountsDiscardTitle,
-      description: l.hideAmountsDiscardBody,
+      description: l.securitiesLeaveBody,
       actionLabel: l.hideAmountsDiscardConfirm,
       destructive: true,
       cancelLabel: l.actionCancel,
