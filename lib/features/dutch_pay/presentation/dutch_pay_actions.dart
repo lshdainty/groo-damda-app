@@ -6,6 +6,7 @@ import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 정산 하나에 하는 쓰기 — 상세 시트가 부른다. 요청은 모두 silent(서버 원문 없음)이고 **목록을 다시 받은 뒤에** 끝난다.
 /// 컨테이너를 미리 잡아 두므로 시트가 먼저 닫혀도 안전하다.
@@ -49,6 +50,8 @@ Future<bool> deleteDutchWithConfirm(BuildContext context, DutchPay dp) {
     request: () => dutchDeleteRequest(c, dp.rowId),
     failedMessage: l.dutchDeleteFailed,
     retryLabel: l.actionRetry,
+    // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받기만(검수 M3)
+    onUnconfirmed: () => c.invalidate(dutchPayListProvider),
   );
 }
 
@@ -82,7 +85,13 @@ Future<bool> _runWithRetry(
     try {
       await request(c);
       return true;
-    } catch (_) {
+    } catch (e) {
+      // 응답을 못 받았다 — 처리됐을 수 있다. [다시 시도] 없이 다시 받고 확인을 부탁한다(검수 M3)
+      if (isUnconfirmedSave(e)) {
+        c.invalidate(dutchPayListProvider);
+        snack?.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
+        return false;
+      }
       snack?.show(
         message: failed(l),
         tone: PSnackbarTone.critical,

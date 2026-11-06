@@ -390,7 +390,16 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             );
             await repo.contribute(goalId, amount: amount, silent: true);
             container.invalidate(savingGoalListProvider);
-          } on ApiException {
+          } on ApiException catch (e) {
+            // 응답을 못 받았다 — 납입됐을 수 있다. 또 [다시 시도] 를 주지 않는다(두 번 납입, 검수 M3)
+            if (isUnconfirmedSave(e)) {
+              container.invalidate(savingGoalListProvider);
+              snack.show(
+                message: l.saveUnconfirmed,
+                tone: PSnackbarTone.critical,
+              );
+              return;
+            }
             _firstContributionFailed(container, l, snack, goalId, amount);
           }
         },

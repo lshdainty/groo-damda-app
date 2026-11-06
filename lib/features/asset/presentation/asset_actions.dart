@@ -73,14 +73,20 @@ class AssetActions implements ItemActions<Asset> {
       failedMessage: l.assetDetailDeleteFailed,
       retryLabel: l.actionRetry,
       onRetried: onRetried,
+      // 응답을 못 받았다 — 지워졌을 수 있다. 다시 받기만(검수 M3)
+      onUnconfirmed: () => _refresh(container, a),
     );
   }
 
   /// 서버에 지우고 뒷정리까지 — 던지면 호출처가 실패로 본다. 위젯 수명과 무관하게 container 로만 한다.
   Future<void> _request(ProviderContainer container, Asset a) async {
-    final kind = _kindOf(a);
     final repo = await container.read(assetRepositoryProvider.future);
     await repo.delete(a.rowId, silent: true);
+    _refresh(container, a);
+  }
+
+  void _refresh(ProviderContainer container, Asset a) {
+    final kind = _kindOf(a);
     // 자산이 하나 늘거나 줄면 순자산·추이·청구·실적이 함께 달라진다 —
     // 전부 별도 조회라 목록만 비우면 옛 값이 남는다.
     for (final p in <ProviderOrFamily>[

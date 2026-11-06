@@ -1012,6 +1012,8 @@ Future<void> showTradeDetailSheet(
     failedMessage: l.tradeCancelFailed,
     retryLabel: l.actionRetry,
     onRetried: () => PSnackbar.maybeOf(context)?.show(message: l.tradeDeleted),
+    // 응답을 못 받았다 — 취소됐을 수 있다. 다시 받기만(검수 M3)
+    onUnconfirmed: () => _invalidateAfterTradeChange(container, assetRowId),
   );
   if (ok && context.mounted) {
     PSnackbar.maybeOf(context)?.show(message: l.tradeDeleted);
@@ -1026,7 +1028,11 @@ Future<void> _cancelTradeRequest(
 ) async {
   final repo = await container.read(assetRepositoryProvider.future);
   await repo.deleteTrade(trade.rowId, silent: true);
-  // 예수금·평가액이 되돌아간다 — 순자산·추이까지 다시 받는다.
+  _invalidateAfterTradeChange(container, assetRowId);
+}
+
+/// 매매가 바뀐 뒤 — 예수금·평가액이 되돌아간다. 순자산·추이까지 다시 받는다.
+void _invalidateAfterTradeChange(ProviderContainer container, int assetRowId) {
   for (final p in <ProviderOrFamily>[
     assetsProvider,
     assetSummaryProvider,
@@ -2179,17 +2185,22 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     required Future<void> Function(AssetRepository repo) call,
     bool destructive = false,
     bool block = false,
+    String? unconfirmedMessage,
   }) async {
     if (_paying) return;
     final l = AppLocalizations.of(context);
     final container = ProviderScope.containerOf(context);
     final id = widget.asset.rowId;
-    Future<void> request() async {
-      final repo = await container.read(assetRepositoryProvider.future);
-      await call(repo);
+    void refresh() {
       // 이체·잔액·청구가 함께 바뀐다 — 가계부도 비운다(이자 지출 등).
       container.invalidate(cardBillingProvider(id));
       invalidateAfterExpenseChangeIn(container);
+    }
+
+    Future<void> request() async {
+      final repo = await container.read(assetRepositoryProvider.future);
+      await call(repo);
+      refresh();
     }
 
     if (block) setState(() => _paying = true);
@@ -2204,6 +2215,9 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         request: request,
         failedMessage: failedMessage,
         retryLabel: l.actionRetry,
+        // 응답을 못 받았다 — 처리됐을 수 있다. 청구 · 잔액을 다시 받고 확인을 부탁한다(검수 M3)
+        onUnconfirmed: refresh,
+        unconfirmedMessage: unconfirmedMessage,
       );
     } finally {
       if (block && mounted) setState(() => _paying = false);
@@ -2219,6 +2233,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         widget.masked ? '••••' : krw(installmentPayoffAmount(due)),
       ),
       failedMessage: l.assetInstallmentPayoffFailed,
+      unconfirmedMessage: l.payUnconfirmed,
       call: (repo) => repo.payoffInstallment(
         widget.asset.rowId,
         due.expenseRowId,

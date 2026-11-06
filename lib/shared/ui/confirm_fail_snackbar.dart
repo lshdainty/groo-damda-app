@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 확인창 뒤 요청이 실패했을 때의 표시 — 디자인 확정(alert-dialog.md): **확인창 닫기 + critical 스낵바(6초) +
 /// [다시 시도](묻지 않고 바로 요청)**. 스낵바 호스트는 길잡이 바깥이라 시트 · 확인창 **위**에 뜬다(snackbar.md).
@@ -18,6 +20,10 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 ///   성공하면 [onRetried] 로 한다. 둘 다 같은 일을 해야 지운 항목을 그린 시트가 남지 않는다.
 ///   [onRetried] 는 시트가 이미 닫힌 뒤에 불릴 수 있다 — 그 안에서 `context` 에 기대지 말고 `ProviderContainer` ·
 ///   미리 쥔 값을 쓴다(`mounted` 확인).
+///
+/// 응답을 읽지 못했거나 받지 못한 실패([isUnconfirmedSave])는 실패가 아니다 — 서버가 처리했을 수 있어 [다시 시도] 없이
+/// [unconfirmedMessage](기본 "저장됐는지 확인하지 못했어요. 목록에서 확인해주세요.") 한 줄을 띄우고 [onUnconfirmed](서버 상태를
+/// 다시 받게 하는 무효화 — 성공 알림은 넣지 않는다)를 부른다(검수 M3 — 다시 누르면 두 번 처리된다). 돌려주는 값은 false 다(성공 알림을 띄우지 않게).
 ///
 /// 확인창을 띄우고 확정하면 [request] 를 한다. 돌려주는 값 — 요청까지 성공했으면 true. 취소했거나 실패했으면 false
 /// (실패면 확인창이 닫힌 뒤 스낵바가 떠 있다).
@@ -47,9 +53,12 @@ Future<bool> askConfirmThenRequest(
   required String retryLabel,
   VoidCallback? onRetried,
   bool useRootNavigator = true,
+  String? unconfirmedMessage,
+  VoidCallback? onUnconfirmed,
 }) async {
-  // 확인창이 닫히면 이 context 가 없을 수 있다(시트가 함께 닫힘) — 스낵바 길은 미리 쥔다.
+  // 확인창이 닫히면 이 context 가 없을 수 있다(시트가 함께 닫힘) — 스낵바 길 · 글은 미리 쥔다.
   final snack = PSnackbar.maybeOf(context);
+  final l = AppLocalizations.of(context);
   Object? failure;
   var succeeded = false;
   final confirmed = await PAlertDialog.show(
@@ -70,13 +79,24 @@ Future<bool> askConfirmThenRequest(
       }
     },
   );
-  if (confirmed && failure != null) {
+  if (confirmed && failure != null && isUnconfirmedSave(failure)) {
+    // 응답을 읽지 못했거나 받지 못했다 — 서버가 처리했을 수 있다(검수 M3). [다시 시도] 를 주면 두 번 처리된다 —
+    // 서버 상태를 다시 받게 하고([onUnconfirmed] — 목록 비우기. 성공 알림 같은 뒷정리는 하지 않는다) 확인을 부탁하는
+    // 한 문장만 띄운다
+    onUnconfirmed?.call();
+    snack?.show(
+      message: unconfirmedMessage ?? l.saveUnconfirmed,
+      tone: PSnackbarTone.critical,
+    );
+  } else if (confirmed && failure != null) {
     showConfirmFailSnackbar(
       snack,
       message: failedMessage,
       retryLabel: retryLabel,
       retry: request,
       onRetried: onRetried,
+      unconfirmedMessage: unconfirmedMessage ?? l.saveUnconfirmed,
+      onUnconfirmed: onUnconfirmed,
     );
   }
   return confirmed && succeeded;
@@ -92,6 +112,8 @@ void showConfirmFailSnackbar(
   required String retryLabel,
   required Future<void> Function() retry,
   VoidCallback? onRetried,
+  String? unconfirmedMessage,
+  VoidCallback? onUnconfirmed,
 }) {
   if (snack == null) return;
   snack.show(
@@ -103,13 +125,24 @@ void showConfirmFailSnackbar(
         unawaited(() async {
           try {
             await retry();
-          } catch (_) {
+          } catch (e) {
+            if (isUnconfirmedSave(e)) {
+              // 다시 시도의 응답을 못 받았다 — 또 [다시 시도] 를 주지 않는다(두 번 처리 방지)
+              onUnconfirmed?.call();
+              snack.show(
+                message: unconfirmedMessage ?? message,
+                tone: PSnackbarTone.critical,
+              );
+              return;
+            }
             showConfirmFailSnackbar(
               snack,
               message: message,
               retryLabel: retryLabel,
               retry: retry,
               onRetried: onRetried,
+              unconfirmedMessage: unconfirmedMessage,
+              onUnconfirmed: onUnconfirmed,
             );
             return;
           }

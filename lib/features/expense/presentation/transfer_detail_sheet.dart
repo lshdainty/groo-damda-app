@@ -29,6 +29,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
+import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 이체 상세(I-21 21-1 · C) — 거래 상세와 한 벌이다. 머리 "이체 상세" · 닫기 → 회색 타일 48 + "이체" → 금액 → 날짜 → 보내는 · 받는
 /// 계좌 줄(Logo Tile 40) → 값 줄(수수료 · 출금 합계 · 이자 · 원금 · 메모) → "더 하기" 반복 설정 → 바닥 [삭제][수정].
@@ -136,7 +137,7 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     if (!ok) return;
     // 실패 알림은 미리 쥔 [snack] 으로 띄운다 — 요청이 도는 사이 시트가 내려가도(!mounted) 실패가 보이게 mounted 검사보다 앞에 둔다.
     if (failure != null) {
-      _deleteFailed(snack, l, container);
+      _failedOrUnconfirmed(failure!, snack, l, container);
       return;
     }
     if (!mounted) return;
@@ -162,6 +163,23 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     PBottomSheet.of(context).close();
   }
 
+  /// 응답을 읽지 못했거나 받지 못했으면(지워졌을 수 있다) [다시 시도] 없이 다시 받고 확인을 부탁한다(검수 M3), 아니면 실패
+  /// 스낵바 + [다시 시도].
+  void _failedOrUnconfirmed(
+    Object failure,
+    PSnackbarApi snack,
+    AppLocalizations l,
+    ProviderContainer container,
+  ) {
+    if (isUnconfirmedSave(failure)) {
+      container.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChangeIn(container);
+      snack.show(message: l.saveUnconfirmed, tone: PSnackbarTone.critical);
+      return;
+    }
+    _deleteFailed(snack, l, container);
+  }
+
   void _deleteFailed(
     PSnackbarApi snack,
     AppLocalizations l,
@@ -178,7 +196,7 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
           if (err == null) {
             _finishDelete();
           } else {
-            _deleteFailed(snack, l, container);
+            _failedOrUnconfirmed(err, snack, l, container);
           }
         },
       ),
