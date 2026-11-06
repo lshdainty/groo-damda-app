@@ -32,6 +32,7 @@ import 'package:groo_damda_app/features/expense/presentation/closed_cycle_notice
 import 'package:groo_damda_app/features/preset/presentation/preset_pick_sheet.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_input.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart';
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
@@ -2322,10 +2323,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final noteStyle = PTypography.t3.copyWith(
       color: context.colors.fgNeutralSubtle,
     );
-    final rewritable =
-        _edit != null &&
-        (_edit!.replaceable ?? c.moneyLocked) &&
-        !_splitsPending;
+    // [고쳐 쓰기] 는 서버 판정(replaceable)으로만 가른다 — 나눈 내역을 받는 동안에도 보이고, 고쳐 쓰기 폼의 저장만
+    // "불러오는 중" 으로 막는다(_validate). 받는 동안 "중도 정리한 할부" 안내로 바꾸지 않는다.
+    final rewritable = _edit != null && (_edit!.replaceable ?? c.moneyLocked);
+    final splitSource = _splitSource;
     return [
       PList(
         children: [
@@ -2391,6 +2392,12 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
               ],
             ],
           ),
+        ),
+      // 나눈 내역을 못 받았다 — 그 자리 실패 + [다시 시도](웹 상세 · 나누기 단계 SplitFailure 와 같은 꼴)
+      if (_splitsFailed && splitSource != null)
+        TxSplitFailure(
+          onRetry: () =>
+              ref.invalidate(expenseSplitsProvider(splitSource.rowId)),
         ),
       if (_splitMismatch)
         Padding(
