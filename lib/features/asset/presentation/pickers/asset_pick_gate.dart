@@ -69,7 +69,14 @@ class _AssetPickSkeleton extends StatelessWidget {
                 height: PListTile.size,
                 radius: PSkeletonRadius.r12,
               ),
-              PSkeleton.text(PTypography.t5, width: 140),
+              // 이름 자리 — 남은 폭의 2/3(웹 PickSkeleton `w-2/3` 과 같다)
+              Expanded(
+                child: FractionallySizedBox(
+                  widthFactor: 2 / 3,
+                  alignment: Alignment.centerLeft,
+                  child: PSkeleton.text(PTypography.t5),
+                ),
+              ),
             ],
           ),
         ),
