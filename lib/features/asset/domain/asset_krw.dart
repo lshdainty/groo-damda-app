@@ -62,3 +62,14 @@ int? transferReceiveAmount(int amount, Asset? from, Asset? to) {
 /// 계좌 통화 — 안 적힌 자산은 원화.
 String assetCurrencyOf(Asset? a) =>
     (a?.currency ?? '').isEmpty ? kDefaultCurrency : a!.currency!;
+
+/// 순자산 증감률(%) — 지난달 대비. 소수 둘째 자리까지 반올림(HALF_UP)한다(웹과 같은 규칙).
+/// 예: 400,000 ÷ 10,500,000 = 3.8095…% → 3.81. 지난달이 0 이면 [fallback] 을 그대로 쓴다.
+double netWorthChangePercent(
+  int changeAmount,
+  int lastMonth, {
+  double fallback = 0.0,
+}) {
+  if (lastMonth == 0) return fallback;
+  return (changeAmount / lastMonth.abs() * 10000).round() / 100;
+}

@@ -220,4 +220,16 @@ void main() {
       expect(old.krwOrBalance, 130000);
     });
   });
+
+  group('④ 순자산 증감률 — 소수 둘째 자리 반올림(웹과 같은 값)', () {
+    test('400,000 ÷ 10,500,000 = 3.8095… → 3.81', () {
+      expect(netWorthChangePercent(400000, 10500000), 3.81);
+    });
+    test('지난달이 0 이면 fallback', () {
+      expect(netWorthChangePercent(1000, 0, fallback: 2.5), 2.5);
+    });
+    test('음수 증감은 부호를 지킨다', () {
+      expect(netWorthChangePercent(-400000, 10500000), -3.81);
+    });
+  });
 }
