@@ -612,9 +612,13 @@ class AssetGroupSection extends StatelessWidget {
     required this.loading,
     this.negativeTotal = false,
     this.valuations = const {},
+    this.notice,
   });
 
   final String title;
+
+  /// 머리 아래 한 줄 — 투자 묶음의 시세 실패 띠(I-wrap-b2b 4). 줄은 그대로 둔다.
+  final Widget? notice;
   final List<Asset> assets;
   final int total;
   final bool masked;
@@ -639,6 +643,7 @@ class AssetGroupSection extends StatelessWidget {
             : _amount(totalText, c.fgNeutral, align: TextAlign.end),
       ),
       children: [
+        ?notice,
         if (loading)
           const AssetRowsSkeleton()
         else if (assets.isEmpty)
@@ -659,6 +664,20 @@ class AssetGroupSection extends StatelessWidget {
       ],
     );
   }
+}
+
+/// 투자 평가에 쓰는 시세를 못 받고 있다 — 숫자(서버 잔액 · 직전 시세)는 두고 그 카드 머리 아래에 띠 한 줄(I-wrap-b2b 4).
+/// 글은 증권 화면과 같은 "시세를 불러오지 못했어요"(웹 `detail.priceFail`). 다음 받기가 성공하면 저절로 걷힌다.
+class AssetPriceFailure extends StatelessWidget {
+  const AssetPriceFailure({super.key, required this.onRetry});
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => BudgetFailure(
+    key: const ValueKey('asset-price-failure'),
+    title: AppLocalizations.of(context).stocksFailPrice,
+    onRetry: onRetry,
+  );
 }
 
 // ── 저축 목표 ───────────────────────────────────────────────────

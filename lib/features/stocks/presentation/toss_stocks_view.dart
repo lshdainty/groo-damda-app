@@ -177,10 +177,12 @@ class _TossStocksViewState extends ConsumerState<TossStocksView> {
 
     // 보이는 그룹의 심볼을 합쳐 50 씩 한 번에 — 그룹마다 따로 부르지 않는다.
     final symbols = visibleSymbols(groups, _visible);
+    // 관심 시세 — 처음부터 실패면 줄이 "—" 만, 받아 둔 값이 있으면 옛 값이라 조용히 틀린다. 어느 쪽이든 묶음 위에 띠 한 줄(I-wrap-b2b 4)
+    final watchPrices = <AsyncValue<List<TossPrice>>>[];
     for (final chunk in chunkSymbols(symbols)) {
-      final prices =
-          ref.watch(tossPricesProvider(chunk.join(','))).value ??
-          const <TossPrice>[];
+      final pricesAsync = ref.watch(tossPricesProvider(chunk.join(',')));
+      watchPrices.add(pricesAsync);
+      final prices = pricesAsync.value ?? const <TossPrice>[];
       for (final p in prices) {
         final v = double.tryParse(p.lastPrice);
         if (v != null && v > 0) _lastPrices[p.symbol] = v;
@@ -276,6 +278,16 @@ class _TossStocksViewState extends ConsumerState<TossStocksView> {
           ),
         );
       } else {
+        if (watchPrices.any((v) => v.pollFailed)) {
+          slivers.add(
+            SliverToBoxAdapter(
+              child: StocksPriceFailure(
+                retrying: watchPrices.any((v) => v.pollFailed && v.isLoading),
+                onRetry: () => ref.invalidate(tossPricesProvider),
+              ),
+            ),
+          );
+        }
         slivers.add(
           SliverList.builder(
             itemCount: groups.length + 1,
@@ -414,6 +426,12 @@ class _InvestBand extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 받아 둔 보유가 있는 채 다시 받지 못했다 — 숫자는 두고 띠 한 줄(I-wrap-b2b 4)
+          if (holdingsAsync.refreshFailed)
+            StocksPriceFailure(
+              retrying: holdingsAsync.isLoading,
+              onRetry: onRetry,
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
             child: PCardStat(
@@ -535,13 +553,24 @@ class _MarketBand extends ConsumerWidget {
     final indices = (pricesAsync.value ?? [])
         .where((i) => i.priceValue > 0 && indexNameOf(l, i.symbol) != null)
         .toList();
-    final fxRaw = ref.watch(tossExchangeRateProvider).value?.rateValue;
+    final fxAsync = ref.watch(tossExchangeRateProvider);
+    final fxRaw = fxAsync.value?.rateValue;
+    // 지수 · 환율 시세 실패 — 처음이면 그 줄이 조용히 빠지고, 받아 둔 값이 있으면 옛 값이다. 섹션 머리 아래 띠 한 줄(I-wrap-b2b 4)
+    final priceFailed = pricesAsync.pollFailed || fxAsync.pollFailed;
     return PScreenSection(
       padding: const EdgeInsets.only(bottom: PSpacing.x2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           StocksBandTitle(l.stocksSectionMarket),
+          if (priceFailed)
+            StocksPriceFailure(
+              retrying: pricesAsync.isLoading || fxAsync.isLoading,
+              onRetry: () {
+                ref.invalidate(tossIndicatorPricesProvider);
+                ref.invalidate(tossExchangeRateProvider);
+              },
+            ),
           const _MarketStatusLine(),
           const SizedBox(height: PSpacing.x1),
           PList(
@@ -859,7 +888,7 @@ class _HoldingsList extends StatelessWidget {
         headingLevel: 3,
       );
     }
-    return PList(
+    final list = PList(
       semanticLabel: l.stocksTabHoldings,
       children: [
         for (final h in items)
@@ -873,6 +902,15 @@ class _HoldingsList extends StatelessWidget {
             pct: h.profitLossRateValue,
             onTap: () => onTap(h.symbol),
           ),
+      ],
+    );
+    // 받아 둔 보유가 있는 채 다시 받지 못했다 — 줄은 두고 위에 띠 한 줄(I-wrap-b2b 4)
+    if (!async.refreshFailed) return list;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        StocksPriceFailure(retrying: async.isLoading, onRetry: onRetry),
+        list,
       ],
     );
   }
@@ -1210,9 +1248,8 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                   ),
                 ],
                 // 시세 조회가 실패했고 받아 둔 값도 없으면 실패 안내 + [다시 시도](웹 `detail.priceFail`)
-                if (last == null &&
-                    pricesAsync.hasError &&
-                    !pricesAsync.hasValue) ...[
+                // 받아 둔 값(또는 보유 값)이 있으면 숫자는 위에 두고 이 띠가 "지금 시세가 아니다" 를 말한다(I-wrap-b2b 4)
+                if (pricesAsync.pollFailed) ...[
                   // 웹 BandFailure 와 같은 Result Section(구역 안 = medium): 아이콘 · 제목 · 설명 · [다시 시도]
                   StocksFailure(
                     title: l.stocksFailPrice,
@@ -1741,6 +1778,22 @@ class TossPortfolioPage extends ConsumerWidget {
       );
     } else {
       content = StocksCompositionBody(comp: comp, masked: masked);
+    }
+    // 받아 둔 보유가 있는 채 다시 받지 못했다 — 구성은 두고 위에 띠 한 줄(I-wrap-b2b 4)
+    if (holdingsAsync.refreshFailed) {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StocksPriceFailure(
+            retrying: holdingsAsync.isLoading,
+            onRetry: () {
+              ref.invalidate(tossAccountsProvider);
+              ref.invalidate(tossHoldingsProvider);
+            },
+          ),
+          content,
+        ],
+      );
     }
 
     return Scaffold(
@@ -2358,6 +2411,20 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
           book: book,
           changePct: widget.changePct,
         );
+        // 받아 둔 호가가 있는 채 다시 받지 못했다 — 호가창은 두고 위에 띠 한 줄(I-wrap-b2b 4)
+        if (orderbookAsync.refreshFailed) {
+          content = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StocksPriceFailure(
+                title: l.stocksFailOrderbook,
+                retrying: orderbookAsync.isLoading,
+                onRetry: () => widget.onRetryBook?.call(ref),
+              ),
+              content,
+            ],
+          );
+        }
       } else if (orderbookAsync.hasError && !orderbookAsync.hasValue) {
         content = StocksFailure(
           title: l.stocksFailOrderbook,
@@ -2386,6 +2453,19 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
         content = _QuotesEmpty(l.stocksTradesEmpty);
       } else {
         content = _TradeTape(currency: widget.currency, fills: fills);
+      }
+      if (tradesAsync.refreshFailed && content is! StocksFailure) {
+        content = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StocksPriceFailure(
+              title: l.stocksFailTrades,
+              retrying: tradesAsync.isLoading,
+              onRetry: () => widget.onRetryTrades?.call(ref),
+            ),
+            content,
+          ],
+        );
       }
     }
 

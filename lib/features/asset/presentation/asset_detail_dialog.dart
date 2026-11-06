@@ -68,6 +68,8 @@ import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_type_meta.dart';
+import 'package:groo_damda_app/features/asset/presentation/asset_parts.dart'
+    show AssetPriceFailure;
 import 'package:groo_damda_app/features/asset/presentation/asset_actions.dart';
 import 'package:groo_damda_app/features/asset/presentation/holding_format.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
@@ -510,6 +512,14 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               padding: gutterPad,
               child: _InvChangeLine(assetRowId: asset.rowId, masked: masked),
             ),
+            // 시세를 못 받는 동안 위 평가액은 서버 잔액 · 직전 시세다 — 숫자는 두고 띠 한 줄(I-wrap-b2b 4)
+            if (ref.watch(valuationPriceFailedProvider))
+              Padding(
+                padding: gutterPad,
+                child: AssetPriceFailure(
+                  onRetry: () => refreshLiveValuation(ref.invalidate),
+                ),
+              ),
             _HoldingsSection(asset: asset, masked: masked),
           ],
 

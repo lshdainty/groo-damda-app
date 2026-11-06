@@ -264,11 +264,11 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
                     ),
                   ),
                 ],
-                if (detailAsync != null &&
-                    detailAsync.hasError &&
-                    !detailAsync.hasValue)
-                  // 시세 실패는 글 한 줄이 아니라 실패 한 벌 + [다시 시도](M4)
+                // 시세 실패는 글 한 줄이 아니라 실패 한 벌 + [다시 시도](M4). 받아 둔 값이 있거나 보유 잔고 값으로 대신 그렸어도
+                // 그 숫자는 지금 시세가 아니다 — 숫자는 두고 이 띠가 말한다(I-wrap-b2b 4)
+                if (detailAsync != null && detailAsync.pollFailed)
                   StocksFailure(
+                    key: const ValueKey('stocks-price-failure'),
                     title: l.stocksFailPrice,
                     retrying: detailAsync.isLoading,
                     onRetry: () => ref.invalidate(namuQuoteDetailProvider(key)),

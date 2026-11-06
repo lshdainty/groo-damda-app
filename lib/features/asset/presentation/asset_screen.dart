@@ -205,8 +205,13 @@ class _AssetScreenState extends ConsumerState<AssetScreen> {
               total: investmentsTotal,
               masked: masks.investments,
               loading: false,
-
               valuations: invMap,
+              // 시세를 못 받는 동안 평가액은 서버 잔액 · 직전 시세다 — 숫자는 두고 "지금 시세가 아니다" 를 띠로(I-wrap-b2b 4)
+              notice: ref.watch(valuationPriceFailedProvider)
+                  ? AssetPriceFailure(
+                      onRetry: () => refreshLiveValuation(ref.invalidate),
+                    )
+                  : null,
             ),
           ]),
         if (!assetsFailed)

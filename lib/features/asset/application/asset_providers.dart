@@ -125,19 +125,7 @@ final investmentValuationMapProvider =
       if (targets.isEmpty) return const {};
 
       // 시세가 필요한 심볼 수집 — holdings 의 linked + 레거시 단일 연동.
-      final symbols = <String>{};
-      for (final a in targets) {
-        if (a.holdings.isNotEmpty) {
-          for (final h in a.holdings) {
-            if (h.linked && (h.tossSymbol?.isNotEmpty ?? false)) {
-              symbols.add(h.tossSymbol!);
-            }
-          }
-        } else if ((a.tossSymbol?.isNotEmpty ?? false) &&
-            a.tossQuantity != null) {
-          symbols.add(a.tossSymbol!);
-        }
-      }
+      final symbols = valuationSymbolsOf(targets);
 
       // 시세·통화별 환율·전일종가 조달은 livePricesProvider 한 곳에 있다 —
       // 자산 상세·추가/편집도 같은 걸 써야 한 화면에서 금액이 어긋나지 않는다.
@@ -208,6 +196,40 @@ final investmentValuationMapProvider =
       }
       return map;
     }, retry: securitiesNoRetry);
+
+/// 평가에 시세가 필요한 심볼 — holdings 의 linked + 레거시 단일 연동.
+Set<String> valuationSymbolsOf(Iterable<Asset> investments) {
+  final symbols = <String>{};
+  for (final a in investments) {
+    if (a.holdings.isNotEmpty) {
+      for (final h in a.holdings) {
+        if (h.linked && (h.tossSymbol?.isNotEmpty ?? false)) {
+          symbols.add(h.tossSymbol!);
+        }
+      }
+    } else if ((a.tossSymbol?.isNotEmpty ?? false) && a.tossQuantity != null) {
+      symbols.add(a.tossSymbol!);
+    }
+  }
+  return symbols;
+}
+
+/// 평가에 쓰는 시세를 지금 못 받고 있다(처음 · 다시 받기 모두) — 그동안 평가액은 서버 잔액(한 번도 못 받음) 또는 직전 시세다.
+/// 숫자는 두고 그 카드에 "시세를 불러오지 못했어요" 띠를 단다(I-wrap-b2b 4). 시세를 쓰지 않는 사용자(게이트 꺼짐 · 연동 보유
+/// 없음)는 늘 거짓이다. [investmentValuationMapProvider] 와 같은 키를 지켜봐 요청이 더 나가지 않는다.
+final valuationPriceFailedProvider = Provider<bool>((ref) {
+  final features = ref.watch(myFeaturesProvider).asData?.value;
+  final enabled =
+      (features?.hasSecurities ?? false) &&
+      (features?.hasBrokerConnection ?? false);
+  if (!enabled) return false;
+  final assets = ref.watch(assetsProvider).value ?? const <Asset>[];
+  final symbols = valuationSymbolsOf(
+    assets.where((a) => a.assetType == 'INVESTMENT'),
+  );
+  if (symbols.isEmpty) return false;
+  return ref.watch(livePricesProvider(livePricesKey(symbols))).hasError;
+});
 
 /// 자산 화면의 실시간 평가를 새로 받는다 — **시세 조회까지** 무효화한다.
 ///

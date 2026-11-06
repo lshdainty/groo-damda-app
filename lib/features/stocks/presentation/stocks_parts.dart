@@ -215,6 +215,33 @@ class StocksFailure extends StatelessWidget {
   }
 }
 
+/// 폴링 실패 띠 — 받아 둔 숫자는 그대로 두고 그 섹션 머리 아래에 "시세를 불러오지 못했어요"(웹 `detail.priceFail`) +
+/// [다시 시도] 한 줄(I-wrap-b2b 4). 스낵바는 쓰지 않는다. 다음 폴링이 성공하면 부르는 쪽 조건이 거짓이 되어 저절로 걷힌다.
+/// "마지막으로 받은 시각" 은 두지 않는다 — 이 띠가 같은 일을 한다.
+class StocksPriceFailure extends StatelessWidget {
+  const StocksPriceFailure({
+    super.key,
+    required this.onRetry,
+    this.retrying = false,
+    this.title,
+  });
+  final VoidCallback onRetry;
+
+  /// 다시 받는 중 — [다시 시도] 에 진행 원(B2a loadRetrying 과 같은 뜻).
+  final bool retrying;
+
+  /// 비우면 "시세를 불러오지 못했어요". 호가 · 체결처럼 그 자리 이름이 따로 있으면 그 글.
+  final String? title;
+
+  @override
+  Widget build(BuildContext context) => StocksFailure(
+    key: const ValueKey('stocks-price-failure'),
+    title: title ?? AppLocalizations.of(context).stocksFailPrice,
+    retrying: retrying,
+    onRetry: onRetry,
+  );
+}
+
 /// 목록 줄 Skeleton — 제목 · 설명 · 오른쪽 두 줄.
 class StocksLineSkeleton extends StatelessWidget {
   const StocksLineSkeleton({super.key});

@@ -188,12 +188,14 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
     final groups = watchAsync.value ?? const <StockWatchGroup>[];
     // 보이는 그룹의 심볼을 합쳐 50 씩 한 번에 — 그룹마다 따로 부르지 않는다.
     final keys = <String>{};
+    // 관심 시세 — 처음부터 실패면 줄이 "—" 만, 받아 둔 값이 있으면 옛 값이다. 묶음 위에 띠 한 줄(I-wrap-b2b 4)
+    final watchQuotes = <AsyncValue<List<NamuListQuote>>>[];
     if (_seg == _Seg.watch) {
       for (final chunk in chunkSymbols(visibleSymbols(groups, _visible))) {
         keys.add(chunk.join(','));
-        final quotes =
-            ref.watch(namuQuotesProvider(chunk.join(','))).value ??
-            const <NamuListQuote>[];
+        final quotesAsync = ref.watch(namuQuotesProvider(chunk.join(',')));
+        watchQuotes.add(quotesAsync);
+        final quotes = quotesAsync.value ?? const <NamuListQuote>[];
         for (final q in quotes) {
           if (q.price > 0) _lastQuotes[q.symbol] = q;
         }
@@ -306,6 +308,16 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
           ),
         );
       } else {
+        if (watchQuotes.any((v) => v.pollFailed)) {
+          slivers.add(
+            SliverToBoxAdapter(
+              child: StocksPriceFailure(
+                retrying: watchQuotes.any((v) => v.pollFailed && v.isLoading),
+                onRetry: () => ref.invalidate(namuQuotesProvider),
+              ),
+            ),
+          );
+        }
         slivers.add(
           SliverList.builder(
             itemCount: groups.length + 1,
@@ -632,11 +644,22 @@ class NamuInvestBand extends ConsumerWidget {
       ],
     );
 
+    // 한 통화를 못 받았다(그 통화가 조용히 빠진다) · 받아 둔 보유를 다시 받지 못했다(옛 값) — 숫자는 두고 띠 한 줄(I-wrap-b2b 4).
+    // 둘 다 처음부터 실패면 위 [failed] 가 맡는다. 한쪽이 빠지면 지표는 남은 통화 하나라 합계가 아니다 — 띠는 하나다
+    final currencyFailed = krwAsync.pollFailed || usdAsync.pollFailed;
     return PScreenSection(
       padding: const EdgeInsets.only(top: PSpacing.x6, bottom: PSpacing.x2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (currencyFailed)
+            StocksPriceFailure(
+              retrying: [
+                krwAsync,
+                usdAsync,
+              ].any((v) => v.pollFailed && v.isLoading),
+              onRetry: onRetry,
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
             child: Column(
@@ -803,12 +826,23 @@ class _NamuMarketBandState extends ConsumerState<NamuMarketBand> {
         ),
       );
     }
+    // 장 상태 시세 · 환율 실패 — 처음이면 그 칸이 비거나 "환율 없음", 받아 둔 값이 있으면 옛 값이다. 섹션 머리 아래 띠(I-wrap-b2b 4)
+    final priceFailed =
+        (quotesAsync?.pollFailed ?? false) || fxAsync.pollFailed;
     return PScreenSection(
       padding: const EdgeInsets.only(bottom: PSpacing.x2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           StocksBandTitle(l.stocksSectionMarket),
+          if (priceFailed)
+            StocksPriceFailure(
+              retrying: (quotesAsync?.isLoading ?? false) || fxAsync.isLoading,
+              onRetry: () {
+                ref.invalidate(namuQuotesProvider(csv));
+                ref.invalidate(namuExchangeRateProvider);
+              },
+            ),
           if (markets.isNotEmpty) ...[
             StocksMarketStatusLine(markets: markets),
             const SizedBox(height: PSpacing.x1),
