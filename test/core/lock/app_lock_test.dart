@@ -323,6 +323,98 @@ void main() {
       expect(findText('첫 화면'), findsOneWidget);
     });
 
+    Future<(ProviderContainer, GoRouter, _FakeAuth)> pumpRouterGate(
+      WidgetTester tester,
+      Widget formPage,
+    ) async {
+      SharedPreferences.setMockInitialValues({PrefsKeys.appLock: true});
+      final auth = _FakeAuth(AppLockAuthResult.success);
+      final container = _container(auth: auth);
+      final router = GoRouter(
+        routes: [
+          GoRoute(path: '/', builder: (_, _) => const Text('첫 화면')),
+          GoRoute(path: '/form', builder: (_, _) => formPage),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: router,
+            theme: GrooTheme.light(),
+            locale: const Locale('ko'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder: (context, child) =>
+                AppLockGate(child: child ?? const SizedBox()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // 자동 프롬프트 성공 → 풀림
+      router.push('/form');
+      await tester.pumpAndSettle();
+      return (container, router, auth);
+    }
+
+    testWidgets('폼 위에서 잠긴 채 뒤로 — 폼 · 친 값 그대로, "버릴까요" 확인창(PopScope)도 열리지 않는다', (
+      tester,
+    ) async {
+      final ctrl = TextEditingController();
+      addTearDown(ctrl.dispose);
+      var asked = 0;
+      final (container, router, auth) = await pumpRouterGate(
+        tester,
+        Scaffold(
+          body: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) asked++;
+            },
+            child: TextField(controller: ctrl),
+          ),
+        ),
+      );
+      await tester.enterText(find.byType(TextField), '점심 김밥');
+      auth.result = AppLockAuthResult.failure;
+      container.read(appLockedProvider.notifier).lock();
+      await tester.pumpAndSettle();
+      expect(findText('앱 잠금'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(asked, 0, reason: '덮개 아래에서 확인창이 열리지 않는다');
+      expect(ctrl.text, '점심 김밥');
+      expect(router.state.uri.path, '/form');
+    });
+
+    testWidgets('잠긴 동안 덮개 아래 입력칸은 초점을 받지 못하고, 풀리면 다시 받는다', (tester) async {
+      final node = FocusNode();
+      addTearDown(node.dispose);
+      final (container, _, auth) = await pumpRouterGate(
+        tester,
+        Scaffold(body: TextField(focusNode: node)),
+      );
+      node.requestFocus();
+      await tester.pump();
+      expect(node.hasFocus, isTrue);
+
+      auth.result = AppLockAuthResult.failure;
+      container.read(appLockedProvider.notifier).lock();
+      await tester.pumpAndSettle();
+      // 잠기는 순간 아래 칸의 초점은 풀린다(잠금이 맞게 하는 일 — L5) · 다시 달라고 해도 못 받는다
+      expect(node.hasFocus, isFalse);
+      node.requestFocus();
+      await tester.pump();
+      expect(node.hasFocus, isFalse);
+
+      container.read(appLockedProvider.notifier).unlock();
+      await tester.pumpAndSettle();
+      node.requestFocus();
+      await tester.pump();
+      expect(node.hasFocus, isTrue);
+    });
+
     testWidgets('자동 프롬프트가 성공하면 잠금 화면이 걷힌다', (tester) async {
       SharedPreferences.setMockInitialValues({PrefsKeys.appLock: true});
       final auth = _FakeAuth(AppLockAuthResult.success);
