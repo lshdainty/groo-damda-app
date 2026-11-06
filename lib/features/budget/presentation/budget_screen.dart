@@ -269,7 +269,12 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           ref.invalidate(monthBudgetsProvider(_key));
           ref.invalidate(rangeSummaryProvider(_rangeKey));
           ref.invalidate(budgetComplianceProvider(6));
-          await ref.read(monthBudgetsProvider(_key).future);
+          // 비운 것을 모두 기다린다 — 늦게 실패한 것이 끝난 뒤 같은 글을 한 번 더 띄우지 않게(검수 L2)
+          await Future.wait<Object?>([
+            ref.read(monthBudgetsProvider(_key).future),
+            ref.read(rangeSummaryProvider(_rangeKey).future),
+            ref.read(budgetComplianceProvider(6).future),
+          ]);
         },
         child: ListView(
           padding: EdgeInsets.only(
