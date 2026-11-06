@@ -25,5 +25,10 @@ void revealBelowFog(
     position.maxScrollExtent,
   );
   if ((target - position.pixels).abs() < 0.5) return;
-  position.animateTo(target, duration: duration, curve: curve);
+  // 0 이면 바로 옮긴다 — animateTo 는 0 길이를 받지 않는다
+  if (duration == Duration.zero) {
+    position.jumpTo(target);
+  } else {
+    position.animateTo(target, duration: duration, curve: curve);
+  }
 }

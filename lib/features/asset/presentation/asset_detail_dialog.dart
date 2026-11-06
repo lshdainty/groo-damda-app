@@ -11,7 +11,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -460,7 +459,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     final isCredit = asset.assetType == 'CREDIT_CARD';
 
     // 새 부품 줄(List · 목록 제목)이 스스로 좌우 24 를 가지므로 목록은 끝까지 벌리고, 줄이 아닌 것(머리 · 차트 · 내역 줄)만 24 안쪽에 둔다.
-    const gutterPad = EdgeInsets.symmetric(horizontal: PSpace.xl);
+    const gutterPad = EdgeInsets.symmetric(horizontal: PSpacing.x6);
     final hero = Padding(
       padding: gutterPad,
       child: _HeroCard(
@@ -474,17 +473,17 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     );
     final first = !isCard && !isInv;
     return ListView(
-      padding: const EdgeInsets.only(bottom: PSpace.x16),
+      padding: const EdgeInsets.only(bottom: PSpacing.x4),
       children: [
         hero,
         if (isCredit) ...[
           _CardDetailBody(asset: asset, masked: masked, onEdit: widget.onEdit),
         ] else ...[
           // 체크카드 — 실적 줄만(청구 회차 없음, design 신판)
-          if (isCard) const SizedBox(height: PSpace.x4),
+          if (isCard) const SizedBox(height: PSpacing.x1),
           if (isCard) _CardPerfBadge(assetRowId: asset.rowId, masked: masked),
           if (isInv) ...[
-            const SizedBox(height: PSpace.x16),
+            const SizedBox(height: PSpacing.x4),
             Padding(
               padding: gutterPad,
               child: _InvChangeLine(assetRowId: asset.rowId, masked: masked),
@@ -1476,11 +1475,11 @@ class _RecentExpenses extends StatelessWidget {
         children: [
           for (int g = 0; g < 2; g++) ...[
             Padding(
-              padding: EdgeInsets.only(top: g == 0 ? 0 : PSpace.x16),
+              padding: EdgeInsets.only(top: g == 0 ? 0 : PSpacing.x4),
               child: const Row(
                 children: [
                   PSkeleton.line(width: 56, height: 14),
-                  SizedBox(width: PSpace.x8),
+                  SizedBox(width: PSpacing.x2),
                   PSkeleton.line(width: 20, height: 14),
                   Spacer(),
                   PSkeleton.line(width: 72, height: 14),
@@ -1558,7 +1557,7 @@ class _RecentExpenses extends StatelessWidget {
         for (var gi = 0; gi < entries.length; gi++) ...[
           // 헤더-행 간격은 행 자체 pt 12(웹 LedgerRow py-3)가 담당 — bottom 0.
           Padding(
-            padding: EdgeInsets.only(top: gi == 0 ? 0 : PSpace.x16),
+            padding: EdgeInsets.only(top: gi == 0 ? 0 : PSpacing.x4),
             child: _DayGroupHeader(
               dayKey: entries[gi].key,
               items: entries[gi].value,
@@ -1631,7 +1630,7 @@ class _DayGroupHeader extends StatelessWidget {
           ),
         ),
         if (label != null) ...[
-          const SizedBox(width: PSpace.x8),
+          const SizedBox(width: PSpacing.x2),
           Text(
             label.dow,
             style: PTypo.bodySm.copyWith(color: tokens.fgTertiary),
@@ -1652,7 +1651,7 @@ class _DayGroupHeader extends StatelessWidget {
             ),
           ),
         if (dayIncome > 0) ...[
-          if (dayExpense > 0) const SizedBox(width: PSpace.x8),
+          if (dayExpense > 0) const SizedBox(width: PSpacing.x2),
           Text(
             krwSigned(
               dayIncome,
