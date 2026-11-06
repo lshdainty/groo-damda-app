@@ -196,6 +196,8 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
     } else {
       body = _DetailResult(
         kind: PResultKind.empty,
+        // 무엇이 비었는지 말하는 아이콘 — 웹 AssetDetailPage 의 SearchX 와 같다
+        icon: LucideIcons.searchX,
         title: l.assetNotFoundTitle,
         description: l.assetNotFoundDesc,
         action: PResultAction(
@@ -249,11 +251,13 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
 class _DetailResult extends StatelessWidget {
   const _DetailResult({
     required this.kind,
+    this.icon,
     required this.title,
     required this.description,
     required this.action,
   });
   final PResultKind kind;
+  final IconData? icon;
   final String title;
   final String description;
   final PResultAction action;
@@ -264,6 +268,7 @@ class _DetailResult extends StatelessWidget {
       child: PResultSection(
         kind: kind,
         size: PResultSize.large,
+        icon: icon,
         title: title,
         description: description,
         primaryAction: action,
