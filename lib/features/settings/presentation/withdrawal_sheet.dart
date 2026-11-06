@@ -204,6 +204,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
     // 화면 전체 딤 + 흰 원 40 — 시트까지 덮는다. 시트를 내려도 해지는 끝까지 가고,
     // 덮개는 완료 화면으로 간 뒤에 걷는다(I-05 37).
     final scrim = PBusyScrim.show(context, label: l.withdrawBusy);
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await repoFuture;
       String ticket;
@@ -247,6 +248,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
         _submitting = false;
       });
     } finally {
+      sheet?.setBusy(false);
       scrim.hide();
     }
   }

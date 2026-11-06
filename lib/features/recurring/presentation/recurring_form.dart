@@ -885,6 +885,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       return;
     }
     setState(() => _submitting = true);
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       // 이자 판정은 받는 계좌의 종류를 봐야 한다 — 목록이 없으면 받아 온 뒤 정한다. 못 받으면 요청 없이 알린다
       // (이자 키가 빠지면 서버가 지워 버린다)
@@ -997,6 +998,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       if (!mounted) return;
       _showSaveError();
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

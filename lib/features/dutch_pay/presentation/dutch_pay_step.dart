@@ -289,6 +289,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       _attempted = true;
       _saveError = false;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final list = _list;
       if (list.isEmpty) return;
@@ -336,6 +337,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
     } catch (_) {
       if (mounted) _showSaveError();
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

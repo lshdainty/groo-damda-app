@@ -208,6 +208,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(budgetRepositoryProvider.future);
       if (_isEdit) {
@@ -241,6 +242,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

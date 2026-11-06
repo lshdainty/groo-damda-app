@@ -474,6 +474,7 @@ class _CalendarEventFormSheetState
       _submitting = true;
       _saveError = null;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(calendarRepositoryProvider.future);
       final description = _description.trim();
@@ -531,6 +532,7 @@ class _CalendarEventFormSheetState
       if (!mounted) return;
       setState(() => _saveError = l.calFormSaveFailed);
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

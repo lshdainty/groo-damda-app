@@ -318,6 +318,7 @@ class _LabelFormState extends ConsumerState<_LabelForm> {
       _submitting = true;
       _saveError = null;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(calendarRepositoryProvider.future);
       if (_edit == null) {
@@ -338,6 +339,7 @@ class _LabelFormState extends ConsumerState<_LabelForm> {
       if (!mounted) return;
       setState(() => _saveError = l.calLabelSaveFailed);
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

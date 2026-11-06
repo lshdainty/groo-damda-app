@@ -271,6 +271,7 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       if (_isEdit) {
@@ -326,6 +327,7 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

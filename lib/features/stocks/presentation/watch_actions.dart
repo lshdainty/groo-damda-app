@@ -216,6 +216,7 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
       _failed = false;
       _busy = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(stocksRepositoryProvider.future);
       final g = widget.group;
@@ -240,6 +241,8 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
+    } finally {
+      sheet?.setBusy(false);
     }
   }
 

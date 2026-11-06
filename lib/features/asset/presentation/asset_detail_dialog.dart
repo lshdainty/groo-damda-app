@@ -2895,7 +2895,14 @@ class _PaySheetState extends State<_PaySheet> {
       _failed = false;
       _submitting = true;
     });
-    final ok = await widget.onPay(v);
+    // 저장 중에는 시트를 닫지 않는다 — 실패 Callout 을 그릴 폼이 남아 있게
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final bool ok;
+    try {
+      ok = await widget.onPay(v);
+    } finally {
+      sheet?.setBusy(false);
+    }
     if (!mounted) return;
     setState(() => _submitting = false);
     if (ok) {

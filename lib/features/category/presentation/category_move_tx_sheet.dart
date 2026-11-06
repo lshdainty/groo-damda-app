@@ -213,6 +213,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
       final moved = _mode == _Mode.newChild
@@ -247,6 +248,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

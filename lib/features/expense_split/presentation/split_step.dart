@@ -348,6 +348,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
       _attempted = true;
       _saveError = false;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final rows = _rows!;
       if (_remainder != 0 || rows.length < 2) return;
@@ -377,6 +378,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
     } catch (_) {
       if (mounted) _showSaveError();
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

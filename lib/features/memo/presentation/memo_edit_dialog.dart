@@ -291,6 +291,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       pinChanged: (widget.edit?.pinned ?? false) != _pinned,
     );
     Memo saved;
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       saved = await _saveMemo(c, args);
     } catch (_) {
@@ -306,6 +307,8 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
       // 키보드 · 큰 글자로 맨 위 Callout 이 화면 밖이면 올린다(M2)
       revealFormError(_errorKey);
       return;
+    } finally {
+      sheet?.setBusy(false);
     }
     if (mounted) PBottomSheet.of(context).close();
     if (args.pinChanged) {

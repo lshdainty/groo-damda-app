@@ -584,6 +584,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     // 요청이 오가는 동안 시트가 닫힐 수 있다 — 닫힌 뒤에는 ref 를 못 쓰므로 컨테이너를 먼저 잡는다
     final container = ProviderScope.containerOf(context);
     setState(() => _submitting = true);
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await container.read(presetRepositoryProvider.future);
       final name = _nameTrim;
@@ -660,6 +661,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         }
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

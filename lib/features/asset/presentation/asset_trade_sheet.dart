@@ -248,6 +248,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       _failCode = null;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       await repo.createTrade(
@@ -289,6 +290,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

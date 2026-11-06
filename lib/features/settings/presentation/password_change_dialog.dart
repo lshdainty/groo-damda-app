@@ -106,6 +106,7 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
       _failed = false;
       _currentInvalid = false;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(authRepositoryProvider.future);
       await repo.changePassword(
@@ -153,6 +154,8 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
           }
         });
       }
+    } finally {
+      sheet?.setBusy(false);
     }
   }
 

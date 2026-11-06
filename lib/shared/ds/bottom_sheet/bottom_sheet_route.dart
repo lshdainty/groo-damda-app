@@ -185,6 +185,21 @@ class _SheetHostState extends State<_SheetHost>
   bool _dragReady = false;
   Timer? _readyTimer;
   bool _asking = false;
+  bool _busy = false;
+
+  @override
+  bool get busy => _busy;
+
+  @override
+  void setBusy(bool busy) {
+    if (!mounted || _busy == busy) return;
+    if (busy) {
+      // 끌던 손짓은 거기서 멈추고 제자리로 — 저장 중에는 끌리지 않는다
+      if (_tracking && _sheetMoved) _settleBack();
+      _tracking = false;
+    }
+    setState(() => _busy = busy);
+  }
 
   // 끌기
   bool _tracking = false;
@@ -305,7 +320,8 @@ class _SheetHostState extends State<_SheetHost>
   // ── 닫는 길 ──────────────────────────────────────────────────
   @override
   Future<void> requestClose({bool wholeSheet = false}) async {
-    if (_asking) return;
+    // 저장 중에는 닫지 않는다 — 닫기 버튼 · 뒤로 가기 · Esc · 바깥 누르기 · 끌기 · 손잡이가 모두 이 길이다
+    if (_busy || _asking) return;
     if (!wholeSheet && (_route.interceptClose?.call() ?? false)) return;
     final dirty = _route.isDirty?.call() ?? false;
     final copy = _route.leaveCopy;
@@ -332,7 +348,7 @@ class _SheetHostState extends State<_SheetHost>
   }
 
   // ── 끌기 ─────────────────────────────────────────────────────
-  bool get _canDrag => !_route.formNow && _dragReady && !_asking;
+  bool get _canDrag => !_route.formNow && _dragReady && !_asking && !_busy;
 
   bool get _bodyScrolled =>
       bodyController.hasClients && bodyController.position.pixels > 0.5;
@@ -460,7 +476,11 @@ class _SheetHostState extends State<_SheetHost>
         topRadius: _route.topRadius,
         onHandleTap: _handleTap,
         fixedHeight: _hasSnaps,
-        child: Builder(builder: _route.builder),
+        // 저장 중에는 시트 안 누름을 받지 않는다(입력 막기) — 낭독기는 그대로 읽는다
+        child: AbsorbPointer(
+          absorbing: _busy,
+          child: Builder(builder: _route.builder),
+        ),
       ),
     );
     // 끌기 — 입력 폼은 끌리지 않는다. 포인터를 직접 읽는다(본문 스크롤과 다투지 않는다)
@@ -485,7 +505,7 @@ class _SheetHostState extends State<_SheetHost>
           opacityOf: _dimOpacity,
           // 누르는 순간의 단계로 가른다 — 입력 폼 단계는 무시하고, 조회 · 고르기 단계는 시트 전체를 닫는다
           onTap: () {
-            if (!_route.formNow) requestClose(wholeSheet: true);
+            if (!_route.formNow && !_busy) requestClose(wholeSheet: true);
           },
         ),
         CustomSingleChildLayout(
@@ -518,9 +538,10 @@ class _SheetHostState extends State<_SheetHost>
       child: out,
     );
     // 뒤로 가기는 늘 닫는다 — 바뀐 값을 살피는 시트(isDirty)는 직접 받아 묻고, 아니면 그대로 닫힌다.
+    // 저장 중에는 받지 않는다(예측형 뒤로도 미리보기 없이 막힌다).
     // 모달 라우트 안에서만 건다(셸의 branch PopScope 와 겹치지 않는다)
     return PopScope(
-      canPop: _route.isDirty == null && _route.interceptClose == null,
+      canPop: !_busy && _route.isDirty == null && _route.interceptClose == null,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) requestClose();
       },

@@ -282,6 +282,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(savingGoalRepositoryProvider.future);
       // 현재 모은 금액은 update/create 필드가 아니라 contribute API 로 차액 반영(웹 동일 로직).
@@ -346,6 +347,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

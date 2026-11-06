@@ -350,6 +350,7 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(assetRepositoryProvider.future);
       // brand color hex 는 모바일 측에선 별도 파싱이라 institution 으로 추후 매칭.
@@ -436,6 +437,7 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

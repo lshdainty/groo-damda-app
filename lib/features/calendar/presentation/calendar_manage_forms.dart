@@ -130,6 +130,7 @@ class _CreateFormState extends ConsumerState<_CreateForm> {
       _submitting = true;
       _saveError = null;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(userCalendarRepositoryProvider.future);
       await repo.create(calendarName: name, color: _color, silent: true);
@@ -140,6 +141,7 @@ class _CreateFormState extends ConsumerState<_CreateForm> {
       if (!mounted) return;
       setState(() => _saveError = l.calCreateFailed);
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
@@ -290,6 +292,7 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
       _submitting = true;
       _saveError = null;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(userCalendarRepositoryProvider.future);
       await repo.update(
@@ -305,6 +308,7 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
       if (!mounted) return;
       setState(() => _saveError = l.calManageSaveFailed);
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
@@ -413,6 +417,7 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
       _codeError = null;
       _saveError = null;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(userCalendarRepositoryProvider.future);
       final joined = await repo.joinByCode(code);
@@ -439,6 +444,7 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
       });
       if (_codeError != null) widget.codeFocus.requestFocus();
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

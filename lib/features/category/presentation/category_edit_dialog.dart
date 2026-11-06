@@ -291,6 +291,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(expenseRepositoryProvider.future);
       if (_isEdit) {
@@ -327,6 +328,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }

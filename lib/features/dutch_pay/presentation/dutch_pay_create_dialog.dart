@@ -271,6 +271,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
       count: people.length,
       payerIndex: _payerIndex,
     );
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await c.read(dutchPayRepositoryProvider.future);
       await repo.create(
@@ -309,6 +310,8 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
+    } finally {
+      sheet?.setBusy(false);
     }
   }
 

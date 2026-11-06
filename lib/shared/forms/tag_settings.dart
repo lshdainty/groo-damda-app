@@ -525,6 +525,7 @@ class _TagEditSheetState extends State<_TagEditSheet> {
       _submitting = true;
       _saveError = false;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       await widget.onSave(_nameCtrl.text.trim(), _color);
     } catch (_) {
@@ -543,6 +544,8 @@ class _TagEditSheetState extends State<_TagEditSheet> {
         );
       }
       return;
+    } finally {
+      sheet?.setBusy(false);
     }
     if (!mounted) return;
     PBottomSheet.of(context).close(TagEditOutcome.saved);

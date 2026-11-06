@@ -202,6 +202,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       _failed = false;
       _submitting = true;
     });
+    final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
       final repo = await ref.read(todoRepositoryProvider.future);
       final content = _contentCtrl.text.trim();
@@ -241,6 +242,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
+      sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
     }
   }
