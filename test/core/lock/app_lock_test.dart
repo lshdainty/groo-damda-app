@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
 import 'package:groo_damda_app/core/lock/app_lock_gate.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -172,6 +177,86 @@ void main() {
       await tester.pumpAndSettle();
       expect(auth.calls, 2);
       expect(findText('앱 잠금'), findsOneWidget); // 실패라 여전히 잠김
+    });
+
+    testWidgets(
+      '잠금 화면은 해지 완료와 같은 틀 — 흰 면 + Result Section(머리말 1단계) + 바닥 [잠금 해제] large 전체 폭',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({PrefsKeys.appLock: true});
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final handle = tester.ensureSemantics();
+        await pumpGate(tester, _FakeAuth(AppLockAuthResult.failure));
+
+        final screen = find.byKey(const ValueKey('app-lock-screen'));
+        final c = tester.element(screen).colors;
+        expect(
+          tester.widget<Scaffold>(screen).backgroundColor,
+          c.bgLayerDefault,
+        );
+
+        final result = tester.widget<PResultSection>(
+          find.byType(PResultSection),
+        );
+        expect(result.title, '앱 잠금');
+        expect(result.headingLevel, 1);
+        expect(result.icon, LucideIcons.lock300);
+        final heading = tester.getSemantics(findText('앱 잠금'));
+        expect(heading, isSemantics(isHeader: true));
+        expect(heading.headingLevel, 1);
+
+        // 버튼 — ds PButton large(48) · 짙은 채움(브랜드 파랑 아님) · 지문 아이콘 · 좌우 24 전체 폭 · 바닥 24
+        final unlock = find.byKey(const ValueKey('app-lock-unlock'));
+        final button = tester.widget<PButton>(unlock);
+        expect(button.size, PButtonSize.large);
+        expect(button.variant, PButtonVariant.neutralSolid);
+        expect(button.prefixIcon, LucideIcons.fingerprint);
+        final rect = tester.getRect(unlock);
+        final view = tester.getRect(screen);
+        expect(rect.height, 48);
+        expect(rect.left, closeTo(24, 0.5));
+        expect(rect.right, closeTo(view.right - 24, 0.5));
+        expect(rect.bottom, closeTo(view.bottom - 24, 0.5));
+        handle.dispose();
+      },
+    );
+
+    testWidgets('잠긴 동안 뒤 화면은 보조 기술에서 빠진다 — 풀리면 돌아온다', (tester) async {
+      SharedPreferences.setMockInitialValues({PrefsKeys.appLock: true});
+      final handle = tester.ensureSemantics();
+      final container = await pumpGate(
+        tester,
+        _FakeAuth(AppLockAuthResult.failure),
+      );
+      // 의미 트리 전체의 이름 — 화면 읽기 프로그램이 닿는 것
+      List<String> labels() {
+        final out = <String>[];
+        bool visit(SemanticsNode n) {
+          out.add(n.label);
+          n.visitChildren(visit);
+          return true;
+        }
+
+        visit(
+          tester
+              .binding
+              .renderViews
+              .first
+              .owner!
+              .semanticsOwner!
+              .rootSemanticsNode!,
+        );
+        return out;
+      }
+
+      bool reads(String part) => labels().any((x) => x.contains(part));
+      expect(reads('콘텐츠'), isFalse);
+      expect(reads('앱 잠금'), isTrue);
+      container.read(appLockedProvider.notifier).unlock();
+      await tester.pumpAndSettle();
+      expect(reads('콘텐츠'), isTrue);
+      handle.dispose();
     });
 
     testWidgets('자동 프롬프트가 성공하면 잠금 화면이 걷힌다', (tester) async {
