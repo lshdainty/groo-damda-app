@@ -47,7 +47,7 @@ class AssetPickGate extends ConsumerWidget {
   }
 }
 
-/// 처음 받는 중 — 줄 셋(Logo Tile 40 · 이름 t5 줄 높이).
+/// 처음 받는 중 — 줄 넷(Logo Tile 40 · 이름 t5 줄 높이, 웹 PickSkeleton 과 같은 수).
 class _AssetPickSkeleton extends StatelessWidget {
   const _AssetPickSkeleton();
 
@@ -55,7 +55,7 @@ class _AssetPickSkeleton extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     key: const ValueKey('asset-pick-skeleton'),
     children: [
-      for (var i = 0; i < 3; i++)
+      for (var i = 0; i < 4; i++)
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: PSpacing.globalGutter,
