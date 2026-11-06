@@ -612,7 +612,7 @@ void main() {
           .descendant(
             of: head,
             matching: find.byWidgetPredicate(
-              (w) => w is Text && (w.data ?? '').contains('. '),
+              (w) => w is Text && (w.data ?? '').contains('일 ('),
             ),
           )
           .first,

@@ -142,8 +142,8 @@ void main() {
 
     // 날짜가 둘이면 헤더도 둘 — 부제에 날짜를 넣던 옛 방식이면 0 이다.
     expect(find.byType(PDayHeader), findsNWidgets(2));
-    expect(findTextContaining('26. 9. 12'), findsOneWidget);
-    expect(findTextContaining('26. 9. 11'), findsOneWidget);
+    expect(findTextContaining('9월 12일'), findsOneWidget);
+    expect(findTextContaining('9월 11일'), findsOneWidget);
   });
 
   testWidgets('같은 날이면 헤더 하나로 묶인다', (tester) async {

@@ -23,7 +23,7 @@ class PDayHeaderRow extends StatelessWidget {
     this.gutter,
   });
 
-  /// 날짜 글 — `"26. 10. 22(목) · 오늘"` · `"10월 22일 (수) · 어제"`.
+  /// 날짜 글 — `"10월 22일 (목) · 오늘"` · `"2025년 10월 25일 (토)"`.
   final String text;
 
   /// 오른쪽 자리 — 합계(거래) · "2/5 완료"(할 일). 없으면 비운다.
@@ -66,7 +66,7 @@ class PDayHeaderRow extends StatelessWidget {
 
 /// 날짜 묶음 머리 — List Header `mediumWeak`(t4 14 / 19 · 500 · `fg-neutral-subtle` · 좌우 24 · 위아래 8 · gap 10) 값이다(I-07 14).
 ///
-/// 글 `"26. 10. 22(목) · 오늘"` + 그날 합계(지출 `fg-neutral` · 수입 `fg-brand` + "+" · t4 500 고정폭). 합계가 머리 폭의 절반을
+/// 글 `"10월 22일 (목) · 오늘"`(다른 해 `"2025년 10월 25일 (토)"`) + 그날 합계(지출 `fg-neutral` · 수입 `fg-brand` + "+" · t4 500 고정폭). 합계가 머리 폭의 절반을
 /// 넘으면 제목 아래 줄 오른쪽 끝으로 내려간다(`PHeaderRow` — List Header 와 같은 판정). 머리말 `headingLevel: 2`.
 ///
 /// 가계부 · 검색이 함께 쓴다 — 두 화면이 각자 그리면 반드시 갈라진다. 합계는 월 헤더와 같은 규칙(환불 상계 + 예정 제외 —
@@ -103,9 +103,10 @@ class PDayHeader extends StatelessWidget {
         : ds == _ymd(now.subtract(const Duration(days: 1)))
         ? l.txmYesterday
         : null;
-    final label = formatDay(date);
+    // 날짜 규칙(DESIGN "날짜" 표 — 요일): 올해 "10월 25일 (일)", 다른 해 "2025년 10월 25일 (토)", 영어 "Sun, Oct 25" — 할 일
+    // 원장 머리와 같은 함수
     final text =
-        '${date.year % 100}. ${date.month}. ${date.day}(${label.dow})${rel == null ? '' : '\u00A0·\u00A0$rel'}';
+        '${monthDayDow(date)}${rel == null ? '' : '\u00A0·\u00A0$rel'}';
     final style = PDayHeaderRow.textStyle(c);
     final dayExpense = expenseSum(items);
     final dayIncome = incomeSum(items);
