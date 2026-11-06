@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
@@ -29,6 +30,8 @@ bool _isScheduled(String? date) {
 ///   이체는 순자산 증감이 0(수수료 제외)이라 +/- 를 붙이면 지출·수입 합계와 헷갈린다.
 /// - [perspectiveAssetRowId] 있음(자산 상세): 그 자산 기준으로 출금이면 -(금액+수수료),
 ///   입금이면 +금액. 수수료는 보내는 쪽에서만 빠진다(서버 recordTransfer 규칙과 동일).
+/// - 금액 · 수수료는 보내는 계좌 통화, 받는 쪽 관점은 받은 금액(`toAmount`, 없으면 amount)을 받는 계좌 통화로(I-13).
+///   통화가 다른 이체는 금액 아래 작게 "받는 금액 $1,000" 이 붙는다. 통화를 모르면([currencyOf] 없음) 원화로 찍는다(웹과 같다).
 class TransferRow extends StatelessWidget {
   const TransferRow({
     required this.transfer,
@@ -36,6 +39,7 @@ class TransferRow extends StatelessWidget {
     this.perspectiveAssetRowId,
     this.onTap,
     this.gutter,
+    this.currencyOf,
     super.key,
   });
 
@@ -49,6 +53,9 @@ class TransferRow extends StatelessWidget {
   /// **임시 인자** — 기본(null)은 ds List 줄의 24. 좌우 24 를 아직 쥐고 있는 호스트는 0.
   final double? gutter;
 
+  /// 계좌 rowId → 통화(자산 목록에서 읽는다). 없으면 원화로 본다.
+  final String? Function(int assetRowId)? currencyOf;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -61,8 +68,24 @@ class TransferRow extends StatelessWidget {
     final isIn =
         perspectiveAssetRowId != null &&
         transfer.toAssetRowId == perspectiveAssetRowId;
-    final int shown = isOut ? transfer.amount + fee : transfer.amount;
+    final fromCurrency = currencyOf?.call(transfer.fromAssetRowId);
+    final toCurrency = currencyOf?.call(transfer.toAssetRowId);
+    final received = transfer.toAmount ?? transfer.amount;
+    final int shown = isOut
+        ? transfer.amount + fee
+        : (isIn ? received : transfer.amount);
     final String sign = isOut ? '−' : (isIn ? '+' : '');
+    // 줄 금액의 통화 — 받는 쪽 관점만 받는 계좌 통화
+    final shownCurrency = isIn ? toCurrency : fromCurrency;
+    final masked = flags.of(MaskKind.transfer);
+    final locale = Localizations.localeOf(context).toString();
+    // 외화 금액(정수 — "$100", I-13) · 원화는 지금 그대로
+    String money(int n, String? code, {String sign = '', bool unit = true}) =>
+        masked
+        ? kHideMask
+        : isForeignCurrency(code)
+        ? '$sign${formatAssetAmount(n.abs(), code!, locale)}'
+        : krwSigned(n, false, sign: sign, unit: unit);
 
     final route =
         '${transfer.fromAssetName ?? '-'} → ${transfer.toAssetName ?? '-'}';
@@ -78,7 +101,7 @@ class TransferRow extends StatelessWidget {
         PTag(route, shrink: 2),
         if (fee > 0)
           PTag(
-            '${l.transferFeePrefix} ${krwSigned(fee, flags.of(MaskKind.transfer))}',
+            '${l.transferFeePrefix} ${money(fee, fromCurrency, unit: false)}',
             shrink: 0,
           ),
         if (hhmm.isNotEmpty && hhmm != '00:00') PTag(hhmm, shrink: 0),
@@ -95,6 +118,22 @@ class TransferRow extends StatelessWidget {
           )
         : tags;
 
+    final amount = PListValue.amount(
+      money(shown, shownCurrency, sign: sign),
+      style: TextStyle(
+        color: scheduled ? c.fgNeutralSubtle : c.fgNeutral,
+        fontWeight: FontWeight.w700,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+    // 통화가 다른 이체의 받는 금액 — 설명 줄(계좌 이름 · 시각)을 밀지 않게 금액 아래 작은 글로(자산 줄의 외화 작은 글과 같은 자리)
+    final toAmount = transfer.toAmount;
+    final receivedText = toAmount != null && !isIn
+        ? (masked
+              ? kHideMask
+              : l.transferReceivedTag(money(toAmount, toCurrency)))
+        : null;
+
     return PListButtonItem(
       title: transfer.description?.isNotEmpty == true
           ? transfer.description!
@@ -107,14 +146,27 @@ class TransferRow extends StatelessWidget {
         color: c.chartGray,
         child: const Icon(LucideIcons.arrowLeftRight),
       ),
-      suffix: PListValue.amount(
-        krwSigned(shown, flags.of(MaskKind.transfer), sign: sign, unit: true),
-        style: TextStyle(
-          color: scheduled ? c.fgNeutralSubtle : c.fgNeutral,
-          fontWeight: FontWeight.w700,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      ),
+      suffix: receivedText == null
+          ? amount
+          : PListValue(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                spacing: PSpacing.x0_5,
+                children: [
+                  amount,
+                  Text(
+                    receivedText,
+                    textAlign: TextAlign.end,
+                    style: PTypography.t3.copyWith(
+                      color: c.fgNeutralSubtle,
+                      fontWeight: FontWeight.w500,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
+            ),
       onTap: onTap,
     );
   }

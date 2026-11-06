@@ -46,6 +46,8 @@ _AssetTradePreview _$AssetTradePreviewFromJson(Map<String, dynamic> json) =>
       cashDelta: (json['cashDelta'] as num?)?.toInt() ?? 0,
       cashAfter: (json['cashAfter'] as num?)?.toInt() ?? 0,
       fundingAmount: (json['fundingAmount'] as num?)?.toInt() ?? 0,
+      cashCurrency: json['cashCurrency'] as String?,
+      fundingCurrency: json['fundingCurrency'] as String?,
     );
 
 Map<String, dynamic> _$AssetTradePreviewToJson(_AssetTradePreview instance) =>
@@ -55,4 +57,6 @@ Map<String, dynamic> _$AssetTradePreviewToJson(_AssetTradePreview instance) =>
       'cashDelta': instance.cashDelta,
       'cashAfter': instance.cashAfter,
       'fundingAmount': instance.fundingAmount,
+      'cashCurrency': instance.cashCurrency,
+      'fundingCurrency': instance.fundingCurrency,
     };

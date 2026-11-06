@@ -338,7 +338,7 @@ void main() {
         l.assetCreditLimitLabel,
         l.assetPaymentDayLabel,
         l.assetCurrentUsage,
-        l.assetCurrency,
+        // 통화 칸 없음 — 카드는 원화만(I-13 사용자 결정 4)
         l.assetPaymentAccountLabel,
       ]);
     });
@@ -347,7 +347,7 @@ void main() {
       expect(await labelsOf(tester, AssetKind.check), [
         l.assetCardProduct,
         l.assetNickname,
-        l.assetCurrency,
+        // 통화 칸 없음 — 카드는 원화만(I-13 사용자 결정 4)
         l.assetLinkedAccountLabel,
       ]);
     });

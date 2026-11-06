@@ -9,6 +9,7 @@ import 'package:groo_damda_app/core/lifecycle/screen_visibility.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/asset/domain/asset_krw.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_parts.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/saving_goal/application/saving_goal_providers.dart';
@@ -133,9 +134,11 @@ class _AssetScreenState extends ConsumerState<AssetScreen> {
     final netWorth = (summary?.netWorth ?? 0) + summaryDelta;
     final changeAmount = (summary?.changeAmount ?? 0) + summaryDelta;
     final lastMonth = summary?.lastMonthNetWorth ?? 0;
-    final changePercent = lastMonth != 0
-        ? (changeAmount / lastMonth.abs() * 1000).round() / 10
-        : (summary?.changePercent ?? 0.0);
+    final changePercent = netWorthChangePercent(
+      changeAmount,
+      lastMonth,
+      fallback: summary?.changePercent ?? 0.0,
+    );
 
     final masks = (
       netWorth: ref.watch(hideCardProvider('asset.netWorth')),

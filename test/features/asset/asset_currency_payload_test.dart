@@ -218,23 +218,21 @@ void main() {
     l = await AppLocalizations.delegate.load(const Locale('ko'));
   });
 
+  // 카드(신용 · 체크)는 원화만이다(I-13 사용자 결정 4, 서버 AST_037) — 통화 칸이 없고 늘 원화로 보낸다.
+  // 웹에서 USD 로 만든 옛 카드도 앱에서 저장하면 원화 · 환율 null 로 나간다(웹 AssetEditDialog.payload 시험과 같은 기대값).
   group('카드', () {
-    testWidgets('편집 폼이 서버 통화·환율을 채워서 연다', (tester) async {
+    testWidgets('편집 폼에 통화 · 환율 칸이 없다', (tester) async {
       await _host(
         tester,
         (ctx) => showCardEditDialog(ctx, _usdCard),
         assets: const [_usdCard, _krwAccount],
       );
 
-      expect(findPlain('\$ USD'), findsOneWidget);
-      expect(
-        textOf(tester, l.assetExchangeRate),
-        '1380',
-        reason: '환율을 안 채우면 그대로 저장할 때 빈 값이 실려 환산이 사라진다',
-      );
+      expect(find.byType(PSelect<String>), findsNothing);
+      expect(fieldWithLabel(l.assetExchangeRate), findsNothing);
     });
 
-    testWidgets('그대로 저장하면 USD 가 USD 로 남는다', (tester) async {
+    testWidgets('옛 USD 카드를 그대로 저장하면 원화 · 환율 명시적 null 로 나간다', (tester) async {
       final repo = await _host(
         tester,
         (ctx) => showCardEditDialog(ctx, _usdCard),
@@ -244,67 +242,26 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.updated, isNotNull, reason: '저장이 안 불렸다 — 테스트가 아무것도 안 본다');
-      expect(
-        repo.updated!['currency'],
-        'USD',
-        reason: 'KRW 를 실으면 USD 카드가 원화가 되고 환산율이 1 이 된다',
-      );
-      expect(repo.updated!['exchangeRate'], 1380.0);
-    });
-
-    testWidgets('원화로 되돌리면 환율이 명시적 null 로 지워진다', (tester) async {
-      final repo = await _host(
-        tester,
-        (ctx) => showCardEditDialog(ctx, _usdCard),
-        assets: const [_usdCard, _krwAccount],
-      );
-      await _pickCurrency(tester, '₩ KRW');
-      await tester.tap(_submitButton(l.actionSave));
-      await tester.pumpAndSettle();
-
       expect(repo.updated!['currency'], 'KRW');
       expect(
         repo.updated!['exchangeRatePresent'],
         isTrue,
-        reason: '키가 빠지면 서버가 옛 환율을 지켜 원화 잔액이 1380 배가 된다',
+        reason: '키가 빠지면 서버가 옛 환율을 지킨다',
       );
       expect(repo.updated!['exchangeRate'], isNull);
     });
 
-    testWidgets('환율 칸은 외화일 때만 보인다', (tester) async {
-      await _host(tester, showCardAddDialog);
-
-      expect(fieldWithLabel(l.assetExchangeRate), findsNothing);
-      await _pickCurrency(tester, '\$ USD');
-      expect(fieldWithLabel(l.assetExchangeRate), findsOneWidget);
-    });
-
-    testWidgets('신규는 고른 통화를 싣는다', (tester) async {
+    testWidgets('신규 체크카드는 원화로 실린다', (tester) async {
       // 체크카드는 결제일 없이도 저장이 열린다(신용은 결제일이 필수).
       final repo = await _host(
         tester,
         (c) => showAssetKindForm(c, AssetKind.check),
       );
       await pickCardProduct(tester, l.assetCardProduct, 'QA 체크카드');
-      await _pickCurrency(tester, '\$ USD');
-      await typeInto(tester, l.assetExchangeRate, '1400');
       await tester.tap(_submitButton(l.calAdd));
       await tester.pumpAndSettle();
 
       expect(repo.created, isNotNull, reason: '생성이 안 불렸다');
-      expect(repo.created!['currency'], 'USD');
-      expect(repo.created!['exchangeRate'], 1400.0);
-    });
-
-    testWidgets('안 건드리면 원화다 — 기본값은 한 군데서만 정한다', (tester) async {
-      final repo = await _host(
-        tester,
-        (c) => showAssetKindForm(c, AssetKind.check),
-      );
-      await pickCardProduct(tester, l.assetCardProduct, 'QA 체크카드');
-      await tester.tap(_submitButton(l.calAdd));
-      await tester.pumpAndSettle();
-
       expect(repo.created!['currency'], 'KRW');
       expect(repo.created!['exchangeRate'], isNull);
     });
@@ -359,11 +316,25 @@ void main() {
       final repo = await _host(tester, showInvestmentAddDialog);
       await _pickCurrency(tester, '\$ USD');
       await typeInto(tester, l.assetNickname, 'QA 별칭');
+      await typeInto(tester, l.assetExchangeRate, '1300');
       await tester.tap(_submitButton(l.calAdd));
       await tester.pumpAndSettle();
 
       expect(repo.created, isNotNull, reason: '생성이 안 불렸다');
       expect(repo.created!['currency'], 'USD');
+      expect(repo.created!['exchangeRate'], 1300.0);
+    });
+
+    // 외화 자산은 환율이 필수다(서버 AST_036, I-13) — 비우면 요청이 안 나가고 칸 오류가 선다.
+    testWidgets('외화인데 환율을 비우면 저장이 안 나가고 칸 오류', (tester) async {
+      final repo = await _host(tester, showInvestmentAddDialog);
+      await _pickCurrency(tester, '\$ USD');
+      await typeInto(tester, l.assetNickname, 'QA 별칭');
+      await tester.tap(_submitButton(l.calAdd));
+      await tester.pumpAndSettle();
+
+      expect(repo.created, isNull, reason: '환율 없는 외화 자산은 서버가 400 으로 막는다');
+      expect(find.text(l.assetExchangeRateRequired), findsOneWidget);
     });
   });
 

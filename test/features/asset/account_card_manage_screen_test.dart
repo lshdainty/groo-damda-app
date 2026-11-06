@@ -284,9 +284,9 @@ void main() {
     );
   });
 
-  // 외화 투자 자산의 환산은 main 과 같다(평가액을 balance 에 그대로 — 외화 고침은 서버 → 웹 · 앱 후속 PR 한 번에).
-  // 관리 화면과 자산 화면이 같은 식을 쓰는지만 잠근다.
-  test('외화 투자 자산 라이브 치환 — 자산 화면과 같은 식(평가액을 balance 에 그대로)', () {
+  // 외화 투자 자산의 라이브 치환 — 보유 평가 자리만 라이브 원화로, 원화 합계 = round(예수금 × 환율) + 라이브(I-13 길 A).
+  // 관리 화면과 자산 화면이 같은 식을 쓰는지 잠근다(balance 는 옛 뜻 예수금 + 보유로 맞춰 둔다).
+  test('외화 투자 자산 라이브 치환 — 자산 화면과 같은 식(보유 자리만 라이브, 원화 합계 10,130,000)', () {
     const usdInv = Asset(
       rowId: 8,
       assetName: '해외 증권',
@@ -301,6 +301,9 @@ void main() {
     expect(live.single.balance, 10000100);
     expect(live.single.holdingBalance, 10000000);
     expect(liveValuationDelta([usdInv], {8: 10000000}), 10000100 - 5000);
+    expect(live.single.currency, 'USD', reason: '통화는 바꾸지 않는다');
+    expect(live.single.balanceInKrw, 10130000);
+    expect(assetSumIncluded(live), 10130000);
   });
 
   testWidgets('투자 줄에 등락(▲ ▼)이 없다 — 금액만(웹 · 그림과 같다)', (tester) async {

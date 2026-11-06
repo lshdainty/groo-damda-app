@@ -552,7 +552,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetExchangeRateDesc =>
-      'Net worth converts balance × rate. Left empty it is added without conversion.';
+      'Converts the foreign balance or cash to KRW.';
+
+  @override
+  String get assetExchangeRateRequired => 'Enter the exchange rate.';
 
   @override
   String get assetMemoPlaceholder => 'e.g. Last digits 1234';
@@ -1024,6 +1027,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetCashBalance => 'Cash';
+
+  @override
+  String get assetHoldingKrwInputHint => 'Enter in KRW';
+
+  @override
+  String fxApproxKrw(String amount) {
+    return '≈ $amount';
+  }
 
   @override
   String get assetHoldingBalance => 'Holdings';
@@ -2281,6 +2292,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferFeePrefix => 'Fee';
 
   @override
+  String transferReceivedTag(String amount) {
+    return 'Received $amount';
+  }
+
+  @override
+  String get transferReceived => 'Amount received';
+
+  @override
   String get transferPrincipal => 'Principal';
 
   @override
@@ -2517,6 +2536,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetSaveFailed => 'Couldn\'t save the asset.';
+
+  @override
+  String get assetSaveCardForeign => 'Cards can only be registered in KRW.';
+
+  @override
+  String get assetSaveRateRequired =>
+      'Enter the exchange rate to save a foreign-currency asset.';
 
   @override
   String get tradeSaveFailed => 'Couldn\'t process the trade.';
@@ -9338,6 +9364,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String txfEmptyPresetHint(String name) {
     return 'The “$name” preset has no amount. Enter one and press Next.';
+  }
+
+  @override
+  String txfReceiveAmount(String amount) {
+    return 'Amount received ≈ $amount';
   }
 
   @override

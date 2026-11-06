@@ -1127,8 +1127,14 @@ abstract class AppLocalizations {
   /// No description provided for @assetExchangeRateDesc.
   ///
   /// In ko, this message translates to:
-  /// **'순자산은 잔액 × 환율로 환산해요. 비워 두면 환산 없이 그대로 더해져요.'**
+  /// **'외화 잔액 · 예수금을 원화로 바꿀 때 써요.'**
   String get assetExchangeRateDesc;
+
+  /// No description provided for @assetExchangeRateRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'환율을 입력해주세요.'**
+  String get assetExchangeRateRequired;
 
   /// No description provided for @assetMemoPlaceholder.
   ///
@@ -1787,7 +1793,7 @@ abstract class AppLocalizations {
   /// No description provided for @tradeFundingNotice.
   ///
   /// In ko, this message translates to:
-  /// **'예수금이 모자라 결제 계좌에서 {amount}을 옮겨요'**
+  /// **'예수금이 모자라 결제 계좌에서 {amount}만큼 옮겨요'**
   String tradeFundingNotice(String amount);
 
   /// No description provided for @tradeInsufficientCash.
@@ -1992,6 +1998,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'예수금'**
   String get assetCashBalance;
+
+  /// No description provided for @assetHoldingKrwInputHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'원화로 입력해요'**
+  String get assetHoldingKrwInputHint;
+
+  /// No description provided for @fxApproxKrw.
+  ///
+  /// In ko, this message translates to:
+  /// **'약 {amount}'**
+  String fxApproxKrw(String amount);
 
   /// No description provided for @assetHoldingBalance.
   ///
@@ -4225,6 +4243,18 @@ abstract class AppLocalizations {
   /// **'수수료'**
   String get transferFeePrefix;
 
+  /// No description provided for @transferReceivedTag.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 금액 {amount}'**
+  String transferReceivedTag(String amount);
+
+  /// No description provided for @transferReceived.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 금액'**
+  String get transferReceived;
+
   /// No description provided for @transferPrincipal.
   ///
   /// In ko, this message translates to:
@@ -4656,6 +4686,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'자산을 저장하지 못했어요.'**
   String get assetSaveFailed;
+
+  /// No description provided for @assetSaveCardForeign.
+  ///
+  /// In ko, this message translates to:
+  /// **'카드는 원화로만 등록할 수 있어요.'**
+  String get assetSaveCardForeign;
+
+  /// No description provided for @assetSaveRateRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'외화 자산은 환율을 입력해야 저장할 수 있어요.'**
+  String get assetSaveRateRequired;
 
   /// No description provided for @tradeSaveFailed.
   ///
@@ -16410,6 +16452,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'“{name}” 프리셋은 금액이 비어 있어요. 금액을 넣고 [다음]을 눌러주세요.'**
   String txfEmptyPresetHint(String name);
+
+  /// No description provided for @txfReceiveAmount.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 금액 약 {amount}'**
+  String txfReceiveAmount(String amount);
 
   /// No description provided for @txfPresetAllTitle.
   ///

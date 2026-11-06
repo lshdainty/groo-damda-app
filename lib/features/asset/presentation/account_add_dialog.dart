@@ -79,6 +79,9 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
   late bool _hideAmount;
   bool _submitting = false;
   bool _failed = false;
+
+  /// 마지막 저장 실패의 서버 코드 — Callout 고정 글을 가르는 데만 쓴다(서버 원문은 내지 않는다).
+  String? _failCode;
   final _errorKey = GlobalKey();
   bool _touched = false;
 
@@ -124,7 +127,12 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
       _nicknameTrim.length <= kAssetNameMax && !_nicknameDuplicate;
 
   /// 웹과 같은 흐름 — touched 전엔 눌러서 에러를 노출하고, 그 뒤엔 valid 일 때만 저장한다. 단추는 늘 켜 두고 누르면 알린다.
-  bool get _blocked => _nicknameTrim.isEmpty || (_touched && !_nicknameValid);
+  bool get _nameBlocked =>
+      _nicknameTrim.isEmpty || (_touched && !_nicknameValid);
+
+  /// 외화면 환율이 필수다(서버 AST_036, I-13) — 비우면 칸 오류로 막는다.
+  bool get _blocked =>
+      _nameBlocked || exchangeRateMissing(_currency, _fxRateCtrl);
 
   @override
   void initState() {
@@ -203,7 +211,7 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
     if (_submitting) return;
     if (_blocked) {
       setState(() => _showErrors = true);
-      _nameFocus.requestFocus();
+      if (_nameBlocked) _nameFocus.requestFocus();
       return;
     }
     _submit();
@@ -305,10 +313,14 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
       invalidateAfterAssetChange(ref);
       if (!mounted) return;
       PBottomSheet.of(context).close();
-    } on ApiException {
+    } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
+      // 고쳐 다시 할 수 있는 코드(AST_036 · AST_037)만 다른 고정 글로 가른다(I-13).
       if (!mounted) return;
-      setState(() => _failed = true);
+      setState(() {
+        _failed = true;
+        _failCode = e.code;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ctx = _errorKey.currentContext;
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
@@ -372,7 +384,7 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
       submitLabel: _isEdit ? l.actionSave : l.calAdd,
       onBack: widget.onBack,
       submitting: _submitting,
-      errorMessage: _failed ? l.assetSaveFailed : null,
+      errorMessage: _failed ? assetSaveFailedText(l, _failCode) : null,
       errorKey: _errorKey,
       onSubmit: _attempt,
       fields: [
@@ -417,6 +429,7 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
           currency: _currency,
           rateController: _fxRateCtrl,
           onCurrencyChanged: (v) => setState(() => _currencyPick = v),
+          showErrors: _showErrors,
         ),
       ],
       checks: AssetCheckRows(

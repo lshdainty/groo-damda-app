@@ -542,8 +542,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get assetExchangeRateDesc =>
-      '순자산은 잔액 × 환율로 환산해요. 비워 두면 환산 없이 그대로 더해져요.';
+  String get assetExchangeRateDesc => '외화 잔액 · 예수금을 원화로 바꿀 때 써요.';
+
+  @override
+  String get assetExchangeRateRequired => '환율을 입력해주세요.';
 
   @override
   String get assetMemoPlaceholder => '예: 계좌번호 뒷자리 1234';
@@ -895,7 +897,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String tradeFundingNotice(String amount) {
-    return '예수금이 모자라 결제 계좌에서 $amount을 옮겨요';
+    return '예수금이 모자라 결제 계좌에서 $amount만큼 옮겨요';
   }
 
   @override
@@ -1009,6 +1011,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetCashBalance => '예수금';
+
+  @override
+  String get assetHoldingKrwInputHint => '원화로 입력해요';
+
+  @override
+  String fxApproxKrw(String amount) {
+    return '약 $amount';
+  }
 
   @override
   String get assetHoldingBalance => '평가금액';
@@ -2250,6 +2260,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get transferFeePrefix => '수수료';
 
   @override
+  String transferReceivedTag(String amount) {
+    return '받는 금액 $amount';
+  }
+
+  @override
+  String get transferReceived => '받는 금액';
+
+  @override
   String get transferPrincipal => '원금';
 
   @override
@@ -2478,6 +2496,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetSaveFailed => '자산을 저장하지 못했어요.';
+
+  @override
+  String get assetSaveCardForeign => '카드는 원화로만 등록할 수 있어요.';
+
+  @override
+  String get assetSaveRateRequired => '외화 자산은 환율을 입력해야 저장할 수 있어요.';
 
   @override
   String get tradeSaveFailed => '매매를 처리하지 못했어요.';
@@ -9128,6 +9152,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String txfEmptyPresetHint(String name) {
     return '“$name” 프리셋은 금액이 비어 있어요. 금액을 넣고 [다음]을 눌러주세요.';
+  }
+
+  @override
+  String txfReceiveAmount(String amount) {
+    return '받는 금액 약 $amount';
   }
 
   @override

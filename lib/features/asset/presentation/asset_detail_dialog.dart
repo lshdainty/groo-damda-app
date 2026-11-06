@@ -62,6 +62,8 @@ import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/data/asset_repository.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
+import 'package:groo_damda_app/features/asset/domain/asset_krw.dart';
+import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_trade.dart';
 import 'package:groo_damda_app/features/asset/domain/asset_transfer.dart';
 import 'package:groo_damda_app/features/asset/domain/card_billing.dart';
@@ -356,6 +358,15 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
       final i = liveAssets.indexWhere((a) => a.rowId == widget.asset.rowId);
       if (i >= 0) asset = liveAssets[i];
     }
+    // 라이브 평가(프로 + 증권 연결)가 있으면 보유 평가 자리만 라이브 원화로 바꾼다 — 자산 줄 · 묶음 합계와 같은 값(I-13, 웹 상세와 같다).
+    // 다시 받는 동안은 앞 값을 든다(`value`).
+    if (asset.assetType == 'INVESTMENT') {
+      final live = ref
+          .watch(investmentValuationMapProvider)
+          .value?[asset.rowId]
+          ?.value;
+      if (live != null) asset = withLiveHolding(asset, live);
+    }
     // 화면 카드 **또는** 이 자산 자체가 가려져 있으면 가린다 — 합집합이다.
     // 두 축은 서로를 덮지 않는다(하나는 화면 설정, 하나는 자산의 속성).
     final masked =
@@ -554,6 +565,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               emptyText: l.assetNoLinkedTx,
               transfers: assetTransfers,
               perspectiveAssetRowId: asset.rowId,
+              currencyOf: (id) => liveAssets?.byRowId(id)?.currency,
               flags: _assetMaskFlags(ref, asset),
               tokens: t,
             ),
@@ -829,9 +841,13 @@ class KvRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.inset = PSpacing.x6,
+    this.sub,
   });
   final String label;
   final String? value;
+
+  /// 값 아래 작은 글(t3 · `fg-neutral-subtle`) — 외화 예수금의 원화 어림 "약 130,000원"(I-13). 없으면 한 줄.
+  final String? sub;
 
   /// 좌우 여백 — 시트 안은 24, 이미 24 안쪽에 선 페이지 본문은 0.
   final double inset;
@@ -856,14 +872,36 @@ class KvRow extends StatelessWidget {
             ),
             const SizedBox(width: PSpacing.x4),
             Expanded(
-              child: Text(
-                v,
-                textAlign: TextAlign.end,
-                style: PTypography.t5.copyWith(
-                  color: c.fgNeutralMuted,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
+              child: sub == null
+                  ? Text(
+                      v,
+                      textAlign: TextAlign.end,
+                      style: PTypography.t5.copyWith(
+                        color: c.fgNeutralMuted,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          v,
+                          textAlign: TextAlign.end,
+                          style: PTypography.t5.copyWith(
+                            color: c.fgNeutralMuted,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        Text(
+                          sub!,
+                          textAlign: TextAlign.end,
+                          style: PTypography.t3.copyWith(
+                            color: c.fgNeutralSubtle,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -1186,11 +1224,18 @@ class _HeroCard extends StatelessWidget {
     // 연결계좌형 체크카드는 잔액이 늘 0 — 히어로는 이번 달 사용액(서버 계산)을 보여준다.
     final checkLinked =
         asset.assetType == 'CHECK_CARD' && asset.paymentAssetRowId != null;
+    // 큰 금액은 원화 합계 하나다(I-13 길 A) — 서버 balanceInKrw(라이브면 보유 자리만 바꾼 값). 줄 · 묶음 합계와 같은 값이다.
+    // 예전엔 DB balance(예수금 달러 + 보유 원화)를 환산 없이 "원" 으로 찍었다.
     final heroBalance = checkLinked
         ? (asset.monthlyUsedAmount ?? 0)
         : heroIsCard
         ? rawBalance.abs()
-        : rawBalance;
+        : assetKrw(asset);
+    final locale = Localizations.localeOf(context).toString();
+    final foreign = isForeignCurrency(asset.currency);
+    // 외화 금액(정수 — "$100", I-13). 원화 어림은 아래 작게 "약 130,000원".
+    String foreignText(int n) => formatAssetAmount(n, asset.currency!, locale);
+    final cashKrw = cashInKrw(asset);
     // 머리(45) — Logo 48 + 오른쪽 12 + 이름 t6 700 줄바꿈 + 설명 t3 `fg-neutral-subtle`. 구분선 · 띠를 두지 않는다.
     final c = context.colors;
     final amountText = masked
@@ -1251,7 +1296,24 @@ class _HeroCard extends StatelessWidget {
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
-          // 예수금 · 평가금액 — 키-값 줄 둘(예수금이 있을 때만).
+          // 외화 계좌(투자 · 카드 아님)의 자산 통화 잔액 — 큰 금액(원화 합계) 아래 작게(웹 AssetAmount 와 같다).
+          if (foreign && !isInv && !heroIsCard)
+            Padding(
+              padding: const EdgeInsets.only(top: PSpacing.x0_5),
+              child: Text(
+                masked
+                    ? '••••••'
+                    : keepAllAmount(
+                        foreignText(asset.cashBalance ?? rawBalance),
+                      ),
+                style: PTypography.t3.copyWith(
+                  color: c.fgNeutralSubtle,
+                  fontWeight: FontWeight.w500,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          // 예수금 · 평가금액 — 키-값 줄 둘(예수금이 있을 때만). 외화 예수금은 자산 통화 "$100" + 아래 작게 "약 130,000원".
           if (asset.assetType == 'INVESTMENT' &&
               (asset.cashBalance ?? 0) != 0) ...[
             const SizedBox(height: PSpacing.x2),
@@ -1260,7 +1322,14 @@ class _HeroCard extends StatelessWidget {
               label: l.assetCashBalance,
               value: masked
                   ? '••••••'
+                  : foreign
+                  ? keepAllAmount(foreignText(asset.cashBalance!))
                   : keepAllAmount('${krw(asset.cashBalance!)}${wonUnit()}'),
+              sub: foreign && !masked
+                  ? keepAllAmount(
+                      l.fxApproxKrw(krwSigned(cashKrw, false, unit: true)),
+                    )
+                  : null,
             ),
             KvRow(
               inset: 0,
@@ -1322,7 +1391,8 @@ class _BalanceTrendChart extends StatelessWidget {
     final labels = [
       for (var i = 0; i < list.length; i++) l.assetWeeksCount(i + 1),
     ];
-    final name = '$title, ${won(list.last.balance)}';
+    // 원화 합계(서버 balanceInKrw — 줄 · 상세 큰 금액과 같은 한 식, I-13 길 A). 옛 서버면 balance
+    final name = '$title, ${won(list.last.krwOrBalance)}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1337,7 +1407,7 @@ class _BalanceTrendChart extends StatelessWidget {
               key: 'balance',
               label: seriesLabel,
               color: PChartColor.blue,
-              values: [for (final p in list) p.balance.toDouble()],
+              values: [for (final p in list) p.krwOrBalance.toDouble()],
             ),
           ],
           axisFormatter: (v) => masked ? kBudgetMask : formatAxisWon(v),
@@ -1351,7 +1421,7 @@ class _BalanceTrendChart extends StatelessWidget {
           ],
           rows: [
             for (var i = 0; i < list.length; i++)
-              [labels[i], won(list[i].balance)],
+              [labels[i], won(list[i].krwOrBalance)],
           ],
         ),
       ],
@@ -1368,8 +1438,12 @@ class _RecentExpenses extends StatelessWidget {
     required this.emptyText,
     this.transfers = const [],
     this.perspectiveAssetRowId,
+    this.currencyOf,
   });
   final AsyncValue<List<Expense>> async;
+
+  /// 계좌 rowId → 통화 — 이체 줄이 보내는 · 받는 계좌 통화로 금액을 찍는다(I-13).
+  final String? Function(int assetRowId)? currencyOf;
 
   /// 실패 띠의 [다시 시도] · 비었을 때 글(자리마다 다르다).
   final VoidCallback onRetry;
@@ -1508,6 +1582,7 @@ class _RecentExpenses extends StatelessWidget {
               transfer: tr,
               flags: flags,
               perspectiveAssetRowId: perspectiveAssetRowId,
+              currencyOf: currencyOf,
               // 이 화면이 아직 좌우 24 를 쥔다 — 글자 자리가 24 로 같게 줄의 24 는 끈다.
               gutter: 0,
               onTap: () => showTransferDetailSheet(context, tr),
