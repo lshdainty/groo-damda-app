@@ -11,8 +11,6 @@ import 'package:groo_damda_app/features/budget/application/budget_providers.dart
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_edit_dialog.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
-import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
-import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -33,7 +31,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 /// 예산 설정 화면 — 웹 `BudgetManager.tsx`(설정 > 예산 설정) 미러.
 ///
@@ -152,60 +150,9 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
     );
   }
 
-  /// 스와이프 삭제 — ds 확인창(Alert Dialog)으로 묻고(삭제는 criticalSolid), 확정하면 지운다.
-  /// 실패하면 확인창을 닫고 스낵바(critical + 다시 시도)로 알린다 — 다시 시도는 묻지 않고 바로 지운다 —
-  /// 이미 확인창에서 한 번 확정한 삭제이고, 띠는 화면을 나가도 남으므로(앱 뿌리 호스트) 화면이 살아 있든 아니든 같다.
-  Future<void> _confirmDeleteCategory(Budget budget, String name) async {
-    final l = AppLocalizations.of(context);
-    final container = ProviderScope.containerOf(context);
-    final snack = PSnackbar.of(context);
-    final key = _key;
-    Object? failure;
-    final ok = await PAlertDialog.show(
-      context,
-      title: l.budgetDeleteTitle(name),
-      description: l.budgetDeleteConfirm,
-      cancelLabel: l.actionCancel,
-      actionLabel: l.actionDelete,
-      destructive: true,
-      onAction: () async {
-        try {
-          await _deleteBudget(container, key, budget);
-        } catch (e) {
-          failure = e;
-        }
-      },
-    );
-    if (ok && failure != null) {
-      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①). 아니면 실패 띠 + [다시 시도]
-      // (묻지 않고 바로 지운다, 또 실패하면 같은 띠)
-      showConfirmFailSnackbar(
-        snack,
-        error: failure,
-        message: l.budgetDeleteFailed,
-        retryLabel: l.actionRetry,
-        retry: () => _deleteBudget(container, key, budget),
-        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
-        onUnconfirmed: () => container
-          ..invalidate(monthBudgetsProvider(key))
-          ..invalidate(budgetComplianceProvider),
-      );
-    }
-  }
-
-  /// 수정 시트가 쓰던 저장소·무효화 경로를 그대로 쓴다. 실패하면 던진다.
-  /// 실패는 호출한 쪽 스낵바가 알리므로 전역 오류 토스트는 끈다(둘이 같은 아래쪽에서 겹친다).
-  static Future<void> _deleteBudget(
-    ProviderContainer container,
-    BudgetMonthKey key,
-    Budget budget,
-  ) async {
-    final repo = await container.read(budgetRepositoryProvider.future);
-    await repo.delete(budget.rowId, silent: true);
-    container.invalidate(monthBudgetsProvider(key));
-    // 준수율은 keepAlive — 지운 예산이 남아 있으면 달성률이 옛 값으로 굳는다.
-    container.invalidate(budgetComplianceProvider);
-  }
+  /// 스와이프 삭제 — 확인창 · 실패 띠는 [confirmDeleteBudget] (수정 시트 바닥 [삭제] 와 같은 길).
+  Future<void> _confirmDeleteCategory(Budget budget, String name) =>
+      confirmDeleteBudget(context, key: _key, budget: budget, name: name);
 
   void _editCategory(Budget budget, List<Budget> budgets) {
     showBudgetEditDialog(
@@ -367,18 +314,22 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
                     // 지름길이지 유일한 경로가 아니다(spec swipe-actions.md · WCAG 2.1.1).
                     PSwipeActions(
                       key: ValueKey('budget-${b.rowId}'),
-                      groupTag: 'budget-settings-list',
+                      rowLabel: budgetRowName(
+                        l,
+                        categories.byRowId(b.categoryRowId!),
+                        b,
+                      ),
                       actions: [
                         PSwipeAction(
                           label: l.actionEdit,
                           icon: LucideIcons.pencil,
-                          kind: PSwipeKind.primary,
+                          kind: PSwipeActionKind.primary,
                           onSelect: () => _editCategory(b, budgets),
                         ),
                         PSwipeAction(
                           label: l.actionDelete,
                           icon: LucideIcons.trash2,
-                          kind: PSwipeKind.destructive,
+                          kind: PSwipeActionKind.destructive,
                           // 확인은 ds 확인창이 받는다 — 트레이를 먼저 닫은 뒤 화면 context 로 띄운다.
                           onSelect: () => _confirmDeleteCategory(
                             b,
@@ -419,19 +370,21 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
         ),
       ),
       // 흰 면 하나 — 카드 · 줄 사이 선 없음. 구역과 줄이 제 좌우 24 를 갖는다(I-08 18)
-      body: PScreenBandBody(
-        child: PPullToRefresh(
-          onRefresh: () async {
-            ref.invalidate(monthBudgetsProvider(_key));
-            ref.invalidate(
-              rangeSummaryProvider((
-                startDate: _monthStartStr,
-                endDate: _monthEndStr,
-              )),
-            );
-            await ref.read(monthBudgetsProvider(_key).future);
-          },
-          child: ListView(padding: EdgeInsets.zero, children: children),
+      body: PSwipeActionsProvider(
+        child: PScreenBandBody(
+          child: PPullToRefresh(
+            onRefresh: () async {
+              ref.invalidate(monthBudgetsProvider(_key));
+              ref.invalidate(
+                rangeSummaryProvider((
+                  startDate: _monthStartStr,
+                  endDate: _monthEndStr,
+                )),
+              );
+              await ref.read(monthBudgetsProvider(_key).future);
+            },
+            child: ListView(padding: EdgeInsets.zero, children: children),
+          ),
         ),
       ),
     );

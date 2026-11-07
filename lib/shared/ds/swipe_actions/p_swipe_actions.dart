@@ -192,7 +192,8 @@ class _PSwipeActionsScope extends InheritedNotifier<PSwipeActionsController> {
 }
 
 /// 목록의 조상 — 한 번에 한 줄만 열리고(다른 줄을 끌면 열린 줄이 닫힌다), 스크롤하면 열린 줄이 닫힌다.
-/// 폰 셸마다 하나 둔다(화면마다 새로 두지 않는다). 없어도 줄은 제 상태로 열고 닫는다.
+/// 목록이 있는 화면마다 하나 둔다(스크롤 뷰 바깥 — 스크롤 알림이 올라오는 자리). 없으면 줄이 각자 열려
+/// 여러 줄이 열린 채 남는다.
 class PSwipeActionsProvider extends StatefulWidget {
   const PSwipeActionsProvider({super.key, required this.child});
 
@@ -566,6 +567,19 @@ class _PSwipeActionsState extends State<PSwipeActions> {
     final rtl = _rtl;
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final dragging = _drag != null;
+    // 줄 최소 높이 = max(56, 칸 내용) — 큰 글자로 배지 36 + 2 + 라벨이 56 을 넘으면 그만큼(넘치거나 잘리지 않게)
+    final labelFont = MediaQuery.textScalerOf(
+      context,
+    ).scale(PTypography.t2.fontSize ?? 12);
+    final rowMinHeight = math.max(
+      kSwipeMinHeight,
+      (kSwipeBadgeSize +
+              kSwipeBadgeLabelGap +
+              labelFont * kSwipeLabelLineHeight)
+          .ceilToDouble(),
+    );
+    // 다른 줄이 열려 있으면 이 줄의 누름은 열린 줄을 닫기만 한다
+    final otherOpen = !open && _group?.openId != null;
     final reversed = widget.actions.reversed.toList();
 
     return CallbackShortcuts(
@@ -628,6 +642,8 @@ class _PSwipeActionsState extends State<PSwipeActions> {
                 key: const ValueKey('swipe-row'),
                 // 줄은 목록의 폭 전체다 — 줄이 내용만큼 쪼그라들면 밀 자리도 누를 자리도 좁아진다
                 width: double.infinity,
+                // 줄이 56 보다 낮으면 56 으로 — 동작 칸(56)이 줄 높이에 눌려 넘치지 않게(스펙 swipe-actions.md Size)
+                constraints: BoxConstraints(minHeight: rowMinHeight),
                 // 끄는 동안에는 손가락을 1:1 로 — 손을 뗀 뒤 자리를 잡을 때만 150ms 감속(모션 줄이기면 바로)
                 duration: dragging || reduceMotion
                     ? Duration.zero
@@ -644,11 +660,21 @@ class _PSwipeActionsState extends State<PSwipeActions> {
                   child: GestureDetector(
                     // 열려 있으면 누르기는 닫기만 한다(열어 둔 걸 못 보고 누르는 일이 많다)
                     behavior: HitTestBehavior.opaque,
-                    onTap: open ? _close : null,
+                    onTap: open
+                        ? _close
+                        : otherOpen
+                        ? _group!.closeAll
+                        : null,
                     excludeFromSemantics: true,
                     child: AbsorbPointer(
-                      absorbing: open || dragging,
-                      child: widget.child,
+                      absorbing: open || dragging || otherOpen,
+                      // 낮은 줄은 56 안에서 세로 가운데 — 높이는 줄을 따른다(Column min)
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [widget.child],
+                      ),
                     ),
                   ),
                 ),

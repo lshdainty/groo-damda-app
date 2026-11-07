@@ -7179,12 +7179,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String tdmStarToastGain(int gain, int left) {
-    return 'Starlight +$gain · $left to collect';
+    return 'Got $gain starlight, $left more to collect the constellation.';
   }
 
   @override
   String tdmStarToastCollected(int gain) {
-    return 'Starlight +$gain · today\'s constellation collected!';
+    return 'Got $gain starlight and collected today\'s constellation.';
   }
 
   @override

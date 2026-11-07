@@ -99,6 +99,9 @@ class FakeTodoRepo extends TodoRepository {
   /// null 이면 바로 답한다. 주면 그 Completer 가 끝날 때까지 기다린다.
   Completer<int>? gate;
   bool fail = false;
+
+  /// 완료 응답이 돌려주는 별빛(0 이면 토스트 없음).
+  int gain = 0;
   final List<(int, String)> statusCalls = [];
   int listReads = 0;
 
@@ -118,7 +121,7 @@ class FakeTodoRepo extends TodoRepository {
       for (final t in todos)
         if (t.rowId == id) t.copyWith(status: status) else t,
     ];
-    return 0;
+    return gain;
   }
 }
 

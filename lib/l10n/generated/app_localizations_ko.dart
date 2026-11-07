@@ -7044,12 +7044,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String tdmStarToastGain(int gain, int left) {
-    return '별빛 +$gain · 수집까지 $left별';
+    return '별빛 $gain개를 받아 별자리까지 $left개 남았어요.';
   }
 
   @override
   String tdmStarToastCollected(int gain) {
-    return '별빛 +$gain · 오늘의 별자리 수집!';
+    return '별빛 $gain개를 받아 오늘의 별자리를 수집했어요.';
   }
 
   @override

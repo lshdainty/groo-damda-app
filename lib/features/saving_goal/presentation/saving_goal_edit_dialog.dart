@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 
 /// 이름 길이 상한 — 웹 `GOAL_NAME_MAX` · 카테고리와 같은 값(QA #52).
 const _kNameMax = 12;
@@ -50,6 +51,55 @@ void showSavingGoalEditDialog(BuildContext context, {SavingGoal? edit}) {
     ),
     builder: (_) => _GoalForm(edit: edit, probe: probe, titleFocus: titleFocus),
   );
+}
+
+/// 저축 목표 삭제 — ds 확인창(Alert Dialog)으로 묻고(삭제는 criticalSolid), 확정하면 지운다. 밀기 트레이와 수정 시트 바닥
+/// [삭제] 가 같은 길이다. 실패하면 확인창을 닫고 스낵바(critical + 다시 시도)로 알린다 — 다시 시도는 묻지 않고 바로 지운다.
+/// 띠는 앱 뿌리 호스트에 있어 화면을 나가도 남는다(그때 [context] 는 죽었으므로 미리 잡아 둔 컨테이너로 돈다).
+/// 확인창에서 지우기를 눌렀으면(성공이든 실패든) true.
+Future<bool> confirmDeleteSavingGoal(
+  BuildContext context,
+  SavingGoal goal,
+) async {
+  final l = AppLocalizations.of(context);
+  final container = ProviderScope.containerOf(context);
+  final snack = PSnackbar.of(context);
+  Object? failure;
+  final ok = await PAlertDialog.show(
+    context,
+    title: l.savingGoalDeleteTitle(goal.title),
+    description: l.savingGoalDeleteConfirm,
+    cancelLabel: l.actionCancel,
+    actionLabel: l.actionDelete,
+    destructive: true,
+    onAction: () async {
+      try {
+        await _deleteGoal(container, goal);
+      } catch (e) {
+        failure = e;
+      }
+    },
+  );
+  if (ok && failure != null) {
+    // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①)
+    showConfirmFailSnackbar(
+      snack,
+      error: failure,
+      message: l.savingGoalDeleteFailed,
+      retryLabel: l.actionRetry,
+      retry: () => _deleteGoal(container, goal),
+      unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+      onUnconfirmed: () => container.invalidate(savingGoalListProvider),
+    );
+  }
+  return ok;
+}
+
+/// 실패하면 던진다 — 호출한 쪽 스낵바가 알리므로 전역 오류 토스트는 끈다.
+Future<void> _deleteGoal(ProviderContainer container, SavingGoal goal) async {
+  final repo = await container.read(savingGoalRepositoryProvider.future);
+  await repo.delete(goal.rowId, silent: true);
+  container.invalidate(savingGoalListProvider);
 }
 
 class _DirtyProbe {
@@ -93,6 +143,13 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   String? _foreignColor;
 
   bool _submitting = false;
+
+  Future<void> _delete() async {
+    final sheet = PBottomSheet.of(context);
+    final ok = await confirmDeleteSavingGoal(context, widget.edit!);
+    if (ok && mounted) sheet.close();
+  }
+
   bool _failed = false;
 
   /// 실패한 저장의 오류 — 응답을 읽지 못한 쓰기(PARSE)면 실패가 아니라 "저장됐는지 확인하지 못했어요"(검수 M3).
@@ -513,14 +570,43 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
           const SizedBox(height: PSpacing.x2),
         ],
       ),
-      footer: [
-        PButton(
-          label: _isEdit ? l.actionSave : l.savingGoalSubmitAdd,
-          size: PButtonSize.large,
-          loading: _submitting,
-          onPressed: _submitting ? null : _onSubmit,
-        ),
-      ],
+      footer: _isEdit
+          ? const []
+          : [
+              PButton(
+                label: l.savingGoalSubmitAdd,
+                size: PButtonSize.large,
+                loading: _submitting,
+                onPressed: _submitting ? null : _onSubmit,
+              ),
+            ],
+      // 수정 — 바닥 왼쪽 [삭제](밀기와 같은 동작 · 확인창 한 번). 밀기는 지름길이라 닫는 길은 여기에도 있다
+      footerRow: _isEdit
+          ? Row(
+              spacing: PSpacing.x2,
+              children: [
+                // 내용 폭 ghost critical — 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
+                Transform.translate(
+                  offset: const Offset(-20, 0),
+                  child: PButton(
+                    label: l.actionDelete,
+                    variant: PButtonVariant.ghost,
+                    ghostColor: PButtonGhostColor.critical,
+                    size: PButtonSize.large,
+                    onPressed: _submitting ? null : _delete,
+                  ),
+                ),
+                Expanded(
+                  child: PButton(
+                    label: l.actionSave,
+                    size: PButtonSize.large,
+                    loading: _submitting,
+                    onPressed: _submitting ? null : _onSubmit,
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 
