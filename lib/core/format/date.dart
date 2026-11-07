@@ -60,14 +60,14 @@ String monthDayDow(DateTime d) {
   return '${x.md} (${x.dow})';
 }
 
-/// 기간 줄 — "11월 2일 ~ 11월 8일"(날짜 규칙: 올해 줄임, 0 채움 없음). 둘 중 하나라도 올해가 아니면 두 끝 모두 연도를 붙인다
-/// ("2025년 12월 29일 ~ 2026년 1월 4일") — 연도 없이 끝만 달라 보이는 것을 막는다.
+/// 기간 줄 — "11월 2일~11월 8일"(날짜 규칙: 올해 줄임, 0 채움 없음). 둘 중 하나라도 올해가 아니면 두 끝 모두 연도를 붙인다
+/// ("2025년 12월 29일~2026년 1월 4일") — 연도 없이 끝만 달라 보이는 것을 막는다.
 String dateRange(DateTime from, DateTime to) {
   final thisYear = DateTime.now().year;
   final crossYear = from.year != thisYear || to.year != thisYear;
   final f = crossYear ? fullDate(from) : monthDay(from);
   final t = crossYear ? fullDate(to) : monthDay(to);
-  return '$f ~ $t';
+  return '$f~$t';
 }
 
 /// 시각 — 모든 화면에 오전 · 오후 12시간을 쓰고 초는 쓰지 않는다(International v106 · 01A-101):

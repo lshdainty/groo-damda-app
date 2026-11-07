@@ -479,7 +479,7 @@ void main() {
           (w) =>
               w is Text &&
               RegExp(
-                r'^\d{1,2}월 \d{1,2}일 ~ \d{1,2}월 \d{1,2}일$',
+                r'^\d{1,2}월 \d{1,2}일~\d{1,2}월 \d{1,2}일$',
               ).hasMatch(plainOf(w.data ?? '')),
         ),
         findsOneWidget,

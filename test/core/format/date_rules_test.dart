@@ -22,24 +22,21 @@ String _dow(DateTime d) => '월화수목금토일'[d.weekday - 1];
 void main() {
   setUpAll(() async => initializeDateFormatting());
 
-  test('기간 줄 — 올해 안이면 "11월 2일 ~ 11월 8일"(앞 0 · 점 표기 없음)', () {
+  test('기간 줄 — 올해 안이면 "11월 2일~11월 8일"(앞 0 · 점 표기 없음)', () {
     final y = DateTime.now().year;
-    expect(
-      dateRange(DateTime(y, 11, 2), DateTime(y, 11, 8)),
-      '11월 2일 ~ 11월 8일',
-    );
-    expect(dateRange(DateTime(y, 1, 1), DateTime(y, 1, 7)), '1월 1일 ~ 1월 7일');
+    expect(dateRange(DateTime(y, 11, 2), DateTime(y, 11, 8)), '11월 2일~11월 8일');
+    expect(dateRange(DateTime(y, 1, 1), DateTime(y, 1, 7)), '1월 1일~1월 7일');
   });
 
   test('기간 줄 — 다른 해가 끼면 두 끝 모두 연도를 붙인다', () {
     final y = DateTime.now().year;
     expect(
       dateRange(DateTime(y - 1, 12, 29), DateTime(y, 1, 4)),
-      '${y - 1}년 12월 29일 ~ $y년 1월 4일',
+      '${y - 1}년 12월 29일~$y년 1월 4일',
     );
     expect(
       dateRange(DateTime(y + 1, 3, 1), DateTime(y + 1, 3, 7)),
-      '${y + 1}년 3월 1일 ~ ${y + 1}년 3월 7일',
+      '${y + 1}년 3월 1일~${y + 1}년 3월 7일',
     );
   });
 
