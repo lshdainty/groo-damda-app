@@ -38,7 +38,7 @@ class PListHeader extends StatelessWidget {
     this.titleSuffix,
     this.actionBleed = kTextButtonPaddingX,
     this.tabularFigures = false,
-    this.flushAction = false,
+    this.flushAction = true,
   }) : assert(action == null || trailing == null, '오른쪽은 글 버튼과 값 글 중 하나');
 
   final String title;
@@ -70,8 +70,8 @@ class PListHeader extends StatelessWidget {
   /// 제목의 숫자를 고정폭으로(개수가 바뀌어도 폭이 흔들리지 않게).
   final bool tabularFigures;
 
-  /// 동작(36)이 줄 높이를 늘리지 않게 — 위아래 8 씩 번진다(글 줄 20 + 아래 8 이 머리 높이). 스펙 list-header `action` 의 위아래
-  /// −8 블리드. 기본 false(기존 머리는 동작 36 이 줄 높이).
+  /// 동작(36)이 줄 높이를 늘리지 않게 — 위아래 8 씩 번진다(위 8 + 글 줄 20 + 아래 8 이 머리 높이). 스펙 list-header `action` 의
+  /// 위아래 −8 블리드(list-header.yaml marginY). 기본 true — 끄면 동작 36 이 줄 높이이고 위 여백 기본은 0.
   final bool flushAction;
 
   @override
@@ -92,8 +92,9 @@ class PListHeader extends StatelessWidget {
         key: const ValueKey('plist-header'),
         padding: EdgeInsets.fromLTRB(
           inset,
-          // 글 버튼(36)이 있으면 그 36 이 줄 높이다 — 위아래 8 + 20 과 같다(스펙 marginY −8)
-          topInset ?? (action == null ? PSpacing.x2 : 0),
+          // 동작이 번지면(기본) 제목만 있을 때와 같은 8 — 위 8 + 20 + 아래 8 = 36 이 줄 높이다(스펙 marginY −8).
+          // 번지지 않게 끈 동작은 36 이 줄 높이라 위 여백이 0 이다
+          topInset ?? (action == null || flushAction ? PSpacing.x2 : 0),
           inset,
           action == null || flushAction ? PSpacing.x2 : 0,
         ),

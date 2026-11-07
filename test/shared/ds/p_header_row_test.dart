@@ -171,6 +171,51 @@ void main() {
     });
   });
 
+  group('PListHeader 기본 — 동작이 있어도 번지고(flush) 윗여백 8 이 기본이다', () {
+    // 가.2-b: flushAction 기본 true + 기본 윗여백 8. 윗여백을 안 주는 머리가 8 줄지 않고,
+    // 윗여백을 준 머리는 동작 36 이 아니라 20 + 8 만큼 높다(topInset 16 → 44, 4 → 32).
+    for (final c in <(String, double?, double)>[
+      ('윗여백 안 줌 → 36', null, 36),
+      ('윗여백 8 → 36', 8, 36),
+      ('윗여백 16 → 44 (옛 52)', 16, 44),
+      ('윗여백 4 → 32 (옛 40)', 4, 32),
+    ]) {
+      testWidgets(c.$1, (tester) async {
+        _viewport(tester);
+        await tester.pumpWidget(
+          _app(
+            PListHeader(
+              title: '제목',
+              topInset: c.$2,
+              action: const SizedBox(
+                key: ValueKey('act'),
+                width: 36,
+                height: 36,
+              ),
+            ),
+          ),
+        );
+        expect(tester.getSize(find.byType(PListHeader)).height, c.$3);
+      });
+    }
+
+    testWidgets('flushAction 을 끄면 옛 모양 — 윗여백 기본 0 · 동작 36 이 줄 높이', (
+      tester,
+    ) async {
+      _viewport(tester);
+      await tester.pumpWidget(
+        _app(
+          const PListHeader(
+            title: '제목',
+            flushAction: false,
+            action: SizedBox(key: ValueKey('act'), width: 36, height: 36),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(PListHeader)).height, 36);
+    });
+  });
+
   group('새 공용 머리 셋 — 100% 에서 한 줄, 200% 에서 내려간다', () {
     for (final scale in [1.0, 1.3, 2.0]) {
       testWidgets('PCardHeader · 폭 360 · 글자 ${(scale * 100).round()}%', (
