@@ -10,7 +10,10 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/floating_action_button/p_floating_action_button.dart';
+import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 Widget _app(Widget body) => MaterialApp(
@@ -45,6 +48,20 @@ void main() {
         PTopNavigationTextButton(label: '완료', onPressed: () {}),
     'StocksSearchEntry': () => StocksSearchEntry(onTap: () {}),
     'PTextButton': () => PTextButton(label: '전체 보기', onPressed: () {}),
+    'PFloatingActionButton': () => PFloatingActionButton(
+      icon: LucideIcons.plus500,
+      label: '추가',
+      onPressed: () {},
+    ),
+    'PTabs': () => PTabs<String>(
+      value: 'a',
+      onChanged: (_) {},
+      semanticLabel: '탭',
+      items: const [
+        PTab(value: 'a', label: '하나'),
+        PTab(value: 'b', label: '둘'),
+      ],
+    ),
     'PButton(기준)': () => PButton(label: '확인', onPressed: () {}),
   };
 

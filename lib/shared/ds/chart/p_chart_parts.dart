@@ -9,6 +9,7 @@ import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 import 'package:groo_damda_app/shared/ds/list/list_row.dart'
     show kPListStackBelowEm;
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// Chart 의 부품 — 차트 상자 · 툴팁 · 지표 타일 · 도넛 범례 · 표로 보기. 규칙은 p_chart.dart 머리 설명이다.
 
@@ -412,6 +413,7 @@ class _LegendTile extends StatelessWidget {
       // 마지막 하나는 끌 수 없다
       onTap: locked ? null : onToggle,
       touchMin: 0,
+      focusRing: const PFocusRingStyle(radius: PRounded.r3),
       semantics: (child, enabled, tap) => Semantics(
         button: true,
         toggled: on,
@@ -656,6 +658,7 @@ class _PressableDonutRow extends StatelessWidget {
           enabled: true,
           onTap: item.onTap,
           touchMin: 0,
+          focusRing: const PFocusRingStyle(inset: true),
           semantics: (child, enabled, tap) =>
               Semantics(button: true, onTap: tap, child: child),
           builder: (context, pressed, size) => Stack(

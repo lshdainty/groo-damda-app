@@ -46,6 +46,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 const _tabular = [FontFeature.tabularFigures()];
 const _mask = '••••';
@@ -656,6 +657,8 @@ class _HeroEyeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return PressArea(
+      // 브랜드 채움 위 흰 아이콘 단추 — 링도 흰색 원
+      focusRing: const PFocusRingStyle(circle: true, color: Color(0xFFFFFFFF)),
       enabled: true,
       onTap: onTap,
       semantics: (child, enabled, tap) => Semantics(

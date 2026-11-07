@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 달 줄 — 달 글 + 아래 꺾쇠(‹ › 없음, 10-29 — 연 · 월은 휠로만 옮긴다)와 오른쪽 동작(스펙 부품이 아니라 ds 를 조합한 줄 조각). 달 글을 누르면 달 고르기.
 /// 예산 · 캘린더가 함께 쓰고, 둘레 여백 · 글 크기 · 최소 높이만 화면이 정한다.
@@ -52,6 +53,7 @@ class MonthRow extends StatelessWidget {
                       enabled: true,
                       onTap: onPick,
                       touchMin: 0,
+                      focusRing: const PFocusRingStyle(radius: PRounded.r2),
                       semantics: (child, enabled, onTap) => Semantics(
                         container: true,
                         button: true,

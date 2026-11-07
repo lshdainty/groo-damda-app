@@ -17,6 +17,7 @@ import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dar
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 가계부 원장 머리 — 달 이동 · 합계 · 인사이트 · 소비 요약 · 주 달력(I-07 7 · 8 · 11).
 ///
@@ -147,6 +148,7 @@ class LedgerMonthNav extends StatelessWidget {
                   enabled: true,
                   onTap: onPick,
                   touchMin: 0,
+                  focusRing: const PFocusRingStyle(radius: PRounded.r2),
                   semantics: (child, enabled, onTap) => Semantics(
                     container: true,
                     button: true,
@@ -656,6 +658,7 @@ class LedgerCalendarGrid extends StatelessWidget {
         enabled: true,
         onTap: () => onSelect(cellData.ds),
         touchMin: 0,
+        focusRing: const PFocusRingStyle(inset: true),
         // 이름이 있으면 아래에서 칸 하나로 묶어 읽는다 — 여기서는 누름만 맡는다
         semantics: (child, enabled, tap) => label != null
             ? child

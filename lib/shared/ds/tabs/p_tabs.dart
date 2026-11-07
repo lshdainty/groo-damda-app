@@ -11,6 +11,7 @@ import 'package:groo_damda_app/shared/ds/notification_badge/p_notification_badge
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// Line 의 폭 — fill(기본 — 칸을 똑같이 나눈다, 5개 이하 · 짧은 글) · hug(글만큼 — 6개 이상이거나 글이 길 때, 넘치면 가로
 /// 스크롤).
@@ -616,6 +617,7 @@ class _LineTab<T> extends StatelessWidget {
       focusNode: focusNode,
       skipTraversal: !selected,
       touchMin: 0,
+      focusRing: const PFocusRingStyle(radius: PRounded.r2),
       // 이미 고른 탭을 다시 눌러도 그대로다
       onTap: selected ? () {} : onSelect,
       semantics: (child, enabled, onTap) => Semantics(
@@ -885,6 +887,7 @@ class _ChipTab<T> extends StatelessWidget {
         ? '${item.label} ${notificationBadgeNameOf(context)}'
         : item.label;
     return PressArea(
+      focusRing: const PFocusRingStyle(radius: PRounded.full),
       enabled: enabled,
       focusNode: focusNode,
       skipTraversal: !selected,

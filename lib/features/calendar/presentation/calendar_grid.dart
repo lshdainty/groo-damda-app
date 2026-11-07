@@ -9,6 +9,7 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_month_mod
 import 'package:groo_damda_app/features/calendar/presentation/calendar_tone.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 폰 달력 격자 — 칸 높이 103 고정 · 칸마다 위 1px 선 · 칸 안 글자 칩(I-09 9 10).
 /// 격자가 화면보다 길면 화면이 스크롤하고, 마지막 주 아래에 탭 바 보상을 둔다.
@@ -322,6 +323,7 @@ class CalendarDayCell extends StatelessWidget {
       enabled: true,
       onTap: onTap,
       touchMin: 0,
+      focusRing: const PFocusRingStyle(inset: true),
       semantics: (child, enabled, tap) => Semantics(
         container: true,
         button: true,
