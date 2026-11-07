@@ -2841,7 +2841,8 @@ void main() {
           secondaryAction: PResultAction(label: '홈으로', onPressed: () {}),
         ),
       );
-      expect(tester.getSize(find.byKey(secondary)).height, 36 - 16);
+      // 앱은 부모 밖으로 누르는 영역을 못 넓혀 위아래 8 블리드를 다 빼면(20) WCAG AA 24 에 못 미친다 — 24 까지만 뺀다(B5)
+      expect(tester.getSize(find.byKey(secondary)).height, 24);
     });
 
     testWidgets('제목은 제목으로, 묶음은 라이브 영역으로 읽고 아이콘은 읽지 않는다', (tester) async {

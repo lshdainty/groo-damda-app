@@ -599,13 +599,14 @@ class _TotalSection extends StatelessWidget {
     String won(int n, {String sign = ''}) => budgetWon(n, masked, sign: sign);
     final has = overallBudget != null;
     return BudgetSection(
-      topPadding: PSpacing.x3,
+      topPadding: 9 /* 12 − 3: 줄이 24 로 커진 몫 */,
       children: [
         // 첫 줄: 눈썹 + 오른쪽 글 버튼(수정 · 설정). 글 버튼(36)이 줄을 늘리지 않게 줄 높이는 눈썹(18)이고, 버튼은 위아래로 내민다
         PTouchTargetScope(
           slack: 9,
           child: SizedBox(
-            height: 18,
+            // 줄 높이는 눈썹 18 이 아니라 24 — 부모 밖으로는 누르는 영역을 못 넓히므로 AA 24 를 줄이 지킨다(앞 위 여백이 6 을 가져간다)
+            height: 24,
             child: OverflowBox(
               minHeight: kTextButtonHeight,
               maxHeight: kTextButtonHeight,
@@ -622,7 +623,7 @@ class _TotalSection extends StatelessWidget {
             ),
           ),
         ),
-        const _Gap(PSpacing.x3),
+        const _Gap(9 /* 12 − 3 */),
         if (has)
           BudgetBigAmount(amount: won(monthlyLimit))
         else

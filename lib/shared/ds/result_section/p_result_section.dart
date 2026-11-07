@@ -74,6 +74,9 @@ const double _assetGap = PSpacing.x4;
 const double _actionsGap = PSpacing.x5;
 const double _secondaryBleed = PSpacing.x2;
 
+/// WCAG 2.5.8 AA 최소 누르는 영역 — 부모 밖으로 넓힐 수 없는 자리의 하한.
+const double kMinTargetAA = 24;
+
 /// 색 — 아이콘은 결과마다, 제목 · 설명은 늘 같다. 위젯과 테스트가 같은 표를 본다.
 @visibleForTesting
 ({Color asset, Color title, Color description}) resolvePResultColors(
@@ -308,7 +311,8 @@ class PResultSection extends StatelessWidget {
             alignment: primary != null ? Alignment.topCenter : Alignment.center,
             heightFactor: primary != null
                 ? (secondaryHeight - _secondaryBleed) / secondaryHeight
-                : (secondaryHeight - _secondaryBleed * 2) / secondaryHeight,
+                // 첫 버튼이 없으면 위아래 8 을 다 빼면 20 이라 누르는 영역이 WCAG AA 24 에 못 미친다 — 24 까지만 뺀다(앱: 부모 밖으로 못 넓힘)
+                : kMinTargetAA / secondaryHeight,
             child: secondaryButton,
           ),
       ],

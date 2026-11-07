@@ -8,6 +8,8 @@ import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_head
 import 'package:groo_damda_app/features/stocks/presentation/stocks_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 
 Widget _app(Widget body) => MaterialApp(
   theme: GrooTheme.light(),
@@ -80,5 +82,21 @@ void main() {
       StocksSearchEntry(onTap: () {}),
       find.byKey(const ValueKey('stocks-search-entry')),
     );
+  });
+
+  testWidgets('결과 화면 둘째 글 버튼(첫 버튼 없음) — 누르는 영역이 WCAG AA 24 이상', (t) async {
+    await t.pumpWidget(
+      _app(
+        PResultSection(
+          kind: PResultKind.done,
+          title: '끝',
+          secondaryAction: PResultAction(label: '다른 파일 가져오기', onPressed: () {}),
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    final s = hitSize(t, find.byType(PTextButton));
+    _rows.add('PResultSection 둘째 글 버튼(단독) | ${s.height.toStringAsFixed(0)}');
+    expect(s.height, greaterThanOrEqualTo(24));
   });
 }
