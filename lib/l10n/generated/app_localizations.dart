@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLockUnavailable.
   ///
   /// In ko, this message translates to:
-  /// **'이 기기에서는 생체인증이나 화면 잠금을 사용할 수 없어요.'**
+  /// **'이 기기에서는 생체 인증을 쓸 수 없어요.'**
   String get appLockUnavailable;
 
   /// No description provided for @stateEmpty.

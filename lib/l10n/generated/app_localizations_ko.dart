@@ -138,7 +138,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appLockPromptReason => '앱을 열려면 본인 확인이 필요해요.';
 
   @override
-  String get appLockUnavailable => '이 기기에서는 생체인증이나 화면 잠금을 사용할 수 없어요.';
+  String get appLockUnavailable => '이 기기에서는 생체 인증을 쓸 수 없어요.';
 
   @override
   String get stateEmpty => '표시할 항목이 없어요';

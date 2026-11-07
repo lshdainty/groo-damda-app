@@ -26,8 +26,11 @@ class _FakeAuth extends AppLockAuth {
   final AppLockAuthResult result;
   int calls = 0;
 
+  /// false 면 이 기기는 생체 인증 · 화면 잠금을 쓸 수 없다.
+  bool supported = true;
+
   @override
-  Future<bool> isDeviceSupported() async => true;
+  Future<bool> isDeviceSupported() async => supported;
 
   @override
   Future<AppLockAuthResult> authenticate({
@@ -154,6 +157,45 @@ void main() {
       expect(auth.calls, 1);
       // 인증 실패 → 꺼진 채로 남는다.
       expect(container.read(appLockEnabledProvider), false);
+    });
+
+    testWidgets('생체 인증을 쓸 수 없는 기기 — 스낵바 없이 스위치가 막히고 까닭이 줄에 늘 보인다', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final auth = _FakeAuth(AppLockAuthResult.unavailable)..supported = false;
+      final container = await pumpAccount(tester, auth: auth);
+      await container.read(settingsProvider.future);
+      await tester.pump();
+
+      expect(findText('이 기기에서는 생체 인증을 쓸 수 없어요.'), findsOneWidget);
+      final item = tester.widget<PListSwitchItem>(find.byType(PListSwitchItem));
+      expect(item.onChanged, isNull); // 막힌 줄
+      expect(item.checked, isFalse);
+
+      await tester.tap(find.byType(PListSwitchItem), warnIfMissed: false);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(auth.calls, 0); // 인증을 부르지도 않는다
+      expect(container.read(appLockEnabledProvider), false);
+      // 스낵바로는 더 이상 말하지 않는다 — 글이 한 군데(줄 설명)에만 있다
+      expect(findText('이 기기에서는 생체 인증을 쓸 수 없어요.'), findsOneWidget);
+    });
+
+    testWidgets('생체 인증을 쓸 수 있으면 안내 글이 없고 스위치가 열려 있다', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final container = await pumpAccount(
+        tester,
+        auth: _FakeAuth(AppLockAuthResult.success),
+      );
+      await container.read(settingsProvider.future);
+      await tester.pump();
+
+      expect(findText('이 기기에서는 생체 인증을 쓸 수 없어요.'), findsNothing);
+      expect(
+        tester.widget<PListSwitchItem>(find.byType(PListSwitchItem)).onChanged,
+        isNotNull,
+      );
     });
 
     testWidgets('금액 가리기 행을 누르면 전용 화면으로 간다', (tester) async {

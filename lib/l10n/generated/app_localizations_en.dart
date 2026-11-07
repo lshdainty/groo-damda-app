@@ -146,7 +146,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockUnavailable =>
-      'Biometrics or screen lock isn\'t available on this device.';
+      'Biometric authentication isn\'t available on this device.';
 
   @override
   String get stateEmpty => 'Nothing to show';

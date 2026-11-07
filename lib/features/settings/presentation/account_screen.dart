@@ -161,6 +161,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final subKnown = subscriptionAsync.hasValue;
     final hasSecurities = ref.watch(hasSecuritiesProvider);
     final appLockOn = ref.watch(appLockEnabledProvider);
+    // 이 기기에서 생체 인증을 못 쓰면 스위치를 막고 까닭을 줄 설명에 늘 보인다. 이미 켜져 있으면 끌 수 있어야 한다
+    final appLockBlocked =
+        !appLockOn &&
+        ref.watch(appLockSupportedProvider).asData?.value == false;
     final hiddenCount =
         ref.watch(settingsProvider).value?.hideCards.length ?? 0;
     final hiddenTotal = kAllHideCards.length;
@@ -247,8 +251,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               PListSwitchItem(
                 prefix: _icon(LucideIcons.fingerprint),
                 title: l.appLockTitle,
+                detail: appLockBlocked ? l.appLockUnavailable : null,
                 checked: appLockOn,
-                onChanged: (v) => setAppLockWithAuth(context, ref, v),
+                onChanged: appLockBlocked
+                    ? null
+                    : (v) => setAppLockWithAuth(context, ref, v),
               ),
               // 금액 가리기 — 화면·카드 37장을 훑는 목록이라 자기 화면으로 보낸다. 몇 장을 가렸는지 줄에서 보인다.
               PListButtonItem(
