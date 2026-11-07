@@ -1,6 +1,8 @@
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:intl/intl.dart';
 
 import 'package:groo_damda_app/core/format/format_locale.dart';
+import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
 /// porest-desk-front `formatDay(dStr)` 포팅 — "M월 D일" + "요일".
 class DayLabel {
@@ -60,15 +62,41 @@ String monthDayDow(DateTime d) {
   return '${x.md} (${x.dow})';
 }
 
-/// 기간 줄 — "11월 2일~11월 8일"(날짜 규칙: 올해 줄임, 0 채움 없음). 둘 중 하나라도 올해가 아니면 두 끝 모두 연도를 붙인다
-/// ("2025년 12월 29일~2026년 1월 4일") — 연도 없이 끝만 달라 보이는 것을 막는다.
+/// 구간 기호 — 로케일 문구(`dateRangeSeparator`): 한국어 "~", 영어 en dash "–". 앞뒤를 붙여 쓴다(DESIGN.desk.md:3652).
+String _rangeSeparator() => lookupAppLocalizations(
+  Locale(localeIsEn() ? 'en' : 'ko'),
+).dateRangeSeparator;
+
+/// 기간 줄 — ko "11월 2일~11월 8일" · en "Nov 2–8"(같은 달) / "Nov 2–Dec 1"(날짜 규칙: 올해 줄임, 0 채움 없음).
+/// 둘 중 하나라도 올해가 아니면 두 끝 모두 연도를 붙인다(ko "2025년 12월 29일~2026년 1월 4일" · en "Dec 29, 2025–Jan 4, 2026").
 String dateRange(DateTime from, DateTime to) {
+  final sep = _rangeSeparator();
   final thisYear = DateTime.now().year;
   final crossYear = from.year != thisYear || to.year != thisYear;
+  if (localeIsEn() && !crossYear && from.month == to.month) {
+    // "Nov 2–8" — 같은 달은 뒤쪽 달 이름을 줄인다
+    return '${monthDay(from)}$sep${to.day}';
+  }
   final f = crossYear ? fullDate(from) : monthDay(from);
   final t = crossYear ? fullDate(to) : monthDay(to);
-  return '$f~$t';
+  return '$f$sep$t';
 }
+
+/// 월 눈금 글 — 한 해 안이면 ko "1월" · en "Jan"(앞 0 없음), 해가 섞이면 ko 점 표기 "2025. 12." · en "Dec 2025"
+/// (점 표기는 한국어 전용, DESIGN.desk.md:3604). 통계 · 순자산 추이가 같이 쓴다.
+List<String> monthTicks(List<({int year, int month})> rows) {
+  final same = rows.isNotEmpty && rows.every((r) => r.year == rows.first.year);
+  return [
+    for (final r in rows)
+      same
+          ? monthOnly(DateTime(r.year, r.month))
+          : yearMonthDot(DateTime(r.year, r.month)),
+  ];
+}
+
+/// 연 · 월 점 표기 — ko "2026. 1."(0 채움 없음), en "Jan 2026".
+String yearMonthDot(DateTime d) =>
+    localeIsEn() ? DateFormat.yMMM('en').format(d) : '${d.year}. ${d.month}.';
 
 /// 시각 — 모든 화면에 오전 · 오후 12시간을 쓰고 초는 쓰지 않는다(International v106 · 01A-101):
 /// ko "오후 3:07"(`a h:mm`), en "3:07 PM"(`h:mm a`). 서버로 보내는 "HH:mm" 값은 이것으로 만들지 않는다.

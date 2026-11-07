@@ -114,7 +114,7 @@ class WatchGroupBlockState extends ConsumerState<WatchGroupBlock> {
               icon: LucideIcons.ellipsisVertical,
               semanticLabel: l.stocksWatchGroupMore(g.groupName),
               variant: PButtonVariant.ghost,
-              size: PButtonSize.medium,
+              size: PButtonSize.small,
               onPressed: _more,
             ),
           ),

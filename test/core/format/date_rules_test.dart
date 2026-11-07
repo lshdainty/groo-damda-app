@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
@@ -60,34 +61,84 @@ void main() {
     ]);
   });
 
-  testWidgets('순자산 추이 x 눈금 — "1월" … "12월"(앞 0 없음)', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          hideCardsRepositoryProvider.overrideWith(
-            (ref) async => OkHideCardsRepository(),
-          ),
-          netWorthTrendProvider.overrideWith(
-            (ref, months) async => [
-              for (var m = 1; m <= 12; m++)
-                NetWorthPoint(year: 2026, month: m, netWorth: m * 1000000),
-            ],
-          ),
-        ],
-        child: MaterialApp(
-          theme: GrooTheme.light(),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('ko'),
-          home: const Scaffold(body: NetWorthChart()),
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    final chart = tester.widget<PLineChart>(find.byType(PLineChart));
-    expect(chart.categories, [for (var m = 1; m <= 12; m++) '$m월']);
-    expect(chart.categories.where((c) => c.startsWith('0')), isEmpty);
+  group('영어 — 구간은 en dash(로케일 문구), 점 표기는 한국어 전용', () {
+    late String? prev;
+    setUp(() {
+      prev = Intl.defaultLocale;
+      Intl.defaultLocale = 'en';
+    });
+    tearDown(() => Intl.defaultLocale = prev);
+
+    test('기간 줄 — Nov 2–8 · Nov 2–Dec 1 · 해가 섞이면 연도', () {
+      final y = DateTime.now().year;
+      expect(dateRange(DateTime(y, 11, 2), DateTime(y, 11, 8)), 'Nov 2–8');
+      expect(dateRange(DateTime(y, 11, 2), DateTime(y, 12, 1)), 'Nov 2–Dec 1');
+      expect(
+        dateRange(DateTime(y - 1, 12, 29), DateTime(y, 1, 4)),
+        'Dec 29, ${y - 1}–Jan 4, $y',
+      );
+    });
+
+    test('월 눈금 · 마감 — "Jan" / "Dec 2025 · Jan 2026"(점 표기 없음)', () {
+      expect(monthLabels([(year: 2026, month: 1), (year: 2026, month: 12)]), [
+        'Jan',
+        'Dec',
+      ]);
+      expect(monthLabels([(year: 2025, month: 12), (year: 2026, month: 1)]), [
+        'Dec 2025',
+        'Jan 2026',
+      ]);
+      expect(yearMonthDot(DateTime(2026, 1)), 'Jan 2026');
+    });
   });
+
+  test('월 눈금 — 해가 섞이면 해를 붙인다(순자산 추이도 같은 규칙)', () {
+    expect(monthTicks([(year: 2025, month: 12), (year: 2026, month: 1)]), [
+      '2025. 12.',
+      '2026. 1.',
+    ]);
+  });
+
+  for (final (title, pts, want) in [
+    (
+      '순자산 추이 x 눈금 — "1월" … "12월"(앞 0 없음)',
+      [for (var m = 1; m <= 12; m++) (2026, m)],
+      [for (var m = 1; m <= 12; m++) '$m월'],
+    ),
+    (
+      '순자산 추이 x 눈금 — 해를 넘으면 해를 붙인다(통계와 같은 규칙)',
+      [(2025, 11), (2025, 12), (2026, 1)],
+      ['2025. 11.', '2025. 12.', '2026. 1.'],
+    ),
+  ]) {
+    testWidgets(title, (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            hideCardsRepositoryProvider.overrideWith(
+              (ref) async => OkHideCardsRepository(),
+            ),
+            netWorthTrendProvider.overrideWith(
+              (ref, months) async => [
+                for (final (y, m) in pts)
+                  NetWorthPoint(year: y, month: m, netWorth: m * 1000000),
+              ],
+            ),
+          ],
+          child: MaterialApp(
+            theme: GrooTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('ko'),
+            home: const Scaffold(body: NetWorthChart()),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      final chart = tester.widget<PLineChart>(find.byType(PLineChart));
+      expect(chart.categories, want);
+    });
+  }
 }

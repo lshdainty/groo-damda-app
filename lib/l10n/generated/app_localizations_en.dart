@@ -9757,4 +9757,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expRecurringOpenFailed => 'Couldn\'t open the repeat settings.';
+
+  @override
+  String get dateRangeSeparator => '–';
 }

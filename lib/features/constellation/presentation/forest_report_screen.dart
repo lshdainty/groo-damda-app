@@ -159,7 +159,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
       ),
       body: ListView(
         children: [
-          _WeekPicker(
+          ForestWeekPicker(
             label: rangeLabel,
             canPrev: _week == 1,
             canNext: _week == 0,
@@ -201,8 +201,10 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
 }
 
 /// 주 고르기 — ghost 아이콘 버튼 둘 + 가운데 범위(고정폭 · 700). 갈 수 없는 쪽은 막힌 버튼(흐리지 않는다).
-class _WeekPicker extends StatelessWidget {
-  const _WeekPicker({
+@visibleForTesting
+class ForestWeekPicker extends StatelessWidget {
+  const ForestWeekPicker({
+    super.key,
     required this.label,
     required this.canPrev,
     required this.canNext,
@@ -239,7 +241,7 @@ class _WeekPicker extends StatelessWidget {
           Flexible(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: PSpacing.x2),
-              child: Text(
+              child: PText(
                 label,
                 textAlign: TextAlign.center,
                 style: PTypography.t5.copyWith(

@@ -210,7 +210,7 @@ class TransferAccountFields extends StatelessWidget {
                   int.tryParse(interestController.text.replaceAll(',', '')) ??
                   0;
               final canSplit = amount != null && amount > 0 && interest > 0;
-              return Text(
+              return PText(
                 canSplit
                     ? l.expInterestSplit(
                         krw(amount - interest < 0 ? 0 : amount - interest),

@@ -699,7 +699,7 @@ class NamuInvestBand extends ConsumerWidget {
               ..._buyingPowerRows(context, ref, masked),
               row(
                 l.stocksHoldingsLabel,
-                Text(
+                PText(
                   view.mixed
                       ? l.namuCountSplit(view.krw!.count, view.usd!.count)
                       : l.stocksUnitCount(view.count),

@@ -1239,7 +1239,7 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                 ],
                 if (isUs && last != null && fxRate != null) ...[
                   const SizedBox(height: 2),
-                  Text(
+                  PText.amount(
                     '≈ ${krwSigned((last * fxRate).round(), false, unit: true)}',
                     style: PTypography.t3.copyWith(
                       color: c.fgNeutralSubtle,
@@ -1710,7 +1710,7 @@ class _DailyBand extends ConsumerWidget {
               PSpacing.x6,
               0,
             ),
-            child: Text(
+            child: PText(
               '${l.stocksDisclaimerLine1}\n${l.stocksDisclaimerLine2}',
               textAlign: TextAlign.center,
               style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),

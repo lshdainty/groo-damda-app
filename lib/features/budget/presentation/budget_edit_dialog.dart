@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
@@ -562,7 +563,7 @@ class _CategoryPickSheet extends ConsumerWidget {
                 horizontal: PSpacing.globalGutter,
                 vertical: PSpacing.x3,
               ),
-              child: Text(
+              child: PText(
                 list.isEmpty ? l.budgetPickNoCategory : l.budgetPickAllBudgeted,
                 style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
               ),

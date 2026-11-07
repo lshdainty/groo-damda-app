@@ -168,6 +168,12 @@ void main() {
     ) async {
       final repo = await _pump(tester);
 
+      // 테마 · 언어는 서버가 아니라 기기 저장소에 쓴다 — 그쪽 호출도 0 이어야 한다
+      final before = (await SharedPreferences.getInstance()).getKeys();
+      final beforeValues = {
+        for (final k in before)
+          k: (await SharedPreferences.getInstance()).get(k),
+      };
       await tester.tap(findText(row).first);
       await tester.pumpAndSettle();
       expect(find.byType(PBottomSheetContent), findsOneWidget);
@@ -182,6 +188,10 @@ void main() {
 
       expect(find.byType(PBottomSheetContent), findsNothing, reason: '시트가 닫혔다');
       expect(repo.patches, isEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      expect(prefs.getKeys(), before, reason: '기기 저장소에 새로 쓴 키가 없다');
+      expect({for (final k in prefs.getKeys()) k: prefs.get(k)}, beforeValues);
     });
   }
 

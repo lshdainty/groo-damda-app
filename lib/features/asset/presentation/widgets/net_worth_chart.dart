@@ -54,10 +54,11 @@ class NetWorthChart extends ConsumerWidget {
       );
     }
 
-    // 날짜 규칙 — 월은 앞 0 을 채우지 않는다("1월" … "12월")
-    String monthLabel(int month) => monthOnly(DateTime(2000, month));
     String won(num v) => masked ? kBudgetMask : formatWon(v);
-    final labels = [for (final p in points) monthLabel(p.month)];
+    // 날짜 규칙 — 월은 앞 0 을 채우지 않고, 해가 섞이면 해를 붙인다(통계와 같은 규칙)
+    final labels = monthTicks([
+      for (final p in points) (year: p.year, month: p.month),
+    ]);
     final latest = won(points.last.netWorth);
     final name = l.assetChartNetWorthName(latest);
     return Column(

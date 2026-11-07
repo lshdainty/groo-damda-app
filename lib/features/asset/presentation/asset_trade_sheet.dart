@@ -548,7 +548,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             ),
             Padding(
               padding: gutter.copyWith(top: PSpacing.x1_5),
-              child: Text(
+              child: PText(
                 _viaCash
                     ? l.tradeSettlementCashHelp
                     : l.tradeSettlementAccountHelp,
@@ -615,7 +615,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
           if (_fundingAmount > 0)
             Padding(
               padding: gutter.copyWith(top: PSpacing.x2),
-              child: Text(
+              child: PText(
                 // 문장 안 — "$900(약 1,170,000원)"
                 l.tradeFundingNotice(
                   fundingParts.approx == null

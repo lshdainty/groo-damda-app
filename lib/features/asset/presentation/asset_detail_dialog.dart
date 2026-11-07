@@ -2454,7 +2454,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              PText.amount(
                 '${masked ? '••••••' : l.assetInstallmentPrincipal(won(due.principalAmount))}${due.recordOnly ? ' · ${l.expRecordOnlyBadge}' : ''}',
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),
@@ -3063,7 +3063,7 @@ class _PaySheetState extends State<_PaySheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            PText(
               '${l.assetPayConfirmMessage(_money(upcoming))}${l.assetPayConfirmDateSuffix(dateText)}',
               style: PTypography.t5.copyWith(color: c.fgNeutralMuted),
             ),

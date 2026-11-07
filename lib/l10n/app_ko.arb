@@ -5480,5 +5480,9 @@
   "expSplitErrRow": "모든 항목에 카테고리와 0원보다 큰 금액을 넣어주세요.",
   "dutchErrRatio": "몫은 0보다 큰 수로 넣어주세요.",
   "dutchErrCustomEmpty": "모든 참여자의 금액을 넣어주세요.",
-  "expRecurringOpenFailed": "반복 설정을 열지 못했어요."
+  "expRecurringOpenFailed": "반복 설정을 열지 못했어요.",
+  "dateRangeSeparator": "~",
+  "@dateRangeSeparator": {
+    "description": "구간 기호 — 앞뒤를 붙여 쓴다(한국어 ~, 영어 en dash). 날짜 규칙 DESIGN.desk.md:3652"
+  }
 }

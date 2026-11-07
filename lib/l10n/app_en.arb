@@ -5193,5 +5193,9 @@
   "expSplitErrRow": "Give every item a category and an amount above 0.",
   "dutchErrRatio": "Shares must be numbers above 0.",
   "dutchErrCustomEmpty": "Enter an amount for every participant.",
-  "expRecurringOpenFailed": "Couldn't open the repeat settings."
+  "expRecurringOpenFailed": "Couldn't open the repeat settings.",
+  "dateRangeSeparator": "–",
+  "@dateRangeSeparator": {
+    "description": "구간 기호 — 앞뒤를 붙여 쓴다(한국어 ~, 영어 en dash). 날짜 규칙 DESIGN.desk.md:3652"
+  }
 }

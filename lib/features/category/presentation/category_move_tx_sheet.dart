@@ -351,7 +351,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
             ),
             Padding(
               padding: gutter.copyWith(top: PSpacing.x1_5),
-              child: Text(
+              child: PText(
                 _options.isEmpty
                     ? l.categoryMoveTxNoTarget
                     : l.categoryMoveTxHint,

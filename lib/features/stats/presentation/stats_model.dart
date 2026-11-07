@@ -280,14 +280,9 @@ List<int> statsWeekdaySums(List<Expense> exps) {
   return res;
 }
 
-/// 월 라벨 — 한 해 안이면 "1월"(앞 0 없음), 해가 섞이면 점 표기 "2026. 1."(날짜 규칙: 0 을 채우지 않는다).
-List<String> monthLabels(List<({int year, int month})> rows) {
-  final same = rows.isNotEmpty && rows.every((r) => r.year == rows.first.year);
-  return [
-    for (final r in rows)
-      same ? monthOnly(DateTime(r.year, r.month)) : '${r.year}. ${r.month}.',
-  ];
-}
+/// 월 라벨 — [monthTicks](한 해 안이면 "1월", 해가 섞이면 점 표기 "2026. 1." · 영어 "Jan 2026").
+List<String> monthLabels(List<({int year, int month})> rows) =>
+    monthTicks(rows);
 
 /// 추이 점 — 일별(단일 월 · 짧은 직접 기간) 또는 월별.
 List<TrendPoint> trendPoints(

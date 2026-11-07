@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 
 import '../todo/todo_test_support.dart';
+import '../../support/line_breaks.dart';
 import '../../support/plain_text.dart';
 
 // 실제 star_map — groo-sql `desk/data/27. constellation.sql` 에서 뽑은 공용 JSON(웹 · 앱 하네스 · 그리기 시험이 같이 읽는다).
@@ -576,6 +577,36 @@ void main() {
       final legend = tester.widget<Text>(_has('중요 완료'));
       expect(legend.style!.fontWeight, FontWeight.w400);
     });
+
+    // 해를 넘는 주의 기간 줄은 "2025년 12월 22일~2026년 1월 4일" 로 길다 — 낱말 중간에서 끊기지 않는다(검수 M5)
+    for (final scale in [1.0, 2.0]) {
+      testWidgets(
+        '주 고르기 — 해를 넘는 기간 줄 · 폭 360 · 글자 ${scale * 100}% 낱말 중간 끊김 0',
+        (tester) async {
+          final label = dateRange(DateTime(2025, 12, 22), DateTime(2026, 1, 4));
+          expect(label, '2025년 12월 22일~2026년 1월 4일');
+          await pumpApp(
+            tester,
+            Scaffold(
+              body: ForestWeekPicker(
+                label: label,
+                canPrev: true,
+                canNext: true,
+                onPrev: () {},
+                onNext: () {},
+              ),
+            ),
+            textScale: scale,
+          );
+          expect(tester.takeException(), isNull);
+          final text = find.byWidgetPredicate(
+            (w) => w is Text && plainOf(w.data ?? '') == label,
+          );
+          expect(text, findsOneWidget);
+          expect(midWordBreaks(tester, text), isEmpty);
+        },
+      );
+    }
 
     semTest('지난주로 넘기면 — 같은 요일이 골라지고 아래가 그날 것이다(10-29 결정 4)', (tester) async {
       await pumpApp(

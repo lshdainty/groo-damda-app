@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 
@@ -741,7 +742,7 @@ class StatsHeatmapSection extends StatelessWidget {
               l.statsLegendHigh,
               style: PTypography.t2.copyWith(color: c.fgNeutralSubtle),
             ),
-            Text(
+            PText.amount(
               '${l.statsTotalPrefix} $totalText',
               style: PTypography.t2.copyWith(
                 color: c.fgNeutralSubtle,

@@ -545,7 +545,7 @@ class PListRadioGroup<T> extends StatelessWidget {
   }
 }
 
-/// 묶음이 막혔는지 — [PListRadioItem] 이 읽는다.
+/// 묶음이 막혔는지, 고른 줄을 다시 눌렀을 때 부를 것([PListRadioGroup.onReselect]) — [PListRadioItem] 이 읽는다.
 class _PListRadioGroupScope extends InheritedWidget {
   const _PListRadioGroupScope({
     required this.enabled,

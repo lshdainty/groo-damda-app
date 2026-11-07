@@ -37,6 +37,7 @@ import 'package:groo_damda_app/features/expense/presentation/tx_detail_body.dart
 import 'package:groo_damda_app/features/expense_split/application/expense_split_providers.dart';
 import 'package:groo_damda_app/features/expense_split/data/expense_split_repository.dart';
 import 'package:groo_damda_app/features/expense_split/presentation/split_step.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/features/notification/application/user_preferences_providers.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
@@ -2387,7 +2388,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             PSpacing.globalGutter,
             PSpacing.x3,
           ),
-          child: Text(switch (c.autoSource) {
+          child: PText(switch (c.autoSource) {
             'TRADE_REALIZED' => l.expAutoSourceTradeRealized,
             'TRANSFER_INTEREST' => l.expAutoSourceTransferInterest,
             'CARD_CARRYOVER' ||
