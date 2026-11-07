@@ -35,9 +35,8 @@ Future<void> setAppLockWithAuth(
     case AppLockAuthResult.success:
       await notifier.setAppLock(true);
     case AppLockAuthResult.unavailable:
-      // 안내는 스낵바가 아니라 줄 설명이 한다 — 스위치가 미리 막혀 있다(account_screen). 여기 닿는 건
-      // 미리 물은 뒤 상태가 바뀐 드문 경우뿐이라 조용히 둔다.
-      break;
+      // 안내는 스낵바가 아니라 줄 설명이 한다 — 미리 물은 값이 낡았던 경우라 줄이 그 자리에서 막히고 까닭이 보인다
+      ref.read(appLockUnavailableNowProvider.notifier).set(true);
     case AppLockAuthResult.failure:
       // 취소·불일치 — 켜지 않고 그대로 둔다.
       break;

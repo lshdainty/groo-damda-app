@@ -43,7 +43,7 @@
   "appLockLockedDesc": "Verify it's you to unlock.",
   "appLockUnlockAction": "Unlock",
   "appLockPromptReason": "Verify it's you to open the app.",
-  "appLockUnavailable": "Biometric authentication isn't available on this device.",
+  "appLockUnavailable": "Biometric authentication isn't available on this device. Set up a screen lock on your device to use it.",
   "stateEmpty": "Nothing to show",
   "nameTooLong": "Keep the name to {max} characters or fewer.",
   "@nameTooLong": {

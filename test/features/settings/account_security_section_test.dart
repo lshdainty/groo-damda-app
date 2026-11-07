@@ -168,7 +168,10 @@ void main() {
       await container.read(settingsProvider.future);
       await tester.pump();
 
-      expect(findText('이 기기에서는 생체 인증을 쓸 수 없어요.'), findsOneWidget);
+      expect(
+        findText('이 기기에서는 생체 인증을 쓸 수 없어요. 기기에 화면 잠금을 설정하면 쓸 수 있어요.'),
+        findsOneWidget,
+      );
       final item = tester.widget<PListSwitchItem>(find.byType(PListSwitchItem));
       expect(item.onChanged, isNull); // 막힌 줄
       expect(item.checked, isFalse);
@@ -179,7 +182,37 @@ void main() {
       expect(auth.calls, 0); // 인증을 부르지도 않는다
       expect(container.read(appLockEnabledProvider), false);
       // 스낵바로는 더 이상 말하지 않는다 — 글이 한 군데(줄 설명)에만 있다
-      expect(findText('이 기기에서는 생체 인증을 쓸 수 없어요.'), findsOneWidget);
+      expect(
+        findText('이 기기에서는 생체 인증을 쓸 수 없어요. 기기에 화면 잠금을 설정하면 쓸 수 있어요.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('미리 물을 땐 쓸 수 있었는데 켜려니 못 쓰는 기기 — 줄이 그 자리에서 막히고 까닭이 보인다', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final auth = _FakeAuth(AppLockAuthResult.unavailable); // supported=true
+      final container = await pumpAccount(tester, auth: auth);
+      await container.read(settingsProvider.future);
+      await tester.pump();
+      const reason = '이 기기에서는 생체 인증을 쓸 수 없어요. 기기에 화면 잠금을 설정하면 쓸 수 있어요.';
+      expect(findText(reason), findsNothing);
+      await tester.tap(find.byType(PListSwitchItem));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(auth.calls, 1);
+      expect(findText(reason), findsOneWidget);
+      expect(
+        tester.widget<PListSwitchItem>(find.byType(PListSwitchItem)).onChanged,
+        isNull,
+      );
+      // 앱이 앞으로 돌아오면 다시 묻고 비운다
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(findText(reason), findsNothing);
     });
 
     testWidgets('생체 인증을 쓸 수 있으면 안내 글이 없고 스위치가 열려 있다', (tester) async {
@@ -191,7 +224,10 @@ void main() {
       await container.read(settingsProvider.future);
       await tester.pump();
 
-      expect(findText('이 기기에서는 생체 인증을 쓸 수 없어요.'), findsNothing);
+      expect(
+        findText('이 기기에서는 생체 인증을 쓸 수 없어요. 기기에 화면 잠금을 설정하면 쓸 수 있어요.'),
+        findsNothing,
+      );
       expect(
         tester.widget<PListSwitchItem>(find.byType(PListSwitchItem)).onChanged,
         isNotNull,
