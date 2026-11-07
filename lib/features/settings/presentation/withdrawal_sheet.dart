@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/input_otp/p_input_otp.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
@@ -409,7 +410,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
         // 권유는 해지 전에만 할 수 있는 말이라 여기 둔다(설계서 결정 12). R9 칸 설명.
         Padding(
           padding: gutter,
-          child: Text(
+          child: PText(
             l.withdrawDataRetention,
             style: PTypography.t4.copyWith(color: c2.fgNeutralSubtle),
           ),
@@ -487,7 +488,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
           // [코드 받기] 아래 12 · t4 fg-neutral-subtle, 오류 때도 남는다.
           if (_codeSentAt != null) ...[
             const SizedBox(height: PSpacing.x3),
-            Text(
+            PText(
               '${l.withdrawCodeSent} ${l.withdrawCodeHint}',
               style: PTypography.t4.copyWith(
                 color: context.colors.fgNeutralSubtle,

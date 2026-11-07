@@ -32,6 +32,7 @@ import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.d
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 나무증권 폰 화면 — 토스와 같은 띠 틀(내 투자 → 시장 → 종목, I-13 13-3).
 ///
@@ -266,7 +267,7 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
           PSpacing.x6,
           PSpacing.x6,
         ),
-        child: Text(
+        child: PText(
           l.namuDataNotice,
           style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
         ),
@@ -578,7 +579,7 @@ class NamuInvestBand extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                PText(
                   l.namuDomesticValue,
                   style: PTypography.t3.copyWith(
                     color: c.fgNeutralSubtle,
@@ -678,7 +679,7 @@ class NamuInvestBand extends ConsumerWidget {
                 ],
                 if (view.count == 0) ...[
                   const SizedBox(height: PSpacing.x1),
-                  Text(
+                  PText(
                     l.stocksNoHoldings,
                     style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
                   ),
@@ -698,7 +699,7 @@ class NamuInvestBand extends ConsumerWidget {
               ..._buyingPowerRows(context, ref, masked),
               row(
                 l.stocksHoldingsLabel,
-                Text(
+                PText(
                   view.mixed
                       ? l.namuCountSplit(view.krw!.count, view.usd!.count)
                       : l.stocksUnitCount(view.count),
@@ -871,7 +872,7 @@ class _NamuMarketBandState extends ConsumerState<NamuMarketBand> {
                           keepAllAmount(fmtFxRate(fx)),
                           style: stocksMoneyStyle(context),
                         )
-                      : Text(
+                      : PText(
                           l.namuFxUnavailableShort,
                           style: PTypography.t4.copyWith(
                             color: context.colors.fgNeutralSubtle,

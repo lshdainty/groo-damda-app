@@ -144,7 +144,9 @@ class StatsPeriod {
   int get days => to.difference(from).inDays + 1;
 
   /// 기간 버튼 글 — 다른 해에 걸친 직접 기간은 "~" 뒤에서만 줄을 바꾼 두 줄("2025-01-01 ~ ⏎ 2026-03-31").
-  String buttonLabel() => spansYears ? '${ymd(from)} ~\n${ymd(to)}' : label();
+  String buttonLabel() => spansYears
+      ? '${fullDate(from)}${rangeSeparator()}\n${fullDate(to)}'
+      : label();
 
   String label() {
     switch (seg) {
@@ -156,9 +158,8 @@ class StatsPeriod {
       case StatsSeg.year:
         return yearOnly(from);
       case StatsSeg.custom:
-        return spansYears
-            ? '${ymd(from)} ~ ${ymd(to)}'
-            : '${from.month}/${from.day} ~ ${to.month}/${to.day}';
+        // 날짜 규칙 — 올해는 "10월 29일~11월 7일", 해가 섞이면 양끝 연도(앞 0 · 슬래시 표기 없음)
+        return dateRange(from, to);
     }
   }
 
@@ -238,7 +239,7 @@ List<({String label, int income, int expense})> dailyTrendOf(
   final byDate = <String, ({int income, int expense, String label})>{};
   for (var i = 0; i < days; i++) {
     final d = fromDay.add(Duration(days: i));
-    byDate[ymd(d)] = (income: 0, expense: 0, label: '${d.month}/${d.day}');
+    byDate[ymd(d)] = (income: 0, expense: 0, label: monthDayDot(d));
   }
   for (final e in countableTx(exps)) {
     final raw = e.expenseDate ?? '';
@@ -280,16 +281,9 @@ List<int> statsWeekdaySums(List<Expense> exps) {
   return res;
 }
 
-/// 월 라벨 — 한 해 안이면 'MM', 해가 섞이면 'YYYY.MM'.
-List<String> monthLabels(List<({int year, int month})> rows) {
-  final same = rows.isNotEmpty && rows.every((r) => r.year == rows.first.year);
-  return [
-    for (final r in rows)
-      same
-          ? r.month.toString().padLeft(2, '0')
-          : '${r.year}.${r.month.toString().padLeft(2, '0')}',
-  ];
-}
+/// 월 라벨 — [monthTicks](한 해 안이면 "1월", 해가 섞이면 점 표기 "2026. 1." · 영어 "Jan 2026").
+List<String> monthLabels(List<({int year, int month})> rows) =>
+    monthTicks(rows);
 
 /// 추이 점 — 일별(단일 월 · 짧은 직접 기간) 또는 월별.
 List<TrendPoint> trendPoints(
@@ -423,15 +417,23 @@ List<List<int>> heatMatrix(List<HeatmapCell> cells) {
 
 /// 시간대 구간 글 — 한국어 `06~10시`, 영어 `6–10 AM`.
 String heatSub(int i) {
-  const en = [
-    '6–10 AM',
-    '10 AM–2 PM',
-    '2–6 PM',
-    '6–10 PM',
-    '10 PM–2 AM',
-    '2–6 AM',
+  final s = rangeSeparator();
+  final en = [
+    '6${s}10 AM',
+    '10 AM${s}2 PM',
+    '2${s}6 PM',
+    '6${s}10 PM',
+    '10 PM${s}2 AM',
+    '2${s}6 AM',
   ];
-  const ko = ['06~10시', '10~14시', '14~18시', '18~22시', '22~02시', '02~06시'];
+  final ko = [
+    '06${s}10시',
+    '10${s}14시',
+    '14${s}18시',
+    '18${s}22시',
+    '22${s}02시',
+    '02${s}06시',
+  ];
   return localeIsEn() ? en[i] : ko[i];
 }
 

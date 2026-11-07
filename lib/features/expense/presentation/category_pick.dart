@@ -12,6 +12,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 
 /// 카테고리 고르기 시트(I-20 C 19 — 폼 시트 위 고르기) — 고른 카테고리의 rowId 가 돌아온다. 다시 받는 중에는 Skeleton, 못 받으면
@@ -111,7 +112,7 @@ class CategoryPickBody extends ConsumerWidget {
           horizontal: PSpacing.globalGutter,
           vertical: PSpacing.x3,
         ),
-        child: Text(
+        child: PText(
           l.presetNoCategoryOfKind,
           textAlign: TextAlign.center,
           style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),

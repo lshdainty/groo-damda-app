@@ -35,6 +35,7 @@ import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.d
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 /// 증권 — 시세 · 보유 · 관심 · 호가 (토스증권 Open API 실연동).
@@ -236,7 +237,7 @@ class _TossStocksViewState extends ConsumerState<TossStocksView> {
           PSpacing.x6,
           PSpacing.x6,
         ),
-        child: Text(
+        child: PText(
           l.stocksSourceNotice,
           style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
         ),
@@ -393,7 +394,7 @@ class _InvestBand extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                PText(
                   l.stocksMyEval,
                   style: PTypography.t3.copyWith(
                     color: c.fgNeutralSubtle,
@@ -1238,7 +1239,7 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                 ],
                 if (isUs && last != null && fxRate != null) ...[
                   const SizedBox(height: 2),
-                  Text(
+                  PText.amount(
                     '≈ ${krwSigned((last * fxRate).round(), false, unit: true)}',
                     style: PTypography.t3.copyWith(
                       color: c.fgNeutralSubtle,
@@ -1260,7 +1261,7 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                 // 시세 조회가 실패했거나 오는 중이면 '미지원' 이 아니다 — 응답이 왔는데 값이 없을 때만(M8)
                 if (last == null && pricesAsync.hasValue) ...[
                   const SizedBox(height: 2),
-                  Text(
+                  PText(
                     l.stocksPriceUnavailable,
                     style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
                   ),
@@ -1709,7 +1710,7 @@ class _DailyBand extends ConsumerWidget {
               PSpacing.x6,
               0,
             ),
-            child: Text(
+            child: PText(
               '${l.stocksDisclaimerLine1}\n${l.stocksDisclaimerLine2}',
               textAlign: TextAlign.center,
               style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
@@ -2158,7 +2159,7 @@ class _OrderBookHead extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(
+          child: PText(
             l.stocksBidVolume,
             textAlign: TextAlign.right,
             style: style,
@@ -2175,7 +2176,7 @@ class _OrderBookHead extends StatelessWidget {
             style: style,
           ),
         ),
-        Expanded(child: Text(l.stocksAskVolume, style: style)),
+        Expanded(child: PText(l.stocksAskVolume, style: style)),
       ],
     );
   }

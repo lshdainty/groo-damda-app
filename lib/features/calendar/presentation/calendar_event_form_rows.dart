@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
@@ -307,7 +308,7 @@ class CalendarEventFormRows extends StatelessWidget {
                 ),
                 child: Semantics(
                   liveRegion: true,
-                  child: Text(
+                  child: PText(
                     l.calFormEndBeforeStart,
                     style: PTypography.t3.copyWith(color: c.fgCritical),
                   ),

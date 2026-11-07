@@ -31,6 +31,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
 
@@ -271,7 +272,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 title: l.accountDevices,
                 suffix: PListSuffix(
                   children: [
-                    Text(l.accountCurrentDevice, textAlign: TextAlign.end),
+                    PText(l.accountCurrentDevice, textAlign: TextAlign.end),
                     const Icon(LucideIcons.chevronRight),
                   ],
                 ),

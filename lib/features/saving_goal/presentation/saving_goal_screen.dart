@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -258,7 +259,8 @@ class _GoalRow extends StatelessWidget {
     if (raw == null || raw.isEmpty) return null;
     final d = DateTime.tryParse(raw);
     if (d == null) return null;
-    return '${d.year}.${d.month.toString().padLeft(2, '0')}';
+    // 날짜 규칙 — ko 점 표기는 0 을 채우지 않는다("2026. 1."), en "Jan 2026"
+    return yearMonthDot(d);
   }
 
   @override

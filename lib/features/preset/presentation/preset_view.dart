@@ -11,6 +11,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 
 const _tabular = [FontFeature.tabularFigures()];
@@ -130,7 +131,7 @@ Widget presetValueColumn(
             ),
           )
         else
-          Text(
+          PText(
             l.presetAmountEmpty,
             textAlign: TextAlign.end,
             style: PTypography.t3.copyWith(

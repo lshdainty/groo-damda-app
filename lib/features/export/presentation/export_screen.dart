@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
@@ -563,7 +564,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   }
 
   String _rangeText(({String start, String end}) r) =>
-      '${_krLabel(r.start)}~${_krLabel(r.end)}';
+      '${_krLabel(r.start)}${rangeSeparator()}${_krLabel(r.end)}';
 
   Widget _customBody(AppLocalizations l, DateTime today) {
     return PField(
@@ -780,7 +781,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           ),
         Padding(
           padding: _gutter,
-          child: Text(
+          child: PText(
             l.exportPreviewFooter(active.rows.length, _selected.length, total),
             style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
           ),

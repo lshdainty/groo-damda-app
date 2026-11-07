@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/brand/groo_tree.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 서비스 이름 글 — 32 / 40 · 700 · `fg-neutral`. 로그인 · 첫 화면 마크가 같이 쓴다(I-05 85 · 86, 화면 값).
 TextStyle grooNameStyle(BuildContext context) => PTypography.t12.copyWith(
@@ -35,7 +36,7 @@ class GrooWordmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    Widget name = Text(
+    Widget name = PText(
       l.appTitle,
       textAlign: vertical ? TextAlign.center : TextAlign.start,
       style: grooNameStyle(context),

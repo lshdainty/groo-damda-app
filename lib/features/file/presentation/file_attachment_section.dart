@@ -9,6 +9,7 @@ import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import 'package:groo_damda_app/features/file/application/file_providers.dart';
 import 'package:groo_damda_app/features/file/domain/file_attachment.dart';
@@ -148,7 +149,7 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
           children: [
             Icon(LucideIcons.paperclip, size: 14, color: t.fgSecondary),
             const SizedBox(width: 6),
-            Text(
+            PText(
               l.fileAttachTitle,
               style: PTypo.caption.copyWith(
                 color: t.fgPrimary,
@@ -184,7 +185,7 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Center(child: PCircularProgressIndicator()),
           ),
-          error: (e, _) => Text(
+          error: (e, _) => PText(
             l.fileLoadError,
             style: PTypo.caption.copyWith(color: t.statusDangerFg),
           ),
@@ -192,7 +193,7 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
             if (files.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
+                child: PText(
                   l.fileEmpty,
                   style: PTypo.caption.copyWith(color: t.fgTertiary),
                 ),

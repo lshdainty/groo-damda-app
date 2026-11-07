@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 /// 관측 리포트(I-11 15 ~ 21) — 상단 바 + 흰 면 하나: 주 고르기 → 날 줄 → 날짜 줄 → 관측 결과 → 별빛 모으기 → 별빛 분석 →
@@ -103,8 +104,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
     final dows = weekdayLabels(mondayFirst: true);
     final selDate = DateTime.parse(_sel);
     final isToday = _sel == todayYmd;
-    final rangeLabel =
-        '${_ymd(days.first).replaceAll('-', '.')} ~ ${_ymd(days.last).replaceAll('-', '.')}';
+    final rangeLabel = dateRange(days.first, days.last);
 
     final Widget content;
     if (failed) {
@@ -159,7 +159,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
       ),
       body: ListView(
         children: [
-          _WeekPicker(
+          ForestWeekPicker(
             label: rangeLabel,
             canPrev: _week == 1,
             canNext: _week == 0,
@@ -201,8 +201,10 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
 }
 
 /// 주 고르기 — ghost 아이콘 버튼 둘 + 가운데 범위(고정폭 · 700). 갈 수 없는 쪽은 막힌 버튼(흐리지 않는다).
-class _WeekPicker extends StatelessWidget {
-  const _WeekPicker({
+@visibleForTesting
+class ForestWeekPicker extends StatelessWidget {
+  const ForestWeekPicker({
+    super.key,
     required this.label,
     required this.canPrev,
     required this.canNext,
@@ -239,7 +241,7 @@ class _WeekPicker extends StatelessWidget {
           Flexible(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: PSpacing.x2),
-              child: Text(
+              child: PText(
                 label,
                 textAlign: TextAlign.center,
                 style: PTypography.t5.copyWith(
@@ -352,7 +354,7 @@ class _DayCell extends StatelessWidget {
   }
 }
 
-/// 날짜 줄 — 왼쪽 "26.10.22 목", 오른쪽(오늘일 때만) "오후 11:58 기준". 좁으면 오른쪽 글이 줄을 바꾼다.
+/// 날짜 줄 — 왼쪽 "10월 22일 (목)", 오른쪽(오늘일 때만) "오후 11:58 기준". 좁으면 오른쪽 글이 줄을 바꾼다.
 class _DateRow extends StatelessWidget {
   const _DateRow({required this.date, required this.showAsOf});
 
@@ -363,17 +365,14 @@ class _DateRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
-    final yy = (date.year % 100).toString().padLeft(2, '0');
-    final mm = date.month.toString().padLeft(2, '0');
-    final dd = date.day.toString().padLeft(2, '0');
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       crossAxisAlignment: WrapCrossAlignment.center,
       runSpacing: PSpacing.x1,
       spacing: PSpacing.x2,
       children: [
-        Text(
-          '$yy.$mm.$dd ${formatDay(date).dow}',
+        PText(
+          monthDayDow(date),
           style: PTypography.t5.copyWith(
             color: c.fgNeutral,
             fontWeight: FontWeight.w700,
@@ -381,7 +380,7 @@ class _DateRow extends StatelessWidget {
           ),
         ),
         if (showAsOf)
-          Text(
+          PText(
             l.frpAsOf(timeOfDay12(DateTime.now())),
             style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
           ),
@@ -781,7 +780,7 @@ class _ResultLine extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              PText(
                 l.frpObsResult,
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),
@@ -846,7 +845,7 @@ class _Stamp extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    Text(
+                    PText(
                       l.frpStampLabel,
                       softWrap: false,
                       style: PTypography.t1.copyWith(

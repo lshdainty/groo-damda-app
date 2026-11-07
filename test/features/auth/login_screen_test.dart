@@ -72,7 +72,7 @@ void main() {
       final l = lookupAppLocalizations(Locale(locale));
       final texts = tester
           .widgetList<Text>(find.byType(Text))
-          .map((t) => t.data ?? t.textSpan?.toPlainText() ?? '')
+          .map((t) => plainOf(t.data ?? t.textSpan?.toPlainText() ?? ''))
           .join('\n');
       expect(texts, isNot(contains('SSO')));
       expect(l.authLoginPrompt, isNot(contains('SSO')));

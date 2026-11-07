@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_manage_forms.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart'
@@ -599,14 +600,24 @@ class _InviteBlock extends StatelessWidget {
             runSpacing: PSpacing.x3,
             children: [
               // 코드가 없는 캘린더(옛 캘린더 — 초대 코드 칸이 비어 있다)는 값 자리에 글, [복사] 는 숨긴다
-              Text(
-                code.isEmpty ? l.calInviteNone : code,
-                style: PTypography.t8.copyWith(
-                  color: code.isEmpty ? c.fgNeutralSubtle : c.fgNeutral,
-                  fontWeight: FontWeight.w700,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              if (code.isEmpty)
+                PText(
+                  l.calInviteNone,
+                  style: PTypography.t8.copyWith(
+                    color: c.fgNeutralSubtle,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                )
+              else
+                Text(
+                  code,
+                  style: PTypography.t8.copyWith(
+                    color: c.fgNeutral,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
-              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 spacing: PSpacing.x2,

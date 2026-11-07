@@ -23,6 +23,7 @@ import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
@@ -547,7 +548,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             ),
             Padding(
               padding: gutter.copyWith(top: PSpacing.x1_5),
-              child: Text(
+              child: PText(
                 _viaCash
                     ? l.tradeSettlementCashHelp
                     : l.tradeSettlementAccountHelp,
@@ -614,7 +615,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
           if (_fundingAmount > 0)
             Padding(
               padding: gutter.copyWith(top: PSpacing.x2),
-              child: Text(
+              child: PText(
                 // 문장 안 — "$900(약 1,170,000원)"
                 l.tradeFundingNotice(
                   fundingParts.approx == null
@@ -627,7 +628,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
           if (!_isSell && critical)
             Padding(
               padding: gutter.copyWith(top: PSpacing.x2),
-              child: Text(
+              child: PText(
                 l.tradeInsufficientCash,
                 style: PTypography.t3.copyWith(color: c.fgCritical),
               ),

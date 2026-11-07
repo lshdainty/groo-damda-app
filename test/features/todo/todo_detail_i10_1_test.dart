@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/features/todo/presentation/todo_detail_dialog.dart';
@@ -100,6 +101,13 @@ void main() {
     expect(title.style!.color, c.fgDisabled);
     expect(findPlain('없음'), findsOneWidget);
     expect(findPlain('완료 일시'), findsOneWidget);
+    // 완료 시각은 "11월 7일 (토) 오전 9:05" 꼴 — 앞 0 · 24시간 ISO 꼴이 아니다
+    final stamp = formatDayDowTime('${today()}T08:00:00')!;
+    expect(findPlain(stamp), findsOneWidget);
+    expect(
+      stamp,
+      matches(RegExp(r'^\d{1,2}월 \d{1,2}일 \(.\) (오전|오후) \d{1,2}:00$')),
+    );
   });
 
   testWidgets('지난 마감 — 값 글자 fg-critical + ", 마감 지남"', (tester) async {

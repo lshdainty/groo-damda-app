@@ -43,6 +43,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 /// 종목 상세 화면 — 폰 띠 차례(U3): 머리 · 차트 / 내 보유 / 오늘 시세 / 호가 · 체결 / 투자자별(국내) / 기본 정보 / 일별 시세.
@@ -278,7 +279,7 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
                     last == null &&
                     !(detailAsync?.isLoading ?? false)) ...[
                   const SizedBox(height: 2),
-                  Text(
+                  PText(
                     l.namuPriceEmpty,
                     style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
                   ),
@@ -753,7 +754,7 @@ class _NamuDailyBand extends ConsumerWidget {
               PSpacing.x6,
               0,
             ),
-            child: Text(
+            child: PText(
               l.stocksDisclaimerLine2,
               textAlign: TextAlign.center,
               style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),

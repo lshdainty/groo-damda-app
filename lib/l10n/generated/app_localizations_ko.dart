@@ -9532,4 +9532,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expRecurringOpenFailed => '반복 설정을 열지 못했어요.';
+
+  @override
+  String get dateRangeSeparator => '~';
 }

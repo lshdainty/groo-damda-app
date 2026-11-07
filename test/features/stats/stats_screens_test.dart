@@ -334,7 +334,7 @@ void main() {
       await pumpButton(tester, p);
       expect(tester.takeException(), isNull);
       final b = tester.widget<PButton>(find.byType(PButton));
-      expect(b.label, '2025-01-01 ~\n2026-03-31');
+      expect(b.label, '2025년 1월 1일~\n2026년 3월 31일');
       expect(b.labelLines, 2);
       // 두 줄이라 한 줄 버튼(36)보다 높다
       expect(tester.getSize(find.byType(PButton)).height, greaterThan(36));

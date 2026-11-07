@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
@@ -171,7 +172,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
                     horizontal: PSpacing.globalGutter,
                     vertical: PSpacing.x3,
                   ),
-                  child: Text(
+                  child: PText(
                     l.categoryMoveTxNoTarget,
                     style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
                   ),
@@ -350,7 +351,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
             ),
             Padding(
               padding: gutter.copyWith(top: PSpacing.x1_5),
-              child: Text(
+              child: PText(
                 _options.isEmpty
                     ? l.categoryMoveTxNoTarget
                     : l.categoryMoveTxHint,

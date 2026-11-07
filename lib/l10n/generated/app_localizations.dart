@@ -17118,6 +17118,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'반복 설정을 열지 못했어요.'**
   String get expRecurringOpenFailed;
+
+  /// 구간 기호 — 앞뒤를 붙여 쓴다(한국어 ~, 영어 en dash). 날짜 규칙 DESIGN.desk.md:3652
+  ///
+  /// In ko, this message translates to:
+  /// **'~'**
+  String get dateRangeSeparator;
 }
 
 class _AppLocalizationsDelegate

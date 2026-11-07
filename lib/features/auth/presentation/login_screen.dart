@@ -13,6 +13,7 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/shared/brand/groo_wordmark.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// SSO 로그인 화면 (OAuth 2.0 Authorization Code + PKCE, 시스템 브라우저 — RFC 8252).
 ///
@@ -153,7 +154,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // 마크 — 나무 56 + 8 + 이름(5A). 이름이 화면 제목이다(머리말 1단계).
                 const Center(child: GrooWordmark.horizontal(asHeading: true)),
                 const SizedBox(height: PSpacing.x2),
-                Text(
+                PText(
                   l.authLoginPrompt,
                   textAlign: TextAlign.center,
                   style: PTypography.t5.copyWith(color: c.fgNeutralMuted),

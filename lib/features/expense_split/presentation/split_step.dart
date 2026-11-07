@@ -36,6 +36,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
@@ -740,7 +741,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
       child: Row(
         children: [
           Expanded(
-            child: Text(
+            child: PText(
               l.expSplitRemaining,
               style: PTypography.t4.copyWith(color: c.fgNeutral),
             ),

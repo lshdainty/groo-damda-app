@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
@@ -236,7 +237,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
                         PSpacing.globalGutter,
                         PSpacing.x2,
                       ),
-                      child: Text(
+                      child: PText(
                         l.memoTagEmptyHint,
                         textAlign: TextAlign.center,
                         style: PTypography.t4.copyWith(

@@ -17,6 +17,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 오늘 시세 한 줄의 값.
 typedef TodayRow = ({String label, String value, Color? color});
@@ -174,7 +175,7 @@ class StocksInvestorBand extends StatelessWidget {
           PSpacing.x6,
           PSpacing.x3,
         ),
-        child: Text(
+        child: PText(
           l.stocksInvestorEmpty,
           style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
         ),
@@ -324,7 +325,7 @@ class StocksInvestorBand extends StatelessWidget {
                 Semantics(
                   header: true,
                   headingLevel: 2,
-                  child: Text(
+                  child: PText(
                     l.stocksInvestorTitle,
                     style: PTypography.t5.copyWith(
                       fontWeight: FontWeight.w700,
@@ -332,7 +333,7 @@ class StocksInvestorBand extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text(
+                PText(
                   l.stocksInvestorUnit,
                   style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
                 ),

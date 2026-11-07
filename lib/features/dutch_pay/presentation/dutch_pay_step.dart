@@ -28,6 +28,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/select_box/p_select_box.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/step_done.dart';
@@ -480,7 +481,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
           variant: PListHeaderVariant.boldSolid,
           headingLevel: 3,
           topInset: PSpacing.x4,
-          trailing: Text(
+          trailing: PText.amount(
             l.dutchSharesTotal(txMoney(_total, masked)),
             style: PTypography.t4.copyWith(
               color: c.fgNeutral,

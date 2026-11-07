@@ -159,6 +159,8 @@ class AppearanceSection extends ConsumerWidget {
             l.appearanceTheme,
             (ctx) => PListRadioGroup<ThemeMode>(
               semanticLabel: l.appearanceTheme,
+              // 이미 고른 줄을 다시 눌러도 시트는 닫힌다(값은 그대로 · 저장 요청 없음)
+              onReselect: () => PBottomSheet.of(ctx).close(),
               value: settings.themeMode,
               onChanged: (m) {
                 PBottomSheet.of(ctx).close();
@@ -205,6 +207,8 @@ class AppearanceSection extends ConsumerWidget {
             l.settingsLanguage,
             (ctx) => PListRadioGroup<String>(
               semanticLabel: l.settingsLanguage,
+              // 이미 고른 줄을 다시 눌러도 시트는 닫힌다(값은 그대로 · 저장 요청 없음)
+              onReselect: () => PBottomSheet.of(ctx).close(),
               value: langChoice,
               onChanged: (v) {
                 PBottomSheet.of(ctx).close();
@@ -247,10 +251,11 @@ class AppearanceSection extends ConsumerWidget {
                   l.appearanceRegion,
                   (ctx) => PListRadioGroup<String>(
                     semanticLabel: l.appearanceRegion,
+                    // 이미 고른 줄을 다시 눌러도 시트는 닫힌다(값은 그대로 · 저장 요청 없음)
+                    onReselect: () => PBottomSheet.of(ctx).close(),
                     value: prefs.timezone,
                     onChanged: (tz) {
                       PBottomSheet.of(ctx).close();
-                      if (tz == prefs.timezone) return;
                       _savePref(context, ref, {
                         'timezone': tz,
                       }, (prev) => prev.copyWith(timezone: tz));
@@ -284,10 +289,11 @@ class AppearanceSection extends ConsumerWidget {
                   l.appearanceCurrency,
                   (ctx) => PListRadioGroup<String>(
                     semanticLabel: l.appearanceCurrency,
+                    // 이미 고른 줄을 다시 눌러도 시트는 닫힌다(값은 그대로 · 저장 요청 없음)
+                    onReselect: () => PBottomSheet.of(ctx).close(),
                     value: prefs.defaultCurrency,
                     onChanged: (code) {
                       PBottomSheet.of(ctx).close();
-                      if (code == prefs.defaultCurrency) return;
                       _savePref(context, ref, {
                         'defaultCurrency': code,
                       }, (prev) => prev.copyWith(defaultCurrency: code));

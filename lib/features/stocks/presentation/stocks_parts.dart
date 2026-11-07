@@ -19,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 숫자 정렬용 tabular figures.
 const List<FontFeature> kStocksTnum = [FontFeature.tabularFigures()];
@@ -383,7 +384,7 @@ class StocksSearchEntry extends StatelessWidget {
                 Icon(LucideIcons.search, size: 24, color: c.fgNeutralSubtle),
                 const SizedBox(width: PSpacing.x2),
                 Expanded(
-                  child: Text(
+                  child: PText(
                     l.stocksSearchPlaceholder,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

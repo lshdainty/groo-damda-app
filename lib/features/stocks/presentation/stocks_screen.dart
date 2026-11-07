@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 /// 증권 화면 셸 — 헤더와 증권사 선택을 소유하고 본문만 갈아 끼운다.
@@ -129,7 +130,7 @@ class _UnsupportedBroker extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: PScreenSection(
-        child: Text(
+        child: PText(
           l.stocksBrokerUnsupported,
           textAlign: TextAlign.center,
           style: PTypo.bodySm.copyWith(color: t.fgTertiary),

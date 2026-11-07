@@ -2029,10 +2029,12 @@ void _controlTests() {
       Map<String, FocusNode> focus = const {},
       String? disabled,
       PListMarkPosition position = PListMarkPosition.suffix,
+      VoidCallback? onReselect,
     }) => PListRadioGroup<String>(
       semanticLabel: '기본 통화',
       value: value,
       onChanged: onChanged,
+      onReselect: onReselect,
       children: [
         for (final (v, title) in const [
           ('KRW', '대한민국 원'),
@@ -2093,6 +2095,36 @@ void _controlTests() {
       await tester.tap(findText(keepAll('일본 엔')));
       await tester.pump();
       expect(log, ['USD', 'JPY']);
+    });
+
+    testWidgets('onReselect — 고른 줄을 다시 눌렀을 때만 부르고 onChanged 는 부르지 않는다', (
+      tester,
+    ) async {
+      final log = <String>[];
+      var reselect = 0;
+      await tester.pumpWidget(
+        _host(
+          Brightness.light,
+          _Live<String>(
+            initial: 'KRW',
+            log: log,
+            builder: (value, onChanged) => radioRows(
+              value: value,
+              onChanged: onChanged,
+              onReselect: () => reselect++,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(findText(keepAll('대한민국 원')));
+      await tester.pump();
+      expect(reselect, 1);
+      expect(log, isEmpty, reason: '값은 그대로 · 바꿈 호출 없음');
+      expect(selected(tester, '대한민국 원'), isTrue);
+      await tester.tap(findText(keepAll('미국 달러')));
+      await tester.pump();
+      expect(reselect, 1, reason: '다른 줄을 고르면 부르지 않는다');
+      expect(log, ['USD']);
     });
 
     testWidgets('라디오 24 는 뒤(기본)에, 앞에도 둔다 — 고른 것 · 안 고른 것이 모두 보인다', (

@@ -1,23 +1,30 @@
+import 'package:flutter/widgets.dart' show StringCharacters;
+
 /// 낱말 단위 줄바꿈(DESIGN.md v114 — 웹의 word-break: keep-all) — 낱말 안의 글자 사이에 이음 문자(U+2060 WORD
 /// JOINER)를 넣어 띄어쓰기에서만 줄이 바뀌게 한다. 한 줄보다 긴 낱말은 Flutter 가 칸 끝에서 끊는다(웹의
 /// overflow-wrap: break-word 와 같다). 보조 기술은 이음 문자를 읽지 않는다.
+///
+/// 이음 문자는 **문자 묶음(grapheme) 사이에만** 넣는다 — 코드포인트마다 넣으면 이모지(VS16 · ZWJ · 국기 · 피부색), 결합 문자,
+/// 풀어 쓴(NFD) 한글 자모의 묶음이 갈라진다. 사용자가 쓴 이름이 이 함수를 지나도 안전하다.
 String keepAll(String text) {
   final out = StringBuffer();
-  final chars = text.runes.toList();
-  for (var i = 0; i < chars.length; i++) {
-    out.writeCharCode(chars[i]);
-    if (i + 1 < chars.length &&
-        !_breakable(chars[i]) &&
-        !_breakable(chars[i + 1])) {
+  String? prev;
+  for (final g in text.characters) {
+    if (prev != null && !_breakable(prev) && !_breakable(g)) {
       out.writeCharCode(0x2060);
     }
+    out.write(g);
+    prev = g;
   }
   return out.toString();
 }
 
-// 공백 · 줄바꿈 자리에서는 끊을 수 있게 둔다
-bool _breakable(int rune) =>
-    rune == 0x20 || rune == 0x0A || rune == 0x09 || rune == 0x3000;
+// 공백 · 줄바꿈 자리에서는 끊을 수 있게 둔다(문자 묶음의 첫 코드포인트로 본다. CRLF 도 줄바꿈이다)
+bool _breakable(String g) {
+  if (g == '\r\n') return true;
+  final r = g.runes.first;
+  return r == 0x20 || r == 0x0A || r == 0x09 || r == 0x3000;
+}
 
 /// 금액 — [keepAll] 처럼 낱말 단위로 묶되 **쉼표 뒤에서만** 줄을 바꿀 수 있게 한다(03-D 결정 2 B, Typography v114 의
 /// 예외). 지표 · 순자산 · 목록 금액이 칸보다 길 때 숫자 한가운데(`−123,4` / `56,789,`)가 아니라 `−123,` / `456,` /

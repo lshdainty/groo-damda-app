@@ -491,7 +491,7 @@ class PListCheckGroup extends StatelessWidget {
 }
 
 /// 하나 고르기 묶음 — 라디오 줄을 담는다. 묶음의 이름([semanticLabel])이 필수다. 값을 쥐고, 이미 고른 줄을 다시 눌러도
-/// 풀리지 않는다. [onChanged] 가 없으면 묶음 전체가 막힌다(고른 줄은 채운 원 그대로 색만 바뀐다).
+/// 풀리지 않는다([onReselect] 를 주면 그때 부른다). [onChanged] 가 없으면 묶음 전체가 막힌다(고른 줄은 채운 원 그대로 색만 바뀐다).
 ///
 /// 키보드 — 묶음에 들어오면 고른 줄(없으면 첫 줄)로 간다. 화살표로 이전 · 다음 줄을 고르고(막힌 줄은 건너뛴다), Space 로
 /// 포커스된 줄을 고른다. Enter 는 고르지 않는다(폼 제출에 둔다). Flutter 의 RadioGroup 이 맡는다.
@@ -503,6 +503,7 @@ class PListRadioGroup<T> extends StatelessWidget {
     required this.onChanged,
     required this.children,
     this.itemRadius = PRounded.r2_5,
+    this.onReselect,
   }) : assert(semanticLabel != '', '묶음의 이름이 필수다');
 
   final String semanticLabel;
@@ -517,11 +518,16 @@ class PListRadioGroup<T> extends StatelessWidget {
   final List<Widget> children;
   final double itemRadius;
 
+  /// 이미 고른 줄을 다시 눌렀을 때 — 값은 그대로이고 [onChanged] 는 부르지 않는다. 하나 고르기 시트 안의 묶음이 시트를 닫는 데
+  /// 쓴다(`PBottomSheet.of(context).close()`). 인라인 폼의 묶음은 두지 않는다 — 다시 눌러도 아무 일도 없다.
+  final VoidCallback? onReselect;
+
   @override
   Widget build(BuildContext context) {
     final onChanged = this.onChanged;
     return _PListRadioGroupScope(
       enabled: onChanged != null,
+      onReselect: onReselect,
       child: RadioGroup<T>(
         groupValue: value,
         onChanged: (next) {
@@ -539,11 +545,22 @@ class PListRadioGroup<T> extends StatelessWidget {
   }
 }
 
-/// 묶음이 막혔는지 — [PListRadioItem] 이 읽는다.
+/// 묶음이 막혔는지, 고른 줄을 다시 눌렀을 때 부를 것([PListRadioGroup.onReselect]) — [PListRadioItem] 이 읽는다.
 class _PListRadioGroupScope extends InheritedWidget {
-  const _PListRadioGroupScope({required this.enabled, required super.child});
+  const _PListRadioGroupScope({
+    required this.enabled,
+    required this.onReselect,
+    required super.child,
+  });
 
   final bool enabled;
+
+  /// 이미 고른 줄을 다시 눌렀을 때 — [PListRadioGroup.onReselect].
+  final VoidCallback? onReselect;
+
+  static VoidCallback? reselectOf(BuildContext context) => context
+      .getInheritedWidgetOfExactType<_PListRadioGroupScope>()
+      ?.onReselect;
 
   static bool enabledOf(BuildContext context) =>
       context
@@ -648,8 +665,11 @@ class _PListRadioItemState<T> extends State<PListRadioItem<T>>
   }
 
   void _select() {
-    // 이미 고른 줄을 다시 눌러도 풀리지 않는다
-    if (_selected) return;
+    // 이미 고른 줄을 다시 눌러도 풀리지 않는다 — 묶음이 [PListRadioGroup.onReselect] 를 받았으면 그것만 부른다
+    if (_selected) {
+      if (_groupEnabled) _PListRadioGroupScope.reselectOf(context)?.call();
+      return;
+    }
     registry?.onChanged(widget.value);
   }
 

@@ -9,6 +9,7 @@ import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/domain/transfer_rules.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
 import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
@@ -171,7 +172,7 @@ class TransferAccountFields extends StatelessWidget {
         if (fromAssetRowId != null && fromAssetRowId == toAssetRowId)
           Padding(
             padding: const EdgeInsets.only(top: PSpace.x4),
-            child: Text(
+            child: PText(
               l.expTransferSameAsset,
               style: PTypo.caption.copyWith(color: t.statusDangerFg),
             ),
@@ -209,7 +210,7 @@ class TransferAccountFields extends StatelessWidget {
                   int.tryParse(interestController.text.replaceAll(',', '')) ??
                   0;
               final canSplit = amount != null && amount > 0 && interest > 0;
-              return Text(
+              return PText(
                 canSplit
                     ? l.expInterestSplit(
                         krw(amount - interest < 0 ? 0 : amount - interest),

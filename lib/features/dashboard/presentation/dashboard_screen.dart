@@ -43,6 +43,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 const _tabular = [FontFeature.tabularFigures()];
 const _mask = '••••';
@@ -1024,7 +1025,7 @@ class _CategorySection extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             spacing: PSpacing.x3,
             children: [
-              Text(
+              PText(
                 l.dashThisMonthExpense,
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),

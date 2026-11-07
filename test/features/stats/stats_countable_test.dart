@@ -38,7 +38,7 @@ void main() {
       DateTime(2026, 9, 8),
     );
 
-    expect(points.map((p) => p.label), ['9/7', '9/8']);
+    expect(points.map((p) => p.label), ['9. 7.', '9. 8.']);
     expect(points.first.expense, 10000);
     expect(points.last.income, 7000);
     expect(points.last.expense, 0);

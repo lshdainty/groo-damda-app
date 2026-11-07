@@ -11,6 +11,7 @@ import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 별자리 도감(I-11 11) — 머리 + 설명 + ds List 보기 줄(87줄 모두, 줄 사이 선 없음, 맞춤 위) + 뒤 작은 버튼.
 ///
@@ -64,7 +65,7 @@ class CollectionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: PSpacing.x2),
-              Text(
+              PText(
                 l.constCollectionProgress(
                   collection.collectedKinds,
                   collection.entries.length,
