@@ -229,6 +229,20 @@ void main() {
     expect(repo.captured?['isOverdraft'], isTrue);
   });
 
+  testWidgets('잔액이 1,000억 위(상한 전 옛 값)면 칸 아래에 말이 나오고 저장은 요청을 보내지 않는다', (
+    tester,
+  ) async {
+    final repo = await _open(
+      tester,
+      edit: _existing.copyWith(balance: 200000000000),
+    );
+    const msg = '금액은 1,000억원까지 입력할 수 있어요.';
+    expect(findPlain(msg), findsOneWidget);
+    await _tapSubmit(tester, l.actionSave);
+    expect(repo.captured, isNull, reason: '서버에 보내지 않는다(깎지도 않는다)');
+    expect(findPlain(msg), findsOneWidget);
+  });
+
   testWidgets('입출금은 같은 값을 양수로 저장한다', (tester) async {
     final repo = await _open(tester);
     await typeInto(tester, l.assetBalanceLabel, '50000');

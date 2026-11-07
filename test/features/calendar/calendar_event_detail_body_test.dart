@@ -155,6 +155,34 @@ void main() {
     expect(find.byIcon(LucideIcons.sun), findsOneWidget);
   });
 
+  testWidgets('여러 날 종일 — 하나라도 올해가 아니면 양끝에 연도(끝만 다른 해)', (tester) async {
+    await _pump(
+      tester,
+      _ev(
+        full: false,
+        allDay: 'Y',
+        start: '2026-10-28T00:00:00',
+        end: '2027-01-02T23:59:59',
+      ),
+    );
+    expect(findPlain('2026년 10월 28일 (수)~'), findsOneWidget);
+    expect(findPlain('2027년 1월 2일 (토)'), findsOneWidget);
+  });
+
+  testWidgets('여러 날 종일 — 하나라도 올해가 아니면 양끝에 연도(시작만 다른 해)', (tester) async {
+    await _pump(
+      tester,
+      _ev(
+        full: false,
+        allDay: 'Y',
+        start: '2025-12-29T00:00:00',
+        end: '2026-01-02T23:59:59',
+      ),
+    );
+    expect(findPlain('2025년 12월 29일 (월)~'), findsOneWidget);
+    expect(findPlain('2026년 1월 2일 (금)'), findsOneWidget);
+  });
+
   // 줄 바뀜 규칙(DESIGN.desk.md 날짜 구간): ① 첫째 자리는 "~" 뒤 ② 그래도 넘치면 날짜 안 띄어쓰기에서만
   // ③ 낱말 안("2025년 1|2월") · "~" 앞(기호가 줄 첫머리 · 혼자 한 줄)은 안 끊는다.
   for (final scale in [1.0, 1.5, 2.0]) {
@@ -181,7 +209,7 @@ void main() {
             w.plain,
             sameYear
                 ? '10월 25일 (일)~10월 27일 (화)'
-                : '2025년 12월 29일 (월)~1월 2일 (금)',
+                : '2025년 12월 29일 (월)~2026년 1월 2일 (금)',
           );
           final texts = find.descendant(of: range, matching: find.byType(Text));
           expect(texts, findsNWidgets(2));

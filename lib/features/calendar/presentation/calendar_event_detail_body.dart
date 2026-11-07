@@ -97,8 +97,16 @@ class CalendarEventDetailBody extends StatelessWidget {
           ),
         );
 
-        final startDay = formatDateValue(e.start, today);
-        final endDay = formatDateValue(e.end, today);
+        // 한쪽이라도 올해가 아니면 양끝에 연도를 붙인다(공용 dateRange 와 같은 규칙) — 기준 연도를 0 으로 둬 둘 다 붙게 한다
+        final crossYear =
+            e.isAllDayBool &&
+            (e.start.year != today.year || e.end.year != today.year) &&
+            !(e.start.year == e.end.year &&
+                e.start.month == e.end.month &&
+                e.start.day == e.end.day);
+        final yearBase = crossYear ? DateTime(0) : today;
+        final startDay = formatDateValue(e.start, crossYear ? yearBase : today);
+        final endDay = formatDateValue(e.end, crossYear ? yearBase : today);
         final duration = calendarDurationText(l, e);
         final multiDay =
             !(e.start.year == e.end.year &&

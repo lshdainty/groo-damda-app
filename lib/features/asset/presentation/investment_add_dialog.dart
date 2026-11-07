@@ -420,6 +420,13 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   /// 단계로 바뀐다(I-17 21) — 확인하기 전에는 요청이 나가지 않고, ←(취소)면 저장도 안 한다.
   Future<void> _submit() async {
     if (_submitting) return;
+    // 예수금 · 직접 입력한 보유 평가액이 1,000억 위(상한 전에 저장된 옛 값)면 저장하지 않는다 — 칸 아래 오류가 보인다(웹과 같다)
+    if (amountTextExceeds(_cashCtrl.text, kBalanceMax) ||
+        _holdings.any(
+          (h) => !h.linked && (h.holdingValue ?? 0) > kBalanceMax,
+        )) {
+      return;
+    }
     final nameMissing = _nameCtrl.text.trim().isEmpty;
     // 외화면 환율이 필수다(서버 AST_036, I-13) — 비우면 칸 오류로 막는다.
     if (nameMissing || exchangeRateMissing(_currency, _fxRateCtrl)) {

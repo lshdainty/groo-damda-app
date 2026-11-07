@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/export/data/export_repository.dart';
 import 'package:groo_damda_app/features/import/presentation/import_view.dart';
@@ -575,15 +576,8 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     );
   }
 
-  /// 밖으로 나가는 글(채팅 앱에 남는다)이라 연도를 늘 넣는다 — "2026년 10월 1일~10월 31일" · en "Oct 1, 2026–Oct 31".
-  /// 끝이 같은 해면 연도는 시작에만 쓴다.
-  String _shareRangeText(({String start, String end}) r) {
-    final a = DateTime.tryParse(r.start);
-    final b = DateTime.tryParse(r.end);
-    if (a == null || b == null) return _rangeText(r);
-    final end = a.year == b.year ? monthDay(b) : fullDate(b);
-    return '${fullDate(a)}${rangeSeparator()}$end';
-  }
+  String _shareRangeText(({String start, String end}) r) =>
+      exportShareRange(r.start, r.end) ?? _rangeText(r);
 
   String _rangeText(({String start, String end}) r) =>
       '${_krLabel(r.start)}${rangeSeparator()}${_krLabel(r.end)}';
@@ -811,4 +805,20 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       ],
     );
   }
+}
+
+/// 밖으로 나가는 글(채팅 앱에 남는다)의 기간 — 연도를 늘 넣는다. 못 읽으면 null.
+/// ko "2026년 10월 1일~10월 31일" · en 같은 달 "Oct 1–31, 2026" · 같은 해 다른 달 "Oct 1–Nov 4, 2026" · 다른 해 "Dec 29, 2025–Jan 4, 2026".
+String? exportShareRange(String start, String end) {
+  final a = DateTime.tryParse(start);
+  final b = DateTime.tryParse(end);
+  if (a == null || b == null) return null;
+  final sep = rangeSeparator();
+  if (localeIsEn()) {
+    if (a.year != b.year) return '${fullDate(a)}$sep${fullDate(b)}';
+    final tail = a.month == b.month ? '${b.day}' : monthDay(b);
+    return '${monthDay(a)}$sep$tail, ${a.year}';
+  }
+  final endText = a.year == b.year ? monthDay(b) : fullDate(b);
+  return '${fullDate(a)}$sep$endText';
 }
