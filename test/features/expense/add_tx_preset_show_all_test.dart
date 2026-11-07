@@ -102,8 +102,8 @@ void main() {
     await _open(tester, _nine());
     await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
-    expect(findText(l.presetShowAll), findsOneWidget);
-    await tester.tap(findText(l.presetShowAll));
+    expect(findText(l.txfShowAll), findsOneWidget);
+    await tester.tap(findText(l.txfShowAll));
     await tester.pumpAndSettle();
     expect(findText(l.presetPickTitle), findsOneWidget);
     expect(findText('지출8'), findsOneWidget, reason: '칩에 못 든 아홉째가 고르기 목록에 있다');
@@ -111,14 +111,14 @@ void main() {
 
   testWidgets('지출 3 + 수입 6 이면 지출 탭에 "모두 보기" 가 없다', (tester) async {
     await _open(tester, _mixed());
-    expect(findText(l.presetShowAll), findsNothing);
+    expect(findText(l.txfShowAll), findsNothing);
   });
 
   testWidgets('찾기 0건이면 "찾는 프리셋이 없어요."', (tester) async {
     await _open(tester, _nine());
     await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
-    await tester.tap(findText(l.presetShowAll));
+    await tester.tap(findText(l.txfShowAll));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).last, '없는이름');
     await tester.pumpAndSettle();
@@ -139,7 +139,7 @@ void main() {
     );
     await tester.drag(_chipRow(), const Offset(-3000, 0));
     await tester.pumpAndSettle();
-    await tester.tap(findText(l.presetShowAll));
+    await tester.tap(findText(l.txfShowAll));
     await tester.pumpAndSettle();
     expect(findText(l.presetCategoryLoadFailed), findsOneWidget);
     down = false;
