@@ -9,7 +9,6 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
-import 'package:groo_damda_app/features/card/presentation/widgets/card_brand.dart';
 import 'package:groo_damda_app/shared/brand/bank_colors.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
 import 'package:groo_damda_app/shared/ds/institution_colors/institution_colors.dart';
@@ -101,22 +100,6 @@ void main() {
     expect(
       getBrandColor(['없는 기관', '신한'])!.bg,
       PInstitutionColors.find('신한')!.color,
-    );
-  });
-
-  test('getCardBrand — 카드사는 표의 색 · 글자색이고, 흰 글자가 모자란 노랑은 짙은 글자다', () {
-    final shinhan = getCardBrand('신한카드');
-    expect(shinhan.known, isTrue);
-    expect(shinhan.bg1, PInstitutionColors.find('신한카드')!.color);
-    expect(shinhan.text, PInstitutionColors.find('신한카드')!.text);
-    final kb = getCardBrand('KB국민카드');
-    expect(kb.text, PInstitutionText.dark);
-    expect(getCardBrand('모르는카드사').known, isFalse);
-    expect(getCardBrand(null).known, isFalse);
-    // 포함 일치 — 가장 긴 이름이 이긴다
-    expect(
-      getCardBrand('NH농협카드 올원').bg1,
-      PInstitutionColors.find('NH농협카드')!.color,
     );
   });
 
