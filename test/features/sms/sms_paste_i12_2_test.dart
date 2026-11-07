@@ -26,7 +26,6 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
-import 'package:groo_damda_app/shared/widgets/p_alert.dart';
 
 const _pay = '[Web발신]\n숲빛카드 승인\n5,500원 일시불\n골목찻집';
 
@@ -153,7 +152,6 @@ void main() {
     expect(find.byType(PScreenBandBody), findsNothing);
     expect(find.byType(PTopNavigation), findsOneWidget);
     expect(findText('결제 문자로 기록'), findsOneWidget);
-    expect(find.byType(PAlert), findsNothing);
   });
 
   testWidgets('칸 = Field "결제 문자" + Textarea(자리 글은 지어낸 예시, 실제 카드사 · 상호 0)', (
@@ -206,7 +204,6 @@ void main() {
       '결제 문자로 보이지 않아요. 문자 전체를 붙여넣었는지 확인해주세요.',
     );
     expect(find.byType(PCallout), findsNothing);
-    expect(find.byType(PAlert), findsNothing);
     // 값을 고치면 오류를 걷는다 — × 로 닫을 길이 없다
     await _type(tester, '점심 뭐 먹지 오늘은 국밥!');
     expect(_field(tester).invalid, isFalse);

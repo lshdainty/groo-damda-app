@@ -23,11 +23,10 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/money/presentation/money_bundle_screen.dart';
 import 'package:groo_damda_app/shared/widgets/branch_back_to_home.dart';
 import 'package:groo_damda_app/shared/widgets/mobile_scaffold.dart';
-import 'package:groo_damda_app/shared/widgets/p_modal.dart';
 import '../support/plain_text.dart';
 
 /// branch 화면 대역 — 실제 화면은 네트워크 provider 를 물고 있어 셸 동작만 본다.
-/// 시트·다이얼로그를 여는 버튼은 앱과 같은 헬퍼를 쓴다(showPSheet / showDialog).
+/// 시트·다이얼로그를 여는 버튼은 앱과 같은 헬퍼를 쓴다(showModalBottomSheet / showDialog — 옛 showPSheet 는 걷었다).
 class _Screen extends StatelessWidget {
   const _Screen(this.name);
   final String name;
@@ -40,10 +39,9 @@ class _Screen extends StatelessWidget {
         children: [
           Text(name),
           TextButton(
-            onPressed: () => showPSheet<void>(
-              context,
-              title: '시트',
-              contentBuilder: (_, _) => const Text('시트 내용'),
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              builder: (_) => const Text('시트 내용'),
             ),
             child: const Text('시트 열기'),
           ),

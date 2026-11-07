@@ -21,7 +21,6 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import '../support/plain_text.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsskel;
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
@@ -284,7 +283,7 @@ void main() {
       );
 
       expect(findPlain('점심값'), findsWidgets);
-      expect(find.byType(PSkeleton), findsNothing);
+      expect(find.byType(dsskel.PSkeleton), findsNothing);
     });
   });
 
@@ -446,7 +445,7 @@ void main() {
       );
 
       expect(find.byType(CalendarMonthGrid), findsOneWidget);
-      expect(find.byType(PSkeleton), findsNothing);
+      expect(find.byType(dsskel.PSkeleton), findsNothing);
     });
   });
 }

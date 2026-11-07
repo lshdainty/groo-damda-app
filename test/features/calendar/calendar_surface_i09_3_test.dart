@@ -31,8 +31,6 @@ import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
-import 'package:groo_damda_app/shared/widgets/p_card.dart';
-import 'package:groo_damda_app/shared/widgets/p_divider.dart';
 
 import '../../support/plain_text.dart';
 
@@ -139,8 +137,6 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(PCallout), findsOneWidget);
-      expect(find.byType(PCard), findsNothing);
-      expect(find.byType(PDivider), findsNothing);
       expect(
         findRichPlain('캘린더를 만들고 멤버를 초대해 가족 · 친구와 함께 일정을 관리해요.'),
         findsOneWidget,
@@ -348,8 +344,6 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(PCallout), findsOneWidget);
-      expect(find.byType(PCard), findsNothing);
-      expect(find.byType(PDivider), findsNothing);
       expect(findRichText('전체 라벨 · 2'), findsOneWidget);
       expect(findPlain('라벨 추가'), findsOneWidget);
       expect(tester.takeException(), isNull);

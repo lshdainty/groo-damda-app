@@ -8,7 +8,6 @@ import 'package:groo_damda_app/features/stats/presentation/stats_range_sheet.dar
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
-import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
 import '../../support/plain_text.dart';
 
 final _today = DateTime(2026, 10, 29, 13);
@@ -141,7 +140,6 @@ void main() {
     testWidgets('칸 하나 — 날짜 입력칸 두 개와 월 · 분기 · 년 · 직접 탭이 없다', (tester) async {
       await _open(tester, month, (_) {});
       expect(find.byType(PDatePicker), findsOneWidget);
-      expect(find.byType(PDateInput), findsNothing);
       expect(findText('분기'), findsNothing);
       expect(findText('직접'), findsNothing);
     });

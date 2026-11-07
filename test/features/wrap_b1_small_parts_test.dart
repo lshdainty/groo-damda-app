@@ -25,7 +25,6 @@ import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_head
 import 'package:groo_damda_app/features/stocks/presentation/stocks_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as ds;
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart' as old;
 
 Widget _app(Widget child, {List<dynamic> overrides = const []}) =>
     ProviderScope(
@@ -233,7 +232,6 @@ void main() {
       tester,
     ) async {
       await pump(tester, card);
-      expect(find.byType(old.PSkeleton), findsNothing);
       final billing = find.byKey(const ValueKey('card-billing-skeleton'));
       expect(billing, findsOneWidget);
       final faces = tester
@@ -257,7 +255,6 @@ void main() {
       tester,
     ) async {
       await pump(tester, account);
-      expect(find.byType(old.PSkeleton), findsNothing);
       final tiles = tester
           .widgetList<ds.PSkeleton>(find.byType(ds.PSkeleton))
           .where((f) => f.width == 40 && f.height == 40);

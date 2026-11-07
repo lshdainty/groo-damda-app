@@ -13,8 +13,6 @@ void main() {
     ];
     for (final f in Directory('lib').listSync(recursive: true)) {
       if (f is! File || !f.path.endsWith('.dart')) continue;
-      // 옛 위젯 정의 파일은 시험이 아직 쓰는 정의라 제외한다.
-      if (f.path.endsWith('shared/widgets/p_snack_bar.dart')) continue;
       final src = f.readAsStringSync();
       for (final b in banned) {
         expect(src.contains(b), isFalse, reason: '${f.path} : $b');
