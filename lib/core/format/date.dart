@@ -224,23 +224,6 @@ String? localDateKey(String? iso) {
   return '$yyyy-$mm-$dd';
 }
 
-/// 서버 `[UTC]` 시각 → 로컬 `yyyy-MM-dd HH:mm`. 못 읽으면 null.
-///
-/// [localDateKey] 와 같은 이유 — 자르면 UTC 벽시계가 그대로 화면에 나온다.
-/// 웹 `toLocalDateTime` 과 같은 모양을 유지한다(로케일 포맷을 태우지 않는다).
-///
-/// [localDateKey] 와 마찬가지로 **날짜만 있는 값(`LocalDate`)은 대상이 아니다** — null.
-String? localDateTime(String? iso) {
-  final dt = parseServerUtc(iso);
-  if (dt == null) return null;
-  final yyyy = dt.year.toString().padLeft(4, '0');
-  final mm = dt.month.toString().padLeft(2, '0');
-  final dd = dt.day.toString().padLeft(2, '0');
-  final hh = dt.hour.toString().padLeft(2, '0');
-  final mi = dt.minute.toString().padLeft(2, '0');
-  return '$yyyy-$mm-$dd $hh:$mi';
-}
-
 /// 요일 · 시각(DESIGN.desk.md:3605) — ko "11월 7일 (토) 오전 9:05", en "Sat, Nov 7 at 9:05 AM". 다른 해면 연도가 붙는다
 /// ("2025년 11월 7일 (금) 오전 9:05" · "Fri, Nov 7, 2025 at 9:05 AM").
 ///

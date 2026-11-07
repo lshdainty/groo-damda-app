@@ -59,7 +59,6 @@ void main() {
 
     test('파생 함수도 같이 닫힌다 — 조용히 다른 날짜를 내지 않는다', () {
       expect(localDateKey('2026-08-24'), isNull);
-      expect(localDateTime('2026-08-24'), isNull);
       expect(formatMemoStamp('2026-08-24'), '');
     });
 
@@ -136,34 +135,6 @@ void main() {
       expect(localDateKey(null), isNull);
       expect(localDateKey(''), isNull);
       expect(localDateKey('알 수 없음'), isNull);
-    });
-  });
-
-  group('localDateTime — 로컬 yyyy-MM-dd HH:mm', () {
-    String expected(DateTime utc) {
-      final d = utc.toLocal();
-      String p2(int n) => n.toString().padLeft(2, '0');
-      return '${d.year.toString().padLeft(4, '0')}-${p2(d.month)}-${p2(d.day)}'
-          ' ${p2(d.hour)}:${p2(d.minute)}';
-    }
-
-    test('UTC 를 로컬 날짜·시각으로 찍는다', () {
-      expect(
-        localDateTime('2026-08-24T15:30:00'),
-        expected(DateTime.utc(2026, 8, 24, 15, 30)),
-      );
-    });
-
-    test('날짜 부분은 localDateKey 와 같다', () {
-      expect(
-        localDateTime('2026-08-24T15:30:00')!.substring(0, 10),
-        localDateKey('2026-08-24T15:30:00'),
-      );
-    });
-
-    test('없거나 못 읽는 값은 null', () {
-      expect(localDateTime(null), isNull);
-      expect(localDateTime('알 수 없음'), isNull);
     });
   });
 
