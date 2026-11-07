@@ -3476,7 +3476,7 @@
       }
     }
   },
-  "subBrokerDisconnectConfirmBody": "해제하면 보유 주식과 시세를 더 이상 가져오지 않아요.",
+  "subBrokerDisconnectConfirmBody": "해제하면 이 증권사의 보유 주식과 시세를 더 이상 가져오지 않아요. 다시 연결하려면 키를 새로 입력해야 해요.",
   "subConnecting": "연결 중…",
   "subConnect": "연결하기",
   "subBrokerInvalidCred": "인증정보가 올바르지 않아요.",
@@ -4385,7 +4385,7 @@
   "subBrokerUseAsPrimary": "기본으로 쓰기",
   "subBrokerPrimaryNotice": "가계부 자산은 여기서 고른 증권사 시세로 계산해요.",
   "subBrokerPrimaryFailed": "기본 증권사를 바꾸지 못했어요.",
-  "subBrokerConnected": "{broker} 계정을 연결했어요.",
+  "subBrokerConnected": "{broker}를 연결했어요.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {
@@ -4393,14 +4393,7 @@
       }
     }
   },
-  "subBrokerDisconnected": "{broker} 연결을 해제했어요.",
-  "@subBrokerDisconnected": {
-    "placeholders": {
-      "broker": {
-        "type": "String"
-      }
-    }
-  },
+  "subBrokerDisconnected": "연결을 해제했어요.",
   "subBrokerPrimaryChanged": "이제 {broker} 시세로 자산을 평가해요.",
   "@subBrokerPrimaryChanged": {
     "placeholders": {

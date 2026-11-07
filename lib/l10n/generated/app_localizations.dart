@@ -11374,7 +11374,7 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerDisconnectConfirmBody.
   ///
   /// In ko, this message translates to:
-  /// **'해제하면 보유 주식과 시세를 더 이상 가져오지 않아요.'**
+  /// **'해제하면 이 증권사의 보유 주식과 시세를 더 이상 가져오지 않아요. 다시 연결하려면 키를 새로 입력해야 해요.'**
   String get subBrokerDisconnectConfirmBody;
 
   /// No description provided for @subConnecting.
@@ -13540,14 +13540,14 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerConnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 계정을 연결했어요.'**
+  /// **'{broker}를 연결했어요.'**
   String subBrokerConnected(String broker);
 
   /// No description provided for @subBrokerDisconnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 연결을 해제했어요.'**
-  String subBrokerDisconnected(String broker);
+  /// **'연결을 해제했어요.'**
+  String get subBrokerDisconnected;
 
   /// No description provided for @subBrokerPrimaryChanged.
   ///

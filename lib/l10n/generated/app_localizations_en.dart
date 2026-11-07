@@ -6261,7 +6261,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subBrokerDisconnectConfirmBody =>
-      'Holdings and prices will no longer be imported.';
+      'This broker\'s holdings and prices will no longer be imported. To connect again, you\'ll need to enter the keys again.';
 
   @override
   String get subConnecting => 'Connecting…';
@@ -7635,13 +7635,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return 'Connected your $broker account.';
+    return 'Connected $broker.';
   }
 
   @override
-  String subBrokerDisconnected(String broker) {
-    return 'Disconnected from $broker.';
-  }
+  String get subBrokerDisconnected => 'Disconnected.';
 
   @override
   String subBrokerPrimaryChanged(String broker) {

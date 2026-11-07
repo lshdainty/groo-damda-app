@@ -3380,7 +3380,7 @@
       }
     }
   },
-  "subBrokerDisconnectConfirmBody": "Holdings and prices will no longer be imported.",
+  "subBrokerDisconnectConfirmBody": "This broker's holdings and prices will no longer be imported. To connect again, you'll need to enter the keys again.",
   "subConnecting": "Connecting…",
   "subConnect": "Connect",
   "subBrokerInvalidCred": "The credentials are not valid.",
@@ -4203,7 +4203,7 @@
   "subBrokerUseAsPrimary": "Use as primary",
   "subBrokerPrimaryNotice": "Your assets are valued using the provider selected here.",
   "subBrokerPrimaryFailed": "Couldn't change the primary broker.",
-  "subBrokerConnected": "Connected your {broker} account.",
+  "subBrokerConnected": "Connected {broker}.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {
@@ -4211,14 +4211,7 @@
       }
     }
   },
-  "subBrokerDisconnected": "Disconnected from {broker}.",
-  "@subBrokerDisconnected": {
-    "placeholders": {
-      "broker": {
-        "type": "String"
-      }
-    }
-  },
+  "subBrokerDisconnected": "Disconnected.",
   "subBrokerPrimaryChanged": "Assets are now valued with {broker}.",
   "@subBrokerPrimaryChanged": {
     "placeholders": {

@@ -275,6 +275,14 @@ void main() {
       await tester.pump();
       expect(obscured(0), isFalse);
       expect(obscured(1), isTrue);
+
+      // 칸 안 오른쪽 끝 — 보이는 원 40 밖이라도 누르는 영역 44 안(위아래 2)이면 눌린다
+      final center = tester.getCenter(eye);
+      final box = tester.getRect(find.byType(TextField).first);
+      expect(center.dx, greaterThan(box.center.dx), reason: '칸 안 오른쪽');
+      await tester.tapAt(center + const Offset(0, 21));
+      await tester.pump();
+      expect(obscured(0), isTrue, reason: '44 영역 가장자리(원 밖 1px)도 누른다');
     });
   });
 
@@ -300,6 +308,8 @@ void main() {
       await tester.tap(findText('연결 해제').last);
       await tester.pumpAndSettle();
       expect(repo.disconnected, ['NAMU']);
+      expect(_detail, findsNothing, reason: '해제되면 첫 단계로 돌아간다');
+      expect(_list, findsOneWidget);
     });
 
     testWidgets('[기본으로 쓰기] 는 연결이 둘 이상이고 기본이 아닐 때만', (tester) async {

@@ -116,9 +116,10 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
       ref.invalidate(myFeaturesLoadProvider);
       ref.invalidate(brokerConnectionsProvider);
       if (mounted) {
-        PSnackbar.maybeOf(
-          context,
-        )?.show(message: l.subBrokerConnected(c.displayName));
+        PSnackbar.maybeOf(context)?.show(
+          message: l.subBrokerConnected(c.displayName),
+          tone: PSnackbarTone.positive,
+        );
       }
     } catch (e) {
       // 응답을 못 받았다 — 연결됐을 수 있다. 실패라 하지 않고 연결 상태를 다시 받는다(디자인시스템 판단 ⑤).
@@ -154,15 +155,20 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
   Future<void> _run(
     Future<void> Function(SubscriptionRepository repo) action,
     String okMsg,
-    String errMsg,
-  ) async {
+    String errMsg, {
+    PSnackbarTone okTone = PSnackbarTone.neutral,
+    VoidCallback? onDone,
+  }) async {
     _setBusy(true);
     try {
       final repo = await ref.read(subscriptionRepositoryProvider.future);
       await action(repo);
       ref.invalidate(myFeaturesLoadProvider);
       ref.invalidate(brokerConnectionsProvider);
-      if (mounted) PSnackbar.maybeOf(context)?.show(message: okMsg);
+      if (mounted) {
+        PSnackbar.maybeOf(context)?.show(message: okMsg, tone: okTone);
+        onDone?.call();
+      }
     } catch (e) {
       // 서버 글은 내지 않는다(요청은 silent) — 고정 글 한 문장 + [다시 시도](같은 일을 다시)
       if (mounted) {
@@ -171,7 +177,8 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
           tone: PSnackbarTone.critical,
           action: PSnackbarAction(
             label: AppLocalizations.of(context).actionRetry,
-            onPressed: () => _run(action, okMsg, errMsg),
+            onPressed: () =>
+                _run(action, okMsg, errMsg, okTone: okTone, onDone: onDone),
           ),
         );
       }
@@ -194,8 +201,10 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
     if (!ok || !mounted) return;
     await _run(
       (repo) => repo.disconnectBrokerCredential(c.broker, silent: true),
-      l.subBrokerDisconnected(c.displayName),
+      l.subBrokerDisconnected,
       l.subDisconnectFailed,
+      // 해제되면 첫 단계(목록)로 돌아간다
+      onDone: () => Navigator.of(context).maybePop(),
     );
   }
 
@@ -355,30 +364,23 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
     required ValueChanged<bool> onReveal,
   }) {
     final l = AppLocalizations.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      spacing: PSpacing.x1,
-      children: [
-        Expanded(
-          child: PField(
-            label: label,
-            child: PInput(
-              controller: controller,
-              obscureText: !revealed,
-              secret: true,
-              disabled: _busy,
-              autofillHints: const [],
-            ),
-          ),
-        ),
-        PToggle(
+    return PField(
+      label: label,
+      child: PInput(
+        controller: controller,
+        obscureText: !revealed,
+        secret: true,
+        disabled: _busy,
+        autofillHints: const [],
+        // 칸 안 오른쪽 끝 — 지우기 버튼과 같은 자리
+        trailing: PToggle(
           semanticLabel: l.subBrokerToggleReveal(label),
           pressed: revealed,
           onChanged: onReveal,
           icon: LucideIcons.eye,
           pressedIcon: LucideIcons.eyeOff500,
         ),
-      ],
+      ),
     );
   }
 

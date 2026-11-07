@@ -6143,7 +6143,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get subBrokerDisconnectConfirmBody => '해제하면 보유 주식과 시세를 더 이상 가져오지 않아요.';
+  String get subBrokerDisconnectConfirmBody =>
+      '해제하면 이 증권사의 보유 주식과 시세를 더 이상 가져오지 않아요. 다시 연결하려면 키를 새로 입력해야 해요.';
 
   @override
   String get subConnecting => '연결 중…';
@@ -7490,13 +7491,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return '$broker 계정을 연결했어요.';
+    return '$broker를 연결했어요.';
   }
 
   @override
-  String subBrokerDisconnected(String broker) {
-    return '$broker 연결을 해제했어요.';
-  }
+  String get subBrokerDisconnected => '연결을 해제했어요.';
 
   @override
   String subBrokerPrimaryChanged(String broker) {
