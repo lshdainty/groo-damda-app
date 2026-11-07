@@ -39,6 +39,10 @@ import 'package:groo_damda_app/shared/forms/save_failure.dart';
 /// 참여자 이름 길이 상한 — 웹 `PARTICIPANT_NAME_MAX` 와 같은 값.
 const int kDutchParticipantNameMax = 20;
 
+/// 직접 입력 칸 폭 — 한 사람 몫 최대 9,999,999,999원이 글자 100% 에서 다 보이는 폭 — 웹 실측 168(089ea91f) — 앱은 같은 글꼴로 재니 168 에서 1.3px 넘쳐 최소 170 이라 172 로 둔다.
+@visibleForTesting
+const double kDutchCustomFieldWidth = 172;
+
 class _Person {
   _Person({required this.id, required this.name});
   final String id;
@@ -730,8 +734,8 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
             : PListValue(
                 mergeSemantics: false,
                 child: PListEditWidth(
-                  // 금액 직접 입력은 128, 비율은 96 — 웹과 같다(9억대 금액이 칸 안에 들어간다)
-                  width: 128,
+                  // 금액 직접 입력은 9,999,999,999 가 100% 에서 칸 안에 다 보이는 폭(실제 글꼴 실측 170 + 여유 6), 비율은 96
+                  width: kDutchCustomFieldWidth,
                   child: PInput(
                     key: p.customKey,
                     controller: p.customCtrl,

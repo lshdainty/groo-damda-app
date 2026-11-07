@@ -117,6 +117,16 @@ class PListEditWidth extends StatelessWidget {
       SizedBox(width: fill ? double.infinity : width, child: child);
 }
 
+/// 뒤 붙이개 안 [PListEditWidth] 의 폭(없으면 null).
+double? _editWidthOf(Widget? suffix) {
+  final parts = suffix is PListSuffix ? suffix.children : [?suffix];
+  for (final w in parts) {
+    final inner = w is PListValue ? w.child : w;
+    if (inner is PListEditWidth) return inner.width;
+  }
+  return null;
+}
+
 /// 금액처럼 위젯으로 만든 값 — 뒤 붙이개 자리에 두면 줄이 "값" 으로 읽는다. 줄 안 폭이 좁으면([kPListStackBelowEm])
 /// 글 값과 함께 본문 아래로 내려가고, 화살표 · 스위치 · 체크 · 작은 버튼 같은 조작 요소는 줄 끝에 남는다.
 /// 금액 글은 [keepAllAmount] 로 만든다(쉼표 뒤에서만 줄을 바꾼다).
@@ -696,7 +706,10 @@ class _PListRowFrameState extends State<PListRowFrame> {
     final bodyNode = buildBodyNode(container: !merge);
     // 글 값 · 금액 값(PListValue)은 본문 최소 폭만 남기고 줄을 바꾼다 — 금액은 쉼표 뒤에서만(03-D 결정 2 B, keepAllAmount 의 U+200B).
     // (값 + 화살표를 PListSuffix 로 넘긴 줄도 값이 있으면 같은 제한을 받는다 — 화살표는 제한 밖이다)
-    final isText = parts.values.isNotEmpty;
+    // 편집 칸은 본문 때문에 줄지 않는다 — 문턱이 이름 자리를 이미 남겼다
+    final isText = parts.values.any(
+      (v) => !(v is PListValue && v.child is PListEditWidth),
+    );
     final valueSide = merge
         ? (parts.values.length == 1
               ? parts.values.first
@@ -970,9 +983,20 @@ class _PListRowFrameState extends State<PListRowFrame> {
       PListNest.child => kPListChildStart,
     };
     // 줄 안 폭(줄 폭 − 좌우 여백, 앞 붙이개 · 꺾쇠 자리 포함)이 제목 글자 16개보다 좁은가 — em 은 글자 배율을 곱한 크기
-    final stackBelow =
-        kPListStackBelowEm *
-        MediaQuery.textScalerOf(context).scale(PTypography.t5.fontSize!);
+    final em = MediaQuery.textScalerOf(context).scale(PTypography.t5.fontSize!);
+    var stackBelow = kPListStackBelowEm * em;
+    // 줄 끝에 편집 칸([PListEditWidth])이 있으면 문턱은 px 다(글자 배율과 무관, 웹과 같은 식) — 앞 자리 + 칸 폭 × 2.
+    // List 는 공백 없는 긴 이름의 본문을 (줄 안 폭 − 앞 자리) ÷ 2 까지 줄이므로, 그 이름에서도 칸이 줄 안에 남으려면
+    // 줄 안 폭이 앞 자리 + 칸 × 2 이상이어야 한다. 이보다 좁으면 칸이 이름 아래 전폭으로 내려간다
+    final editWidth = _editWidthOf(widget.suffix);
+    if (editWidth != null) {
+      stackBelow =
+          listLead(
+            hasPrefix: widget.prefix != null,
+            hasExpandSlot: nest == PListNest.parent,
+          ) +
+          2 * editWidth;
+    }
     Widget row = Padding(
       padding: EdgeInsetsDirectional.only(
         start: start,
