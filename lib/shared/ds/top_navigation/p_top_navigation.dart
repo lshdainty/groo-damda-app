@@ -153,6 +153,8 @@ class PTopNavigation extends StatelessWidget {
                     header: true,
                     // 안드로이드는 headingLevel > 0 일 때만 머리말로 잡는다(제목 이동) — 화면 제목은 1단계
                     headingLevel: 1,
+                    // 화면이 바뀔 때 안드로이드가 화면 이름으로 읽는다(AppBar 를 걷은 화면)
+                    namesRoute: true,
                     child: Text(
                       title,
                       key: const ValueKey('top-navigation-title'),
@@ -195,6 +197,7 @@ class _SearchSlot extends StatelessWidget {
             container: true,
             header: true,
             headingLevel: 1,
+            namesRoute: true,
             label: heading,
             child: const SizedBox.expand(),
           ),
