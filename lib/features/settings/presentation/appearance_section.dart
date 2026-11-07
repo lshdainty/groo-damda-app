@@ -18,6 +18,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 표시 설정 화면 — 흰 화면 하나(I-14 4-C · 14-1). 머리 = ds 상단 바(← + 제목).
 class AppearanceScreen extends StatelessWidget {
@@ -394,7 +395,10 @@ class _ChoiceRow extends StatelessWidget {
       title: title,
       detail: detail,
       suffix: loading
-          ? SizedBox(width: 64, child: PSkeleton.text(PTypography.t5))
+          ? SizedBox(
+              width: 64,
+              child: loadingInline(PSkeleton.text(PTypography.t5)),
+            )
           : value == null
           ? null
           : Text(value!, textAlign: TextAlign.end),

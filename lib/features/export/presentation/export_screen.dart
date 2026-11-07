@@ -30,6 +30,7 @@ import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 typedef _TypeMeta = ({String name, String slug, IconData icon});
 typedef _FormatMeta = ({String value, String label, String ext, IconData icon});
@@ -626,7 +627,9 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                 : _counts.containsKey(t.slug)
                 ? Text(l.exportCount(_counts[t.slug]!))
                 : _countsLoading
-                ? PSkeleton.text(PTypography.t5, width: PSpacing.x10)
+                ? loadingInline(
+                    PSkeleton.text(PTypography.t5, width: PSpacing.x10),
+                  )
                 : null,
           ),
       ],

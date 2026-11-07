@@ -224,7 +224,7 @@ class _TagSettingsState extends State<TagSettings> {
           ? (widget.failed ? copy.title : '${copy.title} · ')
           : '${copy.title} · ${tags.length}',
       titleSuffix: tags == null && !widget.failed
-          ? PSkeleton.text(PTypography.t4, width: PSpacing.x4)
+          ? loadingInline(PSkeleton.text(PTypography.t4, width: PSpacing.x4))
           : null,
       variant: PListHeaderVariant.boldSolid,
       action: PTextButton(

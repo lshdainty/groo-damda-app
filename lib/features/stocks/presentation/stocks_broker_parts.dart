@@ -401,7 +401,7 @@ Widget stocksBuyingPowerRow(
   final Widget value;
   if (state.loading) {
     // 값 글(stocksMoneyStyle = t5) 줄 높이
-    value = PSkeleton.text(PTypography.t5, width: 96);
+    value = loadingInline(PSkeleton.text(PTypography.t5, width: 96));
   } else if (state.failed) {
     value = Text('—', style: stocksMoneyStyle(context));
   } else {

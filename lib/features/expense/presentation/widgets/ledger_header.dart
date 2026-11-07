@@ -492,7 +492,9 @@ class LedgerCalendar extends StatelessWidget {
         return parts.isEmpty ? date : l.expCellLabel(date, parts.join(', '));
       },
       markBuilder: (context, ds) {
-        if (loading) return PSkeleton.text(PTypography.t1, width: 32);
+        if (loading) {
+          return loadingInline(PSkeleton.text(PTypography.t1, width: 32));
+        }
         final data = byDay[ds];
         if (data == null) return const SizedBox(height: PSpacing.x3);
         // 칸 글이 좁아 안 들어가는 금액은 말줄임 없이 점 "•" 으로 바꾼다(결정 2026-11-07 2A) — 전액은 날을 누르면

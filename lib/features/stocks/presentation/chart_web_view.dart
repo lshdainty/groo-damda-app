@@ -29,6 +29,7 @@ import 'package:groo_damda_app/features/stocks/presentation/chart_bridge.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 증권 차트 WebView 높이 — 그래프 168 + 범례(O·H·L·C·VOL) 두 줄 44.
 /// 임베드 페이지(height 100%)가 범례 줄을 이 안에서 나눠 쓰므로, 범례가 두 줄이면 그래프는 168 이다.
@@ -285,8 +286,8 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
       );
     } else if (_controller == null || _loading) {
       // 스켈레톤 — feedback_skeleton_server_data_only.md 준수(shadow 만, border X)
-      body = const SizedBox.expand(
-        child: PSkeleton(radius: PSkeletonRadius.r12),
+      body = SizedBox.expand(
+        child: loadingInline(const PSkeleton(radius: PSkeletonRadius.r12)),
       );
     } else {
       body = WebViewWidget(

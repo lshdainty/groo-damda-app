@@ -32,3 +32,7 @@ Widget loadingRegionCircle() =>
 /// 더한다. 나머지 화면은 [loadingRegion](보조 기술 알림만, 화면 글은 B6 에서 정한다).
 Widget loadingRegionWithText(Widget skeleton) =>
     loadingRegion(skeleton, slowText: true);
+
+/// 값 조각(줄 끝 · 달력 칸 안 · 글 옆 숫자 자리) — 폭이 정해지지 않은 Row 에서도 선다. 0~1초 보이지 않고, 알림 · 5초 글은 없다.
+Widget loadingInline(Widget skeleton) =>
+    PLoadingRegion.inline(fallback: skeleton);

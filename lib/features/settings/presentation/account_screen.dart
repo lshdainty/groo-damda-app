@@ -34,6 +34,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 계정 화면 — 흰 화면 하나(I-14 1-B · 14-1).
 ///
@@ -190,7 +191,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     // 값은 서버 가격 — 불러오는 중이면 값 자리 Skeleton, 실패면 값 없이 설명만(I-14 34)
     final Widget? priceText = !subKnown
         ? (hasSecurities && subscriptionAsync.isLoading
-              ? SizedBox(width: 72, child: PSkeleton.text(PTypography.t4))
+              ? SizedBox(
+                  width: 72,
+                  child: loadingInline(PSkeleton.text(PTypography.t4)),
+                )
               : null)
         : isSubscribed && subscription?.price != null
         ? PListValue.amount(
@@ -570,7 +574,10 @@ class _GoogleRow extends ConsumerWidget {
         title: 'Google',
         detail: detail,
         detailChild: loading
-            ? SizedBox(width: 96, child: PSkeleton.text(PTypography.t3))
+            ? SizedBox(
+                width: 96,
+                child: loadingInline(PSkeleton.text(PTypography.t3)),
+              )
             : null,
         // 바탕이 보이는 버튼 — 상자 끝이 끝선 24 에 선다(오른쪽 블리드 없음). 위아래 겹침 · 누르는 영역 44 는 그대로.
         suffix: PListAction(

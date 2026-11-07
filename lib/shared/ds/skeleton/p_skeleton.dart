@@ -224,6 +224,10 @@ class _PLoadingAnnouncerState extends State<PLoadingAnnouncer> {
     }
   }
 
+  /// 5초 글을 화면에 보이는 영역인가 — 한 번의 기다림에서 맨 처음 알린 영역(화면 맨 위 영역)만. 나머지는 알림만 받는다.
+  bool ownsSlowText(Object region) =>
+      _phases.isEmpty || _phases.keys.first == region;
+
   /// 영역 하나의 기다림 — [context] 는 그 영역의 것(글 · 방향을 읽는다).
   void report(Object region, PWaitPhase phase, BuildContext context) {
     _phases[region] = phase;
@@ -304,7 +308,7 @@ class PLoadingRegion extends StatefulWidget {
     this.failure,
     this.showSlowText = true,
     required this.child,
-  });
+  }) : inline = false;
 
   /// 기다리는 동안 영역 가운데 Progress Circle(40) — 구조를 미리 그릴 수 없는 화면 · 시트 · 카드 전체.
   const PLoadingRegion.circle({
@@ -314,7 +318,8 @@ class PLoadingRegion extends StatefulWidget {
     this.failure,
     this.showSlowText = true,
     required this.child,
-  }) : fallback = null;
+  }) : fallback = null,
+       inline = false;
 
   final bool pending;
   final bool failed;
@@ -327,6 +332,18 @@ class PLoadingRegion extends StatefulWidget {
   /// 화면에 보이는 5초 글은 주요 화면(홈 · 가계부 · 자산 · 통계 · 예산 · 캘린더)만 켜고 나머지는 B6 에서 정한다.
   final bool showSlowText;
   final Widget child;
+
+  /// 값 조각용 — 줄 끝 · 칸 안 값 자리처럼 폭이 정해지지 않은 곳. 0 ~ 1초는 보이지 않게 그려 크기만 지키고 1초부터 보인다.
+  /// 5초 글 · 보조 기술 알림은 없다(알림은 앱 맨 위 하나와 같은 화면의 다른 영역이 맡는다). 내용으로 바뀌어도 서서히 나타나지 않는다.
+  const PLoadingRegion.inline({super.key, required Widget this.fallback})
+    : pending = true,
+      failed = false,
+      failure = null,
+      showSlowText = false,
+      child = const SizedBox.shrink(),
+      inline = true;
+
+  final bool inline;
 
   @override
   State<PLoadingRegion> createState() => _PLoadingRegionState();
@@ -417,6 +434,7 @@ class _PLoadingRegionState extends State<PLoadingRegion> {
   }
 
   void _report() {
+    if (widget.inline) return;
     if (_waiting) {
       _announcer?.report(this, _phase, context);
     } else {
@@ -433,10 +451,23 @@ class _PLoadingRegionState extends State<PLoadingRegion> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.inline) {
+      return Visibility(
+        visible: _phase != PWaitPhase.quiet,
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: widget.fallback!,
+      );
+    }
     final c = context.colors;
     final l10n = AppLocalizations.of(context);
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    final slow = _waiting && _phase == PWaitPhase.slow && widget.showSlowText;
+    final slow =
+        _waiting &&
+        _phase == PWaitPhase.slow &&
+        widget.showSlowText &&
+        (_announcer?.ownsSlowText(this) ?? true);
     final circle = widget.fallback == null;
     final slowText = Text(
       l10n.dsLoadingSlow,

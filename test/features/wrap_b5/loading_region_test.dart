@@ -129,4 +129,47 @@ void main() {
     expect(_liveLabels(tester), ['평소보다 오래 걸리고 있어요.']);
     h.dispose();
   });
+
+  testWidgets('5초 화면 글은 한 화면에 한 번 — 맨 위 영역만, 나머지는 알림만', (tester) async {
+    final h = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: [
+            for (var i = 0; i < 4; i++)
+              loadingRegionWithText(const PSkeleton(height: 20)),
+          ],
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 5, milliseconds: 100));
+    await tester.pump();
+    expect(findPlain('평소보다 오래 걸리고 있어요.'), findsOneWidget);
+    expect(_liveLabels(tester), ['평소보다 오래 걸리고 있어요.']);
+    h.dispose();
+  });
+
+  testWidgets('값 조각(inline) — 0~1초 보이지 않고 Row 안에서도 서며 글 · 알림이 없다', (
+    tester,
+  ) async {
+    final h = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        Row(
+          children: [
+            const Text('값'),
+            loadingInline(const PSkeleton(width: 40, height: 12)),
+          ],
+        ),
+      ),
+    );
+    expect(_skeletonVisible(tester), isFalse);
+    await tester.pump(const Duration(milliseconds: 1100));
+    expect(_skeletonVisible(tester), isTrue);
+    await tester.pump(const Duration(seconds: 5));
+    expect(findPlain('평소보다 오래 걸리고 있어요.'), findsNothing);
+    expect(_liveLabels(tester), isEmpty);
+    expect(tester.takeException(), isNull);
+    h.dispose();
+  });
 }
