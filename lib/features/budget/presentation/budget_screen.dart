@@ -30,6 +30,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 const double _warnThreshold = 85;
 
@@ -231,7 +232,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   overAllocated: overAllocated,
                   masked: headerMasked,
                 )
-              : const _TotalSkeleton(),
+              : loadingRegionWithText(const _TotalSkeleton()),
           ready
               ? _PaceSection(
                   pct: pct,
@@ -241,14 +242,14 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   onTrack: onTrack,
                   masked: paceMasked,
                 )
-              : const _PaceSkeleton(),
+              : loadingRegionWithText(const _PaceSkeleton()),
         ]),
       );
       bands.add(
         budgetBand([
           ready
               ? _StatusSection(overCount: overCount, healthyCount: healthyCount)
-              : const _StatusSkeleton(),
+              : loadingRegionWithText(const _StatusSkeleton()),
           ready
               ? _CategoryListSection(
                   budgets: categoryBudgets,
@@ -257,7 +258,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   masked: categoriesMasked,
                   onGoSettings: () => context.push('/budget/settings'),
                 )
-              : const _ListSkeleton(),
+              : loadingRegionWithText(const _ListSkeleton()),
         ]),
       );
       bands.add(budgetBand([compliance]));

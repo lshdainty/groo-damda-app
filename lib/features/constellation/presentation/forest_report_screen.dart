@@ -23,6 +23,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 관측 리포트(I-11 15 ~ 21) — 상단 바 + 흰 면 하나: 주 고르기 → 날 줄 → 날짜 줄 → 관측 결과 → 별빛 모으기 → 별빛 분석 →
 /// 못다 켠 별. 주 · 날을 고르면 그 아래 전부가 바뀐다 — 조절하는 줄은 첫 내용과 한 덩어리다(틈 표 T7).
@@ -127,7 +128,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
         todos == null ||
         !skyQ.hasValue ||
         !collectionQ.hasValue) {
-      content = const _ReportSkeleton();
+      content = loadingRegion(const _ReportSkeleton());
     } else {
       content = _Body(
         today: today,

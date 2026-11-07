@@ -18,6 +18,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 오늘 시세 한 줄의 값.
 typedef TodayRow = ({String label, String value, Color? color});
@@ -86,8 +87,10 @@ class StocksTodayBand extends StatelessWidget {
     } else if (loading && rows.isEmpty) {
       body = Semantics(
         label: l.stocksTodayQuote,
-        child: Column(
-          children: [for (var i = 0; i < 4; i++) const StocksLineSkeleton()],
+        child: loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 4; i++) const StocksLineSkeleton()],
+          ),
         ),
       );
     } else if (rows.isEmpty) {
@@ -163,8 +166,10 @@ class StocksInvestorBand extends StatelessWidget {
     } else if (loading && days == null) {
       body = Semantics(
         label: l.stocksInvestorTitle,
-        child: Column(
-          children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+        child: loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+          ),
         ),
       );
     } else if (days == null || days!.isEmpty) {

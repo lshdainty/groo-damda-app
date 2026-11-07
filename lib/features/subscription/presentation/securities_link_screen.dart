@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 증권사 연동 — 첫 단계: 증권사 줄 목록(결정 B, I-wrap-b1 β).
 ///
@@ -48,10 +49,10 @@ class SecuritiesLinkScreen extends ConsumerWidget {
         child: connectionsAsync.when(
           // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
           skipError: true,
-          loading: () => const _LoadingList(),
+          loading: () => loadingRegion(const _LoadingList()),
           error: (_, _) => connectionsAsync.isLoading
               // 다시 받는 중 — 오류를 들고 있어도 진행 표시(눌렀는데 아무 일도 없어 보이지 않게)
-              ? const _LoadingList()
+              ? loadingRegion(const _LoadingList())
               : PResultSection(
                   key: const ValueKey('securities-list-failed'),
                   kind: PResultKind.failure,

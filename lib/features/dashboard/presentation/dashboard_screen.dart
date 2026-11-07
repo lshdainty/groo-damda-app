@@ -45,6 +45,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 const _tabular = [FontFeature.tabularFigures()];
 const _mask = '••••';
@@ -762,7 +763,15 @@ class _MonthSection extends StatelessWidget {
       return _ListSection(
         header: head,
         children: [
-          for (var i = 0; i < 2; i++) const _SkeletonRow(_SkeletonKind.plain),
+          loadingRegionWithText(
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SkeletonRow(_SkeletonKind.plain),
+                _SkeletonRow(_SkeletonKind.plain),
+              ],
+            ),
+          ),
         ],
       );
     }
@@ -915,23 +924,25 @@ class _CategorySection extends StatelessWidget {
       // 첫 불러오기 — 도넛 지름 그대로 + 범례 줄 높이(44) 그대로
       return _TextSection(
         header: head,
-        body: Column(
-          children: [
-            const PSkeleton(
-              width: diameter,
-              height: diameter,
-              radius: PSkeletonRadius.full,
-            ),
-            const SizedBox(height: PSpacing.x4),
-            for (var i = 0; i < 4; i++)
-              SizedBox(
-                height: kChartDonutRowHeight,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: PSkeleton.text(PTypography.t4),
-                ),
+        body: loadingRegionWithText(
+          Column(
+            children: [
+              const PSkeleton(
+                width: diameter,
+                height: diameter,
+                radius: PSkeletonRadius.full,
               ),
-          ],
+              const SizedBox(height: PSpacing.x4),
+              for (var i = 0; i < 4; i++)
+                SizedBox(
+                  height: kChartDonutRowHeight,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: PSkeleton.text(PTypography.t4),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     }
@@ -1098,13 +1109,15 @@ class _BudgetSection extends StatelessWidget {
       }
       return _TextSection(
         header: head,
-        body: Column(
-          children: [
-            for (var i = 0; i < 3; i++) ...[
-              if (i > 0) const SizedBox(height: PSpacing.x5),
-              const _ProgressSkeleton(),
+        body: loadingRegionWithText(
+          Column(
+            children: [
+              for (var i = 0; i < 3; i++) ...[
+                if (i > 0) const SizedBox(height: PSpacing.x5),
+                const _ProgressSkeleton(),
+              ],
             ],
-          ],
+          ),
         ),
       );
     }
@@ -1259,9 +1272,16 @@ class _SchedulePlaceholder extends StatelessWidget {
   Widget build(BuildContext context) => _ListSection(
     // 틀은 먼저 — 머리와 "전체 보기" 는 실제와 같다
     header: _head(context, title, onAll: onAll),
-    children: const [
-      _SkeletonRow(_SkeletonKind.dot),
-      _SkeletonRow(_SkeletonKind.dot),
+    children: [
+      loadingRegionWithText(
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _SkeletonRow(_SkeletonKind.dot),
+            _SkeletonRow(_SkeletonKind.dot),
+          ],
+        ),
+      ),
     ],
   );
 }
@@ -1534,9 +1554,16 @@ class _TodaySection extends StatelessWidget {
       }
       return _ListSection(
         header: _head(context, l.dashTodaySpend, onAll: onAll),
-        children: const [
-          _SkeletonRow(_SkeletonKind.tx),
-          _SkeletonRow(_SkeletonKind.tx),
+        children: [
+          loadingRegionWithText(
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SkeletonRow(_SkeletonKind.tx),
+                _SkeletonRow(_SkeletonKind.tx),
+              ],
+            ),
+          ),
         ],
       );
     }

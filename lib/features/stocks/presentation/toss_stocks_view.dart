@@ -37,6 +37,7 @@ import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 증권 — 시세 · 보유 · 관심 · 호가 (토스증권 Open API 실연동).
 ///
@@ -261,7 +262,9 @@ class _TossStocksViewState extends ConsumerState<TossStocksView> {
           ),
         );
       } else if (watchAsync.isLoading && !watchAsync.hasValue) {
-        slivers.add(const SliverToBoxAdapter(child: StocksGroupSkeleton()));
+        slivers.add(
+          SliverToBoxAdapter(child: loadingRegion(const StocksGroupSkeleton())),
+        );
       } else if (groups.isEmpty) {
         slivers.add(
           SliverToBoxAdapter(
@@ -402,9 +405,16 @@ class _InvestBand extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: PSpacing.x1),
-                PSkeleton(width: 200, height: 32),
-                const SizedBox(height: PSpacing.x1),
-                PSkeleton(width: 160, height: 18),
+                loadingRegion(
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PSkeleton(width: 200, height: 32),
+                      SizedBox(height: PSpacing.x1),
+                      PSkeleton(width: 160, height: 18),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -582,7 +592,9 @@ class _MarketBand extends ConsumerWidget {
           PList(
             children: [
               if (pricesAsync.isLoading && !pricesAsync.hasValue)
-                for (var i = 0; i < 2; i++) const _IndexSkeleton(),
+                loadingRegion(
+                  const Column(children: [_IndexSkeleton(), _IndexSkeleton()]),
+                ),
               for (final i in indices) _IndexLine(index: i),
               if (fxRaw != null && fxRaw > 0)
                 PListItem(
@@ -880,8 +892,10 @@ class _HoldingsList extends StatelessWidget {
     if (async.isLoading && !async.hasValue) {
       return Semantics(
         label: l.stocksRankingLoading,
-        child: Column(
-          children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+        child: loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+          ),
         ),
       );
     }
@@ -1005,8 +1019,10 @@ class _DiscoverPanelState extends ConsumerState<_DiscoverPanel> {
     } else if (rankingsAsync.isLoading && !rankingsAsync.hasValue) {
       body = Semantics(
         label: l.stocksRankingLoading,
-        child: Column(
-          children: [for (var i = 0; i < 10; i++) const StocksLineSkeleton()],
+        child: loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 10; i++) const StocksLineSkeleton()],
+          ),
         ),
       );
     } else if (rankings.isEmpty) {
@@ -1598,8 +1614,10 @@ class _DailyBand extends ConsumerWidget {
     } else if (candlesAsync.isLoading && !candlesAsync.hasValue) {
       list = Semantics(
         label: l.stocksDailyPricesLoading,
-        child: Column(
-          children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+        child: loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+          ),
         ),
       );
     } else if (rows.isEmpty) {
@@ -1753,11 +1771,13 @@ class TossPortfolioPage extends ConsumerWidget {
     } else if (holdingsAsync.isLoading && !holdingsAsync.hasValue) {
       content = Padding(
         padding: const EdgeInsets.all(PSpacing.x6),
-        child: Center(
-          child: PSkeleton(
-            width: 112,
-            height: 112,
-            radius: PSkeletonRadius.full,
+        child: loadingRegion(
+          const Center(
+            child: PSkeleton(
+              width: 112,
+              height: 112,
+              radius: PSkeletonRadius.full,
+            ),
           ),
         ),
       );
@@ -2400,10 +2420,12 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
       if (orderbookAsync.isLoading && !orderbookAsync.hasValue) {
         content = Semantics(
           label: l.stocksOrderbookLoading,
-          child: _OrderBookSkeleton(
-            currency: widget.currency,
-            lastPrice: widget.lastPrice,
-            changePct: widget.changePct,
+          child: loadingRegion(
+            _OrderBookSkeleton(
+              currency: widget.currency,
+              lastPrice: widget.lastPrice,
+              changePct: widget.changePct,
+            ),
           ),
         );
       } else if (hasBook) {
@@ -2443,7 +2465,7 @@ class _StocksQuotesCardState extends ConsumerState<StocksQuotesCard> {
       if (tradesAsync.isLoading && !tradesAsync.hasValue) {
         content = Semantics(
           label: l.stocksTradesLoading,
-          child: const _TradeTapeSkeleton(),
+          child: loadingRegion(const _TradeTapeSkeleton()),
         );
       } else if (tradesAsync.hasError && !tradesAsync.hasValue) {
         content = StocksFailure(

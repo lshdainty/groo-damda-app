@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/overflow_center/p_overflow_center.dart'
 import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 가계부 원장 머리 — 달 이동 · 합계 · 인사이트 · 소비 요약 · 주 달력(I-07 7 · 8 · 11).
 ///
@@ -297,11 +298,18 @@ class LedgerTotalRow extends StatelessWidget {
           final figures = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (loading) ...[
-                PSkeleton.text(PTypography.t9, width: 160),
-                const SizedBox(height: PSpacing.x1_5),
-                PSkeleton.text(PTypography.t4, width: 200),
-              ] else if (!failed) ...[
+              if (loading)
+                loadingRegionWithText(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PSkeleton.text(PTypography.t9, width: 160),
+                      const SizedBox(height: PSpacing.x1_5),
+                      PSkeleton.text(PTypography.t4, width: 200),
+                    ],
+                  ),
+                )
+              else if (!failed) ...[
                 Text(
                   // 금액은 쉼표 뒤에서만 줄을 바꾼다 — 큰 글자에서 숫자 가운데가 끊기지 않게
                   keepAllAmount(total ?? ''),

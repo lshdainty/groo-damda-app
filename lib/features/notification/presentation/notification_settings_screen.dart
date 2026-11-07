@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 알림 "설정" 화면(I-15 48 ~ 54) — 흰 면 하나: 푸시 알림 스위치 줄 → "알림 종류" + 스위치 줄 일곱 → "예산 알림 기준" +
 /// Slider → "방해 금지 시간" → "소리 · 진동" → "이메일 알림". 묶음 제목은 목록 제목(boldSolid), 줄은 ds List.
@@ -57,7 +58,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
       body: prefsAsync.when(
         // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
         skipError: true,
-        loading: () => const _PrefsSkeleton(),
+        loading: () => loadingRegion(const _PrefsSkeleton()),
         error: (e, _) => ListView(
           children: [
             PResultSection(
@@ -658,9 +659,7 @@ class _PrefsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.colors;
-    return ListView(
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
+    return Column(
       children: [
         PList(children: [_row(LucideIcons.bell, l.notiPush)]),
         PListHeader(

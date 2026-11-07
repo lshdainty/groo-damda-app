@@ -30,6 +30,7 @@ import 'package:groo_damda_app/shared/ds/logo_tile/p_logo_tile.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 이체 상세(I-21 21-1 · C) — 거래 상세와 한 벌이다. 머리 "이체 상세" · 닫기 → 회색 타일 48 + "이체" → 금액 → 날짜 → 보내는 · 받는
 /// 계좌 줄(Logo Tile 40) → 값 줄(수수료 · 출금 합계 · 이자 · 원금 · 메모) → "더 하기" 반복 설정 → 바닥 [삭제][수정].
@@ -303,7 +304,7 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
     final assetsAsync = ref.watch(assetsProvider);
     final loading = assetsAsync.isLoading && !assetsAsync.hasValue;
     if (loading) {
-      return const TxDetailSkeleton();
+      return loadingRegion(const TxDetailSkeleton());
     }
     final assets = assetsAsync.value ?? const <Asset>[];
     final from = assets.byRowId(tr.fromAssetRowId);

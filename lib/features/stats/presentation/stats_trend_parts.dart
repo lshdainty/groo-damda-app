@@ -12,6 +12,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 // 통계 · 추이 탭 구역(I-08 36) — 수입 · 지출 추이(ds 선 이중 축 + 지표 타일) · 저축률(고리 게이지는 화면 그림) · 월별 순저축(ds 막대, 음수 포함) ·
 // 주요 카테고리 월별 추이(ds 쌓은 막대). 차트마다 이름 + 표로 보기(42).
@@ -59,7 +60,9 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
     if (data == null) {
       return statsSection(
         header: head,
-        children: const [StatsChartSkeleton(height: 200)],
+        children: [
+          loadingRegionWithText(const StatsChartSkeleton(height: 200)),
+        ],
       );
     }
     if (data.isEmpty || data.every((p) => p.income == 0 && p.expense == 0)) {
@@ -484,7 +487,9 @@ class StatsSavingsBarsSection extends StatelessWidget {
     if (data == null) {
       return statsSection(
         header: head,
-        children: const [StatsChartSkeleton(height: 180)],
+        children: [
+          loadingRegionWithText(const StatsChartSkeleton(height: 180)),
+        ],
       );
     }
     if (data.isEmpty) {
@@ -567,7 +572,9 @@ class StatsCatTrendSection extends StatelessWidget {
     if (s == null) {
       return statsSection(
         header: head,
-        children: const [StatsChartSkeleton(height: 180)],
+        children: [
+          loadingRegionWithText(const StatsChartSkeleton(height: 180)),
+        ],
       );
     }
     final top =

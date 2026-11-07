@@ -33,6 +33,7 @@ import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 총 예산 제안 · 카테고리 예산 제안(웹 `MonthlyBudgetDialog` · `PRESETS` 와 같은 값) — 갈래마다 따로다.
 const kBudgetTotalPresets = [1500000, 2000000, 2500000, 3000000];
@@ -536,27 +537,29 @@ class _CategoryPickSheet extends ConsumerWidget {
         ),
       );
     } else if (!async.hasValue) {
-      body = Column(
-        children: [
-          for (var i = 0; i < 4; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpacing.globalGutter,
-                vertical: PSpacing.x3,
+      body = loadingRegion(
+        Column(
+          children: [
+            for (var i = 0; i < 4; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: PSpacing.globalGutter,
+                  vertical: PSpacing.x3,
+                ),
+                child: Row(
+                  spacing: PSpacing.x3,
+                  children: [
+                    const PSkeleton(
+                      width: PListTile.size,
+                      height: PListTile.size,
+                      radius: PSkeletonRadius.r12,
+                    ),
+                    PSkeleton.text(PTypography.t5, width: 140),
+                  ],
+                ),
               ),
-              child: Row(
-                spacing: PSpacing.x3,
-                children: [
-                  const PSkeleton(
-                    width: PListTile.size,
-                    height: PListTile.size,
-                    radius: PSkeletonRadius.r12,
-                  ),
-                  PSkeleton.text(PTypography.t5, width: 140),
-                ],
-              ),
-            ),
-        ],
+          ],
+        ),
       );
     } else {
       // 웹 기준 통일: 예산 가능 카테고리 = EXPENSE 최상위(부모)만. 자식 지출은 부모로 roll-up 집계된다.

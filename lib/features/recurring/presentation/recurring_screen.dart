@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 const _tabular = [FontFeature.tabularFigures()];
 
@@ -96,7 +97,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
               } catch (_) {}
             },
             child: loading
-                ? const _RecurringSkeleton()
+                ? loadingRegion(const _RecurringSkeleton())
                 : failed
                 ? _failure(l)
                 : items.isEmpty
@@ -299,8 +300,7 @@ class _RecurringSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
+    return Column(
       children: [
         _head(),
         for (var i = 0; i < 3; i++) _row(),

@@ -42,6 +42,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 거래 상세(I-21 21-1 · B · A) — 읽는 상세 + "더 하기" 동작 줄. 같은 시트 안에서 상세 ↔ 환불 단계가 바뀐다(2-2A).
 ///
@@ -662,7 +663,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     if (loading) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: const [TxDetailSkeleton()],
+        children: [loadingRegion(const TxDetailSkeleton())],
       );
     }
 
@@ -834,7 +835,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
             onRetry: () => ref.invalidate(expenseSplitsProvider(e.rowId)),
           )
         else if (splitsAsync.isLoading && splits.isEmpty)
-          const TxSplitSkeleton()
+          loadingRegion(const TxSplitSkeleton())
         else if (splits.isNotEmpty)
           TxSplitSection(
             splits: splits,

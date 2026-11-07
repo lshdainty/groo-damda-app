@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 금액 가리기 화면 — 계정 > 보안 > 금액 가리기(I-14 5-B · 14-3). 흰 화면 하나, 스크롤 하나.
 ///
@@ -222,7 +223,7 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                       ),
                     ),
                     if (!loaded)
-                      const _CheckSkeleton(count: 3)
+                      loadingRegion(const _CheckSkeleton(count: 3))
                     else
                       _CheckGroup(
                         label: l.hideAmountsKindLabel,
@@ -282,7 +283,7 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                       ),
                     ),
                     if (!loaded)
-                      const _CheckSkeleton(count: 6)
+                      loadingRegion(const _CheckSkeleton(count: 6))
                     else if (_tab == null)
                       // 전체 — 화면 이름마다 목록 제목 + 그 화면의 체크 줄(첫 묶음 위 4 · 다음 묶음 위 12)
                       for (final (i, page) in _tabs.skip(1).indexed) ...[

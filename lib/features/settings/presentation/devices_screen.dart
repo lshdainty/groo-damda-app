@@ -23,6 +23,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// "로그인된 기기" — 계정 > 보안에서 들어온다. 흰 화면 하나(I-12 3-A).
 ///
@@ -158,7 +159,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
             listAsync.when(
               // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
               skipError: true,
-              loading: () => const _DevicesSkeleton(),
+              loading: () => loadingRegion(const _DevicesSkeleton()),
               error: (e, _) => PResultSection(
                 kind: PResultKind.failure,
                 size: PResultSize.medium,

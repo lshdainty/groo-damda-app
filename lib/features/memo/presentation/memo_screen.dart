@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 메모 폰 화면(I-15 5 ~ 12) — 흰 면 하나: 상단 바(← "메모") → 밑줄형 검색칸 → 태그 칩 줄(가로로 밀림) → "고정 · N" + 줄 →
 /// "모든 메모 · N" + 줄 → 떠 있는 [+](메모 추가). 띠 · 카드 · 줄 사이 선이 없고 흰 면이 화면 아래 끝까지 닿는다.
@@ -108,8 +109,10 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
         ),
       );
     } else if (loading) {
-      body = Column(
-        children: [for (var i = 0; i < 4; i++) const _MemoRowSkeleton()],
+      body = loadingRegion(
+        Column(
+          children: [for (var i = 0; i < 4; i++) const _MemoRowSkeleton()],
+        ),
       );
     } else if (filtered.isEmpty) {
       // 메모 0 — 버튼 없음(떠 있는 + 가 맡는다)

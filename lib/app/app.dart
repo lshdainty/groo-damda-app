@@ -19,6 +19,7 @@ import 'package:groo_damda_app/core/auth/oauth_link_listener.dart';
 import 'package:groo_damda_app/app/router.dart';
 import 'package:groo_damda_app/app/session_scope.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 /// 화면 밖(네트워크 인터셉터 등)에서 토스트를 띄우기 위한 전역 키.
@@ -210,10 +211,13 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
     // 투명 Material — 호스트가 Navigator 바깥이라 Material 조상이 없으면 띠 글에 노란 이중 밑줄(기본 글 스타일 없음)이 간다.
     child: Material(
       type: MaterialType.transparency,
-      child: PSnackbarHost(
-        key: PSnackbar.appHostKey,
-        closeLabel: AppLocalizations.of(context).actionClose,
-        child: child ?? const SizedBox.shrink(),
+      // 불러오는 중 상태 글 — 앱 맨 위에 한 번. 화면의 loadingRegion 들이 여기에 알린다
+      child: PLoadingAnnouncer(
+        child: PSnackbarHost(
+          key: PSnackbar.appHostKey,
+          closeLabel: AppLocalizations.of(context).actionClose,
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
     ),
   );

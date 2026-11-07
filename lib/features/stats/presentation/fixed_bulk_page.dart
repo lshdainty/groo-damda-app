@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 거래를 고정으로 정리하는 페이지(I-08 Q5-A) — 기간 안 거래 묶음이 처음부터 길어 시트가 아니라 페이지다.
 /// 위 상단 바(← + 제목), 가운데 스크롤(설명 · 종류 · 방향 · 묶음 줄), 아래 바닥 [N건 적용] 하나. 앞 화면은 그대로 아래에 남는다.
@@ -119,18 +120,20 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
         ),
       );
     } else if (expenses == null) {
-      body = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
-        child: Column(
-          spacing: PSpacing.x2,
-          children: [
-            for (var i = 0; i < 4; i++)
-              const PSkeleton(
-                width: double.infinity,
-                height: 52,
-                radius: PSkeletonRadius.r12,
-              ),
-          ],
+      body = loadingRegion(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
+          child: Column(
+            spacing: PSpacing.x2,
+            children: [
+              for (var i = 0; i < 4; i++)
+                const PSkeleton(
+                  width: double.infinity,
+                  height: 52,
+                  radius: PSkeletonRadius.r12,
+                ),
+            ],
+          ),
         ),
       );
     } else if (groups.isEmpty) {

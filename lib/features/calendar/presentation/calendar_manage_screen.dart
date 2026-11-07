@@ -31,6 +31,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 캘린더 관리 — 캘린더 하나 = 페이지(I-09b 22 · 3-B). `/settings/calendar-share/:calendarId`.
 ///
@@ -163,7 +164,7 @@ class _CalendarManageScreenState extends ConsumerState<CalendarManageScreen> {
                   onRetry: () => ref.invalidate(userCalendarListProvider),
                 )
               else if (calendars == null)
-                const _ManageSkeleton(),
+                loadingRegion(const _ManageSkeleton()),
             ],
           ),
         ),
@@ -468,8 +469,9 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
         ),
         membersAsync.when(
           skipError: true,
-          loading: () =>
-              const Column(children: [_MemberSkeleton(), _MemberSkeleton()]),
+          loading: () => loadingRegion(
+            const Column(children: [_MemberSkeleton(), _MemberSkeleton()]),
+          ),
           error: (e, _) => CalendarSurfaceFailure(
             title: l.calMemberLoadFailed,
             retrying: membersAsync.isLoading,

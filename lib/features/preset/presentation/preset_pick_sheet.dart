@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/search_match.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 내역 추가 시트의 "프리셋 고르기"(I-20 C 20) — 칩 줄 끝 "모두 보기" 를 누르면 뜬다. 밑줄 검색칸(이름 · 기본 내역에서 찾는다) +
 /// 지금 종류의 프리셋 모두(사용 많은 순). 줄은 프리셋 관리 목록과 같은 부품([PresetListRow])이다. 고르면 그 프리셋이 돌아온다 —
@@ -85,37 +86,39 @@ class _PresetPickBodyState extends ConsumerState<PresetPickBody> {
           ),
         );
       }
-      return Column(
-        children: [
-          for (var i = 0; i < 4; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpacing.globalGutter,
-                vertical: PSpacing.x3,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: PSpacing.x3,
-                children: [
-                  const PSkeleton(
-                    width: PListTile.size,
-                    height: PListTile.size,
-                    radius: PSkeletonRadius.r12,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: PSpacing.x1,
-                      children: [
-                        PSkeleton.text(PTypography.t5, width: 140),
-                        PSkeleton.text(PTypography.t3, width: 100),
-                      ],
+      return loadingRegion(
+        Column(
+          children: [
+            for (var i = 0; i < 4; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: PSpacing.globalGutter,
+                  vertical: PSpacing.x3,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: PSpacing.x3,
+                  children: [
+                    const PSkeleton(
+                      width: PListTile.size,
+                      height: PListTile.size,
+                      radius: PSkeletonRadius.r12,
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: PSpacing.x1,
+                        children: [
+                          PSkeleton.text(PTypography.t5, width: 140),
+                          PSkeleton.text(PTypography.t3, width: 100),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       );
     }
     final categories = catsAsync.requireValue;

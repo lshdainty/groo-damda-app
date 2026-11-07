@@ -31,6 +31,7 @@ import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 const _kindValues = ['EXPENSE', 'INCOME'];
 
@@ -320,7 +321,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         ],
       );
     } else {
-      body = const _CategorySkeleton();
+      body = loadingRegion(const _CategorySkeleton());
     }
 
     return Scaffold(
@@ -641,9 +642,7 @@ class _CategorySkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     // 부모 타일은 52(앞 4 + 꺾쇠 44 + 4), 하위 타일은 104 에서 선다
     const rows = <bool>[true, false, false, true, true, true];
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
+    return Column(
       children: [
         for (final parent in rows)
           Padding(

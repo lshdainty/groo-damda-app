@@ -34,6 +34,7 @@ import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dar
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/scroll/scroll_to_keyed.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 가계부 화면 — 백엔드 `/expenses` 직접 호출.
 class ExpenseScreen extends ConsumerStatefulWidget {
@@ -620,10 +621,17 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
           ),
         );
       } else if (loading) {
-        listChildren.addAll(const [
-          LedgerDaySkeleton(rows: 3, first: true),
-          LedgerDaySkeleton(rows: 2),
-        ]);
+        listChildren.add(
+          loadingRegionWithText(
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LedgerDaySkeleton(rows: 3, first: true),
+                LedgerDaySkeleton(rows: 2),
+              ],
+            ),
+          ),
+        );
       } else if (groupKeys.isEmpty) {
         // 걸러서 0건(필터 · 자산이 걸림) ↔ 이 달 0건 — 갈래가 다르다. 버튼은 두지 않는다(추가는 탭 바 + 가 맡는다).
         listChildren.add(

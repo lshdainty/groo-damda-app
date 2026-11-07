@@ -302,6 +302,7 @@ class PLoadingRegion extends StatefulWidget {
     this.failed = false,
     required Widget this.fallback,
     this.failure,
+    this.showSlowText = true,
     required this.child,
   });
 
@@ -311,6 +312,7 @@ class PLoadingRegion extends StatefulWidget {
     required this.pending,
     this.failed = false,
     this.failure,
+    this.showSlowText = true,
     required this.child,
   }) : fallback = null;
 
@@ -320,6 +322,10 @@ class PLoadingRegion extends StatefulWidget {
   /// null 이면 원(circle).
   final Widget? fallback;
   final Widget? failure;
+
+  /// 5초에 오래 걸림 글을 화면에 더하는가. false 여도 보조 기술 알림([PLoadingAnnouncer])은 그대로 읽는다 —
+  /// 화면에 보이는 5초 글은 주요 화면(홈 · 가계부 · 자산 · 통계 · 예산 · 캘린더)만 켜고 나머지는 B6 에서 정한다.
+  final bool showSlowText;
   final Widget child;
 
   @override
@@ -430,7 +436,7 @@ class _PLoadingRegionState extends State<PLoadingRegion> {
     final c = context.colors;
     final l10n = AppLocalizations.of(context);
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    final slow = _waiting && _phase == PWaitPhase.slow;
+    final slow = _waiting && _phase == PWaitPhase.slow && widget.showSlowText;
     final circle = widget.fallback == null;
     final slowText = Text(
       l10n.dsLoadingSlow,

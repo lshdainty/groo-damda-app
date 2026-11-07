@@ -9,6 +9,7 @@ import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 계좌 · 카드 고르기 시트의 본문 — 거래 시트 · 프리셋 · 반복 폼이 함께 쓴다.
 ///
@@ -42,7 +43,7 @@ class AssetPickGate extends ConsumerWidget {
         ),
       );
     }
-    if (!async.hasValue) return const _AssetPickSkeleton();
+    if (!async.hasValue) return loadingRegion(const _AssetPickSkeleton());
     return builder(context, async.requireValue);
   }
 }

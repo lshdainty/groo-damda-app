@@ -33,6 +33,7 @@ import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 예산 설정 화면 — 웹 `BudgetManager.tsx`(설정 > 예산 설정) 미러.
 ///
@@ -245,7 +246,10 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
         ),
       );
     } else if (budgets == null || summary == null) {
-      children.addAll(const [_TotalSkeleton(), _ListSkeleton()]);
+      children.addAll([
+        loadingRegion(const _TotalSkeleton()),
+        loadingRegion(const _ListSkeleton()),
+      ]);
     } else {
       final categories = categoriesAsync.value ?? const <ExpenseCategory>[];
       final spentByCategory = _spentByCategoryFromSummary(summary);
