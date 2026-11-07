@@ -19,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 새 버전이 나왔을 때 앞을 막고 알리는 화면.
 ///
@@ -173,7 +174,7 @@ class _Header extends StatelessWidget {
               Semantics(
                 header: true,
                 headingLevel: 1,
-                child: Text(
+                child: PText(
                   l.updateGateTitle(release.version),
                   style: PTypography.t6.copyWith(
                     color: c.fgNeutral,
@@ -183,7 +184,7 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(height: PSpacing.x1),
               // R9 메타
-              Text(
+              PText(
                 l.updateCurrentBuild(currentBuild.toString()),
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),
@@ -210,7 +211,7 @@ class _Changes extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // R4 구역 제목
-        Text(
+        PText(
           l.updateSheetChanges,
           style: PTypography.t5.copyWith(
             color: c.fgNeutral,

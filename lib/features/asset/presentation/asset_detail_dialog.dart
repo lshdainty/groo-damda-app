@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsk;
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
@@ -715,7 +716,7 @@ class _HoldingsSection extends ConsumerWidget {
               vertical: PSpacing.x6,
             ),
             child: Center(
-              child: Text(
+              child: PText(
                 l.assetHoldingsEmptyDetail,
                 style: PTypography.t4.copyWith(
                   color: context.colors.fgNeutralSubtle,
@@ -1454,7 +1455,7 @@ class _BalanceTrendChart extends StatelessWidget {
       return SizedBox(
         height: height,
         child: Center(
-          child: Text(
+          child: PText(
             l.assetChartNoData,
             style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
           ),
@@ -1701,27 +1702,21 @@ class _DayGroupHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = DateTime.tryParse(dayKey);
-    final label = d == null ? null : formatDay(d);
+    final label = d == null ? dayKey : monthDayDow(d);
     // 환불·예정은 빼고 **카드 이월은 넣는다** — 이 화면은 "이 카드로 쓴 것" 을 보여 주는
     // 자리라, 목록에 있는 이월 거래가 그날 합계에서만 빠지면 숫자가 안 맞는다(D4).
     final dayExpense = cardExpenseSum(items);
     final dayIncome = cardIncomeSum(items);
     return Row(
       children: [
+        // 날짜 규칙 — "11월 6일 (금)" 한 글(DESIGN.md 날짜 · 요일)
         Text(
-          label?.md ?? dayKey,
+          label,
           style: PTypo.bodySm.copyWith(
             color: tokens.fgPrimary,
             fontWeight: PFontWeight.bold,
           ),
         ),
-        if (label != null) ...[
-          const SizedBox(width: PSpacing.x2),
-          Text(
-            label.dow,
-            style: PTypo.bodySm.copyWith(color: tokens.fgTertiary),
-          ),
-        ],
         const Spacer(),
         if (dayExpense > 0)
           Text(
@@ -2324,6 +2319,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
             activeIdx: activeIdx,
             masked: widget.masked,
             onPick: (i) => PBottomSheet.of(sheetContext).close(i),
+            onReselect: () => PBottomSheet.of(sheetContext).close(),
           ),
         );
       },
@@ -2539,7 +2535,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         if (st == null)
           Padding(
             padding: const EdgeInsets.fromLTRB(gutter, PSpacing.x3, gutter, 0),
-            child: Text(
+            child: PText(
               l.assetDueThisMonth,
               style: PTypography.t3.copyWith(
                 color: c.fgNeutralSubtle,
@@ -2713,7 +2709,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
             title: l.assetLimitUsage,
             variant: PListHeaderVariant.boldSolid,
             topInset: PSpacing.x4,
-            trailing: Text(
+            trailing: PText(
               l.assetLimitPctUsed(limitPct),
               style: PTypography.t4.copyWith(
                 color: c.fgNeutral,
@@ -2895,7 +2891,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
         child: Center(
-          child: Text(
+          child: PText(
             l.assetNoUsage,
             style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
           ),
@@ -3126,11 +3122,15 @@ class _PeriodPickBody extends StatefulWidget {
     required this.activeIdx,
     required this.masked,
     required this.onPick,
+    required this.onReselect,
   });
   final Map<String, List<(int, _CardStatement)>> byYear;
   final int activeIdx;
   final bool masked;
   final ValueChanged<int> onPick;
+
+  /// 이미 고른 회차를 다시 눌렀다 — 시트만 닫는다(고름은 그대로).
+  final VoidCallback onReselect;
 
   @override
   State<_PeriodPickBody> createState() => _PeriodPickBodyState();
@@ -3161,6 +3161,7 @@ class _PeriodPickBodyState extends State<_PeriodPickBody> {
             semanticLabel: l.assetYearLabel(entry.key),
             value: widget.activeIdx,
             onChanged: widget.onPick,
+            onReselect: widget.onReselect,
             children: [
               PListHeader(title: l.assetYearLabel(entry.key)),
               for (final (i, s) in entry.value)

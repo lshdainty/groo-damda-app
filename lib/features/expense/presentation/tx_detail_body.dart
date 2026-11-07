@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dar
 import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row.dart';
 import 'package:groo_damda_app/features/expense_split/domain/expense_split.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
@@ -639,7 +640,7 @@ class TxHistorySection extends StatelessWidget {
               PSpacing.globalGutter,
               PSpacing.x3,
             ),
-            child: Text(
+            child: PText(
               l.expRecentOnly,
               style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
             ),

@@ -18,6 +18,7 @@ import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 
 // 통계 · 비교 탭 구역(I-08 37) — 요약(큰 숫자 + 증감 + 견줌 막대) · 지표 셋 · 카테고리별 증감 · 요일별 지출 비교(ds 막대 두 계열).
@@ -219,7 +220,7 @@ class StatsCompareSummarySection extends StatelessWidget {
         ),
         const SizedBox(height: PSpacing.x3),
         if (hasPrev && diff == 0)
-          Text(l.statsCompareSame, style: base)
+          PText(l.statsCompareSame, style: base)
         else if (hasPrev)
           // 강조는 금액만 700 — 좋은지 나쁜지는 글이 말한다
           Text.rich(

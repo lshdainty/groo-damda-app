@@ -24,6 +24,7 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/features/notification/data/user_preferences_repository.dart';
 import 'package:groo_damda_app/features/settings/presentation/appearance_section.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import '../../support/plain_text.dart';
 
@@ -154,6 +155,35 @@ void main() {
 
     expect(repo.patches, isEmpty);
   });
+
+  // I-wrap-b3 가.6 — 하나 고르기 시트에서 이미 고른 줄을 다시 눌러도 시트가 닫힌다(값은 그대로 · 저장 요청 없음)
+  for (final (row, option) in const [
+    ('테마', '시스템'),
+    ('언어', '시스템'),
+    ('기준 지역', '대한민국 (서울)'),
+    ('기본 통화', '대한민국 원'),
+  ]) {
+    testWidgets('$row — 고른 "$option" 을 다시 누르면 시트가 닫히고 아무것도 안 보낸다', (
+      tester,
+    ) async {
+      final repo = await _pump(tester);
+
+      await tester.tap(findText(row).first);
+      await tester.pumpAndSettle();
+      expect(find.byType(PBottomSheetContent), findsOneWidget);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(PBottomSheetContent),
+          matching: findText(option),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PBottomSheetContent), findsNothing, reason: '시트가 닫혔다');
+      expect(repo.patches, isEmpty);
+    });
+  }
 
   testWidgets('아직 못 읽었으면 원화로 그리지 않고 줄을 막는다', (tester) async {
     final repo = await _pump(tester, hang: true);

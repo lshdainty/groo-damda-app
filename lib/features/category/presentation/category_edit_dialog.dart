@@ -13,6 +13,7 @@ import 'package:groo_damda_app/features/expense/application/expense_providers.da
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
@@ -451,7 +452,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                     horizontal: PSpacing.globalGutter,
                     vertical: PSpacing.x3,
                   ),
-                  child: Text(
+                  child: PText(
                     l.categoryParentMoveHint,
                     style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
                   ),

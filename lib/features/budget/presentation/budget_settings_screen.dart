@@ -29,6 +29,7 @@ import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart'
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
@@ -621,7 +622,7 @@ class _TotalSection extends StatelessWidget {
         if (has)
           BudgetBigAmount(amount: won(monthlyLimit))
         else
-          Text(
+          PText(
             l.budgetNotSet,
             style: PTypography.t5.copyWith(color: c.fgNeutralSubtle),
           ),

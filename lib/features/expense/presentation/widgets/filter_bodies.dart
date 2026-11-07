@@ -18,6 +18,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/input_button/p_input_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 필터 조건 본문 부품 여섯(I-07 E) — **조건마다 하나**. 폰 시트(이 PR)가 차례로 쌓고, 07-2 가 팝오버 · 시트에 나눠 담는다.
 ///
@@ -80,7 +81,7 @@ class FilterMatchBody extends StatelessWidget {
       withHeader: withHeader,
       children: [
         _pad(
-          Text(
+          PText(
             l.expFilterPeriodAlwaysAnd,
             style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
           ),
@@ -107,7 +108,7 @@ class FilterMatchBody extends StatelessWidget {
           _pad(
             Padding(
               padding: const EdgeInsets.only(top: PSpacing.x1_5),
-              child: Text(
+              child: PText(
                 l.expFilterMatchHint,
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),
@@ -281,7 +282,7 @@ class FilterPeriodBody extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Text(
+                    child: PText(
                       l.expDateRangeError,
                       style: PTypography.t4.copyWith(color: c.fgCritical),
                     ),

@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/constellation/presentation/constellation
 import 'package:groo_damda_app/features/constellation/presentation/sky_colors.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 
 /// 나의 밤하늘 — 최근 2주 관측 격자(I-11 10). 머리 + "누적 n개" · 설명 · 7열 칸(최대 폭 448 · 가로 6 · 세로 8).
 ///
@@ -62,7 +63,7 @@ class MySkyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: PSpacing.x2),
-            Text(
+            PText(
               l.constMySkyTotal(today.totalCollected),
               style: PTypography.t4.copyWith(
                 color: c.fgNeutralSubtle,

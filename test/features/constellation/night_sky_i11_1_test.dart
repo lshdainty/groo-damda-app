@@ -462,15 +462,28 @@ void main() {
           Tristate.isFalse,
         );
       }
-      // 날짜 줄 "26.10.02 목" 꼴 — 두 자리 달 · 날
+      // 날짜 줄 "10월 2일 (금)" 꼴 — 날짜 규칙: 앞 0 없음 · 요일은 괄호(올해가 아니면 연도 앞)
       final dateRow = find.byWidgetPredicate(
         (w) =>
             w is Text &&
-            RegExp(r'^\d{2}\.\d{2}\.\d{2} .$').hasMatch(w.data ?? ''),
+            RegExp(
+              r'^(\d{4}년 )?\d{1,2}월 \d{1,2}일 \(.\)$',
+            ).hasMatch(plainOf(w.data ?? '')),
       );
       expect(dateRow, findsOneWidget);
       expect(findText('관측 결과'), findsOneWidget);
       expect(findText('관측 결과 :'), findsNothing);
+      // 기간 줄 — 날짜 규칙 "11월 2일 ~ 11월 8일"(0 채움 · 점 표기 없음)
+      expect(
+        find.byWidgetPredicate(
+          (w) =>
+              w is Text &&
+              RegExp(
+                r'^\d{1,2}월 \d{1,2}일 ~ \d{1,2}월 \d{1,2}일$',
+              ).hasMatch(plainOf(w.data ?? '')),
+        ),
+        findsOneWidget,
+      );
     });
 
     semTest('날 줄 ↔ 날짜 줄 틈 — 칸 바닥 ↔ 날짜 글 위 12 ~ 14 (칸 아래 4 + 위 12)', (
@@ -486,7 +499,9 @@ void main() {
         find.byWidgetPredicate(
           (w) =>
               w is Text &&
-              RegExp(r'^\d{2}\.\d{2}\.\d{2} .$').hasMatch(w.data ?? ''),
+              RegExp(
+                r'^(\d{4}년 )?\d{1,2}월 \d{1,2}일 \(.\)$',
+              ).hasMatch(plainOf(w.data ?? '')),
         ),
       );
       // 칸 아래 4 안에 원 아래가 든다 → 칸 바닥 ~ 날짜 줄 = 12(글 줄 높이 안 여백 포함 14 이내)
@@ -573,8 +588,9 @@ void main() {
       // 날 줄에 고른 칸이 하나 있고(오늘 칸은 없다) 날짜 줄이 지난주 같은 요일이다.
       expect(find.bySemanticsLabel(RegExp(r', 오늘$')), findsNothing);
       final want = DateTime.now().subtract(const Duration(days: 7));
+      // 같은 글이 날짜 머리에도 있다(머리는 칸보다 아래) — 칸이 먼저다
       final selected = tester.getSemantics(
-        find.bySemanticsLabel(monthDayDow(want)),
+        find.bySemanticsLabel(monthDayDow(want)).first,
       );
       expect(selected.flagsCollection.isSelected, Tristate.isTrue);
       // 도장(오늘 것)은 오늘이 아니라 사라진다

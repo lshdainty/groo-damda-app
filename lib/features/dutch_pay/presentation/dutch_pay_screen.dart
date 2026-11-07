@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.d
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 /// 더치페이 폰 화면(I-15 25 ~ 31 · 5-B) — 띠 둘: 요약 띠(받을 돈 · 보낼 돈 두 줄) | 8 | 목록 띠(Segmented "진행 중 N · 완료 N · 친구 N" + 그 탭의 줄) +
@@ -490,7 +491,7 @@ class _FriendRow extends StatelessWidget {
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             )
-          : Text(
+          : PText(
               l.dutchSettled,
               style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
             ),

@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/select/p_select.dart';
 import 'package:groo_damda_app/shared/ds/select_box/p_select_box.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_busy_scrim.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
@@ -291,7 +292,7 @@ class _ImportViewState extends ConsumerState<ImportView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
+          PText(
             l.importStepMeta(n, 3),
             style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
           ),
@@ -556,7 +557,7 @@ class _ImportViewState extends ConsumerState<ImportView> {
       children: [
         Padding(
           padding: _gutter,
-          child: Text(
+          child: PText(
             l.importPreviewDesc(a.duplicateCount),
             style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
           ),
@@ -657,7 +658,7 @@ class _ImportViewState extends ConsumerState<ImportView> {
                         if (r.createdCategoryCount > r.createdCategories.length)
                           Padding(
                             padding: _gutter,
-                            child: Text(
+                            child: PText(
                               l.importNewCatMore(
                                 r.createdCategoryCount -
                                     r.createdCategories.length,
@@ -691,7 +692,7 @@ class _ImportViewState extends ConsumerState<ImportView> {
                         if (capped)
                           Padding(
                             padding: _gutter,
-                            child: Text(
+                            child: PText(
                               l.importFailuresCapped(
                                 r.failed,
                                 r.failures.length,

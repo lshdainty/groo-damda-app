@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/searchable_list/p_searchable_list.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
@@ -125,7 +126,7 @@ class WatchGroupBlockState extends ConsumerState<WatchGroupBlock> {
                 PSpacing.x6,
                 PSpacing.x3,
               ),
-              child: Text(
+              child: PText(
                 l.stocksWatchGroupEmpty,
                 style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
               ),
@@ -548,7 +549,7 @@ class _StockSearchSheetState extends ConsumerState<_StockSearchSheet> {
                   PSpacing.x6,
                   PSpacing.x6,
                 ),
-                child: Text(
+                child: PText(
                   l.stocksSearchHint,
                   style: PTypography.t4.copyWith(
                     color: context.colors.fgNeutralSubtle,

@@ -25,6 +25,7 @@ import 'package:groo_damda_app/features/recurring/domain/recurring_transaction.d
 import 'package:groo_damda_app/features/recurring/presentation/recurring_format.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/step_probe.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart'
     show Expense;
@@ -675,7 +676,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                         horizontal: PSpacing.globalGutter,
                         vertical: PSpacing.x3,
                       ),
-                      child: Text(
+                      child: PText(
                         l.recNoAssets,
                         textAlign: TextAlign.center,
                         style: PTypography.t3.copyWith(

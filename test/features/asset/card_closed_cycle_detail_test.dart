@@ -629,11 +629,16 @@ void main() {
     expect(findText('2026년'), findsOneWidget);
     expect(findText('예정'), findsWidgets);
 
-    // 회차가 하나뿐이다 — 고른 줄을 다시 누르면 고름이 바뀌지 않아 시트는 그대로다(ds 라디오 · 웹 ListRadioGroup 과 같다)
+    // 회차가 하나뿐이다 — 고른 줄을 다시 눌러도 시트가 닫힌다(고름은 그대로 · 웹 ListRadioGroup 과 같다, I-wrap-b3 가.6)
     await tester.tap(findText('10월 12일 결제').last);
     await tester.pumpAndSettle();
-    expect(findText('결제 회차'), findsOneWidget);
+    expect(findText('결제 회차'), findsNothing);
+    expect(findText('10월 12일 결제'), findsOneWidget, reason: '회차 단추 값은 그대로');
 
+    // 다시 열어 닫기 단추로도 닫힌다
+    await tester.tap(findText('10월 12일 결제'));
+    await tester.pumpAndSettle();
+    expect(findText('결제 회차'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('닫기').last);
     await tester.pumpAndSettle();
     expect(findText('결제 회차'), findsNothing);

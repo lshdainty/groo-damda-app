@@ -17,6 +17,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 
 /// 업데이트 — 설정에서 들어와 지금 상태를 확인하고, 있으면 여기서 받는다.
@@ -113,7 +114,7 @@ class _Body extends ConsumerWidget {
           Padding(
             padding: gutter,
             // R4 구역 제목
-            child: Text(
+            child: PText(
               l.updateSheetChanges,
               style: PTypography.t5.copyWith(
                 color: c.fgNeutral,

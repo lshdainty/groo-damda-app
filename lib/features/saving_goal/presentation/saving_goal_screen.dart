@@ -258,7 +258,8 @@ class _GoalRow extends StatelessWidget {
     if (raw == null || raw.isEmpty) return null;
     final d = DateTime.tryParse(raw);
     if (d == null) return null;
-    return '${d.year}.${d.month.toString().padLeft(2, '0')}';
+    // 날짜 규칙 — 점 표기는 0 을 채우지 않는다("2026. 1.")
+    return '${d.year}. ${d.month}.';
   }
 
   @override

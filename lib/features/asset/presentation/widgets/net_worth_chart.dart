@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
-import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
@@ -55,9 +54,8 @@ class NetWorthChart extends ConsumerWidget {
       );
     }
 
-    String monthLabel(int month) => localeIsEn()
-        ? monthOnly(DateTime(2000, month))
-        : '${month.toString().padLeft(2, '0')}월';
+    // 날짜 규칙 — 월은 앞 0 을 채우지 않는다("1월" … "12월")
+    String monthLabel(int month) => monthOnly(DateTime(2000, month));
     String won(num v) => masked ? kBudgetMask : formatWon(v);
     final labels = [for (final p in points) monthLabel(p.month)];
     final latest = won(points.last.netWorth);

@@ -280,14 +280,12 @@ List<int> statsWeekdaySums(List<Expense> exps) {
   return res;
 }
 
-/// 월 라벨 — 한 해 안이면 'MM', 해가 섞이면 'YYYY.MM'.
+/// 월 라벨 — 한 해 안이면 "1월"(앞 0 없음), 해가 섞이면 점 표기 "2026. 1."(날짜 규칙: 0 을 채우지 않는다).
 List<String> monthLabels(List<({int year, int month})> rows) {
   final same = rows.isNotEmpty && rows.every((r) => r.year == rows.first.year);
   return [
     for (final r in rows)
-      same
-          ? r.month.toString().padLeft(2, '0')
-          : '${r.year}.${r.month.toString().padLeft(2, '0')}',
+      same ? monthOnly(DateTime(r.year, r.month)) : '${r.year}. ${r.month}.',
   ];
 }
 
