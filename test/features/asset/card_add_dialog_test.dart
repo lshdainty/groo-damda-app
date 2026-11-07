@@ -212,6 +212,19 @@ void main() {
     });
   });
 
+  testWidgets('잠긴 이월 칸의 옛 값이 1,000억 위여도 저장된다 — 고칠 수 없는 칸은 세지 않는다', (
+    tester,
+  ) async {
+    final repo = await _openEdit(
+      tester,
+      _credit.copyWith(carryoverAmount: 200000000000, carryoverLocked: true),
+    );
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.updated, isTrue);
+    expect(repo.carryoverAmount, isNull, reason: '잠긴 이월은 키째 뺀다');
+  });
+
   group('결제일 변경은 다음 회차부터(D5)', () {
     Future<void> pickDay(WidgetTester tester, int day) async {
       // 첫 Select 가 결제일이다(둘째는 결제 출금계좌)
