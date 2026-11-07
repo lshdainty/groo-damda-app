@@ -30,7 +30,7 @@ import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
 
 /// 라벨 이름 최대 글자 수 — 카테고리 · 라벨 · 태그 · 목표 이름 12자(웹 d837eedc, 카드 한 줄에 들어가는 길이).
@@ -80,104 +80,106 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
         ),
       ),
       // 흰 면 하나 — 카드 · 줄 사이 선 · 구역 틈이 없다(I-09 44)
-      body: PScreenBandBody(
-        child: PPullToRefresh(
-          onRefresh: () async {
-            ref.invalidate(eventLabelsProvider);
-            await ref.read(eventLabelsProvider.future);
-          },
-          child: ListView(
-            padding: const EdgeInsets.only(bottom: PSpacing.x6),
-            children: [
-              CalendarSurfaceCallout(l.calLabelsIntro),
-              labelsAsync.when(
-                // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
-                skipError: true,
-                // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 글과 줄만 데이터 자리
-                loading: () => Column(
-                  children: [
-                    CalendarSurfaceHeaderSkeleton(
-                      action: PTextButton(
-                        label: l.calNewLabel,
-                        onPressed: () => _showLabelEditor(context, ref, null),
+      body: PSwipeActionsProvider(
+        child: PScreenBandBody(
+          child: PPullToRefresh(
+            onRefresh: () async {
+              ref.invalidate(eventLabelsProvider);
+              await ref.read(eventLabelsProvider.future);
+            },
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: PSpacing.x6),
+              children: [
+                CalendarSurfaceCallout(l.calLabelsIntro),
+                labelsAsync.when(
+                  // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
+                  skipError: true,
+                  // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 글과 줄만 데이터 자리
+                  loading: () => Column(
+                    children: [
+                      CalendarSurfaceHeaderSkeleton(
+                        action: PTextButton(
+                          label: l.calNewLabel,
+                          onPressed: () => _showLabelEditor(context, ref, null),
+                        ),
                       ),
-                    ),
-                    for (var i = 0; i < 4; i++)
-                      const CalendarSurfaceRowSkeleton(),
-                  ],
-                ),
-                error: (e, _) => CalendarSurfaceFailure(
-                  title: l.calLabelLoadError,
-                  retrying: labelsAsync.isLoading,
-                  onRetry: () => ref.invalidate(eventLabelsProvider),
-                ),
-                data: (labels) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    PListHeader(
-                      title: l.calAllLabelsCount(labels.length),
-                      variant: PListHeaderVariant.boldSolid,
-                      action: PTextButton(
-                        label: l.calNewLabel,
-                        onPressed: () => _showLabelEditor(context, ref, null),
+                      for (var i = 0; i < 4; i++)
+                        const CalendarSurfaceRowSkeleton(),
+                    ],
+                  ),
+                  error: (e, _) => CalendarSurfaceFailure(
+                    title: l.calLabelLoadError,
+                    retrying: labelsAsync.isLoading,
+                    onRetry: () => ref.invalidate(eventLabelsProvider),
+                  ),
+                  data: (labels) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PListHeader(
+                        title: l.calAllLabelsCount(labels.length),
+                        variant: PListHeaderVariant.boldSolid,
+                        action: PTextButton(
+                          label: l.calNewLabel,
+                          onPressed: () => _showLabelEditor(context, ref, null),
+                        ),
                       ),
-                    ),
-                    if (labels.isEmpty)
-                      CalendarSurfaceEmptyLine(
-                        l.calLabelsEmpty,
-                        hint: l.calLabelsEmptyHint,
-                      )
-                    else
-                      PList(
-                        semanticLabel: l.calAllLabelsCount(labels.length),
-                        children: [
-                          for (final label in labels)
-                            // 밀면 수정·삭제(폰 지름길). 줄 누름은 지금 그대로 편집 시트다
-                            // — 화면을 옮기지 않으니 꺾쇠가 없다(list.md:122)
-                            PSwipeActions(
-                              key: ValueKey('cal-label-${label.rowId}'),
-                              groupTag: 'cal-label-list',
-                              actions: [
-                                PSwipeAction(
-                                  label: l.actionEdit,
-                                  icon: LucideIcons.pencil,
-                                  kind: PSwipeKind.primary,
-                                  onSelect: () =>
+                      if (labels.isEmpty)
+                        CalendarSurfaceEmptyLine(
+                          l.calLabelsEmpty,
+                          hint: l.calLabelsEmptyHint,
+                        )
+                      else
+                        PList(
+                          semanticLabel: l.calAllLabelsCount(labels.length),
+                          children: [
+                            for (final label in labels)
+                              // 밀면 수정·삭제(폰 지름길). 줄 누름은 지금 그대로 편집 시트다
+                              // — 화면을 옮기지 않으니 꺾쇠가 없다(list.md:122)
+                              PSwipeActions(
+                                key: ValueKey('cal-label-${label.rowId}'),
+                                rowLabel: label.labelName,
+                                actions: [
+                                  PSwipeAction(
+                                    label: l.actionEdit,
+                                    icon: LucideIcons.pencil,
+                                    kind: PSwipeActionKind.primary,
+                                    onSelect: () =>
+                                        _showLabelEditor(context, ref, label),
+                                  ),
+                                  PSwipeAction(
+                                    label: l.actionDelete,
+                                    icon: LucideIcons.trash2,
+                                    kind: PSwipeActionKind.destructive,
+                                    // _confirmDelete 가 자체 확인을 띄운다 — 여기서 또 주면 두 번 뜬다
+                                    onSelect: () =>
+                                        _confirmDelete(context, label),
+                                  ),
+                                ],
+                                child: PListButtonItem(
+                                  prefix: PListTile(
+                                    background: chartToneOf(
+                                      context,
+                                      label.color,
+                                    ).weak,
+                                    color: chartToneOf(
+                                      context,
+                                      label.color,
+                                    ).solid,
+                                    child: const Icon(LucideIcons.tag),
+                                  ),
+                                  title: label.labelName,
+                                  detail: l.calLabelUsage(label.usageCount),
+                                  onTap: () =>
                                       _showLabelEditor(context, ref, label),
                                 ),
-                                PSwipeAction(
-                                  label: l.actionDelete,
-                                  icon: LucideIcons.trash2,
-                                  kind: PSwipeKind.destructive,
-                                  // _confirmDelete 가 자체 확인을 띄운다 — 여기서 또 주면 두 번 뜬다
-                                  onSelect: () =>
-                                      _confirmDelete(context, label),
-                                ),
-                              ],
-                              child: PListButtonItem(
-                                prefix: PListTile(
-                                  background: chartToneOf(
-                                    context,
-                                    label.color,
-                                  ).weak,
-                                  color: chartToneOf(
-                                    context,
-                                    label.color,
-                                  ).solid,
-                                  child: const Icon(LucideIcons.tag),
-                                ),
-                                title: label.labelName,
-                                detail: l.calLabelUsage(label.usageCount),
-                                onTap: () =>
-                                    _showLabelEditor(context, ref, label),
                               ),
-                            ),
-                        ],
-                      ),
-                  ],
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

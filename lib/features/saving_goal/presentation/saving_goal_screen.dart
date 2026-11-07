@@ -11,9 +11,6 @@ import 'package:groo_damda_app/features/saving_goal/application/saving_goal_prov
 import 'package:groo_damda_app/features/saving_goal/domain/saving_goal.dart';
 import 'package:groo_damda_app/features/saving_goal/presentation/saving_goal_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
-import 'package:groo_damda_app/shared/forms/save_failure.dart';
-import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
@@ -21,12 +18,11 @@ import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
-import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
-import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 
 /// 저축 목표 관리 (설정 > 저축 목표) — design GoalManager 미러 (웹 SavingGoalManager 정합).
 ///
@@ -34,55 +30,12 @@ import 'package:groo_damda_app/shared/widgets/p_swipe_actions.dart';
 class SavingGoalScreen extends ConsumerWidget {
   const SavingGoalScreen({super.key});
 
-  /// 스와이프 삭제 — ds 확인창(Alert Dialog)으로 묻고(삭제는 criticalSolid), 확정하면 지운다.
-  /// 실패하면 확인창을 닫고 스낵바(critical + 다시 시도)로 알린다 — 다시 시도는 묻지 않고 바로 지운다 —
-  /// 이미 확인창에서 한 번 확정한 삭제이고, 띠는 앱 뿌리 호스트에 있어 화면을 나가도 남는다(그때 [context] · [ref] 는
-  /// 죽었으므로 미리 잡아 둔 [ProviderContainer] 로 돈다).
+  /// 스와이프 삭제 — 확인창 · 실패 띠는 [confirmDeleteSavingGoal] (수정 시트 바닥 [삭제] 와 같은 길).
   Future<void> _confirmDeleteGoal(
     BuildContext context,
     WidgetRef ref,
     SavingGoal goal,
-  ) async {
-    final l = AppLocalizations.of(context);
-    final container = ProviderScope.containerOf(context);
-    final snack = PSnackbar.of(context);
-    Object? failure;
-    final ok = await PAlertDialog.show(
-      context,
-      title: l.savingGoalDeleteTitle(goal.title),
-      description: l.savingGoalDeleteConfirm,
-      cancelLabel: l.actionCancel,
-      actionLabel: l.actionDelete,
-      destructive: true,
-      onAction: () async {
-        try {
-          await _deleteGoal(container, goal);
-        } catch (e) {
-          failure = e;
-        }
-      },
-    );
-    if (ok && failure != null) {
-      // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①)
-      showConfirmFailSnackbar(
-        snack,
-        error: failure,
-        message: l.savingGoalDeleteFailed,
-        retryLabel: l.actionRetry,
-        retry: () => _deleteGoal(container, goal),
-        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
-        onUnconfirmed: () => container.invalidate(savingGoalListProvider),
-      );
-    }
-  }
-
-  /// 수정 시트의 삭제와 같은 저장소·무효화 경로를 쓴다. 실패하면 던진다.
-  /// 실패는 호출한 쪽 스낵바가 알리므로 전역 오류 토스트는 끈다(둘이 같은 아래쪽에서 겹친다).
-  Future<void> _deleteGoal(ProviderContainer container, SavingGoal goal) async {
-    final repo = await container.read(savingGoalRepositoryProvider.future);
-    await repo.delete(goal.rowId, silent: true);
-    container.invalidate(savingGoalListProvider);
-  }
+  ) => confirmDeleteSavingGoal(context, goal);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -170,19 +123,19 @@ class SavingGoalScreen extends ConsumerWidget {
                   // (spec swipe-actions.md · WCAG 2.1.1).
                   PSwipeActions(
                     key: ValueKey('saving-goal-${goal.rowId}'),
-                    groupTag: 'saving-goal-list',
+                    rowLabel: goal.title,
                     actions: [
                       PSwipeAction(
                         label: l.actionEdit,
                         icon: LucideIcons.pencil,
-                        kind: PSwipeKind.primary,
+                        kind: PSwipeActionKind.primary,
                         onSelect: () =>
                             showSavingGoalEditDialog(context, edit: goal),
                       ),
                       PSwipeAction(
                         label: l.actionDelete,
                         icon: LucideIcons.trash2,
-                        kind: PSwipeKind.destructive,
+                        kind: PSwipeActionKind.destructive,
                         // 확인은 ds 확인창이 받는다(같은 삭제는 어디서 불러도 같은 글).
                         onSelect: () => _confirmDeleteGoal(context, ref, goal),
                       ),
@@ -214,13 +167,15 @@ class SavingGoalScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: PScreenBandBody(
-        child: PPullToRefresh(
-          onRefresh: () async {
-            ref.invalidate(savingGoalListProvider);
-            await ref.read(savingGoalListProvider.future);
-          },
-          child: ListView(padding: EdgeInsets.zero, children: [content]),
+      body: PSwipeActionsProvider(
+        child: PScreenBandBody(
+          child: PPullToRefresh(
+            onRefresh: () async {
+              ref.invalidate(savingGoalListProvider);
+              await ref.read(savingGoalListProvider.future);
+            },
+            child: ListView(padding: EdgeInsets.zero, children: [content]),
+          ),
         ),
       ),
     );

@@ -906,6 +906,41 @@ void main() {
     });
   });
 
+  group('별빛 스낵바', () {
+    Future<void> complete(WidgetTester tester, FakeTodoRepo repo) async {
+      await pumpApp(
+        tester,
+        const TodoScreen(),
+        overrides: todoOverrides(todos: _basic(), repo: repo),
+        snackbarHost: true,
+      );
+      await tester.tap(_checkOf('보고서 마무리'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('수집까지 남았으면 웹과 같은 문장 — " · " 없이', (tester) async {
+      await complete(tester, FakeTodoRepo()..gain = 1);
+      expect(findText('별빛 1개를 받아 별자리까지 1개 남았어요.'), findsOneWidget);
+    });
+
+    testWidgets('채우면 오늘의 별자리를 수집했다는 문장', (tester) async {
+      await complete(tester, FakeTodoRepo()..gain = 2);
+      expect(findText('별빛 2개를 받아 오늘의 별자리를 수집했어요.'), findsOneWidget);
+    });
+
+    testWidgets('스낵바는 FAB(+) 를 덮지 않는다 — FAB 윗변 위 8 에 뜬다', (tester) async {
+      await complete(tester, FakeTodoRepo()..gain = 1);
+      final fab = tester.getRect(
+        find.byKey(const ValueKey('floating-action-button')),
+      );
+      final band = tester.getRect(find.byKey(const ValueKey('snackbar-band')));
+      expect(band.bottom, lessThanOrEqualTo(fab.top - 8));
+      expect(band.overlaps(fab), isFalse);
+    });
+  });
+
   group('16 날짜 묶음 머리', () {
     testWidgets(
       '머리말 2 · t4 · 500 · fg-neutral-subtle · "10월 21일 (수) · 오늘" 꼴 · 끝낸 날 초록 없음',

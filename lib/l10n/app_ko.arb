@@ -4098,7 +4098,7 @@
   "tdmEmptyMonthDesc": "오른쪽 아래 + 버튼으로 추가해보세요.",
   "tdmEmptyFilter": "조건에 맞는 할 일이 없어요",
   "tdmEmptyFilterDesc": "조건을 바꾸거나 지워보세요.",
-  "tdmStarToastGain": "별빛 +{gain} · 수집까지 {left}별",
+  "tdmStarToastGain": "별빛 {gain}개를 받아 별자리까지 {left}개 남았어요.",
   "@tdmStarToastGain": {
     "placeholders": {
       "gain": {
@@ -4109,7 +4109,7 @@
       }
     }
   },
-  "tdmStarToastCollected": "별빛 +{gain} · 오늘의 별자리 수집!",
+  "tdmStarToastCollected": "별빛 {gain}개를 받아 오늘의 별자리를 수집했어요.",
   "@tdmStarToastCollected": {
     "placeholders": {
       "gain": {

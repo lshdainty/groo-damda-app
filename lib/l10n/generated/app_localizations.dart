@@ -12820,13 +12820,13 @@ abstract class AppLocalizations {
   /// No description provided for @tdmStarToastGain.
   ///
   /// In ko, this message translates to:
-  /// **'별빛 +{gain} · 수집까지 {left}별'**
+  /// **'별빛 {gain}개를 받아 별자리까지 {left}개 남았어요.'**
   String tdmStarToastGain(int gain, int left);
 
   /// No description provided for @tdmStarToastCollected.
   ///
   /// In ko, this message translates to:
-  /// **'별빛 +{gain} · 오늘의 별자리 수집!'**
+  /// **'별빛 {gain}개를 받아 오늘의 별자리를 수집했어요.'**
   String tdmStarToastCollected(int gain);
 
   /// No description provided for @constHeroLabel.

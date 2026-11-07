@@ -1,12 +1,11 @@
 // 앱 맨 위(MaterialApp.router builder)에 단 PSnackbarHost 가 앱 전체에 주는 영향을 앱과 같은 틀로 잰다.
-// 틀(app.dart): SlidableAutoCloseBehavior > AppLockGate > Material(투명) > PSnackbarHost > 화면(Navigator).
+// 틀(app.dart): AppLockGate > Material(투명) > PSnackbarHost > 화면(Navigator).
 //
 // 잰 것: 값 대조(자리 · 폭 · 높이 · 모서리 · 색 · 글 · 아이콘 · 액션) · 안전 영역 · 키보드 · 넓은 화면 · 눌러지는 자리(띠 밖은 통과) ·
 // 대화상자 위 · 잠금 화면 아래 · 읽는 순서(라이브 영역).
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -69,14 +68,12 @@ Future<PSnackbarApi> _mount(
             viewPadding: EdgeInsets.only(bottom: safeBottom),
             padding: EdgeInsets.only(bottom: safeBottom),
           ),
-          child: SlidableAutoCloseBehavior(
-            child: AppLockGate(
-              child: Material(
-                type: MaterialType.transparency,
-                child: PSnackbarHost(
-                  closeLabel: AppLocalizations.of(context).actionClose,
-                  child: child ?? const SizedBox.shrink(),
-                ),
+          child: AppLockGate(
+            child: Material(
+              type: MaterialType.transparency,
+              child: PSnackbarHost(
+                closeLabel: AppLocalizations.of(context).actionClose,
+                child: child ?? const SizedBox.shrink(),
               ),
             ),
           ),

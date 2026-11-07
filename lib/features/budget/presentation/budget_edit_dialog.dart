@@ -11,6 +11,7 @@ import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
+import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
@@ -23,6 +24,8 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
@@ -85,6 +88,65 @@ void showBudgetEditDialog(
   );
 }
 
+/// 예산 삭제 — ds 확인창(Alert Dialog)으로 묻고(삭제는 criticalSolid), 확정하면 지운다. 밀기 트레이와 수정 시트 바닥
+/// [삭제] 가 같은 길이다. 실패하면 확인창을 닫고 스낵바(critical + 다시 시도)로 알린다 — 다시 시도는 묻지 않고 바로 지운다.
+/// 이미 확인창에서 한 번 확정한 삭제이고, 띠는 앱 뿌리 호스트에 있어 화면을 나가도 남는다(미리 잡아 둔 컨테이너로 돈다).
+/// 확인창에서 지우기를 눌렀으면(성공이든 실패든) true.
+Future<bool> confirmDeleteBudget(
+  BuildContext context, {
+  required BudgetMonthKey key,
+  required Budget budget,
+  required String name,
+}) async {
+  final l = AppLocalizations.of(context);
+  final container = ProviderScope.containerOf(context);
+  final snack = PSnackbar.of(context);
+  Object? failure;
+  final ok = await PAlertDialog.show(
+    context,
+    title: l.budgetDeleteTitle(name),
+    description: l.budgetDeleteConfirm,
+    cancelLabel: l.actionCancel,
+    actionLabel: l.actionDelete,
+    destructive: true,
+    onAction: () async {
+      try {
+        await _deleteBudget(container, key, budget);
+      } catch (e) {
+        failure = e;
+      }
+    },
+  );
+  if (ok && failure != null) {
+    // 응답을 못 받았으면 지워졌을 수 있다 — [다시 시도] 없이 다시 받고 한 문장(판단 ①). 아니면 실패 띠 + [다시 시도]
+    showConfirmFailSnackbar(
+      snack,
+      error: failure,
+      message: l.budgetDeleteFailed,
+      retryLabel: l.actionRetry,
+      retry: () => _deleteBudget(container, key, budget),
+      unconfirmedMessage: unconfirmedWriteText(l, WriteKind.delete),
+      onUnconfirmed: () => container
+        ..invalidate(monthBudgetsProvider(key))
+        ..invalidate(budgetComplianceProvider),
+    );
+  }
+  return ok;
+}
+
+/// 수정 시트가 쓰던 저장소·무효화 경로. 실패하면 던진다(호출한 쪽 스낵바가 알리므로 전역 오류 토스트는 끈다).
+Future<void> _deleteBudget(
+  ProviderContainer container,
+  BudgetMonthKey key,
+  Budget budget,
+) async {
+  final repo = await container.read(budgetRepositoryProvider.future);
+  await repo.delete(budget.rowId, silent: true);
+  container.invalidate(monthBudgetsProvider(key));
+  // 준수율은 keepAlive — 지운 예산이 남아 있으면 달성률이 옛 값으로 굳는다.
+  container.invalidate(budgetComplianceProvider);
+}
+
 /// 시트가 바뀐 값을 가졌는지 — 입력칸의 주인은 시트 State 라, 닫을 때 그쪽에 묻는다.
 class _DirtyProbe {
   bool Function() dirty = () => false;
@@ -133,6 +195,27 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   String? _amountError;
 
   bool get _isEdit => widget.edit != null;
+
+  /// 카테고리 예산만 지운다(전체 예산은 밀기에도 없다).
+  bool get _canDelete => _isEdit && widget.edit!.categoryRowId != null;
+
+  Future<void> _delete() async {
+    final edit = widget.edit!;
+    final l = AppLocalizations.of(context);
+    final sheet = PBottomSheet.of(context);
+    final category = ref
+        .read(categoriesProvider)
+        .value
+        ?.byRowId(edit.categoryRowId!);
+    final ok = await confirmDeleteBudget(
+      context,
+      key: (year: widget.year, month: widget.month),
+      budget: edit,
+      name: budgetRowName(l, category, edit),
+    );
+    if (ok && mounted) sheet.close();
+  }
+
   bool get _isOverall =>
       widget.overallNew || (_isEdit && widget.edit!.categoryRowId == null);
 
@@ -266,6 +349,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
     final l = AppLocalizations.of(context);
     final c = context.colors;
     final categories = ref.watch(categoriesProvider).value;
+    final canDelete = _canDelete;
     final presets = _isOverall ? kBudgetTotalPresets : kBudgetCategoryPresets;
     final title = _isOverall
         ? l.budgetMonthTotal(widget.month)
@@ -363,14 +447,43 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
           ),
         ],
       ),
-      footer: [
-        PButton(
-          label: _isEdit ? l.actionSave : l.budgetSubmitAdd,
-          size: PButtonSize.large,
-          loading: _submitting,
-          onPressed: _submitting ? null : _onSubmit,
-        ),
-      ],
+      footer: canDelete
+          ? const []
+          : [
+              PButton(
+                label: _isEdit ? l.actionSave : l.budgetSubmitAdd,
+                size: PButtonSize.large,
+                loading: _submitting,
+                onPressed: _submitting ? null : _onSubmit,
+              ),
+            ],
+      // 카테고리 예산 수정 — 바닥 왼쪽 [삭제](밀기와 같은 동작 · 확인창 한 번). 밀기는 지름길이라 닫는 길은 여기에도 있다
+      footerRow: canDelete
+          ? Row(
+              spacing: PSpacing.x2,
+              children: [
+                // 내용 폭 ghost critical — 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
+                Transform.translate(
+                  offset: const Offset(-20, 0),
+                  child: PButton(
+                    label: l.actionDelete,
+                    variant: PButtonVariant.ghost,
+                    ghostColor: PButtonGhostColor.critical,
+                    size: PButtonSize.large,
+                    onPressed: _submitting ? null : _delete,
+                  ),
+                ),
+                Expanded(
+                  child: PButton(
+                    label: l.actionSave,
+                    size: PButtonSize.large,
+                    loading: _submitting,
+                    onPressed: _submitting ? null : _onSubmit,
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

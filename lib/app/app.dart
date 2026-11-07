@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:groo_damda_app/core/format/format_locale.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/features/sms/data/sms_android.dart';
@@ -185,10 +184,8 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
       // 앱 잠금(생체인증) — 라우터 전체를 덮는 오버레이. 로그인 세션과 별개로,
       // 켜져 있으면 실행·복귀 시 본인 확인 후에만 화면을 보여준다.
       //
-      // 스와이프 액션(PSwipeActions)은 "한 번에 한 행만 열림" 을 이 조상에 기댄다.
-      // 화면마다 두게 하면 새 리스트를 붙일 때 잊어버리고, 그러면 행이 여러 개
-      // 열린 채로 남는다 — 실제로 가계부에서 그렇게 됐다. 여기 한 번만 둔다.
-      // 리스트끼리는 groupTag 로 갈라지므로 하나로 충분하다.
+      // 스와이프 액션(PSwipeActions)의 "한 번에 한 행만 열림" 은 PSwipeActionsProvider 가 맡는다 —
+      // 셸이 아니라 목록이 있는 화면마다 스크롤 뷰 바깥에 둔다(새 목록에 잊으면 행이 여러 개 열린 채 남는다).
       //
       // 주의 — 이 builder 안쪽(라우터 위)의 State 는 **계정이 바뀌어도 살아남는다.**
       // 컨테이너를 새로 만들 때 트리도 새로 그리지만, 위 `scaffoldMessengerKey` 가
@@ -209,19 +206,14 @@ class _GrooDamdaAppState extends ConsumerState<GrooDamdaApp>
     );
   }
 
-  Widget _shell(
-    BuildContext context,
-    Widget? child,
-  ) => SlidableAutoCloseBehavior(
-    child: AppLockGate(
-      // 투명 Material — 호스트가 Navigator 바깥이라 Material 조상이 없으면 띠 글에 노란 이중 밑줄(기본 글 스타일 없음)이 간다.
-      child: Material(
-        type: MaterialType.transparency,
-        child: PSnackbarHost(
-          key: PSnackbar.appHostKey,
-          closeLabel: AppLocalizations.of(context).actionClose,
-          child: child ?? const SizedBox.shrink(),
-        ),
+  Widget _shell(BuildContext context, Widget? child) => AppLockGate(
+    // 투명 Material — 호스트가 Navigator 바깥이라 Material 조상이 없으면 띠 글에 노란 이중 밑줄(기본 글 스타일 없음)이 간다.
+    child: Material(
+      type: MaterialType.transparency,
+      child: PSnackbarHost(
+        key: PSnackbar.appHostKey,
+        closeLabel: AppLocalizations.of(context).actionClose,
+        child: child ?? const SizedBox.shrink(),
       ),
     ),
   );
