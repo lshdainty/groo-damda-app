@@ -154,7 +154,7 @@ class _AccountCardManageScreenState
       body: PSwipeActionsProvider(
         child: Builder(
           builder: (context) {
-            if (loading) return loadingRegion(const _ManageSkeleton());
+            if (loading) return loadingRegionScroll(const _ManageSkeleton());
             if (failed) {
               return _CenteredResult(
                 kind: PResultKind.failure,

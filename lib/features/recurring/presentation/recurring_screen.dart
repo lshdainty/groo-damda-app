@@ -97,7 +97,7 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
               } catch (_) {}
             },
             child: loading
-                ? loadingRegion(const _RecurringSkeleton())
+                ? loadingRegionScroll(const _RecurringSkeleton())
                 : failed
                 ? _failure(l)
                 : items.isEmpty

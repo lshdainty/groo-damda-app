@@ -321,7 +321,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         ],
       );
     } else {
-      body = loadingRegion(const _CategorySkeleton());
+      body = loadingRegionScroll(const _CategorySkeleton());
     }
 
     return Scaffold(

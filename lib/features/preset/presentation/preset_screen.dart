@@ -136,7 +136,7 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
               } catch (_) {}
             },
             child: loading
-                ? loadingRegion(const _PresetSkeleton())
+                ? loadingRegionScroll(const _PresetSkeleton())
                 : failed
                 ? _failure(l)
                 : items.isEmpty
