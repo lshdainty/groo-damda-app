@@ -33,7 +33,6 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_labels_sc
 import 'package:groo_damda_app/features/calendar/presentation/calendar_manage_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
 
 import '../../support/plain_text.dart';
 
@@ -97,7 +96,7 @@ class _NoAuth extends AuthNotifier {
 Finder _button(String label) => find
     .ancestor(
       of: findText(label),
-      matching: find.byWidgetPredicate((w) => w is PButton || w is dsb.PButton),
+      matching: find.byWidgetPredicate((w) => w is dsb.PButton),
     )
     .last;
 

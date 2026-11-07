@@ -43,7 +43,6 @@ import 'package:groo_damda_app/shared/ds/input_button/p_input_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
-import 'package:groo_damda_app/shared/widgets/p_card.dart';
 import '../../support/plain_text.dart';
 
 /// ds List 의 keepAll 이 글자 사이에 넣는 U+2060 · U+200B 를 뺀 글로 찾는다.
@@ -336,7 +335,6 @@ void main() {
     await tester.tap(findText('소비 요약'));
     await tester.pumpAndSettle();
     expect(_text('합계'), findsOneWidget);
-    expect(find.byType(PCard), findsNothing);
     // 달력을 펼치면 요약이 접힌다(요약 줄 "합계" 가 사라진다)
     await tester.tap(find.bySemanticsLabel('월 달력'));
     await tester.pumpAndSettle();

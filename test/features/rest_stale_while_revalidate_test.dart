@@ -25,7 +25,6 @@ import 'package:groo_damda_app/core/network/dio_provider.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import '../support/plain_text.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsskel;
-import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/domain/asset.dart';
@@ -116,10 +115,8 @@ String _ymd(DateTime d) =>
     '${d.month.toString().padLeft(2, '0')}-'
     '${d.day.toString().padLeft(2, '0')}';
 
-/// 옛 shared/widgets · 새 ds 스켈레톤 둘 다 — 화면마다 옮긴 정도가 다르다(프리셋은 ds)
-final _anySkeleton = find.byWidgetPredicate(
-  (w) => w is PSkeleton || w is dsskel.PSkeleton,
-);
+/// ds 스켈레톤(옛 shared/widgets 스켈레톤은 걷었다)
+final _anySkeleton = find.byType(dsskel.PSkeleton);
 
 void main() {
   final now = DateTime.now();

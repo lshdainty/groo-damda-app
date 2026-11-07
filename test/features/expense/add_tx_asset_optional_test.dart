@@ -18,7 +18,6 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/add_tx_sheet.dart';
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
-import 'package:groo_damda_app/shared/widgets/p_button.dart';
 import '../../support/plain_text.dart';
 
 /// 망을 타지 않는 저장소 — 만들기 요청을 적어 두고, 저장 뒤 다시 받는 그 달 목록은 빈 목록.

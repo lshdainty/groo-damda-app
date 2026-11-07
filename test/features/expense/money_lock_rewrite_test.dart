@@ -34,8 +34,6 @@ import 'package:groo_damda_app/features/notification/application/user_preference
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
-import 'package:groo_damda_app/shared/widgets/p_date_input.dart';
-import 'package:groo_damda_app/shared/widgets/p_select.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import '../../support/plain_text.dart';
 
