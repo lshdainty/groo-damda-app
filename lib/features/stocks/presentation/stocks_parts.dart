@@ -383,7 +383,9 @@ class _StocksSearchEntryState extends State<StocksSearchEntry> {
         enabled: true,
         focusNode: _focus,
         onTap: _open,
-        touchMin: 0,
+        // 보이는 상자는 40(input.md 가 받아들인 값) — 누르는 영역만 44 까지 넓힌다. 위는 부모 여백 안이라 받고,
+        // 아래는 부모 상자가 끝이라 넓히지 못한다(Flutter 는 부모 안에서만 자식에게 묻는다)
+        touchMin: PTouch.min,
         // 키보드 초점 링 — 밑줄 칸이지만 다른 칸(Input Button)과 같은 링을 입구 전체 상자에 그린다
         focusRing: const PFocusRingStyle(radius: PRounded.r3),
         semantics: (child, enabled, tap) => Semantics(
