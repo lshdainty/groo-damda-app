@@ -135,8 +135,9 @@ void main() {
     await tester.tap(findText('문자 읽기'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    // 붙여넣기 화면 위에는 스낵바가 없다. (시트가 열려도 시트의 Callout 이 한 번이다 — 스낵바 글까지 두 번이 아니다)
-    expect(findPlain('일부 항목을 읽지 못했어요. 확인하고 채워주세요.'), findsNothing);
+    // 안내는 시트 Callout 하나뿐이다 — 스낵바 글까지 두 번이 아니다.
+    expect(findPlain('일부 항목을 읽지 못했어요. 확인하고 채워주세요.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('callout-text')), findsOneWidget);
     expect(find.byType(PSnackbarHost), findsOneWidget);
   });
 
