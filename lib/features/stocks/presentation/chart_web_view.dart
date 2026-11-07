@@ -23,12 +23,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:groo_damda_app/app/env.dart';
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/core/network/dio_provider.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/stocks/presentation/chart_bridge.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 
 /// 증권 차트 WebView 높이 — 그래프 168 + 범례(O·H·L·C·VOL) 두 줄 44.
 /// 임베드 페이지(height 100%)가 범례 줄을 이 안에서 나눠 쓰므로, 범례가 두 줄이면 그래프는 168 이다.
@@ -61,7 +61,8 @@ class ChartWebView extends ConsumerStatefulWidget {
 class _ChartWebViewState extends ConsumerState<ChartWebView> {
   WebViewController? _controller;
   bool _loading = true;
-  String? _error;
+  // 실패 — 화면에는 한 문장 + [다시 시도] 뿐이다. 원인(오류 코드 · 서버 글 · 예외)은 사용자에게 내지 않고 디버그 로그로만 남긴다.
+  bool _failed = false;
   Timer? _tokenTimer; // embed_token 만료 전 in-place 갱신 주기 타이머
 
   /// embed_token 갱신 주기 — 토큰(60s)이 만료되기 전에 새 토큰을 push.
@@ -95,8 +96,9 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
         if (mounted) {
           setState(() {
             _loading = false;
-            _error = AppLocalizations.of(context).stocksChartTokenFailed;
+            _failed = true;
           });
+          _logFailure('embed token empty');
         }
         return;
       }
@@ -107,8 +109,9 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
         if (mounted) {
           setState(() {
             _loading = false;
-            _error = AppLocalizations.of(context).stocksChartHttpsError;
+            _failed = true;
           });
+          _logFailure('web origin is not https: ${Env.webBaseUrl}');
         }
         return;
       }
@@ -120,7 +123,7 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
 
       final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(const Color(0x00000000)) // 투명 — 부모 PCard 배경이 비치도록
+        ..setBackgroundColor(const Color(0x00000000)) // 투명 — 뒤 배경이 비치도록
         ..addJavaScriptChannel(
           'PorestChart',
           onMessageReceived: _onChannelMessage,
@@ -135,9 +138,8 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
               if (!mounted) return;
               // 메인 프레임 에러만 사용자에게 노출(서브 리소스 누락은 잡소리 방지)
               if (e.isForMainFrame ?? true) {
-                setState(() {
-                  _error = '${e.errorCode}: ${e.description}';
-                });
+                setState(() => _failed = true);
+                _logFailure('web resource ${e.errorCode}: ${e.description}');
               }
             },
             onNavigationRequest: (req) {
@@ -159,22 +161,23 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
       if (!mounted) return;
       setState(() {
         _controller = controller;
-        _error = null;
+        _failed = false;
       });
       _startTokenRefresh(); // reload 없는 토큰 회전 시작
     } on DioException catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error =
-            '${AppLocalizations.of(context).stocksChartTokenFailed}: ${e.response?.statusCode ?? e.message ?? "error"}';
+        _failed = true;
       });
+      _logFailure('embed token ${e.response?.statusCode ?? e.message}');
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = AppLocalizations.of(context).stocksChartInitFailed;
+        _failed = true;
       });
+      _logFailure('init $e');
     }
   }
 
@@ -186,6 +189,10 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
     isUs: widget.isUs,
     broker: widget.broker,
   );
+
+  void _logFailure(String why) {
+    if (kDebugMode) debugPrint('[ChartWebView] load failed: $why');
+  }
 
   void _onChannelMessage(JavaScriptMessage msg) {
     try {
@@ -234,7 +241,7 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
     _bridge.reset(); // 새 페이지가 ready 를 알릴 때까지 다시 보관 모드
     setState(() {
       _loading = true;
-      _error = null;
+      _failed = false;
     });
     // 기존 컨트롤러는 _controller 교체로 dispose 처리 — _initialize 가 새 컨트롤러 세팅
     await _initialize();
@@ -253,7 +260,6 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
 
     // 테마 변경 감지 — settingsProvider 의 themeMode 변경 시 JS 채널로 푸시
@@ -264,24 +270,23 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
     });
 
     Widget body;
-    if (_error != null) {
-      body = Center(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Text(
-            '${l.stocksChartLoadFailed}\n$_error',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: t.fgTertiary),
-          ),
+    if (_failed) {
+      // 카드 안 결과 — 화면용 한 문장 + [다시 시도](토큰부터 다시 받아 연다)
+      body = PResultSection(
+        key: const ValueKey('chart-load-failed'),
+        kind: PResultKind.failure,
+        size: PResultSize.medium,
+        placement: PResultPlacement.card,
+        title: l.stocksChartLoadFailed,
+        primaryAction: PResultAction(
+          label: l.actionRetry,
+          onPressed: () => unawaited(_reinitialize()),
         ),
       );
     } else if (_controller == null || _loading) {
       // 스켈레톤 — feedback_skeleton_server_data_only.md 준수(shadow 만, border X)
-      body = Container(
-        decoration: BoxDecoration(
-          color: t.bgSunken,
-          borderRadius: PRadius.brMd,
-        ),
+      body = const SizedBox.expand(
+        child: PSkeleton(radius: PSkeletonRadius.r12),
       );
     } else {
       body = WebViewWidget(
@@ -293,6 +298,13 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
       );
     }
 
+    // 실패 칸은 최소 높이만 정하고 내용만큼 늘어난다 — 글자 200% 에서 [다시 시도] 가 잘리지 않게
+    if (_failed) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(minHeight: widget.height),
+        child: Center(child: body),
+      );
+    }
     return SizedBox(height: widget.height, child: body);
   }
 

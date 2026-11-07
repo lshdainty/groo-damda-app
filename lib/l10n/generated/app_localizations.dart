@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// 증권 연결 화면 나가기 확인창 본문(키를 친 화면) — 금액 가리기는 hideAmountsDiscardBody("고른") 그대로
   ///
   /// In ko, this message translates to:
-  /// **'입력한 내용이 사라져요.'**
+  /// **'작성한 내용이 사라져요.'**
   String get securitiesLeaveBody;
 
   /// 이용 해지 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE) — 웹과 같은 글
@@ -211,6 +211,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'삭제됐는지 확인하지 못했어요.'**
   String get unconfirmedDelete;
+
+  /// No description provided for @unconfirmedDisconnect.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제됐는지 확인하지 못했어요.'**
+  String get unconfirmedDisconnect;
 
   /// 스낵바 — 그 밖 쓰기(기기 로그아웃 · 캘린더 나가기 · 모두 받음 등)의 응답을 못 받았을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글
   ///
@@ -10213,28 +10219,10 @@ abstract class AppLocalizations {
   /// **'{count}건'**
   String statsCountValue(int count);
 
-  /// No description provided for @stocksChartTokenFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'토큰 발급 실패'**
-  String get stocksChartTokenFailed;
-
-  /// No description provided for @stocksChartHttpsError.
-  ///
-  /// In ko, this message translates to:
-  /// **'보안 오류: 차트 WebView 가 HTTPS 가 아닙니다'**
-  String get stocksChartHttpsError;
-
-  /// No description provided for @stocksChartInitFailed.
-  ///
-  /// In ko, this message translates to:
-  /// **'차트 초기화 실패'**
-  String get stocksChartInitFailed;
-
   /// No description provided for @stocksChartLoadFailed.
   ///
   /// In ko, this message translates to:
-  /// **'차트를 불러올 수 없어요'**
+  /// **'차트를 불러오지 못했어요.'**
   String get stocksChartLoadFailed;
 
   /// No description provided for @stocksSearch.
@@ -11371,17 +11359,29 @@ abstract class AppLocalizations {
   /// **'연결됨'**
   String get subConnected;
 
-  /// No description provided for @subBrokerLastVerified.
+  /// No description provided for @subBrokerStatusConnectedAt.
   ///
   /// In ko, this message translates to:
-  /// **'마지막 검증 · {date}'**
-  String subBrokerLastVerified(String date);
+  /// **'연결됨 · {date} 확인'**
+  String subBrokerStatusConnectedAt(String date);
 
-  /// No description provided for @subBrokerCollecting.
+  /// No description provided for @subBrokerStatusNone.
   ///
   /// In ko, this message translates to:
-  /// **'보유 주식·시세 자동 수집 중'**
-  String get subBrokerCollecting;
+  /// **'연결 안 됨'**
+  String get subBrokerStatusNone;
+
+  /// No description provided for @subBrokerDisconnectConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{broker} 연결을 해제할까요?'**
+  String subBrokerDisconnectConfirmTitle(String broker);
+
+  /// No description provided for @subBrokerDisconnectConfirmBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제하면 이 증권사의 보유 주식과 시세를 더 이상 가져오지 않아요. 다시 연결하려면 키를 새로 입력해야 해요.'**
+  String get subBrokerDisconnectConfirmBody;
 
   /// No description provided for @subConnecting.
   ///
@@ -13519,12 +13519,6 @@ abstract class AppLocalizations {
   /// **'증권 데이터 연동'**
   String get subBrokerSectionTitle;
 
-  /// No description provided for @subBrokerConnectDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'본인 API 키를 등록하면 보유 주식·시세를 가져와요'**
-  String get subBrokerConnectDesc;
-
   /// No description provided for @subBrokerPrimary.
   ///
   /// In ko, this message translates to:
@@ -13534,7 +13528,7 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerUseAsPrimary.
   ///
   /// In ko, this message translates to:
-  /// **'이 증권사 시세로 자산 평가하기'**
+  /// **'기본으로 쓰기'**
   String get subBrokerUseAsPrimary;
 
   /// No description provided for @subBrokerPrimaryNotice.
@@ -13549,23 +13543,17 @@ abstract class AppLocalizations {
   /// **'기본 증권사를 바꾸지 못했어요.'**
   String get subBrokerPrimaryFailed;
 
-  /// No description provided for @subBrokerKeyConnected.
-  ///
-  /// In ko, this message translates to:
-  /// **'{broker} API 키 연결됨'**
-  String subBrokerKeyConnected(String broker);
-
   /// No description provided for @subBrokerConnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 계정을 연결했어요.'**
+  /// **'{broker} 연결을 마쳤어요.'**
   String subBrokerConnected(String broker);
 
   /// No description provided for @subBrokerDisconnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker} 연결을 해제했어요.'**
-  String subBrokerDisconnected(String broker);
+  /// **'연결을 해제했어요.'**
+  String get subBrokerDisconnected;
 
   /// No description provided for @subBrokerPrimaryChanged.
   ///
@@ -13582,7 +13570,7 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerToggleReveal.
   ///
   /// In ko, this message translates to:
-  /// **'{field} 표시 전환'**
+  /// **'{field} 보기'**
   String subBrokerToggleReveal(String field);
 
   /// No description provided for @brokerToss.

@@ -58,7 +58,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'The values shown are the last balance, not live prices.';
 
   @override
-  String get securitiesLeaveBody => 'What you entered will be discarded.';
+  String get securitiesLeaveBody => 'What you wrote will be discarded.';
 
   @override
   String get withdrawUnconfirmed =>
@@ -69,6 +69,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unconfirmedDelete => 'We couldn\'t confirm it was deleted.';
+
+  @override
+  String get unconfirmedDisconnect =>
+      'We couldn\'t confirm it was disconnected.';
 
   @override
   String get unconfirmedProcess => 'We couldn\'t confirm it went through.';
@@ -5634,17 +5638,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get stocksChartTokenFailed => 'Failed to issue token';
-
-  @override
-  String get stocksChartHttpsError =>
-      'Security error: chart WebView is not HTTPS';
-
-  @override
-  String get stocksChartInitFailed => 'Chart initialization failed';
-
-  @override
-  String get stocksChartLoadFailed => 'Couldn\'t load chart';
+  String get stocksChartLoadFailed => 'Couldn\'t load the chart.';
 
   @override
   String get stocksSearch => 'Search stocks';
@@ -6257,12 +6251,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subConnected => 'Connected';
 
   @override
-  String subBrokerLastVerified(String date) {
-    return 'Last verified · $date';
+  String subBrokerStatusConnectedAt(String date) {
+    return 'Connected · Checked $date';
   }
 
   @override
-  String get subBrokerCollecting => 'Auto-collecting holdings and prices';
+  String get subBrokerStatusNone => 'Not connected';
+
+  @override
+  String subBrokerDisconnectConfirmTitle(String broker) {
+    return 'Disconnect $broker?';
+  }
+
+  @override
+  String get subBrokerDisconnectConfirmBody =>
+      'This broker\'s holdings and prices will no longer be imported. To connect again, you\'ll need to enter the keys again.';
 
   @override
   String get subConnecting => 'Connecting…';
@@ -7622,14 +7625,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subBrokerSectionTitle => 'Securities data link';
 
   @override
-  String get subBrokerConnectDesc =>
-      'Register your API key to import holdings and prices';
-
-  @override
   String get subBrokerPrimary => 'Primary';
 
   @override
-  String get subBrokerUseAsPrimary => 'Value assets with this provider';
+  String get subBrokerUseAsPrimary => 'Use as primary';
 
   @override
   String get subBrokerPrimaryNotice =>
@@ -7639,19 +7638,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subBrokerPrimaryFailed => 'Couldn\'t change the primary broker.';
 
   @override
-  String subBrokerKeyConnected(String broker) {
-    return '$broker API key connected';
-  }
-
-  @override
   String subBrokerConnected(String broker) {
-    return 'Connected your $broker account.';
+    return '$broker is connected.';
   }
 
   @override
-  String subBrokerDisconnected(String broker) {
-    return 'Disconnected from $broker.';
-  }
+  String get subBrokerDisconnected => 'Disconnected.';
 
   @override
   String subBrokerPrimaryChanged(String broker) {
@@ -7665,7 +7657,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subBrokerToggleReveal(String field) {
-    return 'Toggle $field visibility';
+    return 'Show $field';
   }
 
   @override

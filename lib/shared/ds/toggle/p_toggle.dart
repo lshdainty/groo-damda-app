@@ -20,7 +20,7 @@ const String toggleOnFont = 'Lucide500';
 /// 위젯이 그 값과 같은지 본다). 웹(desk-front `src/shared/ds/toggle`)과 같은 값이다.
 ///
 /// 이름은 고정이고 켬은 읽는 상태(toggled)가 알린다(웹 aria-pressed) — 상태마다 [semanticLabel] 을 바꾸지 않는다.
-/// 아이콘은 지금 상태를 그린다: 기능 단추(눈 · 종)는 lucide 의 -off 짝(`eye` → `eyeOff500`), 모으기 단추(관심 · 고정)는
+/// 아이콘은 지금 상태를 그린다: 기능 단추(눈 · 종)는 lucide 의 -off 짝(눈은 지금 상태 — 가림 끔 `eyeOff` → 보임 켬 `eye500`), 모으기 단추(관심 · 고정)는
 /// 사선 없이 같은 아이콘(`star` → `star500`)이다. 켬의 아이콘은 선 2.5 짝(500)을 준다. 켬 · 끔은 아이콘만 바뀐다 — 켬은 진한 색
 /// (fg-neutral) + 선 2.5, 끔은 흐린 색(fg-neutral-muted) + 선 2. 바탕은 켬 · 끔에 따라 바뀌지 않는다(옅은 바탕 · 반전은
 /// 고르지 않았다). 아이콘의 크기(20) · 색은 단추가 건다.
@@ -42,6 +42,7 @@ class PToggle extends StatelessWidget {
     required this.icon,
     required this.pressedIcon,
     this.tone = PToggleTone.defaultTone,
+    this.pressFill = true,
   });
 
   /// 고정 이름 — 켜고 끄는 것 하나("관심 등록" · "금액 가리기"). 상태마다 바꾸지 않는다.
@@ -53,13 +54,17 @@ class PToggle extends StatelessWidget {
   /// 눌러 바뀐 값 — 손을 뗄 때 바로. 없으면 비활성.
   final ValueChanged<bool>? onChanged;
 
-  /// 끔일 때의 아이콘(lucide, 선 2 — `LucideIcons.eye`) — 지금 상태를 그린다.
+  /// 끔일 때의 아이콘(lucide, 선 2 — 눈은 가림이라 `LucideIcons.eyeOff`) — 지금 상태를 그린다.
   final IconData icon;
 
-  /// 켬일 때의 아이콘(선 2.5 짝 — `LucideIcons.eyeOff500`). 기능 단추(눈 · 종)는 -off 짝이고, 모으기 단추(관심 · 고정)는
+  /// 켬일 때의 아이콘(선 2.5 짝 — 눈은 보임이라 `LucideIcons.eye500`). 기능 단추(눈 · 종)는 상태를 그리는 짝이고, 모으기 단추(관심 · 고정)는
   /// 사선 없이 같은 아이콘의 500 이다(`LucideIcons.star500`).
   final IconData pressedIcon;
   final PToggleTone tone;
+
+  /// 누르는 동안 바탕을 칠하는가 — 기본 true. 입력 칸 안 뒤 단추 자리([PInput.trailing])에서는 지우기 버튼처럼 상자를 하나 더
+  /// 그리지 않는다(false) — 눌림은 축소만, 상태는 아이콘으로만 말한다.
+  final bool pressFill;
 
   /// 보이는 상자 · 아이콘 — 누르는 영역은 44([PTouch.min]).
   static const double box = 40;
@@ -103,7 +108,7 @@ class PToggle extends StatelessWidget {
       ),
       builder: (context, isPressed, pressSize) {
         // 누름 바탕 — 브랜드 채움 위에는 누름 색 짝이 없어 칠하지 않는다
-        final background = isPressed && !inverted
+        final background = isPressed && !inverted && pressFill
             ? c.bgLayerDefaultPressed
             : const Color(0x00000000);
         return PressScale(

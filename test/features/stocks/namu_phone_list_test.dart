@@ -632,7 +632,8 @@ void main() {
         await tester.pump();
       }
       await tester.ensureVisible(_t('체결').first);
-      await tester.pumpAndSettle();
+      // 차트 로딩 자리가 ds 스켈레톤(끝없이 반짝임)이라 settle 하지 않는다
+      await tester.pump(const Duration(milliseconds: 400));
       await tester.tap(_t('체결').first);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
@@ -646,7 +647,7 @@ void main() {
         await tester.pump();
       }
       await tester.ensureVisible(_t('체결').first);
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 400));
       expect(_t('체결 내역이 없어요'), findsOneWidget, reason: '내렸다 올리니 호가 탭으로 돌아갔다');
     });
 

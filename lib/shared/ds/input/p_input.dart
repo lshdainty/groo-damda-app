@@ -119,6 +119,8 @@ class PInput extends PTextControl {
     this.textInputAction,
     this.onSubmitted,
     this.obscureText = false,
+    this.secret = false,
+    this.trailing,
     this.autofillHints,
     this.tabularFigures = false,
     this.placeholderKeepsColorWhenDisabled = false,
@@ -152,6 +154,14 @@ class PInput extends PTextControl {
 
   /// 가린 칸(비밀번호) — 키보드 사전 · 추천 · 학습에 남기지 않는다.
   final bool obscureText;
+
+  /// 자격증명 칸(API 키 · 시크릿) — 눈 Toggle 로 값을 벗겨 보는 동안([obscureText] false)에도 키보드 사전 · 추천 · 학습에
+  /// 남기지 않는다. 가린 칸([obscureText])은 이미 그렇다.
+  final bool secret;
+
+  /// 칸 안 오른쪽 끝 단추 자리 — 지우기 버튼과 같은 자리 규칙(보이는 원 + 누르는 영역 44, 입력 글 오른쪽 끝을 비운다,
+  /// input.md:84). 눈 Toggle("App Key 보기")이 쓴다. 단추의 누름은 단추가 받고 나머지 상자는 입력으로 간다.
+  final Widget? trailing;
   final Iterable<String>? autofillHints;
 
   /// 고정폭 숫자 — 자리마다 폭이 같은 숫자(인증 코드 칸 · input-otp.yaml value.numerals). 글자 · 예시 글에 건다.
@@ -242,10 +252,16 @@ class _PInputState extends PTextControlState<PInput> {
               fontFeatures: widget.tabularFigures ? _tabular : null,
             ),
             multiline: false,
-            keyboardType: widget.keyboardType,
+            // 벗겨 보는 동안에도 추천을 무시하는 키보드가 있어 비밀번호 종류로 연다(secret 만 — 가린 칸은 이미 가려 둔다)
+            keyboardType:
+                widget.keyboardType ??
+                (widget.secret && !widget.obscureText
+                    ? TextInputType.visiblePassword
+                    : null),
             textAlign: widget.textAlign,
             textInputAction: widget.textInputAction,
             obscureText: widget.obscureText,
+            secret: widget.secret,
             onSubmitted: widget.onSubmitted,
             autofillHints: widget.autofillHints,
             describedAffixes: [widget.prefixText, widget.suffixText],
@@ -261,6 +277,7 @@ class _PInputState extends PTextControlState<PInput> {
             label: l10n.dsInputClear,
             onPressed: clear,
           ),
+        if (widget.trailing != null) widget.trailing!,
       ],
     );
 
@@ -289,7 +306,8 @@ class _PInputState extends PTextControlState<PInput> {
                 extendEnd:
                     widget.suffixText == null &&
                     widget.suffixIcon == null &&
-                    !showClear,
+                    !showClear &&
+                    widget.trailing == null,
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: s.paddingX,

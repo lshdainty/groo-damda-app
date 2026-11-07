@@ -261,6 +261,7 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
     TextAlign textAlign = TextAlign.start,
     TextInputAction? textInputAction,
     bool obscureText = false,
+    bool secret = false,
     ValueChanged<String>? onSubmitted,
     Iterable<String>? autofillHints,
     List<String?> describedAffixes = const [],
@@ -295,9 +296,10 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
           textInputAction: textInputAction,
           obscureText: obscureText,
           // 가린 칸(비밀번호)은 자격증명 — 키보드 사전 · 추천 · 학습에 남기지 않는다
-          autocorrect: obscureText ? false : null,
-          enableSuggestions: !obscureText,
-          enableIMEPersonalizedLearning: !obscureText,
+          // [secret] 은 잠깐 벗겨 보는 동안에도 같다(눈 Toggle) — 가린 칸이 아니라 자격증명 칸이다
+          autocorrect: (obscureText || secret) ? false : null,
+          enableSuggestions: !(obscureText || secret),
+          enableIMEPersonalizedLearning: !(obscureText || secret),
           maxLength: maxGraphemeCount,
           maxLengthEnforcement:
               MaxLengthEnforcement.truncateAfterCompositionEnds,

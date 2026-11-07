@@ -5,9 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
-import 'package:groo_damda_app/features/subscription/presentation/broker_connect_card.dart';
+import 'package:groo_damda_app/features/subscription/presentation/broker_connect_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+
+import '../../support/plain_text.dart';
 
 // 라벨은 서버가 준다 — 나무는 App Key/App Secret, 토스는 Client ID/Client Secret.
 const _conn = BrokerConnection(
@@ -22,39 +26,32 @@ const _conn = BrokerConnection(
 );
 
 Widget _app() => ProviderScope(
+  overrides: [
+    brokerConnectionsProvider.overrideWith((ref) async => const [_conn]),
+  ],
   child: MaterialApp(
     theme: GrooTheme.dark(),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('ko'),
-    home: const Scaffold(
-      body: SingleChildScrollView(
-        child: BrokerConnectCard(connection: _conn, showPrimaryAction: false),
-      ),
-    ),
+    home: const BrokerConnectScreen(broker: 'NAMU'),
   ),
 );
 
-/// 서버가 준 라벨이 그대로 placeholder 라 그걸로 칸을 집는다.
+/// 칸 이름(Field 머리 글)으로 집는다 — 그 Field 안의 입력.
 EditableText _fieldFor(WidgetTester tester, String label) {
-  final field = tester
-      .widgetList<TextField>(find.byType(TextField))
-      .firstWhere(
-        (f) => f.decoration?.hintText == label,
-        orElse: () => throw StateError('"$label" 입력칸을 못 찾았다'),
-      );
-  return tester
-      .widgetList<EditableText>(find.byType(EditableText))
-      .firstWhere(
-        (e) => e.controller == field.controller,
-        orElse: () => throw StateError('"$label" 의 EditableText 를 못 찾았다'),
-      );
+  final field = find
+      .ancestor(of: findText(label), matching: find.byType(PField))
+      .first;
+  return tester.widget<EditableText>(
+    find.descendant(of: field, matching: find.byType(EditableText)),
+  );
 }
 
 void main() {
   testWidgets('Key 와 Secret 둘 다 처음엔 가려져 있다', (tester) async {
     await tester.pumpWidget(_app());
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     for (final label in ['App Key', 'App Secret']) {
       final e = _fieldFor(tester, label);
@@ -72,7 +69,7 @@ void main() {
 
   testWidgets('붙여넣은 키가 그대로 들어간다', (tester) async {
     await tester.pumpWidget(_app());
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     const key = 'PSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
     const secret = 'SEyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy';
@@ -86,10 +83,10 @@ void main() {
 
   testWidgets('눈 아이콘으로 잠깐 벗겨 봐도 학습은 계속 막힌다', (tester) async {
     await tester.pumpWidget(_app());
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // 서버 라벨이 그대로 토글 이름이 된다 — 칸이 둘이라 이름이 달라야 구분된다.
-    final keyToggle = find.bySemanticsLabel('App Key 표시 전환');
+    final keyToggle = find.bySemanticsLabel('App Key 보기');
     expect(keyToggle, findsOneWidget);
 
     await tester.tap(keyToggle);

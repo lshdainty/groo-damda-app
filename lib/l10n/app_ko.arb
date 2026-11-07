@@ -24,13 +24,14 @@
   "@stocksStaleLastPrice": {"description": "시세 폴링이 받아 둔 값이 있는 채 실패했을 때 섹션 Callout 본문(제목 stocksFailPrice) — 웹과 같은 글"},
   "stocksStaleLastBalance": "보이는 값은 시세가 아닌 마지막 잔액이에요.",
   "@stocksStaleLastBalance": {"description": "투자 평가 시세를 못 받아 서버 잔액으로 그린 자리의 Callout 본문 — 웹과 같은 글"},
-  "securitiesLeaveBody": "입력한 내용이 사라져요.",
+  "securitiesLeaveBody": "작성한 내용이 사라져요.",
   "@securitiesLeaveBody": {"description": "증권 연결 화면 나가기 확인창 본문(키를 친 화면) — 금액 가리기는 hideAmountsDiscardBody(\"고른\") 그대로"},
   "withdrawUnconfirmed": "해지됐는지 확인하지 못했어요. 앱을 다시 열어 확인해주세요.",
   "@withdrawUnconfirmed": {"description": "이용 해지 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE) — 웹과 같은 글"},
   "unconfirmedSave": "저장됐는지 확인하지 못했어요.",
   "@unconfirmedSave": {"description": "스낵바 — 저장 · 추가 쓰기의 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE). 한 문장(목록은 저절로 다시 받는다), [다시 시도] 없음 — 웹과 같은 글"},
   "unconfirmedDelete": "삭제됐는지 확인하지 못했어요.",
+  "unconfirmedDisconnect": "해제됐는지 확인하지 못했어요.",
   "@unconfirmedDelete": {"description": "스낵바 — 삭제 응답을 읽지 못했거나 받지 못했을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글"},
   "unconfirmedProcess": "처리됐는지 확인하지 못했어요.",
   "@unconfirmedProcess": {"description": "스낵바 — 그 밖 쓰기(기기 로그아웃 · 캘린더 나가기 · 모두 받음 등)의 응답을 못 받았을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글"},
@@ -3141,10 +3142,7 @@
       }
     }
   },
-  "stocksChartTokenFailed": "토큰 발급 실패",
-  "stocksChartHttpsError": "보안 오류: 차트 WebView 가 HTTPS 가 아닙니다",
-  "stocksChartInitFailed": "차트 초기화 실패",
-  "stocksChartLoadFailed": "차트를 불러올 수 없어요",
+  "stocksChartLoadFailed": "차트를 불러오지 못했어요.",
   "stocksSearch": "종목 검색",
   "stocksSearchPlaceholder": "종목 검색",
   "stocksSearchNoResults": "'{query}'에 대한 검색 결과가 없어요",
@@ -3462,15 +3460,24 @@
     }
   },
   "subConnected": "연결됨",
-  "subBrokerLastVerified": "마지막 검증 · {date}",
-  "@subBrokerLastVerified": {
+  "subBrokerStatusConnectedAt": "연결됨 · {date} 확인",
+  "@subBrokerStatusConnectedAt": {
     "placeholders": {
       "date": {
         "type": "String"
       }
     }
   },
-  "subBrokerCollecting": "보유 주식·시세 자동 수집 중",
+  "subBrokerStatusNone": "연결 안 됨",
+  "subBrokerDisconnectConfirmTitle": "{broker} 연결을 해제할까요?",
+  "@subBrokerDisconnectConfirmTitle": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "subBrokerDisconnectConfirmBody": "해제하면 이 증권사의 보유 주식과 시세를 더 이상 가져오지 않아요. 다시 연결하려면 키를 새로 입력해야 해요.",
   "subConnecting": "연결 중…",
   "subConnect": "연결하기",
   "subBrokerInvalidCred": "인증정보가 올바르지 않아요.",
@@ -4375,20 +4382,11 @@
   "settingsSecuritiesLinkDesc": "본인 API 키를 등록하면 보유 주식·시세를 자동으로 가져와요. 키는 서버에 암호화되어 저장되고 본인만 사용해요.",
   "securitiesLoadError": "증권사 목록을 불러오지 못했어요",
   "subBrokerSectionTitle": "증권 데이터 연동",
-  "subBrokerConnectDesc": "본인 API 키를 등록하면 보유 주식·시세를 가져와요",
   "subBrokerPrimary": "기본",
-  "subBrokerUseAsPrimary": "이 증권사 시세로 자산 평가하기",
+  "subBrokerUseAsPrimary": "기본으로 쓰기",
   "subBrokerPrimaryNotice": "가계부 자산은 여기서 고른 증권사 시세로 계산해요.",
   "subBrokerPrimaryFailed": "기본 증권사를 바꾸지 못했어요.",
-  "subBrokerKeyConnected": "{broker} API 키 연결됨",
-  "@subBrokerKeyConnected": {
-    "placeholders": {
-      "broker": {
-        "type": "String"
-      }
-    }
-  },
-  "subBrokerConnected": "{broker} 계정을 연결했어요.",
+  "subBrokerConnected": "{broker} 연결을 마쳤어요.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {
@@ -4396,14 +4394,7 @@
       }
     }
   },
-  "subBrokerDisconnected": "{broker} 연결을 해제했어요.",
-  "@subBrokerDisconnected": {
-    "placeholders": {
-      "broker": {
-        "type": "String"
-      }
-    }
-  },
+  "subBrokerDisconnected": "연결을 해제했어요.",
   "subBrokerPrimaryChanged": "이제 {broker} 시세로 자산을 평가해요.",
   "@subBrokerPrimaryChanged": {
     "placeholders": {
@@ -4420,7 +4411,7 @@
       }
     }
   },
-  "subBrokerToggleReveal": "{field} 표시 전환",
+  "subBrokerToggleReveal": "{field} 보기",
   "@subBrokerToggleReveal": {
     "placeholders": {
       "field": {
