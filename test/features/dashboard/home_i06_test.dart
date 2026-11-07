@@ -419,6 +419,24 @@ void main() {
     });
   });
 
+  group('카테고리 도넛 범례 비중', () {
+    testWidgets('늘 소수 첫째 자리 — 합이 100 에서 벗어나지 않는다', (tester) async {
+      await _pump(tester);
+      final ps = find.byKey(
+        const ValueKey('chart-donut-percent'),
+        skipOffstage: false,
+      );
+      expect(ps, findsWidgets);
+      var sum = 0.0;
+      for (final e in ps.evaluate()) {
+        final t = (e.widget as Text).data!;
+        expect(RegExp(r'^\d+\.\d%$').hasMatch(t), isTrue, reason: t);
+        sum += double.parse(t.replaceAll('%', ''));
+      }
+      expect(sum, closeTo(100, 0.3));
+    });
+  });
+
   group('이번 달 가계부 — 16', () {
     testWidgets('수입 · 지출 줄 원까지 · 수입 brand · 지출 neutral · 안내 % 색 없음', (
       tester,

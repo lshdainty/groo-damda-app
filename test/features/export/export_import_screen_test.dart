@@ -179,7 +179,61 @@ Future<void> _pump(
 }
 
 void main() {
+  group('내보내기 기간 계산 — 서버 PeriodResolver 와 같은 값', () {
+    test('THIS_YEAR = 1/1 ~ 12/31 — 연초 · 연중 · 연말, 파일명도 같은 범위', () {
+      for (final now in [
+        DateTime(2026, 1, 1),
+        DateTime(2026, 11, 7),
+        DateTime(2026, 12, 31),
+      ]) {
+        final r = resolveExportRange('THIS_YEAR', now);
+        expect(r.start, '2026-01-01', reason: '$now');
+        expect(r.end, '2026-12-31', reason: '$now');
+      }
+      final r = resolveExportRange('THIS_YEAR', DateTime(2026, 11, 7));
+      expect(
+        buildExportFilename('CSV', ['EXPENSE'], r),
+        'porest-expense-2026-01-01_2026-12-31.csv',
+      );
+      expect(
+        buildExportFilename('CSV', ['EXPENSE', 'ASSET'], r),
+        'groo-export-2026-01-01_2026-12-31.zip',
+      );
+    });
+    test('다른 기간은 그대로', () {
+      final now = DateTime(2026, 11, 7);
+      expect(resolveExportRange('THIS_MONTH', now), (
+        start: '2026-11-01',
+        end: '2026-11-30',
+      ));
+      expect(resolveExportRange('LAST_3_MONTHS', now), (
+        start: '2026-09-01',
+        end: '2026-11-30',
+      ));
+    });
+  });
+
   group('내보내기', () {
+    testWidgets('기간 "올해" — 1월 1일부터 12월 31일까지(서버 THIS_YEAR 와 같다)', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const ExportScreen(),
+        overrides: [
+          exportRepositoryProvider.overrideWith((ref) async => _ExportRepo()),
+        ],
+      );
+      await tester.pumpAndSettle();
+      final group = tester.widget<PRadioSelectBoxGroup<String>>(
+        find.byType(PRadioSelectBoxGroup<String>, skipOffstage: false).first,
+      );
+      final year = group.children.cast<PRadioSelectBox<String>>().firstWhere(
+        (b) => b.value == 'THIS_YEAR',
+      );
+      expect(year.description, '1월 1일~12월 31일');
+    });
+
     testWidgets('머리 · 탭 · 기간 1열 · 형식 1열 · 마스크 Checkbox · 바닥 짝', (tester) async {
       await _pump(
         tester,

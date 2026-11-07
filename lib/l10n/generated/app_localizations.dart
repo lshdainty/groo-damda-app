@@ -17124,6 +17124,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'~'**
   String get dateRangeSeparator;
+
+  /// 비중이 0 보다 크고 0.05% 미만일 때 — 0.0% 로 보이지 않게. 영어는 <0.1%
+  ///
+  /// In ko, this message translates to:
+  /// **'0.1% 미만'**
+  String get percentUnderTenth;
+
+  /// No description provided for @expCellLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}, {parts}'**
+  String expCellLabel(String date, String parts);
+
+  /// No description provided for @expCellOutPart.
+  ///
+  /// In ko, this message translates to:
+  /// **'지출 {amount}'**
+  String expCellOutPart(String amount);
+
+  /// No description provided for @expCellInPart.
+  ///
+  /// In ko, this message translates to:
+  /// **'수입 {amount}'**
+  String expCellInPart(String amount);
+
+  /// No description provided for @expCellHidden.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액 가림'**
+  String get expCellHidden;
 }
 
 class _AppLocalizationsDelegate

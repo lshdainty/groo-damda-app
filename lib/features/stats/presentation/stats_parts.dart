@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -430,8 +431,7 @@ class _StatsDonutSectionState extends State<StatsDonutSection> {
         amount: rest.fold<int>(0, (s, e) => s + e.amount),
       ),
     );
-    String pct(int v) =>
-        '${total == 0 ? '0.0' : (v * 100 / total).toStringAsFixed(1)}%';
+    String pct(int v) => formatShareOf(v, total, underOne: l.percentUnderTenth);
     String money(int v) => statsWon(v, masked);
     final totalText = money(total);
     final name = l.statsChartDonutName(widget.period.label(), totalText);

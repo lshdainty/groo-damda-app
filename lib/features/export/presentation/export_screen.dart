@@ -94,6 +94,63 @@ String _krLabel(String isoDate) {
   ).md;
 }
 
+/// 기간 이름 → 시작 · 끝(ISO). 서버 `PeriodResolver` 와 **같은 값**이다 — 특히 THIS_YEAR 는
+/// 1월 1일 ~ 12월 31일(끝이 이번 달 말일이 아니다, 2026-11-07 결정 4A). 안내 글과 파일명이 이 값을 쓴다.
+({String start, String end}) resolveExportRange(
+  String period,
+  DateTime now, {
+  DateTime? customFrom,
+  DateTime? customTo,
+}) {
+  DateTime firstOf(int y, int m) => DateTime(y, m, 1);
+  DateTime lastOf(int y, int m) => DateTime(y, m + 1, 0);
+  switch (period) {
+    case 'THIS_MONTH':
+      return (
+        start: _iso(firstOf(now.year, now.month)),
+        end: _iso(lastOf(now.year, now.month)),
+      );
+    case 'LAST_MONTH':
+      final d = DateTime(now.year, now.month - 1, 1);
+      return (
+        start: _iso(firstOf(d.year, d.month)),
+        end: _iso(lastOf(d.year, d.month)),
+      );
+    case 'LAST_3_MONTHS':
+      final d = DateTime(now.year, now.month - 2, 1);
+      return (
+        start: _iso(firstOf(d.year, d.month)),
+        end: _iso(lastOf(now.year, now.month)),
+      );
+    case 'THIS_YEAR':
+      return (start: '${now.year}-01-01', end: '${now.year}-12-31');
+    default:
+      return (
+        start: customFrom != null ? _iso(customFrom) : '',
+        end: customTo != null ? _iso(customTo) : '',
+      );
+  }
+}
+
+@visibleForTesting
+String buildExportFilename(
+  String format,
+  List<String> types,
+  ({String start, String end}) r,
+) {
+  final ext = format == 'EXCEL'
+      ? 'xlsx'
+      : format == 'JSON'
+      ? 'json'
+      : 'csv';
+  final rangePart = '${r.start}_${r.end}';
+  if (format != 'EXCEL' && types.length > 1) {
+    return 'groo-export-$rangePart.zip';
+  }
+  final namePart = types.length == 1 ? _slugOf(types.first) : 'export';
+  return 'porest-$namePart-$rangePart.$ext';
+}
+
 /// 데이터 내보내기 풀스크린 — 설정 > 데이터 내보내기.
 class ExportScreen extends ConsumerStatefulWidget {
   const ExportScreen({super.key});
@@ -138,40 +195,13 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           _customTo == null ||
           _customFrom!.isAfter(_customTo!));
 
-  ({String start, String end}) _resolveRange(String period) {
-    final now = DateTime.now();
-    DateTime firstOf(int y, int m) => DateTime(y, m, 1);
-    DateTime lastOf(int y, int m) => DateTime(y, m + 1, 0);
-    switch (period) {
-      case 'THIS_MONTH':
-        return (
-          start: _iso(firstOf(now.year, now.month)),
-          end: _iso(lastOf(now.year, now.month)),
-        );
-      case 'LAST_MONTH':
-        final d = DateTime(now.year, now.month - 1, 1);
-        return (
-          start: _iso(firstOf(d.year, d.month)),
-          end: _iso(lastOf(d.year, d.month)),
-        );
-      case 'LAST_3_MONTHS':
-        final d = DateTime(now.year, now.month - 2, 1);
-        return (
-          start: _iso(firstOf(d.year, d.month)),
-          end: _iso(lastOf(now.year, now.month)),
-        );
-      case 'THIS_YEAR':
-        return (
-          start: '${now.year}-01-01',
-          end: _iso(lastOf(now.year, now.month)),
-        );
-      default:
-        return (
-          start: _customFrom != null ? _iso(_customFrom!) : '',
-          end: _customTo != null ? _iso(_customTo!) : '',
-        );
-    }
-  }
+  ({String start, String end}) _resolveRange(String period) =>
+      resolveExportRange(
+        period,
+        DateTime.now(),
+        customFrom: _customFrom,
+        customTo: _customTo,
+      );
 
   Map<String, dynamic> _queryBody(List<String> types) {
     final r = _resolveRange(_period);
@@ -181,24 +211,6 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       if (_period == 'CUSTOM') 'endDate': r.end,
       'types': types,
     };
-  }
-
-  String _buildFilename(
-    String format,
-    List<String> types,
-    ({String start, String end}) r,
-  ) {
-    final ext = format == 'EXCEL'
-        ? 'xlsx'
-        : format == 'JSON'
-        ? 'json'
-        : 'csv';
-    final rangePart = '${r.start}_${r.end}';
-    if (format != 'EXCEL' && types.length > 1) {
-      return 'groo-export-$rangePart.zip';
-    }
-    final namePart = types.length == 1 ? _slugOf(types.first) : 'export';
-    return 'porest-$namePart-$rangePart.$ext';
   }
 
   String _mimeType(String format, List<String> types) {
@@ -296,7 +308,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       final r = _resolveRange(_period);
       final types = _orderedSelected();
       final body = {..._queryBody(types), 'format': _format, 'mask': _mask};
-      final filename = _buildFilename(_format, types, r);
+      final filename = buildExportFilename(_format, types, r);
       final file = await repo.download(body: body, filename: filename);
       try {
         await Share.shareXFiles([

@@ -9760,4 +9760,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dateRangeSeparator => '–';
+
+  @override
+  String get percentUnderTenth => '<0.1%';
+
+  @override
+  String expCellLabel(String date, String parts) {
+    return '$date, $parts';
+  }
+
+  @override
+  String expCellOutPart(String amount) {
+    return 'spent $amount';
+  }
+
+  @override
+  String expCellInPart(String amount) {
+    return 'income $amount';
+  }
+
+  @override
+  String get expCellHidden => 'amount hidden';
 }

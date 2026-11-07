@@ -405,6 +405,34 @@ void main() {
       expect(data.titlesData.leftTitles.sideTitles.showTitles, isFalse);
     });
 
+    testWidgets('이행률 퍼센트는 정수 — 막대 글 · 말풍선 · 표가 같은 값(76.43 → 76%)', (
+      tester,
+    ) async {
+      final now = DateTime.now();
+      await _pump(
+        tester,
+        const BudgetScreen(),
+        compliance: [
+          BudgetComplianceMonth(
+            year: now.year,
+            month: now.month,
+            totalLimit: 100,
+            totalSpent: 76,
+            compliancePercent: 76.43,
+          ),
+        ],
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('chart-bar-label-0')),
+          matching: find.text('76%'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('76.4', skipOffstage: false), findsNothing);
+      expect(find.text('76%', skipOffstage: false), findsAtLeastNWidgets(1));
+    });
+
     testWidgets('이행률 가장 큰 막대(2,855%) 위 % 글이 차트 위로 잘리지 않는다', (tester) async {
       final now = DateTime.now();
       await _pump(

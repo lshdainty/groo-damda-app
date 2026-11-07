@@ -9535,4 +9535,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dateRangeSeparator => '~';
+
+  @override
+  String get percentUnderTenth => '0.1% 미만';
+
+  @override
+  String expCellLabel(String date, String parts) {
+    return '$date, $parts';
+  }
+
+  @override
+  String expCellOutPart(String amount) {
+    return '지출 $amount';
+  }
+
+  @override
+  String expCellInPart(String amount) {
+    return '수입 $amount';
+  }
+
+  @override
+  String get expCellHidden => '금액 가림';
 }

@@ -10,6 +10,7 @@ import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -977,7 +978,7 @@ class _CategorySection extends StatelessWidget {
         hex: null,
       ),
     );
-    String pct(int v) => '${total == 0 ? 0 : (v * 100 / total).round()}%';
+    String pct(int v) => formatShareOf(v, total, underOne: l.percentUnderTenth);
     String money(int v) => masked ? _mask : formatWon(v);
     final totalText = masked ? _mask : formatWon(total);
     final label = l.dashCategoryChartLabel(month.month, totalText);

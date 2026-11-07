@@ -5484,5 +5484,16 @@
   "dateRangeSeparator": "~",
   "@dateRangeSeparator": {
     "description": "구간 기호 — 앞뒤를 붙여 쓴다(한국어 ~, 영어 en dash). 날짜 규칙 DESIGN.desk.md:3652"
-  }
+  },
+  "percentUnderTenth": "0.1% 미만",
+  "@percentUnderTenth": {
+    "description": "비중이 0 보다 크고 0.05% 미만일 때 — 0.0% 로 보이지 않게. 영어는 <0.1%"
+  },
+  "expCellLabel": "{date}, {parts}",
+  "@expCellLabel": {"placeholders": {"date": {"type": "String"}, "parts": {"type": "String"}}},
+  "expCellOutPart": "지출 {amount}",
+  "@expCellOutPart": {"placeholders": {"amount": {"type": "String"}}},
+  "expCellInPart": "수입 {amount}",
+  "@expCellInPart": {"placeholders": {"amount": {"type": "String"}}},
+  "expCellHidden": "금액 가림"
 }

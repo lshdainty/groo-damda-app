@@ -368,6 +368,18 @@ void main() {
       expect(findPlain('기타'), findsWidgets);
     });
 
+    testWidgets('범례 비중은 늘 소수 첫째 자리', (tester) async {
+      await _pump(tester);
+      final ps = find.byKey(const ValueKey('chart-donut-percent'));
+      expect(ps, findsWidgets);
+      for (final e in ps.evaluate()) {
+        expect(
+          RegExp(r'^(\d+\.\d%|0\.1% 미만)$').hasMatch((e.widget as Text).data!),
+          isTrue,
+        );
+      }
+    });
+
     testWidgets('범례 긴 이름은 모든 글자가 보이고(줄바꿈) 금액은 원까지', (tester) async {
       await _pump(tester);
       expect(findPlain('987,654,321원'), findsWidgets);

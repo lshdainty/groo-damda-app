@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/features/stocks/application/stocks_model.dart';
 import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -340,9 +341,28 @@ class StocksGroupSkeleton extends StatelessWidget {
 }
 
 /// 찾는 칸(입구) — Searchable List 칸 모양의 단추. 누르면 찾기 시트(밑줄형 large 40 · 돋보기 24 · 글 t6).
-class StocksSearchEntry extends StatelessWidget {
+class StocksSearchEntry extends StatefulWidget {
   const StocksSearchEntry({super.key, required this.onTap});
   final VoidCallback onTap;
+
+  @override
+  State<StocksSearchEntry> createState() => _StocksSearchEntryState();
+}
+
+class _StocksSearchEntryState extends State<StocksSearchEntry> {
+  /// 누르면 초점이 입구에 오고, 시트를 닫으면 route 가 그 초점을 돌려준다(키보드 · 화면 낭독 사용자가 제자리로 돌아온다).
+  final _focus = FocusNode(debugLabel: 'stocks search entry');
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  void _open() {
+    _focus.requestFocus();
+    widget.onTap();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +380,8 @@ class StocksSearchEntry extends StatelessWidget {
       child: PressArea(
         key: const ValueKey('stocks-search-entry'),
         enabled: true,
-        onTap: onTap,
+        focusNode: _focus,
+        onTap: _open,
         touchMin: 0,
         semantics: (child, enabled, tap) => Semantics(
           container: true,
@@ -549,10 +570,13 @@ class StocksCompositionBody extends StatelessWidget {
                     ),
                   ),
                   suffix: PListValue(
-                    child: Text(
+                    child: PText(
                       masked
                           ? '••••'
-                          : '${comp[i].weightPct.toStringAsFixed(2)}%',
+                          : formatShare(
+                              comp[i].weightPct,
+                              underOne: l.percentUnderTenth,
+                            ),
                       style: stocksMoneyStyle(context),
                     ),
                   ),
