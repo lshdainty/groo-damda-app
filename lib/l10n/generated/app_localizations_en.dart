@@ -1167,10 +1167,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetTapToChange => 'Tap to change';
 
   @override
-  String get assetStockSearchHint =>
-      'Search ticker or code (e.g. Samsung Elec, 005930)';
-
-  @override
   String get stockSecurityTypeIndex => 'Index';
 
   @override
@@ -2468,6 +2464,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get amountTooLarge => 'Amount can be up to 10 billion won.';
+
+  @override
+  String amountTooLargeAt(String limit) {
+    return 'Amount can be up to $limit.';
+  }
+
+  @override
+  String get amountLimitBalance => '100 billion won';
 
   @override
   String get budgetPickUsed => 'Already has a budget this month';
@@ -3854,7 +3858,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescStocks => 'Quotes · Holdings · Watchlist · Orders';
 
   @override
-  String get moreDescBudget => 'Monthly · By category';
+  String get moreDescBudget => 'Monthly budget · limits by category';
 
   @override
   String get moreDescSavingGoal => 'Goals · Progress';
@@ -3866,7 +3870,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescRecurring => 'Subscriptions · Fixed costs';
 
   @override
-  String get moreDescAccountCard => 'Add · Edit accounts & cards';
+  String get moreDescAccountCard => 'Manage accounts & cards';
 
   @override
   String get moreDescCalendar => 'Events · Recurring · Reminders';
@@ -3896,13 +3900,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescSettings => 'All settings menu';
 
   @override
-  String get moreDescNotifications => 'Push · Do not disturb';
+  String get moreDescNotifications => 'Push · Email · Do not disturb';
 
   @override
   String get moreDescExport => 'CSV · Excel · JSON';
 
   @override
   String get moreDescAccount => 'Profile · Security · Subscription';
+
+  @override
+  String get settingsDescCategory =>
+      'Add · edit · delete expense and income categories';
+
+  @override
+  String get settingsDescAccountCard => 'Manage accounts & cards';
+
+  @override
+  String get settingsDescBudget => 'Monthly budget · limits by category';
+
+  @override
+  String get settingsDescSavingGoal => 'Manage goals and track progress';
+
+  @override
+  String get settingsDescRecurring =>
+      'Subscriptions · fixed payments · regular income in one place';
+
+  @override
+  String get settingsDescPreset => 'Fill frequent entries with a single tap';
+
+  @override
+  String get settingsDescTodoTag => 'Manage todo tag names & colors';
+
+  @override
+  String get settingsDescMemoTag => 'Manage memo tag names & colors';
+
+  @override
+  String get settingsDescCalendarLabel =>
+      'Manage labels shared across all calendars';
+
+  @override
+  String get settingsDescCalendarShare =>
+      'Create multiple calendars and share with members';
+
+  @override
+  String get settingsDescAppearance =>
+      'Theme · language · region · default currency';
+
+  @override
+  String get settingsDescNotifications =>
+      'Payment due and budget overage alerts';
+
+  @override
+  String get settingsDescExport => 'Back up data as CSV · Excel · JSON';
+
+  @override
+  String get settingsDescAccount => 'Profile · security · logout';
+
+  @override
+  String get settingsDescPrivacyPolicy =>
+      'Data collected · retention · your rights';
+
+  @override
+  String get settingsDescGuide => 'How to use each screen · FAQ';
 
   @override
   String get moreSearchHint => 'Search menu';

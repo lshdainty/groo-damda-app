@@ -22,6 +22,7 @@ class _SettingsItem {
     required this.icon,
     required this.onTap,
     this.external = false,
+    this.desc,
   });
   final String label;
 
@@ -31,6 +32,9 @@ class _SettingsItem {
 
   /// 바깥 주소로 가는 줄(처리방침 · 설명서) — 링크 줄.
   final bool external;
+
+  /// 줄 설명 — 웹 설정과 같은 글(List 줄 설명 자리).
+  final String? desc;
 }
 
 class _SettingsGroup {
@@ -47,32 +51,38 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
       items: [
         _SettingsItem(
           label: l.settingsMenuCategory,
+          desc: l.settingsDescCategory,
           icon: LucideIcons.tag,
           onTap: (c) => c.push('/categories'),
         ),
         _SettingsItem(
           label: l.settingsMenuAccountCard,
+          desc: l.settingsDescAccountCard,
           icon: LucideIcons.creditCard,
           onTap: (c) => c.push('/account-card-manage'),
         ),
         _SettingsItem(
           label: l.settingsMenuBudget,
+          desc: l.settingsDescBudget,
           icon: LucideIcons.filePen,
           // 웹 정합: 전체 > 설정 > 예산 설정 → BudgetManager 페이지 (개요 /budget 아님).
           onTap: (c) => c.push('/budget/settings'),
         ),
         _SettingsItem(
           label: l.navSavingGoals,
+          desc: l.settingsDescSavingGoal,
           icon: LucideIcons.piggyBank,
           onTap: (c) => c.push('/saving-goals'),
         ),
         _SettingsItem(
           label: l.settingsMenuRecurring,
+          desc: l.settingsDescRecurring,
           icon: LucideIcons.repeat,
           onTap: (c) => c.push('/recurring'),
         ),
         _SettingsItem(
           label: l.settingsMenuPreset,
+          desc: l.settingsDescPreset,
           icon: LucideIcons.bookmark,
           onTap: (c) => c.push('/presets'),
         ),
@@ -84,17 +94,20 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
       items: [
         _SettingsItem(
           label: l.settingsMenuTodoTag,
+          desc: l.settingsDescTodoTag,
           icon: LucideIcons.tags,
           onTap: (c) => c.push('/settings/todo-tags'),
         ),
         // 메모 태그는 할 일 태그 바로 아래다 — 웹 설정도 같은 순서로 놓는다.
         _SettingsItem(
           label: l.settingsMenuMemoTag,
+          desc: l.settingsDescMemoTag,
           icon: LucideIcons.notebookTabs,
           onTap: (c) => c.push('/settings/memo-tags'),
         ),
         _SettingsItem(
           label: l.settingsMenuCalendarLabel,
+          desc: l.settingsDescCalendarLabel,
           icon: LucideIcons.tag,
           onTap: (c) => c.push('/settings/calendar-labels'),
         ),
@@ -105,6 +118,7 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
       items: [
         _SettingsItem(
           label: l.settingsMenuCalendarShare,
+          desc: l.settingsDescCalendarShare,
           icon: LucideIcons.calendarCog,
           onTap: (c) => c.push('/settings/calendar-share'),
         ),
@@ -115,6 +129,7 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
       items: [
         _SettingsItem(
           label: l.settingsMenuAppearance,
+          desc: l.settingsDescAppearance,
           icon: LucideIcons.palette,
           onTap: (c) => c.push('/settings/appearance'),
         ),
@@ -123,6 +138,7 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
         // 화면 제목과 같은 키를 쓴다(위 표시 설정·아래 업데이트와 같은 방식).
         _SettingsItem(
           label: l.notiSettings,
+          desc: l.settingsDescNotifications,
           icon: LucideIcons.bell,
           onTap: (c) => c.push('/settings/notifications'),
         ),
@@ -140,6 +156,7 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
       items: [
         _SettingsItem(
           label: l.exportTitle,
+          desc: l.settingsDescExport,
           icon: LucideIcons.download,
           onTap: (c) => c.push('/settings/export-data'),
         ),
@@ -152,11 +169,13 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
         // 메뉴 이름 = 그 화면의 제목 — 화면 제목 `accountTitle` 과 같은 키를 쓴다.
         _SettingsItem(
           label: l.accountTitle,
+          desc: l.settingsDescAccount,
           icon: LucideIcons.user,
           onTap: (c) => c.push('/account'),
         ),
         _SettingsItem(
           label: l.settingsMenuPrivacyPolicy,
+          desc: l.settingsDescPrivacyPolicy,
           icon: LucideIcons.shieldCheck,
           onTap: _openPrivacyPolicy,
           external: true,
@@ -168,6 +187,7 @@ List<_SettingsGroup> _buildGroups(BuildContext ctx) {
       items: [
         _SettingsItem(
           label: l.settingsMenuGuide,
+          desc: l.settingsDescGuide,
           icon: LucideIcons.bookOpen,
           onTap: _openGuide,
           external: true,
@@ -300,6 +320,7 @@ class SettingsScreen extends ConsumerWidget {
                         item.external
                             ? PListLinkItem(
                                 title: item.label,
+                                detail: item.desc,
                                 prefix: ExcludeSemantics(
                                   child: Icon(item.icon),
                                 ),
@@ -308,6 +329,7 @@ class SettingsScreen extends ConsumerWidget {
                               )
                             : PListButtonItem(
                                 title: item.label,
+                                detail: item.desc,
                                 prefix: ExcludeSemantics(
                                   child: Icon(item.icon),
                                 ),

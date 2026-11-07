@@ -347,6 +347,68 @@ void main() {
       );
     });
 
+    testWidgets('줄마다 웹 설정과 같은 설명이 붙는다', (tester) async {
+      await _pump(tester, const SettingsScreen());
+      for (final d in const [
+        '지출 · 수입 카테고리 추가 · 수정 · 삭제',
+        '계좌 · 카드 관리',
+        '월간 예산 · 카테고리별 한도',
+        '목표 추가 · 수정 · 삭제 및 진행률 관리',
+        '구독 · 고정 결제 · 정기 수입을 한곳에서',
+        '자주 쓰는 내역을 한 번 탭으로 채우기',
+        '할 일 태그 이름 · 색 관리',
+        '메모 태그 이름 · 색 관리',
+        '전 캘린더 공용 라벨 관리',
+        '다중 캘린더 생성과 멤버 공유 설정',
+        '테마 · 언어 · 기준 지역 · 기본 통화',
+        '결제 예정 · 예산 초과 알림',
+        'CSV · Excel · JSON으로 데이터 백업',
+        '프로필 · 보안 · 로그아웃',
+        '수집 항목 · 보유기간 · 권리 안내',
+        '화면별 사용법과 자주 묻는 질문',
+      ]) {
+        // 계좌 · 카드 관리는 줄 이름과 설명이 같은 글이라 둘이 보인다
+        expect(
+          findPlain(d),
+          d == '계좌 · 카드 관리' ? findsNWidgets(2) : findsOneWidget,
+          reason: d,
+        );
+      }
+    });
+
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('줄 높이(폭 360 · 글자 ${(scale * 100).round()}%) — 넘침 0', (
+        tester,
+      ) async {
+        await _pump(tester, const SettingsScreen(), scale: scale);
+        // 설명이 붙은 설정 줄만 잰다(계정 줄은 제외)
+        final heights = <double>[];
+        for (final e
+            in find
+                .byWidgetPredicate(
+                  (w) =>
+                      (w is PListButtonItem && w.detail != null) ||
+                      (w is PListLinkItem && w.detail != null),
+                )
+                .evaluate()) {
+          final w = e.widget;
+          if (w is PListButtonItem &&
+              w.key == const ValueKey('settings-account-row')) {
+            continue;
+          }
+          heights.add(
+            tester.getSize(find.byElementPredicate((x) => x == e)).height,
+          );
+        }
+        heights.sort();
+        // ignore: avoid_print
+        print(
+          'SETTINGS_ROW_HEIGHTS scale=$scale rows=${heights.length} min=${heights.first} max=${heights.last}',
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     testWidgets('글자 200% 에서 넘침 0', (tester) async {
       await _pump(tester, const SettingsScreen(), scale: 2);
       expect(tester.takeException(), isNull);

@@ -114,7 +114,7 @@ void main() {
 
     expect(findText('거래 기록 · 1'), findsOneWidget);
     expect(findText('매수 · 가람전자 10주'), findsOneWidget);
-    expect(findText('2026-10-19'), findsOneWidget);
+    expect(findText('10월 19일'), findsOneWidget);
 
     // 거래 기록은 보유 종목 아래, 최근 거래 위
     final holdings = tester.getTopLeft(findText('보유 종목 · 1')).dy;

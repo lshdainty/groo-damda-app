@@ -37,4 +37,11 @@ void main() {
     expect(tradeDateLabel(_t('2026-10-10T14:30:00')), '10월 10일');
     expect(tradeDateLabel(_t('몰라')), '몰라');
   });
+
+  test('거래 기록 줄 날짜 — 올해는 연도 없이, 다른 해는 연도 붙여', () {
+    final year = DateTime.now().year;
+    expect(tradeRowDate(_t('$year-10-10T14:30:00')), '10월 10일');
+    expect(tradeRowDate(_t('2001-10-10T14:30:00')), '2001년 10월 10일');
+    expect(tradeRowDate(_t('몰라')), '몰라');
+  });
 }

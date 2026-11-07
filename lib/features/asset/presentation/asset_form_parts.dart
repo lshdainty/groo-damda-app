@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -169,7 +170,7 @@ class AssetMemoField extends StatelessWidget {
 /// 한도 상한(`kBalanceMax`)이다. 도움말 · 안내는 Field 설명이다(여러 줄이면 줄바꿈으로 잇는다).
 ///
 /// [descriptionIcon] 은 설명 앞 아이콘(한도 초과 안내의 경고) — 칸을 오류로 칠하지 않는다(저장을 막지 않는 안내).
-class AssetAmountField extends StatelessWidget {
+class AssetAmountField extends StatefulWidget {
   const AssetAmountField({
     super.key,
     required this.label,
@@ -194,23 +195,44 @@ class AssetAmountField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
 
   @override
+  State<AssetAmountField> createState() => _AssetAmountFieldState();
+}
+
+class _AssetAmountFieldState extends State<AssetAmountField> {
+  /// 1,000억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  bool _over = false;
+  late final List<TextInputFormatter> _formatters = [
+    AmountInputFormatter(
+      max: kBalanceMax,
+      onLimit: (over) {
+        if (over != _over && mounted) setState(() => _over = over);
+      },
+    ),
+  ];
+
+  @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return PField(
-      label: label,
-      indicator: optional ? PFieldIndicator.optional : PFieldIndicator.none,
-      readOnly: readOnly,
-      description: description,
-      descriptionIcon: descriptionIcon,
+      label: widget.label,
+      indicator: widget.optional
+          ? PFieldIndicator.optional
+          : PFieldIndicator.none,
+      readOnly: widget.readOnly,
+      description: widget.description,
+      descriptionIcon: widget.descriptionIcon,
+      invalid: _over,
+      errorMessage: _over ? l.amountTooLargeAt(l.amountLimitBalance) : null,
       child: PInput(
-        key: inputKey,
-        controller: controller,
+        key: widget.inputKey,
+        controller: widget.controller,
         placeholder: '0',
-        suffixText: unit,
+        suffixText: widget.unit,
         tabularFigures: true,
-        readOnly: readOnly,
+        readOnly: widget.readOnly,
         keyboardType: TextInputType.number,
-        inputFormatters: const [AmountInputFormatter(max: kBalanceMax)],
-        onChanged: onChanged,
+        inputFormatters: _formatters,
+        onChanged: widget.onChanged,
       ),
     );
   }

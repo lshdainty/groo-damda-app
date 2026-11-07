@@ -842,7 +842,7 @@ Widget _tradeRow(
   final tr = trade;
   final pl = tr.realizedPl;
   final desc = [
-    tradeDateOnly(tr),
+    tradeRowDate(tr),
     if (tr.tradeType == 'SELL' && pl != null && pl != 0)
       '${l.tradeRealizedPreview} ${masked ? '••••' : tradeSignedKrw(pl)}',
   ].join(' · ');
@@ -877,6 +877,13 @@ String tradeDateTimeText(AssetTrade tr) {
   return localeIsEn()
       ? '$day at ${timeOfDay12(dt)}'
       : '$day ${timeOfDay12(dt)}';
+}
+
+/// 거래 기록 줄의 날짜 — 날짜 규칙(올해는 "10월 10일", 다른 해는 "2025년 10월 10일", en "Oct 10"). 못 읽으면 서버 값 그대로.
+String tradeRowDate(AssetTrade tr) {
+  final raw = tradeDateOnly(tr);
+  final dt = DateTime.tryParse(raw);
+  return dt == null ? raw : formatDay(dt).md;
 }
 
 /// 확인창 문장 안의 거래 날짜 — ko "10월 19일" · en "Oct 19"(연도 없음). 못 읽으면 서버 값 그대로.

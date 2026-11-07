@@ -2215,12 +2215,6 @@ abstract class AppLocalizations {
   /// **'변경하려면 탭'**
   String get assetTapToChange;
 
-  /// No description provided for @assetStockSearchHint.
-  ///
-  /// In ko, this message translates to:
-  /// **'종목명 · 코드 검색 (예: 삼성전자, 005930)'**
-  String get assetStockSearchHint;
-
   /// No description provided for @stockSecurityTypeIndex.
   ///
   /// In ko, this message translates to:
@@ -4548,6 +4542,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'금액은 100억원까지 입력할 수 있어요.'**
   String get amountTooLarge;
+
+  /// No description provided for @amountTooLargeAt.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액은 {limit}까지 입력할 수 있어요.'**
+  String amountTooLargeAt(String limit);
+
+  /// No description provided for @amountLimitBalance.
+  ///
+  /// In ko, this message translates to:
+  /// **'1,000억원'**
+  String get amountLimitBalance;
 
   /// No description provided for @budgetPickUsed.
   ///
@@ -6964,7 +6970,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreDescBudget.
   ///
   /// In ko, this message translates to:
-  /// **'월간 · 카테고리별'**
+  /// **'월간 예산 · 카테고리별 한도'**
   String get moreDescBudget;
 
   /// No description provided for @moreDescSavingGoal.
@@ -6976,7 +6982,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreDescStats.
   ///
   /// In ko, this message translates to:
-  /// **'카테고리 · 트렌드 · 비교'**
+  /// **'카테고리 · 추이 · 비교'**
   String get moreDescStats;
 
   /// No description provided for @moreDescRecurring.
@@ -6988,7 +6994,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreDescAccountCard.
   ///
   /// In ko, this message translates to:
-  /// **'계좌 · 카드 추가 · 편집'**
+  /// **'계좌 · 카드 관리'**
   String get moreDescAccountCard;
 
   /// No description provided for @moreDescCalendar.
@@ -7048,7 +7054,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreDescNotifications.
   ///
   /// In ko, this message translates to:
-  /// **'푸시 · 방해 금지'**
+  /// **'푸시 · 이메일 · 방해 금지'**
   String get moreDescNotifications;
 
   /// No description provided for @moreDescExport.
@@ -7062,6 +7068,102 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'프로필 · 보안 · 구독'**
   String get moreDescAccount;
+
+  /// No description provided for @settingsDescCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'지출 · 수입 카테고리 추가 · 수정 · 삭제'**
+  String get settingsDescCategory;
+
+  /// No description provided for @settingsDescAccountCard.
+  ///
+  /// In ko, this message translates to:
+  /// **'계좌 · 카드 관리'**
+  String get settingsDescAccountCard;
+
+  /// No description provided for @settingsDescBudget.
+  ///
+  /// In ko, this message translates to:
+  /// **'월간 예산 · 카테고리별 한도'**
+  String get settingsDescBudget;
+
+  /// No description provided for @settingsDescSavingGoal.
+  ///
+  /// In ko, this message translates to:
+  /// **'목표 추가 · 수정 · 삭제 및 진행률 관리'**
+  String get settingsDescSavingGoal;
+
+  /// No description provided for @settingsDescRecurring.
+  ///
+  /// In ko, this message translates to:
+  /// **'구독 · 고정 결제 · 정기 수입을 한곳에서'**
+  String get settingsDescRecurring;
+
+  /// No description provided for @settingsDescPreset.
+  ///
+  /// In ko, this message translates to:
+  /// **'자주 쓰는 내역을 한 번 탭으로 채우기'**
+  String get settingsDescPreset;
+
+  /// No description provided for @settingsDescTodoTag.
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일 태그 이름 · 색 관리'**
+  String get settingsDescTodoTag;
+
+  /// No description provided for @settingsDescMemoTag.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 태그 이름 · 색 관리'**
+  String get settingsDescMemoTag;
+
+  /// No description provided for @settingsDescCalendarLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'전 캘린더 공용 라벨 관리'**
+  String get settingsDescCalendarLabel;
+
+  /// No description provided for @settingsDescCalendarShare.
+  ///
+  /// In ko, this message translates to:
+  /// **'다중 캘린더 생성과 멤버 공유 설정'**
+  String get settingsDescCalendarShare;
+
+  /// No description provided for @settingsDescAppearance.
+  ///
+  /// In ko, this message translates to:
+  /// **'테마 · 언어 · 기준 지역 · 기본 통화'**
+  String get settingsDescAppearance;
+
+  /// No description provided for @settingsDescNotifications.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 예정 · 예산 초과 알림'**
+  String get settingsDescNotifications;
+
+  /// No description provided for @settingsDescExport.
+  ///
+  /// In ko, this message translates to:
+  /// **'CSV · Excel · JSON으로 데이터 백업'**
+  String get settingsDescExport;
+
+  /// No description provided for @settingsDescAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로필 · 보안 · 로그아웃'**
+  String get settingsDescAccount;
+
+  /// No description provided for @settingsDescPrivacyPolicy.
+  ///
+  /// In ko, this message translates to:
+  /// **'수집 항목 · 보유기간 · 권리 안내'**
+  String get settingsDescPrivacyPolicy;
+
+  /// No description provided for @settingsDescGuide.
+  ///
+  /// In ko, this message translates to:
+  /// **'화면별 사용법과 자주 묻는 질문'**
+  String get settingsDescGuide;
 
   /// No description provided for @moreSearchHint.
   ///

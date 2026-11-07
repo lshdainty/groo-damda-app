@@ -1145,9 +1145,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetTapToChange => '변경하려면 탭';
 
   @override
-  String get assetStockSearchHint => '종목명 · 코드 검색 (예: 삼성전자, 005930)';
-
-  @override
   String get stockSecurityTypeIndex => '지수';
 
   @override
@@ -2422,6 +2419,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get amountTooLarge => '금액은 100억원까지 입력할 수 있어요.';
+
+  @override
+  String amountTooLargeAt(String limit) {
+    return '금액은 $limit까지 입력할 수 있어요.';
+  }
+
+  @override
+  String get amountLimitBalance => '1,000억원';
 
   @override
   String get budgetPickUsed => '이번 달 예산이 있어요';
@@ -3775,19 +3780,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreDescStocks => '시세 · 보유 · 관심 · 호가';
 
   @override
-  String get moreDescBudget => '월간 · 카테고리별';
+  String get moreDescBudget => '월간 예산 · 카테고리별 한도';
 
   @override
   String get moreDescSavingGoal => '목표 · 진행률';
 
   @override
-  String get moreDescStats => '카테고리 · 트렌드 · 비교';
+  String get moreDescStats => '카테고리 · 추이 · 비교';
 
   @override
   String get moreDescRecurring => '구독 · 고정비';
 
   @override
-  String get moreDescAccountCard => '계좌 · 카드 추가 · 편집';
+  String get moreDescAccountCard => '계좌 · 카드 관리';
 
   @override
   String get moreDescCalendar => '일정 · 반복 · 알림';
@@ -3817,13 +3822,61 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreDescSettings => '전체 설정 메뉴';
 
   @override
-  String get moreDescNotifications => '푸시 · 방해 금지';
+  String get moreDescNotifications => '푸시 · 이메일 · 방해 금지';
 
   @override
   String get moreDescExport => 'CSV · Excel · JSON';
 
   @override
   String get moreDescAccount => '프로필 · 보안 · 구독';
+
+  @override
+  String get settingsDescCategory => '지출 · 수입 카테고리 추가 · 수정 · 삭제';
+
+  @override
+  String get settingsDescAccountCard => '계좌 · 카드 관리';
+
+  @override
+  String get settingsDescBudget => '월간 예산 · 카테고리별 한도';
+
+  @override
+  String get settingsDescSavingGoal => '목표 추가 · 수정 · 삭제 및 진행률 관리';
+
+  @override
+  String get settingsDescRecurring => '구독 · 고정 결제 · 정기 수입을 한곳에서';
+
+  @override
+  String get settingsDescPreset => '자주 쓰는 내역을 한 번 탭으로 채우기';
+
+  @override
+  String get settingsDescTodoTag => '할 일 태그 이름 · 색 관리';
+
+  @override
+  String get settingsDescMemoTag => '메모 태그 이름 · 색 관리';
+
+  @override
+  String get settingsDescCalendarLabel => '전 캘린더 공용 라벨 관리';
+
+  @override
+  String get settingsDescCalendarShare => '다중 캘린더 생성과 멤버 공유 설정';
+
+  @override
+  String get settingsDescAppearance => '테마 · 언어 · 기준 지역 · 기본 통화';
+
+  @override
+  String get settingsDescNotifications => '결제 예정 · 예산 초과 알림';
+
+  @override
+  String get settingsDescExport => 'CSV · Excel · JSON으로 데이터 백업';
+
+  @override
+  String get settingsDescAccount => '프로필 · 보안 · 로그아웃';
+
+  @override
+  String get settingsDescPrivacyPolicy => '수집 항목 · 보유기간 · 권리 안내';
+
+  @override
+  String get settingsDescGuide => '화면별 사용법과 자주 묻는 질문';
 
   @override
   String get moreSearchHint => '메뉴 검색';

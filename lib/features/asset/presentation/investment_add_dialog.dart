@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -834,6 +835,26 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
   /// 연동 줄의 평가액(읽기 전용) — 시세가 바뀔 때마다 글만 바꾼다.
   final TextEditingController _linkedValueCtrl = TextEditingController();
 
+  /// 1,000억을 넘겨 입력을 막았나(평가액 · 매수원가) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  bool _valueOver = false;
+  bool _costOver = false;
+  late final List<TextInputFormatter> _valueFormatters = [
+    AmountInputFormatter(
+      max: kBalanceMax,
+      onLimit: (over) {
+        if (over != _valueOver && mounted) setState(() => _valueOver = over);
+      },
+    ),
+  ];
+  late final List<TextInputFormatter> _costFormatters = [
+    AmountInputFormatter(
+      max: kBalanceMax,
+      onLimit: (over) {
+        if (over != _costOver && mounted) setState(() => _costOver = over);
+      },
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -915,6 +936,10 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
     final valueField = PField(
       label: l.assetHoldingValueLabel,
       description: h.linked ? null : widget.krwHint,
+      invalid: !h.linked && _valueOver,
+      errorMessage: !h.linked && _valueOver
+          ? l.amountTooLargeAt(l.amountLimitBalance)
+          : null,
       child: h.linked
           ? PInput(
               controller: _linkedValueCtrl,
@@ -926,7 +951,7 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
           : PInput(
               controller: _valueCtrl,
               keyboardType: TextInputType.number,
-              inputFormatters: const [AmountInputFormatter(max: kBalanceMax)],
+              inputFormatters: _valueFormatters,
               suffixText: wonUnit(),
               tabularFigures: true,
               onChanged: _onValueChanged,
@@ -1032,10 +1057,14 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
                     ?widget.krwHint,
                     l.holdingAvgPriceInline(krwSigned(avg, false, unit: true)),
                   ].join('\n'),
+            invalid: _costOver,
+            errorMessage: _costOver
+                ? l.amountTooLargeAt(l.amountLimitBalance)
+                : null,
             child: PInput(
               controller: _costCtrl,
               keyboardType: TextInputType.number,
-              inputFormatters: const [AmountInputFormatter(max: kBalanceMax)],
+              inputFormatters: _costFormatters,
               placeholder: '0',
               suffixText: wonUnit(),
               tabularFigures: true,
