@@ -102,4 +102,51 @@ void main() {
     expect(findTextContaining('boom-internal'), findsNothing);
     expect(findTextContaining('초기화'), findsNothing);
   });
+
+  testWidgets('글자 200% · 폭 360 — 실패 칸이 넘치지 않고 [다시 시도] 가 화면 안에서 눌린다', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final adapter = _Adapter((_) => _status(500, '{}'));
+    final dio = Dio()..httpClientAdapter = adapter;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dioProvider.overrideWith((ref) async => dio)],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(2.0)),
+            child: child!,
+          ),
+          home: const Scaffold(
+            body: SingleChildScrollView(
+              child: ChartWebView(
+                symbol: '005930',
+                isUs: false,
+                range: '1D',
+                height: kStockChartWebViewHeight,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: '212 고정 칸이면 46px 넘쳤다');
+    expect(findText('차트를 불러오지 못했어요.'), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('chart-load-failed'))).height,
+      greaterThan(0),
+    );
+    await tester.tap(findText('다시 시도'));
+    await tester.pumpAndSettle();
+    expect(adapter.calls, 2);
+  });
 }

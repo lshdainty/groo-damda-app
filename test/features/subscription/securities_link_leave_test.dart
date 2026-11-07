@@ -17,7 +17,10 @@ import 'package:groo_damda_app/features/subscription/data/subscription_repositor
 import 'package:groo_damda_app/features/subscription/presentation/broker_connect_screen.dart';
 import 'package:groo_damda_app/features/subscription/presentation/securities_link_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
+import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
 import '../../support/plain_text.dart';
 
@@ -70,6 +73,9 @@ class _Repo extends SubscriptionRepository {
   final gate = Completer<void>();
   final disconnected = <String>[];
   final primaries = <String>[];
+  Object? disconnectError;
+  Object? primaryError;
+  Completer<void>? disconnectGate;
 
   @override
   Future<void> registerBrokerCredential(
@@ -83,11 +89,19 @@ class _Repo extends SubscriptionRepository {
   Future<void> disconnectBrokerCredential(
     String broker, {
     bool silent = false,
-  }) async => disconnected.add(broker);
+  }) async {
+    await disconnectGate?.future;
+    final e = disconnectError;
+    if (e != null) throw e;
+    disconnected.add(broker);
+  }
 
   @override
-  Future<void> setPrimaryBroker(String broker, {bool silent = false}) async =>
-      primaries.add(broker);
+  Future<void> setPrimaryBroker(String broker, {bool silent = false}) async {
+    final e = primaryError;
+    if (e != null) throw e;
+    primaries.add(broker);
+  }
 }
 
 Future<GoRouter> _pump(
@@ -95,6 +109,7 @@ Future<GoRouter> _pump(
   _Repo? repo,
   List<BrokerConnection> connections = const [_toss, _namu],
   String open = '/settings/securities',
+  List<int>? reads,
 }) async {
   tester.view.physicalSize = const Size(390 * 2, 1400 * 2);
   tester.view.devicePixelRatio = 2;
@@ -126,7 +141,10 @@ Future<GoRouter> _pump(
     ProviderScope(
       retry: (_, _) => null,
       overrides: [
-        brokerConnectionsProvider.overrideWith((ref) async => connections),
+        brokerConnectionsProvider.overrideWith((ref) async {
+          reads?.add(1);
+          return connections;
+        }),
         subscriptionRepositoryProvider.overrideWith(
           (ref) async => repo ?? _Repo(),
         ),
@@ -137,6 +155,8 @@ Future<GoRouter> _pump(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('ko'),
+        builder: (context, child) =>
+            PSnackbarHost(closeLabel: '닫기', child: child!),
       ),
     ),
   );
@@ -300,13 +320,28 @@ void main() {
       }
 
       expect(fill(), const Color(0x00000000), reason: '끔');
+      expect(
+        tester
+            .widget<Icon>(find.byKey(const ValueKey('toggle-icon')).first)
+            .icon,
+        LucideIcons.eyeOff,
+        reason: '끔(가림) = eye-off',
+      );
+      // 누르는 동안에도 칸 안에 눌림 바탕 상자를 그리지 않는다(지우기 버튼과 같은 모양)
+      final hold = await tester.startGesture(
+        tester.getCenter(find.bySemanticsLabel('App Key 보기')),
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(fill(), const Color(0x00000000), reason: '누르는 동안');
+      await hold.cancel();
+      await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('App Key 보기'));
       await tester.pumpAndSettle();
       expect(fill(), const Color(0x00000000), reason: '켬(손을 뗀 뒤)');
       final icon = tester.widget<Icon>(
         find.byKey(const ValueKey('toggle-icon')).first,
       );
-      expect(icon.icon, LucideIcons.eyeOff500, reason: '켬 상태는 아이콘이 말한다');
+      expect(icon.icon, LucideIcons.eye500, reason: '켬(보임) = eye — 지금 상태를 그린다');
     });
   });
 
@@ -365,5 +400,117 @@ void main() {
       );
       expect(findText('기본으로 쓰기'), findsNothing);
     });
+  });
+  group('해제 · 기본 지정 실패', () {
+    final noResponse = ApiException(code: kApiNoResponseCode, message: 'x');
+    final server = ApiException(code: 'X', message: '서버 원문', statusCode: 500);
+
+    Future<void> disconnect(WidgetTester tester) async {
+      await tester.tap(findText('연결 해제'));
+      await tester.pumpAndSettle();
+      await tester.tap(findText('연결 해제').last);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('해제가 500 — 실패 띠 + [다시 시도], 화면을 떠난 뒤에도 다시 시도가 동작한다', (
+      tester,
+    ) async {
+      final repo = _Repo()..disconnectError = server;
+      await _pump(
+        tester,
+        repo: repo,
+        connections: const [_toss, _namuOn],
+        open: '/settings/securities/NAMU',
+      );
+      await disconnect(tester);
+      expect(_detail, findsOneWidget, reason: '실패하면 화면에 남는다');
+      expect(findText('연결을 해제하지 못했어요.'), findsOneWidget);
+      expect(findTextContaining('서버 원문'), findsNothing);
+
+      // 화면을 떠난다 — 스낵바는 길잡이 바깥이라 남는다
+      repo.disconnectError = null;
+      await tester.tap(find.bySemanticsLabel('뒤로'));
+      await tester.pumpAndSettle();
+      expect(_detail, findsNothing);
+      await tester.tap(findText('다시 시도'));
+      await tester.pumpAndSettle();
+      expect(repo.disconnected, ['NAMU'], reason: '떠난 화면의 ref 없이도 요청이 간다');
+      expect(findText('연결을 해제했어요.'), findsOneWidget);
+    });
+
+    testWidgets('해제 응답을 못 받음 — "해제됐는지 확인하지 못했어요." · 다시 시도 없음 · 연결 상태를 다시 받는다', (
+      tester,
+    ) async {
+      final repo = _Repo()..disconnectError = noResponse;
+      final reads = <int>[];
+      await _pump(
+        tester,
+        repo: repo,
+        connections: const [_toss, _namuOn],
+        open: '/settings/securities/NAMU',
+        reads: reads,
+      );
+      final before = reads.length;
+      await disconnect(tester);
+      expect(findText('해제됐는지 확인하지 못했어요.'), findsOneWidget);
+      expect(findText('다시 시도'), findsNothing);
+      expect(reads.length, greaterThan(before), reason: '연결 상태를 다시 받는다');
+    });
+
+    testWidgets('기본 지정 500 · 응답 못 받음을 가른다', (tester) async {
+      final repo = _Repo()..primaryError = server;
+      final reads = <int>[];
+      await _pump(
+        tester,
+        repo: repo,
+        connections: const [_toss, _namuOn],
+        open: '/settings/securities/NAMU',
+        reads: reads,
+      );
+      await tester.tap(findText('기본으로 쓰기'));
+      await tester.pumpAndSettle();
+      expect(findText('기본 증권사를 바꾸지 못했어요.'), findsOneWidget);
+      expect(findText('다시 시도'), findsOneWidget);
+
+      repo.primaryError = noResponse;
+      final before = reads.length;
+      await tester.tap(findText('다시 시도'));
+      await tester.pumpAndSettle();
+      expect(findText('바뀌었는지 확인하지 못했어요.'), findsOneWidget);
+      expect(reads.length, greaterThan(before));
+    });
+
+    testWidgets('해제 중에는 누른 단추([연결 해제])만 loading — [기본으로 쓰기] 는 막히기만', (
+      tester,
+    ) async {
+      final repo = _Repo()..disconnectGate = Completer<void>();
+      await _pump(
+        tester,
+        repo: repo,
+        connections: const [_toss, _namuOn],
+        open: '/settings/securities/NAMU',
+      );
+      await tester.tap(findText('연결 해제'));
+      await tester.pumpAndSettle();
+      await tester.tap(findText('연결 해제').last);
+      await tester.pump();
+      PButton btn(String label) => tester
+          .widgetList<PButton>(
+            find.descendant(of: _detail, matching: find.byType(PButton)),
+          )
+          .firstWhere((b) => b.label == label);
+      expect(btn('연결 해제').loading, isTrue);
+      expect(btn('기본으로 쓰기').loading, isFalse);
+      expect(btn('기본으로 쓰기').onPressed, isNull, reason: '막혀 있다');
+      repo.disconnectGate!.complete();
+      await tester.pumpAndSettle();
+    });
+  });
+
+  testWidgets('모르는 증권사 코드는 목록으로 보낸다 — 실패 화면 · 끝없는 다시 시도 없음', (tester) async {
+    await _pump(tester, open: '/settings/securities/NOPE');
+    expect(_detail, findsNothing);
+    expect(_list, findsOneWidget);
+    expect(findText('증권사 목록을 불러오지 못했어요'), findsNothing);
   });
 }

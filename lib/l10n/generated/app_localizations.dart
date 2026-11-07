@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'삭제됐는지 확인하지 못했어요.'**
   String get unconfirmedDelete;
 
+  /// No description provided for @unconfirmedDisconnect.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제됐는지 확인하지 못했어요.'**
+  String get unconfirmedDisconnect;
+
   /// 스낵바 — 그 밖 쓰기(기기 로그아웃 · 캘린더 나가기 · 모두 받음 등)의 응답을 못 받았을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글
   ///
   /// In ko, this message translates to:

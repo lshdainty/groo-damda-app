@@ -49,16 +49,19 @@ class SecuritiesLinkScreen extends ConsumerWidget {
           // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
           skipError: true,
           loading: () => const _LoadingList(),
-          error: (_, _) => PResultSection(
-            key: const ValueKey('securities-list-failed'),
-            kind: PResultKind.failure,
-            title: l.securitiesLoadError,
-            description: l.subLoadFailedDesc,
-            primaryAction: PResultAction(
-              label: l.actionRetry,
-              onPressed: () => ref.invalidate(brokerConnectionsProvider),
-            ),
-          ),
+          error: (_, _) => connectionsAsync.isLoading
+              // 다시 받는 중 — 오류를 들고 있어도 진행 표시(눌렀는데 아무 일도 없어 보이지 않게)
+              ? const _LoadingList()
+              : PResultSection(
+                  key: const ValueKey('securities-list-failed'),
+                  kind: PResultKind.failure,
+                  title: l.securitiesLoadError,
+                  description: l.subLoadFailedDesc,
+                  primaryAction: PResultAction(
+                    label: l.actionRetry,
+                    onPressed: () => ref.invalidate(brokerConnectionsProvider),
+                  ),
+                ),
           data: (connections) => _List(connections: connections),
         ),
       ),

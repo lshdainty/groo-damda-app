@@ -252,7 +252,12 @@ class _PInputState extends PTextControlState<PInput> {
               fontFeatures: widget.tabularFigures ? _tabular : null,
             ),
             multiline: false,
-            keyboardType: widget.keyboardType,
+            // 벗겨 보는 동안에도 추천을 무시하는 키보드가 있어 비밀번호 종류로 연다(secret 만 — 가린 칸은 이미 가려 둔다)
+            keyboardType:
+                widget.keyboardType ??
+                (widget.secret && !widget.obscureText
+                    ? TextInputType.visiblePassword
+                    : null),
             textAlign: widget.textAlign,
             textInputAction: widget.textInputAction,
             obscureText: widget.obscureText,

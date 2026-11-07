@@ -23,13 +23,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:groo_damda_app/app/env.dart';
-import 'package:groo_damda_app/app/theme/radius.dart';
-import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/core/network/dio_provider.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/stocks/presentation/chart_bridge.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 
 /// 증권 차트 WebView 높이 — 그래프 168 + 범례(O·H·L·C·VOL) 두 줄 44.
 /// 임베드 페이지(height 100%)가 범례 줄을 이 안에서 나눠 쓰므로, 범례가 두 줄이면 그래프는 168 이다.
@@ -124,7 +123,7 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
 
       final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(const Color(0x00000000)) // 투명 — 부모 PCard 배경이 비치도록
+        ..setBackgroundColor(const Color(0x00000000)) // 투명 — 뒤 배경이 비치도록
         ..addJavaScriptChannel(
           'PorestChart',
           onMessageReceived: _onChannelMessage,
@@ -261,7 +260,6 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
     final l = AppLocalizations.of(context);
 
     // 테마 변경 감지 — settingsProvider 의 themeMode 변경 시 JS 채널로 푸시
@@ -287,11 +285,8 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
       );
     } else if (_controller == null || _loading) {
       // 스켈레톤 — feedback_skeleton_server_data_only.md 준수(shadow 만, border X)
-      body = Container(
-        decoration: BoxDecoration(
-          color: t.bgSunken,
-          borderRadius: PRadius.brMd,
-        ),
+      body = const SizedBox.expand(
+        child: PSkeleton(radius: PSkeletonRadius.r12),
       );
     } else {
       body = WebViewWidget(
@@ -303,6 +298,13 @@ class _ChartWebViewState extends ConsumerState<ChartWebView> {
       );
     }
 
+    // 실패 칸은 최소 높이만 정하고 내용만큼 늘어난다 — 글자 200% 에서 [다시 시도] 가 잘리지 않게
+    if (_failed) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(minHeight: widget.height),
+        child: Center(child: body),
+      );
+    }
     return SizedBox(height: widget.height, child: body);
   }
 

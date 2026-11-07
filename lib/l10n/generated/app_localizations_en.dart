@@ -71,6 +71,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unconfirmedDelete => 'We couldn\'t confirm it was deleted.';
 
   @override
+  String get unconfirmedDisconnect =>
+      'We couldn\'t confirm it was disconnected.';
+
+  @override
   String get unconfirmedProcess => 'We couldn\'t confirm it went through.';
 
   @override

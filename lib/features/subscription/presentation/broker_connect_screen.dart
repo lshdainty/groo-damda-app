@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/toggle/p_toggle.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
@@ -38,6 +39,9 @@ import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 /// 나가기: 연결 요청이 나가 있는 동안(busy)은 막는다(canPop=false). 키 · 시크릿에 친 값이 있으면 ← · 안드로이드 뒤로 ·
 /// 예측형 뒤로 모두 "작성한 내용이 사라져요" 를 묻는다(I-wrap-b2b 5, 금액 가리기와 같은 방식). PopScope 는 셸이 아니라 이
 /// 화면에 둔다(예측형 뒤로가기). 첫 단계 화면에는 두지 않는다.
+/// 지금 나가 있는 요청 — 하나만 돈다. 누른 단추만 loading, 나머지는 막는다.
+enum _Action { connect, disconnect, primary }
+
 class BrokerConnectScreen extends ConsumerStatefulWidget {
   const BrokerConnectScreen({super.key, required this.broker});
 
@@ -52,7 +56,8 @@ class BrokerConnectScreen extends ConsumerStatefulWidget {
 class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
   final _keyCtrl = TextEditingController();
   final _secretCtrl = TextEditingController();
-  bool _busy = false;
+  _Action? _action;
+  bool get _busy => _action != null;
   // 붙여넣은 키가 맞는지 눈으로 확인할 방법이 없으면 연동이 실패해도 원인을 못 찾는다.
   // 기본은 가린 상태고, 사용자가 잠깐 벗겨 보는 건 본인 의지다.
   bool _revealKey = false;
@@ -97,8 +102,8 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
     if (ok && mounted) router.pop();
   }
 
-  void _setBusy(bool busy) {
-    if (mounted) setState(() => _busy = busy);
+  void _setAction(_Action? action) {
+    if (mounted) setState(() => _action = action);
   }
 
   Future<void> _connect(BrokerConnection c, String key, String secret) async {
@@ -106,7 +111,7 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
     // 응답을 못 받은 뒤 다시 받기는 화면이 사라져도 한다 — 컨테이너를 미리 잡는다
     final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _connectError = null);
-    _setBusy(true);
+    _setAction(_Action.connect);
     try {
       final repo = await ref.read(subscriptionRepositoryProvider.future);
       await repo.registerBrokerCredential(c.broker, key, secret, silent: true);
@@ -148,64 +153,105 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
         if (ctx != null && ctx.mounted) revealBelowFog(ctx);
       });
     } finally {
-      _setBusy(false);
+      _setAction(null);
     }
   }
 
-  Future<void> _run(
-    Future<void> Function(SubscriptionRepository repo) action,
-    String okMsg,
-    String errMsg, {
-    PSnackbarTone okTone = PSnackbarTone.neutral,
-    VoidCallback? onDone,
-  }) async {
-    _setBusy(true);
-    try {
-      final repo = await ref.read(subscriptionRepositoryProvider.future);
-      await action(repo);
-      ref.invalidate(myFeaturesLoadProvider);
-      ref.invalidate(brokerConnectionsProvider);
-      if (mounted) {
-        PSnackbar.maybeOf(context)?.show(message: okMsg, tone: okTone);
-        onDone?.call();
-      }
-    } catch (e) {
-      // 서버 글은 내지 않는다(요청은 silent) — 고정 글 한 문장 + [다시 시도](같은 일을 다시)
-      if (mounted) {
-        PSnackbar.maybeOf(context)?.show(
-          message: errMsg,
-          tone: PSnackbarTone.critical,
-          action: PSnackbarAction(
-            label: AppLocalizations.of(context).actionRetry,
-            onPressed: () =>
-                _run(action, okMsg, errMsg, okTone: okTone, onDone: onDone),
-          ),
-        );
-      }
-    } finally {
-      _setBusy(false);
-    }
+  /// 연결 상태를 서버 값으로 다시 받는다 — 응답을 못 받은 쓰기 뒤(성공 알림은 넣지 않는다). 화면이 사라진 뒤에도 쓴다.
+  static void _refresh(ProviderContainer container) {
+    container
+      ..invalidate(myFeaturesLoadProvider)
+      ..invalidate(brokerConnectionsProvider);
   }
 
-  /// [연결 해제] — 확인창 한 번, 확인하면 요청을 보낸다.
+  /// [연결 해제] — 확인창 한 번 뒤 요청. 실패 · 확인 못 함은 공용 길([askConfirmThenRequest])이 맡는다:
+  /// 확인창 닫기 + critical 스낵바 + [다시 시도](화면을 떠나도 동작 — 요청은 컨테이너만 쓴다), 응답을 못 받았으면
+  /// "해제됐는지 확인하지 못했어요." + 연결 상태 다시 받기.
   Future<void> _confirmDisconnect(BrokerConnection c) async {
     final l = AppLocalizations.of(context);
-    final ok = await PAlertDialog.show(
+    final container = ProviderScope.containerOf(context, listen: false);
+    final snack = PSnackbar.maybeOf(context);
+    final router = GoRouter.of(context);
+    final okMessage = l.subBrokerDisconnected;
+
+    Future<void> request() async {
+      _setAction(_Action.disconnect);
+      try {
+        final repo = await container.read(
+          subscriptionRepositoryProvider.future,
+        );
+        await repo.disconnectBrokerCredential(c.broker, silent: true);
+      } finally {
+        _setAction(null);
+      }
+    }
+
+    void done() {
+      _refresh(container);
+      snack?.show(message: okMessage);
+    }
+
+    final ok = await askConfirmThenRequest(
       context,
       title: l.subBrokerDisconnectConfirmTitle(c.displayName),
       description: l.subBrokerDisconnectConfirmBody,
       actionLabel: l.assetUnlink,
       cancelLabel: l.actionCancel,
-      destructive: true,
+      request: request,
+      failedMessage: l.subDisconnectFailed,
+      retryLabel: l.actionRetry,
+      // [다시 시도] 로 해제되면 화면이 이미 없을 수 있다 — 목록 갱신 + 알림만
+      onRetried: done,
+      kind: WriteKind.process,
+      unconfirmedMessage: l.unconfirmedDisconnect,
+      onUnconfirmed: () => _refresh(container),
     );
-    if (!ok || !mounted) return;
-    await _run(
-      (repo) => repo.disconnectBrokerCredential(c.broker, silent: true),
-      l.subBrokerDisconnected,
-      l.subDisconnectFailed,
-      // 해제되면 첫 단계(목록)로 돌아간다
-      onDone: () => Navigator.of(context).maybePop(),
-    );
+    if (!ok) return;
+    done();
+    // 해제되면 첫 단계(목록)로 돌아간다
+    if (mounted && router.canPop()) router.pop();
+  }
+
+  /// [기본으로 쓰기] — 확인창 없이 바로. 실패 · 확인 못 함은 [showConfirmFailSnackbar] 로 같은 길을 쓴다.
+  Future<void> _setPrimary(BrokerConnection c) async {
+    final l = AppLocalizations.of(context);
+    final container = ProviderScope.containerOf(context, listen: false);
+    final snack = PSnackbar.maybeOf(context);
+    final okMessage = l.subBrokerPrimaryChanged(c.displayName);
+
+    Future<void> request() async {
+      _setAction(_Action.primary);
+      try {
+        final repo = await container.read(
+          subscriptionRepositoryProvider.future,
+        );
+        await repo.setPrimaryBroker(c.broker, silent: true);
+      } finally {
+        _setAction(null);
+      }
+    }
+
+    void done() {
+      _refresh(container);
+      snack?.show(message: okMessage);
+    }
+
+    try {
+      await request();
+    } catch (e) {
+      showConfirmFailSnackbar(
+        snack,
+        error: e,
+        message: l.subBrokerPrimaryFailed,
+        retryLabel: l.actionRetry,
+        retry: request,
+        onRetried: done,
+        unconfirmedMessage: l.unconfirmedToggle,
+        onUnconfirmed: () => _refresh(container),
+      );
+      return;
+    }
+    done();
   }
 
   @override
@@ -218,6 +264,21 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
       if (b.broker.toLowerCase() == widget.broker.toLowerCase()) c = b;
     }
     final dirty = c != null && !c.connected && _hasInput;
+    // 응답을 못 받은 연결이 사실은 됐다 — 다시 받은 상태가 연결됨이면 폼의 값 · 오류 글을 비운다(해제 뒤 옛 키가 안 나오게)
+    if (c != null && c.connected && (_hasInput || _connectError != null)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _keyCtrl.clear();
+        _secretCtrl.clear();
+        if (_connectError != null) setState(() => _connectError = null);
+      });
+    }
+    // 목록에 없는 증권사 코드 — 받기는 끝났는데 없다. 다시 시도해도 같으니 목록으로 보낸다
+    if (c == null && all != null && !connectionsAsync.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.pushReplacement('/settings/securities');
+      });
+    }
 
     return PopScope(
       // 요청이 나가 있는 동안은 막는다 · 친 값이 있으면 묻는다
@@ -250,7 +311,8 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
   /// 목록에서 이 증권사를 못 찾았다 — 받는 중이거나(딥링크 · 다시 받기) 받지 못했다.
   Widget _noBroker(AsyncValue<List<BrokerConnection>> async) {
     final l = AppLocalizations.of(context);
-    if (async.isLoading && !async.hasError) {
+    // 다시 받는 중에는 오류를 들고 있어도 진행 표시(B2a — 눌렀는데 아무 일도 없어 보이지 않게)
+    if (async.isLoading || async.value != null) {
       return const Center(
         child: PProgressCircle(key: ValueKey('broker-loading')),
       );
@@ -376,9 +438,12 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
         trailing: PToggle(
           semanticLabel: l.subBrokerToggleReveal(label),
           pressed: revealed,
+          // 칸 안 단추는 눌림 바탕 상자를 그리지 않는다(지우기 버튼과 같은 모양)
+          pressFill: false,
           onChanged: onReveal,
-          icon: LucideIcons.eye,
-          pressedIcon: LucideIcons.eyeOff500,
+          // 지금 상태를 그린다 — 가림(끔) = eye-off, 보임(켬) = eye (toggle.md:48 · :98)
+          icon: LucideIcons.eyeOff,
+          pressedIcon: LucideIcons.eye500,
         ),
       ),
     );
@@ -393,7 +458,7 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
       child: PButton(
         label: l.subConnect,
         size: PButtonSize.large,
-        loading: _busy,
+        loading: _action == _Action.connect,
         onPressed: key.isEmpty || secret.isEmpty || _busy
             ? null
             : () => _connect(c, key, secret),
@@ -441,6 +506,7 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
       variant: PButtonVariant.ghost,
       ghostColor: PButtonGhostColor.critical,
       size: PButtonSize.large,
+      loading: _action == _Action.disconnect,
       onPressed: _busy ? null : () => _confirmDisconnect(c),
     );
     if (!showPrimary) {
@@ -452,14 +518,8 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
       primary: PButton(
         label: l.subBrokerUseAsPrimary,
         size: PButtonSize.large,
-        loading: _busy,
-        onPressed: _busy
-            ? null
-            : () => _run(
-                (repo) => repo.setPrimaryBroker(c.broker, silent: true),
-                l.subBrokerPrimaryChanged(c.displayName),
-                l.subBrokerPrimaryFailed,
-              ),
+        loading: _action == _Action.primary,
+        onPressed: _busy ? null : () => _setPrimary(c),
       ),
     );
   }

@@ -66,6 +66,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get unconfirmedDelete => '삭제됐는지 확인하지 못했어요.';
 
   @override
+  String get unconfirmedDisconnect => '해제됐는지 확인하지 못했어요.';
+
+  @override
   String get unconfirmedProcess => '처리됐는지 확인하지 못했어요.';
 
   @override

@@ -19,6 +19,7 @@
   "withdrawUnconfirmed": "We couldn't confirm the cancellation. Please reopen the app to check.",
   "unconfirmedSave": "We couldn't confirm it was saved.",
   "unconfirmedDelete": "We couldn't confirm it was deleted.",
+  "unconfirmedDisconnect": "We couldn't confirm it was disconnected.",
   "unconfirmedProcess": "We couldn't confirm it went through.",
   "unconfirmedToggle": "We couldn't confirm it changed.",
   "unconfirmedConnect": "We couldn't confirm the connection.",

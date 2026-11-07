@@ -9,6 +9,9 @@ import 'package:groo_damda_app/features/subscription/application/subscription_pr
 import 'package:groo_damda_app/features/subscription/data/subscription_repository.dart';
 import 'package:groo_damda_app/features/subscription/presentation/broker_connect_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+
+import '../../support/plain_text.dart';
 
 // 라벨은 서버가 준다 — 나무는 App Key/App Secret, 토스는 Client ID/Client Secret.
 const _conn = BrokerConnection(
@@ -35,16 +38,14 @@ Widget _app() => ProviderScope(
   ),
 );
 
-/// 칸 순서로 집는다 — 키 · 시크릿(서버 라벨 순서). 칸 이름은 Field 머리 글이라 placeholder 가 아니다.
+/// 칸 이름(Field 머리 글)으로 집는다 — 그 Field 안의 입력.
 EditableText _fieldFor(WidgetTester tester, String label) {
-  final i = switch (label) {
-    'App Key' => 0,
-    'App Secret' => 1,
-    _ => throw StateError('"$label" 입력칸을 모른다'),
-  };
-  return tester
-      .widgetList<EditableText>(find.byType(EditableText))
-      .elementAt(i);
+  final field = find
+      .ancestor(of: findText(label), matching: find.byType(PField))
+      .first;
+  return tester.widget<EditableText>(
+    find.descendant(of: field, matching: find.byType(EditableText)),
+  );
 }
 
 void main() {

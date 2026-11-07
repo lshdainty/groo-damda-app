@@ -31,6 +31,7 @@
   "unconfirmedSave": "저장됐는지 확인하지 못했어요.",
   "@unconfirmedSave": {"description": "스낵바 — 저장 · 추가 쓰기의 응답을 읽지 못했거나 받지 못했을 때(PARSE · NO_RESPONSE). 한 문장(목록은 저절로 다시 받는다), [다시 시도] 없음 — 웹과 같은 글"},
   "unconfirmedDelete": "삭제됐는지 확인하지 못했어요.",
+  "unconfirmedDisconnect": "해제됐는지 확인하지 못했어요.",
   "@unconfirmedDelete": {"description": "스낵바 — 삭제 응답을 읽지 못했거나 받지 못했을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글"},
   "unconfirmedProcess": "처리됐는지 확인하지 못했어요.",
   "@unconfirmedProcess": {"description": "스낵바 — 그 밖 쓰기(기기 로그아웃 · 캘린더 나가기 · 모두 받음 등)의 응답을 못 받았을 때. 한 문장, [다시 시도] 없음 — 웹과 같은 글"},
