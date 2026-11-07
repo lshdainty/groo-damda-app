@@ -435,7 +435,8 @@ class _PLoadingRegionState extends State<PLoadingRegion> {
 
   void _report() {
     if (widget.inline) return;
-    if (_waiting) {
+    // 가려진 화면 · 숨은 탭 영역(TickerMode 꺼짐)은 알리지 않는다 — 보이지 않는 곳의 기다림을 읽어 주지 않게
+    if (_waiting && TickerMode.valuesOf(context).enabled) {
       _announcer?.report(this, _phase, context);
     } else {
       _announcer?.leave(this);

@@ -45,6 +45,9 @@ class _Person {
   final String name;
   String ratio = '1';
   String custom = '';
+  // 칸이 줄 끝 ↔ 본문 아래로 옮겨도(글자 크기 · 폭이 바뀔 때) 입력 초점 · 캐럿이 유지되게 한다
+  final ratioKey = GlobalKey();
+  final customKey = GlobalKey();
   late final ratioCtrl = TextEditingController(text: '1');
   late final customCtrl = TextEditingController();
   void dispose() {
@@ -704,6 +707,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
           child: PListEditWidth(
             width: 96,
             child: PInput(
+              key: p.ratioKey,
               controller: p.ratioCtrl,
               semanticLabel: '$name ${l.dutchShareUnit}',
               suffixText: l.dutchShareUnit,
@@ -728,6 +732,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
                 child: PListEditWidth(
                   width: 96,
                   child: PInput(
+                    key: p.customKey,
                     controller: p.customCtrl,
                     semanticLabel: name,
                     placeholder: '0',

@@ -24,10 +24,6 @@ Widget loadingRegion(Widget skeleton, {bool slowText = false}) =>
       child: const SizedBox.shrink(),
     );
 
-/// 구조를 미리 그릴 수 없는 화면 · 시트 · 카드 전체 — 스켈레톤 대신 가운데 Progress Circle(40).
-Widget loadingRegionCircle() =>
-    const PLoadingRegion.circle(pending: true, child: SizedBox.shrink());
-
 /// 주요 화면(홈 · 가계부 · 자산 · 통계 · 예산 · 캘린더)의 기다리는 영역 — 5초에 화면에도 "평소보다 오래 걸리고 있어요." 를
 /// 더한다. 나머지 화면은 [loadingRegion](보조 기술 알림만, 화면 글은 B6 에서 정한다).
 Widget loadingRegionWithText(Widget skeleton) =>
@@ -36,3 +32,11 @@ Widget loadingRegionWithText(Widget skeleton) =>
 /// 값 조각(줄 끝 · 달력 칸 안 · 글 옆 숫자 자리) — 폭이 정해지지 않은 Row 에서도 선다. 0~1초 보이지 않고, 알림 · 5초 글은 없다.
 Widget loadingInline(Widget skeleton) =>
     PLoadingRegion.inline(fallback: skeleton);
+
+/// 화면 한 장을 채우는 스켈레톤(스크롤 본문 자리) — 영역이 높이를 재야 해서 Column 으로 그린 스켈레톤이 화면 높이보다
+/// 길어도(큰 글자 · 작은 폰) 넘치지 않도록 스크롤 가능한 상자에 둔다. 당겨 새로고침도 그대로 받는다.
+Widget loadingRegionScroll(Widget skeleton, {bool slowText = false}) =>
+    SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: loadingRegion(skeleton, slowText: slowText),
+    );

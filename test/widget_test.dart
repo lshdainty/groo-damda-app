@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +16,7 @@ import 'package:groo_damda_app/features/asset/domain/asset_summary.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'support/plain_text.dart';
 
 void main() {
@@ -57,6 +60,47 @@ void main() {
     // Dashboard hero
     expect(findPlain('순자산'), findsOneWidget);
     expect(findPlain('자산'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('앱 맨 위에 불러오는 중 Announcer 가 하나 있고, 홈의 기다리는 영역이 거기에 알린다', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith(_FakeAuth.new),
+          categoriesProvider.overrideWith(
+            (_) => Completer<List<ExpenseCategory>>().future,
+          ),
+          assetsProvider.overrideWith((_) => Completer<List<Asset>>().future),
+          assetSummaryProvider.overrideWith(
+            (_, _) => Completer<AssetSummary>().future,
+          ),
+          monthExpensesProvider.overrideWith(
+            (_, _) => Completer<List<Expense>>().future,
+          ),
+        ],
+        child: const GrooDamdaApp(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(PLoadingAnnouncer), findsOneWidget);
+    // 홈이 기다리는 영역 — loadingRegion 으로 감싸져 있다
+    expect(find.byType(PLoadingRegion), findsWidgets);
+    // 1초 안에는 스켈레톤이 보이지 않고, 1초 뒤에 보인다
+    Iterable<bool> shown() => tester
+        .widgetList<Visibility>(
+          find.descendant(
+            of: find.byType(PLoadingRegion),
+            matching: find.byType(Visibility),
+          ),
+        )
+        .map((v) => v.visible);
+    expect(shown(), everyElement(isFalse));
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(shown(), contains(isTrue));
   });
 }
 

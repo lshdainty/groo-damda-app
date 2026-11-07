@@ -172,4 +172,24 @@ void main() {
     expect(tester.takeException(), isNull);
     h.dispose();
   });
+
+  testWidgets('가려진 화면(TickerMode 꺼짐)의 기다림은 알리지 않는다', (tester) async {
+    final h = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: [
+            TickerMode(
+              enabled: false,
+              child: loadingRegion(const PSkeleton(height: 20)),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump();
+    expect(_liveLabels(tester), isEmpty);
+    h.dispose();
+  });
 }

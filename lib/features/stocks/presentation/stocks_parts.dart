@@ -370,12 +370,12 @@ class _StocksSearchEntryState extends State<StocksSearchEntry> {
     final l = AppLocalizations.of(context);
     final c = context.colors;
     return Padding(
-      // 아래 2 는 누르는 영역 44 의 아래쪽 몫(보이는 상자 40 + 위아래 2) — 부모 안에서만 받으므로 놓인 자리로 준다
+      // 아래 4 는 누르는 영역 44 의 아래쪽 몫 2 와 초점 링 아래 변(띄움 2 + 두께 2)이 잘리지 않을 자리 — 부모 안에서만 받으므로 놓인 자리로 준다
       padding: const EdgeInsets.fromLTRB(
         PSpacing.x6,
         PSpacing.x2,
         PSpacing.x6,
-        PSpacing.x0_5,
+        PSpacing.x1,
       ),
       // 누르는 자리 — ds PressArea. 누르는 동안 바탕 bg-layer-default-pressed + 내용 2px 축소(Input Button 의 누름과 같다).
       // Material 물결은 두지 않는다
