@@ -360,6 +360,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         ? widget.replaceOf
         : null;
     _smsDraft = widget.smsDraft;
+    // 붙여넣기 화면 길은 초안을 들고 열린다 — 확신 낮은 안내를 시트 Callout 이 맡는다(B5)
+    _smsLow = widget.smsDraft?.parsed.isLowConfidence ?? false;
     _startedAtOne =
         _edit == null &&
         widget.editTransfer == null &&
