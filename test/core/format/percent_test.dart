@@ -46,17 +46,24 @@ void main() {
       expect(sum, closeTo(100, 0.2));
     });
   });
-  test('formatProgress 진행률 — 정수, 100 미만 내림 · 100 초과 올림', () {
-    expect(formatProgress(0), '0%');
-    expect(formatProgress(76.43), '76%');
-    expect(formatProgress(76.9), '76%');
-    expect(formatProgress(99.6), '99%'); // 아직 다 안 찼다
-    expect(formatProgress(99.95), '99%');
-    expect(formatProgress(100), '100%');
-    expect(formatProgress(100.3), '101%'); // 넘었다
-    expect(formatProgress(112.5), '113%');
-    expect(formatProgress(-2.5), '−2%');
-    expect(formatProgress(-0.2), '0%');
+  test('formatProgress 진행률 — 정수 반올림, 100 경계만 예외(웹과 같은 표)', () {
+    final table = <double, String>{
+      0: '0%',
+      76.4: '76%',
+      76.43: '76%',
+      76.6: '77%',
+      99.4: '99%',
+      99.6: '99%', // 반올림하면 100 → 99
+      99.95: '99%',
+      100: '100%',
+      100.3: '101%', // 반올림하면 100 → 101
+      100.6: '101%',
+      112.5: '113%',
+      -2.5: '−3%',
+      -76.6: '−77%',
+      -0.2: '0%',
+    };
+    table.forEach((v, want) => expect(formatProgress(v), want, reason: '$v'));
     expect(formatProgress(double.nan), '—');
     expect(formatProgress(double.infinity), '—');
     expect(formatProgress(double.negativeInfinity), '—');
