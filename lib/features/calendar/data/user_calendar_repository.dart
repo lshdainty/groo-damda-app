@@ -22,7 +22,7 @@ class UserCalendarRepository {
     }
   }
 
-  /// [silent] — 전역 오류 알림을 끈다(폼이 맨 위 Callout 으로 알린다).
+  /// [silent] — 실패는 폼이 맨 위 Callout 으로 알린다(요청에 kSilentErrorToast 표식을 싣는다).
   Future<UserCalendar> create({
     required String calendarName,
     String? color,
@@ -103,7 +103,7 @@ class UserCalendarRepository {
     }
   }
 
-  /// 틀린 코드 · 이미 참여는 칸 아래 오류로 알린다 — 전역 오류 알림은 끈다(두 번 알리지 않게).
+  /// 틀린 코드 · 이미 참여는 칸 아래 오류로 알린다 — 요청에 kSilentErrorToast 표식을 싣는다(실패는 화면이 말한다).
   Future<UserCalendar> joinByCode(String inviteCode) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(

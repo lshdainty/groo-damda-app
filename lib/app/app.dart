@@ -22,7 +22,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
-/// 화면 밖(네트워크 인터셉터 등)에서 토스트를 띄우기 위한 전역 키.
+/// 화면 밖에서 떠 있는 스낵바를 다루기 위한 전역 키 — 세션을 갈아 끼울 때 앞사람의 알림을 걷는 데 쓴다.
 final GlobalKey<ScaffoldMessengerState> appMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 

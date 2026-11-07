@@ -28,8 +28,8 @@ const _tabular = [FontFeature.tabularFigures()];
 /// 프리셋 상세(I-20 C 18) — 조회 시트(바깥 누름 · 끌어내림으로 닫힌다). 머리(타일 48 + 이름) → 금액 → 설명 한 줄 → 키-값 줄.
 /// 값이 없는 줄은 그리지 않는다. 바닥은 [삭제](ghost critical 왼쪽) + [수정](나머지). 줄 끝 ⋮ 가 없으니 지우기는 여기다.
 ///
-/// [삭제] → 확인창(PAlertDialog) → 지움. 실패하면 확인창을 닫고 critical 스낵바 + [다시 시도](바로 요청)로 알린다 — 전역 오류
-/// 토스트와 겹치지 않는다. 지우는 동안과 지운 뒤 닫히기 전에는 두 버튼을 막는다.
+/// [삭제] → 확인창(PAlertDialog) → 지움. 실패하면 확인창을 닫고 critical 스낵바 + [다시 시도](바로 요청)로 알린다.
+/// 지우는 동안과 지운 뒤 닫히기 전에는 두 버튼을 막는다.
 Future<PresetDetailAction?> showPresetDetailSheet(
   BuildContext context, {
   required ExpenseTemplate template,

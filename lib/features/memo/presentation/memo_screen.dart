@@ -30,7 +30,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 /// "모든 메모 · N" + 줄 → 떠 있는 [+](메모 추가). 띠 · 카드 · 줄 사이 선이 없고 흰 면이 화면 아래 끝까지 닿는다.
 /// 줄을 밀면 [고정 / 해제, 수정, 삭제] — 줄 끝 ⋮ 는 두지 않는다(좁은 목록 줄 — 10-25).
 ///
-/// 실패 안내는 서버 원문이 아니라 고정 글이다(요청은 전역 오류 알림을 끈다) — 목록 실패는 Result Section, 고정 · 삭제 실패는 스낵바 + [다시 시도].
+/// 실패 안내는 서버 원문이 아니라 고정 글이다(요청은 silent 표식을 싣는다) — 목록 실패는 Result Section, 고정 · 삭제 실패는 스낵바 + [다시 시도].
 class MemoScreen extends ConsumerStatefulWidget {
   const MemoScreen({super.key});
   @override

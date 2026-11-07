@@ -1,4 +1,4 @@
-// revoke · revokeAll 은 전역 오류 알림을 끈다(I-12 31) — 화면이 알림 하나만 띄운다.
+// revoke · revokeAll 은 silent 표식을 싣는다(I-12 31) — 화면이 알림 하나만 띄운다.
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';

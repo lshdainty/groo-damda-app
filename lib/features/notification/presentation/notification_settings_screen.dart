@@ -30,7 +30,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 /// 알림 "설정" 화면(I-15 48 ~ 54) — 흰 면 하나: 푸시 알림 스위치 줄 → "알림 종류" + 스위치 줄 일곱 → "예산 알림 기준" +
 /// Slider → "방해 금지 시간" → "소리 · 진동" → "이메일 알림". 묶음 제목은 목록 제목(boldSolid), 줄은 ds List.
 /// 각 컨트롤은 누르는 순간 적용(낙관적 PATCH)하고, 저장하지 못하면 되돌리고 critical 스낵바 고정 글을 띄운다
-/// (요청은 전역 오류 알림을 끈다 · [다시 시도] 는 두지 않는다 — 스위치는 다시 누르는 것이 재시도다).
+/// (요청은 silent 표식을 싣는다 · [다시 시도] 는 두지 않는다 — 스위치는 다시 누르는 것이 재시도다).
 ///
 /// 헤더는 고정, content 만 스크롤. 알림 "목록"(/notifications)과 별개.
 class NotificationSettingsScreen extends ConsumerWidget {

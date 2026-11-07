@@ -109,7 +109,7 @@ class SavingGoalRepository {
     }
   }
 
-  /// [silent] 면 전역 오류 토스트를 띄우지 않는다 — 화면이 자기 스낵바로 알린다.
+  /// [silent] 면 kSilentErrorToast 표식을 싣는다 — 실패는 화면이 자기 스낵바로 알린다.
   Future<void> delete(int id, {bool silent = false}) async {
     try {
       await _dio.delete<void>('/saving-goal/$id', options: _quiet(silent));

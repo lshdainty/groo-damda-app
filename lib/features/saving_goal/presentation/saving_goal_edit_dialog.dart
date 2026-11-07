@@ -97,7 +97,7 @@ Future<bool> confirmDeleteSavingGoal(
   return ok;
 }
 
-/// 실패하면 던진다 — 호출한 쪽 스낵바가 알리므로 전역 오류 토스트는 끈다.
+/// 실패하면 던진다 — 호출한 쪽 스낵바가 알리므로 요청은 silent 표식을 싣는다.
 Future<void> _deleteGoal(ProviderContainer container, SavingGoal goal) async {
   final repo = await container.read(savingGoalRepositoryProvider.future);
   await repo.delete(goal.rowId, silent: true);

@@ -17,9 +17,9 @@ class AuthRepository {
   /// 인앱 WebView 가 가로챈 code+codeVerifier 를 BFF 로 교환한다.
   /// 성공 시 응답 쿠키(`desk_access_token`)가 cookie_jar 에 저장된다 — 사용자 정보는 [check] 로.
   ///
-  /// 실패는 전역 오류 토스트에 싣지 않는다. 로그인 흐름이 자기 자리에 그린다 — 로그인
+  /// 실패는 로그인 흐름이 자기 자리에 그린다 — 로그인
   /// 화면의 에러 줄(`loginErrorMessage`), 해지한 계정(USER_021)이면 해지 완료 화면.
-  /// 토스트까지 뜨면 겹친다(QA 28 1 — 해지 완료 화면 위에 빨간 토스트).
+  /// 요청은 silent 표식을 싣는다(QA 28 1 — 예전에는 해지 완료 화면 위에 빨간 토스트가 겹쳤다).
   Future<void> exchangeCode({
     required String code,
     required String codeVerifier,
@@ -72,7 +72,7 @@ class AuthRepository {
       await _dio.post<dynamic>(
         '/users/me/verify-password',
         data: {'password': password},
-        // 실패 글은 화면이 코드로 가른 고정 글로 알린다 — 그루 계정이 쓴 글이 전역 알림으로 닿지 않게(I-14 43)
+        // 실패 글은 화면이 코드로 가른 고정 글로 알린다 — 그루 계정이 쓴 글이 화면에 그대로 닿지 않게(I-14 43)
         options: Options(extra: {kSilentErrorToast: true}),
       );
     } catch (e, s) {
@@ -94,7 +94,7 @@ class AuthRepository {
           'newPassword': newPassword,
           'confirmPassword': confirmPassword,
         },
-        // 실패 글은 화면이 코드로 가른 고정 글로 알린다 — 그루 계정이 쓴 글이 전역 알림으로 닿지 않게(I-14 16)
+        // 실패 글은 화면이 코드로 가른 고정 글로 알린다 — 그루 계정이 쓴 글이 화면에 그대로 닿지 않게(I-14 16)
         options: Options(extra: {kSilentErrorToast: true}),
       );
     } catch (e, s) {

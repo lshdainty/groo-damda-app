@@ -145,7 +145,7 @@ class ExportRepository {
         '/export',
         data: body,
         cancelToken: cancel,
-        // 이 길의 실패는 화면이 [다시 시도] 가 달린 띠로 알린다 — 전역 토스트와 겹치지 않게
+        // 이 길의 실패는 화면이 [다시 시도] 가 달린 띠로 알린다 — 요청에는 silent 표식을 싣는다
         options: Options(
           responseType: ResponseType.stream,
           extra: {kSilentErrorToast: true},

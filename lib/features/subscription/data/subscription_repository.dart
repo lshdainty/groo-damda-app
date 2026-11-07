@@ -242,7 +242,7 @@ class SubscriptionRepository {
     }
   }
 
-  /// [silent] — 전역 서버 원문 알림을 끈다(화면이 정한 글을 띄울 때).
+  /// [silent] — kSilentErrorToast 표식을 싣는다(화면이 정한 글을 띄울 때).
   Future<void> subscribe(String planCode, {bool silent = false}) async {
     try {
       await _dio.post<dynamic>(

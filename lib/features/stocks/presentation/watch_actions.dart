@@ -352,7 +352,7 @@ Future<void> toggleWatch(
   if (!groupsAsync.hasValue) return;
   final groups = groupsAsync.value ?? const <StockWatchGroup>[];
   // 바로 바뀌는 값 — 실패하면 별은 그대로(서버 값이 그대로라 되돌릴 것이 없다) 스낵바 한 문장 + [다시 시도].
-  // 서버 글 전역 토스트는 끈다(silent). 스낵바 길은 시트가 닫히기 전에 쥔다.
+  // 서버 글은 띄우지 않는다(silent). 스낵바 길은 시트가 닫히기 전에 쥔다.
   final snack = PSnackbar.maybeOf(context);
   final container = ProviderScope.containerOf(context);
   final repo = await ref.read(stocksRepositoryProvider.future);

@@ -403,7 +403,7 @@ class StocksRepository {
     }
   }
 
-  /// [silent] 면 서버 글 전역 토스트를 끈다 — 화면이 자기 문장으로 말한다.
+  /// [silent] 면 kSilentErrorToast 표식을 싣는다 — 화면이 자기 문장으로 말한다.
   Future<StockWatchGroup> createWatchGroup(
     String groupName, {
     bool silent = false,

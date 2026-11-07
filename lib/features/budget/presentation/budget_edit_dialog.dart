@@ -137,7 +137,7 @@ Future<bool> confirmDeleteBudget(
   return ok;
 }
 
-/// 수정 시트가 쓰던 저장소·무효화 경로. 실패하면 던진다(호출한 쪽 스낵바가 알리므로 전역 오류 토스트는 끈다).
+/// 수정 시트가 쓰던 저장소·무효화 경로. 실패하면 던진다(호출한 쪽 스낵바가 알리므로 요청은 silent 표식을 싣는다).
 Future<void> _deleteBudget(
   ProviderContainer container,
   BudgetMonthKey key,

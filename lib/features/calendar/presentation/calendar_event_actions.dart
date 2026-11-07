@@ -46,7 +46,7 @@ Future<bool> askDeleteCalendarEvent(
 
 /// 일정 삭제 요청 — **컨테이너로** 한다(시트를 닫은 뒤 스낵바의 [다시 시도] 도 이걸 부른다). 실패(`ApiException`)는 던진다.
 /// 지운 뒤 다시 받을 것(달 · 홈 위젯)은 무효화하고, 이 일정의 시작 달은 [refetchCalendarMonthIn] 로 부른 쪽이 받는다.
-/// 전역 오류 토스트는 저장소가 끈다(`silent`).
+/// 실패는 화면이 말한다(저장소가 `silent` 표식을 싣는다).
 Future<void> deleteCalendarEventRequest(
   ProviderContainer container,
   CalendarEvent event,

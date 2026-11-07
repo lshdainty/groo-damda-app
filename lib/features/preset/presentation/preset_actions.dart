@@ -6,8 +6,8 @@ import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 
-/// 프리셋 하나를 지우고 목록을 다시 받는다. 실패하면 던진다 — 알리는 일은 부른 쪽 몫이다(전역 오류 토스트는 끈다:
-/// 화면이 자기 자리에서 알리므로 둘이 같은 아래쪽에서 겹치지 않게).
+/// 프리셋 하나를 지우고 목록을 다시 받는다. 실패하면 던진다 — 알리는 일은 부른 쪽 몫이다(실패는 화면이 자기 자리에서
+/// 알린다).
 ///
 /// 목록을 **다시 받은 뒤에** 끝난다 — 호출한 쪽이 시트를 닫거나 버튼을 풀 때 줄이 이미 사라져 있다(지운 줄을 한 번 더 누르지 않게).
 Future<void> deletePresetRequest(ProviderContainer container, int rowId) async {

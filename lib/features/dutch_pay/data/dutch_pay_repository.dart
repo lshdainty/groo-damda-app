@@ -13,7 +13,7 @@ class DutchPayRepository {
     try {
       final res = await _dio.get<Map<String, dynamic>>(
         '/dutch-pays',
-        // 목록 실패는 화면의 실패 상자가 말한다 — 서버 원문 알림을 끈다
+        // 목록 실패는 화면의 실패 상자가 말한다 — silent 표식을 싣는다
         options: _quiet(true),
       );
       return _unwrapList(res, 'dutchPays', DutchPay.fromJson);
@@ -62,7 +62,7 @@ class DutchPayRepository {
     }
   }
 
-  /// 한 줄 받음 · 모두 받음 · 삭제는 [silent] 로 전역 서버 원문 알림을 끈다 — 화면이 고정 글로 알린다(I-15 확인창 실패 규칙).
+  /// 한 줄 받음 · 모두 받음 · 삭제는 [silent] 로 kSilentErrorToast 표식을 싣는다 — 화면이 고정 글로 알린다(I-15 확인창 실패 규칙).
   static Options? _quiet(bool silent) =>
       silent ? Options(extra: {kSilentErrorToast: true}) : null;
 

@@ -13,7 +13,7 @@ import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
-/// 반복 하나를 켜고 끈다 — 전역 오류 스낵바는 끈다(화면이 고정 글로 알린다). 다시 켤 때 오늘이 회차면 서버가 그 거래를 바로
+/// 반복 하나를 켜고 끈다 — 요청은 silent 로 보낸다(화면이 고정 글로 알린다). 다시 켤 때 오늘이 회차면 서버가 그 거래를 바로
 /// 기록한다(QA 30 1 · 4) — 가계부 · 자산 · 홈도 함께 새로 받는다. 목록을 **다시 받은 뒤에** 끝난다(상세가 새 값으로 다시 그려질 때
 /// 목록이 이미 새 값이다). 실패하면 던진다 — 알리는 일은 부른 쪽 몫이다. 화면이 사라진 뒤에도 쓰도록 컨테이너로 받는다.
 Future<void> toggleRecurringRequest(

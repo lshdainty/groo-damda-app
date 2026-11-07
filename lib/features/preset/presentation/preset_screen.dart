@@ -72,7 +72,7 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
     }
   }
 
-  /// 밀기의 [삭제] — 확인창 한 번. 실패하면 확인창을 닫고 스낵바(고정 글 + 다시 시도)로 알린다(전역 오류 토스트와 겹치지 않는다).
+  /// 밀기의 [삭제] — 확인창 한 번. 실패하면 확인창을 닫고 스낵바(고정 글 + 다시 시도)로 알린다.
   Future<void> _confirmDelete(ExpenseTemplate p) async {
     final l = AppLocalizations.of(context);
     final snack = PSnackbar.of(context);

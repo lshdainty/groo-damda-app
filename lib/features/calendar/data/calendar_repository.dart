@@ -31,7 +31,7 @@ class CalendarRepository {
   CalendarRepository(this._dio);
   final Dio _dio;
 
-  /// 일정 쓰기(추가 · 수정 · 삭제)는 전역 오류 스낵바를 끈다 — 시트 · 폼이 자기 자리의 Callout 으로 알린다(스낵바는 시트 뒤 화면에 떠서 가려진다).
+  /// 일정 쓰기(추가 · 수정 · 삭제)는 silent 표식을 싣는다 — 시트 · 폼이 자기 자리의 Callout 으로 알린다.
   static final Options _silent = Options(extra: {kSilentErrorToast: true});
 
   // ─── Events ────────────────────────────────────
@@ -188,7 +188,7 @@ class CalendarRepository {
       final res = await _dio.post<Map<String, dynamic>>(
         '/calendar/label',
         data: {'labelName': labelName, 'color': ?color},
-        // 폼이 맨 위 Callout 으로 알린다 — 전역 서버 글과 겹치지 않게
+        // 폼이 맨 위 Callout 으로 알린다 — 서버 글은 띄우지 않는다
         options: _silent,
       );
       return _unwrap(res, EventLabel.fromJson);

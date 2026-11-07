@@ -10,7 +10,7 @@ class ExpenseSplitRepository {
   ExpenseSplitRepository(this._dio);
   final Dio _dio;
 
-  /// [silent] 면 전역 오류 스낵바를 끈다 — 화면이 자기 자리에서 고정 글로 알린다.
+  /// [silent] 면 kSilentErrorToast 표식을 싣는다 — 화면이 자기 자리에서 고정 글로 알린다.
   static Options? _opts(bool silent) =>
       silent ? Options(extra: {kSilentErrorToast: true}) : null;
 

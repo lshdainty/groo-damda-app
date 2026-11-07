@@ -250,7 +250,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         _countsLoading = false;
       });
     } catch (_) {
-      // 전역 토스트 대신 자리에서 알린다 — 묶음 아래 오류 글 + [다시 시도](I-05 42)
+      // 자리에서 알린다 — 묶음 아래 오류 글 + [다시 시도](I-05 42)
       if (mounted) {
         setState(() {
           _countsLoading = false;

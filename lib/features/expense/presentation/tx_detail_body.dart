@@ -161,7 +161,7 @@ class TxNoticeCallout extends StatelessWidget {
   );
 }
 
-/// 요청 실패 알림(critical) — 서버가 낸 글이 아니라 우리 글이다. 시트 안 보이는 자리에 둔다(전역 스낵바는 시트 뒤에 가려진다).
+/// 요청 실패 알림(critical) — 서버가 낸 글이 아니라 우리 글이다. 시트 안 보이는 자리에 둔다(스낵바는 시트 위에 뜨지만, 상세의 실패는 자기 자리에서 말한다).
 class TxFailureCallout extends StatelessWidget {
   const TxFailureCallout({super.key, required this.message, this.onRetry});
   final String message;

@@ -120,7 +120,7 @@ class AssetRepository {
     // 신용카드: 결제를 기다리던 지난달 청구분(양수) — 다가오는 결제일에 청구된다. [balance] 는
     // 그 뒤 쓴 금액이다. null 이면 키를 안 싣는다(없음).
     int? dueCarryoverAmount,
-    // 폼이 실패를 자리에서 말할 때 — 전역 서버 글 토스트를 끈다.
+    // 폼이 실패를 자리에서 말할 때 — 요청에 silent 표식을 싣는다.
     bool silent = false,
   }) async {
     try {
@@ -205,7 +205,7 @@ class AssetRepository {
     int? carryoverAmount,
     // 신용카드: 결제 대기 청구분 — null 이면 키가 빠진다(유지), 0 이면 서버가 지운다.
     int? dueCarryoverAmount,
-    // 폼이 실패를 자리에서 말할 때 — 전역 서버 글 토스트를 끈다.
+    // 폼이 실패를 자리에서 말할 때 — 요청에 silent 표식을 싣는다.
     bool silent = false,
   }) async {
     try {
@@ -468,7 +468,7 @@ class AssetRepository {
     /// 결제 계좌 — null 이면 증권계좌 예수금에서.
     int? settlementAssetRowId,
 
-    /// 폼이 실패를 자리에서 말할 때 — 전역 서버 글 토스트를 끈다.
+    /// 폼이 실패를 자리에서 말할 때 — 요청에 silent 표식을 싣는다.
     bool silent = false,
   }) async {
     try {

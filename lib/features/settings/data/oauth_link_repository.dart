@@ -32,7 +32,7 @@ class OAuthProviderInfo {
 /// desk 백엔드가 그루 계정에서 연동 티켓을 받아 `startUrl` 을 돌려주고, 브라우저가 거기로 가
 /// 연동한 뒤 복귀 주소(`porestdesk://oauth/linked`)로 `?linked=` · `?linkError=` 를 달고 돌아온다.
 ///
-/// **세 요청 모두 전역 오류 알림을 끈다** — 그루 계정이 쓴 글("Cannot unlink the only
+/// **세 요청 모두 silent 표식을 싣는다** — 그루 계정이 쓴 글("Cannot unlink the only
 /// authentication method" 같은 영어 · 합니다체)이 화면에 닿지 않게, 실패는 화면이 고정 글로 알린다.
 class OAuthLinkRepository {
   OAuthLinkRepository(this._dio);

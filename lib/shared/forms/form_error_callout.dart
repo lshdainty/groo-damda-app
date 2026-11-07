@@ -6,7 +6,7 @@ import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 /// 시트 · 폼 맨 위 저장 실패 알림 — 서버가 낸 글이 아니라 우리 글(고정 문구). 폼은 열려 있고 쓴 값은 그대로다.
 ///
 /// 규칙: **폼 저장 실패 = 맨 위 Callout**(그리고 스크롤해 보이게 — [revealFormError]), **확인창(삭제 · 고정)의 실패 = 확인창을 닫고 critical 스낵바 +
-/// [다시 시도]**. 서버 원문을 띄우는 전역 오류 알림은 그 요청에서 끈다. 앱의 스낵바 호스트는 시트 · 확인창 **위**에 뜨지만(길잡이 바깥),
+/// [다시 시도]**. 그 요청은 silent 표식을 싣는다(서버 원문은 띄우지 않는다). 앱의 스낵바 호스트는 시트 · 확인창 **위**에 뜨지만(길잡이 바깥),
 /// 폼 실패는 쓴 값 옆에서 고치는 자리라 Callout 이 맞다.
 class FormErrorCallout extends StatelessWidget {
   const FormErrorCallout({super.key, required this.message});
