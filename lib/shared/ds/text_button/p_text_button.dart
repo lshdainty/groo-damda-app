@@ -1,7 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 글 버튼(SEED Text Button) — 카드 머리 "전체 보기" · 모두 펼치기 · 결과 둘째 버튼 · 목록 제목 동작의 모양.
 /// 수치 원본은 card.yaml `headerAction`(2026-10-16 사용자 결정, 글자 역할 D2): 보이는 상자 높이 36 · 좌우 14 · 모서리 8,
@@ -33,6 +35,7 @@ const double kTextButtonPaddingX = PSpacing.x3_5;
 
 class _PTextButtonState extends State<PTextButton> {
   bool _pressed = false;
+  bool _ringVisible = false;
   double _basis = 24;
 
   void _setPressed(bool value) {
@@ -95,16 +98,42 @@ class _PTextButtonState extends State<PTextButton> {
           onTapCancel: active ? () => _setPressed(false) : null,
           onTap: widget.onPressed,
           excludeFromSemantics: true,
-          child: MouseRegion(
-            cursor: active
-                ? SystemMouseCursors.click
-                : SystemMouseCursors.forbidden,
-            child: AnimatedScale(
-              key: const ValueKey('text-button-scale'),
-              scale: _pressed && !reduceMotion ? (_basis - 2) / _basis : 1,
-              duration: PDuration.pressedScale,
-              curve: PEasing.pressedScale,
-              child: box,
+          // Tab 으로 초점을 받고 Space · Enter 로 누른다 — 링은 키보드로 올 때만(터치는 그리지 않는다)
+          child: CallbackShortcuts(
+            bindings: {
+              if (active) ...{
+                const SingleActivator(LogicalKeyboardKey.space):
+                    widget.onPressed!,
+                const SingleActivator(LogicalKeyboardKey.enter):
+                    widget.onPressed!,
+                const SingleActivator(LogicalKeyboardKey.numpadEnter):
+                    widget.onPressed!,
+              },
+            },
+            child: Focus(
+              canRequestFocus: active,
+              onFocusChange: (focused) {
+                final next = focused && keyboardHighlight();
+                if (next != _ringVisible) setState(() => _ringVisible = next);
+              },
+              child: MouseRegion(
+                cursor: active
+                    ? SystemMouseCursors.click
+                    : SystemMouseCursors.forbidden,
+                child: PFocusRing(
+                  visible: _ringVisible && active,
+                  style: const PFocusRingStyle(radius: PRounded.r2),
+                  child: AnimatedScale(
+                    key: const ValueKey('text-button-scale'),
+                    scale: _pressed && !reduceMotion
+                        ? (_basis - 2) / _basis
+                        : 1,
+                    duration: PDuration.pressedScale,
+                    curve: PEasing.pressedScale,
+                    child: box,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

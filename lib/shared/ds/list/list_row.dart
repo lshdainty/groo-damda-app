@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 // List 의 줄 틀 — 줄의 종류(보기만 · 누르는 · 링크 · 컨트롤 · 부모)가 함께 쓰는 짜임. 화면에서 직접 쓰지 않는다 —
@@ -1084,6 +1085,18 @@ class _PListRowFrameState extends State<PListRowFrame> {
       fit: StackFit.passthrough,
       children: [background, content],
     );
+    if (widget.interactive && !disabled) {
+      // 키보드 초점 링 — 줄 안쪽 2px (list.yaml focused: 화면 폭 줄은 바깥 링이 잘린다)
+      // 줄 자신이 초점을 가질 때만 — 줄 안의 꺾쇠 단추가 받으면 그 단추 몫이다. 터치로 눌러 생긴 초점에는 없다
+      final row = result;
+      result = Builder(
+        builder: (context) => PFocusRing(
+          visible: Focus.of(context).hasPrimaryFocus && keyboardHighlight(),
+          style: PFocusRingStyle(radius: scope.itemRadius, inset: true),
+          child: row,
+        ),
+      );
+    }
 
     if (widget.interactive) {
       if (!disabled) {

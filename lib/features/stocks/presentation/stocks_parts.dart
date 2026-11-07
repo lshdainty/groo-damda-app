@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_donut.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
@@ -383,6 +384,8 @@ class _StocksSearchEntryState extends State<StocksSearchEntry> {
         focusNode: _focus,
         onTap: _open,
         touchMin: 0,
+        // 키보드 초점 링 — 밑줄 칸이지만 다른 칸(Input Button)과 같은 링을 입구 전체 상자에 그린다
+        focusRing: const PFocusRingStyle(radius: PRounded.r3),
         semantics: (child, enabled, tap) => Semantics(
           container: true,
           button: true,

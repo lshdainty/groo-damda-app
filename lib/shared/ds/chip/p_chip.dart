@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/checkbox/selection_control.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 
 /// 변형 — solid(옅은 회색 채움 — 제안 · 필터 바, 흰 표면 위에서만) · outlineStrong(고르면 짙은 채움) · outlineWeak(기본 —
@@ -337,6 +338,8 @@ class ChipVisual extends StatelessWidget {
   }
 }
 
+const _chipFocusRing = PFocusRingStyle(radius: PRounded.full);
+
 /// Chip(버튼) — 제안(누르면 칸에 값을 넣는다 · 고른 모습 없음) · 필터 바의 여는 칩(뒤 아래 화살표, 걸린 조건이면
 /// [selected]) · 아이콘만 있는 필터 지우기([PChip.icon]). 구조는 SEED Chip(2026-10-02), 수치 원본은 groo-design
 /// `specs/components/chip.yaml`(값은 `test/fixtures/design_spec/chip.json` — 테스트가 위젯이 그 값과 같은지 본다).
@@ -348,8 +351,8 @@ class ChipVisual extends StatelessWidget {
 /// 크기가 변하지 않는다.
 ///
 /// 상태(색은 150ms) — 누르면 누름 바탕 + 칩 전체가 2px 거리 준다(기준 max(높이, 폭 ÷ 4, 24) — 모션 줄이기면 줄지
-/// 않는다). 비활성은 전용 색(흐리게 하지 않는다)이고 고른 채 막히면 짙은 1px 를 남긴다. 올림(hovered) · 포커스 링
-/// (focused)은 웹 상태라 앱에는 없다 — 키보드 포커스는 받고 링은 그리지 않는다. 누르는 영역은 보이는 칩과 따로 44 까지
+/// 않는다). 비활성은 전용 색(흐리게 하지 않는다)이고 고른 채 막히면 짙은 1px 를 남긴다. 올림(hovered)은
+/// 웹 상태라 앱에는 없다. 키보드 포커스 링(focused)은 키보드로 초점이 올 때만 그린다(DESIGN.desk.md State — 터치에는 없다). 누르는 영역은 보이는 칩과 따로 44 까지
 /// 넓힌다(놓인 자리는 그대로).
 ///
 /// [onPressed] 가 없으면 비활성이다. 읽기 — 버튼이다(웹 aria-pressed 는 쓰지 않는다 — [selected] 는 모습일 뿐). 여는
@@ -407,6 +410,8 @@ class PChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
     return PressArea(
+      // 키보드로 초점이 올 때만 바깥 링 2px · 띄움 2px (chip.md focused) — 터치로 눌러서는 그리지 않는다
+      focusRing: _chipFocusRing,
       enabled: enabled,
       onTap: onPressed,
       semantics: (child, enabled, onTap) => Semantics(
@@ -461,6 +466,8 @@ class PChipToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onChanged != null;
     return PressArea(
+      // 키보드로 초점이 올 때만 바깥 링 2px · 띄움 2px (chip.md focused) — 터치로 눌러서는 그리지 않는다
+      focusRing: _chipFocusRing,
       enabled: enabled,
       activateOnEnter: false,
       onTap: enabled ? () => onChanged!(!checked) : null,
@@ -1013,6 +1020,8 @@ class _PChipRadioState<T> extends State<PChipRadio<T>> with RadioClient<T> {
       _ => false,
     };
     return PressArea(
+      // 키보드로 초점이 올 때만 바깥 링 2px · 띄움 2px (chip.md focused) — 터치로 눌러서는 그리지 않는다
+      focusRing: _chipFocusRing,
       enabled: enabled,
       focusNode: _focusNode,
       // 화살표는 라디오 묶음이 맡는다(옮기면 바로 고른다). Space 로 포커스된 칩을 고르고 Enter 는 고르지 않는다

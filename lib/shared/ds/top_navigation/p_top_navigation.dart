@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/notification_badge/p_notification_badge.dart';
 
 /// 바의 타입 — root(탭 첫 화면 — 큰 제목 22, 왼쪽 버튼 없음) · standard(그 아래 화면 — 왼쪽 버튼 + 제목 18, 기본).
@@ -296,6 +297,8 @@ class PTopNavigationIconButton extends StatelessWidget {
       onTap: onPressed,
       // 상자 44 가 곧 누르는 영역이다 — 보이지 않는 여백을 더하지 않는다
       touchMin: 0,
+      // 키보드 초점 링 — 상자 안쪽 2px (top-navigation.md focused)
+      focusRing: const PFocusRingStyle(radius: PRounded.r2, inset: true),
       semantics: (child, enabled, onTap) => Semantics(
         container: true,
         button: true,
@@ -356,6 +359,7 @@ class PTopNavigationTextButton extends StatelessWidget {
       enabled: active,
       onTap: onPressed,
       touchMin: 0,
+      focusRing: const PFocusRingStyle(radius: PRounded.r2, inset: true),
       semantics: (child, enabled, onTap) => Semantics(
         container: true,
         button: true,
