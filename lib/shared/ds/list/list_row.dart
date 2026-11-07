@@ -96,6 +96,27 @@ double listTitleMinWidth({
 /// (list.yaml content.stackBelow, 03-D 결정 1 B). em 은 제목 글자(t5)의 **글자 배율을 곱한** 크기다.
 const double kPListStackBelowEm = 16;
 
+/// 줄 끝에 놓는 편집 칸의 폭 — 보통은 [width] 로 줄 끝에 서고, 줄 안 폭이 좁으면([kPListStackBelowEm]) 본문 아래 전폭으로
+/// 내려간다(list.md "큰 글자에서 값을 본문 아래로"를 편집 칸 붙이개에도). [PListValue] 안에 둔다(mergeSemantics false —
+/// 칸은 줄 이름에 합쳐지지 않고 따로 읽힌다). 내려갈 때 쓰는 모양은 줄이 [below] 로 바꿔 입힌다.
+class PListEditWidth extends StatelessWidget {
+  const PListEditWidth({super.key, required this.width, required this.child})
+    : fill = false;
+
+  const PListEditWidth._below({required this.child}) : width = 0, fill = true;
+
+  final double width;
+  final Widget child;
+  final bool fill;
+
+  /// 본문 아래로 내려온 모양 — 전폭.
+  PListEditWidth get below => PListEditWidth._below(child: child);
+
+  @override
+  Widget build(BuildContext context) =>
+      SizedBox(width: fill ? double.infinity : width, child: child);
+}
+
 /// 금액처럼 위젯으로 만든 값 — 뒤 붙이개 자리에 두면 줄이 "값" 으로 읽는다. 줄 안 폭이 좁으면([kPListStackBelowEm])
 /// 글 값과 함께 본문 아래로 내려가고, 화살표 · 스위치 · 체크 · 작은 버튼 같은 조작 요소는 줄 끝에 남는다.
 /// 금액 글은 [keepAllAmount] 로 만든다(쉼표 뒤에서만 줄을 바꾼다).
@@ -156,6 +177,7 @@ const double kPListExpandSlotHeight = PTouch.min - 2 * PSpacing.x0_5;
 @visibleForTesting
 Widget alignListValueStart(Widget w) {
   bool isEnd(TextAlign? a) => a == TextAlign.end || a == TextAlign.right;
+  if (w is PListEditWidth) return w.below;
   if (w is PListValue) {
     return PListValue(
       key: w.key,

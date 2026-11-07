@@ -699,39 +699,48 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
         if (rest > 0) detail = l.dutchRemainIncluded(txMoney(rest, masked));
       case DutchSplitMethod.ratio:
         detail = txMoney(amount, masked);
-        suffix = SizedBox(
-          width: 96,
-          child: PInput(
-            controller: p.ratioCtrl,
-            semanticLabel: '$name ${l.dutchShareUnit}',
-            suffixText: l.dutchShareUnit,
-            textAlign: TextAlign.end,
-            invalid: _attempted && _rowBad(p),
-            tabularFigures: true,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-            ],
-            onChanged: (v) => setState(() => p.ratio = v),
+        suffix = PListValue(
+          mergeSemantics: false,
+          child: PListEditWidth(
+            width: 96,
+            child: PInput(
+              controller: p.ratioCtrl,
+              semanticLabel: '$name ${l.dutchShareUnit}',
+              suffixText: l.dutchShareUnit,
+              textAlign: TextAlign.end,
+              invalid: _attempted && _rowBad(p),
+              tabularFigures: true,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+              onChanged: (v) => setState(() => p.ratio = v),
+            ),
           ),
         );
       case DutchSplitMethod.custom:
         suffix = isMe
             ? amountText
-            : SizedBox(
-                width: 96,
-                child: PInput(
-                  controller: p.customCtrl,
-                  semanticLabel: name,
-                  placeholder: '0',
-                  suffixText: wonUnit(),
-                  textAlign: TextAlign.end,
-                  invalid: _attempted && _rowBad(p),
-                  tabularFigures: true,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: const [AmountInputFormatter()],
-                  onChanged: (v) =>
-                      setState(() => p.custom = '${parseAmountInput(v) ?? 0}'),
+            : PListValue(
+                mergeSemantics: false,
+                child: PListEditWidth(
+                  width: 96,
+                  child: PInput(
+                    controller: p.customCtrl,
+                    semanticLabel: name,
+                    placeholder: '0',
+                    suffixText: wonUnit(),
+                    textAlign: TextAlign.end,
+                    invalid: _attempted && _rowBad(p),
+                    tabularFigures: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: const [AmountInputFormatter()],
+                    onChanged: (v) => setState(
+                      () => p.custom = '${parseAmountInput(v) ?? 0}',
+                    ),
+                  ),
                 ),
               );
     }
