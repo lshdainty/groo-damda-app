@@ -70,8 +70,8 @@ class _TodoDetailSheetState extends ConsumerState<_TodoDetailSheet> {
     final overdue = !todo.done && isTodoOverdue(todo.due, today);
     final content = (todo.content ?? '').trim();
     // completedAt 은 서버 `[UTC]` — 잘라 쓰면 UTC 벽시계가 그대로 나와 KST(+9)에서 9시간 전으로, 자정 근처면 날짜까지 하루 어긋나
-    // 보였다. 웹 TodoPage 상세와 같은 모양(yyyy-MM-dd HH:mm)으로 파싱해 찍고, 못 읽는 값만 원문을 그대로 둔다.
-    final completedAt = localDateTime(todo.completedAt) ?? todo.completedAt;
+    // 보였다. 파싱해 로컬로 옮겨 스펙 "요일 · 시각"(11월 7일 (토) 오전 9:05)으로 찍고, 못 읽는 값만 원문을 그대로 둔다.
+    final completedAt = formatDayDowTime(todo.completedAt) ?? todo.completedAt;
     final due = todo.due;
 
     Widget value(String text, {Color? color, FontWeight? weight}) => Text(

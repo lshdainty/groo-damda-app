@@ -112,6 +112,56 @@ void main() {
     );
   });
 
+  group('요일 · 시각 — 할 일 상세 완료 시각(DESIGN.desk.md:3605)', () {
+    // 서버 [UTC] 값 -> 로컬. 기대값은 로컬 시계에서 독립적으로 조립한다.
+    String ko(DateTime u) {
+      final d = u.toLocal();
+      final h12 = d.hour % 12 == 0 ? 12 : d.hour % 12;
+      final mm = d.minute.toString().padLeft(2, '0');
+      final yr = d.year == DateTime.now().year ? '' : '${d.year}년 ';
+      return '$yr${d.month}월 ${d.day}일 (${_dow(d)}) '
+          '${d.hour < 12 ? '오전' : '오후'} $h12:$mm';
+    }
+
+    String iso(DateTime u) => u.toIso8601String().replaceFirst('Z', '');
+    final thisYear = DateTime.utc(DateTime.now().year, 6, 15, 12, 5);
+    final otherYear = DateTime.utc(2020, 11, 7, 0, 5);
+
+    test('한국어 올해 · 다른 해', () {
+      expect(formatDayDowTime(iso(thisYear)), ko(thisYear));
+      expect(formatDayDowTime(iso(otherYear)), ko(otherYear));
+      expect(formatDayDowTime(iso(otherYear)), startsWith('2020년 '));
+      expect(formatDayDowTime(iso(thisYear)), isNot(contains('년')));
+      expect(formatDayDowTime(iso(thisYear)), isNot(contains('-')));
+    });
+
+    test('영어 올해 "Sat, Nov 7 at 9:05 AM" 꼴 · 다른 해는 연도', () {
+      final prev = Intl.defaultLocale;
+      Intl.defaultLocale = 'en';
+      addTearDown(() => Intl.defaultLocale = prev);
+      expect(
+        formatDayDowTime(iso(thisYear)),
+        matches(
+          RegExp(r'^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2} at \d{1,2}:05 [AP]M$'),
+        ),
+      );
+      expect(
+        formatDayDowTime(iso(otherYear)),
+        matches(
+          RegExp(
+            r'^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}, 2020 at \d{1,2}:05 [AP]M$',
+          ),
+        ),
+      );
+    });
+
+    test('못 읽는 값 · 날짜만 있는 값은 null', () {
+      expect(formatDayDowTime(null), isNull);
+      expect(formatDayDowTime('알 수 없음'), isNull);
+      expect(formatDayDowTime('2026-08-24'), isNull);
+    });
+  });
+
   test('좁은 칸 월 · 일 — 점 표기 "10. 29."(슬래시 · 앞 0 없음), 영어 "Oct 29"', () {
     expect(monthDayDot(DateTime(2026, 10, 29)), '10. 29.');
     expect(monthDayDot(DateTime(2026, 9, 7)), '9. 7.');

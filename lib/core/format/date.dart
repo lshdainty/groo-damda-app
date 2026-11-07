@@ -241,6 +241,19 @@ String? localDateTime(String? iso) {
   return '$yyyy-$mm-$dd $hh:$mi';
 }
 
+/// 요일 · 시각(DESIGN.desk.md:3605) — ko "11월 7일 (토) 오전 9:05", en "Sat, Nov 7 at 9:05 AM". 다른 해면 연도가 붙는다
+/// ("2025년 11월 7일 (금) 오전 9:05" · "Fri, Nov 7, 2025 at 9:05 AM").
+///
+/// 서버 `[UTC]` 시각을 로컬로 옮겨 찍는다([localDateKey] 와 같은 이유). 못 읽는 값(날짜만 있는 값 포함)은 null.
+String? formatDayDowTime(String? iso) {
+  final dt = parseServerUtc(iso);
+  if (dt == null) return null;
+  final day = monthDayDow(dt);
+  return localeIsEn()
+      ? '$day at ${timeOfDay12(dt)}'
+      : '$day ${timeOfDay12(dt)}';
+}
+
 /// 메모 수정 시각(I-15 9) — 올해는 줄임 날짜 + 시각 "10월 22일 오후 5:10", 다른 해는 표준 날짜 "2025년 12월 3일"(웹 `formatMemoStamp` 와 한 벌).
 ///
 /// 서버 `[UTC]` 시각을 파싱해 로컬로 옮긴 뒤 찍는다 — 문자열을 자르면 UTC 벽시계가 그대로 나와 KST(+9)에서 9시간 · 자정 근처엔 하루가 어긋난다.
