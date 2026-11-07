@@ -53,7 +53,7 @@ class NotificationRepository {
 
   Future<void> markAllRead() async {
     try {
-      // 실패는 화면이 고정 글 + [다시 시도] 로 알린다 — 전역 서버 원문 알림과 겹치지 않게 막는다
+      // 실패는 화면이 고정 글 + [다시 시도] 로 알린다 — 서버 원문이 화면에 닿지 않게 silent 표식을 싣는다
       await _dio.patch<dynamic>(
         '/notifications/read-all',
         options: Options(extra: {kSilentErrorToast: true}),
@@ -65,7 +65,7 @@ class NotificationRepository {
 
   Future<void> delete(int id) async {
     try {
-      // 오류 알림은 화면이 확인창을 열어 둔 채 띄운다 — 인터셉터의 전역 토스트와 겹치지 않게 막는다
+      // 오류 알림은 화면이 확인창을 열어 둔 채 띄운다 — silent 표식을 싣는다
       await _dio.delete<void>(
         '/notification/$id',
         options: Options(extra: {kSilentErrorToast: true}),

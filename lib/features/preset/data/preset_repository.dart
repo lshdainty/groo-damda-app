@@ -10,7 +10,7 @@ class PresetRepository {
   PresetRepository(this._dio);
   final Dio _dio;
 
-  /// 화면이 실패를 자기 자리에서 알릴 때 전역 오류 토스트(서버 원문)를 끈다 — 둘이 겹치지 않게.
+  /// 화면이 실패를 자기 자리에서 알릴 때 kSilentErrorToast 표식을 싣는다(서버 원문은 띄우지 않는다).
   Options? _opts(bool silent) =>
       silent ? Options(extra: {kSilentErrorToast: true}) : null;
 

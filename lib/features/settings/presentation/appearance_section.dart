@@ -111,7 +111,7 @@ class AppearanceSection extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final outcome = await ref
         .read(userPreferencesProvider.notifier)
-        // 실패는 아래에서 고정 글 하나로 알린다 — 서버 글이 전역 알림으로 닿지 않게(I-14 21)
+        // 실패는 아래에서 고정 글 하나로 알린다 — 서버 글이 화면에 그대로 닿지 않게(I-14 21)
         .patch(fields, optimistic: optimistic, silent: true);
     if (outcome != WriteOutcome.done && context.mounted) {
       // 바로 바뀌는 값 — 실패면 낙관 값은 되돌았다. 응답을 못 받았으면 되돌리지 않고 서버 값을 다시 받는 중이다(판단 ②).

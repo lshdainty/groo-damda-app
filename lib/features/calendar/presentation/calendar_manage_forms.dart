@@ -31,7 +31,7 @@ const int kInviteCodeLength = 8;
 
 /// 새 캘린더 · 캘린더 이름 바꾸기 · 초대 코드로 참여(I-09b 24 · 34 · 36) — 모두 ds Bottom Sheet 입력 폼이다.
 /// 바깥 · 끌기로 닫히지 않고, 바뀐 값이 있으면 닫기 전에 "작성한 내용이 사라져요" 를 묻는다. 바닥은 버튼 하나.
-/// 비워 두고 눌러도 [저장] 은 켜 둔 채 칸 아래 오류로 알린다(field.md:86). 요청 실패는 맨 위 Callout, 전역 오류 알림은 끈다.
+/// 비워 두고 눌러도 [저장] 은 켜 둔 채 칸 아래 오류로 알린다(field.md:86). 요청 실패는 맨 위 Callout, 요청은 silent 표식을 싣는다.
 
 class _DirtyProbe {
   bool Function() dirty = () => false;

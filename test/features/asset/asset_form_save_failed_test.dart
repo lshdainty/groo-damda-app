@@ -1,4 +1,4 @@
-// 자산 폼(계좌 · 카드 · 투자) 저장 실패 — 폼은 열린 채 맨 위에 우리 글 Callout 한 문장, 서버 글 전역 토스트 없음(silent), 쓴 값은 남는다.
+// 자산 폼(계좌 · 카드 · 투자) 저장 실패 — 폼은 열린 채 맨 위에 우리 글 Callout 한 문장, 서버 글은 띄우지 않음(silent), 쓴 값은 남는다.
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

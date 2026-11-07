@@ -185,7 +185,7 @@ class UserPreferencesRepository {
   /// 부분 갱신. PATCH /users/me/preferences. [fields] 의 키만 전송한다.
   /// 응답 전체 환경설정을 반환.
   ///
-  /// [silent] 면 실패를 전역 오류 알림으로 띄우지 않는다 — 화면이 고정 글로 알릴 때만(표시 설정). 기본은 전역 알림을 유지한다
+  /// [silent] 면 kSilentErrorToast 표식을 싣는다 — 화면이 고정 글로 알릴 때만(표시 설정). 기본은 표식을 싣지 않는다
   /// (알림 설정 화면은 결과를 따로 알리지 않는다).
   Future<UserPreferences> update(
     Map<String, dynamic> fields, {

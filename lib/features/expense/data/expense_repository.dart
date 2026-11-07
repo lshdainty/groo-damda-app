@@ -13,7 +13,7 @@ class ExpenseRepository {
   ExpenseRepository(this._dio);
   final Dio _dio;
 
-  /// 실패 알림을 전역 스낵바로 띄우지 않는 요청(시트 안에서 따로 말하는 자리).
+  /// 실패를 시트 안에서 따로 말하는 요청(kSilentErrorToast 표식을 싣는다).
   static Options? _quiet(bool silent) =>
       silent ? Options(extra: {kSilentErrorToast: true}) : null;
 
@@ -236,7 +236,7 @@ class ExpenseRepository {
   /// 앞서 찍힌 거래보다 과거가 되어 카드 회차 판정이 하루 밀린다). 거래일부터
   /// 오늘까지만 받는다(D16). 안 고르면 키를 안 싣고 서버가 제 시각으로 찍는다.
   ///
-  /// [silent] 면 실패를 전역 스낵바로 띄우지 않는다 — 부르는 쪽이 시트 안(보이는 자리)에서 말한다(I-21 21-1).
+  /// [silent] 면 kSilentErrorToast 표식을 싣는다 — 부르는 쪽이 시트 안(보이는 자리)에서 말한다(I-21 21-1).
   Future<Expense> refund(
     int id, {
     String? refundedAt,

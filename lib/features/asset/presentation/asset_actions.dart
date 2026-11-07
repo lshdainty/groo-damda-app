@@ -55,7 +55,7 @@ class AssetActions implements ItemActions<Asset> {
   }
 
   /// 확인창 → 삭제. 실패하면 확인창이 닫힌 뒤 critical 스낵바 + [다시 시도](묻지 않고 바로 요청).
-  /// 요청은 silent 라 전역 서버 원문 토스트와 겹치지 않는다. 성공은 true — 바로 성공했을 때만 돌려받고,
+  /// 요청은 silent 로 보내고 실패는 화면이 말한다. 성공은 true — 바로 성공했을 때만 돌려받고,
   /// [다시 시도] 로 성공하면 [onRetried] 가 불린다(둘 다 같은 뒷정리를 해야 한다).
   Future<bool> confirmAndDelete(
     BuildContext context,

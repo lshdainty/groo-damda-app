@@ -13,7 +13,7 @@ import 'package:groo_damda_app/shared/forms/save_failure.dart';
 /// 쓰는 자리는 "삭제 · 취소 · 해제 · 환불 취소" 같은 확인창 뒤 요청이다. 폼 저장 실패는 이게 아니다 — 창을 연 채 고쳐야 하니
 /// 폼 맨 위 Callout 이 맞다.
 ///
-/// - 요청(`request`)은 **silent** 로 보낸다(저장소 메서드의 `silent: true`) — 전역 서버 원문 토스트와 겹치지 않게.
+/// - 요청(`request`)은 **silent** 로 보낸다(저장소 메서드의 `silent: true`) — 실패는 이 함수의 스낵바가 말한다.
 /// - 실패 글(`failedMessage`)은 호출처가 준다(해요체 + 마침표, 서버 글 아님). [다시 시도] 글자(`retryLabel`)는 보통 `l.actionRetry`.
 /// - 요청은 실패하면 **던진다**.
 /// - 성공 뒷정리(무효화 · 시트 닫기)는 **두 길**이다. 확인창에서 바로 성공하면 돌려받은 `true`(ok)로, 실패한 뒤 [다시 시도] 로

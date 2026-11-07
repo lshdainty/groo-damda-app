@@ -1,5 +1,4 @@
 // 확인창 뒤 실패 표시 공용 함수 — 확인창 닫기 + critical 스낵바 + [다시 시도](묻지 않고 바로 요청).
-// (작성만 — 실행은 UI 이관이 끝난 뒤 한꺼번에.)
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

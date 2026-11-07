@@ -146,7 +146,7 @@ class ExpenseActions implements ItemActions<Expense> {
   /// 열린 회차에서 미리 낸 돈이 남아 결제계좌로 돌아갔으면 그 금액을 스낵바로 알린다
   /// (D4). 결제가 끝난 회차의 거래였으면 [잔액 고치기] 를 단다(D9) — 둘 다 [deleteExpenseRequest] 가 한다.
   ///
-  /// 요청은 **silent** 라 서버 글이 전역 토스트로 뜨지 않는다. 실패하면 고정 글의 critical 스낵바 + [다시 시도] 를 띄우고 false 를
+  /// 요청은 **silent** 로 보내고 실패는 화면이 말한다. 실패하면 고정 글의 critical 스낵바 + [다시 시도] 를 띄우고 false 를
   /// 돌려준다([throwOnError] 면 대신 던진다 — 부른 쪽이 말한다). 확인창은 부르는 쪽이 이미 받았다 — 스와이프는 확인창과 함께
   /// [askConfirmThenRequest] 로 [deleteExpenseRequest] 를 직접 부른다.
   ///
@@ -204,7 +204,7 @@ class ExpenseActions implements ItemActions<Expense> {
   ///
   /// 성공하면 서버가 돌려준 거래를 준다 — 상세가 그걸로 다시 그려 배너가 뜬다.
   /// 미리 낸 돈이 계좌로 돌아갔으면 토스트로 알리고(D4), 결제가 끝난 회차였으면
-  /// [잔액 고치기] 를 단다(D9). 실패는 null 이다(토스트는 인터셉터가 이미 띄웠다).
+  /// [잔액 고치기] 를 단다(D9). 실패는 null 이다(글은 부르는 쪽이 고른다).
   ///
   /// [silent] · [throwOnError] 는 [delete] 와 같다. 응답은 목록을 다시 받은 뒤에 돌려준다 — 상세가 응답으로 단계를 옮길
   /// 때 옛 값이 먼저 비치지 않는다.

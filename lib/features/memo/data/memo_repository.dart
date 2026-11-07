@@ -10,7 +10,7 @@ class MemoRepository {
   MemoRepository(this._dio);
   final Dio _dio;
 
-  /// 서버 원문을 띄우는 전역 오류 알림을 끈다 — 화면이 고정 글로 알린다(I-15 12 · 13 · 21: 저장 실패는 시트 안 Callout, 삭제 · 고정 실패는 스낵바 + 다시 시도).
+  /// kSilentErrorToast 표식을 싣는다 — 서버 원문 대신 화면이 고정 글로 알린다(I-15 12 · 13 · 21: 저장 실패는 시트 안 Callout, 삭제 · 고정 실패는 스낵바 + 다시 시도).
   static final Options _silent = Options(extra: {kSilentErrorToast: true});
 
   Future<List<Memo>> list({String? search}) async {

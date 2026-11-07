@@ -96,7 +96,7 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
   int? _openRowId;
   String? _openDay;
 
-  /// 상세에서 [삭제] 가 실패했다 — 상세 본문 맨 위 Callout 으로 알린다(전역 스낵바는 시트 뒤에 가려진다).
+  /// 상세에서 [삭제] 가 실패했다 — 상세 본문 맨 위 Callout 으로 알린다(스낵바는 시트 위에 뜨지만, 상세의 실패는 자기 자리에서 말한다).
 
   /// 목록 단계를 떠날 때 보던 스크롤 · 연 줄 — 돌아오면 그대로(I-09b 5).
   double _listOffset = 0;

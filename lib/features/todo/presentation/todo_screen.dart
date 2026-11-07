@@ -274,7 +274,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
           // 다시 못 받으면 이전 목록 그대로 — 글이 확인을 부탁한다
         }
       }
-      // 서버 원문을 띄우지 않는다(전역 오류 알림은 이 요청에서 껐다) — 실패면 되돌리고 새 글 한 번, 다시 시도 없음.
+      // 서버 원문을 띄우지 않는다(이 요청은 silent 표식을 싣는다) — 실패면 되돌리고 새 글 한 번, 다시 시도 없음.
       if (mounted) {
         PSnackbar.maybeOf(context)?.show(
           message: unconfirmed ? l.unconfirmedToggle : l.todoToggleFailed,

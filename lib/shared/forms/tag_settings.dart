@@ -34,7 +34,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 /// 흰 면 하나 — 안내 Callout(informative · 제목 없음) → 목록 제목 "… 태그 · N" + 글 버튼 "태그 추가" → 색 타일 40 줄.
 /// 줄 누름 = 수정 시트, 밀기 = [수정, 삭제]. 줄 끝 ⋮ 는 두지 않는다(좁은 목록 줄 — 10-25).
 ///
-/// 실패 안내는 서버 원문이 아니라 고정 글이다(부르는 쪽 요청은 전역 오류 알림을 끈다) — 저장 실패는 시트 안 Callout,
+/// 실패 안내는 서버 원문이 아니라 고정 글이다(부르는 쪽 요청은 silent 표식을 싣는다) — 저장 실패는 시트 안 Callout,
 /// 삭제 실패는 확인창을 닫고 critical 스낵바 + [다시 시도]. 저장 · 삭제는 목록을 다시 받은 뒤에 끝나야 한다(부르는 쪽 몫).
 class TagItem {
   const TagItem({

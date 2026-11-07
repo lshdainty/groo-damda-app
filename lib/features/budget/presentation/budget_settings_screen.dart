@@ -426,7 +426,7 @@ class _BudgetCopyJob {
   final List<int> created = [];
 
   /// [items] 를 하나씩 복사한다 — 이번 달에 같은 key 가 있으면 **덮어쓰기**(update), 없으면 생성(create).
-  /// 실패한 항목을 돌려준다(던지지 않는다). 실패는 [afterCopy] 의 스낵바가 알리므로 전역 오류 토스트는 끈다.
+  /// 실패한 항목을 돌려준다(던지지 않는다). 실패는 [afterCopy] 의 스낵바가 알리므로 요청은 silent 표식을 싣는다.
   Future<List<Budget>> copyItems(List<Budget> items) async {
     final failed = <Budget>[];
     try {

@@ -187,7 +187,7 @@ Future<void> _markReadOneDetached(
   }
 }
 
-/// 모두 읽음 — 실패하면 critical 스낵바 + [다시 시도](같은 요청을 바로). 요청은 전역 오류 알림을 끈다.
+/// 모두 읽음 — 실패하면 critical 스낵바 + [다시 시도](같은 요청을 바로). 요청은 silent 표식을 싣는다(실패는 화면이 말한다).
 Future<void> _markAllRead(BuildContext context, WidgetRef ref) async {
   final c = ProviderScope.containerOf(context, listen: false);
   final snack = PSnackbar.maybeOf(context);
