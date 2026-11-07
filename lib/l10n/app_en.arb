@@ -95,7 +95,7 @@
   "notiUnreadMark": "Unread",
   "notiMarkReadFailed": "Couldn't mark the notification as read.",
   "notiMarkAllFailed": "Couldn't mark all notifications as read.",
-  "notiPrefsSaveFailed": "Couldn't save notification settings.",
+  "notiPrefsSaveFailed": "Couldn't save notification settings. Try again later.",
   "notiSettingsLoadFailedDesc": "Please try again in a moment.",
   "notiThresholdLabel": "Usage shown as a warning",
   "notiThresholdDesc": "Above this value it shows as a warning and you get an alert. Above 100%, an over-budget alert is sent separately.",
@@ -2261,6 +2261,7 @@
     }
   },
   "hideAmountsSaveFailed": "Couldn't save the amount hiding.",
+  "hideAmountsSaveFailedToast": "Couldn't save the amount hiding. Try again later.",
   "hideAmountsDiscardTitle": "Leave without saving",
   "hideAmountsDiscardBody": "Your selection will be discarded.",
   "hideAmountsDiscardConfirm": "Leave",

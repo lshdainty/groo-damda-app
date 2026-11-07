@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_range.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 
 const double _rowIcon = 22;
@@ -76,7 +77,7 @@ class CalendarEventDetailBody extends StatelessWidget {
           required String title,
           required IconData icon,
           List<String> pieces = const [],
-          String? range,
+          Widget? range,
         }) => PListItem(
           title: title,
           prefix: Icon(icon, size: _rowIcon),
@@ -89,8 +90,8 @@ class CalendarEventDetailBody extends StatelessWidget {
               children: [
                 for (final p in pieces)
                   Text(keepAll(p), textAlign: TextAlign.end),
-                // 여러 날 종일 — 한 글이고 구간 기호 뒤에서만 줄이 바뀐다
-                if (range != null) Text(range, textAlign: TextAlign.end),
+                // 여러 날 종일 — 한 글, 줄은 구간 기호 뒤가 첫째 자리(KeepAllRange)
+                ?range,
               ],
             ),
           ),
@@ -162,7 +163,11 @@ class CalendarEventDetailBody extends StatelessWidget {
                     // 여러 날은 한 글 "10월 25일 (토)~10월 27일 (월)" — 구간 기호 앞뒤를 붙이고 기호 뒤에서만 줄을 바꾼다
                     pieces: multiDay ? const [] : [startDay],
                     range: multiDay
-                        ? keepAllRange(startDay, rangeSeparator(), endDay)
+                        ? KeepAllRange(
+                            from: startDay,
+                            separator: rangeSeparator(),
+                            to: endDay,
+                          )
                         : null,
                   )
                 else ...[

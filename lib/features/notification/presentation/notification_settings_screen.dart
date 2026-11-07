@@ -127,7 +127,7 @@ class _Content extends ConsumerWidget {
     _notifyOutcome(snack, l, outcome);
   }
 
-  /// 바로 바뀌는 값의 결과 알림 — 실패는 저장 실패 글, 응답 없음은 "바뀌었는지 확인하지 못했어요." 둘 다 한 문장 · 다시 시도 없음.
+  /// 바로 바뀌는 값의 결과 알림 — 실패는 저장 실패 글(두 문장), 응답 없음은 "바뀌었는지 확인하지 못했어요."(한 문장) · 둘 다 다시 시도 버튼 없음.
   static void _notifyOutcome(
     PSnackbarApi? snack,
     AppLocalizations l,

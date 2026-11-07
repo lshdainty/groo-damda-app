@@ -21,8 +21,9 @@ String eventTimeText(AppLocalizations l, CalendarEvent e) {
     final sd = DateTime(s.year, s.month, s.day);
     final ed = DateTime(end.year, end.month, end.day);
     if (!ed.isAfter(sd)) return l.calAllDay;
-    final endText = !localeIsEn() && sd.month == ed.month && sd.year == ed.year
-        ? '${ed.day}일'
+    // 같은 달이면 끝 날짜는 일만 — ko "10월 25일~27일" · en "Oct 25–27"(웹 · 스펙과 같다)
+    final endText = sd.month == ed.month && sd.year == ed.year
+        ? (localeIsEn() ? '${ed.day}' : '${ed.day}일')
         : monthDay(ed);
     return '${l.calAllDay} · ${monthDay(sd)}${rangeSeparator()}$endText';
   }

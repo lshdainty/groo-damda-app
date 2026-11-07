@@ -279,7 +279,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notiMarkAllFailed => 'Couldn\'t mark all notifications as read.';
 
   @override
-  String get notiPrefsSaveFailed => 'Couldn\'t save notification settings.';
+  String get notiPrefsSaveFailed =>
+      'Couldn\'t save notification settings. Try again later.';
 
   @override
   String get notiSettingsLoadFailedDesc => 'Please try again in a moment.';
@@ -4078,6 +4079,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hideAmountsSaveFailed => 'Couldn\'t save the amount hiding.';
+
+  @override
+  String get hideAmountsSaveFailedToast =>
+      'Couldn\'t save the amount hiding. Try again later.';
 
   @override
   String get hideAmountsDiscardTitle => 'Leave without saving';

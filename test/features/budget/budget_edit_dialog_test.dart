@@ -220,7 +220,9 @@ void main() {
     expect(repo.calls, ['update:7:500000']);
   });
 
-  testWidgets('100억 넘게 저장된 옛 값은 누를 때 칸 아래에 말이 나온다', (tester) async {
+  testWidgets('3-a 100억 넘게 저장된 옛 값은 열자마자 칸 아래에 말이 나오고 그 값으로 저장은 막힌다', (
+    tester,
+  ) async {
     const edit = Budget(
       rowId: 7,
       budgetAmount: 20000000000,
@@ -228,10 +230,14 @@ void main() {
       budgetMonth: 10,
     );
     final repo = await _open(tester, edit: edit);
-    expect(_t(l.amountTooLarge), findsNothing);
+    expect(_t(l.amountTooLarge), findsOneWidget);
     await _press(tester, l.actionSave);
     expect(_t(l.amountTooLarge), findsOneWidget);
-    expect(repo.calls, isEmpty);
+    expect(repo.calls, isEmpty, reason: '깎아서 저장하지 않는다');
+    // 줄이는 입력은 받는다 — 상한 안이 되면 오류가 사라지고 저장된다
+    await tester.enterText(_inputs().first, '5000000000');
+    await tester.pump();
+    expect(_t(l.amountTooLarge), findsNothing);
   });
 
   testWidgets('카테고리 추가 — 처음엔 고르지 않음 · 제안 여섯 · 빈 저장은 두 칸 오류', (tester) async {
@@ -394,6 +400,30 @@ void main() {
     await tester.enterText(_inputs().first, '1000000000');
     await tester.pump();
     expect(_amount(tester), '1,000,000,000');
+    expect(_t(l.amountTooLarge), findsNothing);
+  });
+
+  testWidgets('3-c 빈 칸에 넘는 값을 붙이고 저장을 누르면 필수 오류가 이긴다', (tester) async {
+    final repo = await _open(tester, overallNew: true);
+    await tester.enterText(_inputs().first, '100000000000');
+    await tester.pump();
+    expect(_t(l.amountTooLarge), findsOneWidget);
+    expect(_amount(tester), '', reason: '빈 채로 막혔다');
+
+    await _press(tester, l.budgetSubmitAdd);
+    expect(_t(l.budgetFormErrTotal), findsOneWidget);
+    expect(_t(l.amountTooLarge), findsNothing);
+    expect(repo.calls, isEmpty);
+  });
+
+  testWidgets('3-b 막힌 뒤 제안 칩이 값을 넣으면 상한 오류는 사라진다', (tester) async {
+    await _open(tester, overallNew: true);
+    await tester.enterText(_inputs().first, '100000000000');
+    await tester.pump();
+    expect(_t(l.amountTooLarge), findsOneWidget);
+    await tester.tap(_t('150만원'));
+    await tester.pumpAndSettle();
+    expect(_amount(tester), '1,500,000');
     expect(_t(l.amountTooLarge), findsNothing);
   });
 

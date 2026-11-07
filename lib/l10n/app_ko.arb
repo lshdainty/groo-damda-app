@@ -111,7 +111,7 @@
   "notiUnreadMark": "안 읽음",
   "notiMarkReadFailed": "알림을 읽음으로 바꾸지 못했어요.",
   "notiMarkAllFailed": "알림을 모두 읽음으로 바꾸지 못했어요.",
-  "notiPrefsSaveFailed": "알림 설정을 저장하지 못했어요.",
+  "notiPrefsSaveFailed": "알림 설정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "notiSettingsLoadFailedDesc": "잠시 뒤 다시 시도해주세요.",
   "notiThresholdLabel": "경고로 표시할 사용률",
   "notiThresholdDesc": "이 값을 넘으면 경고로 표시되고 알림을 받아요. 100%를 넘으면 초과 알림이 따로 와요.",
@@ -2303,6 +2303,7 @@
     }
   },
   "hideAmountsSaveFailed": "금액 가리기를 저장하지 못했어요.",
+  "hideAmountsSaveFailedToast": "금액 가리기를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "hideAmountsDiscardTitle": "저장하지 않고 나가기",
   "hideAmountsDiscardBody": "고른 내용이 사라져요.",
   "hideAmountsDiscardConfirm": "나가기",

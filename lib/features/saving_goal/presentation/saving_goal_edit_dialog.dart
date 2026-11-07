@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -161,24 +162,18 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   String? _currentError;
 
   /// 100억을 넘겨 입력을 막았나(목표 금액 · 지금 모은 금액) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
-  bool _amountOver = false;
-  bool _currentOver = false;
-  late final List<TextInputFormatter> _amountFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _amountOver && mounted) setState(() => _amountOver = over);
-      },
-    ),
-  ];
-  late final List<TextInputFormatter> _currentFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _currentOver && mounted) {
-          setState(() => _currentOver = over);
-        }
-      },
-    ),
-  ];
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+  late final _currentLimit = AmountLimitGuard(
+    _currentCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
 
   bool get _isEdit => widget.edit != null;
 
@@ -234,6 +229,8 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
+    _currentLimit.dispose();
     widget.probe.dirty = () => false;
     _titleCtrl.dispose();
     _amountCtrl.dispose();
@@ -323,6 +320,8 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
 
   Future<void> _onSubmit() async {
     if (_submitting) return;
+    _amountLimit.dismiss();
+    _currentLimit.dismiss();
     final l = AppLocalizations.of(context);
     String? nameErr;
     if (_titleTrim.isEmpty) {
@@ -532,14 +531,14 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             padding: gutter,
             child: PField(
               label: l.savingGoalAmountLabel,
-              invalid: _amountError != null || _amountOver,
-              errorMessage: _amountOver
+              invalid: _amountError != null || _amountLimit.over,
+              errorMessage: _amountLimit.over
                   ? l.savingGoalErrAmountTooLarge
                   : _amountError,
               child: _amountInput(
                 _amountCtrl,
                 _amountFocus,
-                _amountFormatters,
+                _amountLimit.formatters,
                 () {
                   if (_amountError != null || _currentError != null) {
                     setState(() {
@@ -557,12 +556,14 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             child: PField(
               label: l.savingGoalCurrentLabel,
               indicator: PFieldIndicator.optional,
-              invalid: _currentError != null || _currentOver,
-              errorMessage: _currentOver ? l.amountTooLarge : _currentError,
+              invalid: _currentError != null || _currentLimit.over,
+              errorMessage: _currentLimit.over
+                  ? l.amountTooLarge
+                  : _currentError,
               child: _amountInput(
                 _currentCtrl,
                 _currentFocus,
-                _currentFormatters,
+                _currentLimit.formatters,
                 () {
                   if (_currentError != null) {
                     setState(() => _currentError = null);

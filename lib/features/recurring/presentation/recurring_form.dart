@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -176,24 +177,20 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   bool get _embedded => widget.onBack != null;
   final _draftCtrl = TextEditingController();
 
-  /// 100억을 넘겨 입력을 막았나 — 금액 칸(`_amountOver`)과 수수료 · 이자 단계 칸(`_draftOver`) 아래에 오류를 띄우고
+  /// 100억을 넘겨 입력을 막았나 — 금액 칸(`_amountLimit.over`)과 수수료 · 이자 단계 칸(`_draftLimit.over`) 아래에 오류를 띄우고
   /// 다음 유효한 입력에서 걷는다.
-  bool _amountOver = false;
-  bool _draftOver = false;
-  late final List<TextInputFormatter> _amountFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _amountOver && mounted) setState(() => _amountOver = over);
-      },
-    ),
-  ];
-  late final List<TextInputFormatter> _draftFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _draftOver && mounted) setState(() => _draftOver = over);
-      },
-    ),
-  ];
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+  late final _draftLimit = AmountLimitGuard(
+    _draftCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
   final _draftFocus = FocusNode();
   final _countCtrl = TextEditingController();
 
@@ -377,6 +374,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
+    _draftLimit.dispose();
     widget.probe.dirty = () => false;
     widget.probe.interceptClose = () => false;
     if (widget.probe is! _Probe) _amountFocus.dispose();
@@ -539,10 +538,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
         ? formatAmountInput(int.parse(v))
         : v;
     _stepOrigin = _draftCtrl.text;
-    setState(() {
-      _step = s;
-      _draftOver = false;
-    });
+    _draftLimit.dismiss();
+    setState(() => _step = s);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _step == s) _draftFocus.requestFocus();
     });
@@ -905,6 +902,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   Future<void> _submit() async {
     if (_submitting) return;
     final l = AppLocalizations.of(context);
+    // 저장을 누른 순간엔 폼 검증 오류가 이긴다(가장 최근 일)
+    _amountLimit.dismiss();
     setState(() {
       _attempted = true;
       _saveError = false;
@@ -1139,8 +1138,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
             padding: gutter,
             child: PField(
               description: _step == _Step.interest ? l.expInterestHint : null,
-              invalid: _draftOver,
-              errorMessage: _draftOver ? l.amountTooLarge : null,
+              invalid: _draftLimit.over,
+              errorMessage: _draftLimit.over ? l.amountTooLarge : null,
               child: PInput(
                 variant: PInputVariant.underline,
                 controller: _draftCtrl,
@@ -1151,7 +1150,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                 tabularFigures: true,
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
-                inputFormatters: _draftFormatters,
+                inputFormatters: _draftLimit.formatters,
                 onSubmitted: (_) => _confirmStep(),
               ),
             ),
@@ -1494,8 +1493,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
             ),
             child: PField(
               label: l.expAmount,
-              invalid: amountError != null || _amountOver,
-              errorMessage: _amountOver ? l.amountTooLarge : amountError,
+              invalid: amountError != null || _amountLimit.over,
+              errorMessage: _amountLimit.over ? l.amountTooLarge : amountError,
               child: PInput(
                 controller: _amountCtrl,
                 focusNode: _amountFocus,
@@ -1504,7 +1503,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 keyboardType: TextInputType.number,
-                inputFormatters: _amountFormatters,
+                inputFormatters: _amountLimit.formatters,
                 onChanged: (_) => setState(() {}),
               ),
             ),

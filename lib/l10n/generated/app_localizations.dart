@@ -617,7 +617,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiPrefsSaveFailed.
   ///
   /// In ko, this message translates to:
-  /// **'알림 설정을 저장하지 못했어요.'**
+  /// **'알림 설정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get notiPrefsSaveFailed;
 
   /// No description provided for @notiSettingsLoadFailedDesc.
@@ -7386,6 +7386,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'금액 가리기를 저장하지 못했어요.'**
   String get hideAmountsSaveFailed;
+
+  /// No description provided for @hideAmountsSaveFailedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액 가리기를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get hideAmountsSaveFailedToast;
 
   /// No description provided for @hideAmountsDiscardTitle.
   ///

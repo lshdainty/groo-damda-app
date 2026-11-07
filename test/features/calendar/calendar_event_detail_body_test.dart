@@ -11,8 +11,10 @@ import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_event_detail_body.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_range.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 
+import '../../support/line_breaks.dart';
 import '../../support/plain_text.dart';
 
 final _today = DateTime(2026, 10, 29, 13);
@@ -148,51 +150,77 @@ void main() {
     );
     expect(_titles(tester), ['캘린더', '종일', '반복']);
     // 한 글 · 구간 기호 앞뒤를 붙인다(DESIGN.desk.md 날짜 구간)
-    expect(findPlain('10월 23일 (금)~10월 25일 (일)'), findsOneWidget);
+    expect(findPlain('10월 23일 (금)~'), findsOneWidget);
+    expect(findPlain('10월 25일 (일)'), findsOneWidget);
     expect(find.byIcon(LucideIcons.sun), findsOneWidget);
   });
 
-  testWidgets('여러 날 종일은 한 글이고 줄은 "~" 뒤에서만 바뀐다 — 글자 130% · 폭 360', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      _ev(
-        full: false,
-        allDay: 'Y',
-        start: '2026-10-25T00:00:00',
-        end: '2026-10-27T23:59:59',
-      ),
-      scale: 1.3,
-      width: 360,
-    );
-    final range = findPlain('10월 25일 (일)~10월 27일 (화)');
-    expect(range, findsOneWidget);
-    final p = tester.renderObject<RenderParagraph>(
-      find.descendant(of: range, matching: find.byType(RichText)).first,
-    );
-    final text = p.text.toPlainText();
-    final tilde = text.indexOf('~');
-    // 줄이 바뀐 자리(캐럿 세로 위치가 내려가는 첫 글자) — 모두 "~" 바로 뒤여야 한다
-    final breaks = <int>[];
-    double? lastY;
-    for (var i = 0; i < text.length; i++) {
-      final y = p.getOffsetForCaret(TextPosition(offset: i), Rect.zero).dy;
-      if (lastY != null && y > lastY + 1) breaks.add(i);
-      lastY = y;
-    }
-    expect(breaks, isNotEmpty, reason: '폭 320 · 200% 에서는 한 줄에 안 들어간다');
-    for (final b in breaks) {
-      expect(
-        text.substring(0, b).replaceAll('\u200B', '').endsWith('~'),
-        isTrue,
-        reason:
-            '줄이 바뀐 자리 ${text.substring(b - 2, b)}|${text.substring(b, b + 2)}',
+  // 줄 바뀜 규칙(DESIGN.desk.md 날짜 구간): ① 첫째 자리는 "~" 뒤 ② 그래도 넘치면 날짜 안 띄어쓰기에서만
+  // ③ 낱말 안("2025년 1|2월") · "~" 앞(기호가 줄 첫머리 · 혼자 한 줄)은 안 끊는다.
+  for (final scale in [1.0, 1.5, 2.0]) {
+    for (final sameYear in [true, false]) {
+      testWidgets(
+        '여러 날 종일 줄바꿈 — 글자 ${(scale * 100).round()}% · 폭 360 · ${sameYear ? "같은 해" : "다른 해"}',
+        (tester) async {
+          await _pump(
+            tester,
+            _ev(
+              full: false,
+              allDay: 'Y',
+              start: sameYear ? '2026-10-25T00:00:00' : '2025-12-29T00:00:00',
+              end: sameYear ? '2026-10-27T23:59:59' : '2026-01-02T23:59:59',
+            ),
+            scale: scale,
+            width: 360,
+          );
+          final range = find.byType(KeepAllRange);
+          expect(range, findsOneWidget);
+          final w = tester.widget<KeepAllRange>(range);
+          // 한 글로 읽힌다 — 읽는 이름은 시작 · 기호 · 끝을 이은 원래 글
+          expect(
+            w.plain,
+            sameYear
+                ? '10월 25일 (일)~10월 27일 (화)'
+                : '2025년 12월 29일 (월)~1월 2일 (금)',
+          );
+          final texts = find.descendant(of: range, matching: find.byType(Text));
+          expect(texts, findsNWidgets(2));
+          final first = texts.at(0);
+          final second = texts.at(1);
+          // 낱말 안에서는 끊지 않는다(공백 앞뒤만) — 두 조각 모두
+          expect(midWordBreaks(tester, first), isEmpty);
+          expect(midWordBreaks(tester, second), isEmpty);
+          // 구간 기호는 앞 날짜에 붙어 있다 — 첫 조각의 마지막 글자이고, 줄 첫머리에 오지 않는다
+          final p = tester.renderObject<RenderParagraph>(
+            find.descendant(of: first, matching: find.byType(RichText)).first,
+          );
+          final text = p.text.toPlainText();
+          final tilde = text.indexOf('~');
+          expect(tilde, greaterThan(0));
+          double? lastY;
+          for (var k = 0; k < text.length; k++) {
+            final y = p
+                .getOffsetForCaret(TextPosition(offset: k), Rect.zero)
+                .dy;
+            if (lastY != null && y > lastY + 1) {
+              expect(k, isNot(tilde), reason: '"~" 가 줄 첫머리에 온다');
+            }
+            lastY = y;
+          }
+          // 끝 날짜는 통째로 같은 줄이거나(들어가면) 다음 줄로 내려간다 — 첫 조각 줄 중간에 걸치지 않는다
+          final a = tester.getRect(first);
+          final b = tester.getRect(second);
+          expect(
+            b.top >= a.bottom - 1 ||
+                (b.top - a.top).abs() < 1 && b.left >= a.right - 1,
+            isTrue,
+            reason: '첫 조각 $a · 끝 조각 $b',
+          );
+          expect(tester.takeException(), isNull);
+        },
       );
-      expect(b, greaterThan(tilde));
     }
-    expect(tester.takeException(), isNull);
-  });
+  }
 
   testWidgets('다른 해는 날짜에 연도가 붙는다', (tester) async {
     await _pump(

@@ -886,12 +886,9 @@ String tradeRowDate(AssetTrade tr) {
   return dt == null ? raw : formatDay(dt).md;
 }
 
-/// 확인창 문장 안의 거래 날짜 — ko "10월 19일" · en "Oct 19"(연도 없음). 못 읽으면 서버 값 그대로.
-String tradeDateLabel(AssetTrade tr) {
-  final raw = tradeDateOnly(tr);
-  final dt = DateTime.tryParse(raw);
-  return dt == null ? raw : monthDay(dt);
-}
+/// 확인창 문장 안의 거래 날짜 — 날짜 규칙: 올해는 줄여 "10월 19일"(en "Oct 19"), 다른 해는 연도를 붙인다
+/// "2025년 12월 31일"(en "Dec 31, 2025"). 못 읽으면 서버 값 그대로.
+String tradeDateLabel(AssetTrade tr) => tradeRowDate(tr);
 
 /// 거래 기록에 보이는 종목 이름 — 연동 종목은 보유 목록의 이름(없으면 티커 코드), 직접 입력은 항목명(= holdingKey) 그대로.
 String tradeHoldingName(AssetTrade tr, List<AssetHolding> holdings) {
@@ -1118,7 +1115,7 @@ class TradeDetailBody extends StatelessWidget {
                 ? (masked ? '••••' : tradeSignedKrw(pl))
                 : null,
           ),
-          KvRow(label: l.tradeDateTime, value: tradeDateTimeText(tr)),
+          KvRow(label: l.tradeDateTime, value: keepAll(tradeDateTimeText(tr))),
         ],
       ),
       footerRow: Align(
@@ -3268,10 +3265,10 @@ String _periodLabel(String startIso, String endIso) {
   return dateRange(a, b);
 }
 
-/// 결제일 — ko "10월 25일" · en "Oct 25". 못 읽으면 서버 값 그대로(폴백).
+/// 결제일 — 날짜 규칙: 올해는 "10월 25일", 다른 해는 "2025년 12월 25일". 못 읽으면 서버 값 그대로(폴백).
 String _paymentDateLabel(String iso) {
   final d = DateTime.tryParse(iso);
-  return d == null ? iso : monthDay(d);
+  return d == null ? iso : formatDay(d).md;
 }
 
 /// stats 차트와 동일한 만/억 단위 — 한글 단위가 KRW 와 어울리고

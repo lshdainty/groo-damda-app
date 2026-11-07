@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
@@ -120,14 +120,12 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
   final _amountCtrl = TextEditingController();
 
   /// 100억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
-  bool _amountOver = false;
-  late final List<TextInputFormatter> _amountFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _amountOver && mounted) setState(() => _amountOver = over);
-      },
-    ),
-  ];
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
   final _nameFocus = FocusNode();
   final _amountFocus = FocusNode();
   bool _itemAttempted = false;
@@ -149,6 +147,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
     widget.probe.dirty = () => false;
     widget.probe.interceptClose = () => false;
     _nameCtrl.dispose();
@@ -304,6 +303,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
   void _doneItem() {
     final l = AppLocalizations.of(context);
     final amount = parseAmountInput(_amountCtrl.text) ?? 0;
+    _amountLimit.dismiss();
     if (_itemCat == null || amount <= 0) {
       setState(() => _itemAttempted = true);
       if (amount <= 0) _amountFocus.requestFocus();
@@ -899,9 +899,9 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
             ),
             child: PField(
               label: l.expAmount,
-              invalid: amountErr != null || _amountOver,
-              errorMessage: _amountOver ? l.amountTooLarge : amountErr,
-              description: amountErr != null || _amountOver
+              invalid: amountErr != null || _amountLimit.over,
+              errorMessage: _amountLimit.over ? l.amountTooLarge : amountErr,
+              description: amountErr != null || _amountLimit.over
                   ? null
                   : l.expSplitItemHelp(
                       txMoney(others, masked),
@@ -916,7 +916,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 keyboardType: TextInputType.number,
-                inputFormatters: _amountFormatters,
+                inputFormatters: _amountLimit.formatters,
                 onChanged: (_) => setState(() {}),
                 onSubmitted: (_) => _doneItem(),
               ),

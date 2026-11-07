@@ -271,7 +271,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiMarkAllFailed => '알림을 모두 읽음으로 바꾸지 못했어요.';
 
   @override
-  String get notiPrefsSaveFailed => '알림 설정을 저장하지 못했어요.';
+  String get notiPrefsSaveFailed => '알림 설정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get notiSettingsLoadFailedDesc => '잠시 뒤 다시 시도해주세요.';
@@ -3990,6 +3990,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get hideAmountsSaveFailed => '금액 가리기를 저장하지 못했어요.';
+
+  @override
+  String get hideAmountsSaveFailedToast => '금액 가리기를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get hideAmountsDiscardTitle => '저장하지 않고 나가기';

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
@@ -100,22 +100,18 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
   final _feeCtrl = TextEditingController();
 
   /// 100억을 넘겨 입력을 막았나(거래 금액 · 수수료) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
-  bool _amountOver = false;
-  bool _feeOver = false;
-  late final List<TextInputFormatter> _amountFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _amountOver && mounted) setState(() => _amountOver = over);
-      },
-    ),
-  ];
-  late final List<TextInputFormatter> _feeFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _feeOver && mounted) setState(() => _feeOver = over);
-      },
-    ),
-  ];
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+  late final _feeLimit = AmountLimitGuard(
+    _feeCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
   final _memoCtrl = TextEditingController();
 
   late String _type;
@@ -246,6 +242,8 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
+    _feeLimit.dispose();
     _previewDebounce?.cancel();
     for (final c in [_qtyCtrl, _amountCtrl, _feeCtrl, _memoCtrl]) {
       c.dispose();
@@ -257,6 +255,8 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
   Future<void> _submit() async {
     if (_submitting) return;
     // 주 버튼을 막지 않고 누르면 칸 아래 오류(DESIGN.desk:4081)
+    _amountLimit.dismiss();
+    _feeLimit.dismiss();
     setState(() => _tried = true);
     if (!_canSubmit) {
       (_qty <= 0 || (_isSell && _qty > _heldQty) ? widget.qtyFocus : null)
@@ -518,13 +518,13 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             child: PField(
               label: l.tradeAmount,
               description: l.tradeAmountHelp,
-              invalid: amountError != null || _amountOver,
-              errorMessage: _amountOver ? l.amountTooLarge : amountError,
+              invalid: amountError != null || _amountLimit.over,
+              errorMessage: _amountLimit.over ? l.amountTooLarge : amountError,
               child: PInput(
                 variant: PInputVariant.underline,
                 controller: _amountCtrl,
                 keyboardType: TextInputType.number,
-                inputFormatters: _amountFormatters,
+                inputFormatters: _amountLimit.formatters,
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 placeholder: '0',
@@ -538,13 +538,13 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             child: PField(
               label: l.tradeFee,
               indicator: PFieldIndicator.optional,
-              invalid: _feeOver,
-              errorMessage: _feeOver ? l.amountTooLarge : null,
+              invalid: _feeLimit.over,
+              errorMessage: _feeLimit.over ? l.amountTooLarge : null,
               child: PInput(
                 variant: PInputVariant.underline,
                 controller: _feeCtrl,
                 keyboardType: TextInputType.number,
-                inputFormatters: _feeFormatters,
+                inputFormatters: _feeLimit.formatters,
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 placeholder: '0',

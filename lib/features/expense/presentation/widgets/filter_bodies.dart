@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/input_button/p_input_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 필터 조건 본문 부품 여섯(I-07 E) — **조건마다 하나**. 폰 시트(이 PR)가 차례로 쌓고, 07-2 가 팝오버 · 시트에 나눠 담는다.
 ///
@@ -564,6 +565,21 @@ class FilterAmountBody extends StatefulWidget {
 class _FilterAmountBodyState extends State<FilterAmountBody> {
   late List<(TextEditingController, TextEditingController)> _rows;
 
+  /// 칸마다 100억 상한 안내 — 넘는 입력은 받지 않고 그 줄 아래에 오류, 값이 상한 안이 되면 사라진다(웹 FilterAmountBody 와 같다).
+  final _limits = <TextEditingController, AmountLimitGuard>{};
+  AmountLimitGuard _limitFor(TextEditingController c) => _limits.putIfAbsent(
+    c,
+    () => AmountLimitGuard(
+      c,
+      grouped: false,
+      onChanged: () {
+        if (mounted) setState(() {});
+      },
+    ),
+  );
+
+  void _release(TextEditingController c) => _limits.remove(c)?.dispose();
+
   @override
   void initState() {
     super.initState();
@@ -579,6 +595,8 @@ class _FilterAmountBodyState extends State<FilterAmountBody> {
   @override
   void dispose() {
     for (final (mn, mx) in _rows) {
+      _release(mn);
+      _release(mx);
       mn.dispose();
       mx.dispose();
     }
@@ -602,55 +620,70 @@ class _FilterAmountBodyState extends State<FilterAmountBody> {
           _pad(
             Padding(
               padding: const EdgeInsets.only(bottom: PSpacing.x2),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: PSpacing.x2,
                 children: [
-                  Expanded(
-                    child: PInput(
-                      controller: _rows[i].$1,
-                      placeholder: l.expMinAmount,
-                      semanticLabel: l.expMinAmount,
-                      suffixText: wonUnit(),
-                      keyboardType: TextInputType.number,
-                      tabularFigures: true,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (_) => _emit(),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: PInput(
+                          controller: _rows[i].$1,
+                          placeholder: l.expMinAmount,
+                          semanticLabel: l.expMinAmount,
+                          suffixText: wonUnit(),
+                          keyboardType: TextInputType.number,
+                          tabularFigures: true,
+                          inputFormatters: _limitFor(_rows[i].$1).formatters,
+                          onChanged: (_) => _emit(),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: PSpacing.x2,
+                        ),
+                        child: Text(
+                          rangeSeparator(),
+                          style: PTypography.t5.copyWith(
+                            color: c.fgNeutralSubtle,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: PInput(
+                          controller: _rows[i].$2,
+                          placeholder: l.expMaxAmount,
+                          semanticLabel: l.expMaxAmount,
+                          suffixText: wonUnit(),
+                          keyboardType: TextInputType.number,
+                          tabularFigures: true,
+                          inputFormatters: _limitFor(_rows[i].$2).formatters,
+                          onChanged: (_) => _emit(),
+                        ),
+                      ),
+                      PButton.icon(
+                        icon: LucideIcons.x,
+                        semanticLabel: l.expFilterRemoveRow,
+                        variant: PButtonVariant.ghost,
+                        size: PButtonSize.small,
+                        onPressed: () {
+                          setState(() {
+                            final (mn, mx) = _rows.removeAt(i);
+                            mn.dispose();
+                            mx.dispose();
+                          });
+                          _emit();
+                        },
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: PSpacing.x2,
+                  if (_limitFor(_rows[i].$1).over ||
+                      _limitFor(_rows[i].$2).over)
+                    Text(
+                      keepAll(l.amountTooLarge),
+                      semanticsLabel: l.amountTooLarge,
+                      style: PTypography.t4.copyWith(color: c.fgCritical),
                     ),
-                    child: Text(
-                      rangeSeparator(),
-                      style: PTypography.t5.copyWith(color: c.fgNeutralSubtle),
-                    ),
-                  ),
-                  Expanded(
-                    child: PInput(
-                      controller: _rows[i].$2,
-                      placeholder: l.expMaxAmount,
-                      semanticLabel: l.expMaxAmount,
-                      suffixText: wonUnit(),
-                      keyboardType: TextInputType.number,
-                      tabularFigures: true,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (_) => _emit(),
-                    ),
-                  ),
-                  PButton.icon(
-                    icon: LucideIcons.x,
-                    semanticLabel: l.expFilterRemoveRow,
-                    variant: PButtonVariant.ghost,
-                    size: PButtonSize.small,
-                    onPressed: () {
-                      setState(() {
-                        final (mn, mx) = _rows.removeAt(i);
-                        mn.dispose();
-                        mx.dispose();
-                      });
-                      _emit();
-                    },
-                  ),
                 ],
               ),
             ),

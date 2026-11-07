@@ -39,16 +39,3 @@ String keepAllAmount(String amount) =>
 // 포매터가 \u 이스케이프를 보이지 않는 글자 그대로 풀어 버려, 코드 값으로 만든다
 final String _commaJoined = ',${String.fromCharCode(0x2060)}';
 final String _commaBreak = ',${String.fromCharCode(0x200B)}';
-
-/// 구간 글 — [from] [separator] [to] 를 붙여 한 글로 쓰되 **구간 기호 뒤에서만** 줄을 바꾼다(통계 기간 버튼과 같은
-/// 규칙, DESIGN.desk.md 날짜 구간 — 기호는 앞뒤를 붙인다). 각 끝 안의 공백은 줄바꿈 없는 공백(U+00A0)으로 바꿔
-/// "10월 25일 (토)" 가 낱말 사이에서도 갈리지 않고, 기호 앞은 이음 문자(U+2060)로 붙이고 기호 바로 뒤에 너비 0 공백(U+200B)을 둬 끊을 자리를 만든다.
-/// 보이는 글에만 쓴다(읽는 이름은 `semanticsLabel` 로 원래 글).
-String keepAllRange(String from, String separator, String to) {
-  String side(String s) => keepAll(s.replaceAll(' ', _nbsp));
-  return '${side(from)}$_wj$separator$_zwsp${side(to)}';
-}
-
-final String _nbsp = String.fromCharCode(0xA0);
-final String _zwsp = String.fromCharCode(0x200B);
-final String _wj = String.fromCharCode(0x2060);

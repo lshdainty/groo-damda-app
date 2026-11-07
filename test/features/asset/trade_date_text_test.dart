@@ -34,7 +34,9 @@ void main() {
   });
 
   test('확인창 날짜 — "10월 10일"', () {
-    expect(tradeDateLabel(_t('2026-10-10T14:30:00')), '10월 10일');
+    final year = DateTime.now().year;
+    expect(tradeDateLabel(_t('$year-10-10T14:30:00')), '10월 10일');
+    expect(tradeDateLabel(_t('2001-12-31T14:30:00')), '2001년 12월 31일');
     expect(tradeDateLabel(_t('몰라')), '몰라');
   });
 

@@ -313,7 +313,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       try {
         await Share.shareXFiles([
           XFile(file.path, name: filename, mimeType: _mimeType(_format, types)),
-        ], text: l.exportShareText(_rangeText(r)));
+        ], text: l.exportShareText(_shareRangeText(r)));
       } finally {
         // 금융 데이터 평문 임시파일 — 공유 완료 후 즉시 삭제(복구 방지).
         if (await file.exists()) await file.delete();
@@ -573,6 +573,16 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         ],
       ),
     );
+  }
+
+  /// 밖으로 나가는 글(채팅 앱에 남는다)이라 연도를 늘 넣는다 — "2026년 10월 1일~10월 31일" · en "Oct 1, 2026–Oct 31".
+  /// 끝이 같은 해면 연도는 시작에만 쓴다.
+  String _shareRangeText(({String start, String end}) r) {
+    final a = DateTime.tryParse(r.start);
+    final b = DateTime.tryParse(r.end);
+    if (a == null || b == null) return _rangeText(r);
+    final end = a.year == b.year ? monthDay(b) : fullDate(b);
+    return '${fullDate(a)}${rangeSeparator()}$end';
   }
 
   String _rangeText(({String start, String end}) r) =>

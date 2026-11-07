@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -197,14 +197,12 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   String? _amountError;
 
   /// 100억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
-  bool _amountOver = false;
-  late final List<TextInputFormatter> _amountFormatters = [
-    AmountInputFormatter(
-      onLimit: (over) {
-        if (over != _amountOver && mounted) setState(() => _amountOver = over);
-      },
-    ),
-  ];
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
 
   bool get _isEdit => widget.edit != null;
 
@@ -250,6 +248,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
     final probe = widget.probe;
     if (probe is _DirtyProbe) probe.dirty = () => false;
     _amountCtrl.dispose();
@@ -280,6 +279,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
   Future<void> _onSubmit() async {
     if (_submitting) return;
+    _amountLimit.dismiss();
     final l = AppLocalizations.of(context);
     final amount = parseAmountInput(_amountCtrl.text);
     final catErr = !_isEdit && !_isOverall && _categoryRowId == null
@@ -419,8 +419,8 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               label: _isOverall
                   ? l.budgetOverallCapLabel
                   : l.budgetFormAmountLabel,
-              invalid: _amountError != null || _amountOver,
-              errorMessage: _amountOver
+              invalid: _amountError != null || _amountLimit.over,
+              errorMessage: _amountLimit.over
                   ? AppLocalizations.of(context).amountTooLarge
                   : _amountError,
               child: PInput(
@@ -431,7 +431,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 keyboardType: TextInputType.number,
-                inputFormatters: _amountFormatters,
+                inputFormatters: _amountLimit.formatters,
                 onChanged: (_) => setState(() => _amountError = null),
               ),
             ),

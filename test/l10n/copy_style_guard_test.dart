@@ -41,8 +41,18 @@ void main() {
     });
 
     test('$lang — 구간 기호 "~" 는 띄우지 않는다 (붙임 + 로케일 구간 기호)', () {
-      expect(_offenders(arb, RegExp(r' ~|~ ')), isEmpty);
+      // 줄바꿈 없는 공백(U+00A0 · U+202F)으로 띄운 것도 띄운 것이다
+      expect(
+        _offenders(arb, RegExp('[ \u00A0\u202F]~|~[ \u00A0\u202F]')),
+        isEmpty,
+      );
     });
+
+    if (lang == 'en') {
+      test('en — 구간 기호는 "~" 가 아니라 en dash(로케일 문구 dateRangeSeparator)', () {
+        expect(_offenders(arb, RegExp('~')), isEmpty);
+      });
+    }
   }
 
   test('ko — 합니다체를 쓰지 않는다 (해요체)', () {
@@ -50,7 +60,8 @@ void main() {
     expect(
       _offenders(
         arb,
-        RegExp(r'[가-힣]니다(?=[.!?,\s)…]|$)'),
+        // 평서 · 의문(습니까) 모두
+        RegExp(r'[가-힣]니(?:다|까)(?=[.!?,\s)…]|$)'),
         allowed: _politeAllowed,
       ),
       isEmpty,

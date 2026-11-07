@@ -1,8 +1,8 @@
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_kind.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -199,16 +199,20 @@ class AssetAmountField extends StatefulWidget {
 }
 
 class _AssetAmountFieldState extends State<AssetAmountField> {
-  /// 1,000억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
-  bool _over = false;
-  late final List<TextInputFormatter> _formatters = [
-    AmountInputFormatter(
-      max: kBalanceMax,
-      onLimit: (over) {
-        if (over != _over && mounted) setState(() => _over = over);
-      },
-    ),
-  ];
+  /// 1,000억을 넘겨 입력을 막으면 칸 아래 오류 — 지금 값에서 나온다(상한 안이 되면 사라진다).
+  late final _limit = AmountLimitGuard(
+    widget.controller,
+    max: kBalanceMax,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+
+  @override
+  void dispose() {
+    _limit.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -221,8 +225,10 @@ class _AssetAmountFieldState extends State<AssetAmountField> {
       readOnly: widget.readOnly,
       description: widget.description,
       descriptionIcon: widget.descriptionIcon,
-      invalid: _over,
-      errorMessage: _over ? l.amountTooLargeAt(l.amountLimitBalance) : null,
+      invalid: _limit.over,
+      errorMessage: _limit.over
+          ? l.amountTooLargeAt(l.amountLimitBalance)
+          : null,
       child: PInput(
         key: widget.inputKey,
         controller: widget.controller,
@@ -231,7 +237,7 @@ class _AssetAmountFieldState extends State<AssetAmountField> {
         tabularFigures: true,
         readOnly: widget.readOnly,
         keyboardType: TextInputType.number,
-        inputFormatters: _formatters,
+        inputFormatters: _limit.formatters,
         onChanged: widget.onChanged,
       ),
     );
