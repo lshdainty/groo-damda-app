@@ -13540,7 +13540,7 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerConnected.
   ///
   /// In ko, this message translates to:
-  /// **'{broker}를 연결했어요.'**
+  /// **'{broker} 연결을 마쳤어요.'**
   String subBrokerConnected(String broker);
 
   /// No description provided for @subBrokerDisconnected.

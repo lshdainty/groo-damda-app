@@ -4385,7 +4385,7 @@
   "subBrokerUseAsPrimary": "기본으로 쓰기",
   "subBrokerPrimaryNotice": "가계부 자산은 여기서 고른 증권사 시세로 계산해요.",
   "subBrokerPrimaryFailed": "기본 증권사를 바꾸지 못했어요.",
-  "subBrokerConnected": "{broker}를 연결했어요.",
+  "subBrokerConnected": "{broker} 연결을 마쳤어요.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {

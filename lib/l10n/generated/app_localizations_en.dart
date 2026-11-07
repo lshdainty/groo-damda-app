@@ -7635,7 +7635,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return 'Connected $broker.';
+    return '$broker is connected.';
   }
 
   @override

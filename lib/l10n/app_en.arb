@@ -4203,7 +4203,7 @@
   "subBrokerUseAsPrimary": "Use as primary",
   "subBrokerPrimaryNotice": "Your assets are valued using the provider selected here.",
   "subBrokerPrimaryFailed": "Couldn't change the primary broker.",
-  "subBrokerConnected": "Connected {broker}.",
+  "subBrokerConnected": "{broker} is connected.",
   "@subBrokerConnected": {
     "placeholders": {
       "broker": {

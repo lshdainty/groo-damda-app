@@ -7491,7 +7491,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String subBrokerConnected(String broker) {
-    return '$broker를 연결했어요.';
+    return '$broker 연결을 마쳤어요.';
   }
 
   @override

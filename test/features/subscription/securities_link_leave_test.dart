@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
@@ -283,6 +284,29 @@ void main() {
       await tester.tapAt(center + const Offset(0, 21));
       await tester.pump();
       expect(obscured(0), isTrue, reason: '44 영역 가장자리(원 밖 1px)도 누른다');
+    });
+  });
+
+  group('눈 Toggle 바탕', () {
+    testWidgets('눈 Toggle 은 켜도 꺼도 칸 안에 바탕 상자를 칠하지 않는다 — 켬은 아이콘으로만', (
+      tester,
+    ) async {
+      await _pump(tester, open: '/settings/securities/NAMU');
+      Color? fill() {
+        final box = tester.widget<DecoratedBox>(
+          find.byKey(const ValueKey('toggle-box')).first,
+        );
+        return (box.decoration as BoxDecoration).color;
+      }
+
+      expect(fill(), const Color(0x00000000), reason: '끔');
+      await tester.tap(find.bySemanticsLabel('App Key 보기'));
+      await tester.pumpAndSettle();
+      expect(fill(), const Color(0x00000000), reason: '켬(손을 뗀 뒤)');
+      final icon = tester.widget<Icon>(
+        find.byKey(const ValueKey('toggle-icon')).first,
+      );
+      expect(icon.icon, LucideIcons.eyeOff500, reason: '켬 상태는 아이콘이 말한다');
     });
   });
 
