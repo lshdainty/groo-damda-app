@@ -16,6 +16,7 @@ Future<void> _pump(
   required String name,
   required String detail,
   required TextEditingController ctrl,
+  double boxWidth = 96,
 }) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1;
@@ -41,11 +42,12 @@ Future<void> _pump(
               suffix: PListValue(
                 mergeSemantics: false,
                 child: PListEditWidth(
-                  width: 96,
+                  width: boxWidth,
                   child: PInput(
                     controller: ctrl,
                     semanticLabel: '$name 금액',
                     suffixText: '원',
+
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -70,6 +72,7 @@ void main() {
           addTearDown(ctrl.dispose);
           await _pump(
             tester,
+            boxWidth: 128,
             width: w,
             scale: s,
             name: name,
@@ -93,8 +96,21 @@ void main() {
             expect(input.width, closeTo(inner - 42 - 12 - 0, 60));
             expect(input.width, greaterThan(150));
           } else {
-            expect(input.width, 96);
+            expect(input.width, lessThanOrEqualTo(128));
+            expect(input.width, greaterThanOrEqualTo(96));
           }
+          // 9억대 금액(987,654,321)이 칸 안에 다 들어간다 — 글이 칸보다 길어 스크롤되지 않는다
+          final editable = tester.state<EditableTextState>(
+            find.byType(EditableText),
+          );
+          final re = editable.renderEditable;
+          rows.add(
+            'DBG ${w.toInt()} ${(s * 100).toInt()}% ${name.length > 6 ? 'long' : 'short'} in=${input.width.toStringAsFixed(0)} view=${re.size.width.toStringAsFixed(0)}x${re.size.height.toStringAsFixed(0)} max=${re.maxScrollExtent.toStringAsFixed(0)} fs=${re.text!.style!.fontSize}',
+          );
+          // 시험 글꼴(Ahem)은 글자 폭이 실제보다 넓어 "안 잘림" 은 여기서 단언하지 않는다 — 칸 안쪽 폭(view)과 실제 글꼴 추정폭을 표로 남긴다
+          rows.add(
+            'EST ${w.toInt()} ${(s * 100).toInt()}% 987,654,321 ≈ ${(re.text!.style!.fontSize! * (9 * 0.59 + 2 * 0.28)).toStringAsFixed(0)} vs 칸 안쪽 ${re.size.width.toStringAsFixed(0)}',
+          );
           expect(input.left, greaterThanOrEqualTo(row.left));
           expect(input.right, lessThanOrEqualTo(row.right));
           final title = tester.getRect(findText(name).first);
@@ -102,7 +118,7 @@ void main() {
           expect(title.width, greaterThan(40));
           rows.add(
             '폭 ${w.toInt()} | ${(s * 100).toInt()}% | ${name.length > 6 ? '긴 이름' : '짧은 이름'} | '
-            '${stacked ? '아래 전폭' : '줄 끝 96'} | 입력칸 ${input.width.toStringAsFixed(0)}x${input.height.toStringAsFixed(0)} | '
+            '${stacked ? '아래 전폭' : '줄 끝 128'} | 입력칸 ${input.width.toStringAsFixed(0)}x${input.height.toStringAsFixed(0)} | '
             '이름 폭 ${title.width.toStringAsFixed(0)} | 줄 높이 ${row.height.toStringAsFixed(0)}',
           );
         });

@@ -730,7 +730,8 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
             : PListValue(
                 mergeSemantics: false,
                 child: PListEditWidth(
-                  width: 96,
+                  // 금액 직접 입력은 128, 비율은 96 — 웹과 같다(9억대 금액이 칸 안에 들어간다)
+                  width: 128,
                   child: PInput(
                     key: p.customKey,
                     controller: p.customCtrl,
