@@ -243,6 +243,30 @@ void main() {
     expect(findPlain(msg), findsOneWidget);
   });
 
+  // 상한 검사는 지금 보이는 칸만 센다 — 종류를 바꿔 한도 칸이 사라지면 옛 한도(1,000억 위)는 저장을 막지 않는다
+  testWidgets('마이너스 통장 한도가 1,000억 위면 막고, 입출금으로 바꿔 한도 칸이 사라지면 저장된다', (
+    tester,
+  ) async {
+    final repo = await _open(
+      tester,
+      edit: _overdraft.copyWith(creditLimit: 200000000000),
+      assets: const [_overdraft],
+    );
+    await _tapSubmit(tester, l.actionSave);
+    expect(repo.captured, isNull, reason: '보이는 한도 칸이 상한 위면 여전히 막힌다');
+
+    await tester.tap(find.byType(PSelect<AssetKind>));
+    await tester.pumpAndSettle();
+    await tester.tap(findPlain(AssetKind.checking.label(l)).last);
+    await tester.pumpAndSettle();
+    await _tapSubmit(tester, l.actionSave);
+    expect(repo.captured, isNotNull, reason: '사라진 칸의 옛 값은 세지 않는다');
+    expect(repo.captured!['isOverdraft'], isFalse);
+    final limit = repo.captured!['creditLimit']! as Patch<int>;
+    expect(limit.present, isTrue);
+    expect(limit.value, isNull, reason: '사라진 칸의 값은 요청에 실리지 않는다');
+  });
+
   testWidgets('입출금은 같은 값을 양수로 저장한다', (tester) async {
     final repo = await _open(tester);
     await typeInto(tester, l.assetBalanceLabel, '50000');

@@ -224,9 +224,11 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
   /// 단계로 바뀐다(I-17 21) — 확인하기 전에는 요청이 나가지 않고, ←(취소)면 저장도 안 한다.
   Future<void> _submit() async {
     if (_submitting) return;
-    // 잔액 · 한도가 1,000억 위(상한 전에 저장된 옛 값)면 저장하지 않는다 — 칸 아래 오류가 그대로 보인다(웹과 같다)
+    // 잔액 · 한도가 1,000억 위(상한 전에 저장된 옛 값)면 저장하지 않는다 — 칸 아래 오류가 그대로 보인다(웹과 같다).
+    // **지금 보이는 칸만** 센다 — 종류를 바꿔 한도 칸이 사라졌으면 옛 한도는 보지 않는다(요청에도 안 실린다)
     if (amountTextExceeds(_balanceCtrl.text, kBalanceMax) ||
-        amountTextExceeds(_limitCtrl.text, kBalanceMax)) {
+        (_kind == AssetKind.overdraft &&
+            amountTextExceeds(_limitCtrl.text, kBalanceMax))) {
       return;
     }
     if (assetUnhideNeedsConfirm(

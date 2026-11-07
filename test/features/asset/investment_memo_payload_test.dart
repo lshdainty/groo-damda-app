@@ -97,6 +97,7 @@ class _CapturingRepo extends AssetRepository {
       'memoPresent': memo.present,
       'memo': memo.value,
       'institution': institution,
+      'balance': balance,
     };
     return _fake();
   }
@@ -185,6 +186,36 @@ void main() {
     expect(repo.updated, isNotNull, reason: '저장이 안 불렸다');
     expect(repo.updated!['memoPresent'], isTrue);
     expect(repo.updated!['memo'], isNull);
+  });
+
+  // 상한 검사는 지금 보이는 칸만 센다 — 예수금 칸은 보유가 없을 때만 보인다
+  testWidgets('예수금이 1,000억 위면 막고, 보유 종목이 있어 칸이 없으면 저장된다(balance 는 안 실린다)', (
+    tester,
+  ) async {
+    const overCash = 200000000000;
+    final noHolding = _invest.copyWith(cashBalance: overCash);
+    final blocked = await _host(
+      tester,
+      (ctx) => showInvestmentEditDialog(ctx, noHolding),
+    );
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(blocked.updated, isNull, reason: '보이는 예수금 칸이 상한 위면 막힌다');
+  });
+
+  testWidgets('보유 종목이 있어 예수금 칸이 사라지면 옛 예수금이 상한 위여도 저장된다', (tester) async {
+    final withHolding = _invest.copyWith(
+      cashBalance: 200000000000,
+      holdings: const [AssetHolding(holdingName: '삼성전자', holdingValue: 1000)],
+    );
+    final repo = await _host(
+      tester,
+      (ctx) => showInvestmentEditDialog(ctx, withHolding),
+    );
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.updated, isNotNull, reason: '사라진 칸의 옛 값은 세지 않는다');
+    expect(repo.updated!['balance'], isNull, reason: '보유가 있으면 예수금은 요청에 안 실린다');
   });
 
   testWidgets('투자 별칭은 필수다 — 비우고 누르면 안내가 뜨고 요청은 안 나간다', (tester) async {

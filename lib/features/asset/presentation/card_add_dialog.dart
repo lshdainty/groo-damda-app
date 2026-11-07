@@ -304,9 +304,12 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
   Future<void> _submit() async {
     if (_submitting) return;
     // 잔액 · 이월 · 한도가 1,000억 위(상한 전에 저장된 옛 값)면 저장하지 않는다 — 칸 아래 오류가 그대로 보인다(웹과 같다)
-    if (amountTextExceeds(_balanceCtrl.text, kBalanceMax) ||
-        amountTextExceeds(_dueCtrl.text, kBalanceMax) ||
-        amountTextExceeds(_creditLimitCtrl.text, kBalanceMax)) {
+    // **지금 보이는 칸만** 센다 — 체크카드로 바꿔 사라진 칸 · 결제일을 바꿔 사라진 청구분 칸의 옛 값은 보지 않는다
+    if (_isCredit &&
+        (amountTextExceeds(_balanceCtrl.text, kBalanceMax) ||
+            (_dueField != null &&
+                amountTextExceeds(_dueCtrl.text, kBalanceMax)) ||
+            amountTextExceeds(_creditLimitCtrl.text, kBalanceMax))) {
       return;
     }
     if (assetUnhideNeedsConfirm(

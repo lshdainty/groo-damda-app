@@ -314,6 +314,24 @@ void main() {
     expect(repo.paymentDay.value, isNull);
   });
 
+  // 상한 검사는 지금 보이는 칸만 센다 — 체크카드로 바꿔 신용한도 칸이 사라지면 옛 한도(1,000억 위)는 저장을 막지 않는다
+  testWidgets('신용한도가 1,000억 위면 막고, 체크로 바꿔 칸이 사라지면 저장된다', (tester) async {
+    final repo = await _openEdit(
+      tester,
+      _credit.copyWith(creditLimit: 200000000000),
+    );
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.updated, isFalse, reason: '보이는 칸이 상한 위면 여전히 막힌다');
+
+    await tester.tap(findPlain(l.assetTypeCheckCard));
+    await tester.pumpAndSettle();
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.updated, isTrue, reason: '사라진 칸의 옛 값은 세지 않는다');
+    expect(repo.creditLimit.value, isNull, reason: '사라진 칸의 값은 요청에 실리지 않는다');
+  });
+
   // 이 화면엔 메모 칸이 없다. 없는 칸을 null 로 실으면 계좌 화면에서 적어 둔 메모가
   // 카드를 고칠 때마다 사라진다 — 이게 이 수정의 제일 큰 위험이다.
   testWidgets('이 화면에 없는 메모 칸은 아예 안 실린다', (tester) async {
