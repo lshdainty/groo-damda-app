@@ -5,7 +5,6 @@
   "actionCancel": "Cancel",
   "actionDelete": "Delete",
   "actionEdit": "Edit",
-  "actionCreate": "Create",
   "actionConfirm": "Confirm",
   "actionClose": "Close",
   "actionRetry": "Retry",
@@ -30,21 +29,17 @@
   "actionDone": "Done",
   "actionBack": "Back",
   "actionNext": "Next",
-  "pickDate": "Select date",
   "pickTime": "Select time",
-  "searchResultsEmpty": "No results",
   "unlockTitle": "Verify to view amounts",
   "unlockBody": "Enter your password to view amounts again.",
   "unlockBiometricReason": "Verify it's you to view amounts again.",
   "unlockPasswordLabel": "Password",
   "unlockMismatch": "Password doesn't match.",
   "appLockTitle": "App Lock",
-  "appLockRowDesc": "Verify with Face ID or fingerprint when opening the app.",
   "appLockLockedDesc": "Verify it's you to unlock.",
   "appLockUnlockAction": "Unlock",
   "appLockPromptReason": "Verify it's you to open the app.",
   "appLockUnavailable": "Biometric authentication isn't available on this device. Set up a screen lock on your device to use it.",
-  "stateEmpty": "Nothing to show",
   "nameTooLong": "Keep the name to {max} characters or fewer.",
   "@nameTooLong": {
     "description": "Shared name-length hint for account alias, saving goal, preset, participant",
@@ -58,30 +53,22 @@
   "languageEnglish": "English",
   "languageSystem": "System",
   "settingsLanguage": "Language",
-  "navDashboard": "Dashboard",
   "navTodo": "Todo",
   "navCalendar": "Calendar",
   "navMemo": "Memo",
-  "navTimer": "Timer",
   "navExpense": "Expense",
   "navAsset": "Assets",
   "navDutchPay": "Dutch Pay",
-  "navPostit": "Post-it",
-  "navGroup": "Groups",
   "navSettings": "Settings",
   "navMore": "More",
-  "navMenu": "Menu",
   "navHome": "Home",
   "navStats": "Stats",
-  "navSearch": "Search",
   "navNotifications": "Notifications",
   "navBudget": "Budget",
   "navRecurring": "Manage recurring",
   "navCategories": "Categories",
   "navPresets": "Presets",
-  "navCards": "Cards",
   "navSavingGoals": "Saving goals",
-  "navExport": "Export",
   "navLogout": "Log out",
   "navChangePassword": "Change password",
   "notiTitle": "Notifications",
@@ -104,18 +91,6 @@
   "notiDeleteDescription": "Deleted notifications can't be restored.",
   "notiTypeEventReminder": "Event Reminder",
   "notiTypeBudgetAlert": "Budget Alert",
-  "notiTypeTodoReminder": "Todo Reminder",
-  "notiTypeSystem": "System",
-  "notiConnectionLost": "Notification connection lost",
-  "notiConnectionRestored": "Notification connection restored",
-  "notiNew": "New notification",
-  "assetTitle": "Assets",
-  "assetSummaryTotalBalance": "Total Balance",
-  "assetCreateFirst": "Register your first asset",
-  "assetAdd": "Add Asset",
-  "assetEdit": "Edit Asset",
-  "assetTransferAdd": "Add Transfer",
-  "assetFee": "Fee",
   "assetTypeBankAccount": "Bank Account",
   "assetTypeSavings": "Savings",
   "assetTypeCash": "Cash",
@@ -204,8 +179,6 @@
       }
     }
   },
-  "assetActionFailed": "Failed",
-  "assetDeleteFailed": "Delete failed",
   "assetInstitutionBrand": "Institution",
   "assetBankSearchHint": "Search institution name",
   "assetNickname": "Nickname",
@@ -314,9 +287,6 @@
   "assetBrokerExchange": "Brokerage / exchange",
   "assetInvestSearchHint": "Search brokerage name",
   "assetProductPlaceholder": "e.g. Pension savings, Gold holdings",
-  "assetValuation": "Valuation (KRW)",
-  "assetNewInvestment": "New investment",
-  "assetCryptoExchange": "Crypto exchange",
   "assetCategoryCommercialBank": "Commercial bank",
   "assetCategoryInternetBank": "Internet bank",
   "assetCategoryLocalBank": "Local bank",
@@ -330,7 +300,6 @@
   "assetCardDetail": "Card details",
   "assetInvestDetail": "Investment details",
   "assetAccountDetail": "Account details",
-  "assetHideAmount": "Hide amount",
   "assetPeriod3m": "3 months",
   "assetPeriod6m": "6 months",
   "assetPeriod1y": "1 year",
@@ -378,25 +347,11 @@
     }
   },
   "assetViewAll": "View all",
-  "assetTossLinkStarted": "Started Toss price sync",
-  "assetLinkFailed": "Link failed",
-  "assetTossUnlinked": "Unlinked from Toss",
-  "assetUnlinkFailed": "Unlink failed",
-  "assetQtyUpdated": "Updated quantity",
-  "assetUpdateFailed": "Update failed",
-  "assetTossLinked": "Toss linked",
   "assetHoldings": "Holdings",
   "tradeTitle": "Buy / Sell",
   "tradeBuy": "Buy",
   "tradeSell": "Sell",
-  "tradeBought": "Buy recorded",
-  "tradeSold": "Sell recorded",
   "tradeHolding": "Holding",
-  "tradeHoldingType": "Holding type",
-  "tradeNoHolding": "No holdings yet",
-  "tradeAddNewHolding": "Buy a new holding",
-  "tradePickExisting": "Pick from holdings",
-  "tradeNewHoldingPlaceholder": "Enter a holding name",
   "tradeQuantity": "Quantity",
   "tradeAmount": "Trade amount (KRW)",
   "tradeAmountHelp": "Excluding fees. Enter fees separately below.",
@@ -427,7 +382,6 @@
   "tradeHistory": "Trade log",
   "tradeDeleted": "Trade cancelled.",
   "tradeDeleteTitle": "Cancel trade",
-  "tradeDeleteConfirm": "Cancel this trade? Cash and quantity return to their pre-trade state.",
   "assetDetailTitle": "Asset details",
   "assetNotFoundTitle": "Asset not found",
   "assetDetailDeleteFailed": "Couldn't delete the asset.",
@@ -444,10 +398,6 @@
   "tradeDateTime": "Trade date",
   "tradeDeleteConfirmTarget": "Cancel the {kind} of {qty} {name} on {date}? Cash and quantity return to their pre-trade state.",
   "tradeCancelFailed": "Couldn't cancel the trade.",
-  "holdingTypeStock": "Stock",
-  "holdingTypeGold": "Gold",
-  "holdingTypeCrypto": "Crypto",
-  "holdingAvgPrice": "Avg price",
   "holdingAvgPriceInline": "avg {avg}",
   "@holdingAvgPriceInline": {
     "placeholders": {
@@ -513,7 +463,6 @@
       }
     }
   },
-  "assetHoldingManualSub": "Manual value",
   "assetHoldingLinkedDetail": "{qty} shares · linked at {price}",
   "@assetHoldingLinkedDetail": {
     "placeholders": {
@@ -558,14 +507,6 @@
       }
     }
   },
-  "assetInvestHoldingsSub": "Investment · {count} holdings",
-  "@assetInvestHoldingsSub": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "assetTodayChange": "Today {amount}",
   "@assetTodayChange": {
     "placeholders": {
@@ -582,11 +523,7 @@
       }
     }
   },
-  "assetHoldingQty": "Holdings",
-  "assetEditQty": "Edit quantity",
   "assetUnlink": "Unlink",
-  "assetTossRealtimeTitle": "Real-time valuation via Toss",
-  "assetTapToChange": "Tap to change",
   "stockSecurityTypeIndex": "Index",
   "stockSecurityTypeWarrant": "Warrant",
   "stockMarketKospi": "KOSPI",
@@ -604,18 +541,8 @@
   "stockMarketHks": "Hong Kong",
   "stockMarketHnx": "Hanoi",
   "stockMarketHsx": "Ho Chi Minh",
-  "assetLinkByCode": "Link by code \"{code}\"",
-  "@assetLinkByCode": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      }
-    }
-  },
-  "assetLink": "Link",
   "assetChartNoData": "No data to show",
   "assetNoLinkedTx": "No linked transactions.",
-  "assetTxFallback": "Transaction",
   "assetPayConfirmMessage": "Pay the {amount} due now?",
   "@assetPayConfirmMessage": {
     "placeholders": {
@@ -644,7 +571,6 @@
       }
     }
   },
-  "assetPaymentCancelled": "Payment cancelled",
   "assetInstallmentPayoff": "Pay off remaining",
   "assetInstallmentPayoffConfirm": "Add the remaining ₩{amount} to this billing cycle? No further installments will be charged.",
   "@assetInstallmentPayoffConfirm": {
@@ -712,7 +638,6 @@
   },
   "assetPayNoAccountNote": "No payment account is linked, so the usage is settled without a transfer.",
   "assetBillingLoadError": "Couldn't load billing info",
-  "assetUpcomingPayment": "Upcoming payment",
   "assetScheduledTag": "Upcoming",
   "assetPaidDone": "Paid",
   "assetLimitUsage": "Limit usage",
@@ -803,46 +728,26 @@
       }
     }
   },
-  "assetBillingHistory": "Billing history",
-  "assetStatusPending": "Pending",
-  "assetStatusSkipped": "Skipped",
   "todoTitle": "Todos",
-  "todoCreateFirst": "Create your first todo",
-  "todoQuickAddHint": "+ Quick add",
-  "todoStatusAll": "All",
   "todoStatusCompleted": "Completed",
-  "todoPriorityAll": "All",
-  "todoPriorityHigh": "High",
   "todoPriorityMedium": "Medium",
-  "todoPriorityLow": "Low",
-  "todoTagMgmt": "Tags",
   "memoTitle": "Memos",
   "memoEmpty": "No memos",
   "memoSearchEmpty": "No matching memos",
   "memoSearchHint": "Search memos",
   "memoPin": "Pin",
   "memoUnpin": "Unpin",
-  "calTitle": "Calendar",
-  "calToday": "Today",
-  "calMonthView": "Month",
-  "calWeekView": "Week",
-  "calDayView": "Day",
-  "calYearView": "Year",
-  "calAgendaView": "Agenda",
   "calEventAdd": "Add event",
   "calEventEdit": "Edit event",
   "calEventDelete": "Delete event",
-  "calLabelMgmt": "Labels",
   "calMyCalendars": "My calendars",
   "calAllDay": "All day",
   "calRepeat": "Repeat",
-  "calRepeatNone": "None",
   "calRepeatDaily": "Daily",
   "calRepeatWeekly": "Weekly",
   "calRepeatMonthly": "Monthly",
   "calRepeatYearly": "Yearly",
   "calLocation": "Location",
-  "calMemo": "Notes",
   "calStartDate": "Start",
   "calEndDate": "End",
   "calFieldTitle": "Title",
@@ -852,12 +757,9 @@
   "calFieldColor": "Color",
   "calFieldName": "Name",
   "calFieldReminder": "Reminders",
-  "calFieldStartDate": "Start date",
-  "calFieldEndDate": "End date",
   "calTitlePlaceholder": "e.g. Dental checkup",
   "calDescriptionPlaceholder": "e.g. What to bring",
   "calLocationPlaceholder": "e.g. 3rd floor meeting room",
-  "calSelectCalendar": "Select calendar",
   "calNoLabel": "No label",
   "calLabelNamePlaceholder": "e.g. Important, Deadline, Meeting",
   "calCalendarNamePlaceholder": "e.g. Family, Work, Workout",
@@ -1016,7 +918,6 @@
   },
   "calInviteCode": "Invite code",
   "calDeleteCalendar": "Delete calendar",
-  "calCalendarUpdated": "Calendar updated",
   "calInviteCodeRegenerated": "New invite code created.",
   "calInviteCodeCopied": "Invite code copied.",
   "calRemoveMember": "Remove member",
@@ -1079,20 +980,12 @@
   "calChangeToEditor": "Make editor",
   "calChangeToViewer": "Make read only",
   "calAdd": "Add",
-  "calActionFailed": "Failed",
-  "calSaveFailed": "Save failed",
-  "calDeleteFailed": "Delete failed",
   "calJoinFailed": "Could not join. Please try again in a moment.",
   "calUpdateFailed": "Couldn't change the calendar visibility. Try again later.",
   "importExecuteFailed": "Couldn't import the data.",
   "calCalendarLoadError": "Couldn't load calendars",
   "calLabelLoadError": "Couldn't load labels",
-  "dashTitle": "Home",
-  "dashGreeting": "Have a great day",
-  "dashTotalAssets": "Total assets",
-  "dashChange": "Change",
   "dashThisMonthExpense": "This month's expense",
-  "dashThisMonthIncome": "This month's income",
   "dashRecent": "Recent transactions",
   "dashUpcoming": "Upcoming events",
   "dashRecentTodos": "Recent todos",
@@ -1112,8 +1005,6 @@
       }
     }
   },
-  "dashTrendTitle": "Last 6 months",
-  "dashAddTx": "Add transaction",
   "dashTodayLabel": "Today",
   "dashTomorrowLabel": "Tomorrow",
   "dashDaysLeft": "{n}d",
@@ -1179,36 +1070,19 @@
   "dashFailTodos": "Couldn't load recent todos",
   "dashFailToday": "Couldn't load today's spending",
   "dashFailDesc": "Please try again in a moment.",
-  "expTitle": "Expenses",
   "expFilterAll": "All",
   "expFilterIncome": "Income",
   "expFilterExpense": "Expense",
-  "expFilterTransfer": "Transfer",
-  "expEmptyDescription": "Add your first transaction to get started",
   "expAdd": "Add transaction",
   "expEdit": "Edit transaction",
   "expDelete": "Delete transaction",
   "expAmount": "Amount",
   "expCategory": "Category",
-  "expAsset": "Asset",
   "expDate": "Date",
-  "expMerchant": "Merchant",
   "expPaymentMethod": "Payment",
   "expForeignPayment": "Foreign payment",
   "expCurrency": "Currency",
-  "expOriginalAmount": "Local amount",
   "expExchangeRate": "Rate",
-  "expFxHint": "{original} → {krw}",
-  "@expFxHint": {
-    "placeholders": {
-      "original": {
-        "type": "String"
-      },
-      "krw": {
-        "type": "String"
-      }
-    }
-  },
   "expInstallment": "Installment",
   "expRefund": "Refund",
   "expRefundConfirmTitle": "Mark as refunded",
@@ -1256,17 +1130,6 @@
       }
     }
   },
-  "expInstallmentHint": "About {perMonth} per month for {months} months",
-  "@expInstallmentHint": {
-    "placeholders": {
-      "perMonth": {
-        "type": "String"
-      },
-      "months": {
-        "type": "int"
-      }
-    }
-  },
   "expDescription": "Note",
   "expTypeIncome": "Income",
   "expTypeExpense": "Expense",
@@ -1282,7 +1145,6 @@
   "transferReceived": "Amount received",
   "transferPrincipal": "Principal",
   "transferWithdrawn": "Total withdrawn",
-  "transferDeleted": "Transfer deleted",
   "transferDeleteConfirm": "Delete this transfer? Both accounts' balances go back to before the transfer. A deleted transfer can't be restored.",
   "transferDeleteTitle": "Delete transfer",
   "transferAutoTradeSettlement": "Created automatically to cover a shortfall when buying. It disappears when the purchase is cancelled.",
@@ -1297,20 +1159,7 @@
       }
     }
   },
-  "updateAvailableDesc": "Tap to download and install",
-  "updateAvailableDescIos": "Tap to get it from AltStore",
-  "updateSheetTitle": "Version {version} is available",
-  "@updateSheetTitle": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "updateSheetSubtitle": "A new version is ready. You can get it right below.",
   "updateSheetChanges": "What's new",
-  "updateSheetNoNotes": "No change notes were prepared for this version.",
-  "updateSheetLater": "Later",
   "updateSheetNow": "Update",
   "updateSheetRetry": "Try again",
   "updateSheetDownloading": "Downloading",
@@ -1341,19 +1190,13 @@
   "updateRequiredDesc": "This update is required. You can't use the app until you install it.",
   "expScheduled": "Scheduled",
   "expTypeTransfer": "Transfer",
-  "expTransferFrom": "From",
-  "expTransferTo": "To",
   "expFee": "Fee",
   "expFilter": "Filter",
   "expFilterMin": "Min",
   "expFilterMax": "Max",
   "expFilterPeriod": "Period",
   "expSplit": "Split transaction",
-  "expConvertDutch": "To Dutch Pay",
   "expConvertRecurring": "To Recurring",
-  "expExport": "Export",
-  "expExportCsv": "Export CSV",
-  "expSummaryTitle": "Monthly summary",
   "expSummaryIncome": "Income",
   "expSummaryExpense": "Expense",
   "expSummaryBalance": "Balance",
@@ -1374,7 +1217,6 @@
   "budgetPickNoCategory": "There are no expense categories to budget.",
   "budgetPickLoadFailTitle": "Couldn't load the categories",
   "budgetPickLoadFailDesc": "Please try again in a moment.",
-  "budgetActionFailed": "Failed",
   "budgetDeleteTitle": "Delete the \"{name}\" budget?",
   "@budgetDeleteTitle": {
     "placeholders": {
@@ -1391,7 +1233,6 @@
   "assetSaveRateRequired": "Enter the exchange rate to save a foreign-currency asset.",
   "tradeSaveFailed": "Couldn't process the trade.",
   "tradeSaveInsufficientQty": "Not enough shares held.",
-  "budgetMonthlyLimit": "Monthly budget limit",
   "budgetSelectMonth": "Select month",
   "budgetMonthOverallCap": "Month {month} total budget",
   "@budgetMonthOverallCap": {
@@ -1563,13 +1404,8 @@
   "cardBenefitTypePoint": "Points",
   "cardBenefitTypeMileage": "Mileage",
   "cardBenefitsTitle": "Card benefits",
-  "cardSelectTitle": "Select card",
   "cardSearchHintFull": "Search by card name or issuer",
-  "cardSearchHintNameCompany": "Search card / issuer",
   "cardDetailLoadError": "Couldn't load card information",
-  "cardSearchError": "Card search failed",
-  "cardAddFailed": "Failed to add",
-  "cardDeleteFailed": "Failed to delete",
   "cardLastMonthPerf": "Last month spend",
   "cardKeyBenefitTags": "Key benefit tags",
   "cardBenefitDetailCount": "{count} benefits",
@@ -1605,23 +1441,6 @@
   },
   "cardPerfMonthly": "Spending {amount}",
   "@cardPerfMonthly": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "cardPerfMonthTitle": "{month} spend",
-  "@cardPerfMonthTitle": {
-    "placeholders": {
-      "month": {
-        "type": "String"
-      }
-    }
-  },
-  "cardPerfAchieved": "Achieved",
-  "cardPerfRemaining": "{amount} left",
-  "@cardPerfRemaining": {
     "placeholders": {
       "amount": {
         "type": "String"
@@ -1666,7 +1485,6 @@
   "cardNoBenefits": "No registered benefits.",
   "categoryManageTitle": "Manage categories",
   "categorySearchHint": "Search categories",
-  "categoryLoadError": "Failed to load categories",
   "categoryNoResults": "No matching categories.",
   "categoryEmpty": "No categories yet.",
   "categoryAdd": "Add category",
@@ -1707,7 +1525,6 @@
     }
   },
   "categoryMove": "Move",
-  "categoryActionFailed": "Failed",
   "categoryDeleteBlockedTitle": "Can't delete",
   "categoryDeleteHasChildren": "The \"{name}\" category has subcategories and cannot be deleted. Clear them first.",
   "@categoryDeleteHasChildren": {
@@ -1773,14 +1590,10 @@
   "categoryAddSub": "Add subcategory",
   "authLoginPrompt": "Sign in with your 그루 account.",
   "authSsoLogin": "Sign in with 그루",
-  "authLoginTitle": "Login",
   "authLoginFailed": "Could not sign in.",
   "authLoginExpired": "Your sign-in timed out. Please sign in again.",
   "authLoginError": "Could not complete sign-in.",
   "authSecurityNotHttps": "The connection to the sign-in server is not secure.",
-  "authStateMismatch": "Security check failed (state mismatch). Please try again.",
-  "authNoAuthCode": "Couldn't get the authorization code. Please try again.",
-  "authPageLoadError": "Couldn't load the login page.",
   "dutchSendRequest": "Request",
   "dutchSendRequestOf": "Request payment from {name}",
   "dutchRequestSoon": "Payment requests are coming soon.",
@@ -1798,8 +1611,6 @@
   "@dutchPerPersonOf": {"placeholders": {"amount": {"type": "String"}}},
   "dutchPerPersonRestOf": "{amount} each · {rest} extra for {name}",
   "@dutchPerPersonRestOf": {"placeholders": {"amount": {"type": "String"}, "rest": {"type": "String"}, "name": {"type": "String"}}},
-  "dutchSummaryLine": "{count} people · {amount} each",
-  "@dutchSummaryLine": {"placeholders": {"count": {"type": "int"}, "amount": {"type": "String"}}},
   "dutchPayerPaid": "Paid the bill",
   "dutchPayerPaidShare": "Paid the bill · share {amount}",
   "@dutchPayerPaidShare": {"placeholders": {"amount": {"type": "String"}}},
@@ -1815,8 +1626,6 @@
   "dutchParticipantsHeader": "Participants · {count}",
   "@dutchParticipantsHeader": {"placeholders": {"count": {"type": "int"}}},
   "dutchSuggestHeader": "People you split with before",
-  "dutchSuggestChip": "+ {name}",
-  "@dutchSuggestChip": {"placeholders": {"name": {"type": "String"}}},
   "dutchPayerSelect": "Paid by",
   "dutchLoadFailedTitle": "Could not load splits",
   "dutchLoadFailedDesc": "Please try again in a moment.",
@@ -1833,7 +1642,6 @@
   "dutchEmptyPastSub": "Finished splits gather here.",
   "dutchEmptyFriendsTitle": "No friends yet",
   "dutchEmptyFriendsSub": "Friends you add to a split gather here.",
-  "dutchActionFailed": "Failed",
   "dutchSettleFailed": "Couldn't mark all as received.",
   "dutchDeleteFailed": "Couldn't delete the settlement.",
   "dutchToReceive": "To receive",
@@ -1898,22 +1706,13 @@
   "dutchRequestAll": "Request all",
   "dutchNoName": "(No name)",
   "dutchStartTitle": "Start Dutch Pay",
-  "dutchSplitMethod": "Split method",
   "dutchSplitEqualTitle": "1/N",
-  "dutchSplitEqualSub": "Equal split",
   "dutchSplitRatioTitle": "Ratio",
-  "dutchSplitRatioSub": "By weight",
   "dutchSplitCustomTitle": "Custom amount",
   "dutchSplitCustomSub": "Each differently",
-  "dutchIncludeMyself": "Include myself in the split",
   "dutchIncludeMyselfOffDesc": "You paid in full, collect only others' shares",
-  "dutchSourceSub": "Request payments from participants",
-  "dutchRequestMsgLabel": "Request message (optional)",
-  "dutchRequestMsgPlaceholder": "Add a note to send to participants",
-  "dutchCreated": "Settlement created",
   "expLoadError": "Couldn't load transactions",
   "expTransfersLoadError": "Couldn't load the transfers.",
-  "expEmptyDay": "No transactions on this day",
   "expTotal": "Total",
   "expFiltering": "Filtering",
   "expFilteringBy": "Filtering: {name}",
@@ -1924,8 +1723,6 @@
       }
     }
   },
-  "expViewList": "List",
-  "expViewCalendar": "Calendar",
   "expTxCount": "{count} items",
   "@expTxCount": {
     "placeholders": {
@@ -1935,7 +1732,6 @@
     }
   },
   "expAddShort": "Add",
-  "expActionFailed": "Failed",
   "expDeleteConfirm": "Delete the \"{name}\" transaction? The linked asset balance will be adjusted too. A deleted transaction cannot be restored.",
   "@expDeleteConfirm": {
     "placeholders": {
@@ -1944,51 +1740,18 @@
       }
     }
   },
-  "expSplitMismatch": "Split doesn't match the amount",
-  "expSplitDiff": "New total {total}원 · Split sum {sum}원 · {diff}원 diff",
-  "@expSplitDiff": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      },
-      "sum": {
-        "type": "String"
-      },
-      "diff": {
-        "type": "String"
-      }
-    }
-  },
-  "expSplitReconcile": "Reconcile split",
-  "expPresetLoad": "Load preset",
-  "expPresetApplied": "Applied",
   "expPresetSaveCurrent": "Save current input",
-  "expPresetEmpty": "No saved presets yet. Enter a transaction you use often, then tap “Save current input”.",
-  "expPresetFilled": "Preset values filled in. Adjust the amount and note, then save.",
-  "expClear": "Clear",
-  "expSaveFailed": "Save failed",
   "expPresetSaveTitle": "Save as preset",
   "expPresetNamePlaceholder": "e.g. Lunch box",
   "presetNameDuplicate": "A preset with this name already exists.",
-  "expPresetLockAmount": "Lock amount — auto-fills {amount}원 when applied",
-  "@expPresetLockAmount": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "expPayCash": "Cash",
   "expPayCard": "Card",
   "expPayTransfer": "Bank transfer",
   "expPayOther": "Other",
-  "expAutoLock": "Auto",
   "expAutoSourceTradeRealized": "Realized P/L from a sale. The amount is calculated from the trade.",
   "expAutoSourceTransferInterest": "Interest on a transfer. The amount is calculated from the transfer.",
   "expAutoSourceCardCarryover": "This is the unpaid usage you entered when adding the card. Change the amount by editing the card.",
   "expAutoSourceDefault": "Created automatically. It disappears when the original is deleted.",
-  "expPresetLock": "Preset lock",
-  "expSubcategory": "Subcategory",
   "expTopCategorySuffix": "{name} (parent)",
   "@expTopCategorySuffix": {
     "placeholders": {
@@ -2005,12 +1768,6 @@
   "expNone": "None",
   "expDepositAccount": "Deposit account",
   "expAccountCard": "Account/Card",
-  "expAssetLoadError": "Failed to load assets",
-  "expWithdrawAccount": "From account",
-  "expTransferToAccount": "To account",
-  "expSelect": "Select",
-  "expTransferSameAsset": "From and to assets must differ",
-  "expFeeOptional": "Fee (optional)",
   "expInterest": "Interest",
   "expInterestHint": "The interest portion — debt decreases only by the rest",
   "expInterestSplit": "Principal {principal} · Interest {interest}",
@@ -2024,13 +1781,11 @@
       }
     }
   },
-  "expDateTime": "Date & time",
   "expMemoPlaceholder": "e.g. Lunch, dinner",
   "expIncomeDetail": "Income details",
   "expExpenseDetail": "Expense details",
   "expTxFallback": "Transaction",
   "expUncategorized": "Uncategorized",
-  "expNotSelected": "Not selected",
   "expThisMonth": "This month",
   "expTimesCount": "{count}×",
   "@expTimesCount": {
@@ -2042,48 +1797,14 @@
   },
   "expItem": "Item",
   "expFilterApply": "Apply filter",
-  "expNSelected": "{count} selected",
-  "@expNSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "expPeriodCustom": "Custom",
   "expDateRangeError": "Start date can't be after end date.",
   "expTxType": "Transaction type",
   "expAmountRange": "Amount range",
   "expMinAmount": "Min amount",
   "expMaxAmount": "Max amount",
-  "expSplitSave": "Save split",
-  "expSplitRemove": "Remove split",
-  "expSplitLoadError": "Failed to load split",
   "expAddAmount": "Extra amount",
-  "expSplitRemoveConfirm": "This clears all split items for this transaction. Cleared items cannot be restored.",
-  "expClearFailed": "Failed to clear",
-  "expSplitMatches": "Split sum matches the total",
-  "expSplitSum": "Split sum",
-  "expTotalAmount": "Total",
-  "expSplitTotalChanged": "The total changed — reconcile the split",
-  "expSplitMismatchTotal": "Split sum doesn't match the total",
-  "expSplitCheckItems": "Check the split items",
-  "expShort": "Short",
-  "expOver": "Over",
-  "expQuickAdjust": "Quick adjust",
-  "expProrate": "Prorate",
-  "expProrateDesc": "Auto-adjust by weight",
-  "expApplyToLargest": "Apply to largest",
-  "expApplyToLargestDesc": "Difference to the largest item",
-  "expAdjustItem": "Adjustment item",
-  "expAdjustItemDesc": "Shortfall as a new item",
-  "expRecommended": "Recommended",
-  "expOriginalTx": "Original transaction",
-  "expAddItem": "Add item",
   "expSplitEven": "Split evenly",
-  "expSplitRatio": "Split ratio",
-  "expDeleteItem": "Delete item",
-  "expItemNamePlaceholder": "Item name (optional)",
   "exportTitle": "Export data",
   "exportShareText": "Data export ({range})",
   "@exportShareText": {
@@ -2134,14 +1855,6 @@
   "exportPreview": "Preview",
   "exportRun": "Export",
   "exportEmpty": "No data to export for this period.",
-  "exportPreviewRows": "Top {count} rows",
-  "@exportPreviewRows": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "fileAttachTitle": "Attachments",
   "fileTooltipGallery": "Gallery",
   "fileTooltipCamera": "Camera",
@@ -2318,7 +2031,6 @@
   "hideCardEtcSearch": "Search results",
   "hideCardEtcRecurring": "Recurring",
   "hideCardEtcPreset": "Presets",
-  "appearanceHideAmount": "Hide amounts",
   "appearanceRegion": "Region",
   "appearanceRegionDesc": "Days for 'today' and statistics are calculated in this region. On-screen times follow your device's time zone.",
   "appearanceCurrency": "Default currency",
@@ -2425,7 +2137,6 @@
   },
   "accountProActive": "Pro active",
   "accountProPromo": "Securities investing is Pro-only · Start now",
-  "accountProStart": "Start Pro",
   "accountManage": "Account Management",
   "accountLogoutDesc": "This device only",
   "accountWithdraw": "Stop using 그루 담다",
@@ -2644,14 +2355,12 @@
   "@presetSelectOf": {"placeholders": {"field": {"type": "String"}}},
   "presetNoneOf": "No {field}",
   "@presetNoneOf": {"placeholders": {"field": {"type": "String"}}},
-  "presetNoneValue": "None",
   "presetMemoNone": "No memo",
   "presetNoAccount": "No account or card",
   "presetNoPayment": "No payment method",
   "presetNoCategoryOfKind": "There are no categories of this type.",
   "presetFromAccount": "Sending account",
   "presetToAccount": "Receiving account",
-  "presetShowAll": "Show all",
   "presetPickTitle": "Choose a preset",
   "presetSearch": "Search presets",
   "presetNoResult": "No presets found.",
@@ -2666,7 +2375,6 @@
   "presetMerchant": "Default details",
   "presetMerchantPlaceholder": "e.g. Office lunch box",
   "presetAssetCard": "Account / Card",
-  "recurringToggleFailed": "Change failed",
   "recurringDeleteTitle": "Delete recurring transaction",
   "recurringDeleteConfirm": "Delete the \"{name}\" recurring setting? Already-recorded transactions remain. A deleted recurring setting cannot be restored.",
   "@recurringDeleteConfirm": {
@@ -2676,50 +2384,7 @@
       }
     }
   },
-  "recurringDeleteFailed": "Delete failed",
-  "recurringAllList": "All",
   "recurringAdd": "Add",
-  "recurringFilterAll": "All {count}",
-  "@recurringFilterAll": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "recurringFilterExpense": "Expense {count}",
-  "@recurringFilterExpense": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "recurringFilterIncome": "Income {count}",
-  "@recurringFilterIncome": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "recurringFilterTransfer": "Transfer {count}",
-  "@recurringFilterTransfer": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "recurringFilterPaused": "Paused {count}",
-  "@recurringFilterPaused": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "recurringStatActive": "Active",
   "recurringCount": "{count}",
   "@recurringCount": {
     "placeholders": {
@@ -2728,79 +2393,10 @@
       }
     }
   },
-  "recurringPaused": "Paused",
-  "recurringPauseAction": "Pause",
-  "recurringMonthlyExpense": "Monthly fixed expense",
-  "recurringMonthlyIncome": "Monthly fixed income",
-  "recurringUpcoming": "Next 7 days",
-  "recurringUpcomingCount": "{count} upcoming",
-  "@recurringUpcomingCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "recurringToday": "Today",
-  "recurringNoAccount": "No account",
-  "recurringOccurrences": "{executed}/{max}",
-  "@recurringOccurrences": {
-    "placeholders": {
-      "executed": {
-        "type": "int"
-      },
-      "max": {
-        "type": "int"
-      }
-    }
-  },
-  "recurringNext": "Next",
-  "recurringStart": "Start",
-  "recurringEmpty": "No matching recurring transactions",
-  "recurringIndefinite": "Indefinite",
-  "recurringNotifyShort": "Alert",
   "recurringAddTitle": "Add recurring transaction",
   "recurringEditTitle": "Edit recurring transaction",
-  "recurringSaveSubmit": "Save recurring",
-  "recurringSaveFailed": "Save failed",
-  "recurringFrequencyLabel": "Frequency",
-  "recurringDayOfWeekLabel": "Day of week",
-  "recurringDayOfMonthLabel": "Day of month",
-  "recurringEndLabel": "End",
-  "recurringExecutionTime": "Execution time",
-  "recurringIndefiniteDesc": "Repeat until stopped",
-  "recurringByCount": "By count",
-  "recurringTotal": "Total",
-  "recurringTimesUnit": "times",
-  "recurringByDate": "By end date",
-  "recurringOptions": "Options",
-  "recurringAutoLog": "Auto-record",
-  "recurringNotifyDayBefore": "Day-before alert",
-  "recurringNextDates": "Next dates",
-  "recurringSourceSub": "For subscriptions · rent and other regular payments",
-  "recurringStartFrom": "Starts {date}",
-  "@recurringStartFrom": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "recurringMerchant": "Merchant",
-  "recurringMerchantPlaceholder": "e.g. Netflix",
   "recurringAssetCard": "Account / Card",
-  "recurringAssetLoadError": "Failed to load assets",
-  "recurringSelectNone": "None",
-  "recurringStartDateLabel": "Start date",
-  "recurringParentCategory": "{name} (parent)",
-  "@recurringParentCategory": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "savingGoalLoadError": "Failed to load saving goals",
   "savingGoalFailTitle": "Couldn't load the saving goals",
   "savingGoalOverallProgress": "Overall progress",
   "savingGoalListCount": "Goals · {n}",
@@ -2813,12 +2409,10 @@
   },
   "savingGoalAddAction": "Add goal",
   "savingGoalManagePrompt": "Add saving goals in Settings.",
-  "savingGoalManageLink": "Manage",
   "savingGoalNoDeadline": "No deadline",
   "savingGoalCurrentLabel": "Amount saved",
   "savingGoalIconLabel": "Icon",
   "savingGoalEmpty": "No saving goals yet. Start with ‘Add goal’.",
-  "savingGoalActionFailed": "Failed",
   "savingGoalAchieved": "Achieved",
   "savingGoalAdd": "Add saving goal",
   "savingGoalSaveFailed": "Couldn't save the saving goal.",
@@ -2876,9 +2470,6 @@
   "statsPrevPeriod": "Previous period",
   "statsMomMonth": "vs. {prev}",
   "@statsMomMonth": {"placeholders": {"prev": {"type": "String"}}},
-  "statsMomPrevMonth": "Last month",
-  "statsMomPrevQuarter": "Last quarter",
-  "statsMomPrevYear": "Last year",
   "statsDailyAvg": "Daily average",
   "statsMonthlyAvg": "Monthly average",
   "statsPeriodPickerTitle": "Select period",
@@ -2954,20 +2545,10 @@
       }
     }
   },
-  "statsCategoryByMom": "By category, {mom}",
-  "@statsCategoryByMom": {
-    "placeholders": {
-      "mom": {
-        "type": "String"
-      }
-    }
-  },
   "statsCategoryDelta": "Change by category",
   "statsSortByChange": "Biggest changes",
   "statsNoCompareData": "No data to compare",
   "statsWeekdayTitle": "Spending by weekday",
-  "statsThisMonthShort": "This month",
-  "statsLastMonthShort": "Last month",
   "statsWeekdayInsightDown": "{day} spending dropped by {amount} vs {prev}.",
   "statsWeekdayInsightUp": "{day} spending rose by {amount} vs {prev}.",
   "statsWeekdayInsightSame": "Similar to {prev}.",
@@ -2994,14 +2575,6 @@
   "stocksTabWatch": "Watchlist",
   "stocksTabDiscover": "Discover",
   "stocksNoHoldings": "No holdings yet",
-  "stocksSharesHeld": "Holding {qty} shares",
-  "@stocksSharesHeld": {
-    "placeholders": {
-      "qty": {
-        "type": "String"
-      }
-    }
-  },
   "stocksRange1d": "1D",
   "stocksRange1w": "1W",
   "stocksRange1m": "1M",
@@ -3105,9 +2678,6 @@
   "stocksDailyPrices": "Daily prices",
   "stocksDailyPricesLoading": "Loading daily prices…",
   "stocksDailyPricesEmpty": "No daily prices",
-  "stocksDate": "Date",
-  "stocksClosePrice": "Close",
-  "stocksChangeRate": "Change",
   "stocksSearchHint": "Stock name or code (KR + US · CN · JP · HK · VN)",
   "stocksPriceUnavailable": "Price unavailable via Toss (KR · US only)",
   "stocksRankingLoading": "Loading rankings",
@@ -3134,13 +2704,9 @@
       }
     }
   },
-  "todoDetail": "Details",
-  "todoCompletionRate": "Completion rate",
-  "todoQuickAddPlaceholder": "Type a todo and press Enter",
   "todoTitlePlaceholder": "Write a todo",
   "todoTitleRequired": "Title is required.",
   "todoDueDate": "Due date",
-  "todoUnset": "Not set",
   "todoTag": "Tag",
   "todoTagSelect": "Select tag",
   "todoTagNone": "No tag",
@@ -3152,21 +2718,8 @@
   "todoEditMode": "Edit",
   "todoPreview": "Preview",
   "todoNoContent": "None",
-  "todoEmptyToday": "Nothing due today",
-  "todoEmptyWeek": "A light week ahead",
-  "todoEmptyDone": "Nothing completed yet",
-  "todoEmptyAll": "No todos",
-  "todoEmptyAddHint": "Add one quickly using the field above.",
-  "todoNewProject": "New project",
-  "todoProjectNamePlaceholder": "Project name",
-  "todoDescOptional": "Description (optional)",
-  "todoAdding": "Adding…",
-  "todoAddProject": "Add project",
-  "todoRegisteredProjects": "Projects",
-  "todoDeleteProjectTitle": "Delete project",
   "todoNewTag": "Add tag",
   "todoTagNamePlaceholder": "Tag name",
-  "todoRegisteredTags": "Tags",
   "todoDeleteTagTitle": "Delete tag",
   "todoDeleteTagConfirm": "Deleting \"{name}\" will leave {count} todos using it untagged. A deleted tag cannot be restored.",
   "@todoDeleteTagConfirm": {
@@ -3179,14 +2732,8 @@
       }
     }
   },
-  "todoActionFailed": "Failed",
-  "todoAddFailed": "Add failed",
   "todoDeleteFailed": "Couldn't delete the to-do.",
-  "todoUpdateFailed": "Update failed",
-  "todoStatusChangeFailed": "Status change failed",
-  "todoMoveFailed": "Move failed",
   "todoLoadError": "Couldn't load your to-dos",
-  "todoProjectLoadError": "Failed to load projects",
   "todoTagLoadError": "Couldn't load tags",
   "subManageTitle": "Manage subscription",
   "subUsingPro": "On 담다 Pro",
@@ -3304,7 +2851,6 @@
     }
   },
   "subBrokerDisconnectConfirmBody": "This broker's holdings and prices will no longer be imported. To connect again, you'll need to enter the keys again.",
-  "subConnecting": "Connecting…",
   "subConnect": "Connect",
   "subBrokerInvalidCred": "The credentials are not valid.",
   "subBrokerConnectFailed": "Couldn't connect to the broker.",
@@ -3383,8 +2929,6 @@
   "mtagDesc": "Tags you attach to memos. They are used to filter the memo screen. If you delete a tag, its memos stay as 'No tag'.",
   "mtagEmpty": "No tags yet",
   "mtagEditTitle": "Edit tag",
-  "mtagNameLabel": "Name",
-  "mtagColorLabel": "Color",
   "mtagUsage": "Used by {count} memos",
   "@mtagUsage": {
     "placeholders": {
@@ -3398,14 +2942,6 @@
   "dateToday": "Today",
   "dateTomorrow": "Tomorrow",
   "dateYesterday": "Yesterday",
-  "dateInDays": "in {n} days",
-  "@dateInDays": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "dateDaysAgo": "{n} days ago",
   "@dateDaysAgo": {
     "placeholders": {
@@ -3432,17 +2968,6 @@
     }
   },
   "todoNoDue": "No due date",
-  "todoGroupLabel": "{label} · {count}",
-  "@todoGroupLabel": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "dayN": "Day {d}",
   "@dayN": {
     "placeholders": {
@@ -3451,16 +2976,6 @@
       }
     }
   },
-  "weekN": "W{n}",
-  "@weekN": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "countUnit": "",
-  "dayUnit": "day",
   "constHeroTodayTarget": "Today's constellation",
   "constHeroCollectedBang": "{name} collected!",
   "@constHeroCollectedBang": {
@@ -3561,14 +3076,11 @@
   "todoDetailStatus": "Status",
   "todoStatusPending": "Pending",
   "todoDetailCompletedAt": "Completed at",
-  "todoDetailContent": "Note",
   "memoDetailNoContent": "No content",
   "calEventDetailTitle": "Event details",
-  "calDetailNone": "None",
   "exportTab": "Export",
   "importTab": "Import",
   "importSourceTitle": "Which app are you importing from?",
-  "importSourceDesc": "Pick your previous app and we'll auto-map the columns",
   "importSourceGroo": "그루 담다",
   "importSourceGrooDesc": "File exported from 그루 담다",
   "importSourceEasybudget": "EasyBudget · Money Manager",
@@ -3581,9 +3093,6 @@
   "importSourceCustomDesc": "Map CSV/Excel yourself",
   "importUploadTitle": "Upload file",
   "importUploadDesc": "Upload a CSV or Excel (.xlsx, .xls) file. Up to 10MB.",
-  "importDropTitle": "Choose a file",
-  "importDropHint": ".csv · .xlsx · .xls supported",
-  "importAnalyzing": "Analyzing…",
   "importNotice": "Imported data is added to existing transactions without overwriting. Check duplicates and errors in the preview.",
   "importFileTitle": "File to import",
   "importRowsDetected": "{total} rows · {valid} valid",
@@ -3651,7 +3160,6 @@
   "importPreviewDesc": "{dup} possible duplicates",
   "importIncome": "Income",
   "importExpense": "Expense",
-  "importDupBadge": "Dup?",
   "importOptionsTitle": "Import options",
   "importOptDupSkip": "Skip duplicate transactions",
   "importOptDupSkipDesc": "Excludes {dup} rows with the same date, amount, and content.",
@@ -3659,13 +3167,11 @@
   "importOptAutoCatDesc": "Missing categories are created automatically.",
   "importPrev": "Back",
   "importDoImport": "Import {count}",
-  "importDoneTitle": "Import complete",
   "importDoneCount": "Imported {count} transactions",
   "importDoneDetail": "{skipped} skipped · {failed} not imported.",
   "importAnother": "Import another file",
   "importStepUpload": "Choose file",
   "importStepMapping": "Map columns",
-  "importStepDone": "Done",
   "exportTabsLabel": "Export and import data",
   "exportSelectAll": "All",
   "exportCountsFailed": "Couldn't load the counts.",
@@ -3761,22 +3267,6 @@
   "txmEmptyMonthDesc": "Browse another month or add your first transaction.",
   "txmToday": "Today",
   "txmYesterday": "Yesterday",
-  "expChipMin": "Min {amount}",
-  "@expChipMin": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "expChipMax": "Max {amount}",
-  "@expChipMax": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "tdmTodayLeft": "{count} to-dos today",
   "@tdmTodayLeft": {
     "placeholders": {
@@ -4033,33 +3523,6 @@
   "ttagColorLabel": "Color",
   "ttagNameLabel": "Name",
   "ttagEmpty": "No tags yet",
-  "ttagDeleteDesc": "{count} to-dos using this tag will become untagged.",
-  "@ttagDeleteDesc": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "iconPickerTitle": "Select icon",
-  "iconPickerSearchHint": "Search icons...",
-  "iconPickerNone": "None",
-  "iconPickerResultCount": "{count} results",
-  "@iconPickerResultCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "iconPickerTotalHint": "{count} total · scroll for more",
-  "@iconPickerTotalHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "smsPasteTitle": "Record from payment text",
   "smsPasteDesc": "Paste a card payment text and we will read the amount, merchant and time to fill in the expense form. You can review it before saving.",
   "smsPasteFieldLabel": "Payment text",
@@ -4165,7 +3628,6 @@
   "namuPriceEmpty": "No current price for this instrument",
   "namuTabDomestic": "Domestic",
   "namuTabOverseas": "Overseas",
-  "namuHoldingsEmpty": "No holdings yet",
   "expFilterMatch": "Condition matching",
   "expFilterMatchAll": "Match all",
   "expFilterMatchAny": "Match any",
@@ -4413,7 +3875,6 @@
   "statsLoadFailedCategory": "Couldn't load spending by category",
   "statsLoadFailedMerchant": "Couldn't load top merchants",
   "statsLoadFailedHeatmap": "Couldn't load spending by day and time",
-  "statsLoadFailedHighlights": "Couldn't load the summary",
   "statsLoadFailedTrend": "Couldn't load the trend",
   "statsLoadFailedCompare": "Couldn't load the comparison",
   "statsLoadFailedWeekday": "Couldn't load spending by weekday",
@@ -4720,7 +4181,6 @@
   "stocksMarketSinglePrice": "Single-price session",
   "stocksMarketHalted": "Temporarily closed",
   "stocksMarketBeforeOpen": "Before open",
-  "stocksFailQuote": "Couldn't load the price",
   "stocksFailToday": "Couldn't load today's quotes",
   "stocksFailInvestor": "Couldn't load investor trading",
   "namuFxUnavailableShort": "No FX rate",
@@ -4847,11 +4307,8 @@
   "recErrCountMin": "Enter 1 or more.",
   "recSaveFailed": "Could not save. Please try again in a moment.",
   "recNoAssets": "There is no account to choose.",
-  "recNoCategoryOfKind": "There are no categories of this type.",
-  "recFromAccount": "From account",
   "recDepositAccount": "Deposit account",
   "recIncomeMethod": "Income method",
-  "recClearValue": "Clear value",
   "expDetailMore": "More",
   "expSplitValue": "Split into {count}",
   "@expSplitValue": {
@@ -4946,7 +4403,6 @@
       }
     }
   },
-  "txfPresetAllTitle": "Choose a preset",
   "txfShowAll": "See all",
   "txfNone": "None",
   "txfNoAccountOption": "No account or card",
@@ -4958,9 +4414,7 @@
   "txfErrInterest": "Interest can't be more than the amount.",
   "txfSplitsLoading": "Loading the split items. Try again in a moment.",
   "txfSaveFailed": "Couldn't save. Please try again in a moment.",
-  "txfCategoryLoadFailed": "Couldn't load categories",
   "txfAssetLoadFailed": "Couldn't load accounts and cards",
-  "txfNoCategoryOfType": "There are no categories of this kind.",
   "txfNoPickableAsset": "No account or card fits this payment method.",
   "txfFxHint": "{local} {code} × {rate} = {krw}",
   "@txfFxHint": {
