@@ -94,6 +94,10 @@ List<String> monthTicks(List<({int year, int month})> rows) {
   ];
 }
 
+/// 좁은 칸(차트 눈금 · 표 · 목록 끝)의 월 · 일 — ko "10. 29."(점 표기, 앞 0 없음), en "Oct 29".
+String monthDayDot(DateTime d) =>
+    localeIsEn() ? DateFormat.MMMd('en').format(d) : '${d.month}. ${d.day}.';
+
 /// 연 · 월 점 표기 — ko "2026. 1."(0 채움 없음), en "Jan 2026".
 String yearMonthDot(DateTime d) =>
     localeIsEn() ? DateFormat.yMMM('en').format(d) : '${d.year}. ${d.month}.';

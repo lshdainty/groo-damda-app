@@ -92,6 +92,35 @@ void main() {
     });
   });
 
+  test('통계 직접 기간 이름 — 올해는 "10월 29일~11월 7일", 다른 해는 양끝 연도(앞 0 · 슬래시 없음)', () {
+    final y = DateTime.now().year;
+    expect(
+      StatsPeriod(
+        seg: StatsSeg.custom,
+        from: DateTime(y, 10, 29),
+        to: DateTime(y, 11, 7),
+      ).label(),
+      '10월 29일~11월 7일',
+    );
+    expect(
+      StatsPeriod(
+        seg: StatsSeg.custom,
+        from: DateTime(y - 1, 12, 29),
+        to: DateTime(y, 1, 7),
+      ).label(),
+      '${y - 1}년 12월 29일~$y년 1월 7일',
+    );
+  });
+
+  test('좁은 칸 월 · 일 — 점 표기 "10. 29."(슬래시 · 앞 0 없음), 영어 "Oct 29"', () {
+    expect(monthDayDot(DateTime(2026, 10, 29)), '10. 29.');
+    expect(monthDayDot(DateTime(2026, 9, 7)), '9. 7.');
+    final prev = Intl.defaultLocale;
+    Intl.defaultLocale = 'en';
+    addTearDown(() => Intl.defaultLocale = prev);
+    expect(monthDayDot(DateTime(2026, 10, 29)), 'Oct 29');
+  });
+
   test('월 눈금 — 해가 섞이면 해를 붙인다(순자산 추이도 같은 규칙)', () {
     expect(monthTicks([(year: 2025, month: 12), (year: 2026, month: 1)]), [
       '2025. 12.',

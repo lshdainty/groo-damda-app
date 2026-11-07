@@ -144,7 +144,8 @@ class StatsPeriod {
   int get days => to.difference(from).inDays + 1;
 
   /// 기간 버튼 글 — 다른 해에 걸친 직접 기간은 "~" 뒤에서만 줄을 바꾼 두 줄("2025-01-01 ~ ⏎ 2026-03-31").
-  String buttonLabel() => spansYears ? '${ymd(from)} ~\n${ymd(to)}' : label();
+  String buttonLabel() =>
+      spansYears ? '${fullDate(from)}~\n${fullDate(to)}' : label();
 
   String label() {
     switch (seg) {
@@ -156,9 +157,8 @@ class StatsPeriod {
       case StatsSeg.year:
         return yearOnly(from);
       case StatsSeg.custom:
-        return spansYears
-            ? '${ymd(from)} ~ ${ymd(to)}'
-            : '${from.month}/${from.day} ~ ${to.month}/${to.day}';
+        // 날짜 규칙 — 올해는 "10월 29일~11월 7일", 해가 섞이면 양끝 연도(앞 0 · 슬래시 표기 없음)
+        return dateRange(from, to);
     }
   }
 
@@ -238,7 +238,7 @@ List<({String label, int income, int expense})> dailyTrendOf(
   final byDate = <String, ({int income, int expense, String label})>{};
   for (var i = 0; i < days; i++) {
     final d = fromDay.add(Duration(days: i));
-    byDate[ymd(d)] = (income: 0, expense: 0, label: '${d.month}/${d.day}');
+    byDate[ymd(d)] = (income: 0, expense: 0, label: monthDayDot(d));
   }
   for (final e in countableTx(exps)) {
     final raw = e.expenseDate ?? '';
