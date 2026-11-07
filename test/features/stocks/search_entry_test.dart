@@ -31,8 +31,14 @@ void main() {
   testWidgets('종목 찾기 입구 — 역할 단추 · 이름 "종목 검색" (입력칸이 아니다)', (t) async {
     final handle = t.ensureSemantics();
     await _pump(t);
+    // 누르는 영역을 넓히는 상자(TouchTarget)가 가장 바깥이라 이름은 그 안의 Semantics 가 단다
     final node = t.getSemantics(
-      find.byKey(const ValueKey('stocks-search-entry')),
+      find
+          .descendant(
+            of: find.byKey(const ValueKey('stocks-search-entry')),
+            matching: find.byType(Semantics),
+          )
+          .first,
     );
     expect(node.label, '종목 검색');
     // ignore: deprecated_member_use

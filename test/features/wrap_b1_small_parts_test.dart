@@ -169,7 +169,9 @@ void main() {
       await tester.pump();
       expect(opened, 1);
       expect(
-        tester.getSemantics(entry),
+        tester.getSemantics(
+          find.descendant(of: entry, matching: find.byType(Semantics)).first,
+        ),
         isSemantics(label: '종목 검색', isButton: true, hasTapAction: true),
       );
       handle.dispose();
