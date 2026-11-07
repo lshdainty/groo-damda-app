@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -195,6 +196,14 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   String? _catError;
   String? _amountError;
 
+  /// 100억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+
   bool get _isEdit => widget.edit != null;
 
   /// 카테고리 예산만 지운다(전체 예산은 밀기에도 없다).
@@ -239,6 +248,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
     final probe = widget.probe;
     if (probe is _DirtyProbe) probe.dirty = () => false;
     _amountCtrl.dispose();
@@ -269,6 +279,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
   Future<void> _onSubmit() async {
     if (_submitting) return;
+    _amountLimit.dismiss();
     final l = AppLocalizations.of(context);
     final amount = parseAmountInput(_amountCtrl.text);
     final catErr = !_isEdit && !_isOverall && _categoryRowId == null
@@ -408,8 +419,10 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               label: _isOverall
                   ? l.budgetOverallCapLabel
                   : l.budgetFormAmountLabel,
-              invalid: _amountError != null,
-              errorMessage: _amountError,
+              invalid: _amountError != null || _amountLimit.over,
+              errorMessage: _amountLimit.over
+                  ? AppLocalizations.of(context).amountTooLarge
+                  : _amountError,
               child: PInput(
                 variant: PInputVariant.underline,
                 controller: _amountCtrl,
@@ -418,7 +431,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 keyboardType: TextInputType.number,
-                inputFormatters: const [AmountInputFormatter()],
+                inputFormatters: _amountLimit.formatters,
                 onChanged: (_) => setState(() => _amountError = null),
               ),
             ),

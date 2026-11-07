@@ -149,12 +149,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Biometrics or screen lock isn\'t available on this device.';
 
   @override
-  String get stateNoData => 'No data';
-
-  @override
-  String get stateError => 'Something went wrong';
-
-  @override
   String get stateEmpty => 'Nothing to show';
 
   @override
@@ -285,7 +279,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notiMarkAllFailed => 'Couldn\'t mark all notifications as read.';
 
   @override
-  String get notiPrefsSaveFailed => 'Couldn\'t save notification settings.';
+  String get notiPrefsSaveFailed =>
+      'Couldn\'t save notification settings. Try again later.';
 
   @override
   String get notiSettingsLoadFailedDesc => 'Please try again in a moment.';
@@ -337,9 +332,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetSummaryTotalBalance => 'Total Balance';
 
   @override
-  String get assetEmpty => 'No assets registered';
-
-  @override
   String get assetCreateFirst => 'Register your first asset';
 
   @override
@@ -350,9 +342,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetTransferAdd => 'Add Transfer';
-
-  @override
-  String get assetTransferEmpty => 'No transfers yet';
 
   @override
   String get assetFee => 'Fee';
@@ -401,9 +390,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetSubtypeOverdraft => 'Overdraft account';
-
-  @override
-  String get assetLoadError => 'Couldn\'t load assets';
 
   @override
   String get assetEmptyState => 'No assets yet';
@@ -526,15 +512,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetEmptyCta => 'Go to manage accounts & cards';
 
   @override
-  String get assetAccountAdded => 'Account added';
-
-  @override
-  String get assetAccountUpdated => 'Account updated';
-
-  @override
-  String get assetAccountDeleted => 'Account deleted';
-
-  @override
   String get assetAccountDelete => 'Delete account';
 
   @override
@@ -647,21 +624,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'The bill is withdrawn from this account on the payment day.';
 
   @override
-  String get assetCardAdded => 'Card added';
-
-  @override
-  String get assetCardUpdated => 'Card updated';
-
-  @override
   String get assetCardDelete => 'Delete card';
 
   @override
   String assetCardDeleteConfirm(String name) {
     return '\"$name\" will be removed from the list. Linked transactions are kept. A deleted asset cannot be restored.';
   }
-
-  @override
-  String get assetCardDeleted => 'Card deleted';
 
   @override
   String get assetCardProduct => 'Card product';
@@ -728,15 +696,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assetDiscontinued => 'Discontinued';
-
-  @override
-  String get assetInvestAdded => 'Investment added';
-
-  @override
-  String get assetInvestUpdated => 'Investment updated';
-
-  @override
-  String get assetInvestDeleted => 'Investment deleted';
 
   @override
   String get assetInvestDelete => 'Delete investment';
@@ -985,7 +944,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tradeHistory => 'Trade log';
 
   @override
-  String get tradeDeleted => 'Trade cancelled';
+  String get tradeDeleted => 'Trade cancelled.';
 
   @override
   String get tradeDeleteTitle => 'Cancel trade';
@@ -1194,11 +1153,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String assetTossValuationFormula(int qty) {
-    return 'Valuation updates in real time as Toss price × $qty shares.';
-  }
-
-  @override
   String get assetHoldingQty => 'Holdings';
 
   @override
@@ -1211,15 +1165,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetTossRealtimeTitle => 'Real-time valuation via Toss';
 
   @override
-  String get assetTossRealtimeDesc =>
-      'Register a ticker and quantity to reflect valuation live as Toss price × quantity.';
-
-  @override
   String get assetTapToChange => 'Tap to change';
-
-  @override
-  String get assetStockSearchHint =>
-      'Search ticker or code (e.g. Samsung Elec, 005930)';
 
   @override
   String get stockSecurityTypeIndex => 'Index';
@@ -1391,9 +1337,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No payment account is linked, so the usage is settled without a transfer.';
 
   @override
-  String get assetPaymentRecorded => 'Payment recorded';
-
-  @override
   String get assetBillingLoadError => 'Couldn\'t load billing info';
 
   @override
@@ -1485,11 +1428,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetNoUsage => 'No usage history yet.';
 
   @override
-  String assetBillingPeriod(String start, String end) {
-    return 'Usage $start–$end';
-  }
-
-  @override
   String assetMonthlyPaymentDay(int day) {
     return 'Day $day each month';
   }
@@ -1505,9 +1443,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todoTitle => 'Todos';
-
-  @override
-  String get todoEmpty => 'No todos';
 
   @override
   String get todoCreateFirst => 'Create your first todo';
@@ -1574,9 +1509,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calAgendaView => 'Agenda';
-
-  @override
-  String get calNoEvents => 'No events';
 
   @override
   String get calEventAdd => 'Add event';
@@ -1749,12 +1681,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get calEventAdded => 'Event added';
-
-  @override
-  String get calEventUpdated => 'Event updated';
-
-  @override
   String get calLabelsTitle => 'Calendar labels';
 
   @override
@@ -1894,7 +1820,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calJoinedCalendar(String name) {
-    return 'Joined the \"$name\" calendar';
+    return 'Joined the \"$name\" calendar.';
   }
 
   @override
@@ -1907,10 +1833,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calCalendarUpdated => 'Calendar updated';
 
   @override
-  String get calInviteCodeRegenerated => 'New invite code created';
+  String get calInviteCodeRegenerated => 'New invite code created.';
 
   @override
-  String get calInviteCodeCopied => 'Invite code copied';
+  String get calInviteCodeCopied => 'Invite code copied.';
 
   @override
   String get calRemoveMember => 'Remove member';
@@ -1978,7 +1904,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calRemoveMemberFailed => 'Couldn\'t remove the member.';
 
   @override
-  String get calColorChangeFailed => 'Couldn\'t change the color.';
+  String get calColorChangeFailed =>
+      'Couldn\'t change the color. Try again later.';
 
   @override
   String get calRoleChangeFailed => 'Couldn\'t change the permission.';
@@ -2032,7 +1959,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calJoinFailed => 'Could not join. Please try again in a moment.';
 
   @override
-  String get calUpdateFailed => 'Couldn\'t change the calendar visibility.';
+  String get calUpdateFailed =>
+      'Couldn\'t change the calendar visibility. Try again later.';
 
   @override
   String get importExecuteFailed => 'Couldn\'t import the data.';
@@ -2082,15 +2010,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashTrendTitle => 'Last 6 months';
-
-  @override
-  String get dashEmptyTransactions => 'No recent transactions';
-
-  @override
-  String get dashEmptyEvents => 'No upcoming events';
-
-  @override
-  String get dashEmptyTodos => 'No pending todos';
 
   @override
   String get dashAddTx => 'Add transaction';
@@ -2219,9 +2138,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expFilterTransfer => 'Transfer';
-
-  @override
-  String get expEmpty => 'No transactions';
 
   @override
   String get expEmptyDescription => 'Add your first transaction to get started';
@@ -2548,7 +2464,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetFormErrAmount => 'Enter the budget.';
 
   @override
-  String get amountTooLarge => 'Enter an amount up to 10 billion won.';
+  String get amountTooLarge => 'Amount can be up to 10 billion won.';
+
+  @override
+  String amountTooLargeAt(String limit) {
+    return 'Amount can be up to $limit.';
+  }
+
+  @override
+  String get amountLimitBalance => '100 billion won';
 
   @override
   String get budgetPickUsed => 'Already has a budget this month';
@@ -2566,12 +2490,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetPickLoadFailDesc => 'Please try again in a moment.';
-
-  @override
-  String get budgetUpdated => 'Budget updated';
-
-  @override
-  String get budgetAdded => 'Budget added';
 
   @override
   String get budgetActionFailed => 'Failed';
@@ -2608,9 +2526,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetMonthlyLimit => 'Monthly budget limit';
-
-  @override
-  String get budgetLoadError => 'Couldn\'t load budget';
 
   @override
   String get budgetSelectMonth => 'Select month';
@@ -2971,9 +2886,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardNoBenefits => 'No registered benefits.';
 
   @override
-  String get cardPickerNoMatch => 'No matching cards';
-
-  @override
   String get categoryManageTitle => 'Manage categories';
 
   @override
@@ -3038,12 +2950,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryMove => 'Move';
 
   @override
-  String get categoryUpdated => 'Category updated';
-
-  @override
-  String get categoryAdded => 'Category added';
-
-  @override
   String get categoryActionFailed => 'Failed';
 
   @override
@@ -3069,7 +2975,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryMoveTxFailed => 'Couldn\'t move the transactions.';
 
   @override
-  String get categoryReorderFailed => 'Couldn\'t change the order.';
+  String get categoryReorderFailed =>
+      'Couldn\'t change the order. Try again later.';
 
   @override
   String get todoSaveFailed => 'Couldn\'t save the to-do.';
@@ -3402,10 +3309,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchStartTitle => 'Start Dutch Pay';
 
   @override
-  String get dutchFromTxDesc =>
-      'Create a Dutch Pay settlement from this transaction. Send payment requests to participants and track settlement progress.';
-
-  @override
   String get dutchSplitMethod => 'Split method';
 
   @override
@@ -3430,9 +3333,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchIncludeMyself => 'Include myself in the split';
 
   @override
-  String get dutchIncludeMyselfDesc => 'Your share is calculated too';
-
-  @override
   String get dutchIncludeMyselfOffDesc =>
       'You paid in full, collect only others\' shares';
 
@@ -3446,16 +3346,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dutchRequestMsgPlaceholder => 'Add a note to send to participants';
 
   @override
-  String dutchShortBy(String amount) {
-    return 'The total is $amount원 short.';
-  }
-
-  @override
-  String dutchOverBy(String amount) {
-    return 'The total exceeds by $amount원.';
-  }
-
-  @override
   String get dutchCreated => 'Settlement created';
 
   @override
@@ -3463,9 +3353,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expTransfersLoadError => 'Couldn\'t load the transfers.';
-
-  @override
-  String get expEmptyMonth => 'No transactions this month';
 
   @override
   String get expEmptyDay => 'No transactions on this day';
@@ -3496,24 +3383,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expAddShort => 'Add';
 
   @override
-  String get expTransferDone => 'Transfer completed';
-
-  @override
   String get expActionFailed => 'Failed';
-
-  @override
-  String get expUpdated => 'Transaction updated';
-
-  @override
-  String get expAdded => 'Transaction added';
 
   @override
   String expDeleteConfirm(String name) {
     return 'Delete the \"$name\" transaction? The linked asset balance will be adjusted too. A deleted transaction cannot be restored.';
   }
-
-  @override
-  String get expDeleted => 'Transaction deleted';
 
   @override
   String get expSplitMismatch => 'Split doesn\'t match the amount';
@@ -3598,9 +3473,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expPresetLock => 'Preset lock';
 
   @override
-  String get expNoCategoryForType => 'No categories for this type';
-
-  @override
   String get expSubcategory => 'Subcategory';
 
   @override
@@ -3637,6 +3509,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expWithdrawAccount => 'From account';
+
+  @override
+  String get expTransferToAccount => 'To account';
 
   @override
   String get expSelect => 'Select';
@@ -3730,9 +3605,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expAddAmount => 'Extra amount';
 
   @override
-  String get expSplitSaved => 'Split saved';
-
-  @override
   String get expSplitRemoveConfirm =>
       'This clears all split items for this transaction. Cleared items cannot be restored.';
 
@@ -3788,10 +3660,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expRecommended => 'Recommended';
 
   @override
-  String get expSplitDesc =>
-      'Record one payment split by category and item. e.g. Groceries and household items bought together at a mart.';
-
-  @override
   String get expOriginalTx => 'Original transaction';
 
   @override
@@ -3813,8 +3681,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportTitle => 'Export data';
 
   @override
-  String exportShareText(String start, String end) {
-    return 'Data export ($start ~ $end)';
+  String exportShareText(String range) {
+    return 'Data export ($range)';
   }
 
   @override
@@ -3991,19 +3859,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescStocks => 'Quotes · Holdings · Watchlist · Orders';
 
   @override
-  String get moreDescBudget => 'Monthly · By category';
+  String get moreDescBudget => 'Monthly budget · per-category limits';
 
   @override
   String get moreDescSavingGoal => 'Goals · Progress';
 
   @override
-  String get moreDescStats => 'Category · Trends · Comparison';
+  String get moreDescStats => 'Category · Trends · Compare';
 
   @override
   String get moreDescRecurring => 'Subscriptions · Fixed costs';
 
   @override
-  String get moreDescAccountCard => 'Add · Edit accounts & cards';
+  String get moreDescAccountCard => 'Manage accounts and cards';
 
   @override
   String get moreDescCalendar => 'Events · Recurring · Reminders';
@@ -4033,13 +3901,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescSettings => 'All settings menu';
 
   @override
-  String get moreDescNotifications => 'Push · Do not disturb';
+  String get moreDescNotifications => 'Push · email · do not disturb';
 
   @override
   String get moreDescExport => 'CSV · Excel · JSON';
 
   @override
   String get moreDescAccount => 'Profile · Security · Subscription';
+
+  @override
+  String get settingsDescCategory =>
+      'Add · edit · delete expense and income categories';
+
+  @override
+  String get settingsDescAccountCard => 'Manage accounts and cards';
+
+  @override
+  String get settingsDescBudget => 'Monthly budget · per-category limits';
+
+  @override
+  String get settingsDescSavingGoal => 'Manage goals and track progress';
+
+  @override
+  String get settingsDescRecurring =>
+      'Subscriptions · fixed payments · regular income in one place';
+
+  @override
+  String get settingsDescPreset => 'Fill frequent entries with a single tap';
+
+  @override
+  String get settingsDescTodoTag => 'Manage todo tag names & colors';
+
+  @override
+  String get settingsDescMemoTag => 'Manage memo tag names & colors';
+
+  @override
+  String get settingsDescCalendarLabel =>
+      'Manage labels shared across all calendars';
+
+  @override
+  String get settingsDescCalendarShare =>
+      'Create multiple calendars and share with members';
+
+  @override
+  String get settingsDescAppearance =>
+      'Theme · language · region · default currency';
+
+  @override
+  String get settingsDescNotifications =>
+      'Payment due and budget overage alerts';
+
+  @override
+  String get settingsDescExport => 'Back up data as CSV · Excel · JSON';
+
+  @override
+  String get settingsDescAccount => 'Profile · security · logout';
+
+  @override
+  String get settingsDescPrivacyPolicy =>
+      'Data collected · retention · your rights';
+
+  @override
+  String get settingsDescGuide => 'How to use each screen · FAQ';
 
   @override
   String get moreSearchHint => 'Search menu';
@@ -4096,7 +4019,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsMenuPrivacyPolicy => 'Privacy Policy';
 
   @override
-  String get settingsPrivacyOpenFailed => 'Couldn\'t open the privacy policy.';
+  String get settingsPrivacyOpenFailed =>
+      'Couldn\'t open the privacy policy. Try again later.';
 
   @override
   String get settingsGroupHelp => 'Help';
@@ -4105,7 +4029,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsMenuGuide => 'User guide';
 
   @override
-  String get settingsGuideOpenFailed => 'Couldn\'t open the user guide.';
+  String get settingsGuideOpenFailed =>
+      'Couldn\'t open the user guide. Try again later.';
 
   @override
   String get appearanceTitle => 'Display settings';
@@ -4154,6 +4079,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hideAmountsSaveFailed => 'Couldn\'t save the amount hiding.';
+
+  @override
+  String get hideAmountsSaveFailedToast =>
+      'Couldn\'t save the amount hiding. Try again later.';
 
   @override
   String get hideAmountsDiscardTitle => 'Leave without saving';
@@ -4328,9 +4257,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceHideAmount => 'Hide amounts';
 
   @override
-  String get appearanceHideAmountDesc => 'Display all amounts as ••••';
-
-  @override
   String get appearanceRegion => 'Region';
 
   @override
@@ -4364,7 +4290,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t load the default currency';
 
   @override
-  String get appearanceSaveFailed => 'Couldn\'t change the setting.';
+  String get appearanceSaveFailed =>
+      'Couldn\'t change the setting. Try again later.';
 
   @override
   String get passwordChanged => 'Changed your password.';
@@ -4736,7 +4663,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notiBudgetDesc(int threshold) {
-    return 'Category budget reaches $threshold%·100%';
+    return 'Category budget reaches $threshold% · 100%';
   }
 
   @override
@@ -4853,7 +4780,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Transactions already recorded stay as they are. A deleted preset cannot be restored.';
 
   @override
-  String get presetDeleteFailed => 'Could not delete the preset';
+  String get presetDeleteFailed => 'Could not delete the preset.';
 
   @override
   String get presetSortUsed => 'Frequent';
@@ -5042,9 +4969,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringDeleteFailed => 'Delete failed';
 
   @override
-  String get recurringLoadError => 'Failed to load recurring transactions';
-
-  @override
   String get recurringAllList => 'All';
 
   @override
@@ -5139,17 +5063,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringSaveSubmit => 'Save recurring';
 
   @override
-  String get recurringUpdated => 'Recurring setting updated';
-
-  @override
-  String get recurringSaved => 'Recurring setting saved';
-
-  @override
   String get recurringSaveFailed => 'Save failed';
-
-  @override
-  String get recurringIntro =>
-      'Automatically repeat this transaction on a set cycle. Great for subscriptions, rent, regular donations, etc.';
 
   @override
   String get recurringFrequencyLabel => 'Frequency';
@@ -5159,10 +5073,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurringDayOfMonthLabel => 'Day of month';
-
-  @override
-  String get recurringDayNote =>
-      'Months without this day are handled on the last day';
 
   @override
   String get recurringEndLabel => 'End';
@@ -5192,22 +5102,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringAutoLog => 'Auto-record';
 
   @override
-  String get recurringAutoLogDesc =>
-      'Automatically add the transaction on the date';
-
-  @override
   String get recurringNotifyDayBefore => 'Day-before alert';
-
-  @override
-  String get recurringNotifyDesc =>
-      'Send an alert the day before the payment/transfer';
 
   @override
   String get recurringNextDates => 'Next dates';
 
   @override
   String get recurringSourceSub =>
-      'For subscriptions·rent and other regular payments';
+      'For subscriptions · rent and other regular payments';
 
   @override
   String recurringStartFrom(String date) {
@@ -5340,7 +5242,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savingGoalErrAmountTooLarge =>
-      'The target amount can be up to 10 billion won.';
+      'Target amount can be up to 10 billion won.';
 
   @override
   String get savingGoalErrCurrentExceeds =>
@@ -5914,11 +5816,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stocksSearchHint =>
-      'Search by name or symbol (KR + US·CN·JP·HK·VN)';
+      'Stock name or code (KR + US · CN · JP · HK · VN)';
 
   @override
   String get stocksPriceUnavailable =>
-      'Price unavailable via Toss (KR·US only)';
+      'Price unavailable via Toss (KR · US only)';
 
   @override
   String get stocksRankingLoading => 'Loading rankings';
@@ -5945,14 +5847,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stocksWatchGroupSaveFail => 'Couldn\'t save the group.';
 
   @override
-  String get stocksWatchAddFail => 'Couldn\'t add it to your watchlist.';
+  String get stocksWatchAddFail =>
+      'Couldn\'t add it to your watchlist. Try again later.';
 
   @override
   String get stocksWatchGroupDeleteFail => 'Couldn\'t delete the group.';
 
   @override
   String get stocksWatchRemoveFail =>
-      'Couldn\'t remove it from your watchlist.';
+      'Couldn\'t remove it from your watchlist. Try again later.';
 
   @override
   String get stocksMarketToggleKr => 'KR';
@@ -6042,9 +5945,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todoEmptyAll => 'No todos';
 
   @override
-  String get todoEmptyDoneHint => 'Completed todos appear here.';
-
-  @override
   String get todoEmptyAddHint => 'Add one quickly using the field above.';
 
   @override
@@ -6066,15 +5966,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todoRegisteredProjects => 'Projects';
 
   @override
-  String get todoNoProjects => 'No projects';
-
-  @override
   String get todoDeleteProjectTitle => 'Delete project';
-
-  @override
-  String todoDeleteProjectConfirm(String name) {
-    return 'Delete project \"$name\"? Linked todos will be set to no project.';
-  }
 
   @override
   String get todoNewTag => 'Add tag';
@@ -6084,9 +5976,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todoRegisteredTags => 'Tags';
-
-  @override
-  String get todoNoTags => 'No tags';
 
   @override
   String get todoDeleteTagTitle => 'Delete tag';
@@ -6356,11 +6245,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memoSaveFailed => 'Could not save. Please try again in a moment.';
 
   @override
-  String get memoDeleteFailed =>
-      'Could not delete. Please try again in a moment.';
+  String get memoSaveFailedToast => 'Couldn\'t save.';
 
   @override
-  String get memoPinFailed => 'Couldn\'t change the pin.';
+  String get memoDeleteFailed => 'Couldn\'t delete.';
+
+  @override
+  String get memoPinFailed => 'Couldn\'t change the pin. Try again later.';
 
   @override
   String memoModifiedAt(String time) {
@@ -6767,7 +6658,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String categoryMoveTxDone(int count) {
-    return 'Moved $count items';
+    return 'Moved $count items.';
   }
 
   @override
@@ -7467,9 +7358,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get iconPickerNone => 'None';
 
   @override
-  String get iconPickerNoResults => 'No results found';
-
-  @override
   String iconPickerResultCount(int count) {
     return '$count results';
   }
@@ -7652,7 +7540,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subBrokerKeyNotice(String broker) {
-    return 'Your key is stored encrypted on the server and used only by you. Issue one at the $broker developer center.';
+    return 'Your key is stored encrypted on the server and used only by you. Get yours from the $broker developer center.';
   }
 
   @override
@@ -7967,8 +7855,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsFixedBulkTitle => 'Organize fixed items';
 
   @override
-  String statsFixedBulkDesc(String start, String end) {
-    return 'Transactions from $start to $end. Items with the same name are grouped. Balances don\'t change, only how statistics classify them.';
+  String statsFixedBulkDesc(String range) {
+    return 'Transactions in $range. Items with the same name are grouped. Balances don\'t change, only how statistics classify them.';
   }
 
   @override
@@ -8543,7 +8431,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tdmLoadFailedDesc => 'Please try again in a moment.';
 
   @override
-  String get todoToggleFailed => 'Couldn\'t update the to-do.';
+  String get todoToggleFailed => 'Couldn\'t update the to-do. Try again later.';
 
   @override
   String get todoDetailOverdue => 'Overdue';
@@ -9131,17 +9019,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recToastPaused(String name) {
-    return 'Paused $name';
+    return 'Paused $name.';
   }
 
   @override
   String recToastResumed(String name) {
-    return 'Turned $name back on';
+    return 'Turned $name back on.';
   }
 
   @override
   String recToastDeleted(String name) {
-    return 'Deleted the $name recurring setting';
+    return 'Deleted the $name recurring setting.';
   }
 
   @override
@@ -9390,9 +9278,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txfEntryRequired => 'Enter an amount.';
-
-  @override
-  String get txfAmountTooLarge => 'Amount can be up to 10 billion won.';
 
   @override
   String txfCurrencyChip(String code) {

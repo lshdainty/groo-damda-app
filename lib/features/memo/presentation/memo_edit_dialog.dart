@@ -341,7 +341,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
     _SaveArgs args,
   ) {
     snack?.show(
-      message: l.memoSaveFailed,
+      message: l.memoSaveFailedToast,
       tone: PSnackbarTone.critical,
       action: PSnackbarAction(
         label: l.actionRetry,

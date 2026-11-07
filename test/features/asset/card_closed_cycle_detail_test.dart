@@ -782,8 +782,8 @@ void main() {
       expect(findText('결제 취소'), findsOneWidget);
       await tester.tap(findText('결제 취소'));
       await tester.pumpAndSettle();
-      expect(findTextContaining('2026-09-05에 낸'), findsOneWidget);
-      expect(findTextContaining('2026-09-12에 낸'), findsNothing);
+      expect(findTextContaining('9월 5일에 낸'), findsOneWidget);
+      expect(findTextContaining('9월 12일에 낸'), findsNothing);
     });
 
     testWidgets('서버가 닫힌 회차로 내려 준 회차의 결제는 고르지 않는다', (tester) async {

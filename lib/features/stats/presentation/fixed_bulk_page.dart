@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
@@ -216,12 +217,7 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
               0,
             ),
             child: Text(
-              keepAll(
-                l.statsFixedBulkDesc(
-                  widget.range.startDate,
-                  widget.range.endDate,
-                ),
-              ),
+              keepAll(l.statsFixedBulkDesc(_rangeText(widget.range))),
               style: PTypography.t3.copyWith(color: c.fgNeutralMuted),
             ),
           ),
@@ -293,4 +289,14 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
       ),
     );
   }
+}
+
+/// 설명 줄의 기간 — 날짜 규칙 + 구간 기호는 붙여 로케일 문구(ko "10월 1일~10월 31일" · en "Oct 1–31"). 못 읽으면 서버 값 그대로.
+String _rangeText(DateRange r) {
+  final a = DateTime.tryParse(r.startDate);
+  final b = DateTime.tryParse(r.endDate);
+  if (a == null || b == null) {
+    return '${r.startDate}${rangeSeparator()}${r.endDate}';
+  }
+  return dateRange(a, b);
 }

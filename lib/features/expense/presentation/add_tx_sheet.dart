@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
@@ -250,6 +251,26 @@ class TxFormFlow extends ConsumerStatefulWidget {
 class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   late TxInput _input;
   _S _step = _S.one;
+
+  /// 금액 칸마다 100억 상한 안내 — 칸(컨트롤러)별로 하나씩 만든다(금액 · 원화 · 수수료 · 이자 · 프리셋 금액).
+  final _limits = <TextEditingController, AmountLimitGuard>{};
+  AmountLimitGuard _limitFor(TextEditingController c) => _limits.putIfAbsent(
+    c,
+    () => AmountLimitGuard(
+      c,
+      onChanged: () {
+        if (mounted) setState(() {});
+      },
+    ),
+  );
+
+  /// 저장 · 다음을 눌렀다 — 거절 때 선 상한 오류를 내려놓고 폼 검증 오류가 자리를 받는다(가장 최근 일).
+  void _dismissLimits() {
+    for (final g in _limits.values) {
+      g.dismiss();
+    }
+  }
+
   _S _returnTo = _S.one;
 
   /// 프리셋 저장 단계를 연 단계 — 금액 단계가 끝나도 이 값은 그대로다(N2).
@@ -360,6 +381,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   void dispose() {
     widget.probe.dirty = () => false;
     widget.probe.interceptClose = () => false;
+    for (final g in _limits.values) {
+      g.dispose();
+    }
     _input.dispose();
     _amountFocus.dispose();
     _merchantFocus.dispose();
@@ -499,6 +523,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       'presetAmount': _presetAmountCtrl.text,
     };
     _subSig = _snap!.values.join('|');
+    _dismissLimits();
     setState(() => _step = step);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _step == step) (focus ?? _subFocus).requestFocus();
@@ -1066,6 +1091,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   // ── 검증 · 저장 ─────────────────────────────────────────
   _Errs _validate() {
+    _dismissLimits();
     final l = AppLocalizations.of(context);
     final c = _input;
     final e = _Errs();
@@ -1079,7 +1105,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     if (foreign && e.amount == null && c.amountInt <= 0) {
       e.fx = l.txfErrFx;
     }
-    if (c.amountInt > kAmountMax) e.krw = l.txfAmountTooLarge;
+    if (c.amountInt > kAmountMax) e.krw = l.amountTooLarge;
     if (isTransfer) {
       if (c.assetRowId == null) e.from = l.txfErrFrom;
       if (c.toAssetRowId == null || c.toAssetRowId == c.assetRowId) {
@@ -1101,6 +1127,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   /// [다음] — 금액이 비면 칸 아래 오류, 아니면 2단계로.
   void _next() {
+    _dismissLimits();
     final l = AppLocalizations.of(context);
     final c = _input;
     final foreign = c.isForeignTx;
@@ -1927,12 +1954,16 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             decimal: foreign,
             formatters: foreign
                 ? const [DecimalFormatter(maxFrac: 2)]
-                : kWonFormatters,
+                : _limitFor(c.amountCtrl).formatters,
             // 이체에는 통화 칩이 없다 — 뒤 글자는 보내는 계좌 통화(I-13 — 원화 "원", USD 계좌면 "$")
             suffixText: c.type == 'TRANSFER' ? _transferUnit : wonUnit(),
             chip: c.type == 'TRANSFER' ? null : _currencyChip(l),
-            invalid: _errs.amount != null,
-            errorMessage: _errs.amount,
+            invalid:
+                _errs.amount != null ||
+                (!foreign && _limitFor(c.amountCtrl).over),
+            errorMessage: !foreign && _limitFor(c.amountCtrl).over
+                ? l.amountTooLarge
+                : _errs.amount,
             // 프리셋으로 계좌가 정해진 이체 — 칸 아래 원화 어림 · 받는 금액(읽기 전용)
             hintMessage: _emptyPresetName == null
                 ? _transferHint()
@@ -2541,7 +2572,11 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         decimal: foreign,
         formatters: foreign
             ? const [DecimalFormatter(maxFrac: 2)]
-            : kWonFormatters,
+            : _limitFor(ctrl).formatters,
+        invalid: !foreign && _limitFor(ctrl).over,
+        errorMessage: !foreign && _limitFor(ctrl).over
+            ? l.amountTooLarge
+            : null,
         // 이체 금액은 보내는 계좌 통화(I-13) — 칸 뒤 글자 · 칸 아래 원화 어림 · 받는 금액
         suffixText: !presetAmount && c.type == 'TRANSFER'
             ? _transferUnit
@@ -2604,7 +2639,11 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         controller: isFee ? c.feeCtrl : c.interestCtrl,
         focusNode: _subFocus,
         semanticLabel: isFee ? l.expFee : l.expInterest,
-        formatters: kWonFormatters,
+        formatters: _limitFor(isFee ? c.feeCtrl : c.interestCtrl).formatters,
+        invalid: _limitFor(isFee ? c.feeCtrl : c.interestCtrl).over,
+        errorMessage: _limitFor(isFee ? c.feeCtrl : c.interestCtrl).over
+            ? l.amountTooLarge
+            : null,
         // 수수료 · 이자도 보내는 계좌 통화다(I-13) — 뒤 글자가 그 통화
         suffixText: _transferUnit,
         hintMessage: isFee

@@ -341,7 +341,7 @@ void main() {
       expect(find.byKey(const ValueKey('tx-detail-name')), findsOneWidget);
       // 머리와 같은 값 두 번 — 키-값 줄에 금액 · 날짜 · 시간이 없다
       expect(findText('금액'), findsNothing);
-      expect(findText('날짜·시간'), findsNothing);
+      expect(findText('날짜 · 시간'), findsNothing);
       expect(findText('메모'), findsNothing, reason: '값이 없는 줄은 그리지 않는다');
       expect(findText('쇼핑 · 가전·가구'), findsOneWidget);
     });

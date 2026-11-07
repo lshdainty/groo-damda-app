@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event_detail_rules.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event_form_rules.dart';
@@ -13,6 +14,7 @@ import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_range.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 
 const double _rowIcon = 22;
@@ -74,7 +76,8 @@ class CalendarEventDetailBody extends StatelessWidget {
         Widget when({
           required String title,
           required IconData icon,
-          required List<String> pieces,
+          List<String> pieces = const [],
+          Widget? range,
         }) => PListItem(
           title: title,
           prefix: Icon(icon, size: _rowIcon),
@@ -84,13 +87,26 @@ class CalendarEventDetailBody extends StatelessWidget {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.center,
               spacing: PSpacing.x2,
-              children: [for (final p in pieces) Text(keepAll(p))],
+              children: [
+                for (final p in pieces)
+                  Text(keepAll(p), textAlign: TextAlign.end),
+                // 여러 날 종일 — 한 글, 줄은 구간 기호 뒤가 첫째 자리(KeepAllRange)
+                ?range,
+              ],
             ),
           ),
         );
 
-        final startDay = formatDateValue(e.start, today);
-        final endDay = formatDateValue(e.end, today);
+        // 한쪽이라도 올해가 아니면 양끝에 연도를 붙인다(공용 dateRange 와 같은 규칙) — 기준 연도를 0 으로 둬 둘 다 붙게 한다
+        final crossYear =
+            e.isAllDayBool &&
+            (e.start.year != today.year || e.end.year != today.year) &&
+            !(e.start.year == e.end.year &&
+                e.start.month == e.end.month &&
+                e.start.day == e.end.day);
+        final yearBase = crossYear ? DateTime(0) : today;
+        final startDay = formatDateValue(e.start, crossYear ? yearBase : today);
+        final endDay = formatDateValue(e.end, crossYear ? yearBase : today);
         final duration = calendarDurationText(l, e);
         final multiDay =
             !(e.start.year == e.end.year &&
@@ -152,7 +168,15 @@ class CalendarEventDetailBody extends StatelessWidget {
                   when(
                     title: l.calAllDay,
                     icon: LucideIcons.sun,
-                    pieces: [startDay, if (multiDay) '~ $endDay'],
+                    // 여러 날은 한 글 "10월 25일 (토)~10월 27일 (월)" — 구간 기호 앞뒤를 붙이고 기호 뒤에서만 줄을 바꾼다
+                    pieces: multiDay ? const [] : [startDay],
+                    range: multiDay
+                        ? KeepAllRange(
+                            from: startDay,
+                            separator: rangeSeparator(),
+                            to: endDay,
+                          )
+                        : null,
                   )
                 else ...[
                   when(

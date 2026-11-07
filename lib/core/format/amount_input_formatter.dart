@@ -12,10 +12,15 @@ import 'package:groo_damda_app/core/format/amount_limits.dart';
 ///
 /// 저장할 때는 [parseAmountInput] 으로 쉼표를 떼고 읽는다. 처음 값은 [formatAmountInput] 으로 쉼표를 찍어 넣는다.
 class AmountInputFormatter extends TextInputFormatter {
-  const AmountInputFormatter({this.max = kAmountMax});
+  const AmountInputFormatter({this.max = kAmountMax, this.onLimit});
 
   /// 넣을 수 있는 가장 큰 값 — 기본은 거래 · 예산 · 목표 상한(100억).
   final int max;
+
+  /// 상한 때문에 입력이 막혔는지 알린다 — 넘는 글자를 받지 않으면 `true`, 그 뒤 상한 안의 입력을 받으면 `false`.
+  /// 막기만 하고 말이 없으면 눌러도 안 써지는 칸으로 보인다. 칸 아래에 "금액은 100억원까지 입력할 수 있어요."
+  /// (오류, 다음 유효한 입력에서 사라진다)를 띄우는 데 쓴다. 칸이 가진 상태로 두고 formatter 는 한 번만 만든다.
+  final void Function(bool exceeded)? onLimit;
 
   @override
   TextEditingValue formatEditUpdate(
@@ -23,11 +28,18 @@ class AmountInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final digits = _stripZeros(_digitsOf(newValue.text));
-    if (digits.isEmpty) return const TextEditingValue();
+    if (digits.isEmpty) {
+      onLimit?.call(false);
+      return const TextEditingValue();
+    }
 
-    if (_exceeds(digits) &&
-        !_shrinks(_stripZeros(_digitsOf(oldValue.text)), digits)) {
-      return oldValue;
+    if (_exceeds(digits)) {
+      if (!_shrinks(_stripZeros(_digitsOf(oldValue.text)), digits)) {
+        onLimit?.call(true);
+        return oldValue;
+      }
+    } else {
+      onLimit?.call(false);
     }
 
     final text = _group(digits);

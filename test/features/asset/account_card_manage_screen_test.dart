@@ -229,14 +229,14 @@ void main() {
   testWidgets('불러오는 중 → 스켈레톤(오류 글 없음) · 상단 바는 그대로', (tester) async {
     final never = Completer<List<Asset>>();
     await _pump(tester, load: () => never.future);
-    expect(findPlain('계좌·카드를 불러오지 못했어요'), findsNothing);
+    expect(findPlain('계좌 · 카드를 불러오지 못했어요'), findsNothing);
     expect(findText('추가'), findsOneWidget, reason: '상단 바는 그대로 있다');
   });
 
   testWidgets('실패 → Result Section + 다시 시도 · 서버 원문을 그리지 않는다', (tester) async {
     await _pump(tester, load: () async => throw Exception('RAW_SERVER_TEXT'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(findPlain('계좌·카드를 불러오지 못했어요'), findsOneWidget);
+    expect(findPlain('계좌 · 카드를 불러오지 못했어요'), findsOneWidget);
     expect(findPlain('다시 시도'), findsOneWidget);
     expect(findTextContaining('RAW_SERVER_TEXT'), findsNothing);
   });

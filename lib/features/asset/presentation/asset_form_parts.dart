@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/features/asset/presentation/asset_kind.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -169,7 +170,7 @@ class AssetMemoField extends StatelessWidget {
 /// 한도 상한(`kBalanceMax`)이다. 도움말 · 안내는 Field 설명이다(여러 줄이면 줄바꿈으로 잇는다).
 ///
 /// [descriptionIcon] 은 설명 앞 아이콘(한도 초과 안내의 경고) — 칸을 오류로 칠하지 않는다(저장을 막지 않는 안내).
-class AssetAmountField extends StatelessWidget {
+class AssetAmountField extends StatefulWidget {
   const AssetAmountField({
     super.key,
     required this.label,
@@ -194,23 +195,50 @@ class AssetAmountField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
 
   @override
+  State<AssetAmountField> createState() => _AssetAmountFieldState();
+}
+
+class _AssetAmountFieldState extends State<AssetAmountField> {
+  /// 1,000억을 넘겨 입력을 막으면 칸 아래 오류 — 지금 값에서 나온다(상한 안이 되면 사라진다).
+  late final _limit = AmountLimitGuard(
+    widget.controller,
+    max: kBalanceMax,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+
+  @override
+  void dispose() {
+    _limit.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return PField(
-      label: label,
-      indicator: optional ? PFieldIndicator.optional : PFieldIndicator.none,
-      readOnly: readOnly,
-      description: description,
-      descriptionIcon: descriptionIcon,
+      label: widget.label,
+      indicator: widget.optional
+          ? PFieldIndicator.optional
+          : PFieldIndicator.none,
+      readOnly: widget.readOnly,
+      description: widget.description,
+      descriptionIcon: widget.descriptionIcon,
+      invalid: _limit.over,
+      errorMessage: _limit.over
+          ? l.amountTooLargeAt(l.amountLimitBalance)
+          : null,
       child: PInput(
-        key: inputKey,
-        controller: controller,
+        key: widget.inputKey,
+        controller: widget.controller,
         placeholder: '0',
-        suffixText: unit,
+        suffixText: widget.unit,
         tabularFigures: true,
-        readOnly: readOnly,
+        readOnly: widget.readOnly,
         keyboardType: TextInputType.number,
-        inputFormatters: const [AmountInputFormatter(max: kBalanceMax)],
-        onChanged: onChanged,
+        inputFormatters: _limit.formatters,
+        onChanged: widget.onChanged,
       ),
     );
   }

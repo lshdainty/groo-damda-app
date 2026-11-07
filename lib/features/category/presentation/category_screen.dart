@@ -148,7 +148,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
       await ref.read(categoriesProvider.future);
     } catch (e) {
       debugPrint('reorderCategories failed: $e');
-      // 낙관 순서는 finally 에서 걷혀 서버 순서로 되돌아간다 — 스낵바 한 문장, 다시 시도 없음.
+      // 낙관 순서는 finally 에서 걷혀 서버 순서로 되돌아간다 — 스낵바 두 문장("… 잠시 뒤 다시 시도해주세요."), 다시 시도 버튼 없음.
       if (mounted) {
         PSnackbar.maybeOf(context)?.show(
           message: AppLocalizations.of(context).categoryReorderFailed,

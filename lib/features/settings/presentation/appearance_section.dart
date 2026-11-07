@@ -114,7 +114,7 @@ class AppearanceSection extends ConsumerWidget {
         .patch(fields, optimistic: optimistic, silent: true);
     if (outcome != WriteOutcome.done && context.mounted) {
       // 바로 바뀌는 값 — 실패면 낙관 값은 되돌았다. 응답을 못 받았으면 되돌리지 않고 서버 값을 다시 받는 중이다(판단 ②).
-      // 스낵바 한 문장, 다시 시도 없음.
+      // 실패는 스낵바 두 문장("… 잠시 뒤 다시 시도해주세요."), 응답 없음은 한 문장 — 다시 시도 버튼 없음.
       PSnackbar.maybeOf(context)?.show(
         message: outcome == WriteOutcome.unconfirmed
             ? l.unconfirmedToggle

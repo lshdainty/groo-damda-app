@@ -211,25 +211,28 @@ void main() {
 
         expect(repo.pins, 1);
         expect(findPlain('바뀌었는지 확인하지 못했어요.'), findsOneWidget);
-        expect(findPlain('고정을 바꾸지 못했어요.'), findsNothing);
+        expect(findPlain('고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsNothing);
         expect(_action, findsNothing, reason: '뒤집기만 하는 요청 — 다시 누르면 한 번 더 뒤집힌다');
         expect(repo.lists, 2, reason: '서버 값으로 맞춘다');
       },
     );
 
-    testWidgets('실패 — 한 문장 "고정을 바꾸지 못했어요." · [다시 시도] 없음(판단 ②)', (tester) async {
-      final repo = _MemoRepo(
-        () => ApiException(code: 'HTTP_500', message: 'raw', statusCode: 500),
-      );
-      await _mount(tester, [
-        memoRepositoryProvider.overrideWith((ref) async => repo),
-      ], (context) => memoActions.pin(context, _memo));
+    testWidgets(
+      '실패 — 두 문장 "고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요." · [다시 시도] 없음(판단 ②)',
+      (tester) async {
+        final repo = _MemoRepo(
+          () => ApiException(code: 'HTTP_500', message: 'raw', statusCode: 500),
+        );
+        await _mount(tester, [
+          memoRepositoryProvider.overrideWith((ref) async => repo),
+        ], (context) => memoActions.pin(context, _memo));
 
-      await tester.tap(findText('열기'));
-      await tester.pumpAndSettle();
+        await tester.tap(findText('열기'));
+        await tester.pumpAndSettle();
 
-      expect(findPlain('고정을 바꾸지 못했어요.'), findsOneWidget);
-      expect(_action, findsNothing);
-    });
+        expect(findPlain('고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+        expect(_action, findsNothing);
+      },
+    );
   });
 }

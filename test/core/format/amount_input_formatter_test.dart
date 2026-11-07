@@ -55,4 +55,40 @@ void main() {
     expect(parseAmountInput(''), isNull);
     expect(formatAmountInput(1500000), '1,500,000');
   });
+
+  group('onLimit — 막았다고 알린다 (칸 아래 "금액은 100억원까지 입력할 수 있어요.")', () {
+    List<bool> run(List<(String, String)> edits) {
+      final seen = <bool>[];
+      final f = AmountInputFormatter(onLimit: seen.add);
+      for (final (old, next) in edits) {
+        f.formatEditUpdate(
+          TextEditingValue(text: old),
+          TextEditingValue(
+            text: next,
+            selection: TextSelection.collapsed(offset: next.length),
+          ),
+        );
+      }
+      return seen;
+    }
+
+    test('넘는 입력을 막으면 true, 다음 유효한 입력은 false', () {
+      expect(
+        run([
+          ('1,000,000,000', '10000000000'), // 정확히 100억 — 받는다
+          ('10,000,000,000', '100,000,000,001'), // 넘는다 — 막는다
+          ('10,000,000,000', '1,000,000,000'), // 줄인다 — 받는다
+        ]),
+        [false, true, false],
+      );
+    });
+
+    test('비우는 입력도 걷는다', () {
+      expect(run([('10,000,000,000', '')]), [false]);
+    });
+
+    test('상한 위 옛 값을 줄이는 편집은 막지 않는다(알리지도 않는다)', () {
+      expect(run([('99,999,999,999', '9,999,999,999')]), [false]);
+    });
+  });
 }

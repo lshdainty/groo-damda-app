@@ -138,7 +138,7 @@ void main() {
     await tester.tap(plain('삭제').last);
     await tester.pumpAndSettle();
     expect(repo.calls, ['delete 1 silent=true']);
-    expect(plain('관리비 반복 설정을 삭제했어요'), findsOneWidget); // 스낵바
+    expect(plain('관리비 반복 설정을 삭제했어요.'), findsOneWidget); // 스낵바
   });
 
   testWidgets('삭제 실패 — 스낵바 고정 글 + 다시 시도, 서버 원문은 없다', (tester) async {

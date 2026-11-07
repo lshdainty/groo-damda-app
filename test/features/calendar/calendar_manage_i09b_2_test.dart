@@ -391,7 +391,7 @@ void main() {
       await tester.tap(findText('참여').last);
       await tester.pumpAndSettle();
       expect(repo.joins, 1);
-      expect(findPlain('"독서 모임" 캘린더에 참여했어요'), findsOneWidget);
+      expect(findPlain('"독서 모임" 캘린더에 참여했어요.'), findsOneWidget);
     });
   });
 }

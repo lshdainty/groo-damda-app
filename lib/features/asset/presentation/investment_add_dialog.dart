@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -419,6 +420,13 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   /// 단계로 바뀐다(I-17 21) — 확인하기 전에는 요청이 나가지 않고, ←(취소)면 저장도 안 한다.
   Future<void> _submit() async {
     if (_submitting) return;
+    // 예수금 · 직접 입력한 보유 평가액이 1,000억 위(상한 전에 저장된 옛 값)면 저장하지 않는다 — 칸 아래 오류가 보인다(웹과 같다)
+    if (amountTextExceeds(_cashCtrl.text, kBalanceMax) ||
+        _holdings.any(
+          (h) => !h.linked && (h.holdingValue ?? 0) > kBalanceMax,
+        )) {
+      return;
+    }
     final nameMissing = _nameCtrl.text.trim().isEmpty;
     // 외화면 환율이 필수다(서버 AST_036, I-13) — 비우면 칸 오류로 막는다.
     if (nameMissing || exchangeRateMissing(_currency, _fxRateCtrl)) {
@@ -834,6 +842,22 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
   /// 연동 줄의 평가액(읽기 전용) — 시세가 바뀔 때마다 글만 바꾼다.
   final TextEditingController _linkedValueCtrl = TextEditingController();
 
+  /// 1,000억을 넘겨 입력을 막았나(평가액 · 매수원가) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  late final _valueLimit = AmountLimitGuard(
+    _valueCtrl,
+    max: kBalanceMax,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+  late final _costLimit = AmountLimitGuard(
+    _costCtrl,
+    max: kBalanceMax,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+
   @override
   void initState() {
     super.initState();
@@ -855,6 +879,8 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
 
   @override
   void dispose() {
+    _valueLimit.dispose();
+    _costLimit.dispose();
     _qtyCtrl.dispose();
     _nameCtrl.dispose();
     _valueCtrl.dispose();
@@ -915,6 +941,10 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
     final valueField = PField(
       label: l.assetHoldingValueLabel,
       description: h.linked ? null : widget.krwHint,
+      invalid: !h.linked && _valueLimit.over,
+      errorMessage: !h.linked && _valueLimit.over
+          ? l.amountTooLargeAt(l.amountLimitBalance)
+          : null,
       child: h.linked
           ? PInput(
               controller: _linkedValueCtrl,
@@ -926,7 +956,7 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
           : PInput(
               controller: _valueCtrl,
               keyboardType: TextInputType.number,
-              inputFormatters: const [AmountInputFormatter(max: kBalanceMax)],
+              inputFormatters: _valueLimit.formatters,
               suffixText: wonUnit(),
               tabularFigures: true,
               onChanged: _onValueChanged,
@@ -1032,10 +1062,14 @@ class _HoldingEditRowState extends State<_HoldingEditRow> {
                     ?widget.krwHint,
                     l.holdingAvgPriceInline(krwSigned(avg, false, unit: true)),
                   ].join('\n'),
+            invalid: _costLimit.over,
+            errorMessage: _costLimit.over
+                ? l.amountTooLargeAt(l.amountLimitBalance)
+                : null,
             child: PInput(
               controller: _costCtrl,
               keyboardType: TextInputType.number,
-              inputFormatters: const [AmountInputFormatter(max: kBalanceMax)],
+              inputFormatters: _costLimit.formatters,
               placeholder: '0',
               suffixText: wonUnit(),
               tabularFigures: true,

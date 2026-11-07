@@ -105,11 +105,11 @@ Future<void> setHideCardsWithUnlock(
   final outcome = hide
       ? await notifier.hideCards(cards)
       : await notifier.revealCards(cards);
-  // 누르는 순간 바뀌는 값 — 한 문장, [다시 시도] 없음(디자인시스템 판단 ②). 서버가 받지 못하면 로컬도 그대로다.
+  // 누르는 순간 바뀌는 값 — 액션이 없어 두 문장("… 잠시 뒤 다시 시도해주세요."), [다시 시도] 없음(디자인시스템 판단 ②). 서버가 받지 못하면 로컬도 그대로다.
   // 응답을 못 받았으면 서버 값을 다시 받아 맞췄다 — "바뀌었는지 확인하지 못했어요."
   final message = switch (outcome) {
     WriteOutcome.done => null,
-    WriteOutcome.failed => l.hideAmountsSaveFailed,
+    WriteOutcome.failed => l.hideAmountsSaveFailedToast,
     WriteOutcome.unconfirmed => l.unconfirmedToggle,
   };
   if (message != null) {

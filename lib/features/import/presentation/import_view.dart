@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -587,11 +588,7 @@ class _ImportViewState extends ConsumerState<ImportView> {
                       ),
                     PTagGroup(
                       items: [
-                        PTag(
-                          r.date != null && r.date!.length >= 10
-                              ? r.date!.substring(0, 10)
-                              : '—',
-                        ),
+                        PTag(_previewDate(r.date)),
                         if (r.type != null)
                           PTag(
                             r.type == 'INCOME'
@@ -750,4 +747,13 @@ class _ImportViewState extends ConsumerState<ImportView> {
     }
     return buf.toString();
   }
+}
+
+/// 미리보기 날짜 칩 — 화면에 보이는 글이라 날짜 규칙(ko "10월 10일" · 다른 해 "2025년 10월 10일", en "Oct 10")으로 보인다.
+/// 파일 값을 못 읽으면 앞 10자 그대로, 값이 없으면 "—".
+String _previewDate(String? raw) {
+  if (raw == null || raw.length < 10) return '—';
+  final head = raw.substring(0, 10);
+  final d = DateTime.tryParse(head);
+  return d == null ? head : formatDay(d).md;
 }

@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
+import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -222,6 +224,11 @@ class _AccountAddBodyState extends ConsumerState<AccountAddBody> {
   /// 단계로 바뀐다(I-17 21) — 확인하기 전에는 요청이 나가지 않고, ←(취소)면 저장도 안 한다.
   Future<void> _submit() async {
     if (_submitting) return;
+    // 잔액 · 한도가 1,000억 위(상한 전에 저장된 옛 값)면 저장하지 않는다 — 칸 아래 오류가 그대로 보인다(웹과 같다)
+    if (amountTextExceeds(_balanceCtrl.text, kBalanceMax) ||
+        amountTextExceeds(_limitCtrl.text, kBalanceMax)) {
+      return;
+    }
     if (assetUnhideNeedsConfirm(
       wasHidden: widget.edit?.isAmountHidden == 'Y',
       nowHidden: _hideAmount,

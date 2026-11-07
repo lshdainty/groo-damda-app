@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -159,6 +161,20 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   String? _amountError;
   String? _currentError;
 
+  /// 100억을 넘겨 입력을 막았나(목표 금액 · 지금 모은 금액) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+  late final _currentLimit = AmountLimitGuard(
+    _currentCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+
   bool get _isEdit => widget.edit != null;
 
   @override
@@ -213,6 +229,8 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
+    _currentLimit.dispose();
     widget.probe.dirty = () => false;
     _titleCtrl.dispose();
     _amountCtrl.dispose();
@@ -302,6 +320,8 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
 
   Future<void> _onSubmit() async {
     if (_submitting) return;
+    _amountLimit.dismiss();
+    _currentLimit.dismiss();
     final l = AppLocalizations.of(context);
     String? nameErr;
     if (_titleTrim.isEmpty) {
@@ -511,16 +531,23 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             padding: gutter,
             child: PField(
               label: l.savingGoalAmountLabel,
-              invalid: _amountError != null,
-              errorMessage: _amountError,
-              child: _amountInput(_amountCtrl, _amountFocus, () {
-                if (_amountError != null || _currentError != null) {
-                  setState(() {
-                    _amountError = null;
-                    _currentError = null;
-                  });
-                }
-              }),
+              invalid: _amountError != null || _amountLimit.over,
+              errorMessage: _amountLimit.over
+                  ? l.savingGoalErrAmountTooLarge
+                  : _amountError,
+              child: _amountInput(
+                _amountCtrl,
+                _amountFocus,
+                _amountLimit.formatters,
+                () {
+                  if (_amountError != null || _currentError != null) {
+                    setState(() {
+                      _amountError = null;
+                      _currentError = null;
+                    });
+                  }
+                },
+              ),
             ),
           ),
           const SizedBox(height: PSpacing.x6),
@@ -529,11 +556,20 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             child: PField(
               label: l.savingGoalCurrentLabel,
               indicator: PFieldIndicator.optional,
-              invalid: _currentError != null,
-              errorMessage: _currentError,
-              child: _amountInput(_currentCtrl, _currentFocus, () {
-                if (_currentError != null) setState(() => _currentError = null);
-              }),
+              invalid: _currentError != null || _currentLimit.over,
+              errorMessage: _currentLimit.over
+                  ? l.amountTooLarge
+                  : _currentError,
+              child: _amountInput(
+                _currentCtrl,
+                _currentFocus,
+                _currentLimit.formatters,
+                () {
+                  if (_currentError != null) {
+                    setState(() => _currentError = null);
+                  }
+                },
+              ),
             ),
           ),
           const SizedBox(height: PSpacing.x3),
@@ -613,6 +649,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   Widget _amountInput(
     TextEditingController ctrl,
     FocusNode focus,
+    List<TextInputFormatter> formatters,
     VoidCallback onEdited,
   ) => PInput(
     controller: ctrl,
@@ -621,7 +658,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
     suffixText: wonUnit(),
     tabularFigures: true,
     keyboardType: TextInputType.number,
-    inputFormatters: const [AmountInputFormatter()],
+    inputFormatters: formatters,
     onChanged: (_) => onEdited(),
   );
 }

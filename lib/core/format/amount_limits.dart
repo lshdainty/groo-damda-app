@@ -20,9 +20,12 @@ const int kBalanceMax = 100000000000; // 1,000억
 /// 앞단에 [FilteringTextInputFormatter.digitsOnly] 가 붙는 걸 전제한다 —
 /// 숫자가 아닌 문자가 남아 있으면 파싱이 실패해 이전 값으로 되돌아간다.
 class AmountLimitFormatter extends TextInputFormatter {
-  const AmountLimitFormatter(this.max);
+  const AmountLimitFormatter(this.max, {this.onLimit});
 
   final int max;
+
+  /// 상한 때문에 막았으면 `true`, 상한 안의 입력을 받으면 `false` — [AmountInputFormatter.onLimit] 과 같다.
+  final void Function(bool exceeded)? onLimit;
 
   @override
   TextEditingValue formatEditUpdate(
@@ -31,13 +34,21 @@ class AmountLimitFormatter extends TextInputFormatter {
   ) {
     final next = _digits(newValue.text);
     // 비우는 건 언제나 허용한다.
-    if (next.isEmpty) return newValue;
+    if (next.isEmpty) {
+      onLimit?.call(false);
+      return newValue;
+    }
     final n = int.tryParse(next);
-    if (n != null && n <= max) return newValue;
+    if (n != null && n <= max) {
+      onLimit?.call(false);
+      return newValue;
+    }
     // 상한을 넘겼다. 다만 **줄이는 편집**은 통과시킨다 — 상한이 생기기 전에 저장된
     // 값(QA 가 만든 99조 잔액)을 열면 한 글자도 못 지우고 통째로 비우는 수밖에
     // 없어진다. 줄이는 방향이면 어차피 상한 아래로 내려가는 길이다.
-    return _shrinks(_digits(oldValue.text), next) ? newValue : oldValue;
+    if (_shrinks(_digits(oldValue.text), next)) return newValue;
+    onLimit?.call(true);
+    return oldValue;
   }
 
   static String _digits(String s) => s.replaceAll(RegExp(r'[^0-9]'), '');

@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
+import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -74,6 +75,14 @@ class _CreateSheet extends ConsumerStatefulWidget {
 class _CreateSheetState extends ConsumerState<_CreateSheet> {
   final _titleCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
+
+  /// 100억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  late final _amountLimit = AmountLimitGuard(
+    _amountCtrl,
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
   final _placeCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
   final _titleFocus = FocusNode();
@@ -116,6 +125,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
 
   @override
   void dispose() {
+    _amountLimit.dispose();
     widget.probe.dirty = () => false;
     for (final c in [_titleCtrl, _amountCtrl, _placeCtrl, _nameCtrl]) {
       c.dispose();
@@ -257,6 +267,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
   Future<void> _submit() async {
     // 이중 제출은 await 앞에서 막는다
     if (_submitting) return;
+    _amountLimit.dismiss();
     setState(() => _attempted2 = true);
     if (_others.isEmpty) {
       _nameFocus.requestFocus();
@@ -414,8 +425,10 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
             label: l.dutchTotalLabel,
             indicator: PFieldIndicator.required,
             required: true,
-            invalid: emptyAmount,
-            errorMessage: emptyAmount ? l.dutchAmountRequired : null,
+            invalid: emptyAmount || _amountLimit.over,
+            errorMessage: _amountLimit.over
+                ? l.amountTooLarge
+                : (emptyAmount ? l.dutchAmountRequired : null),
             child: PInput(
               controller: _amountCtrl,
               focusNode: _amountFocus,
@@ -423,7 +436,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
               suffixText: wonUnit(),
               tabularFigures: true,
               keyboardType: TextInputType.number,
-              inputFormatters: const [AmountInputFormatter()],
+              inputFormatters: _amountLimit.formatters,
               onChanged: (_) => setState(() {}),
             ),
           ),

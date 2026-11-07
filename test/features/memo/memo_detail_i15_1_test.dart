@@ -265,7 +265,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(findPlain('삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
+    expect(findPlain('삭제하지 못했어요.'), findsOneWidget);
     expect(findPlain('다시 시도'), findsOneWidget);
     repo.failDelete = false;
     await tester.tap(findPlain('다시 시도'));

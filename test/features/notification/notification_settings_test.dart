@@ -125,7 +125,7 @@ void main() {
       findWidgetWithText(PListSwitchItem, '결제 알림'),
     );
     expect(row.checked, isTrue, reason: '낙관 반영이 서버 값으로 되돌아온다');
-    expect(findText('알림 설정을 저장하지 못했어요.'), findsOneWidget);
+    expect(findText('알림 설정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
     expect(findText('다시 시도'), findsNothing);
   });
 }
