@@ -429,8 +429,16 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.textContaining('76.4', skipOffstage: false), findsNothing);
-      expect(find.text('76%', skipOffstage: false), findsAtLeastNWidgets(1));
+      // 읽는 표(visuallyHidden)는 Text 가 아니라 Semantics.value 에만 있다 — 거기서 본다
+      final handle = tester.ensureSemantics();
+      final table = tester.getSemantics(
+        find
+            .byKey(const ValueKey('chart-data-table'), skipOffstage: false)
+            .last,
+      );
+      expect(table.value, contains('76%'));
+      expect(table.value, isNot(contains('76.4')));
+      handle.dispose();
     });
 
     testWidgets('이행률 가장 큰 막대(2,855%) 위 % 글이 차트 위로 잘리지 않는다', (tester) async {

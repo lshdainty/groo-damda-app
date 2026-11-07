@@ -14,23 +14,51 @@ void main() {
     test('늘 한 자리', () {
       expect(formatShare(30, underOne: under), '30.0%');
       expect(formatShare(58.14, underOne: under), '58.1%');
-      expect(formatShare(double.nan, underOne: under), '0.0%');
+    });
+    test('웹과 같은 반올림 — 이진 오차로 갈리던 동점(Math.round 식)', () {
+      expect(formatShare(12.35, underOne: under), '12.4%');
+      expect(formatShare(58.15, underOne: under), '58.2%');
+      expect(formatShare(0.15, underOne: under), '0.2%');
+      expect(formatShare(0.35, underOne: under), '0.4%');
+      expect(formatShare(1.15, underOne: under), '1.2%');
+      expect(formatShare(1235 * 100 / 10000, underOne: under), '12.4%');
+    });
+    test('경계 — NaN · 무한은 "—", 음수는 부호 그대로(웹 기준)', () {
+      expect(formatShare(double.nan, underOne: under), '—');
+      expect(formatShare(double.infinity, underOne: under), '—');
+      expect(formatShare(double.negativeInfinity, underOne: under), '—');
+      expect(formatShare(-3, underOne: under), '−3.0%');
+      expect(formatShare(-2.5, underOne: under), '−2.5%');
+      expect(formatShare(-0.04, underOne: under), '0.0%');
     });
     test('formatShareOf — 합 0 이면 0.0%, 범례 합이 101 이 되지 않는다', () {
       expect(formatShareOf(5, 0, underOne: under), '0.0%');
+      // 0 자리 반올림이면 58 + 22 + 15 + 5 + 1 = 101 이던 자료
       final parts = [581400, 215100, 151200, 46500, 5800];
       final total = parts.fold<int>(0, (a, b) => a + b);
-      final sum = parts
-          .map((p) => p * 100 / total)
-          .map((v) => double.parse(v.toStringAsFixed(1)))
+      final shown = [
+        for (final p in parts) formatShareOf(p, total, underOne: under),
+      ];
+      expect(shown, ['58.1%', '21.5%', '15.1%', '4.7%', '0.6%']);
+      final sum = shown
+          .map((t) => double.parse(t.replaceAll('%', '')))
           .fold<double>(0, (a, b) => a + b);
       expect(sum, closeTo(100, 0.2));
     });
   });
-  test('formatProgress 진행률 — 정수', () {
+  test('formatProgress 진행률 — 정수, 100 미만 내림 · 100 초과 올림', () {
     expect(formatProgress(0), '0%');
     expect(formatProgress(76.43), '76%');
-    expect(formatProgress(99.95), '100%');
+    expect(formatProgress(76.9), '76%');
+    expect(formatProgress(99.6), '99%'); // 아직 다 안 찼다
+    expect(formatProgress(99.95), '99%');
+    expect(formatProgress(100), '100%');
+    expect(formatProgress(100.3), '101%'); // 넘었다
     expect(formatProgress(112.5), '113%');
+    expect(formatProgress(-2.5), '−2%');
+    expect(formatProgress(-0.2), '0%');
+    expect(formatProgress(double.nan), '—');
+    expect(formatProgress(double.infinity), '—');
+    expect(formatProgress(double.negativeInfinity), '—');
   });
 }

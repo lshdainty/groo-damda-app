@@ -95,8 +95,11 @@ void main() {
         if (s == 1.0) expect(find.text('−4,500'), findsWidgets);
         if (s == 1.0 && w >= 390) expect(find.text('−98,765'), findsOneWidget);
         // 점이어도 칸 이름은 원까지
-        expect(_labelOf(t, '11월 4일'), '11월 4일, 지출 1,234,567원');
-        expect(_labelOf(t, '11월 5일'), '11월 5일, 지출 4,500원, 수입 400,000,000원');
+        expect(_labelOf(t, '11월 4일'), '11월 4일 (수), 지출 −1,234,567원');
+        expect(
+          _labelOf(t, '11월 5일'),
+          '11월 5일 (목), 지출 −4,500원, 수입 +400,000,000원',
+        );
         handle.dispose();
       });
     }
@@ -120,11 +123,32 @@ void main() {
         );
         expect(find.text('+400,000,000'), findsNothing);
         expect(find.byKey(const ValueKey('ledger-cell-dot')), findsWidgets);
-        expect(_labelOf(t, '11월 4일'), '11월 4일, 지출 1,234,567원');
+        expect(_labelOf(t, '11월 4일'), '11월 4일 (수), 지출 −1,234,567원');
         handle.dispose();
       });
     }
   }
+
+  testWidgets('칸 이름 — 금액 없는 날은 날짜만, 가린 금액은 "금액 가림"', (t) async {
+    final handle = t.ensureSemantics();
+    await _pump(t, 390, 1);
+    expect(_labelOf(t, '11월 6일'), '11월 6일 (금)');
+    expect(_labelOf(t, '11월 2일'), '11월 2일 (월), 지출 −4,500원');
+    await _pump(
+      t,
+      390,
+      1,
+      flags: const MaskFlags(
+        card: false,
+        expense: true,
+        income: false,
+        transfer: false,
+      ),
+    );
+    expect(_labelOf(t, '11월 5일'), '11월 5일 (목), 수입 +400,000,000원, 금액 가림');
+    expect(_labelOf(t, '11월 2일'), '11월 2일 (월), 금액 가림');
+    handle.dispose();
+  });
 
   testWidgets('줄 높이 불변 — 점이 있는 칸과 금액만 있는 칸의 금액 줄 높이가 같다', (t) async {
     await _pump(t, 390, 1);

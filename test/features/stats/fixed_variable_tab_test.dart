@@ -151,11 +151,11 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('고정이 0.05% 미만이면 숫자 없는 문장 · 값은 "0.1% 미만"', (tester) async {
+  testWidgets('고정이 0.05% 미만이면 "0.1% 미만이 고정이에요" (조사가 갈린다)', (tester) async {
     await _pump(tester, _summary(fixedExpense: 100));
     expect(findPlainContaining('0.1% 미만'), findsWidgets);
-    expect(findRichPlain('고정 지출이 거의 없어요. 고정을 뺀 지출은'), findsOneWidget);
-    expect(findRichPlain('지출의 '), findsNothing);
+    expect(findRichPlain('지출의 0.1% 미만이 고정이에요'), findsOneWidget);
+    expect(findRichPlain('지출의 0.1% 미만가'), findsNothing);
   });
 
   testWidgets('고정이 하나도 없으면 안내와 정리 버튼이 나온다', (tester) async {

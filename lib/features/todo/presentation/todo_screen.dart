@@ -604,7 +604,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     );
     if (mark == null) return null;
     final l = AppLocalizations.of(context);
-    final date = monthDay(DateTime.parse(ds));
+    final date = monthDayDow(DateTime.parse(ds));
     return switch (mark) {
       TodoCellLeft(:final count) => l.tdmCellLeft(date, count),
       TodoCellCollected() || TodoCellGrown() => l.tdmCellCollected(date),

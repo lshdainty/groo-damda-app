@@ -44,18 +44,14 @@ const _variableColor = PChartColor.green;
 String _share(AppLocalizations l, double pct) =>
     formatShare(pct, underOne: l.percentUnderTenth);
 
-/// 한 줄 안내 — 고정 비중이 "0.1% 미만" 이면 숫자 없는 글로 간다(조사가 어색해서).
+/// 한 줄 안내 — 비중 값 뒤 조사는 값에 따라 갈린다("33.2%가" · "0.1% 미만이").
 String _insight(AppLocalizations l, FixedSplit s, bool isExpense) {
   final tiny = s.fixed > 0 && s.fixedShare < 0.05;
-  if (tiny) {
-    return isExpense
-        ? l.statsFixedInsightExpenseNone
-        : l.statsFixedInsightIncomeNone;
-  }
   final pct = _share(l, s.fixedShare);
+  final josa = tiny ? '이' : '가';
   return isExpense
-      ? l.statsFixedInsightExpense(pct)
-      : l.statsFixedInsightIncome(pct);
+      ? l.statsFixedInsightExpense(pct, josa)
+      : l.statsFixedInsightIncome(pct, josa);
 }
 
 class FixedVariableTab extends ConsumerWidget {

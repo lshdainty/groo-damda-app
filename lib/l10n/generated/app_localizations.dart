@@ -14008,26 +14008,14 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedInsightExpense.
   ///
   /// In ko, this message translates to:
-  /// **'지출의 {pct}가 고정이에요. 고정을 뺀 지출은'**
-  String statsFixedInsightExpense(String pct);
+  /// **'지출의 {pct}{josa} 고정이에요. 고정을 뺀 지출은'**
+  String statsFixedInsightExpense(String pct, String josa);
 
   /// No description provided for @statsFixedInsightIncome.
   ///
   /// In ko, this message translates to:
-  /// **'수입의 {pct}가 고정이에요. 고정을 뺀 수입은'**
-  String statsFixedInsightIncome(String pct);
-
-  /// No description provided for @statsFixedInsightExpenseNone.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정 지출이 거의 없어요. 고정을 뺀 지출은'**
-  String get statsFixedInsightExpenseNone;
-
-  /// No description provided for @statsFixedInsightIncomeNone.
-  ///
-  /// In ko, this message translates to:
-  /// **'고정 수입이 거의 없어요. 고정을 뺀 수입은'**
-  String get statsFixedInsightIncomeNone;
+  /// **'수입의 {pct}{josa} 고정이에요. 고정을 뺀 수입은'**
+  String statsFixedInsightIncome(String pct, String josa);
 
   /// No description provided for @statsFixedInsightTail.
   ///

@@ -8,17 +8,38 @@
 ///   그대로 둔다(거절된 안: 합치기).
 library;
 
+/// JS `Math.round` 와 같은 반올림(.5 는 +무한 쪽) — 웹 `formatPercent` 와 같은 글자를 내려고 쓴다.
+double _jsRound(double x) => (x + 0.5).floorToDouble();
+
+const String _minus = '−'; // U+2212 — 금액 부호와 같은 글자(하이픈이 아니다)
+
 /// 비중 — "30.0%". 0 은 "0.0%", 0 보다 크고 0.05% 미만은 [underOne]("0.1% 미만" · "<0.1%" —
-/// 로케일 문구라 호출처가 `l.percentUnderTenth` 를 넘긴다). 음수 · NaN 은 0 으로 본다.
+/// 로케일 문구라 호출처가 `l.percentUnderTenth` 를 넘긴다). 유한하지 않은 값(NaN · 무한)은 "—".
+/// 소수 첫째 자리는 웹과 같은 식(`Math.round(pct * 10) / 10`)으로 맞춘다 — 12.35 가 앱 12.3 · 웹 12.4 로 갈리지 않게.
+/// 음수는 빼기 U+2212 를 앞에 붙인다("−12.3%"), 반올림해서 0 이 되면 부호 없이 "0.0%".
 String formatShare(double pct, {required String underOne}) {
-  if (pct.isNaN || pct <= 0) return '0.0%';
-  if (pct < 0.05) return underOne;
-  return '${pct.toStringAsFixed(1)}%';
+  if (!pct.isFinite) return '—';
+  if (pct > 0 && pct < 0.05) return underOne;
+  final v = _jsRound(pct * 10) / 10;
+  if (v == 0) return '0.0%';
+  final body = v.abs().toStringAsFixed(1);
+  return v < 0 ? '$_minus$body%' : '$body%';
 }
 
 /// [part] 가 [total] 중 차지하는 비중. [total] 이 0 이하면 0.0%.
 String formatShareOf(num part, num total, {required String underOne}) =>
     formatShare(total <= 0 ? 0 : part * 100 / total, underOne: underOne);
 
-/// 진행률 — "76%". 정수로 반올림한다. 막대가 넘치는 100 초과는 그대로 둔다(호출처가 자른다).
-String formatProgress(num pct) => '${pct.isNaN ? 0 : pct.round()}%';
+/// 진행률 — "76%". 정수다. 100 미만은 내림(99.6 → "99%": 아직 다 안 찼는데 100% 로 보이지 않게), 100 초과는 올림
+/// (100.3 → "101%": 넘었는데 100% 로 보이지 않게), 정확히 100 만 "100%". 음수는 반올림하고 U+2212 를 붙인다.
+/// 유한하지 않은 값은 "—". 막대가 넘치는 100 초과는 그대로 둔다(호출처가 자른다).
+String formatProgress(num pct) {
+  final v = pct.toDouble();
+  if (!v.isFinite) return '—';
+  if (v < 0) {
+    final n = _jsRound(v).abs().toInt();
+    return n == 0 ? '0%' : '$_minus$n%';
+  }
+  final n = v > 100 ? v.ceil() : v.floor();
+  return '$n%';
+}

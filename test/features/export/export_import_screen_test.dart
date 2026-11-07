@@ -200,6 +200,30 @@ void main() {
         'groo-export-2026-01-01_2026-12-31.zip',
       );
     });
+    test('1월의 LAST_MONTH 는 해를 넘겨 전년 12월 · LAST_3_MONTHS 도', () {
+      final now = DateTime(2026, 1, 15);
+      expect(resolveExportRange('LAST_MONTH', now), (
+        start: '2025-12-01',
+        end: '2025-12-31',
+      ));
+      expect(resolveExportRange('LAST_3_MONTHS', now), (
+        start: '2025-11-01',
+        end: '2026-01-31',
+      ));
+    });
+    test('CUSTOM 은 고른 날 그대로, 안 골랐으면 빈 값', () {
+      final now = DateTime(2026, 11, 7);
+      expect(
+        resolveExportRange(
+          'CUSTOM',
+          now,
+          customFrom: DateTime(2026, 3, 5),
+          customTo: DateTime(2026, 4, 9),
+        ),
+        (start: '2026-03-05', end: '2026-04-09'),
+      );
+      expect(resolveExportRange('CUSTOM', now), (start: '', end: ''));
+    });
     test('다른 기간은 그대로', () {
       final now = DateTime(2026, 11, 7);
       expect(resolveExportRange('THIS_MONTH', now), (

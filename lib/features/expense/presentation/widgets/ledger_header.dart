@@ -464,27 +464,24 @@ class LedgerCalendar extends StatelessWidget {
       expanded: expanded,
       onSelect: onSelect,
       onToggleExpand: onToggleExpand,
-      // 칸 하나가 "11월 6일, 지출 4,500원, 수입 …" 한 이름으로 읽힌다 — 칸 금액이 점이어도 원까지 읽힌다.
+      // 칸 하나가 "11월 4일 (수), 지출 −1,234,567원, 수입 +400,000원" 한 이름으로 읽힌다(웹 cellName 과 한 꼴) —
+      // 칸 금액이 점이어도 원까지 읽힌다. 금액 없는 날(불러오는 중 포함)은 날짜만. 가린 금액은 "금액 가림" 으로
+      // 말해 거래가 없는 날처럼 들리지 않게 한다.
       cellLabel: (context, ds) {
-        final data = byDay[ds];
-        if (loading || data == null) return null;
         final l = AppLocalizations.of(context);
+        final date = monthDayDow(DateTime.parse(ds));
+        final data = loading ? null : byDay[ds];
+        if (data == null) return date;
+        final hideOut = data.out > 0 && flags.of(MaskKind.expense);
+        final hideIn = data.inn > 0 && flags.of(MaskKind.income);
         final parts = <String>[
-          if (data.out > 0)
-            l.expCellOutPart(
-              flags.of(MaskKind.expense)
-                  ? l.expCellHidden
-                  : krwSigned(data.out, false, unit: true),
-            ),
-          if (data.inn > 0)
-            l.expCellInPart(
-              flags.of(MaskKind.income)
-                  ? l.expCellHidden
-                  : krwSigned(data.inn, false, unit: true),
-            ),
+          if (data.out > 0 && !hideOut)
+            l.expCellOutPart(krwSigned(data.out, false, sign: '−', unit: true)),
+          if (data.inn > 0 && !hideIn)
+            l.expCellInPart(krwSigned(data.inn, false, sign: '+', unit: true)),
+          if (hideOut || hideIn) l.expCellHidden,
         ];
-        if (parts.isEmpty) return null;
-        return l.expCellLabel(monthDay(DateTime.parse(ds)), parts.join(', '));
+        return parts.isEmpty ? date : l.expCellLabel(date, parts.join(', '));
       },
       markBuilder: (context, ds) {
         if (loading) return PSkeleton.text(PTypography.t1, width: 32);
@@ -586,7 +583,7 @@ class LedgerCalendarGrid extends StatelessWidget {
   /// 날 숫자 아래 표시 — 없으면 빈 자리를 돌려준다.
   final Widget Function(BuildContext context, String ds) markBuilder;
 
-  /// 칸의 읽는 이름 — 없으면 이름을 달지 않는다(가계부).
+  /// 칸의 읽는 이름 — 없으면 이름을 달지 않는다(할 일의 표시 없는 날).
   final String? Function(BuildContext context, String ds)? cellLabel;
 
   /// 날 숫자 원 — 눈금 36.

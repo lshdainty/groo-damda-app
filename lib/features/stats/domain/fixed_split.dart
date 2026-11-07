@@ -17,7 +17,6 @@ class FixedSplit {
     required this.total,
     required this.fixed,
     required this.variable,
-    required this.fixedPercent,
     required this.fixedShare,
     required this.variableShare,
   });
@@ -30,12 +29,6 @@ class FixedSplit {
 
   /// 변동 = 전체 − 고정
   final int variable;
-
-  /// 전체 중 고정 비율, 0~100 정수 반올림. 전체가 0 이면 0.
-  final int fixedPercent;
-
-  /// 변동 비율 — 고정 비율의 나머지다(둘이 늘 100 을 이룬다).
-  int get variablePercent => 100 - fixedPercent;
 
   /// 화면에 보이는 비중(%, 소수 첫째 자리) — 고정 · 변동 둘이 한 자리로 보여도 합이 100.0 이 되게 변동은
   /// 고정의 나머지다. 0 초과 0.05 미만은 반올림하지 않고 그대로 둔다("0.1% 미만" 표기는 `formatShare` 몫).
@@ -56,7 +49,6 @@ FixedSplit splitFixed(int? total, int? fixed) {
     total: t,
     fixed: f,
     variable: t - f,
-    fixedPercent: t == 0 ? 0 : (f * 100 / t).round(),
     fixedShare: shares.fixed,
     variableShare: shares.variable,
   );

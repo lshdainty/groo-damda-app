@@ -4352,8 +4352,6 @@
   "statsFixedBarSemantics": "{fixed} fixed, {variable} variable of {kind}",
   "statsFixedInsightExpense": "{pct} of spending is fixed. Spending excluding fixed is",
   "statsFixedInsightIncome": "{pct} of income is fixed. Income excluding fixed is",
-  "statsFixedInsightExpenseNone": "Almost no spending is fixed. Spending excluding fixed is",
-  "statsFixedInsightIncomeNone": "Almost no income is fixed. Income excluding fixed is",
   "statsFixedInsightTail": ".",
   "statsFixedEmptyDesc": "Mark monthly items like rent or salary as fixed to see them separately here",
   "statsFixedManage": "Organize fixed items",

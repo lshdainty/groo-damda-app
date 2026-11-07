@@ -7911,22 +7911,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String statsFixedInsightExpense(String pct) {
+  String statsFixedInsightExpense(String pct, String josa) {
     return '$pct of spending is fixed. Spending excluding fixed is';
   }
 
   @override
-  String statsFixedInsightIncome(String pct) {
+  String statsFixedInsightIncome(String pct, String josa) {
     return '$pct of income is fixed. Income excluding fixed is';
   }
-
-  @override
-  String get statsFixedInsightExpenseNone =>
-      'Almost no spending is fixed. Spending excluding fixed is';
-
-  @override
-  String get statsFixedInsightIncomeNone =>
-      'Almost no income is fixed. Income excluding fixed is';
 
   @override
   String get statsFixedInsightTail => '.';

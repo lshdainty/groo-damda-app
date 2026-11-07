@@ -7751,20 +7751,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String statsFixedInsightExpense(String pct) {
-    return '지출의 $pct가 고정이에요. 고정을 뺀 지출은';
+  String statsFixedInsightExpense(String pct, String josa) {
+    return '지출의 $pct$josa 고정이에요. 고정을 뺀 지출은';
   }
 
   @override
-  String statsFixedInsightIncome(String pct) {
-    return '수입의 $pct가 고정이에요. 고정을 뺀 수입은';
+  String statsFixedInsightIncome(String pct, String josa) {
+    return '수입의 $pct$josa 고정이에요. 고정을 뺀 수입은';
   }
-
-  @override
-  String get statsFixedInsightExpenseNone => '고정 지출이 거의 없어요. 고정을 뺀 지출은';
-
-  @override
-  String get statsFixedInsightIncomeNone => '고정 수입이 거의 없어요. 고정을 뺀 수입은';
 
   @override
   String get statsFixedInsightTail => '이에요.';
