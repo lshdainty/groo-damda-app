@@ -8,7 +8,13 @@ import 'package:groo_damda_app/shared/ds/radio/p_radio.dart';
 import 'package:groo_damda_app/shared/ds/switch/p_switch.dart';
 
 export 'package:groo_damda_app/shared/ds/list/list_row.dart'
-    show PListAction, PListAlign, PListNest, PListSuffix, PListValue;
+    show
+        PListAction,
+        PListAlign,
+        PListEditWidth,
+        PListNest,
+        PListSuffix,
+        PListValue;
 
 /// List — 가로 줄로 된 내용을 세로로 잇는다(설정 · 메뉴 · 선택 · 키-값 줄과 거래 · 할 일 · 알림 같은 내용 줄). 구조는 SEED
 /// List(2026-10-01), 수치 원본은 groo-design `specs/components/list.yaml` · `list-header.yaml`(값은

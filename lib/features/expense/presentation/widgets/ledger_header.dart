@@ -16,6 +16,8 @@ import 'package:groo_damda_app/shared/ds/overflow_center/p_overflow_center.dart'
 import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 가계부 원장 머리 — 달 이동 · 합계 · 인사이트 · 소비 요약 · 주 달력(I-07 7 · 8 · 11).
 ///
@@ -134,102 +136,107 @@ class LedgerMonthNav extends StatelessWidget {
         left: PSpacing.globalGutter - _bleedStart,
         right: PSpacing.globalGutter - _bleedEnd,
       ),
-      child: Row(
-        children: [
-          if (showMonth)
-            // 남는 폭은 모두 이 자리(Expanded)가 받고 달 글은 왼쪽에 붙는다 — 거르기 · [+] 가 늘 오른쪽 끝에 선다.
-            // 달 글이 길면(큰 글자) 이 폭 안에서만 줄여 담는다.
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: PressArea(
-                  enabled: true,
-                  onTap: onPick,
-                  touchMin: 0,
-                  semantics: (child, enabled, onTap) => Semantics(
-                    container: true,
-                    button: true,
-                    label: label,
-                    onTap: onTap,
-                    excludeSemantics: true,
-                    child: child,
-                  ),
-                  builder: (context, pressed, size) => Container(
-                    constraints: const BoxConstraints(minHeight: PTouch.min),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: PSpacing.x2_5,
+      // 달 글이 없어도(할 일 · 달 글 숨김) 줄이 44 라야 오른쪽 단추 40 의 누르는 영역이 44 를 받는다
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: PTouch.min),
+        child: Row(
+          children: [
+            if (showMonth)
+              // 남는 폭은 모두 이 자리(Expanded)가 받고 달 글은 왼쪽에 붙는다 — 거르기 · [+] 가 늘 오른쪽 끝에 선다.
+              // 달 글이 길면(큰 글자) 이 폭 안에서만 줄여 담는다.
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: PressArea(
+                    enabled: true,
+                    onTap: onPick,
+                    touchMin: 0,
+                    focusRing: const PFocusRingStyle(radius: PRounded.r2),
+                    semantics: (child, enabled, onTap) => Semantics(
+                      container: true,
+                      button: true,
+                      label: label,
+                      onTap: onTap,
+                      excludeSemantics: true,
+                      child: child,
                     ),
-                    decoration: BoxDecoration(
-                      color: pressed
-                          ? c.bgLayerDefaultPressed
-                          : c.bgLayerDefaultPressed.withValues(alpha: 0),
-                      borderRadius: BorderRadius.circular(PRounded.r2),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: PSpacing.x1,
-                      children: [
-                        // 큰 글자에서도 한 줄 — 글자 가운데에서 줄이 바뀌지 않게 모자라면 조금 줄여 담는다
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              label,
-                              maxLines: 1,
-                              style: PTypography.t6.copyWith(
-                                color: c.fgNeutral,
-                                fontWeight: FontWeight.w700,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
+                    builder: (context, pressed, size) => Container(
+                      constraints: const BoxConstraints(minHeight: PTouch.min),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: PSpacing.x2_5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: pressed
+                            ? c.bgLayerDefaultPressed
+                            : c.bgLayerDefaultPressed.withValues(alpha: 0),
+                        borderRadius: BorderRadius.circular(PRounded.r2),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: PSpacing.x1,
+                        children: [
+                          // 큰 글자에서도 한 줄 — 글자 가운데에서 줄이 바뀌지 않게 모자라면 조금 줄여 담는다
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                style: PTypography.t6.copyWith(
+                                  color: c.fgNeutral,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Icon(
-                          LucideIcons.chevronDown,
-                          size: 16,
-                          color: c.fgNeutralMuted,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            )
-          else
-            const Spacer(),
-          // 걸린 조건의 개수는 배지로 말하지 않는다 — 가계부는 아래 칩 줄이, 할 일은 알림 점 하나가 말한다.
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              PButton.icon(
-                icon: LucideIcons.slidersHorizontal,
-                semanticLabel: filterOn ? l.tdmFilterOn : l.expFilter,
-                variant: PButtonVariant.ghost,
-                onPressed: onOpenFilter,
-              ),
-              if (filterOn)
-                const Positioned.fill(
-                  child: IgnorePointer(
-                    child: Center(
-                      child: PNotificationBadge(
-                        child: SizedBox.square(dimension: PSpacing.x4_5),
+                          Icon(
+                            LucideIcons.chevronDown,
+                            size: 16,
+                            color: c.fgNeutralMuted,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-            ],
-          ),
-          if (onAddTx != null)
-            PButton.icon(
-              icon: LucideIcons.plus,
-              semanticLabel: l.expAdd,
-              variant: PButtonVariant.ghost,
-              onPressed: onAddTx,
+              )
+            else
+              const Spacer(),
+            // 걸린 조건의 개수는 배지로 말하지 않는다 — 가계부는 아래 칩 줄이, 할 일은 알림 점 하나가 말한다.
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                PButton.icon(
+                  icon: LucideIcons.slidersHorizontal,
+                  semanticLabel: filterOn ? l.tdmFilterOn : l.expFilter,
+                  variant: PButtonVariant.ghost,
+                  onPressed: onOpenFilter,
+                ),
+                if (filterOn)
+                  const Positioned.fill(
+                    child: IgnorePointer(
+                      child: Center(
+                        child: PNotificationBadge(
+                          child: SizedBox.square(dimension: PSpacing.x4_5),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-        ],
+            if (onAddTx != null)
+              PButton.icon(
+                icon: LucideIcons.plus,
+                semanticLabel: l.expAdd,
+                variant: PButtonVariant.ghost,
+                onPressed: onAddTx,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -283,25 +290,38 @@ class LedgerTotalRow extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, box) {
           final label = buttonLabel ?? l.txmSpendSummary;
+          // 보이는 단추 36 은 그대로, 놓인 자리를 44 로 — 누르는 영역이 부모 안에서만 넓어지므로(사이의 Semantics 는 가장 바깥)
           final button = Semantics(
             container: true,
             expanded: summaryOpen,
-            child: PButton(
-              label: label,
-              prefixIcon: buttonIcon,
-              size: PButtonSize.small,
-              variant: PButtonVariant.neutralOutline,
-              onPressed: (loading || failed) ? null : onToggleSummary,
+            child: SizedBox(
+              height: PTouch.min,
+              child: Center(
+                child: PButton(
+                  label: label,
+                  prefixIcon: buttonIcon,
+                  size: PButtonSize.small,
+                  variant: PButtonVariant.neutralOutline,
+                  onPressed: (loading || failed) ? null : onToggleSummary,
+                ),
+              ),
             ),
           );
           final figures = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (loading) ...[
-                PSkeleton.text(PTypography.t9, width: 160),
-                const SizedBox(height: PSpacing.x1_5),
-                PSkeleton.text(PTypography.t4, width: 200),
-              ] else if (!failed) ...[
+              if (loading)
+                loadingRegionWithText(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PSkeleton.text(PTypography.t9, width: 160),
+                      const SizedBox(height: PSpacing.x1_5),
+                      PSkeleton.text(PTypography.t4, width: 200),
+                    ],
+                  ),
+                )
+              else if (!failed) ...[
                 Text(
                   // 금액은 쉼표 뒤에서만 줄을 바꾼다 — 큰 글자에서 숫자 가운데가 끊기지 않게
                   keepAllAmount(total ?? ''),
@@ -484,7 +504,9 @@ class LedgerCalendar extends StatelessWidget {
         return parts.isEmpty ? date : l.expCellLabel(date, parts.join(', '));
       },
       markBuilder: (context, ds) {
-        if (loading) return PSkeleton.text(PTypography.t1, width: 32);
+        if (loading) {
+          return loadingInline(PSkeleton.text(PTypography.t1, width: 32));
+        }
         final data = byDay[ds];
         if (data == null) return const SizedBox(height: PSpacing.x3);
         // 칸 글이 좁아 안 들어가는 금액은 말줄임 없이 점 "•" 으로 바꾼다(결정 2026-11-07 2A) — 전액은 날을 누르면
@@ -646,6 +668,7 @@ class LedgerCalendarGrid extends StatelessWidget {
         enabled: true,
         onTap: () => onSelect(cellData.ds),
         touchMin: 0,
+        focusRing: const PFocusRingStyle(inset: true),
         // 이름이 있으면 아래에서 칸 하나로 묶어 읽는다 — 여기서는 누름만 맡는다
         semantics: (child, enabled, tap) => label != null
             ? child
@@ -770,14 +793,22 @@ class LedgerCalendarGrid extends StatelessWidget {
             child: Semantics(
               container: true,
               expanded: expanded,
-              child: PButton.icon(
-                icon: expanded
-                    ? LucideIcons.chevronUp
-                    : LucideIcons.chevronDown,
-                // 이름은 늘 "월 달력" — 펼침 여부는 expanded 가 말한다
-                semanticLabel: AppLocalizations.of(context).txmCalendarToggle,
-                variant: PButtonVariant.ghost,
-                onPressed: onToggleExpand,
+              // 보이는 단추 40 은 그대로, 놓인 자리를 44x44 로 — 머리 틀이 단추에서 끝나 누르는 영역이 더 넓어질 데가 없었다
+              child: SizedBox.square(
+                dimension: PTouch.min,
+                child: Center(
+                  child: PButton.icon(
+                    icon: expanded
+                        ? LucideIcons.chevronUp
+                        : LucideIcons.chevronDown,
+                    // 이름은 늘 "월 달력" — 펼침 여부는 expanded 가 말한다
+                    semanticLabel: AppLocalizations.of(
+                      context,
+                    ).txmCalendarToggle,
+                    variant: PButtonVariant.ghost,
+                    onPressed: onToggleExpand,
+                  ),
+                ),
               ),
             ),
           ),

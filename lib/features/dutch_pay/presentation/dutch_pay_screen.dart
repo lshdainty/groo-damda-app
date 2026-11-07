@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 더치페이 폰 화면(I-15 25 ~ 31 · 5-B) — 띠 둘: 요약 띠(받을 돈 · 보낼 돈 두 줄) | 8 | 목록 띠(Segmented "진행 중 N · 완료 N · 친구 N" + 그 탭의 줄) +
 /// 떠 있는 [+]("정산 만들기"). 띠 안에 카드를 두지 않는다. '보낼 돈' 데이터는 모델에 없어 늘 0(지금 있는 기능만).
@@ -82,8 +83,8 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
         ),
       );
     } else if (items == null) {
-      content = Column(
-        children: [for (var i = 0; i < 3; i++) const _RowSkeleton()],
+      content = loadingRegion(
+        Column(children: [for (var i = 0; i < 3; i++) const _RowSkeleton()]),
       );
     } else {
       content = switch (_tab) {

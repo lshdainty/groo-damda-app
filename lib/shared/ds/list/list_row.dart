@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 // List 의 줄 틀 — 줄의 종류(보기만 · 누르는 · 링크 · 컨트롤 · 부모)가 함께 쓰는 짜임. 화면에서 직접 쓰지 않는다 —
@@ -95,6 +96,37 @@ double listTitleMinWidth({
 /// (list.yaml content.stackBelow, 03-D 결정 1 B). em 은 제목 글자(t5)의 **글자 배율을 곱한** 크기다.
 const double kPListStackBelowEm = 16;
 
+/// 줄 끝에 놓는 편집 칸의 폭 — 보통은 [width] 로 줄 끝에 서고, 줄 안 폭이 좁으면([kPListStackBelowEm]) 본문 아래 전폭으로
+/// 내려간다(list.md "큰 글자에서 값을 본문 아래로"를 편집 칸 붙이개에도). [PListValue] 안에 둔다(mergeSemantics false —
+/// 칸은 줄 이름에 합쳐지지 않고 따로 읽힌다). 내려갈 때 쓰는 모양은 줄이 [below] 로 바꿔 입힌다.
+class PListEditWidth extends StatelessWidget {
+  const PListEditWidth({super.key, required this.width, required this.child})
+    : fill = false;
+
+  const PListEditWidth._below({required this.child}) : width = 0, fill = true;
+
+  final double width;
+  final Widget child;
+  final bool fill;
+
+  /// 본문 아래로 내려온 모양 — 전폭.
+  PListEditWidth get below => PListEditWidth._below(child: child);
+
+  @override
+  Widget build(BuildContext context) =>
+      SizedBox(width: fill ? double.infinity : width, child: child);
+}
+
+/// 뒤 붙이개 안 [PListEditWidth] 의 폭(없으면 null).
+double? _editWidthOf(Widget? suffix) {
+  final parts = suffix is PListSuffix ? suffix.children : [?suffix];
+  for (final w in parts) {
+    final inner = w is PListValue ? w.child : w;
+    if (inner is PListEditWidth) return inner.width;
+  }
+  return null;
+}
+
 /// 금액처럼 위젯으로 만든 값 — 뒤 붙이개 자리에 두면 줄이 "값" 으로 읽는다. 줄 안 폭이 좁으면([kPListStackBelowEm])
 /// 글 값과 함께 본문 아래로 내려가고, 화살표 · 스위치 · 체크 · 작은 버튼 같은 조작 요소는 줄 끝에 남는다.
 /// 금액 글은 [keepAllAmount] 로 만든다(쉼표 뒤에서만 줄을 바꾼다).
@@ -155,6 +187,7 @@ const double kPListExpandSlotHeight = PTouch.min - 2 * PSpacing.x0_5;
 @visibleForTesting
 Widget alignListValueStart(Widget w) {
   bool isEnd(TextAlign? a) => a == TextAlign.end || a == TextAlign.right;
+  if (w is PListEditWidth) return w.below;
   if (w is PListValue) {
     return PListValue(
       key: w.key,
@@ -538,6 +571,23 @@ Color _lerpPremultiplied(Color a, Color b, double t) {
 }
 
 class _PListRowFrameState extends State<PListRowFrame> {
+  @override
+  void initState() {
+    super.initState();
+    // 입력 방식이 바뀌면(Tab 뒤 터치) 줄 안쪽 링도 따라간다
+    FocusManager.instance.addHighlightModeListener(_onHighlightMode);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onHighlightMode);
+    super.dispose();
+  }
+
+  void _onHighlightMode(FocusHighlightMode _) {
+    if (mounted) setState(() {});
+  }
+
   static const Map<ShortcutActivator, Intent> _spaceOnly = {
     SingleActivator(LogicalKeyboardKey.space): _ActivateRowIntent(),
   };
@@ -656,7 +706,10 @@ class _PListRowFrameState extends State<PListRowFrame> {
     final bodyNode = buildBodyNode(container: !merge);
     // 글 값 · 금액 값(PListValue)은 본문 최소 폭만 남기고 줄을 바꾼다 — 금액은 쉼표 뒤에서만(03-D 결정 2 B, keepAllAmount 의 U+200B).
     // (값 + 화살표를 PListSuffix 로 넘긴 줄도 값이 있으면 같은 제한을 받는다 — 화살표는 제한 밖이다)
-    final isText = parts.values.isNotEmpty;
+    // 편집 칸은 본문 때문에 줄지 않는다 — 문턱이 이름 자리를 이미 남겼다
+    final isText = parts.values.any(
+      (v) => !(v is PListValue && v.child is PListEditWidth),
+    );
     final valueSide = merge
         ? (parts.values.length == 1
               ? parts.values.first
@@ -930,9 +983,20 @@ class _PListRowFrameState extends State<PListRowFrame> {
       PListNest.child => kPListChildStart,
     };
     // 줄 안 폭(줄 폭 − 좌우 여백, 앞 붙이개 · 꺾쇠 자리 포함)이 제목 글자 16개보다 좁은가 — em 은 글자 배율을 곱한 크기
-    final stackBelow =
-        kPListStackBelowEm *
-        MediaQuery.textScalerOf(context).scale(PTypography.t5.fontSize!);
+    final em = MediaQuery.textScalerOf(context).scale(PTypography.t5.fontSize!);
+    var stackBelow = kPListStackBelowEm * em;
+    // 줄 끝에 편집 칸([PListEditWidth])이 있으면 문턱은 px 다(글자 배율과 무관, 웹과 같은 식) — 앞 자리 + 칸 폭 × 2.
+    // List 는 공백 없는 긴 이름의 본문을 (줄 안 폭 − 앞 자리) ÷ 2 까지 줄이므로, 그 이름에서도 칸이 줄 안에 남으려면
+    // 줄 안 폭이 앞 자리 + 칸 × 2 이상이어야 한다. 이보다 좁으면 칸이 이름 아래 전폭으로 내려간다
+    final editWidth = _editWidthOf(widget.suffix);
+    if (editWidth != null) {
+      stackBelow =
+          listLead(
+            hasPrefix: widget.prefix != null,
+            hasExpandSlot: nest == PListNest.parent,
+          ) +
+          2 * editWidth;
+    }
     Widget row = Padding(
       padding: EdgeInsetsDirectional.only(
         start: start,
@@ -1084,6 +1148,18 @@ class _PListRowFrameState extends State<PListRowFrame> {
       fit: StackFit.passthrough,
       children: [background, content],
     );
+    if (widget.interactive && !disabled) {
+      // 키보드 초점 링 — 줄 안쪽 2px (list.yaml focused: 화면 폭 줄은 바깥 링이 잘린다)
+      // 줄 자신이 초점을 가질 때만 — 줄 안의 꺾쇠 단추가 받으면 그 단추 몫이다. 터치로 눌러 생긴 초점에는 없다
+      final row = result;
+      result = Builder(
+        builder: (context) => PFocusRing(
+          visible: Focus.of(context).hasPrimaryFocus && keyboardHighlight(),
+          style: PFocusRingStyle(radius: scope.itemRadius, inset: true),
+          child: row,
+        ),
+      );
+    }
 
     if (widget.interactive) {
       if (!disabled) {

@@ -39,12 +39,19 @@ import 'package:groo_damda_app/shared/forms/save_failure.dart';
 /// 참여자 이름 길이 상한 — 웹 `PARTICIPANT_NAME_MAX` 와 같은 값.
 const int kDutchParticipantNameMax = 20;
 
+/// 직접 입력 칸 폭 — 한 사람 몫 최대 9,999,999,999원이 글자 100% 에서 다 보이는 폭 — 웹 실측 168(089ea91f) — 앱은 같은 글꼴로 재니 168 에서 1.3px 넘쳐 최소 170 이라 172 로 둔다.
+@visibleForTesting
+const double kDutchCustomFieldWidth = 172;
+
 class _Person {
   _Person({required this.id, required this.name});
   final String id;
   final String name;
   String ratio = '1';
   String custom = '';
+  // 칸이 줄 끝 ↔ 본문 아래로 옮겨도(글자 크기 · 폭이 바뀔 때) 입력 초점 · 캐럿이 유지되게 한다
+  final ratioKey = GlobalKey();
+  final customKey = GlobalKey();
   late final ratioCtrl = TextEditingController(text: '1');
   late final customCtrl = TextEditingController();
   void dispose() {
@@ -699,39 +706,51 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
         if (rest > 0) detail = l.dutchRemainIncluded(txMoney(rest, masked));
       case DutchSplitMethod.ratio:
         detail = txMoney(amount, masked);
-        suffix = SizedBox(
-          width: 96,
-          child: PInput(
-            controller: p.ratioCtrl,
-            semanticLabel: '$name ${l.dutchShareUnit}',
-            suffixText: l.dutchShareUnit,
-            textAlign: TextAlign.end,
-            invalid: _attempted && _rowBad(p),
-            tabularFigures: true,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-            ],
-            onChanged: (v) => setState(() => p.ratio = v),
+        suffix = PListValue(
+          mergeSemantics: false,
+          child: PListEditWidth(
+            width: 96,
+            child: PInput(
+              key: p.ratioKey,
+              controller: p.ratioCtrl,
+              semanticLabel: '$name ${l.dutchShareUnit}',
+              suffixText: l.dutchShareUnit,
+              textAlign: TextAlign.end,
+              invalid: _attempted && _rowBad(p),
+              tabularFigures: true,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+              onChanged: (v) => setState(() => p.ratio = v),
+            ),
           ),
         );
       case DutchSplitMethod.custom:
         suffix = isMe
             ? amountText
-            : SizedBox(
-                width: 96,
-                child: PInput(
-                  controller: p.customCtrl,
-                  semanticLabel: name,
-                  placeholder: '0',
-                  suffixText: wonUnit(),
-                  textAlign: TextAlign.end,
-                  invalid: _attempted && _rowBad(p),
-                  tabularFigures: true,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: const [AmountInputFormatter()],
-                  onChanged: (v) =>
-                      setState(() => p.custom = '${parseAmountInput(v) ?? 0}'),
+            : PListValue(
+                mergeSemantics: false,
+                child: PListEditWidth(
+                  // 금액 직접 입력은 9,999,999,999 가 100% 에서 칸 안에 다 보이는 폭(실제 글꼴 실측 170 + 여유 6), 비율은 96
+                  width: kDutchCustomFieldWidth,
+                  child: PInput(
+                    key: p.customKey,
+                    controller: p.customCtrl,
+                    semanticLabel: name,
+                    placeholder: '0',
+                    suffixText: wonUnit(),
+                    textAlign: TextAlign.end,
+                    invalid: _attempted && _rowBad(p),
+                    tabularFigures: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: const [AmountInputFormatter()],
+                    onChanged: (v) => setState(
+                      () => p.custom = '${parseAmountInput(v) ?? 0}',
+                    ),
+                  ),
                 ),
               );
     }

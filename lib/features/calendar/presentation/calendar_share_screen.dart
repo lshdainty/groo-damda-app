@@ -18,6 +18,7 @@ import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart'
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 설정 진입 — 캘린더 관리·공유 (user_calendar 기반).
 ///
@@ -73,8 +74,10 @@ class _CalendarShareScreenState extends ConsumerState<CalendarShareScreen> {
               listAsync.when(
                 // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
                 skipError: true,
-                loading: () => _ShareSkeleton(
-                  onCreate: () => showCalendarCreateSheet(context),
+                loading: () => loadingRegion(
+                  _ShareSkeleton(
+                    onCreate: () => showCalendarCreateSheet(context),
+                  ),
                 ),
                 error: (e, _) => CalendarSurfaceFailure(
                   title: l.calCalendarLoadError,

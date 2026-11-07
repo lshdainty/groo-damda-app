@@ -33,6 +33,7 @@ import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 예산 설정 화면 — 웹 `BudgetManager.tsx`(설정 > 예산 설정) 미러.
 ///
@@ -245,7 +246,10 @@ class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
         ),
       );
     } else if (budgets == null || summary == null) {
-      children.addAll(const [_TotalSkeleton(), _ListSkeleton()]);
+      children.addAll([
+        loadingRegion(const _TotalSkeleton()),
+        loadingRegion(const _ListSkeleton()),
+      ]);
     } else {
       final categories = categoriesAsync.value ?? const <ExpenseCategory>[];
       final spentByCategory = _spentByCategoryFromSummary(summary);
@@ -595,13 +599,14 @@ class _TotalSection extends StatelessWidget {
     String won(int n, {String sign = ''}) => budgetWon(n, masked, sign: sign);
     final has = overallBudget != null;
     return BudgetSection(
-      topPadding: PSpacing.x3,
+      topPadding: 9 /* 12 − 3: 줄이 24 로 커진 몫 */,
       children: [
         // 첫 줄: 눈썹 + 오른쪽 글 버튼(수정 · 설정). 글 버튼(36)이 줄을 늘리지 않게 줄 높이는 눈썹(18)이고, 버튼은 위아래로 내민다
         PTouchTargetScope(
           slack: 9,
           child: SizedBox(
-            height: 18,
+            // 줄 높이는 눈썹 18 이 아니라 24 — 부모 밖으로는 누르는 영역을 못 넓히므로 AA 24 를 줄이 지킨다(앞 위 여백이 6 을 가져간다)
+            height: 24,
             child: OverflowBox(
               minHeight: kTextButtonHeight,
               maxHeight: kTextButtonHeight,
@@ -618,7 +623,7 @@ class _TotalSection extends StatelessWidget {
             ),
           ),
         ),
-        const _Gap(PSpacing.x3),
+        const _Gap(9 /* 12 − 3 */),
         if (has)
           BudgetBigAmount(amount: won(monthlyLimit))
         else

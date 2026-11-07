@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 카드 혜택 라이브러리 — 웹 `CardBenefitPage` 폰 갈래 미러(I-20 E 30 ~ 34).
 ///
@@ -260,7 +261,7 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   /// 결과 영역 — 첫 쪽 Skeleton / 실패 / 0건 / 누적 목록 + 끝 줄.
   List<Widget> _buildResults(AppLocalizations l) {
     if (_initialLoading && !_retryingFirst) {
-      return [const _RowsSkeleton(count: 6)];
+      return [loadingRegion(const _RowsSkeleton(count: 6))];
     }
 
     // 첫 쪽을 못 불러왔다 — 목록 자리가 Result Section 의 실패다(예외 · 서버 글은 쓰지 않는다)

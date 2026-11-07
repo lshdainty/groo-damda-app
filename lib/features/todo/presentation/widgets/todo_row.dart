@@ -19,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_day_group.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 할 일 줄(I-10 12 · 13) — ds List 누르는 줄 + 앞 Checkbox(24 · square · neutral). 줄을 누르면 상세, 체크는 따로 누르는 자리다.
 ///
@@ -148,6 +149,7 @@ class _TodoCheck extends StatelessWidget {
         onTap: onToggle,
         activateOnEnter: false,
         touchMin: 0,
+        focusRing: const PFocusRingStyle(inset: true),
         semantics: (child, enabled, onTap) => Semantics(
           container: true,
           enabled: enabled,

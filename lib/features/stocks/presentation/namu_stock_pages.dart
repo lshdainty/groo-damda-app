@@ -45,6 +45,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 종목 상세 화면 — 폰 띠 차례(U3): 머리 · 차트 / 내 보유 / 오늘 시세 / 호가 · 체결 / 투자자별(국내) / 기본 정보 / 일별 시세.
 /// 보유 종목이 아니면 내 보유 띠가 없고, 미국 종목은 투자자별 띠가 없다.
@@ -113,10 +114,12 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
               StocksBandTitle(l.stocksOrderbookTrades),
               Semantics(
                 label: l.stocksOrderbookLoading,
-                child: Column(
-                  children: [
-                    for (var i = 0; i < 4; i++) const StocksLineSkeleton(),
-                  ],
+                child: loadingRegion(
+                  Column(
+                    children: [
+                      for (var i = 0; i < 4; i++) const StocksLineSkeleton(),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -307,7 +310,9 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
                         ref.invalidate(stockSearchResultProvider(symbol)),
                   )
                 else if (!marketKnown)
-                  const PSkeleton(height: kStockChartWebViewHeight)
+                  loadingRegion(
+                    const PSkeleton(height: kStockChartWebViewHeight),
+                  )
                 else
                   ChartWebView(
                     symbol: symbol,
@@ -376,7 +381,15 @@ class _NamuStockDetailPageState extends ConsumerState<NamuStockDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               StocksBandTitle(l.stocksBasicInfo),
-              for (var i = 0; i < 3; i++) const StocksLineSkeleton(),
+              loadingRegion(
+                const Column(
+                  children: [
+                    StocksLineSkeleton(),
+                    StocksLineSkeleton(),
+                    StocksLineSkeleton(),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -648,10 +661,12 @@ class _NamuDailyPlaceholder extends StatelessWidget {
           StocksBandTitle(l.stocksDailyPrices),
           Semantics(
             label: l.stocksDailyPricesLoading,
-            child: Column(
-              children: [
-                for (var i = 0; i < 5; i++) const StocksLineSkeleton(),
-              ],
+            child: loadingRegion(
+              Column(
+                children: [
+                  for (var i = 0; i < 5; i++) const StocksLineSkeleton(),
+                ],
+              ),
             ),
           ),
         ],
@@ -703,8 +718,10 @@ class _NamuDailyBand extends ConsumerWidget {
     } else if (async.isLoading && !async.hasValue) {
       list = Semantics(
         label: l.stocksDailyPricesLoading,
-        child: Column(
-          children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+        child: loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+          ),
         ),
       );
     } else if (rows.isEmpty) {
@@ -808,11 +825,13 @@ class NamuPortfolioPage extends ConsumerWidget {
     } else if (loading) {
       content = Padding(
         padding: const EdgeInsets.all(PSpacing.x6),
-        child: Center(
-          child: PSkeleton(
-            width: 112,
-            height: 112,
-            radius: PSkeletonRadius.full,
+        child: loadingRegion(
+          const Center(
+            child: PSkeleton(
+              width: 112,
+              height: 112,
+              radius: PSkeletonRadius.full,
+            ),
           ),
         ),
       );

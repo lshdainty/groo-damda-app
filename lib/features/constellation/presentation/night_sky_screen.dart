@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 밤하늘 화면(I-11 7 ~ 12) — 상단 바 + 띠 셋: ① 오늘(하늘 그림 + 관측 리포트 줄) ② 나의 밤하늘 ③ 별자리 도감.
 ///
@@ -85,7 +86,7 @@ class NightSkyScreen extends ConsumerWidget {
           PScreenSection(
             padding: EdgeInsets.zero,
             child: today == null
-                ? const _TodaySkeleton()
+                ? loadingRegion(const _TodaySkeleton())
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -307,7 +308,11 @@ class _CollectionBand extends StatelessWidget {
             ),
           )
         else
-          for (var i = 0; i < 5; i++) const _RowSkeleton(),
+          loadingRegion(
+            Column(
+              children: [for (var i = 0; i < 5; i++) const _RowSkeleton()],
+            ),
+          ),
       ],
     );
   }

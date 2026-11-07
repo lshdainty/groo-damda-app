@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 카테고리 고르기 시트(I-20 C 19 — 폼 시트 위 고르기) — 고른 카테고리의 rowId 가 돌아온다. 다시 받는 중에는 Skeleton, 못 받으면
 /// 시트 안 실패 Result Section + 다시 시도(앱 빨간 원문을 두지 않는다). 폼 줄 값은 그대로다.
@@ -74,27 +75,29 @@ class CategoryPickBody extends ConsumerWidget {
           ),
         );
       }
-      return Column(
-        children: [
-          for (var i = 0; i < 3; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpacing.globalGutter,
-                vertical: PSpacing.x3,
+      return loadingRegion(
+        Column(
+          children: [
+            for (var i = 0; i < 3; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: PSpacing.globalGutter,
+                  vertical: PSpacing.x3,
+                ),
+                child: Row(
+                  spacing: PSpacing.x3,
+                  children: [
+                    const PSkeleton(
+                      width: PListTile.size,
+                      height: PListTile.size,
+                      radius: PSkeletonRadius.r12,
+                    ),
+                    PSkeleton.text(PTypography.t5, width: 140),
+                  ],
+                ),
               ),
-              child: Row(
-                spacing: PSpacing.x3,
-                children: [
-                  const PSkeleton(
-                    width: PListTile.size,
-                    height: PListTile.size,
-                    radius: PSkeletonRadius.r12,
-                  ),
-                  PSkeleton.text(PTypography.t5, width: 140),
-                ],
-              ),
-            ),
-        ],
+          ],
+        ),
       );
     }
 

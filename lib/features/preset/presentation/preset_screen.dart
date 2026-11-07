@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 enum PresetSortKey { used, recent, name }
 
@@ -135,7 +136,7 @@ class _PresetScreenState extends ConsumerState<PresetScreen> {
               } catch (_) {}
             },
             child: loading
-                ? const _PresetSkeleton()
+                ? loadingRegionScroll(const _PresetSkeleton())
                 : failed
                 ? _failure(l)
                 : items.isEmpty
@@ -280,8 +281,7 @@ class _PresetSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
+    return Column(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(

@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 통계 · 고정/변동 탭 — 한 기간의 수입·지출을 **고정**과 **변동(고정 제외)** 으로 나눠 보여 준다(I-08 38).
 /// 웹 `fixed-parts.tsx` 짝.
@@ -463,7 +464,9 @@ class _MonthlyStackState extends ConsumerState<_MonthlyStack> {
     if (s == null) {
       return statsSection(
         header: head,
-        children: [const StatsChartSkeleton(height: 200)],
+        children: [
+          loadingRegionWithText(const StatsChartSkeleton(height: 200)),
+        ],
       );
     }
     // 한 달만 고른 기간이면 막대가 하나뿐이라 의미가 없다 — 그때는 최근 6개월을 보여 준다
@@ -502,7 +505,9 @@ class _MonthlyStackState extends ConsumerState<_MonthlyStack> {
     if (loading) {
       return statsSection(
         header: head,
-        children: [const StatsChartSkeleton(height: 200)],
+        children: [
+          loadingRegionWithText(const StatsChartSkeleton(height: 200)),
+        ],
       );
     }
     if (!rows.any((r) => r.total > 0)) {

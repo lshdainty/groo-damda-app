@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 원 지름 — 아이콘만(SEED extended=false). 누르는 영역도 56.
 const double kFabSize = PSpacing.x14;
@@ -64,6 +65,7 @@ class PFloatingActionButton extends StatelessWidget {
       onTap: onPressed,
       // 원 56 이 곧 누르는 영역이다
       touchMin: 0,
+      focusRing: const PFocusRingStyle(circle: true),
       semantics: (child, enabled, onTap) => Semantics(
         container: true,
         button: true,

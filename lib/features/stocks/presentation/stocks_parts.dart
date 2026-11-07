@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_donut.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
@@ -369,11 +370,12 @@ class _StocksSearchEntryState extends State<StocksSearchEntry> {
     final l = AppLocalizations.of(context);
     final c = context.colors;
     return Padding(
+      // 아래 4 는 누르는 영역 44 의 아래쪽 몫 2 와 초점 링 아래 변(띄움 2 + 두께 2)이 잘리지 않을 자리 — 부모 안에서만 받으므로 놓인 자리로 준다
       padding: const EdgeInsets.fromLTRB(
         PSpacing.x6,
         PSpacing.x2,
         PSpacing.x6,
-        0,
+        PSpacing.x1,
       ),
       // 누르는 자리 — ds PressArea. 누르는 동안 바탕 bg-layer-default-pressed + 내용 2px 축소(Input Button 의 누름과 같다).
       // Material 물결은 두지 않는다
@@ -382,7 +384,10 @@ class _StocksSearchEntryState extends State<StocksSearchEntry> {
         enabled: true,
         focusNode: _focus,
         onTap: _open,
-        touchMin: 0,
+        // 보이는 상자는 40(input.md 가 받아들인 값) — 누르는 영역만 44 까지 넓힌다(위 8 여백 · 아래 2 여백 안에서)
+        touchMin: PTouch.min,
+        // 키보드 초점 링 — 밑줄 칸이지만 다른 칸(Input Button)과 같은 링을 입구 전체 상자에 그린다
+        focusRing: const PFocusRingStyle(radius: PRounded.r3),
         semantics: (child, enabled, tap) => Semantics(
           container: true,
           button: true,

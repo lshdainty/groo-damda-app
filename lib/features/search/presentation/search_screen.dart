@@ -30,6 +30,7 @@ import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/filter_bodies.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_day_group.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 유형 거르기 — 전체 · 지출 · 수입(서버 expenseType, 전체는 보내지 않는다).
 const String _typeAll = 'ALL';
@@ -271,14 +272,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ];
     }
     if (_loading) {
-      return const [
+      return [
         SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              LedgerDaySkeleton(rows: 3, first: true),
-              LedgerDaySkeleton(rows: 2),
-            ],
+          child: loadingRegion(
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LedgerDaySkeleton(rows: 3, first: true),
+                LedgerDaySkeleton(rows: 2),
+              ],
+            ),
           ),
         ),
       ];

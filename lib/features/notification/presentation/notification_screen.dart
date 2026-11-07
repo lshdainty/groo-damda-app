@@ -26,6 +26,7 @@ import 'package:groo_damda_app/core/format/now_tick.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/notification/application/notification_providers.dart';
 import 'package:groo_damda_app/features/notification/domain/notification.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 알림 목록(I-15 41 ~ 44) — 상단 바(← "알림" + ⚙ "알림 설정") → 흰 면 하나: 목록 머리 "읽지 않은 알림 N개" +
 /// 오른쪽 글 버튼 "모두 읽음" → 날짜 묶음("10월 23일 (금) · 오늘") + 줄. 바닥 고정 띠는 없다.
@@ -81,7 +82,7 @@ class NotificationScreen extends ConsumerWidget {
         child: listAsync.when(
           // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
           skipError: true,
-          loading: () => const _NotiSkeleton(),
+          loading: () => loadingRegionScroll(const _NotiSkeleton()),
           error: (e, _) => ListView(
             children: [
               PResultSection(
@@ -301,8 +302,7 @@ class _NotiSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
+    return Column(
       children: [
         for (var i = 0; i < 5; i++) ...[
           if (i == 0 || i == 3)

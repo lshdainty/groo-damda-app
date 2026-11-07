@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 저축 목표 관리 (설정 > 저축 목표) — design GoalManager 미러 (웹 SavingGoalManager 정합).
 ///
@@ -58,7 +59,7 @@ class SavingGoalScreen extends ConsumerWidget {
                 ),
               ],
             )
-          : const _SavingGoalSkeleton();
+          : loadingRegion(const _SavingGoalSkeleton());
     } else {
       final totalTarget = items.fold<int>(0, (s, g) => s + g.targetAmount);
       final totalCurrent = items.fold<int>(0, (s, g) => s + g.currentAmount);

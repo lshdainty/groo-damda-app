@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 // 통계 · 비교 탭 구역(I-08 37) — 요약(큰 숫자 + 증감 + 견줌 막대) · 지표 셋 · 카테고리별 증감 · 요일별 지출 비교(ds 막대 두 계열).
 // 증감은 ds Delta(▲ fg-critical · ▼ fg-informative), "좋은지 나쁜지" 는 글이 말한다(색 강조를 걷는다).
@@ -176,22 +177,28 @@ class StatsCompareSummarySection extends StatelessWidget {
     if (now == null || prev == null) {
       return statsSection(
         children: [
-          PSkeleton.text(PTypography.t3, width: 100),
-          const SizedBox(height: PSpacing.x1),
-          PSkeleton.text(PTypography.t9, width: 200),
-          const SizedBox(height: PSpacing.x3),
-          PSkeleton.text(PTypography.t4, width: 240),
-          const SizedBox(height: PSpacing.x4),
-          const PSkeleton(
-            width: double.infinity,
-            height: PSpacing.x2,
-            radius: PSkeletonRadius.full,
-          ),
-          const SizedBox(height: PSpacing.x2_5),
-          const PSkeleton(
-            width: double.infinity,
-            height: PSpacing.x2,
-            radius: PSkeletonRadius.full,
+          loadingRegionWithText(
+            Column(
+              children: [
+                PSkeleton.text(PTypography.t3, width: 100),
+                const SizedBox(height: PSpacing.x1),
+                PSkeleton.text(PTypography.t9, width: 200),
+                const SizedBox(height: PSpacing.x3),
+                PSkeleton.text(PTypography.t4, width: 240),
+                const SizedBox(height: PSpacing.x4),
+                const PSkeleton(
+                  width: double.infinity,
+                  height: PSpacing.x2,
+                  radius: PSkeletonRadius.full,
+                ),
+                const SizedBox(height: PSpacing.x2_5),
+                const PSkeleton(
+                  width: double.infinity,
+                  height: PSpacing.x2,
+                  radius: PSkeletonRadius.full,
+                ),
+              ],
+            ),
           ),
         ],
       );
@@ -297,14 +304,20 @@ class StatsCompareMetricsSection extends StatelessWidget {
     if (loading) {
       return statsSection(
         children: [
-          for (var i = 0; i < 3; i++) ...[
-            if (i > 0) const SizedBox(height: PSpacing.x5),
-            PSkeleton.text(PTypography.t3, width: 80),
-            const SizedBox(height: PSpacing.x1),
-            PSkeleton.text(PTypography.t9, width: 160),
-            const SizedBox(height: PSpacing.x1),
-            PSkeleton.text(PTypography.t3, width: 140),
-          ],
+          loadingRegionWithText(
+            Column(
+              children: [
+                for (var i = 0; i < 3; i++) ...[
+                  if (i > 0) const SizedBox(height: PSpacing.x5),
+                  PSkeleton.text(PTypography.t3, width: 80),
+                  const SizedBox(height: PSpacing.x1),
+                  PSkeleton.text(PTypography.t9, width: 160),
+                  const SizedBox(height: PSpacing.x1),
+                  PSkeleton.text(PTypography.t3, width: 140),
+                ],
+              ],
+            ),
+          ),
         ],
       );
     }
@@ -385,34 +398,40 @@ class StatsCompareCategorySection extends StatelessWidget {
       return BudgetListSection(
         header: head,
         children: [
-          for (var i = 0; i < 4; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpacing.x6,
-                vertical: PSpacing.x3,
-              ),
-              child: Row(
-                spacing: PSpacing.x3,
-                children: [
-                  const PSkeleton(
-                    width: PSpacing.x10,
-                    height: PSpacing.x10,
-                    radius: PSkeletonRadius.r12,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: PSpacing.x0_5,
+          loadingRegionWithText(
+            Column(
+              children: [
+                for (var i = 0; i < 4; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: PSpacing.x6,
+                      vertical: PSpacing.x3,
+                    ),
+                    child: Row(
+                      spacing: PSpacing.x3,
                       children: [
-                        PSkeleton.text(PTypography.t5, width: 100),
-                        PSkeleton.text(PTypography.t3, width: 140),
+                        const PSkeleton(
+                          width: PSpacing.x10,
+                          height: PSpacing.x10,
+                          radius: PSkeletonRadius.r12,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: PSpacing.x0_5,
+                            children: [
+                              PSkeleton.text(PTypography.t5, width: 100),
+                              PSkeleton.text(PTypography.t3, width: 140),
+                            ],
+                          ),
+                        ),
+                        PSkeleton.text(PTypography.t5, width: 64),
                       ],
                     ),
                   ),
-                  PSkeleton.text(PTypography.t5, width: 64),
-                ],
-              ),
+              ],
             ),
+          ),
         ],
       );
     }
@@ -566,7 +585,9 @@ class _StatsCompareWeekdaySectionState
     if (widget.nowExpenses == null || widget.prevExpenses == null) {
       return statsSection(
         header: head,
-        children: const [StatsChartSkeleton(height: 180)],
+        children: [
+          loadingRegionWithText(const StatsChartSkeleton(height: 180)),
+        ],
       );
     }
     final now = statsWeekdaySums(widget.nowExpenses!);

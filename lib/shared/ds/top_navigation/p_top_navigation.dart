@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/notification_badge/p_notification_badge.dart';
 
 /// 바의 타입 — root(탭 첫 화면 — 큰 제목 22, 왼쪽 버튼 없음) · standard(그 아래 화면 — 왼쪽 버튼 + 제목 18, 기본).
@@ -153,6 +154,8 @@ class PTopNavigation extends StatelessWidget {
                     header: true,
                     // 안드로이드는 headingLevel > 0 일 때만 머리말로 잡는다(제목 이동) — 화면 제목은 1단계
                     headingLevel: 1,
+                    // 화면이 바뀔 때 안드로이드가 화면 이름으로 읽는다(AppBar 를 걷은 화면)
+                    namesRoute: true,
                     child: Text(
                       title,
                       key: const ValueKey('top-navigation-title'),
@@ -195,6 +198,7 @@ class _SearchSlot extends StatelessWidget {
             container: true,
             header: true,
             headingLevel: 1,
+            namesRoute: true,
             label: heading,
             child: const SizedBox.expand(),
           ),
@@ -293,6 +297,8 @@ class PTopNavigationIconButton extends StatelessWidget {
       onTap: onPressed,
       // 상자 44 가 곧 누르는 영역이다 — 보이지 않는 여백을 더하지 않는다
       touchMin: 0,
+      // 키보드 초점 링 — 상자 안쪽 2px (top-navigation.md focused)
+      focusRing: const PFocusRingStyle(radius: PRounded.r2, inset: true),
       semantics: (child, enabled, onTap) => Semantics(
         container: true,
         button: true,
@@ -353,6 +359,7 @@ class PTopNavigationTextButton extends StatelessWidget {
       enabled: active,
       onTap: onPressed,
       touchMin: 0,
+      focusRing: const PFocusRingStyle(radius: PRounded.r2, inset: true),
       semantics: (child, enabled, onTap) => Semantics(
         container: true,
         button: true,

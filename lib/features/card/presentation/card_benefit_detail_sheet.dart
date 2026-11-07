@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 카드 혜택 상세 — 조회 시트(I-20 E 34). 바깥 누름 · 끌어내림으로 닫히고 바닥 버튼은 없다(닫기 원 하나). 높이는 내용만큼 ·
 /// 최대 90%, 본문만 스크롤 + 끝 흐림.
@@ -53,7 +54,7 @@ class CardDetailContent extends ConsumerWidget {
     return async.when(
       // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
       skipError: true,
-      loading: () => const _DetailSkeleton(),
+      loading: () => loadingRegion(const _DetailSkeleton()),
       error: (_, _) => PResultSection(
         kind: PResultKind.failure,
         size: PResultSize.medium,

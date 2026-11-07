@@ -64,6 +64,25 @@ class PressArea extends StatefulWidget {
 class _PressAreaState extends State<PressArea> {
   bool _pressed = false;
   bool _ringVisible = false;
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tab 으로 초점이 온 뒤 손가락으로 바꾸면(또는 반대) 링도 입력 방식을 따라간다
+    FocusManager.instance.addHighlightModeListener(_onHighlightMode);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onHighlightMode);
+    super.dispose();
+  }
+
+  void _onHighlightMode(FocusHighlightMode mode) {
+    final next = _focused && mode == FocusHighlightMode.traditional;
+    if (mounted && next != _ringVisible) setState(() => _ringVisible = next);
+  }
 
   /// 누르는 순간 잰 크기 — 눌린 동안 폭이 바뀌어도 배율은 그대로다(웹 --press-basis).
   Size _size = const Size(0, 24);
@@ -92,6 +111,7 @@ class _PressAreaState extends State<PressArea> {
       onFocusChange: widget.focusRing == null
           ? null
           : (focused) {
+              _focused = focused;
               final next = focused && keyboardHighlight();
               if (next != _ringVisible) setState(() => _ringVisible = next);
             },

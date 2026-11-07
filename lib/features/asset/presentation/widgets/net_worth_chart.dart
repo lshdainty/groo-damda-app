@@ -10,6 +10,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 12개월 순자산 추이 — ds 선 차트. **영역 채움 없이 선 + 데이터 점마다 점**(I-05 57, 사용자 고침 — chart.md 선 줄
 /// "점이 적은 추이는 선 + 점도 된다"). 점은 지름 6 · 계열 색 · 테두리 없음(이 화면 값), 가리킨 점은 스펙 그대로.
@@ -39,7 +40,7 @@ class NetWorthChart extends ConsumerWidget {
         );
       }
       // 불러오는 중 — 차트 높이 그대로(옛 화면 전체 게이트가 아니라 이 자리만)
-      return PSkeleton(height: height);
+      return loadingRegionWithText(PSkeleton(height: height));
     }
     if (points.isEmpty) {
       return SizedBox(

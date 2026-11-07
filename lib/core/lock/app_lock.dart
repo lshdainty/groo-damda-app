@@ -73,6 +73,28 @@ final appLockAuthProvider = Provider<AppLockAuth>((ref) {
   return AppLockAuth(LocalAuthentication());
 });
 
+/// 이 기기에서 생체 인증 · 화면 잠금을 쓸 수 있는가 — 설정 줄이 스위치를 미리 막는 데 쓴다.
+/// 물어보지 못하면(플랫폼 오류) 막지 않는다 — 켤 때의 인증이 다시 가른다.
+final appLockSupportedProvider = FutureProvider.autoDispose<bool>((ref) async {
+  try {
+    return await ref.read(appLockAuthProvider).isDeviceSupported();
+  } on Object {
+    return true;
+  }
+});
+
+/// 켜 보려다 이 기기에서 쓸 수 없다고 나왔다 — 미리 물은 값이 낡았을 때(설정에서 화면 잠금을 지운 뒤) 줄 설명이 그 자리에서 바뀐다.
+/// 앱이 앞으로 돌아오면 다시 묻고 비운다.
+final appLockUnavailableNowProvider =
+    NotifierProvider<AppLockUnavailableNow, bool>(AppLockUnavailableNow.new);
+
+class AppLockUnavailableNow extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool value) => state = value;
+}
+
 /// 앱 잠금 설정이 켜져 있는가 (표시 설정 > 개인정보 보호).
 final appLockEnabledProvider = Provider<bool>((ref) {
   return ref.watch(settingsProvider).value?.appLock ?? false;

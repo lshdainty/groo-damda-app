@@ -33,6 +33,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 나무증권 폰 화면 — 토스와 같은 띠 틀(내 투자 → 시장 → 종목, I-13 13-3).
 ///
@@ -291,7 +292,9 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
           ),
         );
       } else if (watchAsync.isLoading && !watchAsync.hasValue) {
-        slivers.add(const SliverToBoxAdapter(child: StocksGroupSkeleton()));
+        slivers.add(
+          SliverToBoxAdapter(child: loadingRegion(const StocksGroupSkeleton())),
+        );
       } else if (groups.isEmpty) {
         slivers.add(
           SliverToBoxAdapter(
@@ -399,8 +402,10 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
     if (loading) {
       return Semantics(
         label: l.stocksRankingLoading,
-        child: Column(
-          children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+        child: loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 5; i++) const StocksLineSkeleton()],
+          ),
         ),
       );
     }

@@ -13,6 +13,7 @@ import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_select.dart';
 import 'package:groo_damda_app/shared/widgets/p_skeleton.dart';
 import 'package:groo_damda_app/shared/widgets/p_text_input.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 이체의 계좌·수수료·이자 칸 — **거래 시트 · 반복 설정 · 프리셋 편집**이 같이 쓴다.
 ///
@@ -99,7 +100,8 @@ class TransferAccountFields extends StatelessWidget {
     return assets.when(
       // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
       skipError: true,
-      loading: () => const PSkeleton(width: double.infinity, height: 40),
+      loading: () =>
+          loadingRegion(const PSkeleton(width: double.infinity, height: 40)),
       error: (e, _) => loadErrorText == null
           ? const SizedBox.shrink()
           : Text(

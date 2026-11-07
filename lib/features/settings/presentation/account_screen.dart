@@ -34,6 +34,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 계정 화면 — 흰 화면 하나(I-14 1-B · 14-1).
 ///
@@ -72,6 +73,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   /// 브라우저에서 그냥 돌아온 경우(딥링크가 없다) — 목록을 다시 받고 `loading` 을 푼다.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // 기기에서 화면 잠금을 설정하고 돌아왔을 수 있다 — 생체 인증 가능 여부를 다시 묻는다
+      ref.invalidate(appLockSupportedProvider);
+      ref.read(appLockUnavailableNowProvider.notifier).set(false);
+    }
     if (state != AppLifecycleState.resumed || !_linking) return;
     setState(() => _linking = false);
     ref.invalidate(oauthProvidersProvider);
@@ -161,6 +167,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final subKnown = subscriptionAsync.hasValue;
     final hasSecurities = ref.watch(hasSecuritiesProvider);
     final appLockOn = ref.watch(appLockEnabledProvider);
+    // 이 기기에서 생체 인증을 못 쓰면 스위치를 막고 까닭을 줄 설명에 늘 보인다. 이미 켜져 있으면 끌 수 있어야 한다
+    final appLockBlocked =
+        !appLockOn &&
+        (ref.watch(appLockSupportedProvider).asData?.value == false ||
+            ref.watch(appLockUnavailableNowProvider));
     final hiddenCount =
         ref.watch(settingsProvider).value?.hideCards.length ?? 0;
     final hiddenTotal = kAllHideCards.length;
@@ -186,7 +197,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     // 값은 서버 가격 — 불러오는 중이면 값 자리 Skeleton, 실패면 값 없이 설명만(I-14 34)
     final Widget? priceText = !subKnown
         ? (hasSecurities && subscriptionAsync.isLoading
-              ? SizedBox(width: 72, child: PSkeleton.text(PTypography.t4))
+              ? SizedBox(
+                  width: 72,
+                  child: loadingInline(PSkeleton.text(PTypography.t4)),
+                )
               : null)
         : isSubscribed && subscription?.price != null
         ? PListValue.amount(
@@ -247,8 +261,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               PListSwitchItem(
                 prefix: _icon(LucideIcons.fingerprint),
                 title: l.appLockTitle,
+                detail: appLockBlocked ? l.appLockUnavailable : null,
                 checked: appLockOn,
-                onChanged: (v) => setAppLockWithAuth(context, ref, v),
+                onChanged: appLockBlocked
+                    ? null
+                    : (v) => setAppLockWithAuth(context, ref, v),
               ),
               // 금액 가리기 — 화면·카드 37장을 훑는 목록이라 자기 화면으로 보낸다. 몇 장을 가렸는지 줄에서 보인다.
               PListButtonItem(
@@ -563,7 +580,10 @@ class _GoogleRow extends ConsumerWidget {
         title: 'Google',
         detail: detail,
         detailChild: loading
-            ? SizedBox(width: 96, child: PSkeleton.text(PTypography.t3))
+            ? SizedBox(
+                width: 96,
+                child: loadingInline(PSkeleton.text(PTypography.t3)),
+              )
             : null,
         // 바탕이 보이는 버튼 — 상자 끝이 끝선 24 에 선다(오른쪽 블리드 없음). 위아래 겹침 · 누르는 영역 44 는 그대로.
         suffix: PListAction(

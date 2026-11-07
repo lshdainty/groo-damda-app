@@ -80,6 +80,7 @@ import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row
 import 'package:groo_damda_app/features/expense/presentation/widgets/transfer_row.dart';
 import 'package:groo_damda_app/features/stocks/application/live_prices.dart';
 import 'package:groo_damda_app/features/stocks/data/securities_repository.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 자산 상세 페이지로 간다(I-17 36) — 주소 `/asset/:id`. 라우터 밖(테스트 등)이면 같은 화면을 Navigator 로 연다.
 ///
@@ -185,7 +186,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
         onEdit: () => showAssetEditForm(context, asset),
       );
     } else if (loading) {
-      body = const _DetailSkeleton();
+      body = loadingRegion(const _DetailSkeleton());
     } else if (failed) {
       body = _DetailResult(
         kind: PResultKind.failure,
@@ -1559,26 +1560,28 @@ class _RecentExpenses extends StatelessWidget {
     if (async.isLoading && !async.hasValue) {
       // 실렌더와 같은 날짜 그룹 구조 — 그룹 사이 16, 헤더(날짜+요일+일 합계) + 행.
       // 평평한 행만 깔면 데이터가 오는 순간 헤더 높이만큼 목록이 밀린다.
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (int g = 0; g < 2; g++) ...[
-            Padding(
-              padding: EdgeInsets.only(top: g == 0 ? 0 : PSpacing.x4),
-              // 날짜 머리 — 날짜 · 요일 bodySm · 일 합계 caption 의 줄 높이(_DayGroupHeader 와 같다)
-              child: Row(
-                children: [
-                  dsk.PSkeleton.text(PTypo.bodySm, width: 56),
-                  const SizedBox(width: PSpacing.x2),
-                  dsk.PSkeleton.text(PTypo.bodySm, width: 20),
-                  const Spacer(),
-                  dsk.PSkeleton.text(PTypo.caption, width: 72),
-                ],
+      return loadingRegion(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (int g = 0; g < 2; g++) ...[
+              Padding(
+                padding: EdgeInsets.only(top: g == 0 ? 0 : PSpacing.x4),
+                // 날짜 머리 — 날짜 · 요일 bodySm · 일 합계 caption 의 줄 높이(_DayGroupHeader 와 같다)
+                child: Row(
+                  children: [
+                    dsk.PSkeleton.text(PTypo.bodySm, width: 56),
+                    const SizedBox(width: PSpacing.x2),
+                    dsk.PSkeleton.text(PTypo.bodySm, width: 20),
+                    const Spacer(),
+                    dsk.PSkeleton.text(PTypo.caption, width: 72),
+                  ],
+                ),
               ),
-            ),
-            for (int i = 0; i < 2; i++) const _ExpenseRowSkeleton(),
+              for (int i = 0; i < 2; i++) const _ExpenseRowSkeleton(),
+            ],
           ],
-        ],
+        ),
       );
     }
     // 실패가 빈 글로 보이면 안 된다 — 값이 없는 실패는 띠 + 다시 시도.
@@ -2886,10 +2889,12 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     // 불러오는 중은 Skeleton, 실패는 띠 + 다시 시도 — 둘 다 빈 글로 보이면 안 된다.
     if (usageAsync.isLoading && !usageAsync.hasValue) {
       // 실제 줄(ExpenseRow — 날짜 묶음 없이 늘어놓는 줄)과 같은 모양 두 줄
-      return const ExcludeSemantics(
-        child: Column(
-          key: ValueKey('plain-usage-skeleton'),
-          children: [_ExpenseRowSkeleton(), _ExpenseRowSkeleton()],
+      return loadingRegion(
+        const ExcludeSemantics(
+          child: Column(
+            key: ValueKey('plain-usage-skeleton'),
+            children: [_ExpenseRowSkeleton(), _ExpenseRowSkeleton()],
+          ),
         ),
       );
     }

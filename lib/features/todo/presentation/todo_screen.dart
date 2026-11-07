@@ -38,6 +38,7 @@ import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/scroll/hold_ids.dart';
 import 'package:groo_damda_app/shared/scroll/scroll_to_keyed.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 같은 줄의 두 번째 완료 누름을 무시하는 시간 — 따닥 막기(웹 `DOUBLE_CLICK_GUARD_MS`). 붙들기([kListHold] 700)보다 짧아야 한다.
 const Duration kTodoDoubleTapGuard = Duration(milliseconds: 600);
@@ -521,10 +522,17 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
           ),
         );
       } else if (loading) {
-        children.addAll(const [
-          TodoDaySkeleton(rows: 3, first: true),
-          TodoDaySkeleton(rows: 2),
-        ]);
+        children.add(
+          loadingRegion(
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TodoDaySkeleton(rows: 3, first: true),
+                TodoDaySkeleton(rows: 2),
+              ],
+            ),
+          ),
+        );
       } else if (groupKeys.isEmpty) {
         // 걸러서 0건 ↔ 이 달 0건 — 갈래가 다르다. 버튼은 두지 않는다(추가는 [+] 가 맡는다).
         children.add(

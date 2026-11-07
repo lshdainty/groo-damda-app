@@ -32,6 +32,7 @@ import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 라벨 이름 최대 글자 수 — 카테고리 · 라벨 · 태그 · 목표 이름 12자(웹 d837eedc, 카드 한 줄에 들어가는 길이).
 const int kLabelNameMax = 12;
@@ -95,17 +96,20 @@ class _CalendarLabelsScreenState extends ConsumerState<CalendarLabelsScreen> {
                   // 다시 받기가 실패해도 받아 둔 목록은 남긴다(웹과 같다)
                   skipError: true,
                   // 추가 버튼은 정적 UI라 로딩에도 진짜를 쓴다 — 개수 글과 줄만 데이터 자리
-                  loading: () => Column(
-                    children: [
-                      CalendarSurfaceHeaderSkeleton(
-                        action: PTextButton(
-                          label: l.calNewLabel,
-                          onPressed: () => _showLabelEditor(context, ref, null),
+                  loading: () => loadingRegion(
+                    Column(
+                      children: [
+                        CalendarSurfaceHeaderSkeleton(
+                          action: PTextButton(
+                            label: l.calNewLabel,
+                            onPressed: () =>
+                                _showLabelEditor(context, ref, null),
+                          ),
                         ),
-                      ),
-                      for (var i = 0; i < 4; i++)
-                        const CalendarSurfaceRowSkeleton(),
-                    ],
+                        for (var i = 0; i < 4; i++)
+                          const CalendarSurfaceRowSkeleton(),
+                      ],
+                    ),
                   ),
                   error: (e, _) => CalendarSurfaceFailure(
                     title: l.calLabelLoadError,

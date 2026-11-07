@@ -33,6 +33,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 // 자산 화면의 구역 부품(I-05 55 ~ 62) — 웹 `pages/asset/ui/asset-parts.tsx` 와 같은 구조 · 같은 값이다(짝 1).
 // 폰은 띠 화면이다: 구역마다 화면 폭 흰 띠, 띠 안은 구역이 제 좌우 24 를 갖고(목록 줄은 줄이 제 24), 띠 사이 8 만 틈이다(74).
@@ -172,7 +173,7 @@ class AssetSummarySection extends StatelessWidget {
         ),
       );
     }
-    if (loading) return const AssetSummarySkeleton();
+    if (loading) return loadingRegionWithText(const AssetSummarySkeleton());
 
     final Widget delta;
     if (!hasLastMonth) {
@@ -647,7 +648,7 @@ class AssetGroupSection extends StatelessWidget {
       children: [
         ?notice,
         if (loading)
-          const AssetRowsSkeleton()
+          loadingRegionWithText(const AssetRowsSkeleton())
         else if (assets.isEmpty)
           BudgetEmptyLine(l.assetGroupEmpty)
         else
@@ -808,7 +809,7 @@ class AssetSavingGoalsSection extends StatelessWidget {
         if (failed)
           _failureBody(l.assetLoadFailedGoals, onRetry, retrying: loading)
         else if (loading)
-          const _GoalRowsSkeleton()
+          loadingRegionWithText(const _GoalRowsSkeleton())
         else if (goals.isEmpty)
           BudgetEmptyLine(l.savingGoalManagePrompt)
         else

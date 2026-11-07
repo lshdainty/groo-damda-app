@@ -27,6 +27,7 @@ import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 // ---- 관심 그룹 -----------------------------------------------------------------
 
@@ -505,7 +506,7 @@ class _StockSearchSheetState extends ConsumerState<_StockSearchSheet> {
     Widget? body;
     if (query.isNotEmpty && !failed) {
       body = fetching
-          ? const PSearchableListSkeleton()
+          ? loadingRegion(const PSearchableListSkeleton())
           : PSearchableListResults(
               scrollFog: true,
               semanticLabel: l.stocksSearch,

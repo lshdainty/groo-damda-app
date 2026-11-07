@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 계좌·카드 관리(I-17 25 ~ 33, 1-B) — 탭 없이 흰 면 하나에 종류별 묶음 한 목록.
 ///
@@ -153,7 +154,7 @@ class _AccountCardManageScreenState
       body: PSwipeActionsProvider(
         child: Builder(
           builder: (context) {
-            if (loading) return const _ManageSkeleton();
+            if (loading) return loadingRegionScroll(const _ManageSkeleton());
             if (failed) {
               return _CenteredResult(
                 kind: PResultKind.failure,
@@ -388,8 +389,7 @@ class _ManageSkeleton extends StatelessWidget {
         ],
       ),
     );
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
+    return Column(
       children: [
         head(PSpacing.x4),
         const AssetRowsSkeleton(),

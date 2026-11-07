@@ -10,6 +10,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 동작의 종류 — 곁 동작(고정 · 보관 · 공유) · 주 동작(수정) · 되돌리기 어려운 동작(삭제). 색은 배지만 갖는다.
 enum PSwipeActionKind { neutral, primary, destructive }
@@ -277,6 +278,7 @@ class PSwipeActionCell extends StatelessWidget {
       enabled: !action.disabled,
       onTap: onTap ?? action.onSelect,
       touchMin: 0,
+      focusRing: const PFocusRingStyle(inset: true),
       semantics: (child, enabled, tap) => Semantics(
         button: true,
         enabled: enabled,

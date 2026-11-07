@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 class _SettingsItem {
   const _SettingsItem({
@@ -300,7 +301,7 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.push('/account'),
             )
           else if (auth.isLoading)
-            const _AccountRowSkeleton(),
+            loadingRegion(const _AccountRowSkeleton()),
 
           for (final group in groups)
             // 목록 제목 위 16 — 첫 묶음도 계정 줄 아래 16(T2)

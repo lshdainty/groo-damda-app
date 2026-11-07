@@ -8,6 +8,7 @@ import 'package:groo_damda_app/features/stocks/data/stock_master_dto.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/searchable_list/p_searchable_list.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 종목 추가 시트가 돌려주는 것 — 검색에서 찾은 종목([found]) 또는 검색어 그대로 직접 추가([manualName]).
 class StockPick {
@@ -80,7 +81,7 @@ class _StockAddSheetState extends ConsumerState<StockAddSheet> {
     );
     if (query.isNotEmpty) {
       body = fetching
-          ? const PSearchableListSkeleton()
+          ? loadingRegion(const PSearchableListSkeleton())
           : PSearchableListResults(
               scrollFog: true,
               semanticLabel: l.assetHoldings,

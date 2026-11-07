@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
 import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 태그 설정 본문 — 메모 태그 · 할 일 태그가 한 부품을 쓴다(I-15 20 ~ 24 · I-10 33 ~ 37 · Q4 B). 웹 `TagSettings` 와 같은 짜임이다.
 /// 글은 [TagSettingsCopy] 로 받는다 — 키만 다르고 구조는 같다.
@@ -223,7 +224,7 @@ class _TagSettingsState extends State<TagSettings> {
           ? (widget.failed ? copy.title : '${copy.title} · ')
           : '${copy.title} · ${tags.length}',
       titleSuffix: tags == null && !widget.failed
-          ? PSkeleton.text(PTypography.t4, width: PSpacing.x4)
+          ? loadingInline(PSkeleton.text(PTypography.t4, width: PSpacing.x4))
           : null,
       variant: PListHeaderVariant.boldSolid,
       action: PTextButton(
@@ -250,7 +251,14 @@ class _TagSettingsState extends State<TagSettings> {
         ),
       ];
     } else if (tags == null) {
-      body = [header, for (var i = 0; i < 4; i++) const _TagRowSkeleton()];
+      body = [
+        header,
+        loadingRegion(
+          Column(
+            children: [for (var i = 0; i < 4; i++) const _TagRowSkeleton()],
+          ),
+        ),
+      ];
     } else if (tags.isEmpty) {
       body = [
         header,

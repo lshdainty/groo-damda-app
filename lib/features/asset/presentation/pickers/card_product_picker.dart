@@ -13,6 +13,7 @@ import 'package:groo_damda_app/shared/ds/image_frame/p_card_art.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/searchable_list/p_searchable_list.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 카드 상품 고르기(I-17 19) — 칸의 Input Button 이 여는 검색 시트.
 ///
@@ -84,8 +85,10 @@ class _CardProductSheetState extends ConsumerState<CardProductSheet> {
         onRetry: () => ref.invalidate(cardCatalogPageProvider(key)),
       );
     } else if (shown == null) {
-      result = const PSearchableListSkeleton(
-        prefix: PSearchableListSkeletonPrefix.cardArt,
+      result = loadingRegion(
+        const PSearchableListSkeleton(
+          prefix: PSearchableListSkeletonPrefix.cardArt,
+        ),
       );
     } else if (shown.isEmpty) {
       result = PSearchableListEmpty(

@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 /// 구독 관리 화면 — 흰 화면 하나(I-14 3-2A · 14-2). 옛 바텀시트(0.92 고정)를 대신한다.
 ///
@@ -250,9 +251,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     ),
                   )
                 else if (loading)
-                  const _SkeletonRows(
-                    key: ValueKey('subscription-loading-current'),
-                    count: 1,
+                  loadingRegion(
+                    const _SkeletonRows(
+                      key: ValueKey('subscription-loading-current'),
+                      count: 1,
+                    ),
                   )
                 else ...[
                   // ── 지금 플랜 줄
@@ -286,9 +289,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
                 // 불러오는 중 — 요금 줄 둘 자리(안내 상자는 제자리에 있다)
                 if (loading)
-                  const _SkeletonRows(
-                    key: ValueKey('subscription-loading-prices'),
-                    count: 2,
+                  loadingRegion(
+                    const _SkeletonRows(
+                      key: ValueKey('subscription-loading-prices'),
+                      count: 2,
+                    ),
                   ),
                 if (!failed && !loading) ...[
                   // ── 주기 고르기 — 월간 · 연간 두 요금제가 다 있을 때만

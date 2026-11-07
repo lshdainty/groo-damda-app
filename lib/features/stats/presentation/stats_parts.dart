@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 // 통계 구역 부품 — 카테고리 탭(도넛 · TOP 5 · 열지도 · 요약)과 탭들이 함께 쓰는 것(I-08 29 ~ 35).
 // 구역 틀은 예산과 같은 `budget_parts.dart`(띠 안 구역 사이 48 · 머리 위 24 · 머리 ↔ 본문 8)를 쓴다.
@@ -396,22 +397,28 @@ class _StatsDonutSectionState extends State<StatsDonutSection> {
         children: [
           segmented,
           const SizedBox(height: PSpacing.x5),
-          const Center(
-            child: PSkeleton(
-              width: 180,
-              height: 180,
-              radius: PSkeletonRadius.full,
+          loadingRegionWithText(
+            Column(
+              children: [
+                const Center(
+                  child: PSkeleton(
+                    width: 180,
+                    height: 180,
+                    radius: PSkeletonRadius.full,
+                  ),
+                ),
+                const SizedBox(height: PSpacing.x4),
+                for (var i = 0; i < 5; i++)
+                  SizedBox(
+                    height: kChartDonutRowHeight,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: PSkeleton.text(PTypography.t4),
+                    ),
+                  ),
+              ],
             ),
           ),
-          const SizedBox(height: PSpacing.x4),
-          for (var i = 0; i < 5; i++)
-            SizedBox(
-              height: kChartDonutRowHeight,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: PSkeleton.text(PTypography.t4),
-              ),
-            ),
         ],
       );
     }
@@ -527,39 +534,45 @@ class StatsMerchantsSection extends StatelessWidget {
     final all = merchants;
     if (all == null) {
       return list([
-        for (var i = 0; i < 5; i++)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: PSpacing.x6,
-              vertical: PSpacing.x2,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: PSpacing.x2_5,
-              children: [
-                PSkeleton.text(PTypography.t4, width: PSpacing.x4),
-                Expanded(
-                  child: Column(
-                    spacing: PSpacing.x1_5,
+        loadingRegionWithText(
+          Column(
+            children: [
+              for (var i = 0; i < 5; i++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: PSpacing.x6,
+                    vertical: PSpacing.x2,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: PSpacing.x2_5,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          PSkeleton.text(PTypography.t5, width: 120),
-                          PSkeleton.text(PTypography.t5, width: 64),
-                        ],
-                      ),
-                      const PSkeleton(
-                        width: double.infinity,
-                        height: PSpacing.x2,
-                        radius: PSkeletonRadius.full,
+                      PSkeleton.text(PTypography.t4, width: PSpacing.x4),
+                      Expanded(
+                        child: Column(
+                          spacing: PSpacing.x1_5,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                PSkeleton.text(PTypography.t5, width: 120),
+                                PSkeleton.text(PTypography.t5, width: 64),
+                              ],
+                            ),
+                            const PSkeleton(
+                              width: double.infinity,
+                              height: PSpacing.x2,
+                              radius: PSkeletonRadius.full,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
+        ),
       ]);
     }
     final top = (List.of(
@@ -652,7 +665,9 @@ class StatsHeatmapSection extends StatelessWidget {
         children: [
           BudgetDesc(l.statsPatternDesc),
           const SizedBox(height: PSpacing.x3),
-          const StatsChartSkeleton(height: 6 * 34 + 6 * 6 + 18),
+          loadingRegionWithText(
+            const StatsChartSkeleton(height: 6 * 34 + 6 * 6 + 18),
+          ),
         ],
       );
     }
@@ -884,12 +899,20 @@ class StatsHighlightsSection extends StatelessWidget {
 
     final children = <Widget>[];
     if (loading) {
-      children
-        ..add(labelOnly(l.statsTopCategory))
-        ..add(const SizedBox(height: PSpacing.x4))
-        ..add(labelOnly(l.statsTopMerchant))
-        ..add(const SizedBox(height: PSpacing.x4))
-        ..add(labelOnly(period.avgLabel(l)));
+      children.add(
+        loadingRegionWithText(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              labelOnly(l.statsTopCategory),
+              const SizedBox(height: PSpacing.x4),
+              labelOnly(l.statsTopMerchant),
+              const SizedBox(height: PSpacing.x4),
+              labelOnly(period.avgLabel(l)),
+            ],
+          ),
+        ),
+      );
     } else {
       final bd = summary!.categoryBreakdown;
       final groups = <int, ({int id, String name, int amount})>{};

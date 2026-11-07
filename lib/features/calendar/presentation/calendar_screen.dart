@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.d
 import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -128,7 +129,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         ),
                       )
                     else if (firstLoading)
-                      _CalendarGridSkeleton(month: _focused)
+                      loadingRegionWithText(
+                        _CalendarGridSkeleton(month: _focused),
+                      )
                     else
                       CalendarMonthGrid(
                         month: _focused,

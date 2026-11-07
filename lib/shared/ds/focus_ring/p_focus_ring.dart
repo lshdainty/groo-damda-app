@@ -15,11 +15,20 @@ bool keyboardHighlight() =>
 /// (inverted 토글은 흰색).
 @immutable
 class PFocusRingStyle {
-  const PFocusRingStyle({this.radius = 0, this.circle = false, this.color});
+  const PFocusRingStyle({
+    this.radius = 0,
+    this.circle = false,
+    this.color,
+    this.inset = false,
+  });
 
   final double radius;
   final bool circle;
   final Color? color;
+
+  /// 상자 안쪽에 그린다(offset −2) — 화면 폭 줄 · 상단 바 단추처럼 바깥 링이 잘리는 자리(list.yaml focused,
+  /// top-navigation.md). [radius] 는 상자의 모서리 그대로다.
+  final bool inset;
 }
 
 /// [visible] 이면 [child] 둘레에 링을 그린다 — 자리를 차지하지 않는다(바깥으로 띄움 2 + 두께 2).
@@ -37,33 +46,38 @@ class PFocusRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!visible) return child;
+    // 모양은 늘 같다 — 링을 켜고 끌 때 child 의 자리(첫째)가 그대로라 안의 State 가 새로 만들어지지 않는다.
+    // 제약도 그대로 넘긴다(passthrough) — 링이 없을 때와 child 의 크기가 같다
     const out = kFocusRingOffset + kFocusRingWidth;
+    final color = style.color ?? context.colors.strokeFocusRing;
+    final border = Border.all(color: color, width: kFocusRingWidth);
+    final BoxDecoration decoration = BoxDecoration(
+      shape: style.circle ? BoxShape.circle : BoxShape.rectangle,
+      borderRadius: style.circle
+          ? null
+          : BorderRadius.circular(
+              style.inset ? style.radius : style.radius + kFocusRingOffset,
+            ),
+      border: border,
+    );
     return Stack(
       clipBehavior: Clip.none,
+      fit: StackFit.passthrough,
       children: [
         child,
-        Positioned(
-          left: -out,
-          top: -out,
-          right: -out,
-          bottom: -out,
-          child: IgnorePointer(
-            child: DecoratedBox(
-              key: const ValueKey('focus-ring'),
-              decoration: BoxDecoration(
-                shape: style.circle ? BoxShape.circle : BoxShape.rectangle,
-                borderRadius: style.circle
-                    ? null
-                    : BorderRadius.circular(style.radius + kFocusRingOffset),
-                border: Border.all(
-                  color: style.color ?? context.colors.strokeFocusRing,
-                  width: kFocusRingWidth,
-                ),
+        if (visible)
+          Positioned(
+            left: style.inset ? 0 : -out,
+            top: style.inset ? 0 : -out,
+            right: style.inset ? 0 : -out,
+            bottom: style.inset ? 0 : -out,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                key: const ValueKey('focus-ring'),
+                decoration: decoration,
               ),
             ),
           ),
-        ),
       ],
     );
   }

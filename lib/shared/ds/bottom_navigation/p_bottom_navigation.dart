@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/chip/press_area.dart';
 import 'package:groo_damda_app/shared/ds/notification_badge/p_notification_badge.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 
 /// 바 높이 — 펼침 66 · 줄어듦 48. 토큰에 없는 바 자신의 치수다(bottom-navigation.yaml root.height).
 const double kBottomNavigationHeight = 66;
@@ -400,6 +401,7 @@ class _ItemCell extends StatelessWidget {
       },
       // 칸 전체가 누르는 영역이다
       touchMin: 0,
+      focusRing: const PFocusRingStyle(radius: PRounded.r3),
       semantics: (child, enabled, onTap) => Semantics(
         container: true,
         button: true,
@@ -480,6 +482,7 @@ class _AddCell extends StatelessWidget {
         add.onPressed();
       },
       touchMin: 0,
+      focusRing: const PFocusRingStyle(circle: true),
       semantics: (child, enabled, onTap) => Semantics(
         container: true,
         button: true,
