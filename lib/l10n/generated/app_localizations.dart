@@ -14002,20 +14002,32 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedBarSemantics.
   ///
   /// In ko, this message translates to:
-  /// **'{kind} 중 고정 {fixed}%, 변동 {variable}%'**
-  String statsFixedBarSemantics(String kind, int fixed, int variable);
+  /// **'{kind} 중 고정 {fixed}, 변동 {variable}'**
+  String statsFixedBarSemantics(String kind, String fixed, String variable);
 
   /// No description provided for @statsFixedInsightExpense.
   ///
   /// In ko, this message translates to:
-  /// **'지출의 {pct}%가 고정이에요. 고정을 뺀 지출은'**
-  String statsFixedInsightExpense(int pct);
+  /// **'지출의 {pct}가 고정이에요. 고정을 뺀 지출은'**
+  String statsFixedInsightExpense(String pct);
 
   /// No description provided for @statsFixedInsightIncome.
   ///
   /// In ko, this message translates to:
-  /// **'수입의 {pct}%가 고정이에요. 고정을 뺀 수입은'**
-  String statsFixedInsightIncome(int pct);
+  /// **'수입의 {pct}가 고정이에요. 고정을 뺀 수입은'**
+  String statsFixedInsightIncome(String pct);
+
+  /// No description provided for @statsFixedInsightExpenseNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정 지출이 거의 없어요. 고정을 뺀 지출은'**
+  String get statsFixedInsightExpenseNone;
+
+  /// No description provided for @statsFixedInsightIncomeNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정 수입이 거의 없어요. 고정을 뺀 수입은'**
+  String get statsFixedInsightIncomeNone;
 
   /// No description provided for @statsFixedInsightTail.
   ///
@@ -14092,8 +14104,8 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedCategoryFixedPart.
   ///
   /// In ko, this message translates to:
-  /// **'그중 고정 {pct}%'**
-  String statsFixedCategoryFixedPart(int pct);
+  /// **'그중 고정 {pct}'**
+  String statsFixedCategoryFixedPart(String pct);
 
   /// No description provided for @statsFixedBulkTitle.
   ///

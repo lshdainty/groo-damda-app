@@ -45,6 +45,24 @@ void main() {
     });
   });
 
+  group('화면 비중 — 소수 첫째 자리, 합 100.0', () {
+    test('1/3 → 33.3 + 66.7', () {
+      final s = splitFixed(3, 1);
+      expect(s.fixedShare, 33.3);
+      expect(s.variableShare, 66.7);
+    });
+    test('0.05% 미만은 반올림하지 않는다 — 고정 · 변동 어느 쪽이든', () {
+      expect(splitFixed(100000, 10).fixedShare, lessThan(0.05));
+      expect(splitFixed(100000, 10).fixedShare, greaterThan(0));
+      expect(splitFixed(100000, 99990).variableShare, lessThan(0.05));
+      expect(splitFixed(100000, 99990).variableShare, greaterThan(0));
+    });
+    test('전체 0 이면 0', () {
+      final s = splitFixed(0, 0);
+      expect((s.fixedShare, s.variableShare), (0, 0));
+    });
+  });
+
   test('amountFor — 보기에 맞는 금액', () {
     final s = splitFixed(1000, 700);
     expect(amountFor(s, FixedView.all), 1000);

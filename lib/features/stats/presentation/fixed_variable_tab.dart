@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -39,6 +40,24 @@ const _fixedColor = PChartColor.blue;
 const _variableColor = PChartColor.green;
 
 /// 질의 하나 = 상자 하나 — 합계 질의가 실패하면 첫 띠에만 상자를 두고 같은 질의를 먹는 뒤 띠는 그리지 않는다.
+/// 고정 · 변동 비중 한 자리("33.2%") — 0 초과 0.05% 미만은 "0.1% 미만".
+String _share(AppLocalizations l, double pct) =>
+    formatShare(pct, underOne: l.percentUnderTenth);
+
+/// 한 줄 안내 — 고정 비중이 "0.1% 미만" 이면 숫자 없는 글로 간다(조사가 어색해서).
+String _insight(AppLocalizations l, FixedSplit s, bool isExpense) {
+  final tiny = s.fixed > 0 && s.fixedShare < 0.05;
+  if (tiny) {
+    return isExpense
+        ? l.statsFixedInsightExpenseNone
+        : l.statsFixedInsightIncomeNone;
+  }
+  final pct = _share(l, s.fixedShare);
+  return isExpense
+      ? l.statsFixedInsightExpense(pct)
+      : l.statsFixedInsightIncome(pct);
+}
+
 class FixedVariableTab extends ConsumerWidget {
   const FixedVariableTab({
     super.key,
@@ -223,7 +242,7 @@ class _Overview extends StatelessWidget {
                 : l.statsFixedFixedIncome,
             value: s.fixed,
             swatch: _fixedColor,
-            sub: '${s.fixedPercent}%',
+            sub: _share(l, s.fixedShare),
           ),
           (
             label: isExpense
@@ -231,7 +250,7 @@ class _Overview extends StatelessWidget {
                 : l.statsFixedVariableIncome,
             value: s.variable,
             swatch: _variableColor,
-            sub: '${s.variablePercent}%',
+            sub: _share(l, s.variableShare),
           ),
         ];
     return statsSection(
@@ -241,8 +260,8 @@ class _Overview extends StatelessWidget {
           split: s,
           semanticLabel: l.statsFixedBarSemantics(
             totalLabel,
-            s.fixedPercent,
-            s.variablePercent,
+            _share(l, s.fixedShare),
+            _share(l, s.variableShare),
           ),
         ),
         const SizedBox(height: PSpacing.x3),
@@ -286,10 +305,7 @@ class _Overview extends StatelessWidget {
             TextSpan(
               style: PTypography.t3.copyWith(color: c.fgNeutralMuted),
               children: [
-                TextSpan(
-                  text:
-                      '${keepAll(isExpense ? l.statsFixedInsightExpense(s.fixedPercent) : l.statsFixedInsightIncome(s.fixedPercent))} ',
-                ),
+                TextSpan(text: '${keepAll(_insight(l, s, isExpense))} '),
                 TextSpan(
                   text: keepAllAmount(statsWon(s.variable, masked)),
                   style: TextStyle(
@@ -352,7 +368,12 @@ class _RatioBar extends StatelessWidget {
                   Expanded(
                     flex: math.max(1, (fixedFrac * 10000).round()),
                     child: cell(
-                      fixedFrac >= 0.14 ? '${split.fixedPercent}%' : null,
+                      fixedFrac >= 0.14
+                          ? _share(
+                              AppLocalizations.of(context),
+                              split.fixedShare,
+                            )
+                          : null,
                       _fixedColor.of(c),
                     ),
                   ),
@@ -361,7 +382,10 @@ class _RatioBar extends StatelessWidget {
                     flex: math.max(1, ((1 - fixedFrac) * 10000).round()),
                     child: cell(
                       1 - fixedFrac >= 0.14
-                          ? '${split.variablePercent}%'
+                          ? _share(
+                              AppLocalizations.of(context),
+                              split.variableShare,
+                            )
                           : null,
                       _variableColor.of(c),
                     ),
@@ -660,7 +684,9 @@ class _CategoryBars extends StatelessWidget {
                   if (s.fixed > 0) ...[
                     const SizedBox(height: PSpacing.x1),
                     Text(
-                      keepAll(l.statsFixedCategoryFixedPart(s.fixedPercent)),
+                      keepAll(
+                        l.statsFixedCategoryFixedPart(_share(l, s.fixedShare)),
+                      ),
                       style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
                     ),
                   ],

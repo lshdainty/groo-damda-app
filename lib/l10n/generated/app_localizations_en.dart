@@ -7906,19 +7906,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsFixedVariableIncome => 'Income excl. fixed';
 
   @override
-  String statsFixedBarSemantics(String kind, int fixed, int variable) {
-    return '$fixed% fixed, $variable% variable of $kind';
+  String statsFixedBarSemantics(String kind, String fixed, String variable) {
+    return '$fixed fixed, $variable variable of $kind';
   }
 
   @override
-  String statsFixedInsightExpense(int pct) {
-    return '$pct% of spending is fixed. Spending excluding fixed is';
+  String statsFixedInsightExpense(String pct) {
+    return '$pct of spending is fixed. Spending excluding fixed is';
   }
 
   @override
-  String statsFixedInsightIncome(int pct) {
-    return '$pct% of income is fixed. Income excluding fixed is';
+  String statsFixedInsightIncome(String pct) {
+    return '$pct of income is fixed. Income excluding fixed is';
   }
+
+  @override
+  String get statsFixedInsightExpenseNone =>
+      'Almost no spending is fixed. Spending excluding fixed is';
+
+  @override
+  String get statsFixedInsightIncomeNone =>
+      'Almost no income is fixed. Income excluding fixed is';
 
   @override
   String get statsFixedInsightTail => '.';
@@ -7959,8 +7967,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsFixedCategoryTitle => 'Fixed vs. variable by category';
 
   @override
-  String statsFixedCategoryFixedPart(int pct) {
-    return 'Fixed $pct%';
+  String statsFixedCategoryFixedPart(String pct) {
+    return 'Fixed $pct';
   }
 
   @override

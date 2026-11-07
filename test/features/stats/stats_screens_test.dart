@@ -584,7 +584,9 @@ void main() {
       final t = tester
           .widgetList<Text>(find.byType(Text))
           .firstWhere(
-            (t) => t.data == '21%' && t.style?.fontWeight == FontWeight.w700,
+            (t) =>
+                RegExp(r'^\d+\.\d%$').hasMatch(t.data ?? '') &&
+                t.style?.fontWeight == FontWeight.w700,
           );
       expect(t.style!.color, PColors.light.fgNeutralInverted);
     });

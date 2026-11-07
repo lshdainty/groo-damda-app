@@ -7746,19 +7746,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsFixedVariableIncome => '고정 제외 수입';
 
   @override
-  String statsFixedBarSemantics(String kind, int fixed, int variable) {
-    return '$kind 중 고정 $fixed%, 변동 $variable%';
+  String statsFixedBarSemantics(String kind, String fixed, String variable) {
+    return '$kind 중 고정 $fixed, 변동 $variable';
   }
 
   @override
-  String statsFixedInsightExpense(int pct) {
-    return '지출의 $pct%가 고정이에요. 고정을 뺀 지출은';
+  String statsFixedInsightExpense(String pct) {
+    return '지출의 $pct가 고정이에요. 고정을 뺀 지출은';
   }
 
   @override
-  String statsFixedInsightIncome(int pct) {
-    return '수입의 $pct%가 고정이에요. 고정을 뺀 수입은';
+  String statsFixedInsightIncome(String pct) {
+    return '수입의 $pct가 고정이에요. 고정을 뺀 수입은';
   }
+
+  @override
+  String get statsFixedInsightExpenseNone => '고정 지출이 거의 없어요. 고정을 뺀 지출은';
+
+  @override
+  String get statsFixedInsightIncomeNone => '고정 수입이 거의 없어요. 고정을 뺀 수입은';
 
   @override
   String get statsFixedInsightTail => '이에요.';
@@ -7798,8 +7804,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsFixedCategoryTitle => '카테고리별 고정·변동';
 
   @override
-  String statsFixedCategoryFixedPart(int pct) {
-    return '그중 고정 $pct%';
+  String statsFixedCategoryFixedPart(String pct) {
+    return '그중 고정 $pct';
   }
 
   @override

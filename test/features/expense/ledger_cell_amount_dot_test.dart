@@ -27,6 +27,7 @@ Future<void> _pump(
   double width,
   double scale, {
   MaskFlags flags = _flags,
+  bool expanded = false,
 }) async {
   t.view.physicalSize = Size(width, 800);
   t.view.devicePixelRatio = 1;
@@ -47,7 +48,7 @@ Future<void> _pump(
         body: LedgerCalendar(
           month: DateTime(2026, 11),
           selected: '2026-11-02',
-          expanded: false,
+          expanded: expanded,
           byDay: _byDay,
           flags: flags,
           onSelect: (_) {},
@@ -96,6 +97,30 @@ void main() {
         // 점이어도 칸 이름은 원까지
         expect(_labelOf(t, '11월 4일'), '11월 4일, 지출 1,234,567원');
         expect(_labelOf(t, '11월 5일'), '11월 5일, 지출 4,500원, 수입 400,000,000원');
+        handle.dispose();
+      });
+    }
+  }
+
+  for (final w in [360.0, 390.0, 430.0]) {
+    for (final s in [1.0, 2.0]) {
+      testWidgets('펼친 월 격자 — 폭 $w · 글자 ${s * 100}%: 같은 점 규칙, 말줄임 0 · 넘침 0', (
+        t,
+      ) async {
+        final handle = t.ensureSemantics();
+        await _pump(t, w, s, expanded: true);
+        expect(t.takeException(), isNull);
+        final texts = [
+          for (final e in find.byType(Text).evaluate()) (e.widget as Text),
+        ];
+        expect(texts.where((x) => (x.data ?? '').contains('…')), isEmpty);
+        expect(
+          texts.where((x) => x.overflow == TextOverflow.ellipsis),
+          isEmpty,
+        );
+        expect(find.text('+400,000,000'), findsNothing);
+        expect(find.byKey(const ValueKey('ledger-cell-dot')), findsWidgets);
+        expect(_labelOf(t, '11월 4일'), '11월 4일, 지출 1,234,567원');
         handle.dispose();
       });
     }
