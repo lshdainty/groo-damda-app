@@ -4582,12 +4582,12 @@
   "statsFixedFixedIncome": "고정 수입",
   "statsFixedVariableExpense": "고정 제외 지출",
   "statsFixedVariableIncome": "고정 제외 수입",
-  "statsFixedBarSemantics": "{kind} 중 고정 {fixed}%, 변동 {variable}%",
-  "@statsFixedBarSemantics": {"placeholders": {"kind": {"type": "String"}, "fixed": {"type": "int"}, "variable": {"type": "int"}}},
-  "statsFixedInsightExpense": "지출의 {pct}%가 고정이에요. 고정을 뺀 지출은",
-  "@statsFixedInsightExpense": {"placeholders": {"pct": {"type": "int"}}},
-  "statsFixedInsightIncome": "수입의 {pct}%가 고정이에요. 고정을 뺀 수입은",
-  "@statsFixedInsightIncome": {"placeholders": {"pct": {"type": "int"}}},
+  "statsFixedBarSemantics": "{kind} 중 고정 {fixed}, 변동 {variable}",
+  "@statsFixedBarSemantics": {"placeholders": {"kind": {"type": "String"}, "fixed": {"type": "String"}, "variable": {"type": "String"}}},
+  "statsFixedInsightExpense": "지출의 {pct}{josa} 고정이에요. 고정을 뺀 지출은",
+  "@statsFixedInsightExpense": {"placeholders": {"pct": {"type": "String"}, "josa": {"type": "String"}}},
+  "statsFixedInsightIncome": "수입의 {pct}{josa} 고정이에요. 고정을 뺀 수입은",
+  "@statsFixedInsightIncome": {"placeholders": {"pct": {"type": "String"}, "josa": {"type": "String"}}},
   "statsFixedInsightTail": "이에요.",
   "statsFixedEmptyDesc": "월세·통신비·월급처럼 매달 정해진 거래를 고정으로 표시하면 여기서 따로 볼 수 있어요.",
   "statsFixedManage": "거래를 고정으로 정리하기",
@@ -4600,8 +4600,8 @@
   "statsFixedLegendFixed": "고정",
   "statsFixedLegendVariable": "변동",
   "statsFixedCategoryTitle": "카테고리별 고정·변동",
-  "statsFixedCategoryFixedPart": "그중 고정 {pct}%",
-  "@statsFixedCategoryFixedPart": {"placeholders": {"pct": {"type": "int"}}},
+  "statsFixedCategoryFixedPart": "그중 고정 {pct}",
+  "@statsFixedCategoryFixedPart": {"placeholders": {"pct": {"type": "String"}}},
   "statsFixedBulkTitle": "거래를 고정으로 정리하기",
   "statsFixedBulkDesc": "{start} ~ {end} 기간의 거래예요. 매달 같은 이름으로 나가는 돈은 한 줄로 묶여 있어요. 돈이나 잔액은 달라지지 않고 통계의 분류만 바뀌어요.",
   "@statsFixedBulkDesc": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
@@ -5484,5 +5484,16 @@
   "dateRangeSeparator": "~",
   "@dateRangeSeparator": {
     "description": "구간 기호 — 앞뒤를 붙여 쓴다(한국어 ~, 영어 en dash). 날짜 규칙 DESIGN.desk.md:3652"
-  }
+  },
+  "percentUnderTenth": "0.1% 미만",
+  "@percentUnderTenth": {
+    "description": "비중이 0 보다 크고 0.05% 미만일 때 — 0.0% 로 보이지 않게. 영어는 <0.1%"
+  },
+  "expCellLabel": "{date}, {parts}",
+  "@expCellLabel": {"placeholders": {"date": {"type": "String"}, "parts": {"type": "String"}}},
+  "expCellOutPart": "지출 {amount}",
+  "@expCellOutPart": {"placeholders": {"amount": {"type": "String"}}},
+  "expCellInPart": "수입 {amount}",
+  "@expCellInPart": {"placeholders": {"amount": {"type": "String"}}},
+  "expCellHidden": "금액 가림"
 }

@@ -7906,18 +7906,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsFixedVariableIncome => 'Income excl. fixed';
 
   @override
-  String statsFixedBarSemantics(String kind, int fixed, int variable) {
-    return '$fixed% fixed, $variable% variable of $kind';
+  String statsFixedBarSemantics(String kind, String fixed, String variable) {
+    return '$fixed fixed, $variable variable of $kind';
   }
 
   @override
-  String statsFixedInsightExpense(int pct) {
-    return '$pct% of spending is fixed. Spending excluding fixed is';
+  String statsFixedInsightExpense(String pct, String josa) {
+    return '$pct of spending is fixed. Spending excluding fixed is';
   }
 
   @override
-  String statsFixedInsightIncome(int pct) {
-    return '$pct% of income is fixed. Income excluding fixed is';
+  String statsFixedInsightIncome(String pct, String josa) {
+    return '$pct of income is fixed. Income excluding fixed is';
   }
 
   @override
@@ -7959,8 +7959,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsFixedCategoryTitle => 'Fixed vs. variable by category';
 
   @override
-  String statsFixedCategoryFixedPart(int pct) {
-    return 'Fixed $pct%';
+  String statsFixedCategoryFixedPart(String pct) {
+    return 'Fixed $pct';
   }
 
   @override
@@ -9760,4 +9760,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dateRangeSeparator => '–';
+
+  @override
+  String get percentUnderTenth => '<0.1%';
+
+  @override
+  String expCellLabel(String date, String parts) {
+    return '$date, $parts';
+  }
+
+  @override
+  String expCellOutPart(String amount) {
+    return 'spent $amount';
+  }
+
+  @override
+  String expCellInPart(String amount) {
+    return 'income $amount';
+  }
+
+  @override
+  String get expCellHidden => 'amount hidden';
 }

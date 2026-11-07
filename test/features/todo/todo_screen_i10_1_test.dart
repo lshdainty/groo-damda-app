@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_header.dart';
 import 'package:groo_damda_app/features/constellation/application/constellation_providers.dart';
@@ -501,7 +502,9 @@ void main() {
   });
 
   group('9 주 달력 · 칸 표시', () {
-    testWidgets('오늘 칸 이름은 "N월 D일, 남은 할 일 N개" · 표시는 장식 · 높이 15', (tester) async {
+    testWidgets('오늘 칸 이름은 "N월 D일 (요일), 남은 할 일 N개" · 표시는 장식 · 높이 15', (
+      tester,
+    ) async {
       await pumpApp(
         tester,
         const TodoScreen(),
@@ -509,7 +512,7 @@ void main() {
       );
       final handle = tester.ensureSemantics();
       expect(
-        find.bySemanticsLabel('${_now.month}월 ${_now.day}일, 남은 할 일 1개'),
+        find.bySemanticsLabel('${monthDayDow(_now)}, 남은 할 일 1개'),
         findsOneWidget,
       );
       // 표시는 aria-hidden 처럼 읽히지 않는다 — 칸 이름 하나로 읽힌다

@@ -4349,9 +4349,9 @@
   "statsFixedFixedIncome": "Fixed income",
   "statsFixedVariableExpense": "Spending excl. fixed",
   "statsFixedVariableIncome": "Income excl. fixed",
-  "statsFixedBarSemantics": "{fixed}% fixed, {variable}% variable of {kind}",
-  "statsFixedInsightExpense": "{pct}% of spending is fixed. Spending excluding fixed is",
-  "statsFixedInsightIncome": "{pct}% of income is fixed. Income excluding fixed is",
+  "statsFixedBarSemantics": "{fixed} fixed, {variable} variable of {kind}",
+  "statsFixedInsightExpense": "{pct} of spending is fixed. Spending excluding fixed is",
+  "statsFixedInsightIncome": "{pct} of income is fixed. Income excluding fixed is",
   "statsFixedInsightTail": ".",
   "statsFixedEmptyDesc": "Mark monthly items like rent or salary as fixed to see them separately here",
   "statsFixedManage": "Organize fixed items",
@@ -4364,7 +4364,7 @@
   "statsFixedLegendFixed": "Fixed",
   "statsFixedLegendVariable": "Variable",
   "statsFixedCategoryTitle": "Fixed vs. variable by category",
-  "statsFixedCategoryFixedPart": "Fixed {pct}%",
+  "statsFixedCategoryFixedPart": "Fixed {pct}",
   "statsFixedBulkTitle": "Organize fixed items",
   "statsFixedBulkDesc": "Transactions from {start} to {end}. Items with the same name are grouped. Balances don't change, only how statistics classify them.",
   "statsFixedBulkUntitled": "Untitled",
@@ -5197,5 +5197,10 @@
   "dateRangeSeparator": "–",
   "@dateRangeSeparator": {
     "description": "구간 기호 — 앞뒤를 붙여 쓴다(한국어 ~, 영어 en dash). 날짜 규칙 DESIGN.desk.md:3652"
-  }
+  },
+  "percentUnderTenth": "<0.1%",
+  "expCellLabel": "{date}, {parts}",
+  "expCellOutPart": "spent {amount}",
+  "expCellInPart": "income {amount}",
+  "expCellHidden": "amount hidden"
 }

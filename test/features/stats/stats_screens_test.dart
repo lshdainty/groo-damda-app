@@ -368,6 +368,50 @@ void main() {
       expect(findPlain('기타'), findsWidgets);
     });
 
+    testWidgets('0.05% 미만 조각은 "0.1% 미만" · 동점 12.35 는 올림(웹과 같다)', (
+      tester,
+    ) async {
+      CategoryBreakdown row(int id, String name, int amt) => CategoryBreakdown(
+        categoryRowId: id,
+        categoryName: name,
+        expenseType: 'EXPENSE',
+        totalAmount: amt,
+      );
+      // 합 10,000,000 — 1,235,000 = 12.35% · 1,000 = 0.01%
+      final items = [
+        row(11, '큰', 8764000),
+        row(12, '동점', 1235000),
+        row(2, '작은', 1000),
+      ];
+      await _pump(
+        tester,
+        summary: rangeSummaryProvider.overrideWith(
+          (ref, r) async => RangeSummary(
+            startDate: r.startDate,
+            endDate: r.endDate,
+            totalIncome: 0,
+            totalExpense: 10000000,
+            categoryBreakdown: items,
+          ),
+        ),
+      );
+      final ps = find.byKey(const ValueKey('chart-donut-percent'));
+      final shown = [for (final e in ps.evaluate()) (e.widget as Text).data!];
+      expect(shown, containsAll(['87.6%', '12.4%', '0.1% 미만']));
+    });
+
+    testWidgets('범례 비중은 늘 소수 첫째 자리', (tester) async {
+      await _pump(tester);
+      final ps = find.byKey(const ValueKey('chart-donut-percent'));
+      expect(ps, findsWidgets);
+      for (final e in ps.evaluate()) {
+        expect(
+          RegExp(r'^(\d+\.\d%|0\.1% 미만)$').hasMatch((e.widget as Text).data!),
+          isTrue,
+        );
+      }
+    });
+
     testWidgets('범례 긴 이름은 모든 글자가 보이고(줄바꿈) 금액은 원까지', (tester) async {
       await _pump(tester);
       expect(findPlain('987,654,321원'), findsWidgets);
@@ -572,7 +616,9 @@ void main() {
       final t = tester
           .widgetList<Text>(find.byType(Text))
           .firstWhere(
-            (t) => t.data == '21%' && t.style?.fontWeight == FontWeight.w700,
+            (t) =>
+                RegExp(r'^\d+\.\d%$').hasMatch(t.data ?? '') &&
+                t.style?.fontWeight == FontWeight.w700,
           );
       expect(t.style!.color, PColors.light.fgNeutralInverted);
     });

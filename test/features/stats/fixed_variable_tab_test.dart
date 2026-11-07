@@ -120,17 +120,18 @@ void main() {
   testWidgets('지출·수입의 전체 · 고정 · 고정 제외 금액과 비율이 나온다', (tester) async {
     await _pump(tester, _summary());
 
-    // 지출: 전체 1,432,000 = 고정 892,000(62%) + 변동 540,000(38%)
+    // 지출: 전체 1,432,000 = 고정 892,000(62.3%) + 변동 540,000(37.7%) — 비중은 소수 첫째 자리
     expect(findPlain('1,432,000원'), findsOneWidget);
     expect(findPlain('892,000원'), findsOneWidget);
     expect(findRichPlain('고정 지출'), findsWidgets);
     expect(findRichPlain('고정 제외 지출'), findsWidgets);
-    expect(findPlain('62%'), findsWidgets);
+    expect(findPlain('62.3%'), findsWidgets);
+    expect(findPlain('37.7%'), findsWidgets);
     // 수입은 전부 고정
     expect(findPlain('3,200,000원'), findsWidgets);
     expect(findRichPlain('고정 제외 수입'), findsWidgets);
     // 한 줄 해설
-    expect(findRichPlain('지출의 62%가 고정이에요'), findsOneWidget);
+    expect(findRichPlain('지출의 62.3%가 고정이에요'), findsOneWidget);
   });
 
   testWidgets('폭 360 · 14억대 금액 · 긴 카테고리 이름에서도 넘치지 않는다 (라이트)', (tester) async {
@@ -148,6 +149,13 @@ void main() {
   testWidgets('다크에서도 넘치지 않는다', (tester) async {
     await _pump(tester, _summary(scale: 1000), dark: true);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('고정이 0.05% 미만이면 "0.1% 미만이 고정이에요" (조사가 갈린다)', (tester) async {
+    await _pump(tester, _summary(fixedExpense: 100));
+    expect(findPlainContaining('0.1% 미만'), findsWidgets);
+    expect(findRichPlain('지출의 0.1% 미만이 고정이에요'), findsOneWidget);
+    expect(findRichPlain('지출의 0.1% 미만가'), findsNothing);
   });
 
   testWidgets('고정이 하나도 없으면 안내와 정리 버튼이 나온다', (tester) async {

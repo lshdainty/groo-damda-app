@@ -464,34 +464,98 @@ class LedgerCalendar extends StatelessWidget {
       expanded: expanded,
       onSelect: onSelect,
       onToggleExpand: onToggleExpand,
+      // 칸 하나가 "11월 4일 (수), 지출 −1,234,567원, 수입 +400,000원" 한 이름으로 읽힌다(웹 cellName 과 한 꼴) —
+      // 칸 금액이 점이어도 원까지 읽힌다. 금액 없는 날(불러오는 중 포함)은 날짜만. 가린 금액은 "금액 가림" 으로
+      // 말해 거래가 없는 날처럼 들리지 않게 한다.
+      cellLabel: (context, ds) {
+        final l = AppLocalizations.of(context);
+        final date = monthDayDow(DateTime.parse(ds));
+        final data = loading ? null : byDay[ds];
+        if (data == null) return date;
+        final hideOut = data.out > 0 && flags.of(MaskKind.expense);
+        final hideIn = data.inn > 0 && flags.of(MaskKind.income);
+        final parts = <String>[
+          if (data.out > 0 && !hideOut)
+            l.expCellOutPart(krwSigned(data.out, false, sign: '−', unit: true)),
+          if (data.inn > 0 && !hideIn)
+            l.expCellInPart(krwSigned(data.inn, false, sign: '+', unit: true)),
+          if (hideOut || hideIn) l.expCellHidden,
+        ];
+        return parts.isEmpty ? date : l.expCellLabel(date, parts.join(', '));
+      },
       markBuilder: (context, ds) {
         if (loading) return PSkeleton.text(PTypography.t1, width: 32);
         final data = byDay[ds];
         if (data == null) return const SizedBox(height: PSpacing.x3);
-        // 칸 글이 좁아 잘린 금액은 날을 누르면 그날 묶음 머리에 다 보인다 — 옛 길게 누르기 툴팁은 걷었다(tooltip.md Q-009-2
-        // "옛 길게 누르기 툴팁은 옮길 때 걷는다", I-wrap-b1 8-6). 웹처럼 마우스 · 키보드 초점에만 뜨는 툴팁은 두지 않았다(결정 대기).
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (data.out > 0)
-              Text(
-                '−${flags.of(MaskKind.expense) ? '••' : krw(data.out)}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: amountStyle(c.fgNeutral),
-              ),
-            if (data.inn > 0)
-              Text(
-                '+${flags.of(MaskKind.income) ? '••' : krw(data.inn)}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: amountStyle(c.fgBrand),
-              ),
-          ],
+        // 칸 글이 좁아 안 들어가는 금액은 말줄임 없이 점 "•" 으로 바꾼다(결정 2026-11-07 2A) — 전액은 날을 누르면
+        // 그날 묶음 머리에, 화면 낭독은 칸 이름에 있다. 들어가는지는 실제 칸 폭 · 글자 배율로 잰다.
+        return LayoutBuilder(
+          builder: (context, box) {
+            final scaler = MediaQuery.textScalerOf(context);
+            final base = DefaultTextStyle.of(context).style;
+            Widget line(String text, Color color) {
+              final style = amountStyle(color);
+              final fits = ledgerCellAmountFits(
+                text,
+                base.merge(style),
+                scaler,
+                box.maxWidth,
+              );
+              if (fits) {
+                return Text(text, maxLines: 1, softWrap: false, style: style);
+              }
+              return ExcludeSemantics(
+                child: Text(
+                  ledgerCellDot,
+                  key: const ValueKey('ledger-cell-dot'),
+                  maxLines: 1,
+                  softWrap: false,
+                  style: style,
+                ),
+              );
+            }
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (data.out > 0)
+                  line(
+                    '−${flags.of(MaskKind.expense) ? '••' : krw(data.out)}',
+                    c.fgNeutral,
+                  ),
+                if (data.inn > 0)
+                  line(
+                    '+${flags.of(MaskKind.income) ? '••' : krw(data.inn)}',
+                    c.fgBrand,
+                  ),
+              ],
+            );
+          },
         );
       },
     );
   }
+}
+
+/// 칸 금액이 안 들어갈 때 대신 쓰는 점.
+const String ledgerCellDot = '•';
+
+/// [text] 가 [style] · [scaler] 로 한 줄에 [maxWidth] 안에 들어가는가 — 자리수가 아니라 실제 폭으로 잰다.
+bool ledgerCellAmountFits(
+  String text,
+  TextStyle style,
+  TextScaler scaler,
+  double maxWidth,
+) {
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: scaler,
+    maxLines: 1,
+  )..layout();
+  final w = painter.width;
+  painter.dispose();
+  return w <= maxWidth;
 }
 
 /// 접이식 캘린더의 격자 — 접힘: 선택 주 1줄 / 펼침: 월 전체. 요일 t2 · 날 숫자 t5. 칸 아래 표시는 쓰는 화면이 채운다
@@ -519,7 +583,7 @@ class LedgerCalendarGrid extends StatelessWidget {
   /// 날 숫자 아래 표시 — 없으면 빈 자리를 돌려준다.
   final Widget Function(BuildContext context, String ds) markBuilder;
 
-  /// 칸의 읽는 이름 — 없으면 이름을 달지 않는다(가계부).
+  /// 칸의 읽는 이름 — 없으면 이름을 달지 않는다(할 일의 표시 없는 날).
   final String? Function(BuildContext context, String ds)? cellLabel;
 
   /// 날 숫자 원 — 눈금 36.

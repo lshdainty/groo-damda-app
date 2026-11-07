@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
@@ -664,11 +665,11 @@ class _ComplianceSection extends StatelessWidget {
             if (r.compliancePercent > 100) return c.chartRed;
             return i == active ? c.chartBlue : c.chartBlueWeak;
           },
-          barLabel: (i, v) => '${v.round()}%',
+          barLabel: (i, v) => formatProgress(v),
           referenceLines: const [100],
           showValueAxis: false,
           emphasizedIndex: active < 0 ? null : active,
-          valueFormatter: (v) => '${v.toStringAsFixed(1)}%',
+          valueFormatter: formatProgress,
           tooltipFooter: (i) => [
             (name: l.expSummaryExpense, value: won(list[i].totalSpent)),
             (name: l.budgetLimit, value: won(list[i].totalLimit)),
@@ -686,9 +687,7 @@ class _ComplianceSection extends StatelessWidget {
             for (final r in list)
               [
                 monthOnly(DateTime(2000, r.month)),
-                r.totalLimit > 0
-                    ? '${r.compliancePercent.toStringAsFixed(1)}%'
-                    : '-',
+                r.totalLimit > 0 ? formatProgress(r.compliancePercent) : '-',
                 won(r.totalSpent),
                 won(r.totalLimit),
               ],

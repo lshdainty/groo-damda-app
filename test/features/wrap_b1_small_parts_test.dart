@@ -104,8 +104,8 @@ void main() {
     testWidgets('칸 금액을 길게 눌러도 툴팁이 뜨지 않는다 — 옛 길게 누르기 툴팁은 걷었다', (tester) async {
       await pump(tester);
       expect(find.byType(Tooltip), findsNothing);
-      final amount = find.textContaining('123,4');
-      expect(amount, findsOneWidget);
+      // 칸에 안 들어가는 금액은 이제 말줄임 대신 점이다(B3-나 2A) — 그 점을 길게 눌러도 툴팁은 없다
+      final amount = find.byKey(const ValueKey('ledger-cell-dot')).first;
       await tester.longPress(amount);
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.byType(Tooltip), findsNothing);

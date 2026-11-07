@@ -7746,18 +7746,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsFixedVariableIncome => '고정 제외 수입';
 
   @override
-  String statsFixedBarSemantics(String kind, int fixed, int variable) {
-    return '$kind 중 고정 $fixed%, 변동 $variable%';
+  String statsFixedBarSemantics(String kind, String fixed, String variable) {
+    return '$kind 중 고정 $fixed, 변동 $variable';
   }
 
   @override
-  String statsFixedInsightExpense(int pct) {
-    return '지출의 $pct%가 고정이에요. 고정을 뺀 지출은';
+  String statsFixedInsightExpense(String pct, String josa) {
+    return '지출의 $pct$josa 고정이에요. 고정을 뺀 지출은';
   }
 
   @override
-  String statsFixedInsightIncome(int pct) {
-    return '수입의 $pct%가 고정이에요. 고정을 뺀 수입은';
+  String statsFixedInsightIncome(String pct, String josa) {
+    return '수입의 $pct$josa 고정이에요. 고정을 뺀 수입은';
   }
 
   @override
@@ -7798,8 +7798,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsFixedCategoryTitle => '카테고리별 고정·변동';
 
   @override
-  String statsFixedCategoryFixedPart(int pct) {
-    return '그중 고정 $pct%';
+  String statsFixedCategoryFixedPart(String pct) {
+    return '그중 고정 $pct';
   }
 
   @override
@@ -9535,4 +9535,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dateRangeSeparator => '~';
+
+  @override
+  String get percentUnderTenth => '0.1% 미만';
+
+  @override
+  String expCellLabel(String date, String parts) {
+    return '$date, $parts';
+  }
+
+  @override
+  String expCellOutPart(String amount) {
+    return '지출 $amount';
+  }
+
+  @override
+  String expCellInPart(String amount) {
+    return '수입 $amount';
+  }
+
+  @override
+  String get expCellHidden => '금액 가림';
 }

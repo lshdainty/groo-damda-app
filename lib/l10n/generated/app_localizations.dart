@@ -14002,20 +14002,20 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedBarSemantics.
   ///
   /// In ko, this message translates to:
-  /// **'{kind} 중 고정 {fixed}%, 변동 {variable}%'**
-  String statsFixedBarSemantics(String kind, int fixed, int variable);
+  /// **'{kind} 중 고정 {fixed}, 변동 {variable}'**
+  String statsFixedBarSemantics(String kind, String fixed, String variable);
 
   /// No description provided for @statsFixedInsightExpense.
   ///
   /// In ko, this message translates to:
-  /// **'지출의 {pct}%가 고정이에요. 고정을 뺀 지출은'**
-  String statsFixedInsightExpense(int pct);
+  /// **'지출의 {pct}{josa} 고정이에요. 고정을 뺀 지출은'**
+  String statsFixedInsightExpense(String pct, String josa);
 
   /// No description provided for @statsFixedInsightIncome.
   ///
   /// In ko, this message translates to:
-  /// **'수입의 {pct}%가 고정이에요. 고정을 뺀 수입은'**
-  String statsFixedInsightIncome(int pct);
+  /// **'수입의 {pct}{josa} 고정이에요. 고정을 뺀 수입은'**
+  String statsFixedInsightIncome(String pct, String josa);
 
   /// No description provided for @statsFixedInsightTail.
   ///
@@ -14092,8 +14092,8 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedCategoryFixedPart.
   ///
   /// In ko, this message translates to:
-  /// **'그중 고정 {pct}%'**
-  String statsFixedCategoryFixedPart(int pct);
+  /// **'그중 고정 {pct}'**
+  String statsFixedCategoryFixedPart(String pct);
 
   /// No description provided for @statsFixedBulkTitle.
   ///
@@ -17124,6 +17124,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'~'**
   String get dateRangeSeparator;
+
+  /// 비중이 0 보다 크고 0.05% 미만일 때 — 0.0% 로 보이지 않게. 영어는 <0.1%
+  ///
+  /// In ko, this message translates to:
+  /// **'0.1% 미만'**
+  String get percentUnderTenth;
+
+  /// No description provided for @expCellLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date}, {parts}'**
+  String expCellLabel(String date, String parts);
+
+  /// No description provided for @expCellOutPart.
+  ///
+  /// In ko, this message translates to:
+  /// **'지출 {amount}'**
+  String expCellOutPart(String amount);
+
+  /// No description provided for @expCellInPart.
+  ///
+  /// In ko, this message translates to:
+  /// **'수입 {amount}'**
+  String expCellInPart(String amount);
+
+  /// No description provided for @expCellHidden.
+  ///
+  /// In ko, this message translates to:
+  /// **'금액 가림'**
+  String get expCellHidden;
 }
 
 class _AppLocalizationsDelegate
