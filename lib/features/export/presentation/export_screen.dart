@@ -313,7 +313,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       try {
         await Share.shareXFiles([
           XFile(file.path, name: filename, mimeType: _mimeType(_format, types)),
-        ], text: l.exportShareText(r.start, r.end));
+        ], text: l.exportShareText(_rangeText(r)));
       } finally {
         // 금융 데이터 평문 임시파일 — 공유 완료 후 즉시 삭제(복구 방지).
         if (await file.exists()) await file.delete();

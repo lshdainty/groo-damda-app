@@ -111,6 +111,16 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
   late final TextEditingController _nameCtrl;
   late final FocusNode _nameFocus = widget.nameFocus;
   final _draftCtrl = TextEditingController();
+
+  /// 100억을 넘겨 입력을 막았나(금액 · 수수료 · 이자 단계) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  bool _draftOver = false;
+  late final List<TextInputFormatter> _draftFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        if (over != _draftOver && mounted) setState(() => _draftOver = over);
+      },
+    ),
+  ];
   final _draftFocus = FocusNode();
 
   late final String _iType;
@@ -371,7 +381,10 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
         ? formatAmountInput(int.parse(v))
         : v;
     _stepOrigin = _draftCtrl.text;
-    setState(() => _step = s);
+    setState(() {
+      _step = s;
+      _draftOver = false;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _step == s) _draftFocus.requestFocus();
     });
@@ -743,6 +756,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
             description: _step == _Step.amount
                 ? l.presetAmountHint
                 : (_step == _Step.interest ? l.expInterestHint : null),
+            invalid: _draftOver,
+            errorMessage: _draftOver ? l.amountTooLarge : null,
             child: PInput(
               variant: PInputVariant.underline,
               controller: _draftCtrl,
@@ -753,7 +768,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               tabularFigures: true,
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.done,
-              inputFormatters: const [AmountInputFormatter()],
+              inputFormatters: _draftFormatters,
               onSubmitted: (_) => _confirmStep(),
             ),
           ),

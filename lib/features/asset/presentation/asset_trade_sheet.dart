@@ -98,6 +98,24 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
   final _qtyCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
   final _feeCtrl = TextEditingController();
+
+  /// 100억을 넘겨 입력을 막았나(거래 금액 · 수수료) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  bool _amountOver = false;
+  bool _feeOver = false;
+  late final List<TextInputFormatter> _amountFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        if (over != _amountOver && mounted) setState(() => _amountOver = over);
+      },
+    ),
+  ];
+  late final List<TextInputFormatter> _feeFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        if (over != _feeOver && mounted) setState(() => _feeOver = over);
+      },
+    ),
+  ];
   final _memoCtrl = TextEditingController();
 
   late String _type;
@@ -500,13 +518,13 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             child: PField(
               label: l.tradeAmount,
               description: l.tradeAmountHelp,
-              invalid: amountError != null,
-              errorMessage: amountError,
+              invalid: amountError != null || _amountOver,
+              errorMessage: _amountOver ? l.amountTooLarge : amountError,
               child: PInput(
                 variant: PInputVariant.underline,
                 controller: _amountCtrl,
                 keyboardType: TextInputType.number,
-                inputFormatters: const [AmountInputFormatter()],
+                inputFormatters: _amountFormatters,
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 placeholder: '0',
@@ -520,11 +538,13 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
             child: PField(
               label: l.tradeFee,
               indicator: PFieldIndicator.optional,
+              invalid: _feeOver,
+              errorMessage: _feeOver ? l.amountTooLarge : null,
               child: PInput(
                 variant: PInputVariant.underline,
                 controller: _feeCtrl,
                 keyboardType: TextInputType.number,
-                inputFormatters: const [AmountInputFormatter()],
+                inputFormatters: _feeFormatters,
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 placeholder: '0',

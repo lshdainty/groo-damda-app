@@ -148,11 +148,11 @@ class TransferAccountFields extends StatelessWidget {
         ),
         const SizedBox(height: PSpace.x12),
 
-        labelBuilder(l.expDepositAccount),
+        labelBuilder(l.expTransferToAccount),
         const SizedBox(height: PSpace.x4),
         _accountSelect(
           context: context,
-          title: l.expDepositAccount,
+          title: l.expTransferToAccount,
           value: toAssetRowId,
           excludeFrom: true,
           onChanged: (v) {

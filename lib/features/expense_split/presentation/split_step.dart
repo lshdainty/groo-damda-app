@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -117,6 +118,16 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
   int? _itemCat;
   final _nameCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
+
+  /// 100억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  bool _amountOver = false;
+  late final List<TextInputFormatter> _amountFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        if (over != _amountOver && mounted) setState(() => _amountOver = over);
+      },
+    ),
+  ];
   final _nameFocus = FocusNode();
   final _amountFocus = FocusNode();
   bool _itemAttempted = false;
@@ -888,9 +899,9 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
             ),
             child: PField(
               label: l.expAmount,
-              invalid: amountErr != null,
-              errorMessage: amountErr,
-              description: amountErr != null
+              invalid: amountErr != null || _amountOver,
+              errorMessage: _amountOver ? l.amountTooLarge : amountErr,
+              description: amountErr != null || _amountOver
                   ? null
                   : l.expSplitItemHelp(
                       txMoney(others, masked),
@@ -905,7 +916,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
                 suffixText: wonUnit(),
                 tabularFigures: true,
                 keyboardType: TextInputType.number,
-                inputFormatters: kWonFormatters,
+                inputFormatters: _amountFormatters,
                 onChanged: (_) => setState(() {}),
                 onSubmitted: (_) => _doneItem(),
               ),

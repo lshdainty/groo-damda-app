@@ -352,9 +352,12 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
     final check = _check!;
     // 서버가 시간대 없이 주는 `[UTC]` — 그냥 자르면 KST 에서 하루 이르게 보인다.
     // 구독 시트와 같은 값이라 같은 방식으로 읽어야 두 화면이 다른 날짜를 말하지 않는다.
+    // 화면 글은 날짜 규칙("10월 31일") — 읽지 못할 때만 서버 값 그대로.
+    final endDt = parseServerUtc(check.subscriptionPeriodEnd);
     final until = check.subscriptionPeriodEnd != null
-        ? (localDateKey(check.subscriptionPeriodEnd) ??
-              check.subscriptionPeriodEnd!.substring(0, 10))
+        ? (endDt != null
+              ? formatDay(endDt).md
+              : check.subscriptionPeriodEnd!.substring(0, 10))
         : null;
     final headline = check.blockedBySubscription
         ? (until != null

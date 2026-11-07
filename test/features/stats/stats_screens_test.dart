@@ -40,7 +40,7 @@ import '../../support/stats_fixtures.dart' as fx;
 const _tabLabel = {
   StatsTab.trend: '추이',
   StatsTab.compare: '비교',
-  StatsTab.fixed: '고정·변동',
+  StatsTab.fixed: '고정 · 변동',
 };
 
 Future<void> _pump(
@@ -575,12 +575,12 @@ void main() {
     });
   });
 
-  group('고정·변동 탭', () {
+  group('고정 · 변동 탭', () {
     testWidgets('월별 추이의 지출 · 수입 Segmented 는 머리 오른쪽에 있다(제목과 같은 줄)', (
       tester,
     ) async {
       await _pump(tester, tab: StatsTab.fixed, scenario: fx.Scenario.normal);
-      final title = tester.getRect(findPlain('월별 고정·변동 추이'));
+      final title = tester.getRect(findPlain('월별 고정 · 변동 추이'));
       final seg = tester.getRect(
         find
             .byWidgetPredicate(

@@ -247,7 +247,10 @@ void main() {
       expect(_rowLocked(tester, 'category'), isFalse);
       expect(tester.widget<EditableText>(_fieldWith('버스')).readOnly, isFalse);
 
-      expect(findText('결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요'), findsOneWidget);
+      expect(
+        findText('결제가 끝난 거래예요. 금액 · 날짜를 바꾸려면 고쳐 쓰기를 눌러주세요'),
+        findsOneWidget,
+      );
       expect(findText('고쳐 쓰기'), findsOneWidget);
     });
 

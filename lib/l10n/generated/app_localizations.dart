@@ -335,7 +335,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLockRowDesc.
   ///
   /// In ko, this message translates to:
-  /// **'앱을 열 때 Face ID·지문으로 본인 확인을 해요.'**
+  /// **'앱을 열 때 Face ID · 지문으로 본인 확인을 해요.'**
   String get appLockRowDesc;
 
   /// No description provided for @appLockLockedDesc.
@@ -361,18 +361,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이 기기에서는 생체인증이나 화면 잠금을 사용할 수 없어요.'**
   String get appLockUnavailable;
-
-  /// No description provided for @stateNoData.
-  ///
-  /// In ko, this message translates to:
-  /// **'데이터가 없습니다'**
-  String get stateNoData;
-
-  /// No description provided for @stateError.
-  ///
-  /// In ko, this message translates to:
-  /// **'오류가 발생했습니다'**
-  String get stateError;
 
   /// No description provided for @stateEmpty.
   ///
@@ -722,12 +710,6 @@ abstract class AppLocalizations {
   /// **'총 자산'**
   String get assetSummaryTotalBalance;
 
-  /// No description provided for @assetEmpty.
-  ///
-  /// In ko, this message translates to:
-  /// **'등록된 자산이 없습니다'**
-  String get assetEmpty;
-
   /// No description provided for @assetCreateFirst.
   ///
   /// In ko, this message translates to:
@@ -751,12 +733,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이체 추가'**
   String get assetTransferAdd;
-
-  /// No description provided for @assetTransferEmpty.
-  ///
-  /// In ko, this message translates to:
-  /// **'이체 내역이 없습니다'**
-  String get assetTransferEmpty;
 
   /// No description provided for @assetFee.
   ///
@@ -854,12 +830,6 @@ abstract class AppLocalizations {
   /// **'마이너스 통장'**
   String get assetSubtypeOverdraft;
 
-  /// No description provided for @assetLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'자산을 불러오지 못했습니다'**
-  String get assetLoadError;
-
   /// No description provided for @assetEmptyState.
   ///
   /// In ko, this message translates to:
@@ -875,7 +845,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetSummaryColAccounts.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·예금'**
+  /// **'계좌 · 예금'**
   String get assetSummaryColAccounts;
 
   /// No description provided for @assetSummaryColCards.
@@ -953,7 +923,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetManageLoadFailed.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드를 불러오지 못했어요'**
+  /// **'계좌 · 카드를 불러오지 못했어요'**
   String get assetManageLoadFailed;
 
   /// No description provided for @assetHoldingsCount.
@@ -1075,24 +1045,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'계좌 · 카드 관리로 가기'**
   String get assetEmptyCta;
-
-  /// No description provided for @assetAccountAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'계좌가 추가되었습니다'**
-  String get assetAccountAdded;
-
-  /// No description provided for @assetAccountUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'계좌가 수정되었습니다'**
-  String get assetAccountUpdated;
-
-  /// No description provided for @assetAccountDeleted.
-  ///
-  /// In ko, this message translates to:
-  /// **'계좌가 삭제되었습니다'**
-  String get assetAccountDeleted;
 
   /// No description provided for @assetAccountDelete.
   ///
@@ -1298,18 +1250,6 @@ abstract class AppLocalizations {
   /// **'결제일에 이 계좌에서 청구액이 빠져요.'**
   String get assetPaymentAccountHint;
 
-  /// No description provided for @assetCardAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'카드가 추가되었습니다'**
-  String get assetCardAdded;
-
-  /// No description provided for @assetCardUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'카드가 수정되었습니다'**
-  String get assetCardUpdated;
-
   /// No description provided for @assetCardDelete.
   ///
   /// In ko, this message translates to:
@@ -1321,12 +1261,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'\"{name}\"을(를) 목록에서 삭제해요. 연결된 거래 내역은 그대로 남아요. 삭제한 자산은 되돌릴 수 없어요.'**
   String assetCardDeleteConfirm(String name);
-
-  /// No description provided for @assetCardDeleted.
-  ///
-  /// In ko, this message translates to:
-  /// **'카드가 삭제되었습니다'**
-  String get assetCardDeleted;
 
   /// No description provided for @assetCardProduct.
   ///
@@ -1441,24 +1375,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'단종'**
   String get assetDiscontinued;
-
-  /// No description provided for @assetInvestAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'투자가 추가되었습니다'**
-  String get assetInvestAdded;
-
-  /// No description provided for @assetInvestUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'투자가 수정되었습니다'**
-  String get assetInvestUpdated;
-
-  /// No description provided for @assetInvestDeleted.
-  ///
-  /// In ko, this message translates to:
-  /// **'투자가 삭제되었습니다'**
-  String get assetInvestDeleted;
 
   /// No description provided for @assetInvestDelete.
   ///
@@ -1739,7 +1655,7 @@ abstract class AppLocalizations {
   /// No description provided for @tradeTitle.
   ///
   /// In ko, this message translates to:
-  /// **'매수·매도'**
+  /// **'매수 · 매도'**
   String get tradeTitle;
 
   /// No description provided for @tradeBuy.
@@ -1823,7 +1739,7 @@ abstract class AppLocalizations {
   /// No description provided for @tradeFee.
   ///
   /// In ko, this message translates to:
-  /// **'수수료·세금 (원)'**
+  /// **'수수료 · 세금 (원)'**
   String get tradeFee;
 
   /// No description provided for @tradeMemo.
@@ -1889,7 +1805,7 @@ abstract class AppLocalizations {
   /// No description provided for @tradeInsufficientCash.
   ///
   /// In ko, this message translates to:
-  /// **'예수금이 마이너스가 돼요. 그대로 기록됩니다.'**
+  /// **'예수금이 마이너스가 돼요. 그대로 기록돼요.'**
   String get tradeInsufficientCash;
 
   /// No description provided for @tradeInsufficientQty.
@@ -1925,7 +1841,7 @@ abstract class AppLocalizations {
   /// No description provided for @tradeDeleted.
   ///
   /// In ko, this message translates to:
-  /// **'거래를 취소했어요'**
+  /// **'거래를 취소했어요.'**
   String get tradeDeleted;
 
   /// No description provided for @tradeDeleteTitle.
@@ -2269,12 +2185,6 @@ abstract class AppLocalizations {
   /// **'{n}주'**
   String assetSharesCount(String n);
 
-  /// No description provided for @assetTossValuationFormula.
-  ///
-  /// In ko, this message translates to:
-  /// **'평가액 = 토스 현재가 × {qty}주 로 실시간 계산됩니다.'**
-  String assetTossValuationFormula(int qty);
-
   /// No description provided for @assetHoldingQty.
   ///
   /// In ko, this message translates to:
@@ -2299,12 +2209,6 @@ abstract class AppLocalizations {
   /// **'토스 시세로 실시간 평가'**
   String get assetTossRealtimeTitle;
 
-  /// No description provided for @assetTossRealtimeDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'보유 종목과 수량을 등록하면 토스 현재가 × 수량으로 평가액이 실시간 반영됩니다.'**
-  String get assetTossRealtimeDesc;
-
   /// No description provided for @assetTapToChange.
   ///
   /// In ko, this message translates to:
@@ -2314,7 +2218,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetStockSearchHint.
   ///
   /// In ko, this message translates to:
-  /// **'종목명·코드 검색 (예: 삼성전자, 005930)'**
+  /// **'종목명 · 코드 검색 (예: 삼성전자, 005930)'**
   String get assetStockSearchHint;
 
   /// No description provided for @stockSecurityTypeIndex.
@@ -2605,12 +2509,6 @@ abstract class AppLocalizations {
   /// **'연결된 결제 계좌가 없어 이체 없이 사용액만 정리돼요.'**
   String get assetPayNoAccountNote;
 
-  /// No description provided for @assetPaymentRecorded.
-  ///
-  /// In ko, this message translates to:
-  /// **'결제가 기록되었습니다'**
-  String get assetPaymentRecorded;
-
   /// No description provided for @assetBillingLoadError.
   ///
   /// In ko, this message translates to:
@@ -2761,12 +2659,6 @@ abstract class AppLocalizations {
   /// **'이용 내역이 없어요.'**
   String get assetNoUsage;
 
-  /// No description provided for @assetBillingPeriod.
-  ///
-  /// In ko, this message translates to:
-  /// **'{start}~{end} 사용분'**
-  String assetBillingPeriod(String start, String end);
-
   /// No description provided for @assetMonthlyPaymentDay.
   ///
   /// In ko, this message translates to:
@@ -2796,12 +2688,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'할 일'**
   String get todoTitle;
-
-  /// No description provided for @todoEmpty.
-  ///
-  /// In ko, this message translates to:
-  /// **'할 일이 없습니다'**
-  String get todoEmpty;
 
   /// No description provided for @todoCreateFirst.
   ///
@@ -2934,12 +2820,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'안건'**
   String get calAgendaView;
-
-  /// No description provided for @calNoEvents.
-  ///
-  /// In ko, this message translates to:
-  /// **'일정이 없습니다'**
-  String get calNoEvents;
 
   /// No description provided for @calEventAdd.
   ///
@@ -3265,18 +3145,6 @@ abstract class AppLocalizations {
   /// **'\"{title}\" 은 반복 일정이라 모든 회차가 함께 삭제돼요. 삭제한 일정은 되돌릴 수 없어요.'**
   String calEventDeleteConfirmRecurring(String title);
 
-  /// No description provided for @calEventAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'일정이 추가되었습니다'**
-  String get calEventAdded;
-
-  /// No description provided for @calEventUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'일정이 수정되었습니다'**
-  String get calEventUpdated;
-
   /// No description provided for @calLabelsTitle.
   ///
   /// In ko, this message translates to:
@@ -3514,7 +3382,7 @@ abstract class AppLocalizations {
   /// No description provided for @calJoinedCalendar.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 캘린더에 참여했어요'**
+  /// **'\"{name}\" 캘린더에 참여했어요.'**
   String calJoinedCalendar(String name);
 
   /// No description provided for @calInviteCode.
@@ -3538,13 +3406,13 @@ abstract class AppLocalizations {
   /// No description provided for @calInviteCodeRegenerated.
   ///
   /// In ko, this message translates to:
-  /// **'초대 코드를 새로 만들었어요'**
+  /// **'초대 코드를 새로 만들었어요.'**
   String get calInviteCodeRegenerated;
 
   /// No description provided for @calInviteCodeCopied.
   ///
   /// In ko, this message translates to:
-  /// **'초대 코드를 복사했어요'**
+  /// **'초대 코드를 복사했어요.'**
   String get calInviteCodeCopied;
 
   /// No description provided for @calRemoveMember.
@@ -3664,7 +3532,7 @@ abstract class AppLocalizations {
   /// No description provided for @calColorChangeFailed.
   ///
   /// In ko, this message translates to:
-  /// **'색을 바꾸지 못했어요.'**
+  /// **'색을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calColorChangeFailed;
 
   /// No description provided for @calRoleChangeFailed.
@@ -3766,7 +3634,7 @@ abstract class AppLocalizations {
   /// No description provided for @calUpdateFailed.
   ///
   /// In ko, this message translates to:
-  /// **'캘린더 표시를 바꾸지 못했어요.'**
+  /// **'캘린더 표시를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get calUpdateFailed;
 
   /// No description provided for @importExecuteFailed.
@@ -3858,24 +3726,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'최근 6개월'**
   String get dashTrendTitle;
-
-  /// No description provided for @dashEmptyTransactions.
-  ///
-  /// In ko, this message translates to:
-  /// **'최근 거래가 없습니다'**
-  String get dashEmptyTransactions;
-
-  /// No description provided for @dashEmptyEvents.
-  ///
-  /// In ko, this message translates to:
-  /// **'예정된 일정이 없습니다'**
-  String get dashEmptyEvents;
-
-  /// No description provided for @dashEmptyTodos.
-  ///
-  /// In ko, this message translates to:
-  /// **'처리할 할 일이 없습니다'**
-  String get dashEmptyTodos;
 
   /// No description provided for @dashAddTx.
   ///
@@ -4116,12 +3966,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이체'**
   String get expFilterTransfer;
-
-  /// No description provided for @expEmpty.
-  ///
-  /// In ko, this message translates to:
-  /// **'거래가 없습니다'**
-  String get expEmpty;
 
   /// No description provided for @expEmptyDescription.
   ///
@@ -4735,18 +4579,6 @@ abstract class AppLocalizations {
   /// **'잠시 뒤 다시 시도해주세요.'**
   String get budgetPickLoadFailDesc;
 
-  /// No description provided for @budgetUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'예산이 수정되었습니다'**
-  String get budgetUpdated;
-
-  /// No description provided for @budgetAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'예산이 추가되었습니다'**
-  String get budgetAdded;
-
   /// No description provided for @budgetActionFailed.
   ///
   /// In ko, this message translates to:
@@ -4812,12 +4644,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'월 예산 한도'**
   String get budgetMonthlyLimit;
-
-  /// No description provided for @budgetLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'예산을 불러오지 못했습니다'**
-  String get budgetLoadError;
 
   /// No description provided for @budgetSelectMonth.
   ///
@@ -5401,12 +5227,6 @@ abstract class AppLocalizations {
   /// **'등록된 혜택이 없어요.'**
   String get cardNoBenefits;
 
-  /// No description provided for @cardPickerNoMatch.
-  ///
-  /// In ko, this message translates to:
-  /// **'일치하는 카드가 없습니다'**
-  String get cardPickerNoMatch;
-
   /// No description provided for @categoryManageTitle.
   ///
   /// In ko, this message translates to:
@@ -5521,18 +5341,6 @@ abstract class AppLocalizations {
   /// **'옮기기'**
   String get categoryMove;
 
-  /// No description provided for @categoryUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'카테고리가 수정되었습니다'**
-  String get categoryUpdated;
-
-  /// No description provided for @categoryAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'카테고리가 추가되었습니다'**
-  String get categoryAdded;
-
   /// No description provided for @categoryActionFailed.
   ///
   /// In ko, this message translates to:
@@ -5578,7 +5386,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryReorderFailed.
   ///
   /// In ko, this message translates to:
-  /// **'순서를 바꾸지 못했어요.'**
+  /// **'순서를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get categoryReorderFailed;
 
   /// No description provided for @todoSaveFailed.
@@ -6145,12 +5953,6 @@ abstract class AppLocalizations {
   /// **'더치페이 시작'**
   String get dutchStartTitle;
 
-  /// No description provided for @dutchFromTxDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'이 거래를 기준으로 더치페이 정산을 만듭니다. 참여자에게 송금 요청을 보내고, 정산 진행 상황을 추적할 수 있어요.'**
-  String get dutchFromTxDesc;
-
   /// No description provided for @dutchSplitMethod.
   ///
   /// In ko, this message translates to:
@@ -6178,7 +5980,7 @@ abstract class AppLocalizations {
   /// No description provided for @dutchSplitRatioSub.
   ///
   /// In ko, this message translates to:
-  /// **'인원수·기준'**
+  /// **'인원수 · 기준'**
   String get dutchSplitRatioSub;
 
   /// No description provided for @dutchSplitCustomTitle.
@@ -6198,12 +6000,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'나도 포함해서 분배'**
   String get dutchIncludeMyself;
-
-  /// No description provided for @dutchIncludeMyselfDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'내 몫도 계산됩니다'**
-  String get dutchIncludeMyselfDesc;
 
   /// No description provided for @dutchIncludeMyselfOffDesc.
   ///
@@ -6229,18 +6025,6 @@ abstract class AppLocalizations {
   /// **'참여자에게 함께 보낼 한마디를 적어주세요'**
   String get dutchRequestMsgPlaceholder;
 
-  /// No description provided for @dutchShortBy.
-  ///
-  /// In ko, this message translates to:
-  /// **'합계가 총액보다 {amount}원 부족합니다.'**
-  String dutchShortBy(String amount);
-
-  /// No description provided for @dutchOverBy.
-  ///
-  /// In ko, this message translates to:
-  /// **'합계가 총액보다 {amount}원 초과합니다.'**
-  String dutchOverBy(String amount);
-
   /// No description provided for @dutchCreated.
   ///
   /// In ko, this message translates to:
@@ -6258,12 +6042,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이체 내역을 불러오지 못했어요.'**
   String get expTransfersLoadError;
-
-  /// No description provided for @expEmptyMonth.
-  ///
-  /// In ko, this message translates to:
-  /// **'이 달에는 거래가 없습니다'**
-  String get expEmptyMonth;
 
   /// No description provided for @expEmptyDay.
   ///
@@ -6313,41 +6091,17 @@ abstract class AppLocalizations {
   /// **'추가'**
   String get expAddShort;
 
-  /// No description provided for @expTransferDone.
-  ///
-  /// In ko, this message translates to:
-  /// **'이체가 완료되었습니다'**
-  String get expTransferDone;
-
   /// No description provided for @expActionFailed.
   ///
   /// In ko, this message translates to:
   /// **'실패'**
   String get expActionFailed;
 
-  /// No description provided for @expUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'거래가 수정되었습니다'**
-  String get expUpdated;
-
-  /// No description provided for @expAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'거래가 추가되었습니다'**
-  String get expAdded;
-
   /// No description provided for @expDeleteConfirm.
   ///
   /// In ko, this message translates to:
   /// **'\"{name}\" 거래를 삭제할까요? 연결된 자산 잔액이 함께 바뀌어요. 삭제한 거래는 되돌릴 수 없어요.'**
   String expDeleteConfirm(String name);
-
-  /// No description provided for @expDeleted.
-  ///
-  /// In ko, this message translates to:
-  /// **'거래가 삭제되었습니다'**
-  String get expDeleted;
 
   /// No description provided for @expSplitMismatch.
   ///
@@ -6394,7 +6148,7 @@ abstract class AppLocalizations {
   /// No description provided for @expPresetFilled.
   ///
   /// In ko, this message translates to:
-  /// **'프리셋 값이 채워졌어요. 금액·내역만 수정해서 저장하세요.'**
+  /// **'프리셋 값이 채워졌어요. 금액 · 내역만 수정해서 저장하세요.'**
   String get expPresetFilled;
 
   /// No description provided for @expClear.
@@ -6493,12 +6247,6 @@ abstract class AppLocalizations {
   /// **'프리셋 잠금'**
   String get expPresetLock;
 
-  /// No description provided for @expNoCategoryForType.
-  ///
-  /// In ko, this message translates to:
-  /// **'이 타입에 해당하는 카테고리가 없습니다'**
-  String get expNoCategoryForType;
-
   /// No description provided for @expSubcategory.
   ///
   /// In ko, this message translates to:
@@ -6556,7 +6304,7 @@ abstract class AppLocalizations {
   /// No description provided for @expAccountCard.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드'**
+  /// **'계좌 · 카드'**
   String get expAccountCard;
 
   /// No description provided for @expAssetLoadError.
@@ -6568,8 +6316,14 @@ abstract class AppLocalizations {
   /// No description provided for @expWithdrawAccount.
   ///
   /// In ko, this message translates to:
-  /// **'출금 계좌'**
+  /// **'보내는 계좌'**
   String get expWithdrawAccount;
+
+  /// No description provided for @expTransferToAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'받는 계좌'**
+  String get expTransferToAccount;
 
   /// No description provided for @expSelect.
   ///
@@ -6580,7 +6334,7 @@ abstract class AppLocalizations {
   /// No description provided for @expTransferSameAsset.
   ///
   /// In ko, this message translates to:
-  /// **'보낼/받을 자산은 달라야 합니다'**
+  /// **'보낼/받을 자산은 달라야 해요.'**
   String get expTransferSameAsset;
 
   /// No description provided for @expFeeOptional.
@@ -6610,7 +6364,7 @@ abstract class AppLocalizations {
   /// No description provided for @expDateTime.
   ///
   /// In ko, this message translates to:
-  /// **'날짜·시간'**
+  /// **'날짜 · 시간'**
   String get expDateTime;
 
   /// No description provided for @expMemoPlaceholder.
@@ -6739,12 +6493,6 @@ abstract class AppLocalizations {
   /// **'추가 금액'**
   String get expAddAmount;
 
-  /// No description provided for @expSplitSaved.
-  ///
-  /// In ko, this message translates to:
-  /// **'분할이 저장되었습니다'**
-  String get expSplitSaved;
-
   /// No description provided for @expSplitRemoveConfirm.
   ///
   /// In ko, this message translates to:
@@ -6853,12 +6601,6 @@ abstract class AppLocalizations {
   /// **'추천'**
   String get expRecommended;
 
-  /// No description provided for @expSplitDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'하나의 결제를 카테고리·항목별로 나누어 기록합니다. 예: 마트에서 식품과 생활품을 함께 결제한 경우.'**
-  String get expSplitDesc;
-
   /// No description provided for @expOriginalTx.
   ///
   /// In ko, this message translates to:
@@ -6904,8 +6646,8 @@ abstract class AppLocalizations {
   /// No description provided for @exportShareText.
   ///
   /// In ko, this message translates to:
-  /// **'데이터 내보내기 ({start} ~ {end})'**
-  String exportShareText(String start, String end);
+  /// **'데이터 내보내기 ({range})'**
+  String exportShareText(String range);
 
   /// No description provided for @exportSuccess.
   ///
@@ -7156,7 +6898,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreGroupSystem.
   ///
   /// In ko, this message translates to:
-  /// **'계정·시스템'**
+  /// **'계정 · 시스템'**
   String get moreGroupSystem;
 
   /// No description provided for @moreItemStocks.
@@ -7246,7 +6988,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreDescAccountCard.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 추가·편집'**
+  /// **'계좌 · 카드 추가 · 편집'**
   String get moreDescAccountCard;
 
   /// No description provided for @moreDescCalendar.
@@ -7276,7 +7018,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreDescCardBenefits.
   ///
   /// In ko, this message translates to:
-  /// **'신용·체크 카드 검색'**
+  /// **'신용 · 체크 카드 검색'**
   String get moreDescCardBenefits;
 
   /// No description provided for @moreDescCategories.
@@ -7432,7 +7174,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPrivacyOpenFailed.
   ///
   /// In ko, this message translates to:
-  /// **'처리방침을 열지 못했어요.'**
+  /// **'처리방침을 열지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get settingsPrivacyOpenFailed;
 
   /// No description provided for @settingsGroupHelp.
@@ -7450,7 +7192,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsGuideOpenFailed.
   ///
   /// In ko, this message translates to:
-  /// **'설명서를 열지 못했어요.'**
+  /// **'설명서를 열지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get settingsGuideOpenFailed;
 
   /// No description provided for @appearanceTitle.
@@ -7666,7 +7408,7 @@ abstract class AppLocalizations {
   /// No description provided for @hideCardHomeMonthExpense.
   ///
   /// In ko, this message translates to:
-  /// **'이번달 수입·지출'**
+  /// **'이번달 수입 · 지출'**
   String get hideCardHomeMonthExpense;
 
   /// No description provided for @hideCardHomeCategoryDonut.
@@ -7696,7 +7438,7 @@ abstract class AppLocalizations {
   /// No description provided for @hideCardAssetNetWorth.
   ///
   /// In ko, this message translates to:
-  /// **'총 순자산·추이'**
+  /// **'총 순자산 · 추이'**
   String get hideCardAssetNetWorth;
 
   /// No description provided for @hideCardAssetComposition.
@@ -7708,7 +7450,7 @@ abstract class AppLocalizations {
   /// No description provided for @hideCardAssetAccounts.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·예금'**
+  /// **'계좌 · 예금'**
   String get hideCardAssetAccounts;
 
   /// No description provided for @hideCardAssetInvestments.
@@ -7885,12 +7627,6 @@ abstract class AppLocalizations {
   /// **'금액 가리기'**
   String get appearanceHideAmount;
 
-  /// No description provided for @appearanceHideAmountDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'모든 화면의 금액을 ••••로 표시합니다'**
-  String get appearanceHideAmountDesc;
-
   /// No description provided for @appearanceRegion.
   ///
   /// In ko, this message translates to:
@@ -7936,7 +7672,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceCurrencyDesc.
   ///
   /// In ko, this message translates to:
-  /// **'새 자산·거래를 만들 때 이 통화가 먼저 골라져요.'**
+  /// **'새 자산 · 거래를 만들 때 이 통화가 먼저 골라져요.'**
   String get appearanceCurrencyDesc;
 
   /// No description provided for @appearanceRegionLoadError.
@@ -7954,7 +7690,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceSaveFailed.
   ///
   /// In ko, this message translates to:
-  /// **'설정을 바꾸지 못했어요.'**
+  /// **'설정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get appearanceSaveFailed;
 
   /// No description provided for @passwordChanged.
@@ -8248,13 +7984,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountSecuritiesDesc.
   ///
   /// In ko, this message translates to:
-  /// **'토스·나무 등 증권사 API 키를 연결해요'**
+  /// **'토스 · 나무 등 증권사 API 키를 연결해요'**
   String get accountSecuritiesDesc;
 
   /// No description provided for @accountBilling.
   ///
   /// In ko, this message translates to:
-  /// **'구독·결제'**
+  /// **'구독 · 결제'**
   String get accountBilling;
 
   /// No description provided for @accountNextBilling.
@@ -8602,7 +8338,7 @@ abstract class AppLocalizations {
   /// No description provided for @notiBudgetDesc.
   ///
   /// In ko, this message translates to:
-  /// **'카테고리 예산 {threshold}%·100% 도달'**
+  /// **'카테고리 예산 {threshold}% · 100% 도달'**
   String notiBudgetDesc(int threshold);
 
   /// No description provided for @notiAutoRecord.
@@ -8830,7 +8566,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'프리셋을 삭제하지 못했어요'**
+  /// **'프리셋을 삭제하지 못했어요.'**
   String get presetDeleteFailed;
 
   /// No description provided for @presetSortUsed.
@@ -9022,7 +8758,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetNoAccount.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 없음'**
+  /// **'계좌 · 카드 없음'**
   String get presetNoAccount;
 
   /// No description provided for @presetNoPayment.
@@ -9136,7 +8872,7 @@ abstract class AppLocalizations {
   /// No description provided for @presetAssetCard.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드'**
+  /// **'계좌 · 카드'**
   String get presetAssetCard;
 
   /// No description provided for @recurringToggleFailed.
@@ -9162,12 +8898,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'삭제 실패'**
   String get recurringDeleteFailed;
-
-  /// No description provided for @recurringLoadError.
-  ///
-  /// In ko, this message translates to:
-  /// **'반복 거래를 불러오지 못했습니다'**
-  String get recurringLoadError;
 
   /// No description provided for @recurringAllList.
   ///
@@ -9325,29 +9055,11 @@ abstract class AppLocalizations {
   /// **'반복 저장'**
   String get recurringSaveSubmit;
 
-  /// No description provided for @recurringUpdated.
-  ///
-  /// In ko, this message translates to:
-  /// **'반복 설정이 수정되었습니다'**
-  String get recurringUpdated;
-
-  /// No description provided for @recurringSaved.
-  ///
-  /// In ko, this message translates to:
-  /// **'반복 설정이 저장되었습니다'**
-  String get recurringSaved;
-
   /// No description provided for @recurringSaveFailed.
   ///
   /// In ko, this message translates to:
   /// **'저장 실패'**
   String get recurringSaveFailed;
-
-  /// No description provided for @recurringIntro.
-  ///
-  /// In ko, this message translates to:
-  /// **'이 거래를 정해진 주기로 자동 반복합니다. 구독료·월세·정기 후원 등에 사용해보세요.'**
-  String get recurringIntro;
 
   /// No description provided for @recurringFrequencyLabel.
   ///
@@ -9366,12 +9078,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'반복 일자'**
   String get recurringDayOfMonthLabel;
-
-  /// No description provided for @recurringDayNote.
-  ///
-  /// In ko, this message translates to:
-  /// **'해당 일이 없는 달은 말일에 처리됩니다'**
-  String get recurringDayNote;
 
   /// No description provided for @recurringEndLabel.
   ///
@@ -9427,23 +9133,11 @@ abstract class AppLocalizations {
   /// **'자동 기록'**
   String get recurringAutoLog;
 
-  /// No description provided for @recurringAutoLogDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'해당 일자에 거래를 자동으로 추가합니다'**
-  String get recurringAutoLogDesc;
-
   /// No description provided for @recurringNotifyDayBefore.
   ///
   /// In ko, this message translates to:
   /// **'하루 전 알림'**
   String get recurringNotifyDayBefore;
-
-  /// No description provided for @recurringNotifyDesc.
-  ///
-  /// In ko, this message translates to:
-  /// **'결제·이체 예정일 전날 알림을 보냅니다'**
-  String get recurringNotifyDesc;
 
   /// No description provided for @recurringNextDates.
   ///
@@ -9454,7 +9148,7 @@ abstract class AppLocalizations {
   /// No description provided for @recurringSourceSub.
   ///
   /// In ko, this message translates to:
-  /// **'구독료·월세 등 정기 거래에 쓰여요'**
+  /// **'구독료 · 월세 등 정기 거래에 쓰여요'**
   String get recurringSourceSub;
 
   /// No description provided for @recurringStartFrom.
@@ -9478,7 +9172,7 @@ abstract class AppLocalizations {
   /// No description provided for @recurringAssetCard.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드'**
+  /// **'계좌 · 카드'**
   String get recurringAssetCard;
 
   /// No description provided for @recurringAssetLoadError.
@@ -9964,7 +9658,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsPatternTitle.
   ///
   /// In ko, this message translates to:
-  /// **'요일·시간대 지출 패턴'**
+  /// **'요일 · 시간대 지출 패턴'**
   String get statsPatternTitle;
 
   /// No description provided for @statsPatternDesc.
@@ -10030,7 +9724,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsIncomeExpenseTrend.
   ///
   /// In ko, this message translates to:
-  /// **'수입·지출 추이'**
+  /// **'수입 · 지출 추이'**
   String get statsIncomeExpenseTrend;
 
   /// No description provided for @statsNoTrendData.
@@ -10402,7 +10096,7 @@ abstract class AppLocalizations {
   /// No description provided for @stocksWarningAdjustmentOfShares.
   ///
   /// In ko, this message translates to:
-  /// **'주식병합·분할'**
+  /// **'주식병합 · 분할'**
   String get stocksWarningAdjustmentOfShares;
 
   /// No description provided for @stocksNoWatchlist.
@@ -10540,7 +10234,7 @@ abstract class AppLocalizations {
   /// No description provided for @stocksFeesTax.
   ///
   /// In ko, this message translates to:
-  /// **'수수료·세금'**
+  /// **'수수료 · 세금'**
   String get stocksFeesTax;
 
   /// No description provided for @stocksSellable.
@@ -10744,13 +10438,13 @@ abstract class AppLocalizations {
   /// No description provided for @stocksSearchHint.
   ///
   /// In ko, this message translates to:
-  /// **'종목명·심볼로 검색하세요 (국내 + 미국·중국·일본·홍콩·베트남)'**
+  /// **'종목 이름이나 코드 (국내 + 미국 · 중국 · 일본 · 홍콩 · 베트남)'**
   String get stocksSearchHint;
 
   /// No description provided for @stocksPriceUnavailable.
   ///
   /// In ko, this message translates to:
-  /// **'토스 시세 미지원 종목이에요 (국내·미국만 제공)'**
+  /// **'토스 시세 미지원 종목이에요 (국내 · 미국만 제공)'**
   String get stocksPriceUnavailable;
 
   /// No description provided for @stocksRankingLoading.
@@ -10804,7 +10498,7 @@ abstract class AppLocalizations {
   /// No description provided for @stocksWatchAddFail.
   ///
   /// In ko, this message translates to:
-  /// **'관심 종목에 넣지 못했어요.'**
+  /// **'관심 종목에 넣지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get stocksWatchAddFail;
 
   /// No description provided for @stocksWatchGroupDeleteFail.
@@ -10816,7 +10510,7 @@ abstract class AppLocalizations {
   /// No description provided for @stocksWatchRemoveFail.
   ///
   /// In ko, this message translates to:
-  /// **'관심 종목에서 빼지 못했어요.'**
+  /// **'관심 종목에서 빼지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get stocksWatchRemoveFail;
 
   /// No description provided for @stocksMarketToggleKr.
@@ -10987,12 +10681,6 @@ abstract class AppLocalizations {
   /// **'할 일이 없어요'**
   String get todoEmptyAll;
 
-  /// No description provided for @todoEmptyDoneHint.
-  ///
-  /// In ko, this message translates to:
-  /// **'할 일을 완료하면 여기에 모입니다.'**
-  String get todoEmptyDoneHint;
-
   /// No description provided for @todoEmptyAddHint.
   ///
   /// In ko, this message translates to:
@@ -11035,23 +10723,11 @@ abstract class AppLocalizations {
   /// **'등록된 프로젝트'**
   String get todoRegisteredProjects;
 
-  /// No description provided for @todoNoProjects.
-  ///
-  /// In ko, this message translates to:
-  /// **'등록된 프로젝트가 없습니다'**
-  String get todoNoProjects;
-
   /// No description provided for @todoDeleteProjectTitle.
   ///
   /// In ko, this message translates to:
   /// **'프로젝트 삭제'**
   String get todoDeleteProjectTitle;
-
-  /// No description provided for @todoDeleteProjectConfirm.
-  ///
-  /// In ko, this message translates to:
-  /// **'\"{name}\" 프로젝트를 삭제하시겠어요? 연결된 할 일은 프로젝트 미지정으로 변경됩니다.'**
-  String todoDeleteProjectConfirm(String name);
 
   /// No description provided for @todoNewTag.
   ///
@@ -11070,12 +10746,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'등록된 태그'**
   String get todoRegisteredTags;
-
-  /// No description provided for @todoNoTags.
-  ///
-  /// In ko, this message translates to:
-  /// **'등록된 태그가 없습니다'**
-  String get todoNoTags;
 
   /// No description provided for @todoDeleteTagTitle.
   ///
@@ -11545,16 +11215,22 @@ abstract class AppLocalizations {
   /// **'저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get memoSaveFailed;
 
+  /// No description provided for @memoSaveFailedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 못했어요.'**
+  String get memoSaveFailedToast;
+
   /// No description provided for @memoDeleteFailed.
   ///
   /// In ko, this message translates to:
-  /// **'삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  /// **'삭제하지 못했어요.'**
   String get memoDeleteFailed;
 
   /// No description provided for @memoPinFailed.
   ///
   /// In ko, this message translates to:
-  /// **'고정을 바꾸지 못했어요.'**
+  /// **'고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get memoPinFailed;
 
   /// No description provided for @memoModifiedAt.
@@ -11974,7 +11650,7 @@ abstract class AppLocalizations {
   /// No description provided for @importSourceEasybudget.
   ///
   /// In ko, this message translates to:
-  /// **'편한가계부·머니매니저'**
+  /// **'편한가계부 · 머니매니저'**
   String get importSourceEasybudget;
 
   /// No description provided for @importSourceEasybudgetDesc.
@@ -12226,7 +11902,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryMoveTxDone.
   ///
   /// In ko, this message translates to:
-  /// **'{count}건을 옮겼어요'**
+  /// **'{count}건을 옮겼어요.'**
   String categoryMoveTxDone(int count);
 
   /// No description provided for @importFieldDate.
@@ -13255,12 +12931,6 @@ abstract class AppLocalizations {
   /// **'없음'**
   String get iconPickerNone;
 
-  /// No description provided for @iconPickerNoResults.
-  ///
-  /// In ko, this message translates to:
-  /// **'검색 결과가 없습니다'**
-  String get iconPickerNoResults;
-
   /// No description provided for @iconPickerResultCount.
   ///
   /// In ko, this message translates to:
@@ -13282,7 +12952,7 @@ abstract class AppLocalizations {
   /// No description provided for @smsPasteDesc.
   ///
   /// In ko, this message translates to:
-  /// **'카드사에서 온 결제 문자를 붙여넣으면 금액·가맹점·일시를 읽어 지출 폼을 채워드려요. 저장 전에 확인할 수 있어요.'**
+  /// **'카드사에서 온 결제 문자를 붙여넣으면 금액 · 가맹점 · 일시를 읽어 지출 폼을 채워드려요. 저장 전에 확인할 수 있어요.'**
   String get smsPasteDesc;
 
   /// No description provided for @smsPasteFieldLabel.
@@ -13456,7 +13126,7 @@ abstract class AppLocalizations {
   /// No description provided for @smsNotiAccessOffDesc.
   ///
   /// In ko, this message translates to:
-  /// **'알림 접근을 켜면 카드사·은행 앱 알림과 결제 문자를 읽어 기록할 수 있어요. 읽는 건 결제 알림뿐이고 나머지는 곧바로 버려요.'**
+  /// **'알림 접근을 켜면 카드사 · 은행 앱 알림과 결제 문자를 읽어 기록할 수 있어요. 읽는 건 결제 알림뿐이고 나머지는 곧바로 버려요.'**
   String get smsNotiAccessOffDesc;
 
   /// No description provided for @updateAutoBlockerTitle.
@@ -13504,7 +13174,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSecuritiesLinkDesc.
   ///
   /// In ko, this message translates to:
-  /// **'본인 API 키를 등록하면 보유 주식·시세를 자동으로 가져와요. 키는 서버에 암호화되어 저장되고 본인만 사용해요.'**
+  /// **'본인 API 키를 등록하면 보유 주식 · 시세를 자동으로 가져와요. 키는 서버에 암호화되어 저장되고 본인만 사용해요.'**
   String get settingsSecuritiesLinkDesc;
 
   /// No description provided for @securitiesLoadError.
@@ -13564,7 +13234,7 @@ abstract class AppLocalizations {
   /// No description provided for @subBrokerKeyNotice.
   ///
   /// In ko, this message translates to:
-  /// **'키는 서버에 암호화되어 저장되며 본인만 사용합니다. 발급은 {broker} 개발자센터에서.'**
+  /// **'키는 서버에 암호화되어 저장되고 본인만 사용해요. 발급은 {broker} 개발자센터에서 받을 수 있어요.'**
   String subBrokerKeyNotice(String broker);
 
   /// No description provided for @subBrokerToggleReveal.
@@ -13714,13 +13384,13 @@ abstract class AppLocalizations {
   /// No description provided for @expMoneyLockedNote.
   ///
   /// In ko, this message translates to:
-  /// **'결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요'**
+  /// **'결제가 끝난 거래예요. 금액 · 날짜를 바꾸려면 고쳐 쓰기를 눌러주세요'**
   String get expMoneyLockedNote;
 
   /// No description provided for @expMoneyLockedPaidOffNote.
   ///
   /// In ko, this message translates to:
-  /// **'결제가 끝난 거래예요. 중도 정리한 할부라 금액·날짜를 바꿀 수 없어요.'**
+  /// **'결제가 끝난 거래예요. 중도 정리한 할부라 금액 · 날짜를 바꿀 수 없어요.'**
   String get expMoneyLockedPaidOffNote;
 
   /// No description provided for @expRewrite.
@@ -13852,7 +13522,7 @@ abstract class AppLocalizations {
   /// No description provided for @fixedHintExpense.
   ///
   /// In ko, this message translates to:
-  /// **'월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.'**
+  /// **'월세 · 통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.'**
   String get fixedHintExpense;
 
   /// No description provided for @fixedHintIncome.
@@ -13894,13 +13564,13 @@ abstract class AppLocalizations {
   /// No description provided for @hideCardStatsFixed.
   ///
   /// In ko, this message translates to:
-  /// **'고정·변동 탭'**
+  /// **'고정 · 변동 탭'**
   String get hideCardStatsFixed;
 
   /// No description provided for @statsTabFixed.
   ///
   /// In ko, this message translates to:
-  /// **'고정·변동'**
+  /// **'고정 · 변동'**
   String get statsTabFixed;
 
   /// No description provided for @statsFixedViewAria.
@@ -14026,7 +13696,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedEmptyDesc.
   ///
   /// In ko, this message translates to:
-  /// **'월세·통신비·월급처럼 매달 정해진 거래를 고정으로 표시하면 여기서 따로 볼 수 있어요.'**
+  /// **'월세 · 통신비 · 월급처럼 매달 정해진 거래를 고정으로 표시하면 여기서 따로 볼 수 있어요.'**
   String get statsFixedEmptyDesc;
 
   /// No description provided for @statsFixedManage.
@@ -14044,7 +13714,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedTrendTitle.
   ///
   /// In ko, this message translates to:
-  /// **'월별 고정·변동 추이'**
+  /// **'월별 고정 · 변동 추이'**
   String get statsFixedTrendTitle;
 
   /// No description provided for @statsFixedTrendKindAria.
@@ -14086,7 +13756,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedCategoryTitle.
   ///
   /// In ko, this message translates to:
-  /// **'카테고리별 고정·변동'**
+  /// **'카테고리별 고정 · 변동'**
   String get statsFixedCategoryTitle;
 
   /// No description provided for @statsFixedCategoryFixedPart.
@@ -14104,8 +13774,8 @@ abstract class AppLocalizations {
   /// No description provided for @statsFixedBulkDesc.
   ///
   /// In ko, this message translates to:
-  /// **'{start} ~ {end} 기간의 거래예요. 매달 같은 이름으로 나가는 돈은 한 줄로 묶여 있어요. 돈이나 잔액은 달라지지 않고 통계의 분류만 바뀌어요.'**
-  String statsFixedBulkDesc(String start, String end);
+  /// **'{range} 기간의 거래예요. 매달 같은 이름으로 나가는 돈은 한 줄로 묶여 있어요. 돈이나 잔액은 달라지지 않고 통계의 분류만 바뀌어요.'**
+  String statsFixedBulkDesc(String range);
 
   /// No description provided for @statsFixedBulkUntitled.
   ///
@@ -15022,7 +14692,7 @@ abstract class AppLocalizations {
   /// No description provided for @todoToggleFailed.
   ///
   /// In ko, this message translates to:
-  /// **'할 일 상태를 바꾸지 못했어요.'**
+  /// **'할 일 상태를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'**
   String get todoToggleFailed;
 
   /// No description provided for @todoDetailOverdue.
@@ -15412,7 +15082,7 @@ abstract class AppLocalizations {
   /// No description provided for @stocksDisclaimerLine1.
   ///
   /// In ko, this message translates to:
-  /// **'토스증권 Open API 연동 시 실시간 호가·체결가가 반영돼요.'**
+  /// **'토스증권 Open API 연동 시 실시간 호가 · 체결가가 반영돼요.'**
   String get stocksDisclaimerLine1;
 
   /// No description provided for @stocksDisclaimerLine2.
@@ -16054,19 +15724,19 @@ abstract class AppLocalizations {
   /// No description provided for @recToastPaused.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 반복을 멈췄어요'**
+  /// **'{name} 반복을 멈췄어요.'**
   String recToastPaused(String name);
 
   /// No description provided for @recToastResumed.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 반복을 다시 켰어요'**
+  /// **'{name} 반복을 다시 켰어요.'**
   String recToastResumed(String name);
 
   /// No description provided for @recToastDeleted.
   ///
   /// In ko, this message translates to:
-  /// **'{name} 반복 설정을 삭제했어요'**
+  /// **'{name} 반복 설정을 삭제했어요.'**
   String recToastDeleted(String name);
 
   /// No description provided for @recPauseFailed.
@@ -16507,12 +16177,6 @@ abstract class AppLocalizations {
   /// **'금액을 입력해주세요.'**
   String get txfEntryRequired;
 
-  /// No description provided for @txfAmountTooLarge.
-  ///
-  /// In ko, this message translates to:
-  /// **'금액은 100억원까지 입력할 수 있어요.'**
-  String get txfAmountTooLarge;
-
   /// No description provided for @txfCurrencyChip.
   ///
   /// In ko, this message translates to:
@@ -16576,7 +16240,7 @@ abstract class AppLocalizations {
   /// No description provided for @txfNoAccountOption.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드 없음'**
+  /// **'계좌 · 카드 없음'**
   String get txfNoAccountOption;
 
   /// No description provided for @txfNoMethodOption.
@@ -16636,7 +16300,7 @@ abstract class AppLocalizations {
   /// No description provided for @txfAssetLoadFailed.
   ///
   /// In ko, this message translates to:
-  /// **'계좌·카드를 불러오지 못했어요'**
+  /// **'계좌 · 카드를 불러오지 못했어요'**
   String get txfAssetLoadFailed;
 
   /// No description provided for @txfNoCategoryOfType.
@@ -16648,7 +16312,7 @@ abstract class AppLocalizations {
   /// No description provided for @txfNoPickableAsset.
   ///
   /// In ko, this message translates to:
-  /// **'이 결제 수단에 맞는 계좌·카드가 없어요.'**
+  /// **'이 결제 수단에 맞는 계좌 · 카드가 없어요.'**
   String get txfNoPickableAsset;
 
   /// No description provided for @txfFxHint.

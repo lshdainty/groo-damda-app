@@ -22,9 +22,6 @@ import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/features/category/presentation/category_tile.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
-/// 금액 칸 글자 거르기 — 정수(원화 · 수수료 · 이자). 쓰는 동안 천 단위 쉼표를 찍고 부호를 막고 100억에서 멈춘다(I-19 7 · 공용 포매터).
-final List<TextInputFormatter> kWonFormatters = [const AmountInputFormatter()];
-
 /// 칸에 넣을 때(처음 값 · 계산 값) 쉼표를 찍는다.
 String groupWon(int v) => v <= 0 ? '' : formatAmountInput(v);
 

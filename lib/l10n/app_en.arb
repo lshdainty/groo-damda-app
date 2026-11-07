@@ -44,8 +44,6 @@
   "appLockUnlockAction": "Unlock",
   "appLockPromptReason": "Verify it's you to open the app.",
   "appLockUnavailable": "Biometrics or screen lock isn't available on this device.",
-  "stateNoData": "No data",
-  "stateError": "Something went wrong",
   "stateEmpty": "Nothing to show",
   "nameTooLong": "Keep the name to {max} characters or fewer.",
   "@nameTooLong": {
@@ -113,12 +111,10 @@
   "notiNew": "New notification",
   "assetTitle": "Assets",
   "assetSummaryTotalBalance": "Total Balance",
-  "assetEmpty": "No assets registered",
   "assetCreateFirst": "Register your first asset",
   "assetAdd": "Add Asset",
   "assetEdit": "Edit Asset",
   "assetTransferAdd": "Add Transfer",
-  "assetTransferEmpty": "No transfers yet",
   "assetFee": "Fee",
   "assetTypeBankAccount": "Bank Account",
   "assetTypeSavings": "Savings",
@@ -135,7 +131,6 @@
   "assetSubtypeInstallment": "Installment",
   "assetSubtypeDeposit": "Deposit",
   "assetSubtypeOverdraft": "Overdraft account",
-  "assetLoadError": "Couldn't load assets",
   "assetEmptyState": "No assets yet",
   "assetEmptyHint": "You can add one from Settings → Account & Card Management.",
   "assetSummaryColAccounts": "Accounts",
@@ -200,9 +195,6 @@
   "assetLoadFailedAssets": "Couldn't load your assets",
   "assetLoadFailedGoals": "Couldn't load saving goals",
   "assetEmptyCta": "Go to manage accounts & cards",
-  "assetAccountAdded": "Account added",
-  "assetAccountUpdated": "Account updated",
-  "assetAccountDeleted": "Account deleted",
   "assetAccountDelete": "Delete account",
   "assetAccountDeleteConfirm": "\"{name}\" will be removed from the list. Linked transactions are kept. A deleted asset cannot be restored.",
   "@assetAccountDeleteConfirm": {
@@ -251,8 +243,6 @@
   "assetNoBankAccounts": "No checking account",
   "assetPaymentAccountSelect": "Select payment account",
   "assetPaymentAccountHint": "The bill is withdrawn from this account on the payment day.",
-  "assetCardAdded": "Card added",
-  "assetCardUpdated": "Card updated",
   "assetCardDelete": "Delete card",
   "assetCardDeleteConfirm": "\"{name}\" will be removed from the list. Linked transactions are kept. A deleted asset cannot be restored.",
   "@assetCardDeleteConfirm": {
@@ -262,7 +252,6 @@
       }
     }
   },
-  "assetCardDeleted": "Card deleted",
   "assetCardProduct": "Card product",
   "assetIncludeDiscontinued": "Show discontinued cards",
   "assetCardSearchHint": "Search card name",
@@ -313,9 +302,6 @@
   "assetCardShortCredit": "Credit",
   "assetCardShortCheck": "Check",
   "assetDiscontinued": "Discontinued",
-  "assetInvestAdded": "Investment added",
-  "assetInvestUpdated": "Investment updated",
-  "assetInvestDeleted": "Investment deleted",
   "assetInvestDelete": "Delete investment",
   "assetInvestDeleteConfirm": "\"{name}\" will be removed from the list. Linked transactions are kept. A deleted asset cannot be restored.",
   "@assetInvestDeleteConfirm": {
@@ -439,7 +425,7 @@
   "tradePreview": "Preview after the trade",
   "tradeHolding": "Holding",
   "tradeHistory": "Trade log",
-  "tradeDeleted": "Trade cancelled",
+  "tradeDeleted": "Trade cancelled.",
   "tradeDeleteTitle": "Cancel trade",
   "tradeDeleteConfirm": "Cancel this trade? Cash and quantity return to their pre-trade state.",
   "assetDetailTitle": "Asset details",
@@ -596,19 +582,10 @@
       }
     }
   },
-  "assetTossValuationFormula": "Valuation updates in real time as Toss price × {qty} shares.",
-  "@assetTossValuationFormula": {
-    "placeholders": {
-      "qty": {
-        "type": "int"
-      }
-    }
-  },
   "assetHoldingQty": "Holdings",
   "assetEditQty": "Edit quantity",
   "assetUnlink": "Unlink",
   "assetTossRealtimeTitle": "Real-time valuation via Toss",
-  "assetTossRealtimeDesc": "Register a ticker and quantity to reflect valuation live as Toss price × quantity.",
   "assetTapToChange": "Tap to change",
   "assetStockSearchHint": "Search ticker or code (e.g. Samsung Elec, 005930)",
   "stockSecurityTypeIndex": "Index",
@@ -735,7 +712,6 @@
     }
   },
   "assetPayNoAccountNote": "No payment account is linked, so the usage is settled without a transfer.",
-  "assetPaymentRecorded": "Payment recorded",
   "assetBillingLoadError": "Couldn't load billing info",
   "assetUpcomingPayment": "Upcoming payment",
   "assetScheduledTag": "Upcoming",
@@ -820,17 +796,6 @@
   "assetSortAria": "Sort usage history",
   "assetPeriodPick": "Billing cycle",
   "assetNoUsage": "No usage history yet.",
-  "assetBillingPeriod": "Usage {start}–{end}",
-  "@assetBillingPeriod": {
-    "placeholders": {
-      "start": {
-        "type": "String"
-      },
-      "end": {
-        "type": "String"
-      }
-    }
-  },
   "assetMonthlyPaymentDay": "Day {day} each month",
   "@assetMonthlyPaymentDay": {
     "placeholders": {
@@ -843,7 +808,6 @@
   "assetStatusPending": "Pending",
   "assetStatusSkipped": "Skipped",
   "todoTitle": "Todos",
-  "todoEmpty": "No todos",
   "todoCreateFirst": "Create your first todo",
   "todoQuickAddHint": "+ Quick add",
   "todoStatusAll": "All",
@@ -866,7 +830,6 @@
   "calDayView": "Day",
   "calYearView": "Year",
   "calAgendaView": "Agenda",
-  "calNoEvents": "No events",
   "calEventAdd": "Add event",
   "calEventEdit": "Edit event",
   "calEventDelete": "Delete event",
@@ -942,8 +905,6 @@
       }
     }
   },
-  "calEventAdded": "Event added",
-  "calEventUpdated": "Event updated",
   "calLabelsTitle": "Calendar labels",
   "calAllLabelsCount": "All labels · {count}",
   "@calAllLabelsCount": {
@@ -1046,7 +1007,7 @@
   "calJoinCardBody": "Enter a shared invite code to join that calendar.",
   "calJoin": "Join",
   "calCreate": "Create",
-  "calJoinedCalendar": "Joined the \"{name}\" calendar",
+  "calJoinedCalendar": "Joined the \"{name}\" calendar.",
   "@calJoinedCalendar": {
     "placeholders": {
       "name": {
@@ -1057,8 +1018,8 @@
   "calInviteCode": "Invite code",
   "calDeleteCalendar": "Delete calendar",
   "calCalendarUpdated": "Calendar updated",
-  "calInviteCodeRegenerated": "New invite code created",
-  "calInviteCodeCopied": "Invite code copied",
+  "calInviteCodeRegenerated": "New invite code created.",
+  "calInviteCodeCopied": "Invite code copied.",
   "calRemoveMember": "Remove member",
   "calRemoveMemberConfirm": "Remove \"{name}\" from this calendar?",
   "@calRemoveMemberConfirm": {
@@ -1099,7 +1060,7 @@
   "calJoinInvalidCode": "Please check the invite code.",
   "calJoinAlreadyMember": "You have already joined this calendar.",
   "calRemoveMemberFailed": "Couldn't remove the member.",
-  "calColorChangeFailed": "Couldn't change the color.",
+  "calColorChangeFailed": "Couldn't change the color. Try again later.",
   "calRoleChangeFailed": "Couldn't change the permission.",
   "calRegenerateFailed": "Couldn't create a new invite code.",
   "calInviteNone": "No invite code",
@@ -1123,7 +1084,7 @@
   "calSaveFailed": "Save failed",
   "calDeleteFailed": "Delete failed",
   "calJoinFailed": "Could not join. Please try again in a moment.",
-  "calUpdateFailed": "Couldn't change the calendar visibility.",
+  "calUpdateFailed": "Couldn't change the calendar visibility. Try again later.",
   "importExecuteFailed": "Couldn't import the data.",
   "calCalendarLoadError": "Couldn't load calendars",
   "calLabelLoadError": "Couldn't load labels",
@@ -1153,9 +1114,6 @@
     }
   },
   "dashTrendTitle": "Last 6 months",
-  "dashEmptyTransactions": "No recent transactions",
-  "dashEmptyEvents": "No upcoming events",
-  "dashEmptyTodos": "No pending todos",
   "dashAddTx": "Add transaction",
   "dashTodayLabel": "Today",
   "dashTomorrowLabel": "Tomorrow",
@@ -1227,7 +1185,6 @@
   "expFilterIncome": "Income",
   "expFilterExpense": "Expense",
   "expFilterTransfer": "Transfer",
-  "expEmpty": "No transactions",
   "expEmptyDescription": "Add your first transaction to get started",
   "expAdd": "Add transaction",
   "expEdit": "Edit transaction",
@@ -1410,14 +1367,12 @@
   "budgetFormErrCategory": "Select a category.",
   "budgetFormErrTotal": "Enter the total budget.",
   "budgetFormErrAmount": "Enter the budget.",
-  "amountTooLarge": "Enter an amount up to 10 billion won.",
+  "amountTooLarge": "Amount can be up to 10 billion won.",
   "budgetPickUsed": "Already has a budget this month",
   "budgetPickAllBudgeted": "Every expense category already has a budget.",
   "budgetPickNoCategory": "There are no expense categories to budget.",
   "budgetPickLoadFailTitle": "Couldn't load the categories",
   "budgetPickLoadFailDesc": "Please try again in a moment.",
-  "budgetUpdated": "Budget updated",
-  "budgetAdded": "Budget added",
   "budgetActionFailed": "Failed",
   "budgetDeleteTitle": "Delete the \"{name}\" budget?",
   "@budgetDeleteTitle": {
@@ -1436,7 +1391,6 @@
   "tradeSaveFailed": "Couldn't process the trade.",
   "tradeSaveInsufficientQty": "Not enough shares held.",
   "budgetMonthlyLimit": "Monthly budget limit",
-  "budgetLoadError": "Couldn't load budget",
   "budgetSelectMonth": "Select month",
   "budgetMonthOverallCap": "Month {month} total budget",
   "@budgetMonthOverallCap": {
@@ -1709,7 +1663,6 @@
   "cardFailDesc": "Please try again in a moment.",
   "cardBrands": "Brands",
   "cardNoBenefits": "No registered benefits.",
-  "cardPickerNoMatch": "No matching cards",
   "categoryManageTitle": "Manage categories",
   "categorySearchHint": "Search categories",
   "categoryLoadError": "Failed to load categories",
@@ -1753,8 +1706,6 @@
     }
   },
   "categoryMove": "Move",
-  "categoryUpdated": "Category updated",
-  "categoryAdded": "Category added",
   "categoryActionFailed": "Failed",
   "categoryDeleteBlockedTitle": "Can't delete",
   "categoryDeleteHasChildren": "The \"{name}\" category has subcategories and cannot be deleted. Clear them first.",
@@ -1776,7 +1727,7 @@
   "categoryDeleteFailed": "Couldn't delete the category.",
   "categorySaveFailed": "Couldn't save the category.",
   "categoryMoveTxFailed": "Couldn't move the transactions.",
-  "categoryReorderFailed": "Couldn't change the order.",
+  "categoryReorderFailed": "Couldn't change the order. Try again later.",
   "todoSaveFailed": "Couldn't save the to-do.",
   "categoryParentMoveHint": "To make it top level, create a new top-level category and move its transactions.",
   "categoryMakeRoot": "Top level",
@@ -1946,7 +1897,6 @@
   "dutchRequestAll": "Request all",
   "dutchNoName": "(No name)",
   "dutchStartTitle": "Start Dutch Pay",
-  "dutchFromTxDesc": "Create a Dutch Pay settlement from this transaction. Send payment requests to participants and track settlement progress.",
   "dutchSplitMethod": "Split method",
   "dutchSplitEqualTitle": "1/N",
   "dutchSplitEqualSub": "Equal split",
@@ -1955,31 +1905,13 @@
   "dutchSplitCustomTitle": "Custom amount",
   "dutchSplitCustomSub": "Each differently",
   "dutchIncludeMyself": "Include myself in the split",
-  "dutchIncludeMyselfDesc": "Your share is calculated too",
   "dutchIncludeMyselfOffDesc": "You paid in full, collect only others' shares",
   "dutchSourceSub": "Request payments from participants",
   "dutchRequestMsgLabel": "Request message (optional)",
   "dutchRequestMsgPlaceholder": "Add a note to send to participants",
-  "dutchShortBy": "The total is {amount}원 short.",
-  "@dutchShortBy": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "dutchOverBy": "The total exceeds by {amount}원.",
-  "@dutchOverBy": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "dutchCreated": "Settlement created",
   "expLoadError": "Couldn't load transactions",
   "expTransfersLoadError": "Couldn't load the transfers.",
-  "expEmptyMonth": "No transactions this month",
   "expEmptyDay": "No transactions on this day",
   "expTotal": "Total",
   "expFiltering": "Filtering",
@@ -2002,10 +1934,7 @@
     }
   },
   "expAddShort": "Add",
-  "expTransferDone": "Transfer completed",
   "expActionFailed": "Failed",
-  "expUpdated": "Transaction updated",
-  "expAdded": "Transaction added",
   "expDeleteConfirm": "Delete the \"{name}\" transaction? The linked asset balance will be adjusted too. A deleted transaction cannot be restored.",
   "@expDeleteConfirm": {
     "placeholders": {
@@ -2014,7 +1943,6 @@
       }
     }
   },
-  "expDeleted": "Transaction deleted",
   "expSplitMismatch": "Split doesn't match the amount",
   "expSplitDiff": "New total {total}원 · Split sum {sum}원 · {diff}원 diff",
   "@expSplitDiff": {
@@ -2059,7 +1987,6 @@
   "expAutoSourceCardCarryover": "This is the unpaid usage you entered when adding the card. Change the amount by editing the card.",
   "expAutoSourceDefault": "Created automatically. It disappears when the original is deleted.",
   "expPresetLock": "Preset lock",
-  "expNoCategoryForType": "No categories for this type",
   "expSubcategory": "Subcategory",
   "expTopCategorySuffix": "{name} (parent)",
   "@expTopCategorySuffix": {
@@ -2079,6 +2006,7 @@
   "expAccountCard": "Account/Card",
   "expAssetLoadError": "Failed to load assets",
   "expWithdrawAccount": "From account",
+  "expTransferToAccount": "To account",
   "expSelect": "Select",
   "expTransferSameAsset": "From and to assets must differ",
   "expFeeOptional": "Fee (optional)",
@@ -2131,7 +2059,6 @@
   "expSplitRemove": "Remove split",
   "expSplitLoadError": "Failed to load split",
   "expAddAmount": "Extra amount",
-  "expSplitSaved": "Split saved",
   "expSplitRemoveConfirm": "This clears all split items for this transaction. Cleared items cannot be restored.",
   "expClearFailed": "Failed to clear",
   "expSplitMatches": "Split sum matches the total",
@@ -2150,7 +2077,6 @@
   "expAdjustItem": "Adjustment item",
   "expAdjustItemDesc": "Shortfall as a new item",
   "expRecommended": "Recommended",
-  "expSplitDesc": "Record one payment split by category and item. e.g. Groceries and household items bought together at a mart.",
   "expOriginalTx": "Original transaction",
   "expAddItem": "Add item",
   "expSplitEven": "Split evenly",
@@ -2158,13 +2084,10 @@
   "expDeleteItem": "Delete item",
   "expItemNamePlaceholder": "Item name (optional)",
   "exportTitle": "Export data",
-  "exportShareText": "Data export ({start} ~ {end})",
+  "exportShareText": "Data export ({range})",
   "@exportShareText": {
     "placeholders": {
-      "start": {
-        "type": "String"
-      },
-      "end": {
+      "range": {
         "type": "String"
       }
     }
@@ -2292,10 +2215,10 @@
   "settingsGroupAccount": "Account",
   "settingsMenuAccountMgmt": "Account Management",
   "settingsMenuPrivacyPolicy": "Privacy Policy",
-  "settingsPrivacyOpenFailed": "Couldn't open the privacy policy.",
+  "settingsPrivacyOpenFailed": "Couldn't open the privacy policy. Try again later.",
   "settingsGroupHelp": "Help",
   "settingsMenuGuide": "User guide",
-  "settingsGuideOpenFailed": "Couldn't open the user guide.",
+  "settingsGuideOpenFailed": "Couldn't open the user guide. Try again later.",
   "appearanceTitle": "Display settings",
   "appearanceTheme": "Theme",
   "appearanceThemeLight": "Light",
@@ -2378,7 +2301,6 @@
   "hideCardEtcRecurring": "Recurring",
   "hideCardEtcPreset": "Presets",
   "appearanceHideAmount": "Hide amounts",
-  "appearanceHideAmountDesc": "Display all amounts as ••••",
   "appearanceRegion": "Region",
   "appearanceRegionDesc": "Days for 'today' and statistics are calculated in this region. On-screen times follow your device's time zone.",
   "appearanceCurrency": "Default currency",
@@ -2389,7 +2311,7 @@
   "appearanceCurrencyDesc": "New assets and transactions start with this currency.",
   "appearanceRegionLoadError": "Couldn't load the region",
   "appearanceCurrencyLoadError": "Couldn't load the default currency",
-  "appearanceSaveFailed": "Couldn't change the setting.",
+  "appearanceSaveFailed": "Couldn't change the setting. Try again later.",
   "passwordChanged": "Changed your password.",
   "passwordChangeFailed": "Couldn't change your password. Please try again shortly.",
   "passwordCurrent": "Current password",
@@ -2589,7 +2511,7 @@
   "notiKindTitle": "Notification types",
   "notiPayment": "Payment alerts",
   "notiPaymentDesc": "D-1 before due date, and on the payment day",
-  "notiBudgetDesc": "Category budget reaches {threshold}%·100%",
+  "notiBudgetDesc": "Category budget reaches {threshold}% · 100%",
   "@notiBudgetDesc": {
     "placeholders": {
       "threshold": {
@@ -2634,7 +2556,7 @@
   "presetDetailTitle": "Preset detail",
   "presetTypeLabel": "Type",
   "presetDeleteConfirm": "Transactions already recorded stay as they are. A deleted preset cannot be restored.",
-  "presetDeleteFailed": "Could not delete the preset",
+  "presetDeleteFailed": "Could not delete the preset.",
   "presetSortUsed": "Frequent",
   "presetSortRecent": "Recent",
   "presetSortName": "By name",
@@ -2737,7 +2659,6 @@
     }
   },
   "recurringDeleteFailed": "Delete failed",
-  "recurringLoadError": "Failed to load recurring transactions",
   "recurringAllList": "All",
   "recurringAdd": "Add",
   "recurringFilterAll": "All {count}",
@@ -2823,14 +2744,10 @@
   "recurringAddTitle": "Add recurring transaction",
   "recurringEditTitle": "Edit recurring transaction",
   "recurringSaveSubmit": "Save recurring",
-  "recurringUpdated": "Recurring setting updated",
-  "recurringSaved": "Recurring setting saved",
   "recurringSaveFailed": "Save failed",
-  "recurringIntro": "Automatically repeat this transaction on a set cycle. Great for subscriptions, rent, regular donations, etc.",
   "recurringFrequencyLabel": "Frequency",
   "recurringDayOfWeekLabel": "Day of week",
   "recurringDayOfMonthLabel": "Day of month",
-  "recurringDayNote": "Months without this day are handled on the last day",
   "recurringEndLabel": "End",
   "recurringExecutionTime": "Execution time",
   "recurringIndefiniteDesc": "Repeat until stopped",
@@ -2840,11 +2757,9 @@
   "recurringByDate": "By end date",
   "recurringOptions": "Options",
   "recurringAutoLog": "Auto-record",
-  "recurringAutoLogDesc": "Automatically add the transaction on the date",
   "recurringNotifyDayBefore": "Day-before alert",
-  "recurringNotifyDesc": "Send an alert the day before the payment/transfer",
   "recurringNextDates": "Next dates",
-  "recurringSourceSub": "For subscriptions·rent and other regular payments",
+  "recurringSourceSub": "For subscriptions · rent and other regular payments",
   "recurringStartFrom": "Starts {date}",
   "@recurringStartFrom": {
     "placeholders": {
@@ -2919,7 +2834,7 @@
     }
   },
   "savingGoalErrAmount": "Enter the target amount.",
-  "savingGoalErrAmountTooLarge": "The target amount can be up to 10 billion won.",
+  "savingGoalErrAmountTooLarge": "Target amount can be up to 10 billion won.",
   "savingGoalErrCurrentExceeds": "The amount saved can't be more than the target amount.",
   "savingGoalDeadlineClear": "Clear target date",
   "searchAdvancedFilter": "Advanced filter",
@@ -3175,8 +3090,8 @@
   "stocksDate": "Date",
   "stocksClosePrice": "Close",
   "stocksChangeRate": "Change",
-  "stocksSearchHint": "Search by name or symbol (KR + US·CN·JP·HK·VN)",
-  "stocksPriceUnavailable": "Price unavailable via Toss (KR·US only)",
+  "stocksSearchHint": "Stock name or code (KR + US · CN · JP · HK · VN)",
+  "stocksPriceUnavailable": "Price unavailable via Toss (KR · US only)",
   "stocksRankingLoading": "Loading rankings",
   "stocksRankingEmpty": "No rankings yet",
   "stocksWatchDefaultGroupName": "Watchlist",
@@ -3185,9 +3100,9 @@
   "stocksWatchGroupDelete": "Delete group",
   "stocksWatchGroupNamePlaceholder": "Group name",
   "stocksWatchGroupSaveFail": "Couldn't save the group.",
-  "stocksWatchAddFail": "Couldn't add it to your watchlist.",
+  "stocksWatchAddFail": "Couldn't add it to your watchlist. Try again later.",
   "stocksWatchGroupDeleteFail": "Couldn't delete the group.",
-  "stocksWatchRemoveFail": "Couldn't remove it from your watchlist.",
+  "stocksWatchRemoveFail": "Couldn't remove it from your watchlist. Try again later.",
   "stocksMarketToggleKr": "KR",
   "stocksMarketToggleUs": "US",
   "todoAdd": "Add todo",
@@ -3223,7 +3138,6 @@
   "todoEmptyWeek": "A light week ahead",
   "todoEmptyDone": "Nothing completed yet",
   "todoEmptyAll": "No todos",
-  "todoEmptyDoneHint": "Completed todos appear here.",
   "todoEmptyAddHint": "Add one quickly using the field above.",
   "todoNewProject": "New project",
   "todoProjectNamePlaceholder": "Project name",
@@ -3231,20 +3145,10 @@
   "todoAdding": "Adding…",
   "todoAddProject": "Add project",
   "todoRegisteredProjects": "Projects",
-  "todoNoProjects": "No projects",
   "todoDeleteProjectTitle": "Delete project",
-  "todoDeleteProjectConfirm": "Delete project \"{name}\"? Linked todos will be set to no project.",
-  "@todoDeleteProjectConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "todoNewTag": "Add tag",
   "todoTagNamePlaceholder": "Tag name",
   "todoRegisteredTags": "Tags",
-  "todoNoTags": "No tags",
   "todoDeleteTagTitle": "Delete tag",
   "todoDeleteTagConfirm": "Deleting \"{name}\" will leave {count} todos using it untagged. A deleted tag cannot be restored.",
   "@todoDeleteTagConfirm": {
@@ -3430,8 +3334,9 @@
   "memoTagFilter": "Filter by tag",
   "memoSaved": "Saved.",
   "memoSaveFailed": "Could not save. Please try again in a moment.",
-  "memoDeleteFailed": "Could not delete. Please try again in a moment.",
-  "memoPinFailed": "Couldn't change the pin.",
+  "memoSaveFailedToast": "Couldn't save.",
+  "memoDeleteFailed": "Couldn't delete.",
+  "memoPinFailed": "Couldn't change the pin. Try again later.",
   "memoModifiedAt": "Edited {time}",
   "@memoModifiedAt": {"placeholders": {"time": {"type": "String"}}},
   "memoMoreOf": "More for {name}",
@@ -3711,7 +3616,7 @@
   "categoryMoveTxNoTarget": "No category to move to. Please create one first.",
   "categoryMoveTxErrChildName": "Please enter a name for the new subcategory.",
   "categoryMoveTxErrTarget": "Please choose a category to move to.",
-  "categoryMoveTxDone": "Moved {count} items",
+  "categoryMoveTxDone": "Moved {count} items.",
   "@categoryMoveTxDone": {
     "placeholders": {
       "count": {
@@ -4121,7 +4026,6 @@
   "iconPickerTitle": "Select icon",
   "iconPickerSearchHint": "Search icons...",
   "iconPickerNone": "None",
-  "iconPickerNoResults": "No results found",
   "iconPickerResultCount": "{count} results",
   "@iconPickerResultCount": {
     "placeholders": {
@@ -4221,7 +4125,7 @@
       }
     }
   },
-  "subBrokerKeyNotice": "Your key is stored encrypted on the server and used only by you. Issue one at the {broker} developer center.",
+  "subBrokerKeyNotice": "Your key is stored encrypted on the server and used only by you. Get yours from the {broker} developer center.",
   "@subBrokerKeyNotice": {
     "placeholders": {
       "broker": {
@@ -4366,7 +4270,7 @@
   "statsFixedCategoryTitle": "Fixed vs. variable by category",
   "statsFixedCategoryFixedPart": "Fixed {pct}",
   "statsFixedBulkTitle": "Organize fixed items",
-  "statsFixedBulkDesc": "Transactions from {start} to {end}. Items with the same name are grouped. Balances don't change, only how statistics classify them.",
+  "statsFixedBulkDesc": "Transactions in {range}. Items with the same name are grouped. Balances don't change, only how statistics classify them.",
   "statsFixedBulkUntitled": "Untitled",
   "statsFixedBulkTargetAria": "Change to",
   "statsFixedBulkToFixed": "Mark as fixed",
@@ -4535,7 +4439,7 @@
   "tdmCellDone": "{date}, all done",
   "@tdmCellDone": {"placeholders": {"date": {"type": "String"}}},
   "tdmLoadFailedDesc": "Please try again in a moment.",
-  "todoToggleFailed": "Couldn't update the to-do.",
+  "todoToggleFailed": "Couldn't update the to-do. Try again later.",
   "todoDetailOverdue": "Overdue",
   "todoDueDatePlaceholder": "Select due date",
   "todoTagEmptyHint": "Create tags in Settings › Todo tags.",
@@ -4865,11 +4769,11 @@
   "recPausedBadge": "Paused",
   "recMoreOf": "More actions for {name}",
   "@recMoreOf": {"placeholders": {"name": {"type": "String"}}},
-  "recToastPaused": "Paused {name}",
+  "recToastPaused": "Paused {name}.",
   "@recToastPaused": {"placeholders": {"name": {"type": "String"}}},
-  "recToastResumed": "Turned {name} back on",
+  "recToastResumed": "Turned {name} back on.",
   "@recToastResumed": {"placeholders": {"name": {"type": "String"}}},
-  "recToastDeleted": "Deleted the {name} recurring setting",
+  "recToastDeleted": "Deleted the {name} recurring setting.",
   "@recToastDeleted": {"placeholders": {"name": {"type": "String"}}},
   "recPauseFailed": "Couldn't pause the recurrence.",
   "recResumeFailed": "Couldn't turn the recurrence back on.",
@@ -4989,7 +4893,6 @@
   },
   "txfTypeGroup": "Transaction type",
   "txfEntryRequired": "Enter an amount.",
-  "txfAmountTooLarge": "Amount can be up to 10 billion won.",
   "txfCurrencyChip": "Currency, {code}",
   "@txfCurrencyChip": {
     "placeholders": {

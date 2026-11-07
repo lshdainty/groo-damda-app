@@ -250,6 +250,19 @@ class TxFormFlow extends ConsumerStatefulWidget {
 class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   late TxInput _input;
   _S _step = _S.one;
+
+  /// 100억을 넘겨 입력을 막은 단계 — 그 단계의 칸 아래에 오류를 띄우고, 다음 유효한 입력에서 걷는다(`null`).
+  /// 단계로 기억해 다른 단계로 넘어가면 따로 지우지 않아도 보이지 않는다.
+  _S? _overStep;
+  bool get _wonOver => _overStep == _step;
+  late final List<TextInputFormatter> _wonFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        final next = over ? _step : null;
+        if (next != _overStep && mounted) setState(() => _overStep = next);
+      },
+    ),
+  ];
   _S _returnTo = _S.one;
 
   /// 프리셋 저장 단계를 연 단계 — 금액 단계가 끝나도 이 값은 그대로다(N2).
@@ -1079,7 +1092,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     if (foreign && e.amount == null && c.amountInt <= 0) {
       e.fx = l.txfErrFx;
     }
-    if (c.amountInt > kAmountMax) e.krw = l.txfAmountTooLarge;
+    if (c.amountInt > kAmountMax) e.krw = l.amountTooLarge;
     if (isTransfer) {
       if (c.assetRowId == null) e.from = l.txfErrFrom;
       if (c.toAssetRowId == null || c.toAssetRowId == c.assetRowId) {
@@ -1927,12 +1940,12 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             decimal: foreign,
             formatters: foreign
                 ? const [DecimalFormatter(maxFrac: 2)]
-                : kWonFormatters,
+                : _wonFormatters,
             // 이체에는 통화 칩이 없다 — 뒤 글자는 보내는 계좌 통화(I-13 — 원화 "원", USD 계좌면 "$")
             suffixText: c.type == 'TRANSFER' ? _transferUnit : wonUnit(),
             chip: c.type == 'TRANSFER' ? null : _currencyChip(l),
-            invalid: _errs.amount != null,
-            errorMessage: _errs.amount,
+            invalid: _errs.amount != null || _wonOver,
+            errorMessage: _wonOver ? l.amountTooLarge : _errs.amount,
             // 프리셋으로 계좌가 정해진 이체 — 칸 아래 원화 어림 · 받는 금액(읽기 전용)
             hintMessage: _emptyPresetName == null
                 ? _transferHint()
@@ -2541,7 +2554,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         decimal: foreign,
         formatters: foreign
             ? const [DecimalFormatter(maxFrac: 2)]
-            : kWonFormatters,
+            : _wonFormatters,
+        invalid: _wonOver,
+        errorMessage: _wonOver ? l.amountTooLarge : null,
         // 이체 금액은 보내는 계좌 통화(I-13) — 칸 뒤 글자 · 칸 아래 원화 어림 · 받는 금액
         suffixText: !presetAmount && c.type == 'TRANSFER'
             ? _transferUnit
@@ -2604,7 +2619,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         controller: isFee ? c.feeCtrl : c.interestCtrl,
         focusNode: _subFocus,
         semanticLabel: isFee ? l.expFee : l.expInterest,
-        formatters: kWonFormatters,
+        formatters: _wonFormatters,
+        invalid: _wonOver,
+        errorMessage: _wonOver ? l.amountTooLarge : null,
         // 수수료 · 이자도 보내는 계좌 통화다(I-13) — 뒤 글자가 그 통화
         suffixText: _transferUnit,
         hintMessage: isFee

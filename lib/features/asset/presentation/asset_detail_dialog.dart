@@ -48,6 +48,7 @@ import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart'
     show BudgetFailure, kBudgetMask;
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
@@ -866,14 +867,23 @@ String tradeKindLabel(AppLocalizations l, AssetTrade tr) =>
 
 String tradeDateOnly(AssetTrade tr) => (tr.tradeDate ?? '').split('T').first;
 
-/// "2026-10-19 09:30" — 날짜 + 시각(초 아래는 자른다).
+/// 거래 시각 — 날짜 규칙 + 오전 · 오후 12시간(DESIGN.desk.md 날짜): ko "10월 19일 (월) 오전 9:30" · en "Mon, Oct 19 at 9:30 AM".
+/// 거래 일시는 시간대 없는 벽시계 값(ISO-LOCAL-DATETIME)이라 그대로 읽는다. 못 읽으면 서버 값을 그대로 둔다.
 String tradeDateTimeText(AssetTrade tr) {
   final raw = tr.tradeDate ?? '';
-  final text = raw.length >= 16
-      ? raw.substring(0, 16).replaceFirst('T', ' ')
-      : raw;
-  // 날짜 한가운데서 줄이 바뀌지 않게 — 하이픈 뒤 줄바꿈을 막는다(날짜 · 시각 사이 공백에서만 바뀐다).
-  return text.replaceAll('-', '-\u2060');
+  final dt = raw.length >= 16 ? DateTime.tryParse(raw) : null;
+  if (dt == null) return raw;
+  final day = monthDayDow(dt);
+  return localeIsEn()
+      ? '$day at ${timeOfDay12(dt)}'
+      : '$day ${timeOfDay12(dt)}';
+}
+
+/// 확인창 문장 안의 거래 날짜 — ko "10월 19일" · en "Oct 19"(연도 없음). 못 읽으면 서버 값 그대로.
+String tradeDateLabel(AssetTrade tr) {
+  final raw = tradeDateOnly(tr);
+  final dt = DateTime.tryParse(raw);
+  return dt == null ? raw : monthDay(dt);
 }
 
 /// 거래 기록에 보이는 종목 이름 — 연동 종목은 보유 목록의 이름(없으면 티커 코드), 직접 입력은 항목명(= holdingKey) 그대로.
@@ -999,7 +1009,7 @@ Future<void> showTradeDetailSheet(
     context,
     title: l.tradeDeleteTitle,
     description: l.tradeDeleteConfirmTarget(
-      tradeDateOnly(trade),
+      tradeDateLabel(trade),
       holdingName ?? trade.holdingKey,
       tradeQtyText(l, trade),
       tradeKindLabel(l, trade),
@@ -2276,7 +2286,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
       title: l.assetCancelPayment,
       description: l.assetCancelPaymentConfirm(
         widget.masked ? '••••' : krw(billing.billingAmount),
-        billing.paymentDate,
+        _paymentDateLabel(billing.paymentDate),
       ),
       failedMessage: l.assetCancelPaymentFailed,
       kind: WriteKind.process,
@@ -2357,7 +2367,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         (st?.scheduled == true ? st!.amount : (b?.upcomingAmount ?? 0)) > 0 &&
         !_paying;
     final periodText = st?.periodStart != null && st?.periodEnd != null
-        ? '${_fmtDate(st!.periodStart!)} ~ ${_fmtDate(st.periodEnd!)}'
+        ? _periodLabel(st!.periodStart!, st.periodEnd!)
         : null;
     // 이용 내역 — 선택 회차의 청구 기간(전월 1일~말일)만 조회(사용자 결정).
     // 기간 미확정(폴백 회차)이면 카드 전체 최근 12건.
@@ -3243,14 +3253,18 @@ class _PeriodButton extends StatelessWidget {
   }
 }
 
-/// 'yyyy-MM-dd' → 'M.d' 표기.
-String _fmtDate(String iso) {
-  final parts = iso.split('-');
-  if (parts.length != 3) return iso;
-  final m = int.tryParse(parts[1]);
-  final d = int.tryParse(parts[2]);
-  if (m == null || d == null) return iso;
-  return '$m.$d';
+/// 청구 기간 — ko "10월 1일~10월 31일" · en "Oct 1–31"(날짜 규칙: 구간 기호는 붙이고 로케일 문구). 못 읽으면 서버 값 그대로.
+String _periodLabel(String startIso, String endIso) {
+  final a = DateTime.tryParse(startIso);
+  final b = DateTime.tryParse(endIso);
+  if (a == null || b == null) return '$startIso${rangeSeparator()}$endIso';
+  return dateRange(a, b);
+}
+
+/// 결제일 — ko "10월 25일" · en "Oct 25". 못 읽으면 서버 값 그대로(폴백).
+String _paymentDateLabel(String iso) {
+  final d = DateTime.tryParse(iso);
+  return d == null ? iso : monthDay(d);
 }
 
 /// stats 차트와 동일한 만/억 단위 — 한글 단위가 KRW 와 어울리고

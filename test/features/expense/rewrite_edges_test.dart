@@ -32,8 +32,8 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import '../../support/plain_text.dart';
 
-const _lockedNote = '결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요';
-const _paidOffNote = '결제가 끝난 거래예요. 중도 정리한 할부라 금액·날짜를 바꿀 수 없어요.';
+const _lockedNote = '결제가 끝난 거래예요. 금액 · 날짜를 바꾸려면 고쳐 쓰기를 눌러주세요';
+const _paidOffNote = '결제가 끝난 거래예요. 중도 정리한 할부라 금액 · 날짜를 바꿀 수 없어요.';
 
 const _card = Asset(
   rowId: 9,

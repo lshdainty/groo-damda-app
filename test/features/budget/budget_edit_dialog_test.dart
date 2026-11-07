@@ -378,6 +378,25 @@ void main() {
     },
   );
 
+  testWidgets('100억을 넘겨 치면 막고 칸 아래에 알린다 — 다음 유효한 입력에서 사라진다', (tester) async {
+    await _open(tester, overallNew: true);
+    await tester.enterText(_inputs().first, '10000000000');
+    await tester.pump();
+    expect(_amount(tester), '10,000,000,000');
+    expect(_t(l.amountTooLarge), findsNothing, reason: '정확히 100억은 받는다');
+
+    await tester.enterText(_inputs().first, '100000000000');
+    await tester.pump();
+    expect(_amount(tester), '10,000,000,000', reason: '넘는 글자는 받지 않는다');
+    expect(_t(l.amountTooLarge), findsOneWidget);
+    expect(_t('금액은 100억원까지 입력할 수 있어요.'), findsOneWidget);
+
+    await tester.enterText(_inputs().first, '1000000000');
+    await tester.pump();
+    expect(_amount(tester), '1,000,000,000');
+    expect(_t(l.amountTooLarge), findsNothing);
+  });
+
   testWidgets('바뀐 채 닫으면 확인창 · 안 바뀌면 묻지 않는다', (tester) async {
     await _open(tester, overallNew: true);
     await tester.tap(find.byKey(const ValueKey('p-bottom-sheet-close')));

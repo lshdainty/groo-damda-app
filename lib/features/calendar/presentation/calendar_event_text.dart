@@ -13,7 +13,7 @@ String? eventRepeatLabel(AppLocalizations l, String? rrule) {
   return rrule;
 }
 
-/// 일정 줄 설명 첫 조각 — 종일 "종일"(이어지는 종일은 "종일 · 10월 10일 ~ 11일"), 그 밖 "오전 10:00 ~ 오후 12:00".
+/// 일정 줄 설명 첫 조각 — 종일 "종일"(이어지는 종일은 "종일 · 10월 10일~11일"), 그 밖 "오전 10:00~오후 12:00"(구간 기호는 붙여 쓰고 로케일 문구 — DESIGN.desk.md 날짜).
 String eventTimeText(AppLocalizations l, CalendarEvent e) {
   final s = e.start;
   final end = e.end;
@@ -24,7 +24,7 @@ String eventTimeText(AppLocalizations l, CalendarEvent e) {
     final endText = !localeIsEn() && sd.month == ed.month && sd.year == ed.year
         ? '${ed.day}일'
         : monthDay(ed);
-    return '${l.calAllDay} · ${monthDay(sd)} ~ $endText';
+    return '${l.calAllDay} · ${monthDay(sd)}${rangeSeparator()}$endText';
   }
-  return '${timeOfDay12(s)} ~ ${timeOfDay12(end)}';
+  return '${timeOfDay12(s)}${rangeSeparator()}${timeOfDay12(end)}';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -74,6 +75,16 @@ class _CreateSheet extends ConsumerStatefulWidget {
 class _CreateSheetState extends ConsumerState<_CreateSheet> {
   final _titleCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
+
+  /// 100억을 넘겨 입력을 막았나 — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  bool _amountOver = false;
+  late final List<TextInputFormatter> _amountFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        if (over != _amountOver && mounted) setState(() => _amountOver = over);
+      },
+    ),
+  ];
   final _placeCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
   final _titleFocus = FocusNode();
@@ -414,8 +425,10 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
             label: l.dutchTotalLabel,
             indicator: PFieldIndicator.required,
             required: true,
-            invalid: emptyAmount,
-            errorMessage: emptyAmount ? l.dutchAmountRequired : null,
+            invalid: emptyAmount || _amountOver,
+            errorMessage: _amountOver
+                ? l.amountTooLarge
+                : (emptyAmount ? l.dutchAmountRequired : null),
             child: PInput(
               controller: _amountCtrl,
               focusNode: _amountFocus,
@@ -423,7 +436,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
               suffixText: wonUnit(),
               tabularFigures: true,
               keyboardType: TextInputType.number,
-              inputFormatters: const [AmountInputFormatter()],
+              inputFormatters: _amountFormatters,
               onChanged: (_) => setState(() {}),
             ),
           ),

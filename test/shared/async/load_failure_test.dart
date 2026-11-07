@@ -108,7 +108,7 @@ void main() {
       calls.last.completeError(Exception('RAW_SERVER_TEXT'));
       await tester.pump();
       expect(find.byKey(const ValueKey('asset-pick-failure')), findsOneWidget);
-      expect(findText('계좌·카드를 불러오지 못했어요'), findsOneWidget);
+      expect(findText('계좌 · 카드를 불러오지 못했어요'), findsOneWidget);
       expect(findText('잠시 뒤 다시 시도해주세요.'), findsOneWidget);
       expect(findTextContaining('RAW_SERVER_TEXT'), findsNothing);
       expect(find.text('EMPTY'), findsNothing);

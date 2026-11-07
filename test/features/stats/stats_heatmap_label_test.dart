@@ -53,7 +53,7 @@ Future<void> _pumpHeatmap(WidgetTester tester, int cellAmount) async {
   await tester.pumpAndSettle();
 
   await tester.scrollUntilVisible(
-    findPlain('요일·시간대 지출 패턴'),
+    findPlain('요일 · 시간대 지출 패턴'),
     300,
     scrollable: find
         .descendant(

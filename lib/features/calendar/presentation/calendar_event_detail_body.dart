@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event_detail_rules.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_event_form_rules.dart';
@@ -74,7 +75,8 @@ class CalendarEventDetailBody extends StatelessWidget {
         Widget when({
           required String title,
           required IconData icon,
-          required List<String> pieces,
+          List<String> pieces = const [],
+          String? range,
         }) => PListItem(
           title: title,
           prefix: Icon(icon, size: _rowIcon),
@@ -84,7 +86,12 @@ class CalendarEventDetailBody extends StatelessWidget {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.center,
               spacing: PSpacing.x2,
-              children: [for (final p in pieces) Text(keepAll(p))],
+              children: [
+                for (final p in pieces)
+                  Text(keepAll(p), textAlign: TextAlign.end),
+                // 여러 날 종일 — 한 글이고 구간 기호 뒤에서만 줄이 바뀐다
+                if (range != null) Text(range, textAlign: TextAlign.end),
+              ],
             ),
           ),
         );
@@ -152,7 +159,11 @@ class CalendarEventDetailBody extends StatelessWidget {
                   when(
                     title: l.calAllDay,
                     icon: LucideIcons.sun,
-                    pieces: [startDay, if (multiDay) '~ $endDay'],
+                    // 여러 날은 한 글 "10월 25일 (토)~10월 27일 (월)" — 구간 기호 앞뒤를 붙이고 기호 뒤에서만 줄을 바꾼다
+                    pieces: multiDay ? const [] : [startDay],
+                    range: multiDay
+                        ? keepAllRange(startDay, rangeSeparator(), endDay)
+                        : null,
                   )
                 else ...[
                   when(

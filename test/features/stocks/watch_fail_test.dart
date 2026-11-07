@@ -161,7 +161,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.adds, 1);
       expect(repo.silent, ['add']);
-      expect(l.stocksWatchAddFail, '관심 종목에 넣지 못했어요.');
+      expect(l.stocksWatchAddFail, '관심 종목에 넣지 못했어요. 잠시 뒤 다시 시도해주세요.');
       expect(findPlain(l.stocksWatchAddFail), findsOneWidget);
       expect(findTextContaining('서버 원문'), findsNothing);
       expect(

@@ -903,7 +903,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpAndSettle();
       expect(tester.widget<PCheckmark>(_checkOf('보고서 마무리')).checked, isFalse);
-      expect(findText('할 일 상태를 바꾸지 못했어요.'), findsOneWidget);
+      expect(findText('할 일 상태를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
       expect(findText('다시 시도'), findsNothing);
       expect(findTextContaining('RAW_SERVER_TEXT_4471'), findsNothing);
     });

@@ -14,7 +14,6 @@ import 'package:groo_damda_app/features/dutch_pay/domain/dutch_shares.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense.dart';
 import 'package:groo_damda_app/features/expense/presentation/tx_detail_rules.dart';
-import 'package:groo_damda_app/features/expense/presentation/tx_form_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/avatar/p_avatar.dart';
@@ -730,7 +729,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
                   invalid: _attempted && _rowBad(p),
                   tabularFigures: true,
                   keyboardType: TextInputType.number,
-                  inputFormatters: kWonFormatters,
+                  inputFormatters: const [AmountInputFormatter()],
                   onChanged: (v) =>
                       setState(() => p.custom = '${parseAmountInput(v) ?? 0}'),
                 ),

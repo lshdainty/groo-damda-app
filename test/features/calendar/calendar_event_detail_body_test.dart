@@ -136,7 +136,7 @@ void main() {
     expect(_titles(tester), ['시작', '종료', '반복']);
   });
 
-  testWidgets('종일은 시작 · 종료 대신 "종일" 한 줄 — 여러 날이면 날짜 뒤에 "~ 끝 날"', (tester) async {
+  testWidgets('종일은 시작 · 종료 대신 "종일" 한 줄 — 여러 날이면 한 글 "시작~끝"', (tester) async {
     await _pump(
       tester,
       _ev(
@@ -147,9 +147,51 @@ void main() {
       ),
     );
     expect(_titles(tester), ['캘린더', '종일', '반복']);
-    expect(findPlain('10월 23일 (금)'), findsOneWidget);
-    expect(findPlain('~ 10월 25일 (일)'), findsOneWidget);
+    // 한 글 · 구간 기호 앞뒤를 붙인다(DESIGN.desk.md 날짜 구간)
+    expect(findPlain('10월 23일 (금)~10월 25일 (일)'), findsOneWidget);
     expect(find.byIcon(LucideIcons.sun), findsOneWidget);
+  });
+
+  testWidgets('여러 날 종일은 한 글이고 줄은 "~" 뒤에서만 바뀐다 — 글자 130% · 폭 360', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _ev(
+        full: false,
+        allDay: 'Y',
+        start: '2026-10-25T00:00:00',
+        end: '2026-10-27T23:59:59',
+      ),
+      scale: 1.3,
+      width: 360,
+    );
+    final range = findPlain('10월 25일 (일)~10월 27일 (화)');
+    expect(range, findsOneWidget);
+    final p = tester.renderObject<RenderParagraph>(
+      find.descendant(of: range, matching: find.byType(RichText)).first,
+    );
+    final text = p.text.toPlainText();
+    final tilde = text.indexOf('~');
+    // 줄이 바뀐 자리(캐럿 세로 위치가 내려가는 첫 글자) — 모두 "~" 바로 뒤여야 한다
+    final breaks = <int>[];
+    double? lastY;
+    for (var i = 0; i < text.length; i++) {
+      final y = p.getOffsetForCaret(TextPosition(offset: i), Rect.zero).dy;
+      if (lastY != null && y > lastY + 1) breaks.add(i);
+      lastY = y;
+    }
+    expect(breaks, isNotEmpty, reason: '폭 320 · 200% 에서는 한 줄에 안 들어간다');
+    for (final b in breaks) {
+      expect(
+        text.substring(0, b).replaceAll('\u200B', '').endsWith('~'),
+        isTrue,
+        reason:
+            '줄이 바뀐 자리 ${text.substring(b - 2, b)}|${text.substring(b, b + 2)}',
+      );
+      expect(b, greaterThan(tilde));
+    }
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('다른 해는 날짜에 연도가 붙는다', (tester) async {

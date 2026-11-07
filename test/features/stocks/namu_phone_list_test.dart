@@ -519,7 +519,7 @@ void main() {
       for (final k in ['평가금액', '평가손익', '보유수량', '수익률', '평균단가', '매입금액']) {
         expect(_t(k), findsOneWidget, reason: k);
       }
-      expect(_t('수수료·세금'), findsNothing);
+      expect(_t('수수료 · 세금'), findsNothing);
       // 13b-1 — 오늘 시세 · 호가 · 체결 · 투자자별 · 업종 · 투자유의 배지가 더해졌다. 매매 단추는 없다.
       expect(_t('오늘 시세'), findsOneWidget);
       expect(_t('호가 · 체결'), findsOneWidget);

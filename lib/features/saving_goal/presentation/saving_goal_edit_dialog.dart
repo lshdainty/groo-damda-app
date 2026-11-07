@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -158,6 +159,26 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   String? _nameError;
   String? _amountError;
   String? _currentError;
+
+  /// 100억을 넘겨 입력을 막았나(목표 금액 · 지금 모은 금액) — 칸 아래 오류를 띄우고 다음 유효한 입력에서 걷는다.
+  bool _amountOver = false;
+  bool _currentOver = false;
+  late final List<TextInputFormatter> _amountFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        if (over != _amountOver && mounted) setState(() => _amountOver = over);
+      },
+    ),
+  ];
+  late final List<TextInputFormatter> _currentFormatters = [
+    AmountInputFormatter(
+      onLimit: (over) {
+        if (over != _currentOver && mounted) {
+          setState(() => _currentOver = over);
+        }
+      },
+    ),
+  ];
 
   bool get _isEdit => widget.edit != null;
 
@@ -511,16 +532,23 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             padding: gutter,
             child: PField(
               label: l.savingGoalAmountLabel,
-              invalid: _amountError != null,
-              errorMessage: _amountError,
-              child: _amountInput(_amountCtrl, _amountFocus, () {
-                if (_amountError != null || _currentError != null) {
-                  setState(() {
-                    _amountError = null;
-                    _currentError = null;
-                  });
-                }
-              }),
+              invalid: _amountError != null || _amountOver,
+              errorMessage: _amountOver
+                  ? l.savingGoalErrAmountTooLarge
+                  : _amountError,
+              child: _amountInput(
+                _amountCtrl,
+                _amountFocus,
+                _amountFormatters,
+                () {
+                  if (_amountError != null || _currentError != null) {
+                    setState(() {
+                      _amountError = null;
+                      _currentError = null;
+                    });
+                  }
+                },
+              ),
             ),
           ),
           const SizedBox(height: PSpacing.x6),
@@ -529,11 +557,18 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             child: PField(
               label: l.savingGoalCurrentLabel,
               indicator: PFieldIndicator.optional,
-              invalid: _currentError != null,
-              errorMessage: _currentError,
-              child: _amountInput(_currentCtrl, _currentFocus, () {
-                if (_currentError != null) setState(() => _currentError = null);
-              }),
+              invalid: _currentError != null || _currentOver,
+              errorMessage: _currentOver ? l.amountTooLarge : _currentError,
+              child: _amountInput(
+                _currentCtrl,
+                _currentFocus,
+                _currentFormatters,
+                () {
+                  if (_currentError != null) {
+                    setState(() => _currentError = null);
+                  }
+                },
+              ),
             ),
           ),
           const SizedBox(height: PSpacing.x3),
@@ -613,6 +648,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   Widget _amountInput(
     TextEditingController ctrl,
     FocusNode focus,
+    List<TextInputFormatter> formatters,
     VoidCallback onEdited,
   ) => PInput(
     controller: ctrl,
@@ -621,7 +657,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
     suffixText: wonUnit(),
     tabularFigures: true,
     keyboardType: TextInputType.number,
-    inputFormatters: const [AmountInputFormatter()],
+    inputFormatters: formatters,
     onChanged: (_) => onEdited(),
   );
 }

@@ -126,7 +126,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appLockTitle => '앱 잠금';
 
   @override
-  String get appLockRowDesc => '앱을 열 때 Face ID·지문으로 본인 확인을 해요.';
+  String get appLockRowDesc => '앱을 열 때 Face ID · 지문으로 본인 확인을 해요.';
 
   @override
   String get appLockLockedDesc => '잠금을 해제하려면 본인 확인이 필요해요.';
@@ -139,12 +139,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get appLockUnavailable => '이 기기에서는 생체인증이나 화면 잠금을 사용할 수 없어요.';
-
-  @override
-  String get stateNoData => '데이터가 없습니다';
-
-  @override
-  String get stateError => '오류가 발생했습니다';
 
   @override
   String get stateEmpty => '표시할 항목이 없어요';
@@ -328,9 +322,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetSummaryTotalBalance => '총 자산';
 
   @override
-  String get assetEmpty => '등록된 자산이 없습니다';
-
-  @override
   String get assetCreateFirst => '첫 번째 자산을 등록해보세요';
 
   @override
@@ -341,9 +332,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetTransferAdd => '이체 추가';
-
-  @override
-  String get assetTransferEmpty => '이체 내역이 없습니다';
 
   @override
   String get assetFee => '수수료';
@@ -394,16 +382,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetSubtypeOverdraft => '마이너스 통장';
 
   @override
-  String get assetLoadError => '자산을 불러오지 못했습니다';
-
-  @override
   String get assetEmptyState => '아직 등록된 자산이 없어요';
 
   @override
   String get assetEmptyHint => '설정 → 계좌 · 카드 관리에서 추가할 수 있어요.';
 
   @override
-  String get assetSummaryColAccounts => '계좌·예금';
+  String get assetSummaryColAccounts => '계좌 · 예금';
 
   @override
   String get assetSummaryColCards => '카드값';
@@ -444,7 +429,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetManageEmptyHint => '[추가]를 눌러 첫 계좌나 카드를 등록해보세요.';
 
   @override
-  String get assetManageLoadFailed => '계좌·카드를 불러오지 못했어요';
+  String get assetManageLoadFailed => '계좌 · 카드를 불러오지 못했어요';
 
   @override
   String assetHoldingsCount(int count) {
@@ -511,15 +496,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetEmptyCta => '계좌 · 카드 관리로 가기';
-
-  @override
-  String get assetAccountAdded => '계좌가 추가되었습니다';
-
-  @override
-  String get assetAccountUpdated => '계좌가 수정되었습니다';
-
-  @override
-  String get assetAccountDeleted => '계좌가 삭제되었습니다';
 
   @override
   String get assetAccountDelete => '계좌 삭제';
@@ -629,21 +605,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetPaymentAccountHint => '결제일에 이 계좌에서 청구액이 빠져요.';
 
   @override
-  String get assetCardAdded => '카드가 추가되었습니다';
-
-  @override
-  String get assetCardUpdated => '카드가 수정되었습니다';
-
-  @override
   String get assetCardDelete => '카드 삭제';
 
   @override
   String assetCardDeleteConfirm(String name) {
     return '\"$name\"을(를) 목록에서 삭제해요. 연결된 거래 내역은 그대로 남아요. 삭제한 자산은 되돌릴 수 없어요.';
   }
-
-  @override
-  String get assetCardDeleted => '카드가 삭제되었습니다';
 
   @override
   String get assetCardProduct => '카드 상품';
@@ -710,15 +677,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assetDiscontinued => '단종';
-
-  @override
-  String get assetInvestAdded => '투자가 추가되었습니다';
-
-  @override
-  String get assetInvestUpdated => '투자가 수정되었습니다';
-
-  @override
-  String get assetInvestDeleted => '투자가 삭제되었습니다';
 
   @override
   String get assetInvestDelete => '투자 삭제';
@@ -869,7 +827,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetHoldings => '보유 종목';
 
   @override
-  String get tradeTitle => '매수·매도';
+  String get tradeTitle => '매수 · 매도';
 
   @override
   String get tradeBuy => '매수';
@@ -911,7 +869,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tradeAmountHelp => '수수료를 뺀 금액이에요. 수수료는 아래에 따로 적어주세요.';
 
   @override
-  String get tradeFee => '수수료·세금 (원)';
+  String get tradeFee => '수수료 · 세금 (원)';
 
   @override
   String get tradeMemo => '메모';
@@ -946,7 +904,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get tradeInsufficientCash => '예수금이 마이너스가 돼요. 그대로 기록됩니다.';
+  String get tradeInsufficientCash => '예수금이 마이너스가 돼요. 그대로 기록돼요.';
 
   @override
   String get tradeInsufficientQty => '보유 수량보다 많이 팔 수 없어요.';
@@ -964,7 +922,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tradeHistory => '거래 기록';
 
   @override
-  String get tradeDeleted => '거래를 취소했어요';
+  String get tradeDeleted => '거래를 취소했어요.';
 
   @override
   String get tradeDeleteTitle => '거래 취소';
@@ -1172,11 +1130,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String assetTossValuationFormula(int qty) {
-    return '평가액 = 토스 현재가 × $qty주 로 실시간 계산됩니다.';
-  }
-
-  @override
   String get assetHoldingQty => '보유 수량';
 
   @override
@@ -1189,14 +1142,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetTossRealtimeTitle => '토스 시세로 실시간 평가';
 
   @override
-  String get assetTossRealtimeDesc =>
-      '보유 종목과 수량을 등록하면 토스 현재가 × 수량으로 평가액이 실시간 반영됩니다.';
-
-  @override
   String get assetTapToChange => '변경하려면 탭';
 
   @override
-  String get assetStockSearchHint => '종목명·코드 검색 (예: 삼성전자, 005930)';
+  String get assetStockSearchHint => '종목명 · 코드 검색 (예: 삼성전자, 005930)';
 
   @override
   String get stockSecurityTypeIndex => '지수';
@@ -1364,9 +1313,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetPayNoAccountNote => '연결된 결제 계좌가 없어 이체 없이 사용액만 정리돼요.';
 
   @override
-  String get assetPaymentRecorded => '결제가 기록되었습니다';
-
-  @override
   String get assetBillingLoadError => '청구 정보를 불러오지 못했어요';
 
   @override
@@ -1458,11 +1404,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetNoUsage => '이용 내역이 없어요.';
 
   @override
-  String assetBillingPeriod(String start, String end) {
-    return '$start~$end 사용분';
-  }
-
-  @override
   String assetMonthlyPaymentDay(int day) {
     return '매월 $day일';
   }
@@ -1478,9 +1419,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get todoTitle => '할 일';
-
-  @override
-  String get todoEmpty => '할 일이 없습니다';
 
   @override
   String get todoCreateFirst => '첫 번째 할 일을 만들어보세요';
@@ -1547,9 +1485,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get calAgendaView => '안건';
-
-  @override
-  String get calNoEvents => '일정이 없습니다';
 
   @override
   String get calEventAdd => '일정 추가';
@@ -1720,12 +1655,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get calEventAdded => '일정이 추가되었습니다';
-
-  @override
-  String get calEventUpdated => '일정이 수정되었습니다';
-
-  @override
   String get calLabelsTitle => '캘린더 라벨';
 
   @override
@@ -1862,7 +1791,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calJoinedCalendar(String name) {
-    return '\"$name\" 캘린더에 참여했어요';
+    return '\"$name\" 캘린더에 참여했어요.';
   }
 
   @override
@@ -1875,10 +1804,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calCalendarUpdated => '캘린더를 수정했어요';
 
   @override
-  String get calInviteCodeRegenerated => '초대 코드를 새로 만들었어요';
+  String get calInviteCodeRegenerated => '초대 코드를 새로 만들었어요.';
 
   @override
-  String get calInviteCodeCopied => '초대 코드를 복사했어요';
+  String get calInviteCodeCopied => '초대 코드를 복사했어요.';
 
   @override
   String get calRemoveMember => '멤버 내보내기';
@@ -1944,7 +1873,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calRemoveMemberFailed => '멤버를 내보내지 못했어요.';
 
   @override
-  String get calColorChangeFailed => '색을 바꾸지 못했어요.';
+  String get calColorChangeFailed => '색을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get calRoleChangeFailed => '권한을 바꾸지 못했어요.';
@@ -1997,7 +1926,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calJoinFailed => '참여하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get calUpdateFailed => '캘린더 표시를 바꾸지 못했어요.';
+  String get calUpdateFailed => '캘린더 표시를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get importExecuteFailed => '가져오지 못했어요.';
@@ -2047,15 +1976,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dashTrendTitle => '최근 6개월';
-
-  @override
-  String get dashEmptyTransactions => '최근 거래가 없습니다';
-
-  @override
-  String get dashEmptyEvents => '예정된 일정이 없습니다';
-
-  @override
-  String get dashEmptyTodos => '처리할 할 일이 없습니다';
 
   @override
   String get dashAddTx => '거래 추가';
@@ -2184,9 +2104,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expFilterTransfer => '이체';
-
-  @override
-  String get expEmpty => '거래가 없습니다';
 
   @override
   String get expEmptyDescription => '새 거래를 추가해서 가계부를 시작하세요';
@@ -2522,12 +2439,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get budgetPickLoadFailDesc => '잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get budgetUpdated => '예산이 수정되었습니다';
-
-  @override
-  String get budgetAdded => '예산이 추가되었습니다';
-
-  @override
   String get budgetActionFailed => '실패';
 
   @override
@@ -2561,9 +2472,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get budgetMonthlyLimit => '월 예산 한도';
-
-  @override
-  String get budgetLoadError => '예산을 불러오지 못했습니다';
 
   @override
   String get budgetSelectMonth => '월 선택';
@@ -2910,9 +2818,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardNoBenefits => '등록된 혜택이 없어요.';
 
   @override
-  String get cardPickerNoMatch => '일치하는 카드가 없습니다';
-
-  @override
   String get categoryManageTitle => '카테고리 관리';
 
   @override
@@ -2976,12 +2881,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get categoryMove => '옮기기';
 
   @override
-  String get categoryUpdated => '카테고리가 수정되었습니다';
-
-  @override
-  String get categoryAdded => '카테고리가 추가되었습니다';
-
-  @override
   String get categoryActionFailed => '실패';
 
   @override
@@ -3007,7 +2906,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get categoryMoveTxFailed => '거래를 옮기지 못했어요.';
 
   @override
-  String get categoryReorderFailed => '순서를 바꾸지 못했어요.';
+  String get categoryReorderFailed => '순서를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get todoSaveFailed => '할 일을 저장하지 못했어요.';
@@ -3335,10 +3234,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchStartTitle => '더치페이 시작';
 
   @override
-  String get dutchFromTxDesc =>
-      '이 거래를 기준으로 더치페이 정산을 만듭니다. 참여자에게 송금 요청을 보내고, 정산 진행 상황을 추적할 수 있어요.';
-
-  @override
   String get dutchSplitMethod => '분배 방식';
 
   @override
@@ -3351,7 +3246,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchSplitRatioTitle => '비율';
 
   @override
-  String get dutchSplitRatioSub => '인원수·기준';
+  String get dutchSplitRatioSub => '인원수 · 기준';
 
   @override
   String get dutchSplitCustomTitle => '개별 금액';
@@ -3361,9 +3256,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dutchIncludeMyself => '나도 포함해서 분배';
-
-  @override
-  String get dutchIncludeMyselfDesc => '내 몫도 계산됩니다';
 
   @override
   String get dutchIncludeMyselfOffDesc => '내가 전액 결제, 다른 사람 몫만 받아요';
@@ -3378,16 +3270,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dutchRequestMsgPlaceholder => '참여자에게 함께 보낼 한마디를 적어주세요';
 
   @override
-  String dutchShortBy(String amount) {
-    return '합계가 총액보다 $amount원 부족합니다.';
-  }
-
-  @override
-  String dutchOverBy(String amount) {
-    return '합계가 총액보다 $amount원 초과합니다.';
-  }
-
-  @override
   String get dutchCreated => '정산이 만들어졌어요';
 
   @override
@@ -3395,9 +3277,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get expTransfersLoadError => '이체 내역을 불러오지 못했어요.';
-
-  @override
-  String get expEmptyMonth => '이 달에는 거래가 없습니다';
 
   @override
   String get expEmptyDay => '이 날의 거래가 없어요';
@@ -3428,24 +3307,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expAddShort => '추가';
 
   @override
-  String get expTransferDone => '이체가 완료되었습니다';
-
-  @override
   String get expActionFailed => '실패';
-
-  @override
-  String get expUpdated => '거래가 수정되었습니다';
-
-  @override
-  String get expAdded => '거래가 추가되었습니다';
 
   @override
   String expDeleteConfirm(String name) {
     return '\"$name\" 거래를 삭제할까요? 연결된 자산 잔액이 함께 바뀌어요. 삭제한 거래는 되돌릴 수 없어요.';
   }
-
-  @override
-  String get expDeleted => '거래가 삭제되었습니다';
 
   @override
   String get expSplitMismatch => '분할 내역과 금액이 달라요';
@@ -3472,7 +3339,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '저장된 프리셋이 없어요. 자주 쓰는 내역을 입력 후 “현재 입력값 저장”을 눌러보세요.';
 
   @override
-  String get expPresetFilled => '프리셋 값이 채워졌어요. 금액·내역만 수정해서 저장하세요.';
+  String get expPresetFilled => '프리셋 값이 채워졌어요. 금액 · 내역만 수정해서 저장하세요.';
 
   @override
   String get expClear => '해제';
@@ -3527,9 +3394,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expPresetLock => '프리셋 잠금';
 
   @override
-  String get expNoCategoryForType => '이 타입에 해당하는 카테고리가 없습니다';
-
-  @override
   String get expSubcategory => '세부 카테고리';
 
   @override
@@ -3559,19 +3423,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expDepositAccount => '입금 계좌';
 
   @override
-  String get expAccountCard => '계좌·카드';
+  String get expAccountCard => '계좌 · 카드';
 
   @override
   String get expAssetLoadError => '자산 로드 실패';
 
   @override
-  String get expWithdrawAccount => '출금 계좌';
+  String get expWithdrawAccount => '보내는 계좌';
+
+  @override
+  String get expTransferToAccount => '받는 계좌';
 
   @override
   String get expSelect => '선택';
 
   @override
-  String get expTransferSameAsset => '보낼/받을 자산은 달라야 합니다';
+  String get expTransferSameAsset => '보낼/받을 자산은 달라야 해요.';
 
   @override
   String get expFeeOptional => '수수료 (선택)';
@@ -3588,7 +3455,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get expDateTime => '날짜·시간';
+  String get expDateTime => '날짜 · 시간';
 
   @override
   String get expMemoPlaceholder => '예: 점심, 회식 등';
@@ -3658,9 +3525,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expAddAmount => '추가 금액';
 
   @override
-  String get expSplitSaved => '분할이 저장되었습니다';
-
-  @override
   String get expSplitRemoveConfirm => '이 거래의 분할 내역을 모두 지워요. 지운 내역은 되돌릴 수 없어요.';
 
   @override
@@ -3715,10 +3579,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expRecommended => '추천';
 
   @override
-  String get expSplitDesc =>
-      '하나의 결제를 카테고리·항목별로 나누어 기록합니다. 예: 마트에서 식품과 생활품을 함께 결제한 경우.';
-
-  @override
   String get expOriginalTx => '원 거래';
 
   @override
@@ -3740,8 +3600,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get exportTitle => '데이터 내보내기';
 
   @override
-  String exportShareText(String start, String end) {
-    return '데이터 내보내기 ($start ~ $end)';
+  String exportShareText(String range) {
+    return '데이터 내보내기 ($range)';
   }
 
   @override
@@ -3882,7 +3742,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreGroupPersonal => '개인화';
 
   @override
-  String get moreGroupSystem => '계정·시스템';
+  String get moreGroupSystem => '계정 · 시스템';
 
   @override
   String get moreItemStocks => '증권';
@@ -3927,7 +3787,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreDescRecurring => '구독 · 고정비';
 
   @override
-  String get moreDescAccountCard => '계좌·카드 추가·편집';
+  String get moreDescAccountCard => '계좌 · 카드 추가 · 편집';
 
   @override
   String get moreDescCalendar => '일정 · 반복 · 알림';
@@ -3942,7 +3802,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreDescDutchPay => '정산 · 친구 · 송금 요청';
 
   @override
-  String get moreDescCardBenefits => '신용·체크 카드 검색';
+  String get moreDescCardBenefits => '신용 · 체크 카드 검색';
 
   @override
   String get moreDescCategories => '지출 · 수입';
@@ -4020,7 +3880,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsMenuPrivacyPolicy => '개인정보 처리방침';
 
   @override
-  String get settingsPrivacyOpenFailed => '처리방침을 열지 못했어요.';
+  String get settingsPrivacyOpenFailed => '처리방침을 열지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get settingsGroupHelp => '도움말';
@@ -4029,7 +3889,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsMenuGuide => '설명서';
 
   @override
-  String get settingsGuideOpenFailed => '설명서를 열지 못했어요.';
+  String get settingsGuideOpenFailed => '설명서를 열지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get appearanceTitle => '표시 설정';
@@ -4140,7 +4000,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hideCardHomeNetWorth => '순자산';
 
   @override
-  String get hideCardHomeMonthExpense => '이번달 수입·지출';
+  String get hideCardHomeMonthExpense => '이번달 수입 · 지출';
 
   @override
   String get hideCardHomeCategoryDonut => '카테고리 도넛';
@@ -4155,13 +4015,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hideCardHomeUpcoming => '예정 결제';
 
   @override
-  String get hideCardAssetNetWorth => '총 순자산·추이';
+  String get hideCardAssetNetWorth => '총 순자산 · 추이';
 
   @override
   String get hideCardAssetComposition => '자산 구성';
 
   @override
-  String get hideCardAssetAccounts => '계좌·예금';
+  String get hideCardAssetAccounts => '계좌 · 예금';
 
   @override
   String get hideCardAssetInvestments => '투자';
@@ -4251,9 +4111,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceHideAmount => '금액 가리기';
 
   @override
-  String get appearanceHideAmountDesc => '모든 화면의 금액을 ••••로 표시합니다';
-
-  @override
   String get appearanceRegion => '기준 지역';
 
   @override
@@ -4276,7 +4133,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceCurrencyJpy => '일본 엔';
 
   @override
-  String get appearanceCurrencyDesc => '새 자산·거래를 만들 때 이 통화가 먼저 골라져요.';
+  String get appearanceCurrencyDesc => '새 자산 · 거래를 만들 때 이 통화가 먼저 골라져요.';
 
   @override
   String get appearanceRegionLoadError => '기준 지역을 불러오지 못했어요';
@@ -4285,7 +4142,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appearanceCurrencyLoadError => '기본 통화를 불러오지 못했어요';
 
   @override
-  String get appearanceSaveFailed => '설정을 바꾸지 못했어요.';
+  String get appearanceSaveFailed => '설정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get passwordChanged => '비밀번호를 바꿨어요.';
@@ -4442,10 +4299,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountUnlinkedToast => 'Google 연결을 해제했어요.';
 
   @override
-  String get accountSecuritiesDesc => '토스·나무 등 증권사 API 키를 연결해요';
+  String get accountSecuritiesDesc => '토스 · 나무 등 증권사 API 키를 연결해요';
 
   @override
-  String get accountBilling => '구독·결제';
+  String get accountBilling => '구독 · 결제';
 
   @override
   String accountNextBilling(String date) {
@@ -4640,7 +4497,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String notiBudgetDesc(int threshold) {
-    return '카테고리 예산 $threshold%·100% 도달';
+    return '카테고리 예산 $threshold% · 100% 도달';
   }
 
   @override
@@ -4755,7 +4612,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetDeleteConfirm => '이미 기록된 거래는 그대로 남아요. 삭제한 프리셋은 되돌릴 수 없어요.';
 
   @override
-  String get presetDeleteFailed => '프리셋을 삭제하지 못했어요';
+  String get presetDeleteFailed => '프리셋을 삭제하지 못했어요.';
 
   @override
   String get presetSortUsed => '많이 쓴 순';
@@ -4865,7 +4722,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetMemoNone => '메모 없음';
 
   @override
-  String get presetNoAccount => '계좌·카드 없음';
+  String get presetNoAccount => '계좌 · 카드 없음';
 
   @override
   String get presetNoPayment => '결제 수단 없음';
@@ -4923,7 +4780,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetMerchantPlaceholder => '예: 회사 앞 도시락';
 
   @override
-  String get presetAssetCard => '계좌·카드';
+  String get presetAssetCard => '계좌 · 카드';
 
   @override
   String get recurringToggleFailed => '변경 실패';
@@ -4938,9 +4795,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get recurringDeleteFailed => '삭제 실패';
-
-  @override
-  String get recurringLoadError => '반복 거래를 불러오지 못했습니다';
 
   @override
   String get recurringAllList => '전체 목록';
@@ -5037,17 +4891,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recurringSaveSubmit => '반복 저장';
 
   @override
-  String get recurringUpdated => '반복 설정이 수정되었습니다';
-
-  @override
-  String get recurringSaved => '반복 설정이 저장되었습니다';
-
-  @override
   String get recurringSaveFailed => '저장 실패';
-
-  @override
-  String get recurringIntro =>
-      '이 거래를 정해진 주기로 자동 반복합니다. 구독료·월세·정기 후원 등에 사용해보세요.';
 
   @override
   String get recurringFrequencyLabel => '반복 주기';
@@ -5057,9 +4901,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get recurringDayOfMonthLabel => '반복 일자';
-
-  @override
-  String get recurringDayNote => '해당 일이 없는 달은 말일에 처리됩니다';
 
   @override
   String get recurringEndLabel => '종료';
@@ -5089,19 +4930,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recurringAutoLog => '자동 기록';
 
   @override
-  String get recurringAutoLogDesc => '해당 일자에 거래를 자동으로 추가합니다';
-
-  @override
   String get recurringNotifyDayBefore => '하루 전 알림';
-
-  @override
-  String get recurringNotifyDesc => '결제·이체 예정일 전날 알림을 보냅니다';
 
   @override
   String get recurringNextDates => '다음 예정일';
 
   @override
-  String get recurringSourceSub => '구독료·월세 등 정기 거래에 쓰여요';
+  String get recurringSourceSub => '구독료 · 월세 등 정기 거래에 쓰여요';
 
   @override
   String recurringStartFrom(String date) {
@@ -5115,7 +4950,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recurringMerchantPlaceholder => '예: 넷플릭스';
 
   @override
-  String get recurringAssetCard => '계좌·카드';
+  String get recurringAssetCard => '계좌 · 카드';
 
   @override
   String get recurringAssetLoadError => '자산 로드 실패';
@@ -5372,7 +5207,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsTimeDawn => '새벽';
 
   @override
-  String get statsPatternTitle => '요일·시간대 지출 패턴';
+  String get statsPatternTitle => '요일 · 시간대 지출 패턴';
 
   @override
   String get statsPatternDesc => '색이 진할수록 지출이 많은 시간대예요 (단위: 원)';
@@ -5413,7 +5248,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsTopMerchant => '가장 많이 쓴 가맹점';
 
   @override
-  String get statsIncomeExpenseTrend => '수입·지출 추이';
+  String get statsIncomeExpenseTrend => '수입 · 지출 추이';
 
   @override
   String get statsNoTrendData => '추이 데이터가 없어요.';
@@ -5625,7 +5460,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksWarningAdministrative => '관리종목';
 
   @override
-  String get stocksWarningAdjustmentOfShares => '주식병합·분할';
+  String get stocksWarningAdjustmentOfShares => '주식병합 · 분할';
 
   @override
   String get stocksNoWatchlist => '관심 종목이 없어요';
@@ -5699,7 +5534,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksAvgPrice => '평균단가';
 
   @override
-  String get stocksFeesTax => '수수료·세금';
+  String get stocksFeesTax => '수수료 · 세금';
 
   @override
   String get stocksSellable => '매도가능';
@@ -5801,10 +5636,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksChangeRate => '등락률';
 
   @override
-  String get stocksSearchHint => '종목명·심볼로 검색하세요 (국내 + 미국·중국·일본·홍콩·베트남)';
+  String get stocksSearchHint => '종목 이름이나 코드 (국내 + 미국 · 중국 · 일본 · 홍콩 · 베트남)';
 
   @override
-  String get stocksPriceUnavailable => '토스 시세 미지원 종목이에요 (국내·미국만 제공)';
+  String get stocksPriceUnavailable => '토스 시세 미지원 종목이에요 (국내 · 미국만 제공)';
 
   @override
   String get stocksRankingLoading => '순위를 불러오는 중이에요';
@@ -5831,13 +5666,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksWatchGroupSaveFail => '그룹을 저장하지 못했어요.';
 
   @override
-  String get stocksWatchAddFail => '관심 종목에 넣지 못했어요.';
+  String get stocksWatchAddFail => '관심 종목에 넣지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get stocksWatchGroupDeleteFail => '그룹을 삭제하지 못했어요.';
 
   @override
-  String get stocksWatchRemoveFail => '관심 종목에서 빼지 못했어요.';
+  String get stocksWatchRemoveFail => '관심 종목에서 빼지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get stocksMarketToggleKr => '국내';
@@ -5926,9 +5761,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get todoEmptyAll => '할 일이 없어요';
 
   @override
-  String get todoEmptyDoneHint => '할 일을 완료하면 여기에 모입니다.';
-
-  @override
   String get todoEmptyAddHint => '위 입력칸으로 빠르게 추가해보세요.';
 
   @override
@@ -5950,15 +5782,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get todoRegisteredProjects => '등록된 프로젝트';
 
   @override
-  String get todoNoProjects => '등록된 프로젝트가 없습니다';
-
-  @override
   String get todoDeleteProjectTitle => '프로젝트 삭제';
-
-  @override
-  String todoDeleteProjectConfirm(String name) {
-    return '\"$name\" 프로젝트를 삭제하시겠어요? 연결된 할 일은 프로젝트 미지정으로 변경됩니다.';
-  }
 
   @override
   String get todoNewTag => '태그 추가';
@@ -5968,9 +5792,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get todoRegisteredTags => '등록된 태그';
-
-  @override
-  String get todoNoTags => '등록된 태그가 없습니다';
 
   @override
   String get todoDeleteTagTitle => '태그 삭제';
@@ -6237,10 +6058,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get memoSaveFailed => '저장하지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
-  String get memoDeleteFailed => '삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+  String get memoSaveFailedToast => '저장하지 못했어요.';
 
   @override
-  String get memoPinFailed => '고정을 바꾸지 못했어요.';
+  String get memoDeleteFailed => '삭제하지 못했어요.';
+
+  @override
+  String get memoPinFailed => '고정을 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String memoModifiedAt(String time) {
@@ -6493,7 +6317,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importSourceGrooDesc => '그루 담다에서 내보낸 파일';
 
   @override
-  String get importSourceEasybudget => '편한가계부·머니매니저';
+  String get importSourceEasybudget => '편한가계부 · 머니매니저';
 
   @override
   String get importSourceEasybudgetDesc => 'Excel 백업';
@@ -6638,7 +6462,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String categoryMoveTxDone(int count) {
-    return '$count건을 옮겼어요';
+    return '$count건을 옮겼어요.';
   }
 
   @override
@@ -7330,9 +7154,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get iconPickerNone => '없음';
 
   @override
-  String get iconPickerNoResults => '검색 결과가 없습니다';
-
-  @override
   String iconPickerResultCount(int count) {
     return '$count개 결과';
   }
@@ -7347,7 +7168,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get smsPasteDesc =>
-      '카드사에서 온 결제 문자를 붙여넣으면 금액·가맹점·일시를 읽어 지출 폼을 채워드려요. 저장 전에 확인할 수 있어요.';
+      '카드사에서 온 결제 문자를 붙여넣으면 금액 · 가맹점 · 일시를 읽어 지출 폼을 채워드려요. 저장 전에 확인할 수 있어요.';
 
   @override
   String get smsPasteFieldLabel => '결제 문자';
@@ -7443,7 +7264,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get smsNotiAccessOffDesc =>
-      '알림 접근을 켜면 카드사·은행 앱 알림과 결제 문자를 읽어 기록할 수 있어요. 읽는 건 결제 알림뿐이고 나머지는 곧바로 버려요.';
+      '알림 접근을 켜면 카드사 · 은행 앱 알림과 결제 문자를 읽어 기록할 수 있어요. 읽는 건 결제 알림뿐이고 나머지는 곧바로 버려요.';
 
   @override
   String get updateAutoBlockerTitle => '삼성 자동 차단을 꺼야 설치돼요';
@@ -7472,7 +7293,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsSecuritiesLinkDesc =>
-      '본인 API 키를 등록하면 보유 주식·시세를 자동으로 가져와요. 키는 서버에 암호화되어 저장되고 본인만 사용해요.';
+      '본인 API 키를 등록하면 보유 주식 · 시세를 자동으로 가져와요. 키는 서버에 암호화되어 저장되고 본인만 사용해요.';
 
   @override
   String get securitiesLoadError => '증권사 목록을 불러오지 못했어요';
@@ -7507,7 +7328,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String subBrokerKeyNotice(String broker) {
-    return '키는 서버에 암호화되어 저장되며 본인만 사용합니다. 발급은 $broker 개발자센터에서.';
+    return '키는 서버에 암호화되어 저장되고 본인만 사용해요. 발급은 $broker 개발자센터에서 받을 수 있어요.';
   }
 
   @override
@@ -7589,11 +7410,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expFixBalance => '잔액 고치기';
 
   @override
-  String get expMoneyLockedNote => '결제가 끝난 거래예요. 금액·날짜를 바꾸려면 고쳐 쓰기를 눌러주세요';
+  String get expMoneyLockedNote => '결제가 끝난 거래예요. 금액 · 날짜를 바꾸려면 고쳐 쓰기를 눌러주세요';
 
   @override
   String get expMoneyLockedPaidOffNote =>
-      '결제가 끝난 거래예요. 중도 정리한 할부라 금액·날짜를 바꿀 수 없어요.';
+      '결제가 끝난 거래예요. 중도 정리한 할부라 금액 · 날짜를 바꿀 수 없어요.';
 
   @override
   String get expRewrite => '고쳐 쓰기';
@@ -7671,7 +7492,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fixedSwitchIncome => '고정 수입';
 
   @override
-  String get fixedHintExpense => '월세·통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.';
+  String get fixedHintExpense => '월세 · 통신비처럼 매달 나가는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.';
 
   @override
   String get fixedHintIncome => '월급처럼 매달 들어오는 돈이에요. 통계에서 따로 나눠 볼 수 있어요.';
@@ -7692,10 +7513,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetFixedDesc => '이 프리셋으로 만든 거래가 통계의 고정 항목으로 잡혀요.';
 
   @override
-  String get hideCardStatsFixed => '고정·변동 탭';
+  String get hideCardStatsFixed => '고정 · 변동 탭';
 
   @override
-  String get statsTabFixed => '고정·변동';
+  String get statsTabFixed => '고정 · 변동';
 
   @override
   String get statsFixedViewAria => '보기 방식';
@@ -7765,7 +7586,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get statsFixedEmptyDesc =>
-      '월세·통신비·월급처럼 매달 정해진 거래를 고정으로 표시하면 여기서 따로 볼 수 있어요.';
+      '월세 · 통신비 · 월급처럼 매달 정해진 거래를 고정으로 표시하면 여기서 따로 볼 수 있어요.';
 
   @override
   String get statsFixedManage => '거래를 고정으로 정리하기';
@@ -7774,7 +7595,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsFixedManageHint => '매달 같은 이름으로 나가는 돈은 한 번에 정리할 수 있어요';
 
   @override
-  String get statsFixedTrendTitle => '월별 고정·변동 추이';
+  String get statsFixedTrendTitle => '월별 고정 · 변동 추이';
 
   @override
   String get statsFixedTrendKindAria => '지출 또는 수입';
@@ -7795,7 +7616,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsFixedLegendVariable => '변동';
 
   @override
-  String get statsFixedCategoryTitle => '카테고리별 고정·변동';
+  String get statsFixedCategoryTitle => '카테고리별 고정 · 변동';
 
   @override
   String statsFixedCategoryFixedPart(String pct) {
@@ -7806,8 +7627,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsFixedBulkTitle => '거래를 고정으로 정리하기';
 
   @override
-  String statsFixedBulkDesc(String start, String end) {
-    return '$start ~ $end 기간의 거래예요. 매달 같은 이름으로 나가는 돈은 한 줄로 묶여 있어요. 돈이나 잔액은 달라지지 않고 통계의 분류만 바뀌어요.';
+  String statsFixedBulkDesc(String range) {
+    return '$range 기간의 거래예요. 매달 같은 이름으로 나가는 돈은 한 줄로 묶여 있어요. 돈이나 잔액은 달라지지 않고 통계의 분류만 바뀌어요.';
   }
 
   @override
@@ -8339,7 +8160,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tdmLoadFailedDesc => '잠시 후 다시 시도해주세요.';
 
   @override
-  String get todoToggleFailed => '할 일 상태를 바꾸지 못했어요.';
+  String get todoToggleFailed => '할 일 상태를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get todoDetailOverdue => '마감 지남';
@@ -8556,7 +8377,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksSourceNotice => '토스증권 Open API · 시세 지연 표시';
 
   @override
-  String get stocksDisclaimerLine1 => '토스증권 Open API 연동 시 실시간 호가·체결가가 반영돼요.';
+  String get stocksDisclaimerLine1 => '토스증권 Open API 연동 시 실시간 호가 · 체결가가 반영돼요.';
 
   @override
   String get stocksDisclaimerLine2 =>
@@ -8920,17 +8741,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String recToastPaused(String name) {
-    return '$name 반복을 멈췄어요';
+    return '$name 반복을 멈췄어요.';
   }
 
   @override
   String recToastResumed(String name) {
-    return '$name 반복을 다시 켰어요';
+    return '$name 반복을 다시 켰어요.';
   }
 
   @override
   String recToastDeleted(String name) {
-    return '$name 반복 설정을 삭제했어요';
+    return '$name 반복 설정을 삭제했어요.';
   }
 
   @override
@@ -9177,9 +8998,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get txfEntryRequired => '금액을 입력해주세요.';
 
   @override
-  String get txfAmountTooLarge => '금액은 100억원까지 입력할 수 있어요.';
-
-  @override
   String txfCurrencyChip(String code) {
     return '통화, $code';
   }
@@ -9218,7 +9036,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get txfNone => '없음';
 
   @override
-  String get txfNoAccountOption => '계좌·카드 없음';
+  String get txfNoAccountOption => '계좌 · 카드 없음';
 
   @override
   String get txfNoMethodOption => '결제 수단 없음';
@@ -9248,13 +9066,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get txfCategoryLoadFailed => '카테고리를 불러오지 못했어요';
 
   @override
-  String get txfAssetLoadFailed => '계좌·카드를 불러오지 못했어요';
+  String get txfAssetLoadFailed => '계좌 · 카드를 불러오지 못했어요';
 
   @override
   String get txfNoCategoryOfType => '이 종류의 카테고리가 없어요.';
 
   @override
-  String get txfNoPickableAsset => '이 결제 수단에 맞는 계좌·카드가 없어요.';
+  String get txfNoPickableAsset => '이 결제 수단에 맞는 계좌 · 카드가 없어요.';
 
   @override
   String txfFxHint(String local, String code, String rate, String krw) {
