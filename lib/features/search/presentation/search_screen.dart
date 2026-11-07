@@ -449,7 +449,7 @@ class _AdvancedSheetState extends State<_AdvancedSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: PSpacing.x2),
                   child: ExcludeSemantics(
                     child: Text(
-                      '~',
+                      rangeSeparator(),
                       style: PTypography.t5.copyWith(color: c.fgNeutralSubtle),
                     ),
                   ),

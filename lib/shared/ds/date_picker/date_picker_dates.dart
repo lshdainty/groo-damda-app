@@ -9,6 +9,7 @@
 import 'package:flutter/widgets.dart' show BuildContext, Localizations;
 import 'package:intl/intl.dart';
 
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/l10n/ds_l10n.dart';
 
@@ -308,11 +309,11 @@ String formatRangeValue(PDateRange? range, DateTime today) {
     String en(DateTime d) => withYear
         ? DateFormat.yMMMd('en').format(d)
         : DateFormat.MMMd('en').format(d);
-    return '${en(start)}–${en(end)}';
+    return '${en(start)}${rangeSeparator()}${en(end)}';
   }
   String text(DateTime d) =>
       '${withYear ? '${d.year}년 ' : ''}${d.month}월 ${d.day}일';
-  return '${text(start)}~${text(end)}';
+  return '${text(start)}${rangeSeparator()}${text(end)}';
 }
 
 /// 이어지는 달 스크롤에서 위치가 든 달 — 정렬된 위치 목록에서 이진 탐색.

@@ -162,6 +162,18 @@ void main() {
     });
   });
 
+  test('구간 기호는 로케일 문구 — ko "~" · en "–"(시간대 구간 · 직접 기간 버튼 포함)', () {
+    expect(rangeSeparator(), '~');
+    expect(heatSub(0), '06~10시');
+    expect(heatSub(4), '22~02시');
+    final prev = Intl.defaultLocale;
+    Intl.defaultLocale = 'en';
+    addTearDown(() => Intl.defaultLocale = prev);
+    expect(rangeSeparator(), '–');
+    expect(heatSub(0), '6–10 AM');
+    expect(heatSub(1), '10 AM–2 PM');
+  });
+
   test('좁은 칸 월 · 일 — 점 표기 "10. 29."(슬래시 · 앞 0 없음), 영어 "Oct 29"', () {
     expect(monthDayDot(DateTime(2026, 10, 29)), '10. 29.');
     expect(monthDayDot(DateTime(2026, 9, 7)), '9. 7.');

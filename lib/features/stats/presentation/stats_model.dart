@@ -144,8 +144,9 @@ class StatsPeriod {
   int get days => to.difference(from).inDays + 1;
 
   /// 기간 버튼 글 — 다른 해에 걸친 직접 기간은 "~" 뒤에서만 줄을 바꾼 두 줄("2025-01-01 ~ ⏎ 2026-03-31").
-  String buttonLabel() =>
-      spansYears ? '${fullDate(from)}~\n${fullDate(to)}' : label();
+  String buttonLabel() => spansYears
+      ? '${fullDate(from)}${rangeSeparator()}\n${fullDate(to)}'
+      : label();
 
   String label() {
     switch (seg) {
@@ -416,15 +417,23 @@ List<List<int>> heatMatrix(List<HeatmapCell> cells) {
 
 /// 시간대 구간 글 — 한국어 `06~10시`, 영어 `6–10 AM`.
 String heatSub(int i) {
-  const en = [
-    '6–10 AM',
-    '10 AM–2 PM',
-    '2–6 PM',
-    '6–10 PM',
-    '10 PM–2 AM',
-    '2–6 AM',
+  final s = rangeSeparator();
+  final en = [
+    '6${s}10 AM',
+    '10 AM${s}2 PM',
+    '2${s}6 PM',
+    '6${s}10 PM',
+    '10 PM${s}2 AM',
+    '2${s}6 AM',
   ];
-  const ko = ['06~10시', '10~14시', '14~18시', '18~22시', '22~02시', '02~06시'];
+  final ko = [
+    '06${s}10시',
+    '10${s}14시',
+    '14${s}18시',
+    '18${s}22시',
+    '22${s}02시',
+    '02${s}06시',
+  ];
   return localeIsEn() ? en[i] : ko[i];
 }
 

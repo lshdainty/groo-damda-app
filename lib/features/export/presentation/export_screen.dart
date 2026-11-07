@@ -564,7 +564,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   }
 
   String _rangeText(({String start, String end}) r) =>
-      '${_krLabel(r.start)}~${_krLabel(r.end)}';
+      '${_krLabel(r.start)}${rangeSeparator()}${_krLabel(r.end)}';
 
   Widget _customBody(AppLocalizations l, DateTime today) {
     return PField(

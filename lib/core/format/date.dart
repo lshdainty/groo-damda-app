@@ -63,14 +63,14 @@ String monthDayDow(DateTime d) {
 }
 
 /// 구간 기호 — 로케일 문구(`dateRangeSeparator`): 한국어 "~", 영어 en dash "–". 앞뒤를 붙여 쓴다(DESIGN.desk.md:3652).
-String _rangeSeparator() => lookupAppLocalizations(
+String rangeSeparator() => lookupAppLocalizations(
   Locale(localeIsEn() ? 'en' : 'ko'),
 ).dateRangeSeparator;
 
 /// 기간 줄 — ko "11월 2일~11월 8일" · en "Nov 2–8"(같은 달) / "Nov 2–Dec 1"(날짜 규칙: 올해 줄임, 0 채움 없음).
 /// 둘 중 하나라도 올해가 아니면 두 끝 모두 연도를 붙인다(ko "2025년 12월 29일~2026년 1월 4일" · en "Dec 29, 2025–Jan 4, 2026").
 String dateRange(DateTime from, DateTime to) {
-  final sep = _rangeSeparator();
+  final sep = rangeSeparator();
   final thisYear = DateTime.now().year;
   final crossYear = from.year != thisYear || to.year != thisYear;
   if (localeIsEn() && !crossYear && from.month == to.month) {

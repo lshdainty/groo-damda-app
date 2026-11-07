@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.dart';
@@ -620,7 +621,7 @@ class _FilterAmountBodyState extends State<FilterAmountBody> {
                       horizontal: PSpacing.x2,
                     ),
                     child: Text(
-                      '~',
+                      rangeSeparator(),
                       style: PTypography.t5.copyWith(color: c.fgNeutralSubtle),
                     ),
                   ),
