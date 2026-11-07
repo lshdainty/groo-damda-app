@@ -421,7 +421,8 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
   Future<void> _submit() async {
     if (_submitting) return;
     // 예수금 · 직접 입력한 보유 평가액이 1,000억 위(상한 전에 저장된 옛 값)면 저장하지 않는다 — 칸 아래 오류가 보인다(웹과 같다)
-    if (amountTextExceeds(_cashCtrl.text, kBalanceMax) ||
+    // 예수금 칸은 보유가 없을 때만 보인다 — 보유가 생겨 사라졌으면 옛 예수금은 보지 않는다(요청에도 balance 가 null 이다)
+    if ((_rows.isEmpty && amountTextExceeds(_cashCtrl.text, kBalanceMax)) ||
         _holdings.any(
           (h) => !h.linked && (h.holdingValue ?? 0) > kBalanceMax,
         )) {

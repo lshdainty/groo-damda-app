@@ -212,6 +212,19 @@ void main() {
     });
   });
 
+  testWidgets('잠긴 이월 칸의 옛 값이 1,000억 위여도 저장된다 — 고칠 수 없는 칸은 세지 않는다', (
+    tester,
+  ) async {
+    final repo = await _openEdit(
+      tester,
+      _credit.copyWith(carryoverAmount: 200000000000, carryoverLocked: true),
+    );
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.updated, isTrue);
+    expect(repo.carryoverAmount, isNull, reason: '잠긴 이월은 키째 뺀다');
+  });
+
   group('결제일 변경은 다음 회차부터(D5)', () {
     Future<void> pickDay(WidgetTester tester, int day) async {
       // 첫 Select 가 결제일이다(둘째는 결제 출금계좌)
@@ -312,6 +325,24 @@ void main() {
     expect(repo.creditLimit.value, isNull);
     expect(repo.paymentDay.present, isTrue, reason: '결제일 키가 빠지면 14 일이 그대로 남는다');
     expect(repo.paymentDay.value, isNull);
+  });
+
+  // 상한 검사는 지금 보이는 칸만 센다 — 체크카드로 바꿔 신용한도 칸이 사라지면 옛 한도(1,000억 위)는 저장을 막지 않는다
+  testWidgets('신용한도가 1,000억 위면 막고, 체크로 바꿔 칸이 사라지면 저장된다', (tester) async {
+    final repo = await _openEdit(
+      tester,
+      _credit.copyWith(creditLimit: 200000000000),
+    );
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.updated, isFalse, reason: '보이는 칸이 상한 위면 여전히 막힌다');
+
+    await tester.tap(findPlain(l.assetTypeCheckCard));
+    await tester.pumpAndSettle();
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pumpAndSettle();
+    expect(repo.updated, isTrue, reason: '사라진 칸의 옛 값은 세지 않는다');
+    expect(repo.creditLimit.value, isNull, reason: '사라진 칸의 값은 요청에 실리지 않는다');
   });
 
   // 이 화면엔 메모 칸이 없다. 없는 칸을 null 로 실으면 계좌 화면에서 적어 둔 메모가
