@@ -486,10 +486,18 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         const SizedBox(height: PSpacing.x6),
         Padding(
           padding: _gutter,
-          child: PCheckbox(
-            label: l.exportMaskLabel,
-            checked: _mask,
-            onChanged: (v) => setState(() => _mask = v),
+          // 한 줄짜리 체크는 위아래 이웃이 없어 누르는 영역이 줄 높이(38)에서 멈춘다 — 놓인 자리를 44 로
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: PTouch.min),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              widthFactor: 1,
+              child: PCheckbox(
+                label: l.exportMaskLabel,
+                checked: _mask,
+                onChanged: (v) => setState(() => _mask = v),
+              ),
+            ),
           ),
         ),
         if (_previewFailed) ...[

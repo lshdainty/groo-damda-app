@@ -712,7 +712,8 @@ void main() {
     );
     final btnBottom = tester.getBottomLeft(btn.first).dy;
     final divider = tester.getTopLeft(find.byType(LedgerHeaderDivider)).dy;
-    expect(divider, btnBottom, reason: '단추 아래 여백 없음');
+    // 단추 40 은 누르는 영역 44 를 받으려 놓인 자리 44(위아래 2)에 선다 — 보이는 아래 여백은 그 2 뿐이다(B5)
+    expect(divider, btnBottom + 2, reason: '단추 아래 여백은 누르는 영역 몫 2');
     final head = tester.getTopLeft(find.byType(PDayHeader).first).dy;
     expect(head, divider + 1 + 4, reason: '구분선 1 + 첫 묶음 위 4');
   });
