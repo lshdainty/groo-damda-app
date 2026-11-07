@@ -9,7 +9,9 @@ import 'package:groo_damda_app/features/stocks/presentation/stocks_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_parent_item.dart';
 import 'package:groo_damda_app/shared/ds/floating_action_button/p_floating_action_button.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
@@ -128,4 +130,105 @@ void main() {
     final ring = tester.getRect(find.byKey(const ValueKey('focus-ring')));
     expect(ring, row);
   });
+
+  // 터치 입력 방식 — keyboardHighlight 조건을 지우면 이 시험들이 깨진다
+  for (final e in parts.entries) {
+    testWidgets('${e.key} — 입력 방식이 터치면 Tab 으로 초점을 받아도 링이 없다', (tester) async {
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTouch;
+      addTearDown(
+        () => FocusManager.instance.highlightStrategy =
+            FocusHighlightStrategy.automatic,
+      );
+      await tester.pumpWidget(_app(e.value()));
+      await tester.pumpAndSettle();
+      await _tab(tester);
+      expect(FocusManager.instance.primaryFocus, isNotNull);
+      expect(FocusManager.instance.highlightMode, FocusHighlightMode.touch);
+      expect(_rings(), 0);
+    });
+  }
+
+  testWidgets('Tab 뒤 터치로 바꾸면 링이 사라지고, 다시 키보드면 돌아온다', (tester) async {
+    await tester.pumpWidget(_app(PChip(label: '칩', onPressed: () {})));
+    await tester.pumpAndSettle();
+    await _tab(tester);
+    expect(_rings(), 1);
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTouch;
+    await tester.pump();
+    expect(_rings(), 0);
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
+    await tester.pump();
+    expect(_rings(), 1);
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+  });
+
+  testWidgets('링을 켜고 꺼도 줄 안 State 가 새로 만들어지지 않는다(트리 모양 고정)', (tester) async {
+    var inits = 0;
+    Widget host(bool visible) => _app(
+      PFocusRing(
+        visible: visible,
+        style: const PFocusRingStyle(radius: 8),
+        child: _Counter(onInit: () => inits++),
+      ),
+    );
+    await tester.pumpWidget(host(false));
+    await tester.pumpWidget(host(true));
+    await tester.pumpWidget(host(false));
+    await tester.pumpWidget(host(true));
+    expect(inits, 1);
+    // 안쪽 링도 같다
+    Widget inset(bool v) => _app(
+      PFocusRing(
+        visible: v,
+        style: const PFocusRingStyle(inset: true),
+        child: _Counter(onInit: () => inits++),
+      ),
+    );
+    await tester.pumpWidget(inset(false));
+    await tester.pumpWidget(inset(true));
+    await tester.pumpWidget(inset(false));
+    expect(inits, 1);
+  });
+
+  testWidgets('부모 줄 꺾쇠 단추도 Tab 으로 링을 받고, 터치에는 없다', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        PListParentItem(
+          title: '식비',
+          onTap: () {},
+          expandLabel: '하위 카테고리',
+          children: const [PListItem(title: '외식')],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _tab(tester);
+    expect(_rings(), 1);
+    final ring = tester.getSize(find.byKey(const ValueKey('focus-ring')));
+    expect(ring.width, 44 + 8); // 단추 44 + 띄움 2 + 두께 2 사방
+    FocusManager.instance.primaryFocus!.unfocus();
+    await tester.pumpAndSettle();
+    expect(_rings(), 0);
+  });
+}
+
+class _Counter extends StatefulWidget {
+  const _Counter({required this.onInit});
+  final VoidCallback onInit;
+  @override
+  State<_Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<_Counter> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onInit();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(width: 40, height: 40);
 }

@@ -561,6 +561,23 @@ Color _lerpPremultiplied(Color a, Color b, double t) {
 }
 
 class _PListRowFrameState extends State<PListRowFrame> {
+  @override
+  void initState() {
+    super.initState();
+    // 입력 방식이 바뀌면(Tab 뒤 터치) 줄 안쪽 링도 따라간다
+    FocusManager.instance.addHighlightModeListener(_onHighlightMode);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onHighlightMode);
+    super.dispose();
+  }
+
+  void _onHighlightMode(FocusHighlightMode _) {
+    if (mounted) setState(() {});
+  }
+
   static const Map<ShortcutActivator, Intent> _spaceOnly = {
     SingleActivator(LogicalKeyboardKey.space): _ActivateRowIntent(),
   };

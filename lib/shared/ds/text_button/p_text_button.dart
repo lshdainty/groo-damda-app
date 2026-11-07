@@ -36,7 +36,25 @@ const double kTextButtonPaddingX = PSpacing.x3_5;
 class _PTextButtonState extends State<PTextButton> {
   bool _pressed = false;
   bool _ringVisible = false;
+  bool _focused = false;
   double _basis = 24;
+
+  @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addHighlightModeListener(_onHighlightMode);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onHighlightMode);
+    super.dispose();
+  }
+
+  void _onHighlightMode(FocusHighlightMode mode) {
+    final next = _focused && mode == FocusHighlightMode.traditional;
+    if (mounted && next != _ringVisible) setState(() => _ringVisible = next);
+  }
 
   void _setPressed(bool value) {
     if (_pressed == value) return;
@@ -113,6 +131,7 @@ class _PTextButtonState extends State<PTextButton> {
             child: Focus(
               canRequestFocus: active,
               onFocusChange: (focused) {
+                _focused = focused;
                 final next = focused && keyboardHighlight();
                 if (next != _ringVisible) setState(() => _ringVisible = next);
               },

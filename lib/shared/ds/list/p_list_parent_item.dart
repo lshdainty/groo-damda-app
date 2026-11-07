@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -194,6 +195,22 @@ class _ToggleIntent extends Intent {
 }
 
 class _PListExpandButtonState extends State<PListExpandButton> {
+  @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addHighlightModeListener(_onMode);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onMode);
+    super.dispose();
+  }
+
+  void _onMode(FocusHighlightMode _) {
+    if (mounted) setState(() {});
+  }
+
   static const Map<ShortcutActivator, Intent> _keys = {
     SingleActivator(LogicalKeyboardKey.space): _ToggleIntent(),
     SingleActivator(LogicalKeyboardKey.enter): _ToggleIntent(),
@@ -285,7 +302,16 @@ class _PListExpandButtonState extends State<PListExpandButton> {
     // Tab 은 꺾쇠 단추가 줄보다 먼저다(단추는 줄의 포커스 안에 얹혀 있다 — list_row.dart)
     final focusable = FocusTraversalOrder(
       order: const NumericFocusOrder(0),
-      child: Focus(child: tappable),
+      // 키보드 초점 링 — 단추 바깥 2px · 단추 모서리 10 (터치로 눌러 생긴 초점에는 없다)
+      child: Focus(
+        child: Builder(
+          builder: (context) => PFocusRing(
+            visible: Focus.of(context).hasPrimaryFocus && keyboardHighlight(),
+            style: const PFocusRingStyle(radius: 10),
+            child: tappable,
+          ),
+        ),
+      ),
     );
 
     final button = Semantics(
