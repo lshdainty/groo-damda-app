@@ -3858,19 +3858,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescStocks => 'Quotes · Holdings · Watchlist · Orders';
 
   @override
-  String get moreDescBudget => 'Monthly budget · limits by category';
+  String get moreDescBudget => 'Monthly budget · per-category limits';
 
   @override
   String get moreDescSavingGoal => 'Goals · Progress';
 
   @override
-  String get moreDescStats => 'Category · Trends · Comparison';
+  String get moreDescStats => 'Categories · Trends · Compare';
 
   @override
   String get moreDescRecurring => 'Subscriptions · Fixed costs';
 
   @override
-  String get moreDescAccountCard => 'Manage accounts & cards';
+  String get moreDescAccountCard => 'Manage accounts and cards';
 
   @override
   String get moreDescCalendar => 'Events · Recurring · Reminders';
@@ -3900,7 +3900,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescSettings => 'All settings menu';
 
   @override
-  String get moreDescNotifications => 'Push · Email · Do not disturb';
+  String get moreDescNotifications => 'Push · email · do not disturb';
 
   @override
   String get moreDescExport => 'CSV · Excel · JSON';
@@ -3913,10 +3913,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add · edit · delete expense and income categories';
 
   @override
-  String get settingsDescAccountCard => 'Manage accounts & cards';
+  String get settingsDescAccountCard => 'Manage accounts and cards';
 
   @override
-  String get settingsDescBudget => 'Monthly budget · limits by category';
+  String get settingsDescBudget => 'Monthly budget · per-category limits';
 
   @override
   String get settingsDescSavingGoal => 'Manage goals and track progress';
