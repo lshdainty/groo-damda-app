@@ -92,7 +92,6 @@ class _SmsPasteScreenState extends ConsumerState<SmsPasteScreen> {
   Future<void> _parse() async {
     final text = _textCtrl.text.trim();
     if (text.isEmpty || _parsing) return;
-    final l = AppLocalizations.of(context);
 
     // 서버로 보내기 전 로컬 게이트 — 결제 문자가 아닌 텍스트는 아예 올리지 않는다.
     if (!looksLikePaymentSms(text)) {
@@ -121,11 +120,7 @@ class _SmsPasteScreenState extends ConsumerState<SmsPasteScreen> {
         return;
       }
 
-      if (parsed.isLowConfidence) {
-        PSnackbar.maybeOf(
-          context,
-        )?.show(message: l.smsLowConfidence, tone: PSnackbarTone.critical);
-      }
+      // "일부 항목" 안내는 거래 추가 시트 맨 위 Callout 이 한다 — 여기서 또 띄우지 않는다
       showAddTxSheet(
         context,
         smsDraft: SmsDraft(text: text, parsed: parsed, inboxId: widget.inboxId),

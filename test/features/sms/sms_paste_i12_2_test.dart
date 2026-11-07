@@ -47,7 +47,7 @@ class _Repo implements SmsRepository {
     }
     return SmsParseResult(
       matched: true,
-      confidence: 'HIGH',
+      confidence: mode == 'low' ? 'LOW' : 'HIGH',
       cancel: mode == 'cancel',
       amount: 5500,
       assetRemembered: false,
@@ -125,6 +125,19 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(findPlain('클립보드에 텍스트가 없어요.'), findsOneWidget);
+  });
+
+  testWidgets('B5-5 — "일부 항목" 안내를 스낵바로 또 띄우지 않는다(시트 맨 위 Callout 이 한다)', (
+    tester,
+  ) async {
+    await _pump(tester, script: ['low']);
+    await _type(tester, _pay);
+    await tester.tap(findText('문자 읽기'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    // 붙여넣기 화면 위에는 스낵바가 없다. (시트가 열려도 시트의 Callout 이 한 번이다 — 스낵바 글까지 두 번이 아니다)
+    expect(findPlain('일부 항목을 읽지 못했어요. 확인하고 채워주세요.'), findsNothing);
+    expect(find.byType(PSnackbarHost), findsOneWidget);
   });
 
   testWidgets('흰 화면 하나 · 머리는 Top Navigation · 옛 띠 · 경고 상자가 없다', (tester) async {
