@@ -86,6 +86,11 @@ abstract class Expense with _$Expense {
     /// 값이 있으면 금액·날짜·자산은 계산 결과라 고칠 수 없다. 원본 거래를 지우면
     /// 함께 사라진다. 카테고리·메모는 분류라서 그대로 고칠 수 있다.
     String? autoSource,
+
+    /// 이 기록을 지금 직접 지울 수 있나 — 서버가 판정해 내려 준다. 자동 생성이 아니면 true,
+    /// 자동 생성이어도 그 기록을 만든 증권 자산이 이미 삭제됐으면 true. **삭제 버튼 · 스와이프 [삭제] 만**
+    /// 이 값을 본다(수정 · 환불 · 분할은 [autoSource] 그대로). 옛 서버면 없다(null) — [canDelete] 가 폴백한다.
+    bool? deletable,
     int? calendarEventRowId,
     int? todoRowId,
     // 활성 분할 항목들의 카테고리 id (없으면 빈 리스트). 목록 카테고리 필터를 split-aware 하게 매칭.
@@ -105,6 +110,9 @@ abstract class Expense with _$Expense {
 extension ExpenseX on Expense {
   /// 표시용 부호 적용 (지출=음수, 수입/이체=양수).
   int get signedAmount => expenseType == 'EXPENSE' ? -amount : amount;
+
+  /// 삭제할 수 있나 — 삭제 판정의 한 곳. 서버 값이 없으면(옛 서버) 손으로 쓴 거래만.
+  bool get canDelete => deletable ?? autoSource == null;
 
   /// 환불된 거래인가 — 표식 하나로 판정한다.
   bool get isRefunded => refundedAt != null;

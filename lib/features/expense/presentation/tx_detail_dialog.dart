@@ -583,7 +583,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
   /// 바닥 — 자동 거래는 없음 · 환불된 거래는 [삭제] 만 · 그 밖은 [삭제][수정].
   Widget? _footerRow(AppLocalizations l) {
     final auto = _e.autoSource != null;
-    if (auto) return null;
+    if (auto && !_e.canDelete) return null;
     final delete = PButton(
       label: l.actionDelete,
       variant: PButtonVariant.ghost,
@@ -592,7 +592,7 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       loading: _deleting,
       onPressed: _busy ? null : _delete,
     );
-    if (!expenseActions.canEdit(_e)) {
+    if (auto || !expenseActions.canEdit(_e)) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [delete],

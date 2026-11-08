@@ -27,9 +27,10 @@ const expenseActions = ExpenseActions();
 class ExpenseActions implements ItemActions<Expense> {
   const ExpenseActions();
 
-  /// 시스템이 만든 거래(매도 실현손익·이체 이자)는 원본을 지워야 사라진다.
+  /// 시스템이 만든 거래(매도 실현손익·이체 이자)는 원본을 지워야 사라진다 — 서버가 `deletable` 로
+  /// 예외(원본 증권 자산이 이미 삭제됨)를 알려 준다. 판정은 [ExpenseX.canDelete] 한 곳이다.
   @override
-  bool canDelete(Expense e) => e.autoSource == null;
+  bool canDelete(Expense e) => e.canDelete;
 
   /// 환불된 거래도 못 고친다 — 돈이 이미 자산으로 돌아가 되돌릴 기준이 없다
   /// (서버도 EXP_043 으로 막는다). 먼저 환불을 취소해야 한다.
@@ -93,7 +94,7 @@ class ExpenseActions implements ItemActions<Expense> {
 
   /// 목록 줄의 밀기 · 줄 끝 ⋮ 가 함께 쓰는 동작 — ds Swipe Actions 의 배열이다(수정 → 삭제 차례, I-07 6).
   ///
-  /// 시스템이 만든 거래(`autoSource != null`)는 비어 있다(밀기 · ⋮ 모두 없음). 삭제는 ds 가 확인창을 갖지 않으므로
+  /// 시스템이 만든 거래(`autoSource != null`)는 수정이 없고, 삭제는 `deletable` 일 때만 있다. 삭제는 ds 가 확인창을 갖지 않으므로
   /// 여기서 Alert Dialog 를 먼저 띄운다 — 제목 · 본문은 상세 시트에서 지울 때와 같다(결제가 끝난 회차 한 줄 포함).
   List<ds.PSwipeAction> dsSwipeActions(
     BuildContext context,
