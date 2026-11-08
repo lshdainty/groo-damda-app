@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -216,19 +217,19 @@ class StatsSavingsRateSection extends StatelessWidget {
       ),
       (
         name:
-            '${single ? l.expTypeExpense : l.statsAvgExpense} ${spendRate.round()}%',
+            '${single ? l.expTypeExpense : l.statsAvgExpense} ${formatProgress(spendRate)}',
         value: avgOut,
         dot: c.fgCritical,
       ),
       (
         name:
-            '${single ? l.statsNetSavings : l.statsAvgSavings} ${saveRate.round()}%',
+            '${single ? l.statsNetSavings : l.statsAvgSavings} ${formatProgress(saveRate)}',
         value: avgSave,
         dot: c.fgBrand,
       ),
     ];
     final insight = Text(
-      keepAll(l.statsSavingsInsight(saveRate.round())),
+      keepAll(l.statsSavingsInsight(formatProgress(saveRate))),
       style: PTypography.t5.copyWith(
         color: c.fgNeutral,
         fontWeight: FontWeight.w700,
@@ -396,7 +397,7 @@ class StatsSavingsRing extends StatelessWidget {
                 ),
               ),
               Text(
-                '${rate.round()}%',
+                formatProgress(rate),
                 key: const ValueKey('savings-ring-value'),
                 style: PTypography.t9.copyWith(
                   color: c.fgNeutral,

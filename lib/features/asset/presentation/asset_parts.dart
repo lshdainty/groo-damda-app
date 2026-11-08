@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -108,7 +109,7 @@ Widget _meterBar(
       ? l.dsProgressOver(fmt(value - max))
       : reached
       ? l.dsProgressReached
-      : '${(math.min(ratio, 1.0) * 100).round()}%';
+      : formatProgress(math.min(ratio, 1.0) * 100);
   return PProgressBar(
     value: value.toDouble(),
     max: max.toDouble(),
@@ -727,9 +728,9 @@ class AssetSavingGoalRow extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final c = context.colors;
     final color = resolveChartColor(context, goal.color, fallback: c.fgBrand);
-    final pct = goal.targetAmount > 0
-        ? (goal.currentAmount / goal.targetAmount * 100).round()
-        : 0;
+    final pct = formatProgress(
+      goal.targetAmount > 0 ? goal.currentAmount / goal.targetAmount * 100 : 0,
+    );
     final amounts =
         '${assetWon(goal.currentAmount, masked)} / ${assetWon(goal.targetAmount, masked)}';
     return Column(
@@ -750,7 +751,7 @@ class AssetSavingGoalRow extends StatelessWidget {
             ),
           ),
           suffix: Text(
-            '$pct%',
+            pct,
             style: PTypography.t5.copyWith(
               color: c.fgNeutral,
               fontWeight: FontWeight.w700,

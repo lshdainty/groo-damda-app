@@ -1139,8 +1139,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetLimitUsage => '한도 사용';
 
   @override
-  String assetLimitPctUsed(int pct) {
-    return '$pct% 사용';
+  String assetLimitPctUsed(String pct) {
+    return '$pct 사용';
   }
 
   @override
@@ -2162,7 +2162,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String budgetPercentUsed(String pct) {
-    return '$pct% 사용';
+    return '$pct 사용';
   }
 
   @override
@@ -2197,7 +2197,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String budgetPaceBarValue(String used, String elapsed) {
-    return '$used% 사용 · 이번 달 $elapsed% 지남';
+    return '$used 사용 · 이번 달 $elapsed 지남';
   }
 
   @override
@@ -2208,7 +2208,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String budgetMonthElapsed(String pct) {
-    return '이번 달 $pct% 경과 ↑';
+    return '이번 달 $pct 경과 ↑';
   }
 
   @override
@@ -4525,8 +4525,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsSavingsRate => '저축률';
 
   @override
-  String statsSavingsInsight(int pct) {
-    return '월 평균 수입의 $pct%를 저축하고 있어요';
+  String statsSavingsInsight(String pct) {
+    return '월 평균 수입의 $pct를 저축하고 있어요';
   }
 
   @override
@@ -6063,8 +6063,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get frpObsWitheredGuard => '흐린 밤 · 구름 보호로 스트릭 유지';
 
   @override
-  String frpPctBang(int pct) {
-    return '$pct% 달성!';
+  String frpPctBang(String pct) {
+    return '$pct 달성!';
   }
 
   @override
@@ -6090,8 +6090,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get constDetailTodayProgress => '오늘 모은 별빛';
 
   @override
-  String constDetailTodayPct(int pct) {
-    return '$pct%';
+  String constDetailTodayPct(String pct) {
+    return '$pct';
   }
 
   @override
@@ -6152,8 +6152,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get frpStarGather => '별빛 모으기';
 
   @override
-  String frpPctBadge(int pct) {
-    return '$pct% 달성';
+  String frpPctBadge(String pct) {
+    return '$pct 달성';
   }
 
   @override
@@ -6832,8 +6832,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dsAttachUploading => '올리는 중';
 
   @override
-  String dsAttachUploadingPercent(int percent) {
-    return '올리는 중 $percent%';
+  String dsAttachUploadingPercent(String percent) {
+    return '올리는 중 $percent';
   }
 
   @override

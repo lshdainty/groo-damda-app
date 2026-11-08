@@ -1078,6 +1078,32 @@ void main() {
   });
 
   group('올리는 중 · 실패', () {
+    // B6 나.6 — 올리는 중 읽는 글도 진행률 한 규칙: 99.6 → 99%(끝나기 전엔 100% 가 아니다), 정확히 1.0 만 100%
+    for (final (p, want) in [(0.996, '99%'), (0.336, '34%'), (1.0, '100%')]) {
+      testWidgets('올리는 중 읽는 글 $p → $want', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _host(
+            Brightness.light,
+            _input(
+              entries: [
+                _entry('a', status: PAttachmentStatus.uploading, progress: p),
+              ],
+            ),
+          ),
+        );
+        expect(
+          find.bySemanticsLabel(
+            RegExp(
+              '올리는 중 ${RegExp.escape(want)}\\b|올리는 중 ${RegExp.escape(want)}\$',
+            ),
+          ),
+          findsWidgets,
+        );
+        semantics.dispose();
+      });
+    }
+
     testWidgets('진행이 10초 멈추면 실패로 보이고, 진행이 바뀌면 다시 센다', (tester) async {
       Widget build(double p) => _host(
         Brightness.light,

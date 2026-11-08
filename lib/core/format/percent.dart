@@ -30,7 +30,8 @@ String formatShare(double pct, {required String underOne}) {
 String formatShareOf(num part, num total, {required String underOne}) =>
     formatShare(total <= 0 ? 0 : part * 100 / total, underOne: underOne);
 
-/// 진행률 — "76%". 정수 반올림이 기본이다(웹 `formatPercent` "progress" 와 같은 식). 반올림하면 100 이 되는 값만 예외 —
+/// 진행률 — "76%". 규칙 출처: 사용자 결정 1A(진행률 정수) + 100 경계는 디자인시스템 판단(2026-11-07) — 100 경계는 사용자가 정한 게 아니다.
+/// 정수 반올림이 기본이다(웹 `formatPercent` "progress" 와 같은 식). 반올림하면 100 이 되는 값만 예외 —
 /// 100 미만은 99%(99.6), 100 초과는 101%(100.3), 정확히 100 만 "100%"(100 을 넘나드는 상태가 글에서 사라지지 않게).
 /// 음수는 크기를 같은 식으로 센 뒤 U+2212 를 붙인다(반올림해서 0 이면 부호 없음). 유한하지 않은 값은 "—".
 /// 막대가 넘치는 100 초과는 그대로 둔다(호출처가 자른다).

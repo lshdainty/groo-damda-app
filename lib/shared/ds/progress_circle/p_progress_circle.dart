@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
@@ -216,7 +217,7 @@ class _PProgressCircleState extends State<PProgressCircle>
           widget.semanticsLabel ??
           AppLocalizations.of(context).dsProgressCircleLabel,
       value: _determinate
-          ? (widget.valueText ?? '${(_fraction * 100).round()}%')
+          ? (widget.valueText ?? formatProgress(_fraction * 100))
           : null,
       child: circle,
     );

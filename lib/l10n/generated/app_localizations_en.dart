@@ -1163,8 +1163,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetLimitUsage => 'Limit usage';
 
   @override
-  String assetLimitPctUsed(int pct) {
-    return '$pct% used';
+  String assetLimitPctUsed(String pct) {
+    return '$pct used';
   }
 
   @override
@@ -2208,7 +2208,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String budgetPercentUsed(String pct) {
-    return '$pct% used';
+    return '$pct used';
   }
 
   @override
@@ -2243,7 +2243,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String budgetPaceBarValue(String used, String elapsed) {
-    return '$used% used · $elapsed% of the month passed';
+    return '$used used · $elapsed of the month passed';
   }
 
   @override
@@ -2254,7 +2254,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String budgetMonthElapsed(String pct) {
-    return '$pct% of month elapsed ↑';
+    return '$pct of month elapsed ↑';
   }
 
   @override
@@ -4637,8 +4637,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsSavingsRate => 'Savings rate';
 
   @override
-  String statsSavingsInsight(int pct) {
-    return 'You\'re saving $pct% of your average income';
+  String statsSavingsInsight(String pct) {
+    return 'You\'re saving $pct of your average income';
   }
 
   @override
@@ -6199,8 +6199,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get frpObsWitheredGuard => 'Cloudy night · streak kept by cloud guard';
 
   @override
-  String frpPctBang(int pct) {
-    return '$pct% achieved!';
+  String frpPctBang(String pct) {
+    return '$pct achieved!';
   }
 
   @override
@@ -6226,8 +6226,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get constDetailTodayProgress => 'Starlight gathered today';
 
   @override
-  String constDetailTodayPct(int pct) {
-    return '$pct%';
+  String constDetailTodayPct(String pct) {
+    return '$pct';
   }
 
   @override
@@ -6288,8 +6288,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get frpStarGather => 'Starlight gathering';
 
   @override
-  String frpPctBadge(int pct) {
-    return '$pct% achieved';
+  String frpPctBadge(String pct) {
+    return '$pct achieved';
   }
 
   @override
@@ -7024,8 +7024,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dsAttachUploading => 'Uploading';
 
   @override
-  String dsAttachUploadingPercent(int percent) {
-    return 'Uploading $percent%';
+  String dsAttachUploadingPercent(String percent) {
+    return 'Uploading $percent';
   }
 
   @override

@@ -682,11 +682,11 @@
   "assetScheduledTag": "예정",
   "assetPaidDone": "결제 완료",
   "assetLimitUsage": "한도 사용",
-  "assetLimitPctUsed": "{pct}% 사용",
+  "assetLimitPctUsed": "{pct} 사용",
   "@assetLimitPctUsed": {
     "placeholders": {
       "pct": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -1309,7 +1309,7 @@
   },
   "budgetTableMonth": "달",
   "budgetCurrentCategorySum": "현재 카테고리 한도 합계",
-  "budgetPercentUsed": "{pct}% 사용",
+  "budgetPercentUsed": "{pct} 사용",
   "@budgetPercentUsed": {
     "placeholders": {
       "pct": {
@@ -1346,7 +1346,7 @@
   },
   "budgetSpendingPace": "지출 페이스",
   "budgetPaceBarName": "이번 달 지출 페이스",
-  "budgetPaceBarValue": "{used}% 사용 · 이번 달 {elapsed}% 지남",
+  "budgetPaceBarValue": "{used} 사용 · 이번 달 {elapsed} 지남",
   "@budgetPaceBarValue": {
     "placeholders": {
       "used": {"type": "String"},
@@ -1355,7 +1355,7 @@
   },
   "budgetPaceOnTrack": "정상 속도",
   "budgetPaceFast": "빠른 속도",
-  "budgetMonthElapsed": "이번 달 {pct}% 경과 ↑",
+  "budgetMonthElapsed": "이번 달 {pct} 경과 ↑",
   "@budgetMonthElapsed": {
     "placeholders": {
       "pct": {
@@ -2573,11 +2573,11 @@
   "statsNetSavings": "순저축",
   "statsAvgSavings": "평균 저축",
   "statsSavingsRate": "저축률",
-  "statsSavingsInsight": "월 평균 수입의 {pct}%를 저축하고 있어요",
+  "statsSavingsInsight": "월 평균 수입의 {pct}를 저축하고 있어요",
   "@statsSavingsInsight": {
     "placeholders": {
       "pct": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -3564,8 +3564,8 @@
   "frpPrevWeek": "이전 주",
   "frpNextWeek": "다음 주",
   "frpObsWitheredGuard": "흐린 밤 · 구름 보호로 스트릭 유지",
-  "frpPctBang": "{pct}% 달성!",
-  "@frpPctBang": {"placeholders": {"pct": {"type": "int"}}},
+  "frpPctBang": "{pct} 달성!",
+  "@frpPctBang": {"placeholders": {"pct": {"type": "String"}}},
   "frpMissedWeight": "별빛 +{count}",
   "@frpMissedWeight": {"placeholders": {"count": {"type": "int"}}},
   "frpLegendMemo": "메모 별빛",
@@ -3574,8 +3574,8 @@
   "@frpStampName": {"placeholders": {"count": {"type": "int"}}},
   "constDetailTodayDesc": "오늘의 목표 별자리",
   "constDetailTodayProgress": "오늘 모은 별빛",
-  "constDetailTodayPct": "{pct}%",
-  "@constDetailTodayPct": {"placeholders": {"pct": {"type": "int"}}},
+  "constDetailTodayPct": "{pct}",
+  "@constDetailTodayPct": {"placeholders": {"pct": {"type": "String"}}},
   "constDetailTodayRemain": "{lit}/{goal} 별빛 · {count}별 남음",
   "@constDetailTodayRemain": {"placeholders": {"lit": {"type": "int"}, "goal": {"type": "int"}, "count": {"type": "int"}}},
   "constDetailTodayAll": "{lit}/{goal} 별빛",
@@ -3627,11 +3627,11 @@
   },
   "frpStampLabel": "연속 관측!",
   "frpStarGather": "별빛 모으기",
-  "frpPctBadge": "{pct}% 달성",
+  "frpPctBadge": "{pct} 달성",
   "@frpPctBadge": {
     "placeholders": {
       "pct": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -4059,8 +4059,8 @@
   "dsAttachMoveForward": "앞으로 옮기기",
   "dsAttachMoveBack": "뒤로 옮기기",
   "dsAttachUploading": "올리는 중",
-  "dsAttachUploadingPercent": "올리는 중 {percent}%",
-  "@dsAttachUploadingPercent": {"description": "ds 컴포넌트 문구", "placeholders": {"percent": {"type": "int"}}},
+  "dsAttachUploadingPercent": "올리는 중 {percent}",
+  "@dsAttachUploadingPercent": {"description": "ds 컴포넌트 문구", "placeholders": {"percent": {"type": "String"}}},
   "dsAttachUploadFailed": "올리지 못했어요",
   "dsAttachDefaultLabel": "파일",
   "dsAttachSuffix": "첨부",

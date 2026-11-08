@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -327,7 +328,7 @@ class BudgetBar extends StatelessWidget {
       max: max,
       meaning: meaning,
       semanticsLabel: label,
-      semanticsValue: valueText ?? '${pct.toStringAsFixed(0)}%',
+      semanticsValue: valueText ?? formatProgress(pct),
     );
   }
 }

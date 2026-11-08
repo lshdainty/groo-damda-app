@@ -1,3 +1,4 @@
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -2364,7 +2365,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     // 실사용률 그대로 — 한도의 20배를 썼으면 2000% 로 보인다(사용자 결정).
     // 100 으로 눌러 두면 목록(실퍼센트)과 다른 숫자가 나오고, 얼마나 넘겼는지도
     // 안 보인다. 바 채움만 아래에서 100% 로 캡한다(넘치면 그릴 수 없다).
-    final limitPct = limit > 0 ? ((used / limit) * 100).round() : 0;
+    final limitPct = formatProgress(limit > 0 ? (used / limit) * 100 : 0);
     final paymentDay = b?.paymentDay ?? asset.paymentDay;
     final cancellable = _cancellablePayment(b);
     // 이용 내역의 금액 가리기 — 화면·종류 카드에 이 카드 자체의 숨김까지(합집합).
@@ -2755,7 +2756,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                   ),
                   semanticsValue: over
                       ? l.dsProgressOver(won(used - limit))
-                      : '${(math.min(ratio, 1.0) * 100).round()}%',
+                      : formatProgress(math.min(ratio, 1.0) * 100),
                 ),
                 const SizedBox(height: PSpacing.x2),
                 Row(
