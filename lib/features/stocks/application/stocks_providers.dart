@@ -50,9 +50,10 @@ final prevCloseProvider = FutureProvider.family<double?, String>((
 ) async {
   if (symbol.isEmpty) return null;
   try {
+    final clock = ref.read(clockProvider); // await 뒤엔 ref 가 닫혔을 수 있다
     final repo = await ref.watch(stocksRepositoryProvider.future);
     final page = await repo.getCandles(symbol, '1d', count: 3);
-    final today = marketToday(symbol, ref.read(clockProvider)().toUtc());
+    final today = marketToday(symbol, clock().toUtc());
     final v = prevCloseFromCandles(page.candles, today, symbol: symbol);
     if (ref.mounted) ref.read(prevCloseDayProvider)[symbol] = today;
     return v;

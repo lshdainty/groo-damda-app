@@ -62,6 +62,8 @@ Future<(DutchFakeRepo, AppLocalizations)> openDutchFlow(
   WidgetTester tester, {
   Size size = const Size(1200, 3000),
   double textScale = 1.0,
+  Expense expense = dutchTestExpense,
+  Future<void>? repoGate,
 }) async {
   final repo = DutchFakeRepo();
   tester.view.physicalSize = size;
@@ -72,7 +74,10 @@ Future<(DutchFakeRepo, AppLocalizations)> openDutchFlow(
       overrides: [
         authProvider.overrideWith(DutchMe.new),
         categoriesProvider.overrideWith((ref) async => const []),
-        dutchPayRepositoryProvider.overrideWith((ref) async => repo),
+        dutchPayRepositoryProvider.overrideWith((ref) async {
+          await repoGate;
+          return repo;
+        }),
         // 만든 뒤 목록을 다시 받을 때까지 기다린다(7bd39865) — 가짜 저장소에 list 가 없어 덮는다
         dutchPayListProvider.overrideWith((ref) async => const []),
       ],
@@ -93,7 +98,7 @@ Future<(DutchFakeRepo, AppLocalizations)> openDutchFlow(
               onPressed: () => PBottomSheet.show<void>(
                 ctx,
                 builder: (_) => DutchStepFlow(
-                  expense: dutchTestExpense,
+                  expense: expense,
                   probe: StepProbe(),
                   onBack: () {},
                 ),
