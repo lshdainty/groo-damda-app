@@ -279,7 +279,20 @@ class _TransferDetailState extends ConsumerState<_TransferDetail> {
       scrollFog: true,
       body: _body(context, l, locked),
       footerRow: locked
-          ? null
+          ? (_t.canDelete
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      PButton(
+                        label: l.actionDelete,
+                        variant: PButtonVariant.ghost,
+                        ghostColor: PButtonGhostColor.critical,
+                        size: PButtonSize.large,
+                        onPressed: _busy ? null : _delete,
+                      ),
+                    ],
+                  )
+                : null)
           : PFormDeleteFooter(
               deleteLabel: l.actionDelete,
               onDelete: _busy ? null : _delete,

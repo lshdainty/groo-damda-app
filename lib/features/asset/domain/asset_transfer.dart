@@ -11,6 +11,7 @@ class AssetTransfer {
     this.fee,
     this.interestAmount,
     this.autoSource,
+    this.deletable,
     this.principalAmount,
     this.description,
     this.transferDate,
@@ -37,6 +38,13 @@ class AssetTransfer {
   /// 값이 있으면 금액이 원본(매수·청구)과 묶여 있어 고칠 수 없다.
   final String? autoSource;
 
+  /// 이 이체를 지금 직접 지울 수 있나 — 서버 판정. 자동 생성이어도 원본 증권 자산이 삭제됐으면 true.
+  /// 옛 서버면 null — [canDelete] 가 [autoSource] 로 폴백한다. 수정 잠금은 이 값과 무관하다.
+  final bool? deletable;
+
+  /// 삭제 판정의 한 곳.
+  bool get canDelete => deletable ?? autoSource == null;
+
   /// 원금 = amount − interestAmount. 입금 자산(대출)에 실제로 반영된 금액.
   final int? principalAmount;
   final String? description;
@@ -59,6 +67,7 @@ class AssetTransfer {
       fee: (json['fee'] as num?)?.toInt(),
       interestAmount: (json['interestAmount'] as num?)?.toInt(),
       autoSource: json['autoSource'] as String?,
+      deletable: json['deletable'] as bool?,
       principalAmount: (json['principalAmount'] as num?)?.toInt(),
       description: json['description'] as String?,
       transferDate: json['transferDate'] as String?,
