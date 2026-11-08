@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
@@ -219,7 +220,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   /// 자식 이동 시 새 부모 예산 초과 확인 — 초과면 확인창 1회(승인=true) (룰3).
   /// 예산 없음·미초과면 true(그대로 진행), 사용자가 취소하면 false.
   Future<bool> _confirmMoveIfExceedsBudget(int newParentRowId) async {
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     final key = (year: now.year, month: now.month);
     final start =
         '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-01';

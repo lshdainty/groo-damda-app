@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 
 /// 상대시각 해상도 — "n분 전" 이 최소 단위라 1분마다만 다시 그리면 충분하다.
 ///
@@ -14,9 +15,9 @@ const nowTickInterval = Duration(minutes: 1);
 /// **해상도를 맞추는 것만으로는 부족하다.** 앱은 화면을 연 순간부터, 웹은 페이지를 연
 /// 순간부터 1분을 세면 두 시계의 *위상*이 어긋나, 같은 알림이 앱 "2분 전" · 웹 "3분 전" 이
 /// 된다(실측 17%). 양쪽 다 절대 시각의 눈금에 내림하면 마운트 시점과 무관하게 같은 값이 된다.
-DateTime alignedNow() {
+DateTime alignedNow([DateTime Function()? clock]) {
   final step = nowTickInterval.inMilliseconds;
-  final ms = DateTime.now().millisecondsSinceEpoch;
+  final ms = (clock ?? DateTime.now)().millisecondsSinceEpoch;
   return DateTime.fromMillisecondsSinceEpoch(ms ~/ step * step);
 }
 
@@ -35,18 +36,22 @@ DateTime alignedNow() {
 class NowTick extends Notifier<DateTime> {
   @override
   DateTime build() {
-    final timer = Timer.periodic(nowTickInterval, (_) => state = alignedNow());
+    final clock = ref.read(clockProvider);
+    final timer = Timer.periodic(
+      nowTickInterval,
+      (_) => state = alignedNow(clock),
+    );
     // 앱이 백그라운드로 가면 엔진이 이벤트 루프를 세워 타이머가 안 돈다 —
     // 돌아온 직후 최대 1분 동안 나갈 때의 시각이 그대로 보이므로 한 번 더 맞춘다.
     // 웹 `useNow` 의 `visibilitychange` 재동기화와 같은 자리다.
     final lifecycle = AppLifecycleListener(
-      onResume: () => state = alignedNow(),
+      onResume: () => state = alignedNow(clock),
     );
     ref.onDispose(() {
       timer.cancel();
       lifecycle.dispose();
     });
-    return alignedNow();
+    return alignedNow(clock);
   }
 }
 

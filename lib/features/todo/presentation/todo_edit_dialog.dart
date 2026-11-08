@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -115,7 +116,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
     _initialTag = tag.isEmpty ? null : tag;
     _initialPriority = e?.priority ?? 'MEDIUM';
     // 새 할 일의 마감일은 오늘 — 웹과 같다(I-10 20). 고치는 할 일은 가진 값 그대로(없으면 없음).
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     _initialDue = _isEdit ? e!.due : DateTime(now.year, now.month, now.day);
     _titleCtrl = TextEditingController(text: _initialTitle);
     _contentCtrl = TextEditingController(text: _initialContent);

@@ -1,3 +1,4 @@
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'dart:async';
@@ -442,7 +443,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
     );
     // recent tx — web 와 동일 12건. 연결계좌형 체크카드는 "이번 달 뭐 썼나" 가 목적이라
     // 당월(1일~말일) 전체를 다 가져온다 — 12건 컷을 두면 월말엔 월초 내역이 잘린다.
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     String ymd(DateTime d) =>
         '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
     final recentAsync = isCheckLinked

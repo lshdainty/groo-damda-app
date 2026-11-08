@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/constellation/application/constellation_providers.dart';
 import 'package:groo_damda_app/features/constellation/domain/constellation.dart';
@@ -45,7 +46,7 @@ class NightSkyScreen extends ConsumerWidget {
     final collectionQ = ref.watch(constellationCollectionProvider);
     final todos = ref.watch(todoListProvider(_allFilter)).value;
 
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     final todayIso =
         '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
     // completedAt 은 서버가 준 `[UTC]` 라 로컬 날짜로 바꿔 비교한다(KST 새벽 완료가 전날로 밀리지 않게).

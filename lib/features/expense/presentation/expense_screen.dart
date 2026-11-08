@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -99,7 +100,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
   void initState() {
     super.initState();
     _assetIdFilter = widget.initialAssetId;
-    final today = DateTime.now();
+    final today = ref.read(clockProvider)();
     if (today.year == _month.year && today.month == _month.month) {
       _selected = ledgerYmd(today);
     }
@@ -167,7 +168,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
       final parts = raw.split('-');
       return DateTime(int.parse(parts[0]), int.parse(parts[1]), 1);
     }
-    return monthStart(DateTime.now());
+    return monthStart(ref.read(clockProvider)());
   }
 
   @override
@@ -233,7 +234,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
       _setMonth(DateTime(_month.year, _month.month + dir, 1));
 
   void _setMonth(DateTime next) {
-    final today = DateTime.now();
+    final today = ref.read(clockProvider)();
     setState(() {
       _month = next;
       _expanded = false;

@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
@@ -165,12 +166,12 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   String _mode = 'export'; // export | import
   String _format = 'CSV';
   String _period = 'THIS_MONTH';
-  DateTime? _customFrom = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
+  late DateTime? _customFrom = DateTime(
+    ref.read(clockProvider)().year,
+    ref.read(clockProvider)().month,
     1,
   );
-  DateTime? _customTo = DateTime.now();
+  late DateTime? _customTo = ref.read(clockProvider)();
   List<String> _selected = ['EXPENSE', 'ASSET', 'BUDGET'];
   bool _mask = false;
 
@@ -200,7 +201,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   ({String start, String end}) _resolveRange(String period) =>
       resolveExportRange(
         period,
-        DateTime.now(),
+        ref.read(clockProvider)(),
         customFrom: _customFrom,
         customTo: _customTo,
       );
@@ -365,7 +366,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
 
   Future<void> _pickRange() async {
     final l = AppLocalizations.of(context);
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     final picked = await PBottomSheet.show<PDateRange>(
       context,
       builder: (_) {
@@ -561,7 +562,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   // ── 기간 ────────────────────────────────────────────────
 
   Widget _periodBody(AppLocalizations l) {
-    final today = DateTime.now();
+    final today = ref.read(clockProvider)();
     return Padding(
       padding: _gutter,
       child: PRadioSelectBoxGroup<String>(

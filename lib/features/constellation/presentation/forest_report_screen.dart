@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -43,13 +44,13 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
 
   /// 0=지난주, 1=이번주 (월요일 시작).
   int _week = 1;
-  late String _sel = _ymd(DateTime.now());
+  late String _sel = _ymd(ref.read(clockProvider)());
 
   static String _ymd(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   DateTime get _thisMonday {
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     return DateTime(
       now.year,
       now.month,
@@ -65,7 +66,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
   /// 주를 넘긴다 — 그 주의 **같은 요일**을 고른다(아래 전부가 그날 것). 그 요일이 오는 날이면 오늘(10-29 사용자 결정 4).
   void _goWeek(int week) => setState(() {
     _week = week;
-    _sel = weekNavSelect(sel: _sel, week: week, now: DateTime.now());
+    _sel = weekNavSelect(sel: _sel, week: week, now: ref.read(clockProvider)());
   });
 
   /// 우선순위 가중치 — 중요 3 · 보통 2 · 여유 1 (design FOREST_WEIGHT).
@@ -101,7 +102,7 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
     final queries = [todayQ, todosQ, skyQ, collectionQ];
     final failed = queries.any((q) => q.loadFailed);
 
-    final todayYmd = _ymd(DateTime.now());
+    final todayYmd = _ymd(ref.read(clockProvider)());
     final days = _weekDays(_week);
     final dows = weekdayLabels(mondayFirst: true);
     final selDate = DateTime.parse(_sel);

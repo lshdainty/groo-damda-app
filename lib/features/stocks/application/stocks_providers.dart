@@ -3,6 +3,7 @@
 /// 보조 값(전일 종가 · 마스터 검색 등)만 에러를 삼키고 null/빈 값으로 폴백한다.
 library;
 
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,7 +52,7 @@ final prevCloseProvider = FutureProvider.family<double?, String>((
   try {
     final repo = await ref.watch(stocksRepositoryProvider.future);
     final page = await repo.getCandles(symbol, '1d', count: 3);
-    final today = marketToday(symbol, DateTime.now().toUtc());
+    final today = marketToday(symbol, ref.read(clockProvider)().toUtc());
     final v = prevCloseFromCandles(page.candles, today, symbol: symbol);
     if (ref.mounted) ref.read(prevCloseDayProvider)[symbol] = today;
     return v;
@@ -73,7 +74,7 @@ final prevCloseDayProvider = Provider<Map<String, String>>(
 void refreshStalePrevCloses(WidgetRef ref) {
   for (final s in stalePrevCloseSymbols(
     ref.read(prevCloseDayProvider),
-    DateTime.now().toUtc(),
+    ref.read(clockProvider)().toUtc(),
   )) {
     ref.invalidate(prevCloseProvider(s));
   }
