@@ -317,6 +317,30 @@ void main() {
     expect(repo.calls, ['update:5:450000']);
   });
 
+  testWidgets('저장 중 화면이 사라져도 await 뒤에서 터지지 않는다(ApiException 만 잡는 자리)', (
+    tester,
+  ) async {
+    const edit = Budget(
+      rowId: 7,
+      budgetAmount: 500000,
+      budgetYear: 2026,
+      budgetMonth: 10,
+    );
+    final repo = await _open(tester, edit: edit);
+    await tester.enterText(_inputs().first, '600000');
+    repo.gate = Completer<void>();
+    await tester.tap(
+      find.ancestor(of: _t(l.actionSave), matching: find.byType(PButton)).last,
+    );
+    await tester.pump();
+    // 저장 중 시트는 사용자가 못 닫지만 라우트가 코드로 걷힐 수는 있다(로그아웃 등)
+    Navigator.of(tester.element(findText('open'))).pop();
+    await tester.pumpAndSettle();
+    repo.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('저장 중에는 X · 뒤로 · Esc 로 닫히지 않고 묻지도 않는다 — 실패하면 맨 위 Callout', (
     tester,
   ) async {

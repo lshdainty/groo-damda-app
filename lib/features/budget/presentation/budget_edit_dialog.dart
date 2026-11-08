@@ -310,7 +310,8 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
-      final repo = await ref.read(budgetRepositoryProvider.future);
+      final container = ProviderScope.containerOf(context, listen: false);
+      final repo = await container.read(budgetRepositoryProvider.future);
       if (_isEdit) {
         await repo.update(
           id: widget.edit!.rowId,
@@ -326,11 +327,11 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
           silent: true,
         );
       }
-      ref.invalidate(
+      container.invalidate(
         monthBudgetsProvider((year: widget.year, month: widget.month)),
       );
       // 준수율은 keepAlive 라 스스로 다시 받지 않는다 — 예산을 고치면 같이 비운다.
-      ref.invalidate(budgetComplianceProvider);
+      container.invalidate(budgetComplianceProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {

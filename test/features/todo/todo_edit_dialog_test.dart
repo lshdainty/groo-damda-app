@@ -16,6 +16,8 @@
 // 리포지토리 단위 검증은 `test/features/put_clear_payload_test.dart` 에 있고,
 // 여기서는 **화면이 실제로 그 값을 넘기는지**를 본다. 메모 편집기 테스트
 // (`test/features/memo/memo_edit_dialog_test.dart`)와 같은 모양이다.
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,6 +53,9 @@ class _CapturingRepo extends TodoRepository {
   String? priority;
   String? title;
   bool created = false;
+
+  /// 있으면 update 응답을 이 값이 끝날 때까지 미룬다.
+  Completer<void>? gate;
   String? createdCategory;
   String? createdDue;
   String? createdPriority;
@@ -69,6 +74,7 @@ class _CapturingRepo extends TodoRepository {
     this.category = category;
     this.dueDate = dueDate;
     this.priority = priority;
+    if (gate != null) await gate!.future;
     return _todo;
   }
 
@@ -397,5 +403,20 @@ void main() {
       );
       expect(_submitButton(l.actionSave), findsOneWidget);
     });
+  });
+
+  testWidgets('저장 중 화면이 사라져도 await 뒤에서 터지지 않는다(ApiException 만 잡는 자리)', (
+    tester,
+  ) async {
+    final repo = await _openEdit(tester);
+    repo.gate = Completer<void>();
+    await tester.tap(_submitButton(l.actionSave));
+    await tester.pump();
+    // 저장 중 시트는 사용자가 못 닫지만 라우트가 코드로 걷힐 수는 있다(로그아웃 등)
+    Navigator.of(tester.element(findText('open'))).pop();
+    await tester.pumpAndSettle();
+    repo.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }

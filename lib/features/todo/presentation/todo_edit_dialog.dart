@@ -209,7 +209,8 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
     try {
-      final repo = await ref.read(todoRepositoryProvider.future);
+      final container = ProviderScope.containerOf(context, listen: false);
+      final repo = await container.read(todoRepositoryProvider.future);
       final content = _contentCtrl.text.trim();
       if (_isEdit) {
         await repo.update(
@@ -233,9 +234,9 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
           silent: true,
         );
       }
-      ref.invalidate(todoListProvider);
+      container.invalidate(todoListProvider);
       // 홈 위젯(할 일 개수·최근 할 일)의 원본 — 셸 상주라 스스로 안 받는다.
-      ref.invalidate(dashboardSummaryProvider);
+      container.invalidate(dashboardSummaryProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {

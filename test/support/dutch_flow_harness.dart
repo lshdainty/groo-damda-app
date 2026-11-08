@@ -64,6 +64,7 @@ Future<(DutchFakeRepo, AppLocalizations)> openDutchFlow(
   double textScale = 1.0,
   Expense expense = dutchTestExpense,
   Future<void>? repoGate,
+  void Function()? onListLoad,
 }) async {
   final repo = DutchFakeRepo();
   tester.view.physicalSize = size;
@@ -79,7 +80,10 @@ Future<(DutchFakeRepo, AppLocalizations)> openDutchFlow(
           return repo;
         }),
         // 만든 뒤 목록을 다시 받을 때까지 기다린다(7bd39865) — 가짜 저장소에 list 가 없어 덮는다
-        dutchPayListProvider.overrideWith((ref) async => const []),
+        dutchPayListProvider.overrideWith((ref) async {
+          onListLoad?.call();
+          return const [];
+        }),
       ],
       child: MaterialApp(
         theme: GrooTheme.light(),
