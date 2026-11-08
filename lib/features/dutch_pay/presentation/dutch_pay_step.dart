@@ -311,9 +311,12 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       if (list.isEmpty) return;
       if (_sumError(l, masked) != null) return;
       final shares = _shares(list);
+      // await 뒤엔 위젯이 사라졌을 수 있다 — ref · context 를 읽는 값은 먼저 잡아 둔다
+      final day = _day;
+      final title = _title;
       final repo = await ref.read(dutchPayRepositoryProvider.future);
       await repo.create(
-        title: _title,
+        title: title,
         description: _note.isEmpty ? null : _note,
         totalAmount: _total,
         splitMethod: switch (_method) {
@@ -321,7 +324,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
           DutchSplitMethod.ratio => 'RATIO',
           DutchSplitMethod.custom => 'CUSTOM',
         },
-        dutchPayDate: _day,
+        dutchPayDate: day,
         sourceExpenseRowId: _e.rowId,
         silent: true,
         participants: [
