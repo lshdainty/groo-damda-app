@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -42,7 +43,7 @@ class BudgetScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetScreenState extends ConsumerState<BudgetScreen> {
-  late DateTime _month = monthStart(DateTime.now());
+  late DateTime _month = monthStart(ref.read(clockProvider)());
 
   BudgetMonthKey get _key => (year: _month.year, month: _month.month);
 
@@ -184,7 +185,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       final overAllocated =
           overallBudget != null && categoryLimitSum > overallLimit;
 
-      final today = DateTime.now();
+      final today = ref.read(clockProvider)();
       final daysInMonth = DateTime(_month.year, _month.month + 1, 0).day;
       final dayOfMonth =
           (today.year == _month.year && today.month == _month.month)

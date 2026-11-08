@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -110,7 +111,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
   @override
   void initState() {
     super.initState();
-    final n = DateTime.now();
+    final n = ref.read(clockProvider)();
     _today = DateTime(n.year, n.month, n.day);
     _date = _today;
     widget.probe.dirty = () =>

@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
@@ -147,7 +148,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
     final raw = (_e.expenseDate ?? '').trim();
     return raw.length >= 10
         ? raw.substring(0, 10)
-        : DateTime.now().toIso8601String().substring(0, 10);
+        : ref.read(clockProvider)().toIso8601String().substring(0, 10);
   }
 
   // ── 몫 ────────────────────────────────────────────────────

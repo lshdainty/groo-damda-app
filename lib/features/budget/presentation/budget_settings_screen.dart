@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -49,7 +50,7 @@ class BudgetSettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetSettingsScreenState extends ConsumerState<BudgetSettingsScreen> {
-  late DateTime _month = monthStart(DateTime.now());
+  late DateTime _month = monthStart(ref.read(clockProvider)());
 
   @override
   void initState() {

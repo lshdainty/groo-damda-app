@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/constellation/application/constellation_providers.dart';
@@ -58,7 +59,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   /// 전체(status=null) fetch — 상세/칸반과 동일 family 키 공유.
   static const TodoFilter _allFilter = (status: null, priority: null);
 
-  late DateTime _month = monthStart(DateTime.now());
+  late DateTime _month = monthStart(ref.read(clockProvider)());
   String? _selected;
   bool _expanded = false;
   bool _skyOpen = false;
@@ -98,7 +99,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   @override
   void initState() {
     super.initState();
-    _selected = todoYmd(DateTime.now());
+    _selected = todoYmd(ref.read(clockProvider)());
     _scrollCtrl.addListener(_onScroll);
     _hold.addListener(_onHoldChanged);
   }
@@ -170,7 +171,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   }
 
   void _setMonth(DateTime next) {
-    final today = DateTime.now();
+    final today = ref.read(clockProvider)();
     setState(() {
       _month = next;
       _expanded = false;
@@ -216,7 +217,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
   /// 따닥 막기는 그대로다 — 같은 줄 600ms 안의 두 번째 누름은 무시한다. 그 뒤 다시 누르면(앞 요청이 아직 안 끝났어도) 그 뒤 상태로 다시
   /// 보낸다(줄마다 토큰을 두어 앞 요청이 늦게 끝나도 뒤 낙관 값을 지우지 않는다).
   Future<void> _toggleDone(Todo x) async {
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     final last = _lastToggleAt[x.rowId];
     if (last != null && now.difference(last) < kTodoDoubleTapGuard) return;
     _lastToggleAt[x.rowId] = now;
@@ -370,7 +371,7 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
         : null;
     final skyByDate = {for (final d in sky) d.date: d};
 
-    final today = DateTime.now();
+    final today = ref.read(clockProvider)();
     final todayYmd = todoYmd(today);
     final ym =
         '${_month.year.toString().padLeft(4, '0')}-${_month.month.toString().padLeft(2, '0')}';

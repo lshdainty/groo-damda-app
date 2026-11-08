@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/features/todo/domain/todo_ledger.dart';
@@ -65,7 +66,7 @@ class _TodoDetailSheetState extends ConsumerState<_TodoDetailSheet> {
     final c = context.colors;
     final l = AppLocalizations.of(context);
     final todo = widget.todo;
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     final today = DateTime(now.year, now.month, now.day);
     final overdue = !todo.done && isTodoOverdue(todo.due, today);
     final content = (todo.content ?? '').trim();

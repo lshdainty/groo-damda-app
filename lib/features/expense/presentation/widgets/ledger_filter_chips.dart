@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
@@ -71,7 +72,7 @@ class LedgerFilterChips extends ConsumerWidget {
 
       final label = formatRangeValue(
         PDateRange(start: day(p.start), end: day(p.end)),
-        DateTime.now(),
+        ref.read(clockProvider)(),
       );
       add(label, () => onChange(f.copyWith(periods: const [])));
     }
