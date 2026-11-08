@@ -3787,7 +3787,7 @@
   "dsAttachMoveForward": "Move earlier",
   "dsAttachMoveBack": "Move later",
   "dsAttachUploading": "Uploading",
-  "dsAttachUploadingPercent": "Uploading {percent}%",
+  "dsAttachUploadingPercent": "Uploading {percent}",
   "dsAttachUploadFailed": "Upload failed",
   "dsAttachDefaultLabel": "Files",
   "dsAttachSuffix": "attachments",

@@ -12256,8 +12256,8 @@ abstract class AppLocalizations {
   /// ds 컴포넌트 문구
   ///
   /// In ko, this message translates to:
-  /// **'올리는 중 {percent}%'**
-  String dsAttachUploadingPercent(int percent);
+  /// **'올리는 중 {percent}'**
+  String dsAttachUploadingPercent(String percent);
 
   /// No description provided for @dsAttachUploadFailed.
   ///

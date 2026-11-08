@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/l10n/ds_l10n.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/attachment_input/p_attachment_model.dart';
@@ -660,13 +661,13 @@ class _PAttachmentInputState extends State<PAttachmentInput> {
     final parts = [e.name, formatFileSize(e.size)];
     if (badge != null) parts.add(badge);
     if (status == PAttachmentStatus.uploading) {
+      final pct = formatProgress(
+        e.progress == null ? 0 : e.progress!.clamp(0.0, 1.0) * 100,
+      );
       parts.add(
         e.progress == null
             ? (dsL(context)?.dsAttachUploading ?? '올리는 중')
-            : (dsL(context)?.dsAttachUploadingPercent(
-                    (e.progress!.clamp(0.0, 1.0) * 100).round(),
-                  ) ??
-                  '올리는 중 ${(e.progress!.clamp(0.0, 1.0) * 100).round()}%'),
+            : (dsL(context)?.dsAttachUploadingPercent(pct) ?? '올리는 중 $pct'),
       );
     }
     if (status == PAttachmentStatus.error) {

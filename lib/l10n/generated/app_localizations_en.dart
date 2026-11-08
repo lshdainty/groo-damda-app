@@ -7024,8 +7024,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dsAttachUploading => 'Uploading';
 
   @override
-  String dsAttachUploadingPercent(int percent) {
-    return 'Uploading $percent%';
+  String dsAttachUploadingPercent(String percent) {
+    return 'Uploading $percent';
   }
 
   @override

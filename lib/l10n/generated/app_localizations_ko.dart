@@ -6832,8 +6832,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dsAttachUploading => '올리는 중';
 
   @override
-  String dsAttachUploadingPercent(int percent) {
-    return '올리는 중 $percent%';
+  String dsAttachUploadingPercent(String percent) {
+    return '올리는 중 $percent';
   }
 
   @override
