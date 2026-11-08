@@ -641,11 +641,11 @@
   "assetScheduledTag": "Upcoming",
   "assetPaidDone": "Paid",
   "assetLimitUsage": "Limit usage",
-  "assetLimitPctUsed": "{pct}% used",
+  "assetLimitPctUsed": "{pct} used",
   "@assetLimitPctUsed": {
     "placeholders": {
       "pct": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -1267,7 +1267,7 @@
   },
   "budgetTableMonth": "Month",
   "budgetCurrentCategorySum": "Current category limit total",
-  "budgetPercentUsed": "{pct}% used",
+  "budgetPercentUsed": "{pct} used",
   "@budgetPercentUsed": {
     "placeholders": {
       "pct": {
@@ -1304,7 +1304,7 @@
   },
   "budgetSpendingPace": "Spending pace",
   "budgetPaceBarName": "Spending pace this month",
-  "budgetPaceBarValue": "{used}% used · {elapsed}% of the month passed",
+  "budgetPaceBarValue": "{used} used · {elapsed} of the month passed",
   "@budgetPaceBarValue": {
     "placeholders": {
       "used": {"type": "String"},
@@ -1313,7 +1313,7 @@
   },
   "budgetPaceOnTrack": "On pace",
   "budgetPaceFast": "Too fast",
-  "budgetMonthElapsed": "{pct}% of month elapsed ↑",
+  "budgetMonthElapsed": "{pct} of month elapsed ↑",
   "@budgetMonthElapsed": {
     "placeholders": {
       "pct": {
@@ -2531,7 +2531,7 @@
   "statsNetSavings": "Net savings",
   "statsAvgSavings": "Avg savings",
   "statsSavingsRate": "Savings rate",
-  "statsSavingsInsight": "You're saving {pct}% of your average income",
+  "statsSavingsInsight": "You're saving {pct} of your average income",
   "statsDailyNetSavings": "Daily net savings",
   "statsMonthlyNetSavings": "Monthly net savings",
   "statsCatTrendTitle": "Top categories over time",
@@ -3381,8 +3381,8 @@
   "frpPrevWeek": "Previous week",
   "frpNextWeek": "Next week",
   "frpObsWitheredGuard": "Cloudy night · streak kept by cloud guard",
-  "frpPctBang": "{pct}% achieved!",
-  "@frpPctBang": {"placeholders": {"pct": {"type": "int"}}},
+  "frpPctBang": "{pct} achieved!",
+  "@frpPctBang": {"placeholders": {"pct": {"type": "String"}}},
   "frpMissedWeight": "Starlight +{count}",
   "@frpMissedWeight": {"placeholders": {"count": {"type": "int"}}},
   "frpLegendMemo": "Memo starlight",
@@ -3391,8 +3391,8 @@
   "@frpStampName": {"placeholders": {"count": {"type": "int"}}},
   "constDetailTodayDesc": "Today's constellation",
   "constDetailTodayProgress": "Starlight gathered today",
-  "constDetailTodayPct": "{pct}%",
-  "@constDetailTodayPct": {"placeholders": {"pct": {"type": "int"}}},
+  "constDetailTodayPct": "{pct}",
+  "@constDetailTodayPct": {"placeholders": {"pct": {"type": "String"}}},
   "constDetailTodayRemain": "{lit}/{goal} starlight · {count} to go",
   "@constDetailTodayRemain": {"placeholders": {"lit": {"type": "int"}, "goal": {"type": "int"}, "count": {"type": "int"}}},
   "constDetailTodayAll": "{lit}/{goal} starlight",
@@ -3444,11 +3444,11 @@
   },
   "frpStampLabel": "streak!",
   "frpStarGather": "Starlight gathering",
-  "frpPctBadge": "{pct}% achieved",
+  "frpPctBadge": "{pct} achieved",
   "@frpPctBadge": {
     "placeholders": {
       "pct": {
-        "type": "int"
+        "type": "String"
       }
     }
   },

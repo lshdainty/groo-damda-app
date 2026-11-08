@@ -388,7 +388,7 @@ class _TotalSection extends StatelessWidget {
         ),
         const _Gap(PSpacing.x2),
         BudgetBarCaption(
-          left: l.budgetPercentUsed(pct.toStringAsFixed(0)),
+          left: l.budgetPercentUsed(formatProgress(pct)),
           right: remaining >= 0
               ? l.budgetRemaining(won(remaining))
               : l.budgetOverBy(won(-remaining)),
@@ -440,8 +440,8 @@ class _PaceSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.colors;
-    final used = pct.toStringAsFixed(0);
-    final elapsed = daysElapsedPct.toStringAsFixed(0);
+    final used = formatProgress(pct);
+    final elapsed = formatProgress(daysElapsedPct);
     return BudgetSection(
       header: BudgetHead(
         title: l.budgetSpendingPace,

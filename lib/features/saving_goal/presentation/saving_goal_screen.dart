@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
@@ -93,7 +94,7 @@ class SavingGoalScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: PSpacing.x2),
                     Text(
-                      '${totalPct.toStringAsFixed(0)}%',
+                      formatProgress(totalPct),
                       style: PTypography.t9.copyWith(
                         color: c.fgBrand,
                         fontWeight: FontWeight.w700,
@@ -270,7 +271,7 @@ class _GoalRow extends StatelessWidget {
     final c = context.colors;
     // 목표 색은 타일에만 남는다 — 막대 · % 는 fg-brand 한 색
     final color = resolveChartColor(context, goal.color, fallback: c.fgBrand);
-    final pct = (goal.progress * 100).round();
+    final pct = formatProgress(goal.progress * 100);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -316,7 +317,7 @@ class _GoalRow extends StatelessWidget {
               ),
               const SizedBox(width: PSpacing.x2),
               Text(
-                '$pct%',
+                pct,
                 style: PTypography.t4.copyWith(
                   color: c.fgBrand,
                   fontWeight: FontWeight.w700,
@@ -338,7 +339,7 @@ class _GoalRow extends StatelessWidget {
             max: goal.targetAmount.toDouble(),
             meaning: PProgressMeaning.goal,
             label: goal.title,
-            valueText: '$pct%',
+            valueText: pct,
           ),
         ),
       ],

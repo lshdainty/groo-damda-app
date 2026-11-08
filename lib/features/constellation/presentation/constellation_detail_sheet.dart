@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/constellation/domain/constellation.dart';
 import 'package:groo_damda_app/features/constellation/presentation/constellation_painter.dart';
@@ -256,7 +257,9 @@ class _TodayProgress extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final goal = today.goal;
     final reached = goal > 0 && lit >= goal;
-    final pct = goal <= 0 ? 0 : ((lit / goal) * 100).clamp(0, 100).round();
+    final pct = formatProgress(
+      goal <= 0 ? 0 : ((lit / goal) * 100).clamp(0, 100),
+    );
     final remain = math.max(0, goal - lit);
     final tabular = const [FontFeature.tabularFigures()];
     final bottom = remain > 0

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -78,7 +79,7 @@ class PProgress extends StatelessWidget {
     final status = switch (m.state) {
       PProgressState.over => l10n.dsProgressOver(format(m.current - max)),
       PProgressState.reached => l10n.dsProgressReached,
-      PProgressState.enabled => '${(m.fill * 100).round()}%',
+      PProgressState.enabled => formatProgress(m.fill * 100),
     };
     const tabular = [FontFeature.tabularFigures()];
 

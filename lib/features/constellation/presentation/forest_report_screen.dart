@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/constellation/application/constellation_providers.dart';
@@ -518,7 +519,8 @@ class _Body extends StatelessWidget {
                         .starCount ??
                     today.goal)
               : today.goal);
-    final pct = goal <= 0 ? 0 : ((pts / goal) * 100).clamp(0, 100).round();
+    final pctRaw = goal <= 0 ? 0 : ((pts / goal) * 100).clamp(0, 100);
+    final pct = formatProgress(pctRaw);
     final missed = missedOn(todos, sel);
     final selEntry = selSky?.constellationKey != null
         ? entryByKey[selSky!.constellationKey!]
@@ -564,7 +566,7 @@ class _Body extends StatelessWidget {
               _SectionHead(
                 title: l.frpStarGather,
                 trailing: PBadge(
-                  label: pct >= 100 ? l.frpPctBang(pct) : l.frpPctBadge(pct),
+                  label: pctRaw >= 100 ? l.frpPctBang(pct) : l.frpPctBadge(pct),
                   tone: PBadgeTone.positive,
                 ),
               ),

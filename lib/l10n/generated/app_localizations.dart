@@ -2170,8 +2170,8 @@ abstract class AppLocalizations {
   /// No description provided for @assetLimitPctUsed.
   ///
   /// In ko, this message translates to:
-  /// **'{pct}% 사용'**
-  String assetLimitPctUsed(int pct);
+  /// **'{pct} 사용'**
+  String assetLimitPctUsed(String pct);
 
   /// No description provided for @assetLimitOf.
   ///
@@ -4018,7 +4018,7 @@ abstract class AppLocalizations {
   /// No description provided for @budgetPercentUsed.
   ///
   /// In ko, this message translates to:
-  /// **'{pct}% 사용'**
+  /// **'{pct} 사용'**
   String budgetPercentUsed(String pct);
 
   /// No description provided for @budgetRemaining.
@@ -4072,7 +4072,7 @@ abstract class AppLocalizations {
   /// No description provided for @budgetPaceBarValue.
   ///
   /// In ko, this message translates to:
-  /// **'{used}% 사용 · 이번 달 {elapsed}% 지남'**
+  /// **'{used} 사용 · 이번 달 {elapsed} 지남'**
   String budgetPaceBarValue(String used, String elapsed);
 
   /// No description provided for @budgetPaceOnTrack.
@@ -4090,7 +4090,7 @@ abstract class AppLocalizations {
   /// No description provided for @budgetMonthElapsed.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 {pct}% 경과 ↑'**
+  /// **'이번 달 {pct} 경과 ↑'**
   String budgetMonthElapsed(String pct);
 
   /// No description provided for @budgetDailyAvg.
@@ -8362,8 +8362,8 @@ abstract class AppLocalizations {
   /// No description provided for @statsSavingsInsight.
   ///
   /// In ko, this message translates to:
-  /// **'월 평균 수입의 {pct}%를 저축하고 있어요'**
-  String statsSavingsInsight(int pct);
+  /// **'월 평균 수입의 {pct}를 저축하고 있어요'**
+  String statsSavingsInsight(String pct);
 
   /// No description provided for @statsDailyNetSavings.
   ///
@@ -10942,8 +10942,8 @@ abstract class AppLocalizations {
   /// No description provided for @frpPctBang.
   ///
   /// In ko, this message translates to:
-  /// **'{pct}% 달성!'**
-  String frpPctBang(int pct);
+  /// **'{pct} 달성!'**
+  String frpPctBang(String pct);
 
   /// No description provided for @frpMissedWeight.
   ///
@@ -10984,8 +10984,8 @@ abstract class AppLocalizations {
   /// No description provided for @constDetailTodayPct.
   ///
   /// In ko, this message translates to:
-  /// **'{pct}%'**
-  String constDetailTodayPct(int pct);
+  /// **'{pct}'**
+  String constDetailTodayPct(String pct);
 
   /// No description provided for @constDetailTodayRemain.
   ///
@@ -11080,8 +11080,8 @@ abstract class AppLocalizations {
   /// No description provided for @frpPctBadge.
   ///
   /// In ko, this message translates to:
-  /// **'{pct}% 달성'**
-  String frpPctBadge(int pct);
+  /// **'{pct} 달성'**
+  String frpPctBadge(String pct);
 
   /// No description provided for @frpTileStar.
   ///
