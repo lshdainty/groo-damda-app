@@ -314,7 +314,8 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       // await 뒤엔 위젯이 사라졌을 수 있다 — ref · context 를 읽는 값은 먼저 잡아 둔다
       final day = _day;
       final title = _title;
-      final repo = await ref.read(dutchPayRepositoryProvider.future);
+      final container = ProviderScope.containerOf(context, listen: false);
+      final repo = await container.read(dutchPayRepositoryProvider.future);
       await repo.create(
         title: title,
         description: _note.isEmpty ? null : _note,
@@ -345,9 +346,9 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
             ),
         ],
       );
-      ref.invalidate(dutchPayListProvider);
+      container.invalidate(dutchPayListProvider);
       try {
-        await ref.read(dutchPayListProvider.future);
+        await container.read(dutchPayListProvider.future);
       } catch (_) {}
       if (!mounted) return;
       widget.onFinished?.call();
