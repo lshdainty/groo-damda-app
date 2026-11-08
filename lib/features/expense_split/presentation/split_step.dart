@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
@@ -796,7 +797,11 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
         ? null
         : cats?.byRowId(cat!.parentRowId!);
     final fg = resolveChartColor(context, cat?.color, fallback: c.fgBrand);
-    final pct = _totalAbs > 0 ? ((r.amount / _totalAbs) * 100).round() : 0;
+    final pct = formatShareOf(
+      r.amount,
+      _totalAbs,
+      underOne: AppLocalizations.of(context).percentUnderTenth,
+    );
     // 목록을 받기 전은 "…" — 없음으로 보이지 않게
     final catName = cats == null ? '…' : (cat?.categoryName ?? '-');
     final title = r.label.trim().isNotEmpty ? r.label.trim() : catName;
@@ -810,7 +815,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
         items: [
           if (parent != null) PTag(parent.categoryName, shrink: 2),
           PTag(catName, shrink: 1),
-          PTag('$pct%', shrink: 0),
+          PTag(pct, shrink: 0),
         ],
       ),
       onTap: _submitting ? null : () => _openItem(i),

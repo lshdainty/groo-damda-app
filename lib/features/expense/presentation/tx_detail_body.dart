@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -426,7 +427,7 @@ class TxSplitSection extends StatelessWidget {
         ? null
         : categories.byRowId(cat!.parentRowId!);
     final fg = _colorOf(context, s.categoryRowId);
-    final pct = total > 0 ? ((s.amount / total) * 100).round() : 0;
+    final pct = formatShareOf(s.amount, total, underOne: l.percentUnderTenth);
     final title = (s.label?.trim().isNotEmpty ?? false)
         ? s.label!
         : (s.categoryName ?? l.expItem);
@@ -450,7 +451,7 @@ class TxSplitSection extends StatelessWidget {
           // 좁은 줄(큰 글자)에서도 비율이 잘리지 않게 — 줄어드는 쪽은 상위 · 카테고리 이름이고 비율은 줄지 않는다
           if (parent != null) PTag(parent.categoryName, shrink: 2),
           PTag(s.categoryName ?? '-', shrink: 1),
-          PTag('$pct%', shrink: 0),
+          PTag(pct, shrink: 0),
         ],
       ),
       suffix: PListValue.amount(
