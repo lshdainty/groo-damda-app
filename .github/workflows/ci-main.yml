@@ -543,12 +543,14 @@ jobs:
           # 한 번에 하나만 깔리고 서로 덮어쓴다(그렇게 쓰기로 한 구조다). 여기서 가르는
           # 것은 목록에서 어느 쪽인지 알아보는 용도뿐이다.
           if [ "${CONFIG}" = "dev" ]; then
-            SOURCE_NAME="Groo (dev)"
+            SOURCE_NAME="그루 (dev)"
+            SOURCE_SUBTITLE="개발 서버 — 시험용 빌드"
             SOURCE_ID="cloud.groo.altstore.dev"
             APP_NAME="그루 담다 (dev)"
             APP_SUBTITLE="개발 서버 — 시험용 빌드"
           else
-            SOURCE_NAME="Groo"
+            SOURCE_NAME="그루"
+            SOURCE_SUBTITLE="그루 담다 설치 · 업데이트"
             SOURCE_ID="cloud.groo.altstore"
             APP_NAME="그루 담다"
             APP_SUBTITLE="가계부·자산·할일을 한곳에서"
@@ -566,14 +568,14 @@ jobs:
           {
             "name": "${SOURCE_NAME}",
             "identifier": "${SOURCE_ID}",
-            "subtitle": "포레스트 데스크",
+            "subtitle": "${SOURCE_SUBTITLE}",
             "iconURL": "${WEB_BASE}/app-icon.png",
             "tintColor": "0147AD",
             "apps": [
               {
                 "name": "${APP_NAME}",
                 "bundleIdentifier": "com.porest.desk.porestDeskApp",
-                "developerName": "Groo",
+                "developerName": "그루",
                 "subtitle": "${APP_SUBTITLE}",
                 "localizedDescription": "가계부와 자산, 할일을 한곳에서 관리하는 개인용 앱입니다.",
                 "iconURL": "${WEB_BASE}/app-icon.png",
@@ -587,7 +589,7 @@ jobs:
                     "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
                     "downloadURL": "${WEB_BASE}/download/groo-desk-${VERSION}.ipa",
                     "size": ${SIZE},
-                    "minOSVersion": "13.0"
+                    "minOSVersion": "15.0"
                   }
                 ],
                 "appPermissions": { "entitlements": [], "privacy": {} }
