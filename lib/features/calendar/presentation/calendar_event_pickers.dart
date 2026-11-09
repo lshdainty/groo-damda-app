@@ -133,6 +133,7 @@ Future<DateTime?> showCalendarDaySheet(
   required DateTime today,
 }) => PBottomSheet.show<DateTime>(
   context,
+  dismissible: false,
   builder: (ctx) {
     DateTime? draft = value;
     return StatefulBuilder(

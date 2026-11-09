@@ -161,6 +161,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
     FocusScope.of(context).unfocus();
     final picked = await PBottomSheet.show<DateTime>(
       context,
+      dismissible: false,
       builder: (sheetContext) {
         DateTime? draft = _due;
         return StatefulBuilder(

@@ -264,6 +264,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
     FocusScope.of(context).unfocus();
     final picked = await PBottomSheet.show<DateTime>(
       context,
+      dismissible: false,
       builder: (sheetContext) {
         DateTime? draft = _deadline;
         return StatefulBuilder(

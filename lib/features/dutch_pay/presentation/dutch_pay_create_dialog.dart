@@ -174,6 +174,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
     FocusScope.of(context).unfocus();
     final picked = await PBottomSheet.show<DateTime>(
       context,
+      dismissible: false,
       builder: (sheetContext) {
         DateTime draft = _date;
         return StatefulBuilder(

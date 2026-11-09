@@ -822,6 +822,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     FocusScope.of(context).unfocus();
     return PBottomSheet.show<DateTime>(
       context,
+      dismissible: false,
       builder: (ctx) {
         DateTime? draft = value;
         return StatefulBuilder(

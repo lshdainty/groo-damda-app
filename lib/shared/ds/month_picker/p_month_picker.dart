@@ -22,6 +22,7 @@ Future<DateTime?> showPMonthPicker(
   final range = yearRange ?? (start: today.year - 100, end: today.year + 100);
   return PBottomSheet.show<DateTime>(
     context,
+    dismissible: false,
     builder: (sheetContext) {
       var year = initial.year.clamp(range.start, range.end);
       var month = initial.month;

@@ -13,6 +13,7 @@ Future<PTimeValue?> showTimeSheet(
   int minuteStep = 1,
 }) => PBottomSheet.show<PTimeValue>(
   context,
+  dismissible: false,
   builder: (ctx) {
     PTimeValue draft = value;
     return StatefulBuilder(

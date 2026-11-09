@@ -369,6 +369,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     final now = ref.read(clockProvider)();
     final picked = await PBottomSheet.show<PDateRange>(
       context,
+      dismissible: false,
       builder: (_) {
         PDateRange? draft = PDateRange(start: _customFrom, end: _customTo);
         return StatefulBuilder(

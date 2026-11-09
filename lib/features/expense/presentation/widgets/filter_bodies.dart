@@ -149,6 +149,7 @@ Future<PDateRange?> showFilterPeriodSheet(
   final labels = PDatePickerLabels.of(context);
   return PBottomSheet.show<PDateRange>(
     context,
+    dismissible: false,
     builder: (_) {
       PDateRange? draft = current;
       return StatefulBuilder(
