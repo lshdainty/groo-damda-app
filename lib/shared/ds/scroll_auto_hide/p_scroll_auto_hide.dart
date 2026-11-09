@@ -341,6 +341,18 @@ class PScrollAutoHideState extends State<PScrollAutoHide>
               child: widget.builder(context, _controller, _total),
             ),
           ),
+          // 바탕 한 장 — 조각마다 따로 칠하면 조각 높이 · 옮긴 거리가 소수라 맞닿는 물리 픽셀 한 줄을 위아래가 일부씩만 덮어
+          // 뒤 목록이 비친다. 보이는 머리 높이만큼 한 장을 먼저 깔아 이음매 밑을 막는다.
+          ValueListenableBuilder<double>(
+            valueListenable: _translate,
+            builder: (context, dy, _) => Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: math.max(0.0, _total + dy),
+              child: ColoredBox(color: color),
+            ),
+          ),
           Positioned(
             top: 0,
             left: 0,
