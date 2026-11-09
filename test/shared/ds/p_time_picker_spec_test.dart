@@ -181,15 +181,14 @@ void main() {
       expect(formatTimeValue(const PTimeValue(15, 0)), '오후 3:00');
     });
 
-    test(
-      '분 간격 한 벌 — 1 · 5 · 10 · 15 · 30 이고 앱 기본은 1(스펙은 5 — 2026-11-10 사용자 결정으로 앱이 앞섬)',
-      () {
-        expect(pMinuteSteps, _spec.axes['minuteStep']!.map(int.parse));
-        // 스펙 사본의 기본은 아직 5 — 디자인시스템이 1 로 고치면 sync 로 따라온다
-        expect(_spec.defaults['minuteStep'], isNotNull);
-        expect(const PTimePicker().minuteStep, 1);
-      },
-    );
+    test('분 간격 한 벌 — 1 · 5 · 10 · 15 · 30 이고 기본은 1(스펙 minuteStep 기본을 읽는다)', () {
+      expect(pMinuteSteps, _spec.axes['minuteStep']!.map(int.parse));
+      expect(_spec.defaults['minuteStep'], '1');
+      expect(
+        const PTimePicker().minuteStep,
+        int.parse(_spec.defaults['minuteStep']!),
+      );
+    });
   });
 
   group('roundTimeToStep · formatTimeValue', () {
