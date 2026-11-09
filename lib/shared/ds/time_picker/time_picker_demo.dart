@@ -16,7 +16,7 @@ import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 Future<PTimeValue?> showTimePickerSheet(
   BuildContext context, {
   PTimeValue? current,
-  int minuteStep = 5,
+  int minuteStep = 1,
   String title = '시각 선택',
   String? semanticLabel,
   DateTime? now,
