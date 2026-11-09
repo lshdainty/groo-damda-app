@@ -938,7 +938,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final picked = await showTimeSheet(
       context,
       title: l.txfTimeTitle,
-      value: roundTimeToStep(PTimeValue(t.hour, t.minute), 5),
+      value: PTimeValue(t.hour, t.minute),
     );
     if (picked == null || !mounted) return;
     setState(

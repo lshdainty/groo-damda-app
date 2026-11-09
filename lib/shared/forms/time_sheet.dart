@@ -5,12 +5,12 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/time_picker/p_time_picker.dart';
 
-/// 시각 시트 — 12시간 휠([minuteStep] 분, 기본 5 · 방해 금지 시작 · 끝은 1) + "완료". 휠을 안 굴렸으면 지금 값이 들어간다. 닫으면 null.
+/// 시각 시트 — 12시간 휠([minuteStep] 분, 기본 1) + "완료". 휠을 안 굴렸으면 지금 값이 들어간다. 닫으면 null.
 Future<PTimeValue?> showTimeSheet(
   BuildContext context, {
   required String title,
   required PTimeValue value,
-  int minuteStep = 5,
+  int minuteStep = 1,
 }) => PBottomSheet.show<PTimeValue>(
   context,
   builder: (ctx) {

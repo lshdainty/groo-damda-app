@@ -181,11 +181,15 @@ void main() {
       expect(formatTimeValue(const PTimeValue(15, 0)), '오후 3:00');
     });
 
-    test('분 간격 한 벌 — 1 · 5 · 10 · 15 · 30 이고 기본은 5', () {
-      expect(pMinuteSteps, _spec.axes['minuteStep']!.map(int.parse));
-      expect(_spec.defaults['minuteStep'], '5');
-      expect(const PTimePicker().minuteStep, 5);
-    });
+    test(
+      '분 간격 한 벌 — 1 · 5 · 10 · 15 · 30 이고 앱 기본은 1(스펙은 5 — 2026-11-10 사용자 결정으로 앱이 앞섬)',
+      () {
+        expect(pMinuteSteps, _spec.axes['minuteStep']!.map(int.parse));
+        // 스펙 사본의 기본은 아직 5 — 디자인시스템이 1 로 고치면 sync 로 따라온다
+        expect(_spec.defaults['minuteStep'], isNotNull);
+        expect(const PTimePicker().minuteStep, 1);
+      },
+    );
   });
 
   group('roundTimeToStep · formatTimeValue', () {
@@ -260,7 +264,11 @@ void main() {
       await tester.pumpWidget(
         _host(
           Brightness.light,
-          PTimePicker(now: DateTime(2026, 10, 15, 9, 13), onChanged: calls.add),
+          PTimePicker(
+            now: DateTime(2026, 10, 15, 9, 13),
+            minuteStep: 5,
+            onChanged: calls.add,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -277,7 +285,11 @@ void main() {
         await tester.pumpWidget(
           _host(
             Brightness.light,
-            PTimePicker(value: const PTimeValue(23, 58), onChanged: calls.add),
+            PTimePicker(
+              value: const PTimeValue(23, 58),
+              minuteStep: 5,
+              onChanged: calls.add,
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -446,7 +458,11 @@ void main() {
       await tester.pumpWidget(
         _host(
           Brightness.light,
-          PTimePicker(now: DateTime(2026, 10, 15, 9, 0), onChanged: calls.add),
+          PTimePicker(
+            now: DateTime(2026, 10, 15, 9, 0),
+            minuteStep: 5,
+            onChanged: calls.add,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -530,7 +546,7 @@ void main() {
       expect(calls.last, const PTimeValue(9, 0));
     });
 
-    testWidgets('알 수 없는 분 간격은 5 로 본다', (tester) async {
+    testWidgets('알 수 없는 분 간격은 1 로 본다', (tester) async {
       await tester.pumpWidget(
         _host(
           Brightness.light,
@@ -538,7 +554,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(_columns(tester)[2].options, hasLength(12));
+      expect(_columns(tester)[2].options, hasLength(60));
     });
   });
 
@@ -550,7 +566,11 @@ void main() {
         await tester.pumpWidget(
           _host(
             Brightness.light,
-            const PTimePicker(value: PTimeValue(15, 0), semanticLabel: '시작 시각'),
+            const PTimePicker(
+              value: PTimeValue(15, 0),
+              minuteStep: 5,
+              semanticLabel: '시작 시각',
+            ),
           ),
         );
         await tester.pumpAndSettle();
