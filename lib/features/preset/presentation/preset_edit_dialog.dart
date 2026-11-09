@@ -18,6 +18,8 @@ import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.da
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
 import 'package:groo_damda_app/features/expense/domain/expense_category.dart';
 import 'package:groo_damda_app/features/expense/presentation/category_pick.dart';
+import 'package:groo_damda_app/features/expense/presentation/tx_input.dart'
+    show allowTxAsset;
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/features/preset/domain/expense_template.dart';
 import 'package:groo_damda_app/features/preset/presentation/preset_view.dart';
@@ -462,6 +464,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     required List<Asset> Function(List<Asset> assets) pool,
     required int? selected,
     required bool withNone,
+    String? emptyText,
   }) {
     FocusScope.of(context).unfocus();
     return PBottomSheet.show<int>(
@@ -473,15 +476,38 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
           closeLabel: l.actionClose,
           flushBody: true,
           body: AssetPickGate(
-            builder: (_, assets) => PickList<int>(
-              label: title,
-              selected: selected ?? (withNone ? _kNoAsset : null),
-              items: [
-                if (withNone)
-                  PickItem<int>(value: _kNoAsset, title: l.presetNoAccount),
-                for (final a in pool(assets)) _assetItem(a),
-              ],
-            ),
+            builder: (_, assets) {
+              final list = pool(assets);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  PickList<int>(
+                    label: title,
+                    selected: selected ?? (withNone ? _kNoAsset : null),
+                    items: [
+                      if (withNone)
+                        PickItem<int>(
+                          value: _kNoAsset,
+                          title: l.presetNoAccount,
+                        ),
+                      for (final a in list) _assetItem(a),
+                    ],
+                  ),
+                  // 결제 수단에 맞는 계좌 · 카드가 하나도 없을 때(수단을 고른 뒤에만)
+                  if (emptyText != null && list.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(PSpacing.globalGutter),
+                      child: Text(
+                        emptyText,
+                        textAlign: TextAlign.center,
+                        style: PTypography.t4.copyWith(
+                          color: sheetContext.colors.fgNeutralSubtle,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         );
       },
@@ -492,9 +518,14 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
       title: l.presetAssetCard,
-      pool: (assets) => assets,
+      // 결제 수단을 골랐으면 그 수단에 맞는 계좌 · 카드만(거래 입력과 같은 규칙 — allowTxAsset)
+      pool: (assets) => [
+        for (final a in assets)
+          if (allowTxAsset(a, _paymentMethod, _type)) a,
+      ],
       selected: _assetRowId,
       withNone: true,
+      emptyText: _paymentMethod.isNotEmpty ? l.txfNoPickableAsset : null,
     );
     if (picked == null || !mounted) return;
     setState(() {
@@ -573,7 +604,17 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       },
     );
     if (picked == null || !mounted) return;
-    setState(() => _paymentMethod = picked);
+    setState(() {
+      _paymentMethod = picked;
+      // 안 맞는 계좌 · 카드는 비운다(사용자가 바꾼 결과라 바뀐 값으로 친다)
+      if (picked.isNotEmpty && _assetRowId != null && !_isTransfer) {
+        final cur = _assets.where((a) => a.rowId == _assetRowId).firstOrNull;
+        if (cur != null && !allowTxAsset(cur, picked, _type)) {
+          _assetRowId = null;
+          _assetAuto = false;
+        }
+      }
+    });
   }
 
   // ── 저장 ──────────────────────────────────────────────────

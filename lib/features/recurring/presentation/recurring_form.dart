@@ -674,6 +674,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     required List<Asset> Function(List<Asset> assets) pool,
     required int? selected,
     required bool withNone,
+    String? emptyText,
   }) {
     FocusScope.of(context).unfocus();
     return PBottomSheet.show<int>(
@@ -703,16 +704,35 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                         ),
                       ),
                     )
-                  : PickList<int>(
-                      label: title,
-                      selected: selected ?? (withNone ? _kNoAsset : null),
-                      items: [
-                        if (withNone)
-                          PickItem<int>(
-                            value: _kNoAsset,
-                            title: l.recNoneOf(title),
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        PickList<int>(
+                          label: title,
+                          selected: selected ?? (withNone ? _kNoAsset : null),
+                          items: [
+                            if (withNone)
+                              PickItem<int>(
+                                value: _kNoAsset,
+                                title: l.recNoneOf(title),
+                              ),
+                            for (final a in candidates) _assetItem(a),
+                          ],
+                        ),
+                        // 결제 수단에 맞는 계좌 · 카드가 하나도 없을 때
+                        if (emptyText != null && candidates.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(
+                              PSpacing.globalGutter,
+                            ),
+                            child: PText(
+                              emptyText,
+                              textAlign: TextAlign.center,
+                              style: PTypography.t4.copyWith(
+                                color: sheetContext.colors.fgNeutralSubtle,
+                              ),
+                            ),
                           ),
-                        for (final a in candidates) _assetItem(a),
                       ],
                     );
             },
@@ -735,6 +755,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       ],
       selected: _assetRowId,
       withNone: true,
+      emptyText: _paymentMethod.isNotEmpty ? l.txfNoPickableAsset : null,
     );
     if (picked == null || !mounted) return;
     setState(() => _assetRowId = picked == _kNoAsset ? null : picked);
