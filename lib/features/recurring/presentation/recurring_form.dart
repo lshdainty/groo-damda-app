@@ -1569,15 +1569,6 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
               onTap: () => _enterText(_Step.merchant),
             ),
             PickerRow(
-              title: income ? l.recDepositAccount : l.recurringAssetCard,
-              prefix: const Icon(LucideIcons.wallet),
-              value: from?.assetName,
-              placeholder: l.recNoneOf(
-                income ? l.recDepositAccount : l.recurringAssetCard,
-              ),
-              onTap: _pickAssetRow,
-            ),
-            PickerRow(
               title: income ? l.recIncomeMethod : l.expPaymentMethod,
               prefix: const Icon(LucideIcons.creditCard),
               value: _payLabel(l, _paymentMethod),
@@ -1585,6 +1576,15 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                 income ? l.recIncomeMethod : l.expPaymentMethod,
               ),
               onTap: _pickPayment,
+            ),
+            PickerRow(
+              title: income ? l.recDepositAccount : l.recurringAssetCard,
+              prefix: const Icon(LucideIcons.wallet),
+              value: from?.assetName,
+              placeholder: l.recNoneOf(
+                income ? l.recDepositAccount : l.recurringAssetCard,
+              ),
+              onTap: _pickAssetRow,
             ),
           ],
           _stepRow(

@@ -119,7 +119,6 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
       );
     } else {
       add('category', l.expCategory, p.categoryName);
-      add('asset', l.presetAssetCard, p.assetName);
       add('payment', l.expPaymentMethod, switch (p.paymentMethod) {
         'CASH' => l.expPayCash,
         'CARD' => l.expPayCard,
@@ -127,6 +126,7 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
         'OTHER' => l.expPayOther,
         _ => null,
       });
+      add('asset', l.presetAssetCard, p.assetName);
       add('merchant', l.presetMerchant, p.merchant);
     }
     add('memo', l.expDescription, p.description);

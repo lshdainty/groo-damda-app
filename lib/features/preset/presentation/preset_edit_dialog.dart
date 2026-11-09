@@ -1055,16 +1055,16 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               step: _Step.merchant,
             ),
             PickerRow(
-              title: l.presetAssetCard,
-              prefix: const Icon(LucideIcons.wallet),
-              value: from?.assetName ?? l.presetNoAccount,
-              onTap: _pickAssetRow,
-            ),
-            PickerRow(
               title: l.expPaymentMethod,
               prefix: const Icon(LucideIcons.creditCard),
               value: _payLabel(l, _paymentMethod) ?? l.presetNoPayment,
               onTap: _pickPayment,
+            ),
+            PickerRow(
+              title: l.presetAssetCard,
+              prefix: const Icon(LucideIcons.wallet),
+              value: from?.assetName ?? l.presetNoAccount,
+              onTap: _pickAssetRow,
             ),
             _stepRow(
               title: l.presetAmountLabel,
