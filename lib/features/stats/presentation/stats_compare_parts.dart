@@ -82,11 +82,11 @@ class _CompareBar extends StatelessWidget {
               heightFactor: 1,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: current ? c.fgBrand : c.bgNeutralWeak,
-                  // 지난 기간은 1px 테두리를 안쪽에(바탕과 구분)
-                  border: current
-                      ? null
-                      : Border.all(color: c.strokeNeutralWeak),
+                  // Chart 막대의 계열 색(11-10 10B, chart.md "비교 계열") — 이번은 chart-blue, 지난 기간은 같은 색의 옅은 단계
+                  // chart-blue-weak. 트랙 · 테두리는 없다(진행 막대가 아니라 두 값을 견주는 그림이다).
+                  color: current
+                      ? PChartColor.blue.of(c)
+                      : PChartColor.blue.weakOf(c),
                   borderRadius: BorderRadius.circular(PRounded.full),
                 ),
               ),
