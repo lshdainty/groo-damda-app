@@ -95,14 +95,23 @@ void main() {
     expect(_result, DateTime(2026, 11, 1));
   });
 
-  testWidgets('바깥 누르기도 닫기 버튼도 값 없이 닫는다', (tester) async {
+  testWidgets('바깥 누르기로는 안 닫히고 닫기 버튼은 값 없이 닫는다(dismissible: false)', (
+    tester,
+  ) async {
     await _open(tester);
     await tester.tapAt(const Offset(180, 20));
     await tester.pumpAndSettle();
+    expect(_closed, isFalse, reason: '휠 시트는 바깥을 눌러도 닫히지 않는다');
+    expect(find.byType(PBottomSheetContent), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('닫기').first);
+    await tester.pumpAndSettle();
     expect(_closed, isTrue);
     expect(_result, isNull);
+  });
+
+  testWidgets('시스템 뒤로 가기는 값 없이 닫는다', (tester) async {
     await _open(tester);
-    await tester.tap(find.bySemanticsLabel('닫기').first);
+    await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(_closed, isTrue);
     expect(_result, isNull);
@@ -135,17 +144,19 @@ void main() {
     }
   });
 
-  testWidgets('아래로 끌어도 값 없이 닫힌다', (tester) async {
+  testWidgets('아래로 끌어도 닫히지 않고 제자리다(dismissible: false)', (tester) async {
     await _open(tester);
     // 열린 뒤 0.5초가 지나야 끌린다(스펙) — 그 뒤에 끈다
     await tester.pump(const Duration(milliseconds: 700));
+    final top = tester.getTopLeft(find.byType(PBottomSheetContent)).dy;
     await tester.fling(
-      find.byType(PBottomSheetContent),
+      find.byKey(const ValueKey('p-bottom-sheet-title')),
       const Offset(0, 500),
       2000,
     );
     await tester.pumpAndSettle();
-    expect(_closed, isTrue);
-    expect(_result, isNull);
+    expect(_closed, isFalse);
+    expect(find.byType(PBottomSheetContent), findsOneWidget);
+    expect(tester.getTopLeft(find.byType(PBottomSheetContent)).dy, top);
   });
 }
