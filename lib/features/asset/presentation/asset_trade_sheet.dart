@@ -269,8 +269,9 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       _submitting = true;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(assetRepositoryProvider.future);
+      final repo = await container.read(assetRepositoryProvider.future);
       await repo.createTrade(
         assetRowId: widget.asset.rowId,
         tradeType: _type,
@@ -294,18 +295,18 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
       );
       // 예수금·보유·실현손익이 한꺼번에 바뀐다 — 자산과 거래 목록을 모두 새로 받는다.
       // 순자산·추이도 같은 매매로 움직이므로 자산 변경 묶음을 통째로 비운다.
-      invalidateAfterAssetChange(ref);
-      ref.invalidate(assetTradesProvider(widget.asset.rowId));
+      invalidateAfterAssetChangeIn(container);
+      container.invalidate(assetTradesProvider(widget.asset.rowId));
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
       if (isUnconfirmedSave(e)) {
-        invalidateAfterAssetChange(ref);
-        ref.invalidate(assetTradesProvider(widget.asset.rowId));
+        invalidateAfterAssetChangeIn(container);
+        container.invalidate(assetTradesProvider(widget.asset.rowId));
       }
+      if (!mounted) return;
       setState(() {
         _failed = true;
         _failCode = e.code;

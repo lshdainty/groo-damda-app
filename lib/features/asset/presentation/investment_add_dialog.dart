@@ -479,8 +479,9 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       _submitting = true;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(assetRepositoryProvider.future);
+      final repo = await container.read(assetRepositoryProvider.future);
       if (_isEdit) {
         // 메모·통화·환율은 이 화면이 소유한 칸이라 비운 상태 그대로 실어야 지워진다 —
         // 키를 빼면 서버가 옛 값을 지킨다(QA #99).
@@ -522,19 +523,19 @@ class _InvestmentAddBodyState extends ConsumerState<InvestmentAddBody> {
       }
       // 자산이 하나 늘거나 줄면 순자산·추이·청구·실적이 함께 달라진다 —
       // 전부 별도 조회라 목록만 비우면 옛 값이 남는다.
-      invalidateAfterAssetChange(ref);
-      ref.invalidate(investmentValuationMapProvider);
+      invalidateAfterAssetChangeIn(container);
+      container.invalidate(investmentValuationMapProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값 · 단계가 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
       // 고쳐 다시 할 수 있는 코드(AST_036 · AST_037)만 다른 고정 글로 가른다(I-13).
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
       if (isUnconfirmedSave(e)) {
-        invalidateAfterAssetChange(ref);
-        ref.invalidate(investmentValuationMapProvider);
+        invalidateAfterAssetChangeIn(container);
+        container.invalidate(investmentValuationMapProvider);
       }
+      if (!mounted) return;
       setState(() {
         _failed = true;
         _failCode = e.code;

@@ -141,12 +141,13 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         );
       }
     });
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
+      final repo = await container.read(expenseRepositoryProvider.future);
       await repo.reorderCategories(items, silent: true);
       // 서버 권위 데이터로 재동기 후 오버레이 제거 — refetch 완료를 기다려 깜빡임 방지.
-      ref.invalidate(categoriesProvider);
-      await ref.read(categoriesProvider.future);
+      container.invalidate(categoriesProvider);
+      await container.read(categoriesProvider.future);
     } catch (e) {
       debugPrint('reorderCategories failed: $e');
       // 낙관 순서는 finally 에서 걷혀 서버 순서로 되돌아간다 — 스낵바 두 문장("… 잠시 뒤 다시 시도해주세요."), 다시 시도 버튼 없음.

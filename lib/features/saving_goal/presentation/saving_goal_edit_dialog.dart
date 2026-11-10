@@ -365,8 +365,9 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
       _submitting = true;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(savingGoalRepositoryProvider.future);
+      final repo = await container.read(savingGoalRepositoryProvider.future);
       // 현재 모은 금액은 update/create 필드가 아니라 contribute API 로 차액 반영(웹 동일 로직).
       if (_isEdit) {
         await repo.update(
@@ -400,10 +401,9 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
           try {
             await repo.contribute(created.rowId, amount: current, silent: true);
           } on ApiException catch (e) {
-            ref.invalidate(savingGoalListProvider);
+            container.invalidate(savingGoalListProvider);
             if (!mounted) return;
             final l = AppLocalizations.of(context);
-            final container = ProviderScope.containerOf(context);
             final snack = PSnackbar.of(context);
             PBottomSheet.of(context).close();
             // 납입 응답만 못 읽었다(서버는 납입했다) — [다시 시도] 를 주면 두 번 납입된다. 확인을 부탁한다(검수 M3)
@@ -425,14 +425,14 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
           }
         }
       }
-      ref.invalidate(savingGoalListProvider);
+      container.invalidate(savingGoalListProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
-      if (isUnconfirmedSave(e)) ref.invalidate(savingGoalListProvider);
+      if (isUnconfirmedSave(e)) container.invalidate(savingGoalListProvider);
+      if (!mounted) return;
       setState(() {
         _failed = true;
         _failure = e;

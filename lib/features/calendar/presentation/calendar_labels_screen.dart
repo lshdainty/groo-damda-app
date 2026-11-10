@@ -326,8 +326,9 @@ class _LabelFormState extends ConsumerState<_LabelForm> {
       _saveError = null;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(calendarRepositoryProvider.future);
+      final repo = await container.read(calendarRepositoryProvider.future);
       if (_edit == null) {
         await repo.createLabel(labelName: name, color: _color);
       } else {
@@ -337,18 +338,18 @@ class _LabelFormState extends ConsumerState<_LabelForm> {
           color: _color,
         );
       }
-      ref.invalidate(eventLabelsProvider);
+      container.invalidate(eventLabelsProvider);
       // 일정 응답에 라벨 이름·색이 박혀서 온다 — 이미 받아 둔 월 일정도 함께 무효화한다
-      ref.invalidate(monthEventsProvider);
+      container.invalidate(monthEventsProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
       if (isUnconfirmedSave(e)) {
-        ref.invalidate(eventLabelsProvider);
-        ref.invalidate(monthEventsProvider);
+        container.invalidate(eventLabelsProvider);
+        container.invalidate(monthEventsProvider);
       }
+      if (!mounted) return;
       setState(() => _saveError = saveFailureText(l, e, l.calLabelSaveFailed));
     } finally {
       sheet?.setBusy(false);

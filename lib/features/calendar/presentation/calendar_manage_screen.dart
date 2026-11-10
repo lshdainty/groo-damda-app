@@ -230,13 +230,14 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
     );
     if (picked == null || picked == stored || !mounted) return;
     _colorBusy = true;
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
+      final repo = await container.read(userCalendarRepositoryProvider.future);
       // 색만 보낸다. 바로 반영하는 값이라 실패하면 줄 값은 옛 색 그대로 — 알림만, [다시 시도] 없음
       await repo.update(id: cal.rowId, color: picked, silent: true);
       widget.onRecolored(picked);
-      ref.invalidate(userCalendarListProvider);
-      ref.invalidate(monthEventsProvider);
+      container.invalidate(userCalendarListProvider);
+      container.invalidate(monthEventsProvider);
     } on ApiException {
       snack?.show(
         message: l.calColorChangeFailed,
