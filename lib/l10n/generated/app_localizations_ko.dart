@@ -8204,6 +8204,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get txfNoIncomeMethod => '수입 방식 없음';
 
   @override
+  String get txfNoPickableDepositAsset => '이 수입 방식에 맞는 입금 계좌가 없어요.';
+
+  @override
   String get txfSelectFrom => '보내는 계좌 선택';
 
   @override

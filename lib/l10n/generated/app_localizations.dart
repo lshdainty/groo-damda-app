@@ -14671,6 +14671,12 @@ abstract class AppLocalizations {
   /// **'수입 방식 없음'**
   String get txfNoIncomeMethod;
 
+  /// No description provided for @txfNoPickableDepositAsset.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 수입 방식에 맞는 입금 계좌가 없어요.'**
+  String get txfNoPickableDepositAsset;
+
   /// No description provided for @txfSelectFrom.
   ///
   /// In ko, this message translates to:

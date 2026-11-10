@@ -528,7 +528,9 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       ],
       selected: _assetRowId,
       withNone: true,
-      emptyText: _paymentMethod.isNotEmpty ? l.txfNoPickableAsset : null,
+      emptyText: _paymentMethod.isNotEmpty
+          ? (_isIncome ? l.txfNoPickableDepositAsset : l.txfNoPickableAsset)
+          : null,
     );
     if (picked == null || !mounted) return;
     setState(() {

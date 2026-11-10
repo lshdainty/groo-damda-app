@@ -4416,6 +4416,7 @@
   "txfSaveFailed": "Couldn't save. Please try again in a moment.",
   "txfAssetLoadFailed": "Couldn't load accounts and cards",
   "txfNoPickableAsset": "No account or card fits this payment method.",
+  "txfNoPickableDepositAsset": "No deposit account matches this income method.",
   "txfFxHint": "{local} {code} × {rate} = {krw}",
   "@txfFxHint": {
     "placeholders": {

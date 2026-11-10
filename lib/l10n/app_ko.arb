@@ -4788,6 +4788,7 @@
   "txfNoCategory": "카테고리 없음",
   "txfNoDepositAccount": "입금 계좌 없음",
   "txfNoIncomeMethod": "수입 방식 없음",
+  "txfNoPickableDepositAsset": "이 수입 방식에 맞는 입금 계좌가 없어요.",
   "txfSelectFrom": "보내는 계좌 선택",
   "txfSelectTo": "받는 계좌 선택",
   "txfDeletedAsset": "지운 계좌",
