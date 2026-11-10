@@ -290,7 +290,8 @@ class _UnreadHeadState extends State<_UnreadHead> {
       headingLevel: 0,
       action: PTextButton(
         label: l.notiMarkAllRead,
-        onPressed: _busy ? null : _run,
+        onPressed: _run,
+        loading: _busy,
       ),
     );
   }
