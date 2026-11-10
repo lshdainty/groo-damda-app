@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -16,11 +17,12 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
+import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 정산 상세(I-15 38 · 39 · 40) — ds Bottom Sheet 조회. 머리 제목 = 정산 이름(줄바꿈), 본문 = "{날짜 (요일)} · {장소}" · 총액(t9 24 / 32 · 700 ·
 /// 쉼표 뒤에서만 줄바꿈) · "1인당 … · {n}명" · 선 · "참여자 · {n}" + ds List 줄(앞 Avatar 36 · 이름 · 설명 · 뒤 Badge 또는 [받음]).
-/// 바닥: 진행 중 = [삭제] ghost critical + [일괄 요청](막힘) + [모두 받음] · 완료 = [삭제] 하나. 송금 요청 · 일괄 요청은 단추만 남기고 막는다
+/// 바닥: 진행 중 = [삭제] ghost critical + [모두 받음] · 완료 = [삭제] 하나. [일괄 요청] 은 머리 ⋮ 메뉴(막힘). 송금 요청 · 일괄 요청은 줄만 남기고 막는다
 /// (서버에 요청 API 가 없다 — 10-30 결정, 이유 줄 Callout).
 ///
 /// **몫은 저장된 값(`p.amount`)** — 나머지 원이 있는 사람은 그 값이 보인다. 결제자 줄은 몫이 다른 사람과 다를 때만 "· 몫 …" 을 붙인다.
@@ -190,13 +192,6 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
             }),
     );
 
-    final requestAll = PButton(
-      label: l.dutchRequestAll,
-      variant: PButtonVariant.neutralWeak,
-      size: PButtonSize.large,
-      semanticLabel: '${l.dutchRequestAll}. ${l.dutchRequestSoon}',
-      onPressed: null,
-    );
     final settleAll = PButton(
       label: l.dutchSettleAll,
       size: PButtonSize.large,
@@ -209,6 +204,8 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
     return PBottomSheetContent(
       title: d.title,
       closeLabel: l.actionClose,
+      // 동작이 여럿이면 머리 ⋮ 하나(bottom-sheet.yaml headerAction) — 바닥은 주 동작 + 왼쪽 [삭제] 만. 진행 중일 때만 [일괄 요청] 이 있다
+      headerAction: d.isSettled ? null : _headerAction(l, d),
       // 참여자 수는 사용자 데이터라 늘어나는 목록 — 끝 흐림을 건다
       scrollFog: true,
       flushBody: true,
@@ -274,24 +271,45 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
       footerRow: d.isSettled
           // 완료 정산의 [삭제] 는 폭 전체가 아니라 왼쪽 · 내용 폭
           ? Row(children: [deleteButton])
-          : _footer(context, deleteButton, requestAll, settleAll),
+          : _footer(context, deleteButton, settleAll),
     );
   }
 
-  /// 바닥 줄 — 보통은 한 줄(삭제 · 일괄 요청 · 모두 받음). 글자를 크게 키우면 글이 겹치므로 세로로 쌓는다(주 버튼이 위).
-  Widget _footer(
-    BuildContext context,
-    Widget deleteButton,
-    Widget requestAll,
-    Widget settleAll,
-  ) {
+  /// 머리 ⋮ — [일괄 요청] 은 아직 열리지 않았다(서버에 요청 API 가 없다 — 10-30 결정). 줄은 남기고 막는다, 이유는 설명 줄.
+  Widget _headerAction(AppLocalizations l, DutchPay d) {
+    return PButton.icon(
+      icon: LucideIcons.ellipsisVertical,
+      semanticLabel: l.recMoreOf(d.title),
+      variant: PButtonVariant.ghost,
+      ghostColor: PButtonGhostColor.neutralSubtle,
+      size: PButtonSize.small,
+      onPressed: _busy
+          ? null
+          : () => PMenuSheet.show(
+              context,
+              title: d.title,
+              groups: [
+                PMenuSheetGroup([
+                  PMenuSheetItem(
+                    label: l.dutchRequestAll,
+                    description: l.dutchRequestSoon,
+                    icon: LucideIcons.send,
+                    enabled: false,
+                  ),
+                ]),
+              ],
+            ),
+    );
+  }
+
+  /// 바닥 줄 — 왼쪽 [삭제] 내용 폭 + 남은 폭 [모두 받음]. 글자를 크게 키우면 글이 겹치므로 세로로 쌓는다(주 버튼이 위).
+  Widget _footer(BuildContext context, Widget deleteButton, Widget settleAll) {
     if (MediaQuery.textScalerOf(context).scale(16) > 22) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x2,
         children: [
           settleAll,
-          requestAll,
           Row(children: [deleteButton]),
         ],
       );
@@ -300,8 +318,6 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
       spacing: PSpacing.x2,
       children: [
         deleteButton,
-        // [일괄 요청] 은 글 폭, 주 버튼 [모두 받음] 이 남은 폭을 채운다(웹과 같다)
-        requestAll,
         Expanded(child: settleAll),
       ],
     );
