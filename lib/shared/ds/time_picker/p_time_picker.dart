@@ -130,7 +130,7 @@ class PTimePicker extends StatefulWidget {
     super.key,
     this.value,
     this.onChanged,
-    this.minuteStep = 5,
+    this.minuteStep = 1,
     this.disabled = false,
     this.now,
     this.labels,
@@ -143,7 +143,7 @@ class PTimePicker extends StatefulWidget {
   /// 휠이 멈춰 값이 정해졌을 때 — 칸이 아니라 draft 에 넣는다.
   final ValueChanged<PTimeValue>? onChanged;
 
-  /// 분 간격 — 1 · 5(기본) · 10 · 15 · 30. 그 밖의 값은 5.
+  /// 분 간격 — 1(기본, 2026-11-10 사용자 결정 — 스펙 5 에서 앱이 앞서 바꿈) · 5 · 10 · 15 · 30. 그 밖의 값은 1.
   final int minuteStep;
   final bool disabled;
 
@@ -172,7 +172,7 @@ class _PTimePickerState extends State<PTimePicker> {
   late PTimeValue _current;
 
   int get _step =>
-      pMinuteSteps.contains(widget.minuteStep) ? widget.minuteStep : 5;
+      pMinuteSteps.contains(widget.minuteStep) ? widget.minuteStep : 1;
 
   PTimeValue _resolve() =>
       roundTimeToStep(widget.value ?? _inner ?? _fallback, _step);

@@ -168,14 +168,14 @@ class _RecurringDetailBodyState extends ConsumerState<RecurringDetailBody> {
     } else {
       add('category', l.expCategory, cat?.categoryName ?? it.categoryName);
       add(
-        'asset',
-        isIncome ? l.recDepositAccount : l.recurringAssetCard,
-        it.assetName,
-      );
-      add(
         'payment',
         isIncome ? l.recIncomeMethod : l.expPaymentMethod,
         _payLabel(l, it.paymentMethod),
+      );
+      add(
+        'asset',
+        isIncome ? l.recDepositAccount : l.recurringAssetCard,
+        it.assetName,
       );
     }
     add('memo', l.expDescription, it.description);

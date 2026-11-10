@@ -254,8 +254,6 @@ class _Content extends ConsumerWidget {
         context,
         title: title,
         value: _parseHm(current),
-        // 방해 금지 시작 · 끝은 1분 간격(time-picker.md)
-        minuteStep: 1,
       );
       if (picked == null || !context.mounted) return;
       final hm = _fmtHm(picked);

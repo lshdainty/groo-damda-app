@@ -61,12 +61,16 @@ export 'package:groo_damda_app/shared/ds/bottom_sheet/bottom_sheet_route.dart'
 ///
 /// 모션 — 열림 300ms enter-expressive(딤 300ms enter), 닫힘 200ms exit. 모션 줄이기면 150ms 서서히 나타나고 사라진다.
 abstract final class PBottomSheet {
-  /// 시트를 띄운다. [builder] 가 [PBottomSheetContent] 를 돌려준다. 닫으면 [PBottomSheetController.close] 에 준 결과
+  /// 시트를 띄운다. [dismissible] 을 끄면(휠 · 달력이 든 시트 — 위아래로 굴리다 시트가 내려가는 것을 막는다, 2026-11-10 사용자 결정)
+  /// 바깥(딤) 누르기 · 끌어내리기 · 손잡이로는 닫히지 않고 ✕ · 바닥 버튼 · 뒤로 가기 · `Esc` 로만 닫는다. 입력 폼([form])과
+  /// 달리 바뀐 값을 묻지 않는다([isDirty] 를 주지 않으면). 기본은 켜짐 — 지금 동작 그대로다.
+  /// [builder] 가 [PBottomSheetContent] 를 돌려준다. 닫으면 [PBottomSheetController.close] 에 준 결과
   /// (없으면 null).
   static Future<T?> show<T>(
     BuildContext context, {
     required WidgetBuilder builder,
     bool form = false,
+    bool dismissible = true,
     bool Function()? isDirty,
     PLeaveConfirmCopy? leaveCopy,
     bool Function()? interceptClose,
@@ -93,12 +97,12 @@ abstract final class PBottomSheet {
         themes: captureOverlayThemes(context, navigator),
         reduceMotion: MediaQuery.maybeDisableAnimationsOf(context) ?? false,
         builder: builder,
-        form: form,
+        form: form || !dismissible,
         isDirty: isDirty,
         leaveCopy: leaveCopy,
         interceptClose: interceptClose,
         isForm: isForm,
-        snapPoints: form ? null : snapPoints,
+        snapPoints: form || !dismissible ? null : snapPoints,
         initialFocus: initialFocus,
       ),
     );

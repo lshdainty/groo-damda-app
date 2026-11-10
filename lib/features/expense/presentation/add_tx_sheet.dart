@@ -938,7 +938,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     final picked = await showTimeSheet(
       context,
       title: l.txfTimeTitle,
-      value: roundTimeToStep(PTimeValue(t.hour, t.minute), 5),
+      value: PTimeValue(t.hour, t.minute),
     );
     if (picked == null || !mounted) return;
     setState(
@@ -2226,27 +2226,6 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 errorMessage: _errs.category,
               ),
               TxRow(
-                key: const ValueKey('tx-row-asset'),
-                title: isIncome ? l.expDepositAccount : l.expAccountCard,
-                icon: LucideIcons.wallet,
-                value: assetName(c.assetRowId),
-                placeholder: isIncome
-                    ? l.txfNoDepositAccount
-                    : l.txfNoAccountOption,
-                locked: locked,
-                onTap: () => _pickAsset(income: isIncome),
-              ),
-              // 문자 카드 기억 — 계좌·카드 줄 바로 아래(지시서 D 22), 계좌를 고르기 전에는 막힌 줄
-              if (c.smsRememberAsk)
-                PListCheckItem(
-                  key: const ValueKey('tx-sms-remember'),
-                  title: l.smsRememberCard,
-                  checked: c.assetRowId != null && c.smsRememberCard,
-                  onChanged: c.assetRowId == null
-                      ? null
-                      : (v) => setState(() => c.smsRememberCard = v),
-                ),
-              TxRow(
                 key: const ValueKey('tx-row-method'),
                 title: isIncome ? l.expIncomeMethod : l.expPaymentMethod,
                 icon: LucideIcons.creditCard,
@@ -2259,6 +2238,27 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                 locked: locked,
                 onTap: _pickMethod,
               ),
+              TxRow(
+                key: const ValueKey('tx-row-asset'),
+                title: isIncome ? l.expDepositAccount : l.expAccountCard,
+                icon: LucideIcons.wallet,
+                value: assetName(c.assetRowId),
+                placeholder: isIncome
+                    ? l.txfNoDepositAccount
+                    : l.txfNoAccountOption,
+                locked: locked,
+                onTap: () => _pickAsset(income: isIncome),
+              ),
+              // 문자 카드 기억 — 계좌·카드 줄 바로 아래(지시서 D 22), 계좌를 고르기 전에는 막힌 줄. 줄 순서는 결제 수단 → 계좌·카드(2026-11-10 사용자 결정)
+              if (c.smsRememberAsk)
+                PListCheckItem(
+                  key: const ValueKey('tx-sms-remember'),
+                  title: l.smsRememberCard,
+                  checked: c.assetRowId != null && c.smsRememberCard,
+                  onChanged: c.assetRowId == null
+                      ? null
+                      : (v) => setState(() => c.smsRememberCard = v),
+                ),
               if (showTxInstallment(c, assets))
                 TxRow(
                   key: const ValueKey('tx-row-installment'),

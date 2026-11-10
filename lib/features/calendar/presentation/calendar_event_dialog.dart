@@ -414,7 +414,7 @@ class _CalendarEventFormSheetState
     final picked = await showTimeSheet(
       context,
       title: isStart ? l.calFormStartTime : l.calFormEndTime,
-      value: roundTimeToStep(PTimeValue.fromDateTime(cur), 5),
+      value: PTimeValue.fromDateTime(cur),
     );
     if (picked == null || !mounted) return;
     final next = DateTime(

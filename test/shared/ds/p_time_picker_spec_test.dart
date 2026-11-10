@@ -181,10 +181,13 @@ void main() {
       expect(formatTimeValue(const PTimeValue(15, 0)), '오후 3:00');
     });
 
-    test('분 간격 한 벌 — 1 · 5 · 10 · 15 · 30 이고 기본은 5', () {
+    test('분 간격 한 벌 — 1 · 5 · 10 · 15 · 30 이고 기본은 1(스펙 minuteStep 기본을 읽는다)', () {
       expect(pMinuteSteps, _spec.axes['minuteStep']!.map(int.parse));
-      expect(_spec.defaults['minuteStep'], '5');
-      expect(const PTimePicker().minuteStep, 5);
+      expect(_spec.defaults['minuteStep'], '1');
+      expect(
+        const PTimePicker().minuteStep,
+        int.parse(_spec.defaults['minuteStep']!),
+      );
     });
   });
 
@@ -260,7 +263,11 @@ void main() {
       await tester.pumpWidget(
         _host(
           Brightness.light,
-          PTimePicker(now: DateTime(2026, 10, 15, 9, 13), onChanged: calls.add),
+          PTimePicker(
+            now: DateTime(2026, 10, 15, 9, 13),
+            minuteStep: 5,
+            onChanged: calls.add,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -277,7 +284,11 @@ void main() {
         await tester.pumpWidget(
           _host(
             Brightness.light,
-            PTimePicker(value: const PTimeValue(23, 58), onChanged: calls.add),
+            PTimePicker(
+              value: const PTimeValue(23, 58),
+              minuteStep: 5,
+              onChanged: calls.add,
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -446,7 +457,11 @@ void main() {
       await tester.pumpWidget(
         _host(
           Brightness.light,
-          PTimePicker(now: DateTime(2026, 10, 15, 9, 0), onChanged: calls.add),
+          PTimePicker(
+            now: DateTime(2026, 10, 15, 9, 0),
+            minuteStep: 5,
+            onChanged: calls.add,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -530,7 +545,7 @@ void main() {
       expect(calls.last, const PTimeValue(9, 0));
     });
 
-    testWidgets('알 수 없는 분 간격은 5 로 본다', (tester) async {
+    testWidgets('알 수 없는 분 간격은 1 로 본다', (tester) async {
       await tester.pumpWidget(
         _host(
           Brightness.light,
@@ -538,7 +553,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(_columns(tester)[2].options, hasLength(12));
+      expect(_columns(tester)[2].options, hasLength(60));
     });
   });
 
@@ -550,7 +565,11 @@ void main() {
         await tester.pumpWidget(
           _host(
             Brightness.light,
-            const PTimePicker(value: PTimeValue(15, 0), semanticLabel: '시작 시각'),
+            const PTimePicker(
+              value: PTimeValue(15, 0),
+              minuteStep: 5,
+              semanticLabel: '시작 시각',
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -671,7 +690,7 @@ void main() {
     );
 
     testWidgets(
-      '칸이 비었으면 지금을 분 간격에 맞춰 반올림한 자리를 짚어 열기만 한다 — "완료" 는 그 자리를 넣는다(9시 13분 → 9시 15분)',
+      '칸이 비었으면 지금 시각 그대로(기본 1분이라 반올림 없음) 짚어 열기만 한다 — "완료" 는 그 자리를 넣는다(9시 13분)',
       (tester) async {
         tester.view.physicalSize = const Size(360, 780);
         tester.view.devicePixelRatio = 1;
@@ -688,13 +707,37 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('open')));
         await tester.pumpAndSettle();
         expect(_centerLabel(tester, '시'), '9');
-        expect(_centerLabel(tester, '분'), '15');
+        expect(_centerLabel(tester, '분'), '13');
         expect(result, isNull, reason: '열기만 했다 — 고른 것처럼 넣지 않는다');
         await tester.tap(findWidgetWithText(PButton, '완료'));
         await tester.pumpAndSettle();
-        expect(result, const PTimeValue(9, 15));
+        expect(result, const PTimeValue(9, 13));
       },
     );
+
+    testWidgets('5분 간격을 주면 지금을 5분 눈금으로 반올림해 짚는다(9시 13분 → 9시 15분)', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 780);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      PTimeValue? result;
+      await tester.pumpWidget(
+        opener((context) async {
+          result = await showTimePickerSheet(
+            context,
+            minuteStep: 5,
+            now: DateTime(2026, 10, 15, 9, 13),
+          );
+        }),
+      );
+      await tester.tap(find.byKey(const ValueKey('open')));
+      await tester.pumpAndSettle();
+      expect(_centerLabel(tester, '분'), '15');
+      await tester.tap(findWidgetWithText(PButton, '완료'));
+      await tester.pumpAndSettle();
+      expect(result, const PTimeValue(9, 15));
+    });
 
     testWidgets('굴린 값이 "완료" 로 들어가고 · 바깥으로 닫으면 버린다(null)', (tester) async {
       tester.view.physicalSize = const Size(360, 780);
@@ -706,6 +749,7 @@ void main() {
           result = await showTimePickerSheet(
             context,
             current: const PTimeValue(11, 55),
+            minuteStep: 5,
           );
         }),
       );
