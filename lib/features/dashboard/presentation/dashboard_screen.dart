@@ -394,7 +394,7 @@ class _Failure extends StatelessWidget {
   }
 }
 
-/// 빈 구역 한 줄 — R9(t3 · 400 · fg-neutral-subtle) 가운데, 위아래 12.
+/// 빈 구역 한 줄 — R9(t4 14/19 · 400 · fg-neutral-subtle) 가운데, 위아래 12(11-10 4B).
 class _EmptyLine extends StatelessWidget {
   const _EmptyLine(this.text);
 
@@ -410,7 +410,7 @@ class _EmptyLine extends StatelessWidget {
       child: Text(
         keepAll(text),
         textAlign: TextAlign.center,
-        style: PTypography.t3.copyWith(color: context.colors.fgNeutralSubtle),
+        style: PTypography.t4.copyWith(color: context.colors.fgNeutralSubtle),
       ),
     ),
   );

@@ -174,6 +174,23 @@ void main() {
     expect(heatSub(1), '10 AM–2 PM');
   });
 
+  test(
+    '해가 다른 기간 한 줄 — 두 자리 연도 "25. 11. 10.~26. 11. 10."(11-10 7C), 영어 같은 꼴',
+    () {
+      final from = DateTime(2025, 11, 10);
+      final to = DateTime(2026, 11, 10);
+      expect(dateRangeShortYear(from, to), '25. 11. 10.~26. 11. 10.');
+      expect(
+        dateRangeShortYear(DateTime(2009, 1, 2), DateTime(2010, 12, 31)),
+        '09. 1. 2.~10. 12. 31.',
+      );
+      final prev = Intl.defaultLocale;
+      Intl.defaultLocale = 'en';
+      addTearDown(() => Intl.defaultLocale = prev);
+      expect(dateRangeShortYear(from, to), "Nov 10, '25–Nov 10, '26");
+    },
+  );
+
   test('좁은 칸 월 · 일 — 점 표기 "10. 29."(슬래시 · 앞 0 없음), 영어 "Oct 29"', () {
     expect(monthDayDot(DateTime(2026, 10, 29)), '10. 29.');
     expect(monthDayDot(DateTime(2026, 9, 7)), '9. 7.');

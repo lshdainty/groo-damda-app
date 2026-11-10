@@ -82,6 +82,21 @@ String dateRange(DateTime from, DateTime to) {
   return '$f$sep$t';
 }
 
+/// 좁은 자리(통계 기간 버튼)의 해가 다른 기간 한 줄 — 두 자리 연도(11-10 7C): ko "25. 11. 10.~26. 11. 10."
+/// (점 표기 · 앞 0 없음 · 연도만 두 자리), en 같은 꼴의 짧은 글 "Nov 10, '25–Nov 10, '26". 구간 기호는 로케일 문구.
+/// 같은 해 기간에는 쓰지 않는다 — 그 자리는 [dateRange] 그대로다.
+String dateRangeShortYear(DateTime from, DateTime to) {
+  final sep = rangeSeparator();
+  String one(DateTime d) {
+    final yy = (d.year % 100).toString().padLeft(2, '0');
+    return localeIsEn()
+        ? "${DateFormat.MMMd('en').format(d)}, '$yy"
+        : '$yy. ${d.month}. ${d.day}.';
+  }
+
+  return '${one(from)}$sep${one(to)}';
+}
+
 /// 월 눈금 글 — 한 해 안이면 ko "1월" · en "Jan"(앞 0 없음), 해가 섞이면 ko 점 표기 "2025. 12." · en "Dec 2025"
 /// (점 표기는 한국어 전용, DESIGN.desk.md:3604). 통계 · 순자산 추이가 같이 쓴다.
 List<String> monthTicks(List<({int year, int month})> rows) {

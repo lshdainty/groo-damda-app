@@ -699,7 +699,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                       child: PText(
                         l.recNoAssets,
                         textAlign: TextAlign.center,
-                        style: PTypography.t3.copyWith(
+                        style: PTypography.t4.copyWith(
                           color: sheetContext.colors.fgNeutralSubtle,
                         ),
                       ),

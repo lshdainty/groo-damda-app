@@ -75,11 +75,13 @@ void main() {
   ) async {
     await _open(tester, _app(_host(onBack: () {})));
     final circle = tester.getRect(find.byKey(circleKey));
-    final icon = tester.getRect(find.byIcon(LucideIcons.arrowLeft));
+    final icon = tester.getRect(find.byIcon(LucideIcons.chevronLeft));
     final touch = tester.getRect(find.byKey(backKey));
     final title = tester.getRect(find.byKey(titleKey));
     expect(circle.size, const Size(40, 40));
     expect(icon.size, const Size(24, 24));
+    // 11-10 8A — 돌아가기는 모두 꺾쇠(chevron-left)다, 화살표(arrow-left)가 아니다
+    expect(find.byIcon(LucideIcons.arrowLeft), findsNothing);
     expect(icon.left, 24);
     expect(touch.size, const Size(44, 44));
     expect(touch.center, circle.center);

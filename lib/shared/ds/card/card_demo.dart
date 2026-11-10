@@ -364,9 +364,9 @@ class _StatDemo extends StatelessWidget {
                 value: '1,240,000원',
                 delta: PDelta(
                   direction: PDeltaDirection.up,
-                  value: '+12%',
+                  value: '+12.34%',
                   text: '지난달보다',
-                  srText: '지난달보다 12% 더 썼어요',
+                  srText: '지난달보다 12.34% 더 썼어요',
                 ),
               ),
             ),
@@ -376,7 +376,7 @@ class _StatDemo extends StatelessWidget {
                 value: '4,200,000원',
                 delta: PDelta(
                   direction: PDeltaDirection.down,
-                  value: '−3%',
+                  value: '−3.00%',
                   text: '지난달보다',
                 ),
               ),
@@ -404,7 +404,7 @@ class _StatDemo extends StatelessWidget {
                       value: '1,240,000원',
                       delta: PDelta(
                         direction: PDeltaDirection.up,
-                        value: '12%',
+                        value: '12.34%',
                         text: '지난달보다',
                       ),
                     ),
@@ -427,7 +427,7 @@ class _StatDemo extends StatelessWidget {
                       value: '−123,456,789,012원',
                       delta: PDelta(
                         direction: PDeltaDirection.up,
-                        value: '+-12.5%',
+                        value: '+-12.50%',
                         text: '지난달보다 훨씬 많이',
                       ),
                     ),
@@ -486,7 +486,7 @@ class _HeroDemo extends StatelessWidget {
                     PCardHeroDetail(
                       child: PDelta(
                         direction: PDeltaDirection.up,
-                        value: '1.8%',
+                        value: '1.80%',
                         text: '지난달보다',
                       ),
                     ),

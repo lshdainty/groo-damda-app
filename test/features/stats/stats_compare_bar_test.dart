@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/stats/domain/stats_models.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_compare_parts.dart';
@@ -21,6 +22,7 @@ Future<void> _pump(
   double scale, {
   double width = 360,
   int amount = 123456789,
+  bool dark = false,
 }) async {
   tester.view.physicalSize = Size(width * 2, 800 * 2);
   tester.view.devicePixelRatio = 2;
@@ -35,7 +37,7 @@ Future<void> _pump(
   );
   await tester.pumpWidget(
     MaterialApp(
-      theme: GrooTheme.light(),
+      theme: dark ? GrooTheme.dark() : GrooTheme.light(),
       locale: const Locale('ko'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -111,6 +113,30 @@ void main() {
       // 막대는 금액 아래
       final bar = tester.getRect(find.byType(FractionallySizedBox).first);
       expect(bar.top, greaterThanOrEqualTo(a.bottom - 0.5));
+    },
+  );
+
+  testWidgets(
+    '11-10 10B — 막대 색은 Chart 계열 색: 이번 chart-blue · 지난 기간 chart-blue-weak(트랙 · 테두리 없음), 라이트 · 다크',
+    (tester) async {
+      for (final dark in [false, true]) {
+        await _pump(tester, 1, dark: dark);
+        final c = tester
+            .element(find.byType(StatsCompareSummarySection))
+            .colors;
+        final fills = find.byType(FractionallySizedBox);
+        expect(fills, findsNWidgets(2));
+        final decos = [
+          for (final e in fills.evaluate())
+            ((e.widget as FractionallySizedBox).child! as DecoratedBox)
+                    .decoration
+                as BoxDecoration,
+        ];
+        expect(decos[0].color, c.chartBlue, reason: 'dark=$dark 이번');
+        expect(decos[1].color, c.chartBlueWeak, reason: 'dark=$dark 지난');
+        expect(decos[0].border, isNull);
+        expect(decos[1].border, isNull);
+      }
     },
   );
 }

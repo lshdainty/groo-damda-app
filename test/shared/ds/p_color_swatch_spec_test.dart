@@ -923,6 +923,56 @@ void main() {
         },
       );
 
+      testWidgets(
+        '11-10 5A — 위로 올리는 판정은 놓인 자리의 실제 폭이다 — 글자 1 · 2배 × 폭 312 · 320 · 321 · 360 에서 같고 넘치지 않는다',
+        (tester) async {
+          for (final scale in [1.0, 2.0]) {
+            for (final width in [312.0, 320.0, 321.0, 360.0]) {
+              await tester.pumpWidget(
+                MediaQuery(
+                  data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                  child: _host(
+                    Brightness.light,
+                    _Harness(
+                      key: UniqueKey(),
+                      initial: current,
+                      currentColor: _gray,
+                    ),
+                    width: width,
+                  ),
+                ),
+              );
+              await _settle(tester);
+              final reason = 'x$scale · 폭 $width';
+              final div = tester.getRect(
+                find.byKey(const ValueKey('swatch-divider')),
+              );
+              final grid = tester.getRect(
+                find.byKey(const ValueKey('swatch-grid')),
+              );
+              final column = tester.getRect(
+                find.byKey(const ValueKey('swatch-current-column')),
+              );
+              // 판정은 폭만 본다 — 글자를 키워도 옆 ↔ 위가 바뀌지 않는다
+              final side = width >= pColorSwatchStackBelow;
+              expect(div.width == 1, side, reason: reason);
+              expect(div.height == 1, !side, reason: reason);
+              if (!side) expect(column.bottom, lessThan(div.top));
+              // 칸 · 격자는 자리 안에 들고, 글 높이는 글자를 따른다
+              expect(grid.right, lessThanOrEqualTo(40 + width), reason: reason);
+              expect(
+                tester
+                    .getSize(find.byKey(const ValueKey('swatch-current-label')))
+                    .height,
+                closeTo(16 * scale, 0.01),
+                reason: reason,
+              );
+              expect(tester.takeException(), isNull, reason: reason);
+            }
+          }
+        },
+      );
+
       testWidgets('칸마다 같은 이름의 툴팁 — 지금 색 칸은 두지 않는다', (tester) async {
         await pump(tester, const _Harness(initial: blue));
         expect(find.byType(PTooltip), findsNWidgets(10));
