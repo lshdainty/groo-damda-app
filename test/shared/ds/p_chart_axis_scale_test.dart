@@ -77,11 +77,14 @@ void main() {
         reason: '가로축 자리 = 눈금 높이(배율 곱) + 8',
       );
     }
-    expect(
-      t2.bottomTitles.sideTitles.interval!,
-      greaterThan(t1.bottomTitles.sideTitles.interval!),
-      reason: '글이 커지면 달 글자 간격이 넓어져 붙지 않는다',
-    );
+    // 글이 커지면 달 글자 간격이 넓어져 붙지 않는다(보이는 달 수가 줄어든다)
+    await tester.pumpWidget(_host(1));
+    await tester.pump(const Duration(seconds: 1));
+    final n1 = findTextContaining(RegExp(r'^\d\d월$')).evaluate().length;
+    await tester.pumpWidget(_host(2));
+    await tester.pump(const Duration(seconds: 1));
+    final n2 = findTextContaining(RegExp(r'^\d\d월$')).evaluate().length;
+    expect(n2, lessThan(n1));
   });
 
   testWidgets('200% — 눈금 글이 온전하다("1,500억" 이 그대로 그려진다)', (tester) async {
@@ -91,7 +94,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('100% 12개월 — 보이는 달 글자끼리 겹치지 않고 간격에 안 맞는 마지막 달은 그리지 않는다', (
+  testWidgets('100% 12개월 — 보이는 달 글자끼리 겹치지 않고 끝(마지막) 달을 지키고 앞에서부터 건너뛴다', (
     tester,
   ) async {
     await tester.pumpWidget(_host(1));
@@ -119,5 +122,6 @@ void main() {
       for (var i = 0; i < shown.length - 1; i++) shown[i + 1] - shown[i],
     ];
     expect(gaps.toSet().length, 1, reason: '모두 같은 간격(마지막만 따로 찍히지 않는다) $shown');
+    expect(shown.last, 12, reason: '끝 글을 지킨다');
   });
 }

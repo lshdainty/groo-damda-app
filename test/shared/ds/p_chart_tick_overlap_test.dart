@@ -80,8 +80,8 @@ void main() {
               rects.add(tester.getRect(f.first));
             }
             expect(rects, isNotEmpty);
-            // 처음 글은 늘 남는다
-            expect(findText(cats.first).evaluate(), isNotEmpty);
+            // 끝(가장 최근) 글은 늘 남는다
+            expect(findText(cats.last).evaluate(), isNotEmpty);
             rects.sort((a, b) => a.left.compareTo(b.left));
             for (var k = 1; k < rects.length; k++) {
               expect(

@@ -185,6 +185,7 @@ class _Plan {
     required this.leftWidth,
     required this.rightWidth,
     required this.labelInterval,
+    required this.endShift,
     required this.plotLeft,
     required this.plotWidth,
     required this.bottomReserved,
@@ -200,6 +201,9 @@ class _Plan {
   final double leftWidth;
   final double rightWidth;
   final int labelInterval;
+
+  /// 끝 글 하나만 남는 좁은 폭 — 끝 글을 왼쪽으로 당기는 거리(오른쪽 여백을 줄인 만큼).
+  final double endShift;
   final double plotLeft;
   final double plotWidth;
 
@@ -295,14 +299,16 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
     for (final cat in widget.categories) {
       labelW = math.max(labelW, measureText(cat, tickStyle, scaler: scaler));
     }
-    // 가로축 끝 글자가 반쯤 삐져나가므로 오른쪽 축이 없으면 그만큼 비워 둔다
+    // 겹치면 끝(가장 최근) 글을 지키고 앞에서부터 건너뛴다(웹 recharts preserveEnd). 끝 글자가 반쯤 삐져나가므로 오른쪽 축이 없으면 그만큼 비워 둔다
     var rightPad = r == null ? math.max(PSpacing.x2, labelW / 2) : rightW;
     var plotW = math.max(1.0, width - leftW - rightPad);
     final fit = math.max(1, (plotW / (labelW + PSpacing.x2)).floor());
+    // 글 하나도 둘이 못 들어가면 끝 글 하나만 남는다. 끝 글 몫으로 오른쪽을 labelW / 2 나 비우면 그릴 폭이 더 줄어
+    // fl_chart 가 가로 눈금을 하나도 부르지 않는다(200% · 긴 달 글자) — 여백을 8 로 두고 끝 글을 왼쪽으로 당겨 오른쪽 끝에 맞춘다
+    var endShift = 0.0;
     if (fit < 2 && r == null) {
-      // 글 하나도 둘이 못 들어가면 첫 글만 남는다(간격 = 칸 수) — 끝 글이 없으니 오른쪽을 비워 둘 까닭이 없다.
-      // 비우면 그릴 폭이 더 줄어 fl_chart 가 가로 눈금을 하나도 부르지 않았다(200% · 긴 달 글자에서 가로 눈금이 통째로 사라졌다)
       rightPad = PSpacing.x2;
+      endShift = math.max(0.0, labelW / 2 - rightPad);
       plotW = math.max(1.0, width - leftW - rightPad);
     }
     final interval = math.max(1, (widget.categories.length / fit).ceil());
@@ -314,6 +320,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
       leftWidth: leftW,
       rightWidth: rightPad,
       labelInterval: interval,
+      endShift: endShift,
       plotLeft: leftW,
       plotWidth: plotW,
       bottomReserved: scaler.scale(15) + kChartTickMargin,
@@ -375,26 +382,35 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
         sideTitles: SideTitles(
           showTitles: true,
           reservedSize: p.bottomReserved,
-          interval: p.labelInterval.toDouble(),
+          // 칸마다 부르고 끝에서 센 간격만 그린다 — fl_chart 의 간격은 앞(0)에서 세어 끝 글을 못 지킨다
+          interval: 1,
           getTitlesWidget: (v, meta) {
             final i = v.round();
             if (v != i.toDouble() || i < 0 || i >= widget.categories.length) {
               return const SizedBox();
             }
             // fl_chart 는 간격에 안 맞아도 마지막 눈금을 더 찍는다 — 앞 글자와 겹쳐 "11월12월" 이 된다(막대 차트는 interval 을 아예 따르지 않아 칸마다 부른다 — 간격 칸만 그린다)
-            if (i % p.labelInterval != 0) return const SizedBox();
+            if ((widget.categories.length - 1 - i) % p.labelInterval != 0) {
+              return const SizedBox();
+            }
             return SideTitleWidget(
               meta: meta,
               space: kChartTickMargin,
-              child: Text(
-                widget.categories[i],
-                maxLines: 1,
-                style: i == _emphasized
-                    ? chartTickStyle(c).copyWith(
-                        color: c.fgNeutral,
-                        fontWeight: FontWeight.w700,
-                      )
-                    : chartTickStyle(c),
+              child: Transform.translate(
+                offset: Offset(
+                  i == widget.categories.length - 1 ? -p.endShift : 0,
+                  0,
+                ),
+                child: Text(
+                  widget.categories[i],
+                  maxLines: 1,
+                  style: i == _emphasized
+                      ? chartTickStyle(c).copyWith(
+                          color: c.fgNeutral,
+                          fontWeight: FontWeight.w700,
+                        )
+                      : chartTickStyle(c),
+                ),
               ),
             );
           },

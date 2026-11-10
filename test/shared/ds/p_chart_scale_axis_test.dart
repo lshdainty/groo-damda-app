@@ -53,7 +53,7 @@ void main() {
         if (findText('10/$i').evaluate().isNotEmpty) i,
     ];
     expect(shown.length, lessThan(12), reason: '31칸 글을 다 그리면 겹친다');
-    expect(shown.first, 1);
+    expect(shown.last, 31, reason: '끝 글을 지킨다');
     // 이웃한 두 글이 붙어 있지 않다
     for (var k = 1; k < shown.length; k++) {
       expect(shown[k] - shown[k - 1], greaterThanOrEqualTo(2));
