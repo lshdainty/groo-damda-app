@@ -296,9 +296,15 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
       labelW = math.max(labelW, measureText(cat, tickStyle, scaler: scaler));
     }
     // 가로축 끝 글자가 반쯤 삐져나가므로 오른쪽 축이 없으면 그만큼 비워 둔다
-    final rightPad = r == null ? math.max(PSpacing.x2, labelW / 2) : rightW;
-    final plotW = math.max(1.0, width - leftW - rightPad);
+    var rightPad = r == null ? math.max(PSpacing.x2, labelW / 2) : rightW;
+    var plotW = math.max(1.0, width - leftW - rightPad);
     final fit = math.max(1, (plotW / (labelW + PSpacing.x2)).floor());
+    if (fit < 2 && r == null) {
+      // 글 하나도 둘이 못 들어가면 첫 글만 남는다(간격 = 칸 수) — 끝 글이 없으니 오른쪽을 비워 둘 까닭이 없다.
+      // 비우면 그릴 폭이 더 줄어 fl_chart 가 가로 눈금을 하나도 부르지 않았다(200% · 긴 달 글자에서 가로 눈금이 통째로 사라졌다)
+      rightPad = PSpacing.x2;
+      plotW = math.max(1.0, width - leftW - rightPad);
+    }
     final interval = math.max(1, (widget.categories.length / fit).ceil());
     return _Plan(
       below: below,
