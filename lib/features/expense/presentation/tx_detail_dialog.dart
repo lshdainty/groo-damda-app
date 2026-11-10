@@ -814,11 +814,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
             if (e.originalCurrency != null && e.originalAmount != null)
               TxKvRow(label: l.expForeignPayment, value: _foreignText(e)),
             TxKvRow(
-              label: l.expPaymentMethod,
+              label: isIncome ? l.expIncomeMethod : l.expPaymentMethod,
               value: txPaymentMethodLabel(l, e.paymentMethod),
             ),
             TxKvRow(
-              label: l.expAccountCard,
+              label: isIncome ? l.expDepositAccount : l.expAccountCard,
               value: txAssetLabel(
                 institution: asset?.institution,
                 assetName: asset?.assetName,

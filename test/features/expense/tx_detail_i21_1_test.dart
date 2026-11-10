@@ -394,6 +394,33 @@ void main() {
       expect(find.byKey(const ValueKey('more-recurring')), findsOneWidget);
     });
 
+    testWidgets('값 줄 이름 — 수입은 수입 방식 · 입금 계좌, 지출은 결제 수단 · 계좌 · 카드', (
+      tester,
+    ) async {
+      final income = _plain.copyWith(
+        expenseType: 'INCOME',
+        categoryRowId: 12,
+        categoryName: '월급',
+        paymentMethod: 'TRANSFER',
+      );
+      await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, income)));
+      await _openDetail(tester);
+      expect(findText('수입 방식'), findsOneWidget);
+      expect(findText('입금 계좌'), findsOneWidget);
+      expect(findText('결제 수단'), findsNothing);
+      expect(findText('계좌 · 카드'), findsNothing);
+    });
+
+    testWidgets('값 줄 이름 — 지출은 결제 수단 · 계좌 · 카드 그대로', (tester) async {
+      final expense = _plain.copyWith(paymentMethod: 'CASH');
+      await _pump(tester, _opener((ctx) => showTxDetailDialog(ctx, expense)));
+      await _openDetail(tester);
+      expect(findText('결제 수단'), findsOneWidget);
+      expect(findText('계좌 · 카드'), findsOneWidget);
+      expect(findText('수입 방식'), findsNothing);
+      expect(findText('입금 계좌'), findsNothing);
+    });
+
     testWidgets('연결 값 — 나눈 개수 · 연결됨', (tester) async {
       await _pump(
         tester,

@@ -817,7 +817,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             selected: selected,
             label: title,
             withNone: !transfer,
-            noneLabel: l.txfNoAccountOption,
+            noneLabel: income ? l.txfNoDepositAccount : l.txfNoAccountOption,
             emptyText: !transfer && c.paymentMethod.isNotEmpty && list.isEmpty
                 ? l.txfNoPickableAsset
                 : null,
@@ -857,7 +857,12 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         label: title,
         selected: c.paymentMethod,
         items: [
-          PickItem(value: '', title: l.txfNoMethodOption),
+          PickItem(
+            value: '',
+            title: c.type == 'INCOME'
+                ? l.txfNoIncomeMethod
+                : l.txfNoMethodOption,
+          ),
           for (final code in kTxPaymentMethodCodes)
             PickItem(value: code, title: txPaymentMethodLabel(l, code)),
         ],

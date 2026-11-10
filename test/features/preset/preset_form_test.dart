@@ -230,6 +230,63 @@ void main() {
     () async => l = await AppLocalizations.delegate.load(const Locale('ko')),
   );
 
+  group('수입이면 어디서나 "수입 방식 / 입금 계좌" — 종류를 바꿔도 따라간다', () {
+    testWidgets('종류를 수입으로 바꾸면 두 줄 이름과 "없음" 글이 바뀌고, 지출로 돌아오면 그대로다', (
+      tester,
+    ) async {
+      await _open(tester, null);
+      expect(_t(l.expPaymentMethod), findsOneWidget);
+      expect(_t(l.presetAssetCard), findsOneWidget);
+      expect(_t(l.expIncomeMethod), findsNothing);
+
+      await tester.tap(_t('수입').first);
+      await tester.pumpAndSettle();
+      expect(_t(l.expIncomeMethod), findsOneWidget);
+      expect(_t(l.expDepositAccount), findsOneWidget);
+      expect(_t(l.txfNoIncomeMethod), findsOneWidget);
+      expect(_t(l.txfNoDepositAccount), findsOneWidget);
+      expect(_t(l.expPaymentMethod), findsNothing);
+      expect(_t(l.presetAssetCard), findsNothing);
+
+      await tester.tap(_t('지출').first);
+      await tester.pumpAndSettle();
+      expect(_t(l.expPaymentMethod), findsOneWidget);
+      expect(_t(l.presetAssetCard), findsOneWidget);
+      expect(_t(l.expIncomeMethod), findsNothing);
+    });
+
+    testWidgets('수입 — 고르기 시트 제목과 "없음" 항목도 수입 말이다', (tester) async {
+      await _open(tester, null);
+      await tester.tap(_t('수입').first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(_t(l.expIncomeMethod).first);
+      await tester.pumpAndSettle();
+      // 시트 제목 + 고르기 목록 라벨 · "없음" 항목
+      expect(_t(l.expIncomeMethod).evaluate().length, greaterThan(1));
+      expect(_t(l.txfNoIncomeMethod), findsWidgets);
+      expect(_t(l.expPaymentMethod), findsNothing);
+      expect(_t(l.presetNoPayment), findsNothing);
+      await tester.tap(_t(l.txfNoIncomeMethod).last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(_t(l.expDepositAccount).first);
+      await tester.pumpAndSettle();
+      expect(_t(l.expDepositAccount).evaluate().length, greaterThan(1));
+      expect(_t(l.presetAssetCard), findsNothing);
+      expect(_t(l.presetNoAccount), findsNothing);
+    });
+
+    testWidgets('지출 — 고르기 시트는 결제 수단 · 계좌 · 카드 그대로다', (tester) async {
+      await _open(tester, null);
+      await tester.tap(_t(l.expPaymentMethod).first);
+      await tester.pumpAndSettle();
+      expect(_t(l.expPaymentMethod).evaluate().length, greaterThan(1));
+      expect(_t(l.presetNoPayment), findsWidgets);
+      expect(_t(l.expIncomeMethod), findsNothing);
+    });
+  });
+
   testWidgets('고정 금액 스위치가 없고 금액은 줄 하나다 — 비었으면 "비워 둠"', (tester) async {
     await _open(tester, null);
     expect(findText('고정 금액 사용'), findsNothing);

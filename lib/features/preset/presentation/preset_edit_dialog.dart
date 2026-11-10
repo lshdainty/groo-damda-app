@@ -169,6 +169,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
 
   bool get _isNew => widget.edit == null;
   bool get _isTransfer => _type == 'TRANSFER';
+  bool get _isIncome => _type == 'INCOME';
 
   @override
   void initState() {
@@ -465,6 +466,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
     required int? selected,
     required bool withNone,
     String? emptyText,
+    String? noneLabel,
   }) {
     FocusScope.of(context).unfocus();
     return PBottomSheet.show<int>(
@@ -488,7 +490,7 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
                       if (withNone)
                         PickItem<int>(
                           value: _kNoAsset,
-                          title: l.presetNoAccount,
+                          title: noneLabel ?? l.presetNoAccount,
                         ),
                       for (final a in list) _assetItem(a),
                     ],
@@ -517,7 +519,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
   Future<void> _pickAssetRow() async {
     final l = AppLocalizations.of(context);
     final picked = await _pickAsset(
-      title: l.presetAssetCard,
+      title: _isIncome ? l.expDepositAccount : l.presetAssetCard,
+      noneLabel: _isIncome ? l.txfNoDepositAccount : null,
       // 결제 수단을 골랐으면 그 수단에 맞는 계좌 · 카드만(거래 입력과 같은 규칙 — allowTxAsset)
       pool: (assets) => [
         for (final a in assets)
@@ -583,19 +586,24 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
 
   Future<void> _pickPayment() async {
     FocusScope.of(context).unfocus();
+    final income = _isIncome;
     final picked = await PBottomSheet.show<String>(
       context,
       builder: (sheetContext) {
         final l = AppLocalizations.of(sheetContext);
+        final title = income ? l.expIncomeMethod : l.expPaymentMethod;
         return PBottomSheetContent(
-          title: l.expPaymentMethod,
+          title: title,
           closeLabel: l.actionClose,
           flushBody: true,
           body: PickList<String>(
-            label: l.expPaymentMethod,
+            label: title,
             selected: _paymentMethod,
             items: [
-              PickItem(value: '', title: l.presetNoPayment),
+              PickItem(
+                value: '',
+                title: income ? l.txfNoIncomeMethod : l.presetNoPayment,
+              ),
               for (final v in _kPaymentMethodValues)
                 PickItem(value: v, title: _payLabel(l, v)!),
             ],
@@ -1096,15 +1104,19 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
               step: _Step.merchant,
             ),
             PickerRow(
-              title: l.expPaymentMethod,
+              title: _isIncome ? l.expIncomeMethod : l.expPaymentMethod,
               prefix: const Icon(LucideIcons.creditCard),
-              value: _payLabel(l, _paymentMethod) ?? l.presetNoPayment,
+              value:
+                  _payLabel(l, _paymentMethod) ??
+                  (_isIncome ? l.txfNoIncomeMethod : l.presetNoPayment),
               onTap: _pickPayment,
             ),
             PickerRow(
-              title: l.presetAssetCard,
+              title: _isIncome ? l.expDepositAccount : l.presetAssetCard,
               prefix: const Icon(LucideIcons.wallet),
-              value: from?.assetName ?? l.presetNoAccount,
+              value:
+                  from?.assetName ??
+                  (_isIncome ? l.txfNoDepositAccount : l.presetNoAccount),
               onTap: _pickAssetRow,
             ),
             _stepRow(
