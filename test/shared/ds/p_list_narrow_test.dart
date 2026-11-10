@@ -187,6 +187,8 @@ void main() {
       // suffix.placement · textAlign — 본문 칸 안 왼쪽
       expect(want['suffix.placement'], '본문 아래');
       expect(want['suffix.textAlign'], 'start');
+      // 평소의 suffixText.textAlign end 를 이 자리에서 start 로 바꾼다(rule 3)
+      expect(want['suffixText.textAlign'], 'start');
       expect(value.left, closeTo(title.left, 0.5));
       // item.alignItems flex-start — 앞 타일 · 조작 요소가 위에 맞는다 (줄 위 여백 12)
       expect(want['item.alignItems'], 'flex-start');
@@ -475,7 +477,7 @@ void main() {
     });
   });
 
-  testWidgets('스펙의 좁은 줄 값 여섯 줄을 모두 잰다', (tester) async {
+  testWidgets('스펙의 좁은 줄 값 일곱 줄을 모두 잰다', (tester) async {
     // 위 묶음이 잰 키 — 스펙에 새 줄이 생기면 여기서 빨개져 잴 곳을 더하게 한다
     const measured = {
       'item.alignItems',
@@ -484,6 +486,7 @@ void main() {
       'suffix.marginTop',
       'suffix.textAlign',
       'suffix.lineBreak',
+      'suffixText.textAlign',
     };
     final changed = {
       for (final e in _narrow.entries)
