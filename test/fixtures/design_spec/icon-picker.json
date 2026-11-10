@@ -3,7 +3,7 @@
   "source": "specs/components/icon-picker.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "trigger": "트리거 — Input Button. 라벨 \"아이콘\"(Field) · 앞 지금 아이콘 · 값 = 아이콘 이름 · 뒤 chevron-down",

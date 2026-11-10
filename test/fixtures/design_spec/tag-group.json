@@ -3,7 +3,7 @@
   "source": "specs/components/tag-group.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "묶음 — 항목을 \" · \" 로 잇는다. 줄바꿈하거나(기본) 한 줄에서 항목마다 말줄임한다",

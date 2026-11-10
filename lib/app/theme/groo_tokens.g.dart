@@ -1,6 +1,6 @@
 // GENERATED — groo-design scripts/build-dart-tokens.mjs 가 DESIGN.desk.md 에서 만든다. 손으로 고치지 않는다.
 // 바꾸려면 groo-design 의 DESIGN.desk.md 를 고치고 다시 만든다.
-// source: DESIGN.desk.md · sha256 b21bcc4ffd72
+// source: DESIGN.desk.md · sha256 ce410e4e7025
 //
 // 새 이름(SEED 구조)만 담는다 — 옛 이름(primary · text-secondary · xs ~ 3xl · shadow-sm …)은 새 이름의 별칭이라 뺐다.
 // 글자는 웹(CSS)처럼 줄 높이의 남는 간격을 위아래에 똑같이 나눈다(leadingDistribution: even) — 스펙의 줄 높이가 CSS 값이다.
@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 /// 원본 — 제품이 이 파일이 어느 DESIGN 에서 왔는지 볼 수 있게.
 abstract final class PDesignSource {
   static const String file = 'DESIGN.desk.md';
-  static const String sha256 = 'b21bcc4ffd72';
+  static const String sha256 = 'ce410e4e7025';
 }
 
 /// 간격(px) — SEED 눈금 x0_5 ~ x16 + 역할 간격(DESIGN.md v98 · v101). 옛 xs ~ 3xl 은 뺐다.

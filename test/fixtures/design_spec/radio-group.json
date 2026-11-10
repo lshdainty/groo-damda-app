@@ -3,7 +3,7 @@
   "source": "specs/components/radio-group.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "Radio 한 줄 — 동그라미 + 라벨, 누르는 영역",

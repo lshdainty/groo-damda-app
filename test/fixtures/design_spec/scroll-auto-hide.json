@@ -3,7 +3,7 @@
   "source": "specs/components/scroll-auto-hide.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "숨는 영역 — 스크롤 상자 맨 위에 붙고(sticky) 스크롤 거리만큼 위로 옮겨 숨는다",
@@ -112,7 +112,7 @@
       "state": "shown",
       "slot": "root",
       "prop": "snapThreshold",
-      "note": "스크롤이 끝나면(scrollend) 영역 높이의 절반을 넘게 숨었으면 다 숨고, 아니면 다 드러난다 — 거래 검색의 칩 줄 40 은 20, 카드 혜택의 거르는 줄 140 은 70 이상 올려야 다 드러난다"
+      "note": "스크롤이 끝나면(scrollend) 영역 높이의 절반을 넘게 숨었으면 다 숨고, 아니면 다 드러난다 — 거래 검색의 칩 줄 48 은 24, 카드 혜택의 거르는 줄 140 은 70 이상 올려야 다 드러난다"
     },
     {
       "rule": 0,

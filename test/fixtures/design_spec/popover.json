@@ -3,7 +3,7 @@
   "source": "specs/components/popover.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "표면 — 트리거 아래(모자라면 위)",
@@ -293,7 +293,7 @@
       "state": "enabled",
       "slot": "notificationList",
       "prop": "rowDelete",
-      "note": "⋮ → 1280 미만 Menu Sheet(제목 = 알림 제목) · 이상 Menu 의 위험 줄 \"삭제\" 하나 → 메뉴가 닫힌 뒤 Alert Dialog \"알림 삭제\" · \"삭제한 알림은 되돌릴 수 없어요.\" [취소][삭제]. 지우기는 확인에서만 나간다. 실패하면 확인창은 열린 채 두고 웹 · 앱의 오류 알림을 띄운다. 줄 밀기는 두지 않는다"
+      "note": "⋮ → 1280 미만 Menu Sheet(제목 = 알림 제목) · 이상 Menu 의 위험 줄 \"삭제\" 하나 → 메뉴가 닫힌 뒤 Alert Dialog \"알림 삭제\" · \"삭제한 알림은 되돌릴 수 없어요.\" [취소][삭제]. 지우기는 확인에서만 나간다. 실패하면 확인창을 닫고 critical 스낵바 + [다시 시도](다시 묻지 않고 바로 요청 — Alert Dialog 의 \"요청이 실패하면\", 2026-11-05 담다 마무리 15-4). 줄 밀기는 두지 않는다"
     },
     {
       "rule": 0,

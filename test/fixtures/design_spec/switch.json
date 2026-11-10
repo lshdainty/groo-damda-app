@@ -3,7 +3,7 @@
   "source": "specs/components/switch.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "Switch 한 줄 — 스위치 + 라벨, 누르는 영역",
