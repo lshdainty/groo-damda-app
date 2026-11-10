@@ -293,13 +293,14 @@ void main() {
     }
   });
 
-  group('기간 버튼 — 다른 해 직접 기간은 ~ 뒤 두 줄', () {
+  group('기간 버튼 — 다른 해 직접 기간은 두 자리 연도 한 줄(11-10 7C)', () {
     Future<void> pumpButton(
       WidgetTester tester,
       StatsPeriod p, {
       double scale = 1,
+      double width = 360,
     }) async {
-      tester.view.physicalSize = const Size(360, 800);
+      tester.view.physicalSize = Size(width, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
@@ -325,19 +326,46 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('다른 해에 걸친 직접 기간은 "~" 뒤에서만 줄이 바뀐 두 줄', (tester) async {
+    testWidgets('다른 해에 걸친 직접 기간은 두 자리 연도 한 줄 — 390 · 글자 1배 · 2배 넘침 0', (
+      tester,
+    ) async {
       final p = StatsPeriod(
         seg: StatsSeg.custom,
-        from: DateTime(2025, 1, 1),
-        to: DateTime(2026, 3, 31),
+        from: DateTime(2025, 11, 10),
+        to: DateTime(2026, 11, 10),
+      );
+      for (final scale in [1.0, 2.0]) {
+        await pumpButton(tester, p, scale: scale, width: 390);
+        expect(tester.takeException(), isNull, reason: 'x$scale');
+        final b = tester.widget<PButton>(find.byType(PButton));
+        expect(b.label, '25. 11. 10.~26. 11. 10.');
+        expect(b.labelLines, 1);
+        // 한 줄이라 같은 글자 크기의 한 줄 버튼(이번 달) 높이와 같다 — 두 줄로 높아지지 않는다
+        final h = tester.getSize(find.byType(PButton)).height;
+        await pumpButton(
+          tester,
+          StatsPeriod.thisMonth(),
+          scale: scale,
+          width: 390,
+        );
+        expect(
+          h,
+          closeTo(tester.getSize(find.byType(PButton)).height, 0.5),
+          reason: 'x$scale',
+        );
+      }
+    });
+
+    testWidgets('같은 해 직접 기간은 지금 그대로(연도 없는 글)', (tester) async {
+      final y = DateTime.now().year;
+      final p = StatsPeriod(
+        seg: StatsSeg.custom,
+        from: DateTime(y, 3, 1),
+        to: DateTime(y, 4, 2),
       );
       await pumpButton(tester, p);
-      expect(tester.takeException(), isNull);
       final b = tester.widget<PButton>(find.byType(PButton));
-      expect(b.label, '2025년 1월 1일~\n2026년 3월 31일');
-      expect(b.labelLines, 2);
-      // 두 줄이라 한 줄 버튼(36)보다 높다
-      expect(tester.getSize(find.byType(PButton)).height, greaterThan(36));
+      expect(b.label, '3월 1일~4월 2일');
     });
 
     testWidgets('같은 해 · 월은 한 줄', (tester) async {
