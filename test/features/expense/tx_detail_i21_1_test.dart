@@ -7,6 +7,8 @@
 //   ⑤ 환불은 같은 시트 안 한 단계 — ← 는 상세로, 바뀐 채 ← 는 먼저 묻는다, 처리하면 상세로 돌아와 "환불됨"
 //   ⑥ 삭제 — 실패는 확인창을 닫고 시트 안 Callout(스낵바 아님), 지운 뒤 버튼이 다시 열리지 않는다
 //   ⑦ 이체 상세 — 제목 · "보내는 계좌 · 받는 계좌" · Logo Tile · 값 줄 · 자동 이체 바닥 없음
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -137,6 +139,9 @@ class _FakeRepo extends ExpenseRepository {
   bool failCancel = false;
   final cancelled = <int>[];
 
+  /// 있으면 환불 응답을 이 값이 끝날 때까지 미룬다 — 처리 중에 시트를 닫아 본다.
+  Completer<void>? refundGate;
+
   @override
   Future<Expense> cancelRefund(int id, {bool silent = false}) async {
     if (failCancel) {
@@ -182,6 +187,7 @@ class _FakeRepo extends ExpenseRepository {
     bool silent = false,
   }) async {
     silentFlags.add(silent);
+    await refundGate?.future;
     if (failRefund) {
       throw ApiException(code: 'SERVER', message: '서버 원문', statusCode: 500);
     }
@@ -593,6 +599,27 @@ void main() {
       expect(findTextContaining('합계에서 빠져 있어요.'), findsOneWidget);
       expect(find.byKey(const ValueKey('more-refund')), findsNothing);
       expect(find.byKey(const ValueKey('more-split')), findsNothing);
+    });
+
+    testWidgets('환불 처리 중에 상세를 닫아도 끝난 뒤 달 목록을 다시 받는다', (tester) async {
+      final repo = _FakeRepo()..refundGate = Completer<void>();
+      await _pump(
+        tester,
+        _opener((ctx) => showTxDetailDialog(ctx, _plain)),
+        repo: repo,
+      );
+      await _openDetail(tester);
+      await toRefund(tester);
+      await tester.tap(findWidgetWithText(PButton, '환불 처리'));
+      await tester.pump();
+      // 저장 중 시트는 사용자가 못 닫아도 라우트는 코드로 걷힐 수 있다(로그아웃 · 시스템 뒤로)
+      Navigator.of(tester.element(findText('open'))).pop();
+      await tester.pumpAndSettle();
+      final before = repo.listCalls;
+      repo.refundGate!.complete();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(repo.listCalls, greaterThan(before), reason: '환불 뒤 목록이 갱신되지 않았다');
     });
 
     testWidgets('환불됨 Callout 의 버튼은 Callout 상자 안에 있다', (tester) async {

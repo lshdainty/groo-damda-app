@@ -211,7 +211,7 @@ class ExpenseActions implements ItemActions<Expense> {
   /// 때 옛 값이 먼저 비치지 않는다.
   Future<Expense?> refund(
     BuildContext context,
-    WidgetRef ref,
+    ProviderContainer container,
     Expense e, {
     String? refundedAt,
     Asset? asset,
@@ -219,16 +219,19 @@ class ExpenseActions implements ItemActions<Expense> {
     bool throwOnError = false,
   }) async {
     final host = hostContextOf(context);
-    final fixBalance = fixBalanceTargetOf(e, asset ?? assetOfExpense(ref, e));
+    final fixBalance = fixBalanceTargetOf(
+      e,
+      asset ?? assetOfExpenseIn(container, e),
+    );
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
+      final repo = await container.read(expenseRepositoryProvider.future);
       final updated = await repo.refund(
         e.rowId,
         refundedAt: refundedAt,
         silent: silent,
       );
-      _invalidateAfterRefund(ref);
-      await _refetchMonthOf(ref, e);
+      _invalidateAfterRefundIn(container);
+      await _refetchMonthOfIn(container, e);
       if (host.mounted) {
         showChangeResultToast(
           host,
@@ -239,7 +242,7 @@ class ExpenseActions implements ItemActions<Expense> {
       return updated;
     } on ApiException catch (err) {
       // 응답만 못 받았다 — 환불됐을 수 있다. 목록을 비운다(글은 부르는 쪽이 고른다, 검수 M3)
-      if (isUnconfirmedSave(err)) _invalidateAfterRefund(ref);
+      if (isUnconfirmedSave(err)) _invalidateAfterRefundIn(container);
       if (throwOnError) rethrow;
       return null;
     }
@@ -280,6 +283,25 @@ class ExpenseActions implements ItemActions<Expense> {
     }
   }
 
+  /// [_refetchMonthOf] 의 컨테이너판 — 환불 중 상세가 닫혀도 목록은 다시 받는다.
+  Future<void> _refetchMonthOfIn(ProviderContainer container, Expense e) async {
+    final date = e.expenseDate;
+    if (date == null || date.length < 7) return;
+    final y = int.tryParse(date.substring(0, 4));
+    final m = int.tryParse(date.substring(5, 7));
+    if (y == null || m == null) return;
+    try {
+      await container.read(monthExpensesProvider((year: y, month: m)).future);
+    } catch (_) {
+      // 받지 못해도 단계는 옮긴다
+    }
+  }
+
+  void _invalidateAfterRefundIn(ProviderContainer container) {
+    container.invalidate(monthExpensesProvider);
+    invalidateAfterExpenseChangeIn(container);
+  }
+
   /// 환불은 달 하나로 끝나지 않는다 — 옛 환급 이체를 되돌리면 **오늘** 날짜가
   /// 바뀌므로 원거래 달과 이번 달이 함께 바뀐다. 그래서 달을 가리지 않고 전부 무효화한다.
   void _invalidateAfterRefund(WidgetRef ref) {
@@ -293,6 +315,13 @@ Asset? assetOfExpense(WidgetRef ref, Expense e) {
   final id = e.assetRowId;
   if (id == null) return null;
   return ref.read(assetsProvider).value?.byRowId(id);
+}
+
+/// [assetOfExpense] 의 컨테이너판.
+Asset? assetOfExpenseIn(ProviderContainer container, Expense e) {
+  final id = e.assetRowId;
+  if (id == null) return null;
+  return container.read(assetsProvider).value?.byRowId(id);
 }
 
 /// 거래 삭제 요청 — **컨테이너로** 한다(화면 State 와 무관하게 나간다 — 시트를 닫은 뒤 스낵바의 [다시 시도] 도 이걸 부른다).

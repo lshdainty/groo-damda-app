@@ -326,10 +326,11 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
       _refunding = true;
       _refundFailed = false;
     });
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       final updated = await expenseActions.refund(
         context,
-        ref,
+        container,
         _e,
         refundedAt: refundedAtIso(_refundDate),
         asset: _assetOf(_e),
@@ -344,8 +345,8 @@ class _TxDetailFlowState extends ConsumerState<_TxDetailFlow> {
     } on ApiException catch (e) {
       // 응답만 못 받았다 — 환불됐을 수 있다. 다시 받고 "확인하지 못했어요"(검수 M3)
       if (isUnconfirmedSave(e)) {
-        ref.invalidate(monthExpensesProvider);
-        invalidateAfterExpenseChange(ref);
+        container.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChangeIn(container);
       }
       if (mounted) {
         setState(() {
