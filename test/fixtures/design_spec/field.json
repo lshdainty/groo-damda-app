@@ -3,7 +3,7 @@
   "source": "specs/components/field.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "Field — 머리 · 입력 · 꼬리를 세로로 쌓는다",
@@ -45,7 +45,8 @@
         "header": {
           "paddingX": 2,
           "gap": 10,
-          "alignItems": "center"
+          "alignItems": "center",
+          "flexWrap": "wrap"
         },
         "label": {
           "typography": {
@@ -57,7 +58,8 @@
           "foreground": {
             "light": "#1A1F2E",
             "dark": "#F5F6FA"
-          }
+          },
+          "wordBreak": "keep-all"
         },
         "requiredIndicator": {
           "size": "0.375rem",
@@ -100,7 +102,8 @@
           "foreground": {
             "light": "#62697A",
             "dark": "#A2A8B7"
-          }
+          },
+          "wordBreak": "keep-all"
         },
         "descriptionIcon": {
           "size": 16,
@@ -120,7 +123,8 @@
           "foreground": {
             "light": "#D72323",
             "dark": "#FF8477"
-          }
+          },
+          "wordBreak": "keep-all"
         },
         "errorIcon": {
           "size": 16,
@@ -214,6 +218,20 @@
     {
       "rule": 0,
       "state": "enabled",
+      "slot": "header",
+      "prop": "flexWrap",
+      "note": "머리는 줄을 바꿀 수 있다 — 라벨 옆에 보조 액션이 들 자리가 모자라면(큰 글자 · 좁은 칸) 액션이 라벨 아래 줄 오른쪽 끝으로 내려간다. 라벨을 한 글자 폭으로 눌러 세우지 않는다(2026-10-29 17-1 앱 — 200% 에서 라벨이 한 글자씩 깨졌다)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "label",
+      "prop": "wordBreak",
+      "note": "낱말 단위(Typography v114 — keep-all + break-word). 앱은 공용 글자 위젯의 이음 문자(U+2060)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
       "slot": "requiredIndicator",
       "prop": "size",
       "note": "6px — 동그란 점. 글자 크기를 따라 커진다. 점은 화면 읽기 프로그램에 숨기고 필수는 칸의 aria-required 가 알린다"
@@ -270,9 +288,23 @@
     {
       "rule": 0,
       "state": "enabled",
+      "slot": "description",
+      "prop": "wordBreak",
+      "note": "낱말 단위(v114) — 도움말이 낱말 가운데서 끊기지 않는다. 앱 PField 메시지에서 빠져 있던 것을 고쳤다(2026-10-25 I-20 앱)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
       "slot": "descriptionIcon",
       "prop": "gap",
       "note": "아이콘 ↔ 글. 아이콘은 첫 줄 가운데(위 1.5)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "errorMessage",
+      "prop": "wordBreak",
+      "note": "낱말 단위(v114) — 도움말과 같다"
     },
     {
       "rule": 0,

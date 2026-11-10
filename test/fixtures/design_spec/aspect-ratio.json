@@ -3,7 +3,7 @@
   "source": "specs/components/aspect-ratio.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "비율 상자 — 폭은 부모, 높이는 폭 ÷ 비율. 모서리 · 테두리 · 바탕이 없다",

@@ -3,7 +3,7 @@
   "source": "specs/components/skeleton.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "면 — 곧 나타날 내용 하나의 자리(글 한 줄 · 숫자 · 카드 · 아바타 · 사진)",
@@ -162,7 +162,7 @@
       "properties": [
         "opacity 0 → 1"
       ],
-      "note": "스켈레톤을 걷고 내용을 투명도로 — Result Section 의 결과로 바뀜과 같다. 자리 크기는 그대로"
+      "note": "스켈레톤을 걷고 내용을 투명도로 — Result Section 의 결과로 바뀜과 같다. 자리 크기는 그대로. 웹만 — 앱은 전환 없이 바로 바꾼다(2026-11-07 담다 마무리 B6)"
     }
   },
   "notes": [

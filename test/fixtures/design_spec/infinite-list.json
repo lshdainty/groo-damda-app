@@ -3,7 +3,7 @@
   "source": "specs/components/infinite-list.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "목록 끝 자리 — 목록 맨 아래 가운데. 상태 하나를 보인다",

@@ -3,7 +3,7 @@
   "source": "specs/components/avatar-stack.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "묶음 — 아바타를 가로로 겹쳐 놓는다. 뒤에 오는 아바타가 위",

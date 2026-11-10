@@ -3,7 +3,7 @@
   "source": "specs/components/bottom-navigation.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "바 — 화면 아래에 떠 있는 알약. 칸 다섯을 똑같이 나눈다",

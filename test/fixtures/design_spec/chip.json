@@ -3,7 +3,7 @@
   "source": "specs/components/chip.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "알약 — 모서리 full. 글만큼 넓어지고 줄바꿈하지 않는다. 줄보다 길면 줄 폭에서 멈추고 글 끝을 말줄임한다(2026-10-17)",

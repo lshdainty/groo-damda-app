@@ -3,7 +3,7 @@
   "source": "specs/components/toggle.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "단추 — 보이는 40 · 누르는 44. 바탕은 켬 · 끔에 따라 바뀌지 않는다(누름 · 호버에만 칠한다)",

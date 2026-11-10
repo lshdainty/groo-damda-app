@@ -3,7 +3,7 @@
   "source": "specs/components/badge.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "상자 — 둥근 사각. 글만큼 넓어지고 최대 폭이 없다(부모가 좁을 때만 글이 말줄임)",

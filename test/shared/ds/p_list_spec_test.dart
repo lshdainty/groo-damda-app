@@ -275,6 +275,8 @@ const _behavior = {
   'suffix.shrink',
   'suffixText.shrink',
   'suffixText.overflowWrap',
+  // 줄 끝 오른쪽 맞춤(end) — p_list_value_end_test.dart 가 줄마다 오른쪽 끝으로 잰다
+  'suffixText.textAlign',
 };
 
 /// 앱에 없는 값 — 포커스 링은 웹 상태(키보드 포커스 링)다.
@@ -3017,6 +3019,7 @@ void _worstTests() {
       expect(want['suffix.shrink'], 0);
       expect(want['suffixText.shrink'], 1);
       expect(want['suffixText.overflowWrap'], 'anywhere');
+      expect(want['suffixText.textAlign'], 'end');
       expect(kPListBodyTrailGap, 10);
     });
 

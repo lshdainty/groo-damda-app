@@ -3,7 +3,7 @@
   "source": "specs/components/footer.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "바닥 — <footer>(contentinfo). 가운데 정렬된 틀 안에 탐색 영역 · 선 · 안내 영역을 세로로",

@@ -3,7 +3,7 @@
   "source": "specs/components/checkbox.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "b21bcc4ffd72"
+    "sha256": "ce410e4e7025"
   },
   "slots": {
     "root": "Checkbox 한 줄 — 칸 + 라벨, 누르는 영역",
