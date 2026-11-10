@@ -161,7 +161,7 @@ class _PresetPickBodyState extends ConsumerState<PresetPickBody> {
             child: PText(
               l.presetNoResult,
               textAlign: TextAlign.center,
-              style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+              style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
             ),
           )
         else

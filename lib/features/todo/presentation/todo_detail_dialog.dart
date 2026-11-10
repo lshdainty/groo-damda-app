@@ -152,7 +152,7 @@ class _TodoDetailSheetState extends ConsumerState<_TodoDetailSheet> {
             child: content.isEmpty
                 ? Text(
                     l.todoNoContent,
-                    style: PTypography.t5.copyWith(color: c.fgNeutralSubtle),
+                    style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
                   )
                 : MarkdownPreview(content),
           ),

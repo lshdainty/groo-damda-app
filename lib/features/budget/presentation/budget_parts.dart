@@ -421,7 +421,7 @@ Widget budgetKvList(BuildContext context, List<BudgetKv> rows) {
   );
 }
 
-/// 안내 한 줄 — R9 가운데.
+/// 안내 한 줄 — R9 가운데, t4 14/19(11-10 4B: 혼자 서는 빈 글은 14).
 class BudgetEmptyLine extends StatelessWidget {
   const BudgetEmptyLine(this.text, {super.key});
 
@@ -437,7 +437,7 @@ class BudgetEmptyLine extends StatelessWidget {
       child: Text(
         keepAll(text),
         textAlign: TextAlign.center,
-        style: PTypography.t3.copyWith(color: context.colors.fgNeutralSubtle),
+        style: PTypography.t4.copyWith(color: context.colors.fgNeutralSubtle),
       ),
     ),
   );
