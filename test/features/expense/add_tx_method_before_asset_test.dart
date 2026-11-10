@@ -222,6 +222,15 @@ void main() {
     expect(findText('이 결제 수단에 맞는 계좌 · 카드가 없어요.'), findsNothing);
   });
 
+  testWidgets('수입 — 맞는 입금 계좌가 없으면 수입 말로 안내한다(지출 문구는 안 나온다)', (tester) async {
+    await _open(tester, assets: [_bank]);
+    await _toStepTwo(tester, income: true);
+    await _pickMethod(tester, '카드');
+    expect(await _assetCandidates(tester), isEmpty);
+    expect(findText('이 수입 방식에 맞는 입금 계좌가 없어요.'), findsOneWidget);
+    expect(findText('이 결제 수단에 맞는 계좌 · 카드가 없어요.'), findsNothing);
+  });
+
   testWidgets('결제 수단을 바꾸면 안 맞는 계좌 · 카드는 비워지고 맞는 것은 남는다', (tester) async {
     await _open(tester);
     await _toStepTwo(tester);

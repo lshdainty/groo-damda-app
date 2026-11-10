@@ -819,7 +819,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             withNone: !transfer,
             noneLabel: income ? l.txfNoDepositAccount : l.txfNoAccountOption,
             emptyText: !transfer && c.paymentMethod.isNotEmpty && list.isEmpty
-                ? l.txfNoPickableAsset
+                ? (income ? l.txfNoPickableDepositAsset : l.txfNoPickableAsset)
                 : null,
           );
         },

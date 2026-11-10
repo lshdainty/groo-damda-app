@@ -277,6 +277,35 @@ void main() {
       expect(_t(l.presetNoAccount), findsNothing);
     });
 
+    testWidgets('수입 — 맞는 입금 계좌가 없으면 수입 말 안내, 지출은 기존 안내', (tester) async {
+      for (final income in [true, false]) {
+        await _open(tester, null, assetsFuture: Future.value([_bank]));
+        if (income) {
+          await tester.tap(_t('수입').first);
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(
+          _t(income ? l.expIncomeMethod : l.expPaymentMethod).first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(_t('카드').last);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          _t(income ? l.expDepositAccount : l.presetAssetCard).first,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          _t('이 수입 방식에 맞는 입금 계좌가 없어요.'),
+          income ? findsOneWidget : findsNothing,
+        );
+        expect(
+          _t('이 결제 수단에 맞는 계좌 · 카드가 없어요.'),
+          income ? findsNothing : findsOneWidget,
+        );
+        await tester.pumpWidget(const SizedBox());
+      }
+    });
+
     testWidgets('지출 — 고르기 시트는 결제 수단 · 계좌 · 카드 그대로다', (tester) async {
       await _open(tester, null);
       await tester.tap(_t(l.expPaymentMethod).first);

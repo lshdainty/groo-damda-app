@@ -755,7 +755,11 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       ],
       selected: _assetRowId,
       withNone: true,
-      emptyText: _paymentMethod.isNotEmpty ? l.txfNoPickableAsset : null,
+      emptyText: _paymentMethod.isNotEmpty
+          ? (_type == 'INCOME'
+                ? l.txfNoPickableDepositAsset
+                : l.txfNoPickableAsset)
+          : null,
     );
     if (picked == null || !mounted) return;
     setState(() => _assetRowId = picked == _kNoAsset ? null : picked);

@@ -8424,6 +8424,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txfNoIncomeMethod => 'No income method';
 
   @override
+  String get txfNoPickableDepositAsset =>
+      'No deposit account matches this income method.';
+
+  @override
   String get txfSelectFrom => 'Select the sending account';
 
   @override
