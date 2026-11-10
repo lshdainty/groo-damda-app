@@ -203,6 +203,9 @@ class _PLoadingAnnouncerState extends State<PLoadingAnnouncer> {
   final Map<Object, PWaitPhase> _phases = {};
   final Set<String> _said = {};
 
+  /// 값 조각([PLoadingRegion.inline])인 영역 — 알림에는 들지만 화면에 보이는 5초 글의 주인은 못 된다.
+  final Set<Object> _inline = {};
+
   /// 알림을 받지 않는 플랫폼(MediaQuery.supportsAnnounce 가 false — 안드로이드 등)에서 읽힐 글. 화면 밖 라이브
   /// 영역에 두면 글이 바뀔 때 읽힌다(Field 의 오류와 같은 길).
   String? _live;
@@ -218,6 +221,7 @@ class _PLoadingAnnouncerState extends State<PLoadingAnnouncer> {
   /// 떠날 때는 새 글을 넣지 않는다 — 남은 영역의 글은 이미 읽혔다.
   void leave(Object region) {
     _phases.remove(region);
+    _inline.remove(region);
     if (_phases.isEmpty) {
       _said.clear();
       if (_live != null) _setLive(null);
@@ -225,12 +229,22 @@ class _PLoadingAnnouncerState extends State<PLoadingAnnouncer> {
   }
 
   /// 5초 글을 화면에 보이는 영역인가 — 한 번의 기다림에서 맨 처음 알린 영역(화면 맨 위 영역)만. 나머지는 알림만 받는다.
-  bool ownsSlowText(Object region) =>
-      _phases.isEmpty || _phases.keys.first == region;
+  bool ownsSlowText(Object region) {
+    for (final key in _phases.keys) {
+      if (!_inline.contains(key)) return key == region;
+    }
+    return true;
+  }
 
   /// 영역 하나의 기다림 — [context] 는 그 영역의 것(글 · 방향을 읽는다).
-  void report(Object region, PWaitPhase phase, BuildContext context) {
+  void report(
+    Object region,
+    PWaitPhase phase,
+    BuildContext context, {
+    bool inline = false,
+  }) {
     _phases[region] = phase;
+    if (inline) _inline.add(region);
     final l10n = AppLocalizations.of(context);
     final all = _phases.values;
     final next = all.contains(PWaitPhase.slow)
@@ -334,7 +348,8 @@ class PLoadingRegion extends StatefulWidget {
   final Widget child;
 
   /// 값 조각용 — 줄 끝 · 칸 안 값 자리처럼 폭이 정해지지 않은 곳. 0 ~ 1초는 보이지 않게 그려 크기만 지키고 1초부터 보인다.
-  /// 5초 글 · 보조 기술 알림은 없다(알림은 앱 맨 위 하나와 같은 화면의 다른 영역이 맡는다). 내용으로 바뀌어도 서서히 나타나지 않는다.
+  /// 5초 글은 없다. 보조 기술 알림은 다른 영역과 같이 앱 맨 위 [PLoadingAnnouncer] 에 등록한다(WCAG 4.1.3 — 값 조각만 기다려도
+  /// 읽힌다, 같은 기다림의 같은 글은 한 번만). 내용으로 바뀌어도 서서히 나타나지 않는다.
   const PLoadingRegion.inline({super.key, required Widget this.fallback})
     : pending = true,
       failed = false,
@@ -434,10 +449,9 @@ class _PLoadingRegionState extends State<PLoadingRegion> {
   }
 
   void _report() {
-    if (widget.inline) return;
     // 가려진 화면 · 숨은 탭 영역(TickerMode 꺼짐)은 알리지 않는다 — 보이지 않는 곳의 기다림을 읽어 주지 않게
     if (_waiting && TickerMode.valuesOf(context).enabled) {
-      _announcer?.report(this, _phase, context);
+      _announcer?.report(this, _phase, context, inline: widget.inline);
     } else {
       _announcer?.leave(this);
     }
