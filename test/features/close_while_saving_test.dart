@@ -23,6 +23,13 @@ import 'package:groo_damda_app/features/calendar/application/calendar_providers.
 import 'package:groo_damda_app/features/calendar/data/user_calendar_repository.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_filter_sheet.dart';
+import 'package:go_router/go_router.dart';
+import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/auth/user.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_manage_screen.dart';
+import 'package:groo_damda_app/features/category/presentation/category_move_tx_sheet.dart';
+import 'package:groo_damda_app/features/expense/data/expense_repository.dart';
+import 'package:groo_damda_app/shared/ds/color_swatch/p_color_swatch.dart';
 import 'package:groo_damda_app/features/card/application/card_providers.dart';
 import 'package:groo_damda_app/features/card/domain/card_catalog_page.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -312,15 +319,179 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(builds.length, greaterThan(1), reason: '토글 뒤 목록이 갱신되지 않았다');
   });
+
+  testWidgets('거래 옮기기 시트 — 응답을 못 읽은 저장 뒤 시트가 닫혀 있어도 카테고리 목록을 다시 받는다', (
+    tester,
+  ) async {
+    final repo = _GatedExpenseRepo();
+    final builds = <int>[];
+    const a = ExpenseCategory(
+      rowId: 1,
+      categoryName: '식비',
+      expenseType: 'EXPENSE',
+      color: '#c73838',
+    );
+    const d = ExpenseCategory(
+      rowId: 5,
+      categoryName: '카페',
+      expenseType: 'EXPENSE',
+      color: '#2d8060',
+    );
+    _bigView(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          expenseRepositoryProvider.overrideWith((ref) async => repo),
+          categoriesProvider.overrideWith((ref) async {
+            builds.add(builds.length + 1);
+            return [a, d];
+          }),
+        ],
+        child: _home(
+          (ctx) => TextButton(
+            onPressed: () => showCategoryMoveTxSheet(
+              ctx,
+              source: a,
+              categories: const [a, d],
+            ),
+            child: const Text('open'),
+          ),
+          categoriesProvider,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(findText('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(findText('기존 카테고리로'));
+    await tester.pumpAndSettle();
+    await tester.tap(findText('카테고리 고르기'));
+    await tester.pumpAndSettle();
+    await tester.tap(findText('카페'));
+    await tester.pumpAndSettle();
+    repo.gate = Completer<void>();
+    await tester.tap(findText('옮기기').last);
+    await tester.pump();
+    await _dismissSheet(tester);
+    final before = builds.length;
+    repo.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(builds.length, greaterThan(before), reason: '서버는 옮겼는데 목록이 옛 값이다');
+  });
+
+  testWidgets('캘린더 관리 — 색을 바꾸는 중에 화면을 나가도 목록을 다시 받고 던지지 않는다', (tester) async {
+    final repo = _GatedCalendarRepo();
+    final builds = <int>[];
+    const cal = UserCalendar(
+      rowId: 2,
+      calendarName: '가족 일정',
+      color: '#2d8060',
+      inviteCode: '3F9A1C2B',
+      memberCount: 3,
+    );
+    _bigView(tester);
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => const CalendarManageScreen(calendarId: 2),
+        ),
+        GoRoute(path: '/away', builder: (_, _) => const Text('away')),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith(_NoAuth.new),
+          userCalendarRepositoryProvider.overrideWith((ref) async => repo),
+          userCalendarListProvider.overrideWith((ref) async {
+            builds.add(builds.length + 1);
+            return [cal];
+          }),
+        ],
+        child: MaterialApp.router(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          builder: (context, child) => Consumer(
+            builder: (_, ref, _) {
+              ref.watch(userCalendarListProvider);
+              return child!;
+            },
+          ),
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(builds, hasLength(1));
+    await tester.tap(findPlain('색상'));
+    await tester.pumpAndSettle();
+    repo.gate = Completer<void>();
+    // 지금 색이 아닌 다른 칸을 고른다
+    await tester.tap(
+      find
+          .descendant(
+            of: find.byType(PColorSwatchGroup),
+            matching: find.byType(GestureDetector),
+          )
+          .at(1),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(repo.updateCalls, 1, reason: '색 칸이 눌리지 않았다');
+    router.go('/away');
+    await tester.pumpAndSettle();
+    final before = builds.length;
+    repo.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(builds.length, greaterThan(before), reason: '색 저장 뒤 목록이 갱신되지 않았다');
+  });
 }
 
 class _GatedCalendarRepo extends UserCalendarRepository {
   _GatedCalendarRepo() : super(Dio());
   Completer<void>? gate;
+  int updateCalls = 0;
+
+  @override
+  Future<UserCalendar> update({
+    required int id,
+    String? calendarName,
+    String? color,
+    bool silent = false,
+  }) async {
+    updateCalls++;
+    await gate?.future;
+    return const UserCalendar(rowId: 2, calendarName: '가족 일정');
+  }
 
   @override
   Future<UserCalendar> toggleVisibility(int id) async {
     await gate?.future;
     return const UserCalendar(rowId: 3, calendarName: '가족 캘린더');
+  }
+}
+
+class _NoAuth extends AuthNotifier {
+  @override
+  Future<User?> build() async => null;
+}
+
+class _GatedExpenseRepo extends ExpenseRepository {
+  _GatedExpenseRepo() : super(Dio());
+  Completer<void>? gate;
+
+  @override
+  Future<int> moveCategoryTransactions(
+    int id,
+    int targetCategoryRowId, {
+    bool silent = false,
+  }) async {
+    await gate?.future;
+    throw ApiException(code: kApiParseErrorCode, message: '응답 원문');
   }
 }

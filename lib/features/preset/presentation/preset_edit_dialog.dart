@@ -718,9 +718,9 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       PBottomSheet.of(context).close();
     } catch (e) {
       // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글). 서버가 거절하든 저장소를 못 만들든 같다
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
       if (isUnconfirmedSave(e)) container.invalidate(presetListProvider);
+      if (!mounted) return;
       setState(() {
         _saveError = true;
         _failure = e;

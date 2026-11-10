@@ -247,13 +247,13 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       snack?.show(message: l.categoryMoveTxDone(moved));
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
       if (isUnconfirmedSave(e)) {
         container.invalidate(categoriesProvider);
         container.invalidate(monthExpensesProvider);
         invalidateAfterExpenseChangeIn(container);
       }
+      if (!mounted) return;
       setState(() {
         _failed = true;
         _failure = e;

@@ -283,9 +283,10 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
         : l.dutchSharesOverErr(txMoney(-diff, masked));
   }
 
-  void _showSaveError([Object? error]) {
-    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
-    if (isUnconfirmedSave(error)) ref.invalidate(dutchPayListProvider);
+  void _showSaveError(ProviderContainer container, [Object? error]) {
+    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3). 화면이 닫힌 뒤여도 비운다
+    if (isUnconfirmedSave(error)) container.invalidate(dutchPayListProvider);
+    if (!mounted) return;
     setState(() {
       _saveError = true;
       _failure = error;
@@ -306,6 +307,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       _saveError = false;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       final list = _list;
       if (list.isEmpty) return;
@@ -314,7 +316,6 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       // await 뒤엔 위젯이 사라졌을 수 있다 — ref · context 를 읽는 값은 먼저 잡아 둔다
       final day = _day;
       final title = _title;
-      final container = ProviderScope.containerOf(context, listen: false);
       final repo = await container.read(dutchPayRepositoryProvider.future);
       await repo.create(
         title: title,
@@ -353,7 +354,7 @@ class _DutchStepFlowState extends ConsumerState<DutchStepFlow> {
       if (!mounted) return;
       widget.onFinished?.call();
     } catch (e) {
-      if (mounted) _showSaveError(e);
+      _showSaveError(container, e);
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);

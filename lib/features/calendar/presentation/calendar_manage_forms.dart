@@ -305,9 +305,9 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
         calendarName: name,
         silent: true,
       );
-      widget.onRenamed?.call(name);
       container.invalidate(userCalendarListProvider);
       if (!mounted) return;
+      widget.onRenamed?.call(name);
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
