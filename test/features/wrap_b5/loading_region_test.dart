@@ -149,29 +149,34 @@ void main() {
     h.dispose();
   });
 
-  testWidgets('값 조각(inline) — 0~1초 보이지 않고 Row 안에서도 서며 글 · 알림이 없다', (
-    tester,
-  ) async {
-    final h = tester.ensureSemantics();
-    await tester.pumpWidget(
-      _app(
-        Row(
-          children: [
-            const Text('값'),
-            loadingInline(const PSkeleton(width: 40, height: 12)),
-          ],
+  testWidgets(
+    '값 조각(inline) — 0~1초 보이지 않고 Row 안에서도 서며 화면 글은 없고 알림은 읽힌다(WCAG 4.1.3)',
+    (tester) async {
+      final h = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          Row(
+            children: [
+              const Text('값'),
+              loadingInline(const PSkeleton(width: 40, height: 12)),
+            ],
+          ),
         ),
-      ),
-    );
-    expect(_skeletonVisible(tester), isFalse);
-    await tester.pump(const Duration(milliseconds: 1100));
-    expect(_skeletonVisible(tester), isTrue);
-    await tester.pump(const Duration(seconds: 5));
-    expect(findPlain('평소보다 오래 걸리고 있어요.'), findsNothing);
-    expect(_liveLabels(tester), isEmpty);
-    expect(tester.takeException(), isNull);
-    h.dispose();
-  });
+      );
+      expect(_skeletonVisible(tester), isFalse);
+      await tester.pump(const Duration(milliseconds: 1100));
+      expect(_skeletonVisible(tester), isTrue);
+      await tester.pump();
+      expect(_liveLabels(tester), ['불러오는 중…']);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump();
+      // 5초 글은 화면에 없다 — 알림만(2026-11-11 inline 도 상태 글에 등록)
+      expect(findPlain('평소보다 오래 걸리고 있어요.'), findsNothing);
+      expect(_liveLabels(tester), ['평소보다 오래 걸리고 있어요.']);
+      expect(tester.takeException(), isNull);
+      h.dispose();
+    },
+  );
 
   testWidgets('가려진 화면(TickerMode 꺼짐)의 기다림은 알리지 않는다', (tester) async {
     final h = tester.ensureSemantics();
