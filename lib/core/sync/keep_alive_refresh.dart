@@ -82,13 +82,22 @@ void _invalidateExpenseChange(
 ///
 /// 거래는 건드리지 않는다 — 자산을 고쳐도 그 자산에 달린 거래 자체는 그대로다.
 /// 거래까지 바뀌는 경로(카드 결제·이체 삭제 등)는 [invalidateAfterExpenseChange] 를 쓴다.
-void invalidateAfterAssetChange(WidgetRef ref) {
-  ref.invalidate(assetsProvider);
-  ref.invalidate(assetSummaryProvider);
-  ref.invalidate(netWorthTrendProvider);
-  ref.invalidate(assetByIdProvider);
-  ref.invalidate(cardBillingProvider);
-  ref.invalidate(cardPerformanceProvider);
+void invalidateAfterAssetChange(WidgetRef ref) =>
+    _invalidateAssetChange(ref.invalidate);
+
+/// [invalidateAfterAssetChange] 의 컨테이너판 — 저장 중에 화면이 닫혀도 저장 뒤 목록이 갱신되어야 하는 폼이 쓴다.
+void invalidateAfterAssetChangeIn(ProviderContainer container) =>
+    _invalidateAssetChange(container.invalidate);
+
+void _invalidateAssetChange(
+  void Function(ProviderOrFamily provider) invalidate,
+) {
+  invalidate(assetsProvider);
+  invalidate(assetSummaryProvider);
+  invalidate(netWorthTrendProvider);
+  invalidate(assetByIdProvider);
+  invalidate(cardBillingProvider);
+  invalidate(cardPerformanceProvider);
 }
 
 /// 탭이 진입할 때 60초 규칙으로 다시 받는 조회 — **그 화면이 실제로 읽는 것만**.

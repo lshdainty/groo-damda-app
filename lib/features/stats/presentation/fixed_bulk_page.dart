@@ -61,17 +61,18 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
       _failed = false;
       _submitting = true;
     });
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
+      final repo = await container.read(expenseRepositoryProvider.future);
       final updated = await repo.bulkMarkFixed(
         _picked.toList(),
         isFixed: _toFixed,
         silent: true,
       );
       // 합계가 아니라 분류가 바뀌지만 통계(고정/변동)·목록이 모두 달라진다.
-      invalidateAfterExpenseChange(ref);
-      ref.invalidate(rangeSummaryProvider(widget.range));
-      ref.invalidate(monthlyTrendProvider(6));
+      invalidateAfterExpenseChangeIn(container);
+      container.invalidate(rangeSummaryProvider(widget.range));
+      container.invalidate(monthlyTrendProvider(6));
       if (!mounted) return;
       nav.pop();
       if (!host.mounted) return;

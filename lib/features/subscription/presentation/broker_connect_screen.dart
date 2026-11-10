@@ -113,13 +113,17 @@ class _BrokerConnectScreenState extends ConsumerState<BrokerConnectScreen> {
     setState(() => _connectError = null);
     _setAction(_Action.connect);
     try {
-      final repo = await ref.read(subscriptionRepositoryProvider.future);
+      final repo = await container.read(subscriptionRepositoryProvider.future);
       await repo.registerBrokerCredential(c.broker, key, secret, silent: true);
+      // 연결 상태는 화면이 닫혀도 다시 받는다
+      container
+        ..invalidate(myFeaturesLoadProvider)
+        ..invalidate(brokerConnectionsProvider);
       // 연결됐다 — 친 값은 저장된 것이다. 비우지 않으면 연결 해제 뒤 폼에 옛 키가 남는다
-      _keyCtrl.clear();
-      _secretCtrl.clear();
-      ref.invalidate(myFeaturesLoadProvider);
-      ref.invalidate(brokerConnectionsProvider);
+      if (mounted) {
+        _keyCtrl.clear();
+        _secretCtrl.clear();
+      }
       if (mounted) {
         PSnackbar.maybeOf(context)?.show(
           message: l.subBrokerConnected(c.displayName),

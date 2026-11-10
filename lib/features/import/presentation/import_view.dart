@@ -205,8 +205,9 @@ class _ImportViewState extends ConsumerState<ImportView> {
     setState(() => _executing = true);
     // 확정하는 동안 화면 전체 딤 + 흰 원 40 (I-05 49) — 37 과 같은 덮개
     final scrim = PBusyScrim.show(context, label: l.importBusy);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(importRepositoryProvider.future);
+      final repo = await container.read(importRepositoryProvider.future);
       final res = await repo.execute(
         _file!,
         source: _source,
@@ -216,8 +217,8 @@ class _ImportViewState extends ConsumerState<ImportView> {
       );
       // 한 번에 수십 건이 들어온다 — 가계부·홈·통계가 전부 달라진다.
       // 어느 달로 들어갔는지는 파일을 열기 전엔 알 수 없다 — 월 목록은 base 로 민다.
-      ref.invalidate(monthExpensesProvider);
-      invalidateAfterExpenseChange(ref);
+      container.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChangeIn(container);
       if (!mounted) return;
       setState(() {
         _result = res;
@@ -227,8 +228,8 @@ class _ImportViewState extends ConsumerState<ImportView> {
       // 응답을 못 받았다 — 가져왔을 수 있다(거래 수십 건). [다시 시도] 를 주면 두 번 들어간다 — 다시 받고 확인을
       // 부탁한다(검수 M3)
       if (isUnconfirmedSave(e)) {
-        ref.invalidate(monthExpensesProvider);
-        invalidateAfterExpenseChange(ref);
+        container.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChangeIn(container);
         if (mounted) {
           PSnackbar.maybeOf(context)?.show(
             message: unconfirmedWriteText(l, WriteKind.save),

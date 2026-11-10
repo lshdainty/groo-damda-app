@@ -223,24 +223,25 @@ class _GroupFormState extends ConsumerState<_GroupForm> {
       _busy = true;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(stocksRepositoryProvider.future);
+      final repo = await container.read(stocksRepositoryProvider.future);
       final g = widget.group;
       if (g == null) {
         await repo.createWatchGroup(name, silent: true);
       } else {
         await repo.renameWatchGroup(g.rowId, name, silent: true);
       }
-      ref.invalidate(watchGroupsProvider);
+      container.invalidate(watchGroupsProvider);
       if (mounted) {
         widget.probe.dirty = () => false;
         PBottomSheet.of(context).close();
       }
     } catch (e) {
       // 시트는 열린 채 쓴 이름이 남는다 — 실패는 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
-      if (isUnconfirmedSave(e)) ref.invalidate(watchGroupsProvider);
+      if (isUnconfirmedSave(e)) container.invalidate(watchGroupsProvider);
+      if (!mounted) return;
       setState(() {
         _busy = false;
         _failed = true;

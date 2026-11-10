@@ -746,12 +746,12 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     _applyPreset(p);
   }
 
-  Future<void> _touchAppliedPreset() async {
+  Future<void> _touchAppliedPreset(ProviderContainer container) async {
     if (_isEdit || _appliedPresetId == null) return;
     try {
-      final pRepo = await ref.read(presetRepositoryProvider.future);
+      final pRepo = await container.read(presetRepositoryProvider.future);
       await pRepo.touch(_appliedPresetId!);
-      ref.invalidate(presetListProvider);
+      container.invalidate(presetListProvider);
     } catch (_) {
       /* touch 실패는 본 거래 저장에 영향 없음 */
     }
@@ -1052,8 +1052,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     });
     final name = _presetNameCtrl.text.trim();
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(presetRepositoryProvider.future);
+      final repo = await container.read(presetRepositoryProvider.future);
       await repo.create(
         templateName: name,
         categoryRowId: isTransfer ? null : c.categoryRowId,
@@ -1077,7 +1078,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         isFixed: !isTransfer && c.isFixed,
         silent: true,
       );
-      ref.invalidate(presetListProvider);
+      container.invalidate(presetListProvider);
       if (!mounted) return;
       setState(() => _step = _presetOrigin);
       // 저장은 neutral(D1) — 시트 위 호스트. 호스트가 없는 자리(시험)는 조용히 건너뛴다.
@@ -1085,9 +1086,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         hostContextOf(context),
       )?.show(message: l.txfPresetSaved(name));
     } on ApiException catch (e) {
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
-      if (isUnconfirmedSave(e)) ref.invalidate(presetListProvider);
+      if (isUnconfirmedSave(e)) container.invalidate(presetListProvider);
+      if (!mounted) return;
       // 고칠 수 있는 서버 거절(이름 중복 등)은 위에서 먼저 막았다 — 남는 건 우리 글
       setState(() => _presetSaveError = saveFailureText(l, e, l.txfSaveFailed));
     } finally {
@@ -1231,15 +1232,18 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   ///
   /// 응답만 못 읽었으면(PARSE — 서버는 거래 · 이체를 만들었다) 실패라 하지 않는다: 성공 때처럼 가계부 · 자산 · 홈을 비우고
   /// "저장됐는지 확인하지 못했어요. 목록에서 확인해주세요." 를 둔다. 폼은 닫지 않는다(검수 M3 — 다시 누르면 두 번 생긴다).
-  void _failSave(ApiException e) {
+  void _failSave(ApiException e, ProviderContainer container) {
+    // 화면이 닫힌 뒤에도 서버는 저장했으니 목록은 비운다 — 가드는 그 뒤에 둔다
+    if (isUnconfirmedSave(e)) {
+      container.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChangeIn(container);
+      final edited = _edit ?? _replaceOf;
+      if (edited != null) {
+        container.invalidate(expenseSplitsProvider(edited.rowId));
+      }
+    }
     if (!mounted) return;
     final l = AppLocalizations.of(context);
-    if (isUnconfirmedSave(e)) {
-      ref.invalidate(monthExpensesProvider);
-      invalidateAfterExpenseChange(ref);
-      final edited = _edit ?? _replaceOf;
-      if (edited != null) ref.invalidate(expenseSplitsProvider(edited.rowId));
-    }
     setState(() => _saveError = saveFailureText(l, e, l.txfSaveFailed));
     scrollSheetBodyToTop(context);
   }
@@ -1287,8 +1291,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _submitting = true;
       _saveError = null;
     });
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
+      final repo = await container.read(expenseRepositoryProvider.future);
       Expense? savedEdit;
       final edited = _edit;
       if (edited != null) {
@@ -1322,9 +1327,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             refundedAmount: saved.refundedAmount,
           );
         }
-        ref.invalidate(expenseSplitsProvider(edited.rowId));
+        container.invalidate(expenseSplitsProvider(edited.rowId));
       } else if (_smsDraft != null) {
-        final smsRepo = await ref.read(smsRepositoryProvider.future);
+        final smsRepo = await container.read(smsRepositoryProvider.future);
         final committed = await smsRepo.commit(
           text: _smsDraft!.text,
           assetRowId: c.assetRowId,
@@ -1370,20 +1375,22 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         );
         _notifyCreated(refundedAmount: created.refundedAmount);
       }
-      await _touchAppliedPreset();
+      await _touchAppliedPreset(container);
       if (edited?.expenseDate != null) {
         final orig = parseIsoDate(edited!.expenseDate!.substring(0, 10));
         if (orig.year != d.year || orig.month != d.month) {
-          ref.invalidate(
+          container.invalidate(
             monthExpensesProvider((year: orig.year, month: orig.month)),
           );
         }
       }
-      ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
-      invalidateAfterExpenseChange(ref);
+      container.invalidate(
+        monthExpensesProvider((year: d.year, month: d.month)),
+      );
+      invalidateAfterExpenseChangeIn(container);
       // 상세로 돌아가는 길이면 목록을 다시 받은 다음 단계를 옮긴다 — 돌아간 상세가 옛 값을 먼저 그리지 않게(I-21 ⑧)
       if (savedEdit != null && widget.onSaved != null) {
-        await _refetchMonth(d.year, d.month);
+        await _refetchMonth(container, d.year, d.month);
       }
       if (!mounted) return;
       if (savedEdit != null && widget.onSaved != null) {
@@ -1393,7 +1400,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       widget.onFinished?.call();
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
-      _failSave(e);
+      _failSave(e, container);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -1410,12 +1417,13 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _submitting = true;
       _saveError = null;
     });
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       final fee = int.tryParse(c.feeCtrl.text.replaceAll(',', ''));
       final interest = showTxInterest(c, _assetsAtSave)
           ? int.tryParse(c.interestCtrl.text.replaceAll(',', ''))
           : null;
-      final aRepo = await ref.read(assetRepositoryProvider.future);
+      final aRepo = await container.read(assetRepositoryProvider.future);
       final editing = widget.editTransfer;
       AssetTransfer? savedTransfer;
       if (editing != null) {
@@ -1431,7 +1439,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           silent: true,
         );
         if (widget.onTransferSaved != null) {
-          final assets = ref.read(assetsProvider).value;
+          final assets = container.read(assetsProvider).value;
           savedTransfer = AssetTransfer(
             rowId: editing.rowId,
             userRowId: editing.userRowId,
@@ -1461,10 +1469,14 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
           silent: true,
         );
       }
-      ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
-      invalidateAfterExpenseChange(ref);
-      await _touchAppliedPreset();
-      if (savedTransfer != null) await _refetchMonth(d.year, d.month);
+      container.invalidate(
+        monthExpensesProvider((year: d.year, month: d.month)),
+      );
+      invalidateAfterExpenseChangeIn(container);
+      await _touchAppliedPreset(container);
+      if (savedTransfer != null) {
+        await _refetchMonth(container, d.year, d.month);
+      }
       if (!mounted) return;
       if (savedTransfer != null && widget.onTransferSaved != null) {
         await widget.onTransferSaved!(savedTransfer);
@@ -1473,15 +1485,21 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       widget.onFinished?.call();
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
-      _failSave(e);
+      _failSave(e, container);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
   }
 
-  Future<void> _refetchMonth(int year, int month) async {
+  Future<void> _refetchMonth(
+    ProviderContainer container,
+    int year,
+    int month,
+  ) async {
     try {
-      await ref.read(monthExpensesProvider((year: year, month: month)).future);
+      await container.read(
+        monthExpensesProvider((year: year, month: month)).future,
+      );
     } catch (_) {
       // 받지 못해도 돌아간다
     }
@@ -1535,8 +1553,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       _submitting = true;
       _saveError = null;
     });
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
+      final repo = await container.read(expenseRepositoryProvider.future);
       final splits = _effectiveSplits.isEmpty ? null : _effectiveSplits;
       final saved = await repo.replace(
         original.rowId,
@@ -1559,13 +1578,17 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
       final origDate = original.expenseDate;
       if (origDate != null && origDate.length >= 10) {
         final o = parseIsoDate(origDate.substring(0, 10));
-        ref.invalidate(monthExpensesProvider((year: o.year, month: o.month)));
+        container.invalidate(
+          monthExpensesProvider((year: o.year, month: o.month)),
+        );
       }
       final d = c.date;
-      ref.invalidate(monthExpensesProvider((year: d.year, month: d.month)));
-      ref.invalidate(expenseSplitsProvider(original.rowId));
-      ref.invalidate(expenseSplitsProvider(saved.rowId));
-      invalidateAfterExpenseChange(ref);
+      container.invalidate(
+        monthExpensesProvider((year: d.year, month: d.month)),
+      );
+      container.invalidate(expenseSplitsProvider(original.rowId));
+      container.invalidate(expenseSplitsProvider(saved.rowId));
+      invalidateAfterExpenseChangeIn(container);
       // 옛 거래가 지워졌으니 돌아갈 상세가 없다 — 모두 닫는다
       widget.onFinished?.call();
       if (mounted) PBottomSheet.of(context).close();
@@ -1579,13 +1602,13 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     } on ApiException catch (e) {
       // 404 = 옛 거래가 이미 없다 — 교체는 앞선 요청에서 끝났다. 목록을 다시 읽게 하고 닫는다(QA 26 5).
       if (e.statusCode == 404) {
-        ref.invalidate(monthExpensesProvider);
-        ref.invalidate(expenseSplitsProvider(original.rowId));
-        invalidateAfterExpenseChange(ref);
+        container.invalidate(monthExpensesProvider);
+        container.invalidate(expenseSplitsProvider(original.rowId));
+        invalidateAfterExpenseChangeIn(container);
         widget.onFinished?.call();
         if (mounted) PBottomSheet.of(context).close();
       } else {
-        _failSave(e);
+        _failSave(e, container);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);

@@ -444,14 +444,18 @@ class _CalendarEventFormSheetState
 
   /// 반복 일정을 저장 · 삭제한 뒤에는 이미 받아 둔 다른 달에 옛 회차가 남지 않게 달 전체를 비운다(I-09 30). 반복이 아니면 일정이 걸친
   /// 모든 달 — 새 날짜 · 옛 날짜 모두(달을 걸친 일정을 뒤쪽 달에서 고쳐도 그 달이 비워진다).
-  void _invalidateAfterWrite({required bool recurring, CalendarEvent? orig}) {
-    invalidateCalendarMonths(
-      ref,
+  void _invalidateAfterWrite(
+    ProviderContainer container, {
+    required bool recurring,
+    CalendarEvent? orig,
+  }) {
+    invalidateCalendarMonthsIn(
+      container.invalidate,
       recurring: recurring,
       ranges: [(_start, _end), if (orig != null) (orig.start, orig.end)],
     );
     // 홈 위젯(오늘 일정·다가오는 일정)의 원본 — 셸 상주라 스스로 안 받는다.
-    ref.invalidate(dashboardSummaryProvider);
+    container.invalidate(dashboardSummaryProvider);
   }
 
   /// [저장] 은 켜 두고 누를 때 비거나 틀린 칸마다 오류를 보이며 첫 오류 칸으로 초점을 옮긴다.
@@ -476,8 +480,9 @@ class _CalendarEventFormSheetState
       _saveError = null;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(calendarRepositoryProvider.future);
+      final repo = await container.read(calendarRepositoryProvider.future);
       final description = _description.trim();
       final location = _location.trim();
       if (_isEdit) {
@@ -518,6 +523,7 @@ class _CalendarEventFormSheetState
         );
       }
       _invalidateAfterWrite(
+        container,
         recurring: _rruleForSave != null || widget.edit?.rrule != null,
         orig: widget.edit,
       );
@@ -530,14 +536,15 @@ class _CalendarEventFormSheetState
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
       // 시트는 닫히지 않고 쓴 값이 남는다 — 폼 맨 위 Callout(snackbar.md "저장 · 제출이 실패함")
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
       if (isUnconfirmedSave(e)) {
         _invalidateAfterWrite(
+          container,
           recurring: _rruleForSave != null || widget.edit?.rrule != null,
           orig: widget.edit,
         );
       }
+      if (!mounted) return;
       setState(() => _saveError = saveFailureText(l, e, l.calFormSaveFailed));
     } finally {
       sheet?.setBusy(false);

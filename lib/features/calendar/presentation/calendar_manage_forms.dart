@@ -132,16 +132,17 @@ class _CreateFormState extends ConsumerState<_CreateForm> {
       _saveError = null;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
+      final repo = await container.read(userCalendarRepositoryProvider.future);
       await repo.create(calendarName: name, color: _color, silent: true);
-      ref.invalidate(userCalendarListProvider);
+      container.invalidate(userCalendarListProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
-      if (isUnconfirmedSave(e)) ref.invalidate(userCalendarListProvider);
+      if (isUnconfirmedSave(e)) container.invalidate(userCalendarListProvider);
+      if (!mounted) return;
       setState(() => _saveError = saveFailureText(l, e, l.calCreateFailed));
     } finally {
       sheet?.setBusy(false);
@@ -296,21 +297,22 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
       _saveError = null;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
+      final repo = await container.read(userCalendarRepositoryProvider.future);
       await repo.update(
         id: widget.calendar.rowId,
         calendarName: name,
         silent: true,
       );
-      widget.onRenamed?.call(name);
-      ref.invalidate(userCalendarListProvider);
+      container.invalidate(userCalendarListProvider);
       if (!mounted) return;
+      widget.onRenamed?.call(name);
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
-      if (isUnconfirmedSave(e)) ref.invalidate(userCalendarListProvider);
+      if (isUnconfirmedSave(e)) container.invalidate(userCalendarListProvider);
+      if (!mounted) return;
       setState(() => _saveError = saveFailureText(l, e, l.calManageSaveFailed));
     } finally {
       sheet?.setBusy(false);
@@ -423,12 +425,13 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
       _saveError = null;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(userCalendarRepositoryProvider.future);
+      final repo = await container.read(userCalendarRepositoryProvider.future);
       final joined = await repo.joinByCode(code);
-      ref.invalidate(userCalendarListProvider);
+      container.invalidate(userCalendarListProvider);
       // 그 캘린더의 일정도 이제 내 조회 결과에 들어온다(웹과 같게)
-      ref.invalidate(monthEventsProvider);
+      container.invalidate(monthEventsProvider);
       if (!mounted) return;
       PBottomSheet.of(context).close();
       snack?.show(
@@ -436,12 +439,12 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
         tone: PSnackbarTone.positive,
       );
     } on ApiException catch (e) {
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비우고 실패라 하지 않는다(검수 M3)
       if (isUnconfirmedSave(e)) {
-        ref.invalidate(userCalendarListProvider);
-        ref.invalidate(monthEventsProvider);
+        container.invalidate(userCalendarListProvider);
+        container.invalidate(monthEventsProvider);
       }
+      if (!mounted) return;
       setState(() {
         switch (e.code) {
           case 'CAL_012':

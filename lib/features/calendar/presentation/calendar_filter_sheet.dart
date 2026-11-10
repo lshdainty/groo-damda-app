@@ -40,15 +40,19 @@ class _CalendarFilterSheet extends ConsumerWidget {
     final holidayVisible = ref.watch(holidayVisibleProvider);
 
     Future<void> toggle(UserCalendar cal) async {
+      // 저장 중 시트가 닫혀도 목록은 갱신된다 — await 전에 컨테이너를 잡아 둔다
+      final container = ProviderScope.containerOf(context, listen: false);
       try {
-        final repo = await ref.read(userCalendarRepositoryProvider.future);
+        final repo = await container.read(
+          userCalendarRepositoryProvider.future,
+        );
         await repo.toggleVisibility(cal.rowId);
-        ref.invalidate(userCalendarListProvider);
+        container.invalidate(userCalendarListProvider);
       } catch (e) {
         // 바로 바뀌는 값 — 서버 값 그대로라 되돌릴 것이 없다. 스낵바 두 문장("… 잠시 뒤 다시 시도해주세요."), 다시 시도 버튼 없음(요청은 silent).
         // 응답을 못 받았으면 뒤집혔을 수 있다 — 목록을 다시 받아 체크를 서버 값에 맞추고 "바뀌었는지" 한 문장(판단 ②)
         final unconfirmed = isUnconfirmedSave(e);
-        if (unconfirmed) ref.invalidate(userCalendarListProvider);
+        if (unconfirmed) container.invalidate(userCalendarListProvider);
         if (context.mounted) {
           PSnackbar.maybeOf(context)?.show(
             message: unconfirmed ? l.unconfirmedToggle : l.calUpdateFailed,

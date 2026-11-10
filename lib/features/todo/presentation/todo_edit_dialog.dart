@@ -209,8 +209,8 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       _submitting = true;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final container = ProviderScope.containerOf(context, listen: false);
       final repo = await container.read(todoRepositoryProvider.future);
       final content = _contentCtrl.text.trim();
       if (_isEdit) {
@@ -242,12 +242,12 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
       if (isUnconfirmedSave(e)) {
-        ref.invalidate(todoListProvider);
-        ref.invalidate(dashboardSummaryProvider);
+        container.invalidate(todoListProvider);
+        container.invalidate(dashboardSummaryProvider);
       }
+      if (!mounted) return;
       setState(() {
         _failed = true;
         _failure = e;

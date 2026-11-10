@@ -211,10 +211,10 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   /// rangeSummaryProvider 등 family FutureProvider 는 non-autoDispose 라 세션 내내
   /// 캐시가 살아 있어, categoriesProvider 만 무효화하면 예산 게이지·통계 도넛의
   /// categoryBreakdown(부모 귀속)이 stale 로 남는다 (pull-to-refresh 전까지).
-  void _invalidateAggregates() {
-    ref.invalidate(categoriesProvider);
-    ref.invalidate(rangeSummaryProvider);
-    ref.invalidate(dashboardSummaryProvider);
+  void _invalidateAggregates(ProviderContainer container) {
+    container.invalidate(categoriesProvider);
+    container.invalidate(rangeSummaryProvider);
+    container.invalidate(dashboardSummaryProvider);
   }
 
   /// 자식 이동 시 새 부모 예산 초과 확인 — 초과면 확인창 1회(승인=true) (룰3).
@@ -298,8 +298,9 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       _submitting = true;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
+      final repo = await container.read(expenseRepositoryProvider.future);
       if (_isEdit) {
         await repo.updateCategory(
           id: widget.edit!.rowId,
@@ -322,16 +323,16 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           silent: true,
         );
       }
-      _invalidateAggregates();
+      _invalidateAggregates(container);
       if (!mounted) return;
       PBottomSheet.of(context).close();
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
       if (isUnconfirmedSave(e)) {
-        _invalidateAggregates();
+        _invalidateAggregates(container);
       }
+      if (!mounted) return;
       setState(() {
         _failed = true;
         _failure = e;

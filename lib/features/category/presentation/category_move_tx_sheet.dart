@@ -219,8 +219,9 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       _submitting = true;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(expenseRepositoryProvider.future);
+      final repo = await container.read(expenseRepositoryProvider.future);
       final moved = _mode == _Mode.newChild
           ? await repo.splitCategoryIntoChild(
               widget.source.rowId,
@@ -235,10 +236,10 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
               silent: true,
             );
       // 거래의 카테고리가 바뀌므로 목록·통계까지 새로 받는다.
-      ref.invalidate(categoriesProvider);
+      container.invalidate(categoriesProvider);
       // 그 카테고리의 거래가 전 기간에 흩어져 있다 — 어느 달이 바뀌는지 모른다.
-      ref.invalidate(monthExpensesProvider);
-      invalidateAfterExpenseChange(ref);
+      container.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChangeIn(container);
       if (!mounted) return;
       // 성공은 neutral 한 문장 — 스낵바 길은 시트를 닫기 전에 쥔다.
       final snack = PSnackbar.maybeOf(context);
@@ -246,13 +247,13 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
       snack?.show(message: l.categoryMoveTxDone(moved));
     } on ApiException catch (e) {
       // 폼은 열린 채 쓴 값이 남는다 — 실패는 폼 맨 위 Callout 한 문장(우리 글, 서버 글 아님)이 말한다.
-      if (!mounted) return;
       // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다
       if (isUnconfirmedSave(e)) {
-        ref.invalidate(categoriesProvider);
-        ref.invalidate(monthExpensesProvider);
-        invalidateAfterExpenseChange(ref);
+        container.invalidate(categoriesProvider);
+        container.invalidate(monthExpensesProvider);
+        invalidateAfterExpenseChangeIn(container);
       }
+      if (!mounted) return;
       setState(() {
         _failed = true;
         _failure = e;

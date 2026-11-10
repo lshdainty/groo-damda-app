@@ -73,8 +73,9 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
   Future<void> _upload(String path, String name) async {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final repo = await ref.read(fileRepositoryProvider.future);
+      final repo = await container.read(fileRepositoryProvider.future);
       await repo.upload(
         filePath: path,
         fileName: name,
@@ -82,7 +83,7 @@ class _FileAttachmentSectionState extends ConsumerState<FileAttachmentSection> {
         referenceRowId: widget.referenceRowId,
         silent: true,
       );
-      ref.invalidate(filesByReferenceProvider(_key));
+      container.invalidate(filesByReferenceProvider(_key));
       if (!mounted) return;
       PSnackbar.maybeOf(context)?.show(message: l.fileUploadComplete(name));
     } on ApiException {

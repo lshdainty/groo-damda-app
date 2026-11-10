@@ -350,9 +350,10 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
   }
 
   // ── 저장 ────────────────────────────────────────────────
-  void _showSaveError([Object? error]) {
-    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
-    if (isUnconfirmedSave(error)) unawaited(_refreshAfterChange());
+  void _showSaveError(ProviderContainer container, [Object? error]) {
+    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3). 화면이 닫힌 뒤여도 비운다
+    if (isUnconfirmedSave(error)) unawaited(_refreshAfterChange(container));
+    if (!mounted) return;
     setState(() {
       _saveError = true;
       _failure = error;
@@ -373,6 +374,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
       _saveError = false;
     });
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       final rows = _rows!;
       if (_remainder != 0 || rows.length < 2) return;
@@ -392,13 +394,13 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
         onReconciled(inputs);
         return;
       }
-      final repo = await ref.read(expenseSplitRepositoryProvider.future);
+      final repo = await container.read(expenseSplitRepositoryProvider.future);
       await repo.replace(_e.rowId, splits: inputs, silent: true);
-      await _refreshAfterChange();
+      await _refreshAfterChange(container);
       if (!mounted) return;
       widget.onFinished?.call();
     } catch (e) {
-      if (mounted) _showSaveError(e);
+      _showSaveError(container, e);
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
@@ -406,18 +408,18 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
   }
 
   /// 분할은 거래 목록 · 자산 잔액에 영향 — 관련 캐시를 다시 받는다. 상세가 새 값으로 그려지도록 분할 목록은 받은 뒤에 돌아간다.
-  Future<void> _refreshAfterChange() async {
+  Future<void> _refreshAfterChange(ProviderContainer container) async {
     final iso = _e.expenseDate;
     if (iso != null && iso.length >= 10) {
       final p = iso.substring(0, 10).split('-');
-      ref.invalidate(
+      container.invalidate(
         monthExpensesProvider((year: int.parse(p[0]), month: int.parse(p[1]))),
       );
     }
-    invalidateAfterExpenseChange(ref);
-    ref.invalidate(expenseSplitsProvider(_e.rowId));
+    invalidateAfterExpenseChangeIn(container);
+    container.invalidate(expenseSplitsProvider(_e.rowId));
     try {
-      await ref.read(expenseSplitsProvider(_e.rowId).future);
+      await container.read(expenseSplitsProvider(_e.rowId).future);
     } catch (_) {}
   }
 

@@ -907,13 +907,14 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
 
   // ── 저장 ──────────────────────────────────────────────────
   /// 저장 실패 Callout 을 켜고 보이는 자리로 끌어온다(본문 맨 위라 아래로 내린 뒤엔 가려진다).
-  void _showSaveError([Object? error]) {
-    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3)
+  void _showSaveError(ProviderContainer container, [Object? error]) {
+    // 응답만 못 읽었다(서버는 저장했다) — 성공 때와 같은 목록을 비운다(검수 M3). 화면이 닫힌 뒤여도 비우고, 가드는 그 뒤에 둔다
     if (isUnconfirmedSave(error)) {
-      ref.invalidate(recurringListProvider);
-      ref.invalidate(monthExpensesProvider);
-      invalidateAfterExpenseChange(ref);
+      container.invalidate(recurringListProvider);
+      container.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChangeIn(container);
     }
+    if (!mounted) return;
     setState(() {
       _saveError = true;
       _failure = error;
@@ -947,17 +948,18 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
     }
     setState(() => _submitting = true);
     final sheet = PBottomSheet.maybeOf(context)?..setBusy(true);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       // 이자 판정은 받는 계좌의 종류를 봐야 한다 — 목록이 없으면 받아 온 뒤 정한다. 못 받으면 요청 없이 알린다
       // (이자 키가 빠지면 서버가 지워 버린다)
       if (_isTransfer &&
           _toAssetRowId != null &&
-          ref.read(assetsProvider).value == null) {
+          container.read(assetsProvider).value == null) {
         try {
-          await ref.read(assetsProvider.future);
+          await container.read(assetsProvider.future);
         } catch (_) {
           if (!mounted) return;
-          _showSaveError();
+          _showSaveError(container);
           return;
         }
         if (!mounted) return;
@@ -966,7 +968,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           return;
         }
       }
-      final repo = await ref.read(recurringRepositoryProvider.future);
+      final repo = await container.read(recurringRepositoryProvider.future);
       final isWeekly = _frequency == 'WEEKLY';
       final isMonthlyish = _frequency == 'MONTHLY' || _frequency == 'YEARLY';
       final dow = isWeekly ? (_dow == 0 ? 7 : _dow) : null;
@@ -1042,11 +1044,11 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       }
       // 목록을 다시 받은 **뒤에** 닫는다 — 닫혔을 때 줄이 이미 새 값이다. 만들거나 고친 규칙의 회차가 오늘이면 서버가 그 거래를
       // 바로 기록한다(QA 30 1) — 가계부 · 자산 · 홈도 함께 새로 받는다.
-      ref.invalidate(recurringListProvider);
-      ref.invalidate(monthExpensesProvider);
-      invalidateAfterExpenseChange(ref);
+      container.invalidate(recurringListProvider);
+      container.invalidate(monthExpensesProvider);
+      invalidateAfterExpenseChangeIn(container);
       try {
-        await ref.read(recurringListProvider.future);
+        await container.read(recurringListProvider.future);
       } catch (_) {}
       if (!mounted) return;
       if (_embedded) {
@@ -1056,8 +1058,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       }
     } on ApiException catch (e) {
       // 표면이 닫히지 않고 쓴 값이 남는다 — 알림은 폼 맨 위 Callout(고정 글, 서버 원문 없음)
-      if (!mounted) return;
-      _showSaveError(e);
+      _showSaveError(container, e);
     } finally {
       sheet?.setBusy(false);
       if (mounted) setState(() => _submitting = false);
