@@ -642,7 +642,7 @@ class _BackButtonState extends State<_BackButton> {
               height: kBottomSheetBackSize,
               child: Center(
                 child: Icon(
-                  LucideIcons.arrowLeft,
+                  LucideIcons.chevronLeft,
                   size: kBottomSheetBackIcon,
                   color: c.fgNeutral,
                 ),
