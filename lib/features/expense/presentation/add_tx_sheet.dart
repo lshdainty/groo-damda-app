@@ -2819,7 +2819,9 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                       )
                     : (cat == null ? null : categoryTile(context, cat)),
                 // 금액 값 — 쉼표 뒤에서만 줄을 바꾼다(글 값은 ds 가 keepAll 만 걸어 200% 에서 숫자 가운데가 끊긴다)
-                suffix: PListValue.amount(krwSigned(c.amountInt, false, unit: true)),
+                suffix: PListValue.amount(
+                  krwSigned(c.amountInt, false, unit: true),
+                ),
               ),
             ],
           ),
