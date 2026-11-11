@@ -35,6 +35,7 @@ import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.d
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tabs/p_tabs.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
@@ -1255,7 +1256,8 @@ class _TossStockDetailPageState extends ConsumerState<TossStockDetailPage> {
                 ],
                 if (isUs && last != null && fxRate != null) ...[
                   const SizedBox(height: 2),
-                  PText.amount(
+                  // 앞 기호 + 금액 — 띄어쓰기에서 먼저 넘기고 쉼표 뒤는 금액이 칸보다 길 때만(keepAllFit, Typography v114)
+                  KeepAllFitText(
                     '≈ ${krwSigned((last * fxRate).round(), false, unit: true)}',
                     style: PTypography.t3.copyWith(
                       color: c.fgNeutralSubtle,

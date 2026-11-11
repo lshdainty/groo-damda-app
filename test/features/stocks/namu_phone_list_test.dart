@@ -285,12 +285,20 @@ void main() {
     tester,
   ) async {
     await _pump(tester);
+    // "≈ 합계" 는 fit 경로(KeepAllFitText) — 값 글은 그 안의 Text 다
     final stat = tester.widget<Text>(
-      find.byKey(const ValueKey('card-stat-value')),
+      find.descendant(
+        of: find.byKey(const ValueKey('card-stat-value')),
+        matching: find.byType(Text),
+      ),
     );
-    // 1,834,567,890 + 8,760,000 + 6185.55 × 1385.2 = 1,851,895,… 원 (쉼표 뒤 줄바꿈 U+200B)
-    expect(stat.data, contains('​'));
+    // 1,834,567,890 + 8,760,000 + 6185.55 × 1385.2 = 1,851,895,… 원 — 보이는 글은 이음 문자 · 줄바꿈만 다른 같은 글
     expect(stat.semanticsLabel, startsWith('≈ 1,85'));
+    // 금액이 줄보다 길면 keepAllFit 이 앞 기호 뒤 띄어쓰기를 줄바꿈으로 바꾼다("≈" / "1,851,…") — 공백으로 되돌려 비교
+    expect(
+      stat.data!.replaceAll(RegExp('[⁠​]'), '').replaceAll('\n', ' '),
+      stat.semanticsLabel,
+    );
     expect(_t('환율 1,385 적용'), findsOneWidget);
     expect(_tc('+'), findsNothing, reason: 'Delta 에 + 부호 없음');
     expect(_t('국내 평가금액'), findsOneWidget);

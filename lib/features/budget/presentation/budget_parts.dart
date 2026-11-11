@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 import 'package:groo_damda_app/shared/forms/month_row.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 
@@ -288,9 +289,10 @@ class BudgetBigAmount extends StatelessWidget {
           ),
         ),
         if (limit != null)
-          Text(
-            keepAllAmount('/ $limit'),
-            semanticsLabel: '/ $limit',
+          // "/ 한도" — 앞 기호 + 금액이라 keepAllAmount(쉼표 뒤 탐욕 꺾기)면 "/ 98,765," 로 갈린다. Wrap 이 줄 폭을
+          // 주므로 keepAllFit 으로 띄어쓰기에서 먼저 넘긴다(웹 #585 StackedAmount 의 "/ 한도" 와 같은 자리)
+          KeepAllFitText(
+            '/ $limit',
             style: PTypography.t4.copyWith(
               color: c.fgNeutralSubtle,
               fontFeatures: tabularFigures,

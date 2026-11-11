@@ -8,6 +8,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/header_row/p_header_row.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 
 /// Card 의 부품 — 머리 · 본문 · 지표 · 증감 · 순자산 글. 규칙은 [PCard] 머리 설명이다.
@@ -423,12 +424,18 @@ class PCardStat extends StatelessWidget {
     required this.value,
     this.size = PCardStatSize.large,
     this.delta,
+    this.fit = false,
   });
 
   final String label;
   final String value;
   final PCardStatSize size;
   final PDelta? delta;
+
+  /// 값이 "앞 말 + 금액"("≈ 1,234,567원")일 때 켠다 — 칸 폭을 보고 띄어쓰기에서 먼저 넘기고, 쉼표 뒤 줄바꿈은 금액 낱말이 칸보다
+  /// 길 때만 쓴다([KeepAllFitText], Typography v114). 폭을 재므로 **부모 폭이 정해진 자리에서만** 쓴다(IntrinsicWidth 같은
+  /// 고유치 부모 아래에서는 끈다). 기본(끔)은 금액 하나를 쉼표 뒤에서 꺾는 [keepAllAmount] 다.
+  final bool fit;
 
   @override
   Widget build(BuildContext context) {
@@ -453,16 +460,26 @@ class PCardStat extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(top: PSpacing.x1),
-            child: Text(
-              keepAllAmount(value),
-              key: const ValueKey('card-stat-value'),
-              semanticsLabel: value,
-              style: valueStyle.copyWith(
-                color: c.fgNeutral,
-                fontWeight: FontWeight.w700,
-                fontFeatures: _tabular,
-              ),
-            ),
+            child: fit
+                ? KeepAllFitText(
+                    value,
+                    key: const ValueKey('card-stat-value'),
+                    style: valueStyle.copyWith(
+                      color: c.fgNeutral,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: _tabular,
+                    ),
+                  )
+                : Text(
+                    keepAllAmount(value),
+                    key: const ValueKey('card-stat-value'),
+                    semanticsLabel: value,
+                    style: valueStyle.copyWith(
+                      color: c.fgNeutral,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: _tabular,
+                    ),
+                  ),
           ),
           if (delta != null)
             Padding(

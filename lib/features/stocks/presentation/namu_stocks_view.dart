@@ -674,7 +674,8 @@ class NamuInvestBand extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                PCardStat(label: label, value: amount, delta: delta),
+                // "≈ 합계" 는 앞 기호 + 금액 — 폭이 정해진 자리라 fit 경로(띄어쓰기에서 먼저 넘기기)
+                PCardStat(label: label, value: amount, delta: delta, fit: true),
                 if (note != null) ...[
                   const SizedBox(height: PSpacing.x1),
                   Text(
