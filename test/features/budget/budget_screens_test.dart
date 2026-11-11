@@ -399,7 +399,14 @@ void main() {
       expect(find.byType(PBarChart), findsOneWidget);
       final c = tester.element(find.byType(BudgetScreen)).colors;
       final data = tester.widget<BarChart>(find.byType(BarChart)).data;
-      expect(data.barGroups[0].barRods.first.color, c.chartBlueWeak);
+      expect(data.barGroups[0].barRods.first.color, previousPeriodGrayOf(c));
+      // 라이트 gray-500 #8A91A0 · 다크 gray-600 #838997(팔레트와 같은 hex)
+      expect(
+        previousPeriodGrayOf(c),
+        c.bgLayerDefault.computeLuminance() < 0.5
+            ? const Color(0xFF838997)
+            : const Color(0xFF8A91A0),
+      );
       expect(data.barGroups[1].barRods.first.color, c.chartBlue);
       expect(data.extraLinesData.horizontalLines, hasLength(1));
       expect(data.titlesData.leftTitles.sideTitles.showTitles, isFalse);
