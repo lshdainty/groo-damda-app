@@ -6,18 +6,13 @@
 /// - 거절된 안: "첫째 자리" · ".0 빼기" · "첫째 자리 늘".
 library;
 
+import 'package:groo_damda_app/core/format/percent.dart';
+
 const String _minus = '−';
 
 /// 소수 둘째 자리 + 정수부 천 단위 쉼표 — 금액·숫자 표기와 같은 결(웹 formatChangeRate 와 같다).
 /// 천 퍼센트 이상: `1,234.50%`. 로케일과 무관하게 ko · en 모두 쉼표다.
-String _body(double rate) {
-  final fixed = rate.abs().toStringAsFixed(2);
-  final dot = fixed.indexOf('.');
-  final grouped = fixed
-      .substring(0, dot)
-      .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
-  return '$grouped${fixed.substring(dot)}';
-}
+String _body(double rate) => groupPercentDigits(rate.abs().toStringAsFixed(2));
 
 /// 부호가 있는 등락률 — 음수는 "−", [signed] 가 true 면 양수에 "+" 를 붙인다(증권 목록 · 손익). 0 은 부호 없음.
 String formatChangeRate(double rate, {bool signed = false}) {

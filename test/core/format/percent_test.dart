@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/core/format/percent.dart';
 
 void main() {
+  percentCommaTests();
   const under = '0.1% 미만';
   group('formatShare 비중 — 늘 소수 첫째 자리', () {
     test('경계 0 · 0.04 · 0.05 · 99.95 · 100', () {
@@ -67,5 +68,31 @@ void main() {
     expect(formatProgress(double.nan), '—');
     expect(formatProgress(double.infinity), '—');
     expect(formatProgress(double.negativeInfinity), '—');
+  });
+}
+
+// 1000% 이상 천 단위 쉼표(디자인시스템 판단 2026-11-11) — 소수 자리 규칙은 그대로, ko · en 같은 글자.
+void percentCommaTests() {
+  const under = '0.1% 미만';
+  group('퍼센트 천 단위 쉼표 — kind 별', () {
+    test('share(소수 첫째 자리)', () {
+      expect(formatShare(999, underOne: under), '999.0%');
+      expect(formatShare(1000, underOne: under), '1,000.0%');
+      expect(formatShare(1234.56, underOne: under), '1,234.6%');
+      expect(formatShare(-1234.5, underOne: under), '−1,234.5%');
+      expect(formatShare(0.04, underOne: under), under);
+      expect(formatShare(-0.04, underOne: under), '0.0%');
+      expect(formatShare(1234567.89, underOne: under), '1,234,567.9%');
+    });
+    test('progress(정수)', () {
+      expect(formatProgress(999), '999%');
+      expect(formatProgress(1000), '1,000%');
+      expect(formatProgress(1234.56), '1,235%');
+      expect(formatProgress(-1234.5), '−1,235%');
+      expect(formatProgress(0.4), '0%');
+      expect(formatProgress(-0.4), '0%');
+      expect(formatProgress(99.6), '99%');
+      expect(formatProgress(100.3), '101%');
+    });
   });
 }
