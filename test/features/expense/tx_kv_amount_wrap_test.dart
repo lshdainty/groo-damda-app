@@ -51,6 +51,8 @@ List<String> _lines(WidgetTester tester) {
       text.substring(b.start, b.end).replaceAll(RegExp('[⁠​]'), '').trimRight(),
     );
     start = b.end;
+    // 강제 줄바꿈(\n)은 줄 경계 밖에 남는다 — 건너뛰어 다음 줄로
+    if (start < text.length && text[start] == '\n') start++;
   }
   return out;
 }
@@ -89,14 +91,17 @@ void main() {
       expect(lines.join(), '987,654,321,000원');
     });
 
-    testWidgets('앞 말 + 아주 큰 금액 — 금액이 칸보다 길면 쉼표 뒤에서만 꺾는다(앞 말은 첫 줄에 붙는다)', (
+    // groo-design#216(2026-11-12) — 긴 금액은 웹 모양: 앞 말은 앞 줄에 홀로 남고 금액은 새 줄 맨 앞에서 시작해 쉼표 뒤로 꺾는다
+    testWidgets('앞 말 + 아주 큰 금액 — 앞 말은 앞 줄, 금액은 새 줄 맨 앞에서 쉼표 뒤로 꺾는다', (
       tester,
     ) async {
       final lines = await _linesOf(tester, '금액', '이체 987,654,321,000원');
-      expect(lines.first.startsWith('이체 '), isTrue, reason: '$lines');
-      for (final l in lines.take(lines.length - 1)) {
-        expect(l.endsWith(','), isTrue, reason: '$lines');
+      expect(lines.first, '이체', reason: '$lines');
+      expect(lines.length, greaterThan(2), reason: '$lines');
+      for (final l in lines.skip(1).take(lines.length - 2)) {
+        expect(l.endsWith(','), isTrue, reason: '쉼표 뒤에서만: $lines');
       }
+      expect(lines.skip(1).join(), '987,654,321,000원');
     });
 
     testWidgets('글자 180% — 이체 1,000,000원 도 금액째 다음 줄로', (tester) async {

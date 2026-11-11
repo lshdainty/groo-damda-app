@@ -64,6 +64,11 @@ String keepAllRange(String text) => keepAllAmount(text)
 /// 쓴다(금액의 마지막 수단). `한도 1,000,000원` 이 `한도 1,` / `000,000원` 으로 갈라지지 않고 `한도` / `1,000,000원` 이 된다
 /// (DA-31). 글자 크기 · 폭이 줄바꿈을 정하므로 [style] · [scaler] · [maxWidth](칸 폭)가 필요하다. 보이는 글에만 쓴다 —
 /// 읽는 이름은 원래 글로 넘긴다.
+///
+/// 한 줄보다 긴 **금액 낱말**(숫자,숫자)은 새 줄 맨 앞에서 시작하고, 뒤 말도 새 줄에서 시작한다(Typography v114 · 웹
+/// `withCommaBreaks` 의 금액 상자 — 상자 폭이 칸 폭이라 앞뒤 말과 한 줄에 서지 않는다). 쉼표 뒤 자리를 그냥 열어 두면 Flutter 가
+/// 줄을 탐욕적으로 채워 `이체 123,456,` / `789원` 이 되므로, 그 낱말 앞뒤 띄어쓰기를 줄바꿈으로 바꿔 `이체` / `123,456,` /
+/// `789원` 으로 둔다. 금액이 아닌 긴 낱말(구간 "1일~10월" 등)은 웹도 상자를 씌우지 않으므로 띄어쓰기를 그대로 둔다.
 String keepAllFit(
   String text, {
   required TextStyle style,
@@ -76,10 +81,18 @@ String keepAllFit(
     textScaler: scaler,
     maxLines: 1,
   )..layout()).width;
-  return text
-      .split(' ')
-      .map(
-        (w) => w.isEmpty || width(w) <= maxWidth ? keepAll(w) : keepAllRange(w),
-      )
-      .join(' ');
+  final words = text.split(' ');
+  final out = StringBuffer();
+  var breakAfter = false;
+  for (var i = 0; i < words.length; i++) {
+    final w = words[i];
+    final long = w.isNotEmpty && width(w) > maxWidth;
+    final box = long && _amountWord.hasMatch(w);
+    if (i > 0) out.write(box || breakAfter ? '\n' : ' ');
+    out.write(long ? keepAllRange(w) : keepAll(w));
+    breakAfter = box;
+  }
+  return out.toString();
 }
+
+final RegExp _amountWord = RegExp(r'\d,\d');

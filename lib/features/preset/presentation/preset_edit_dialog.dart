@@ -857,7 +857,8 @@ class _PresetFormState extends ConsumerState<_PresetForm> {
       suffix: PListSuffix(
         children: [
           Text(
-            keepAll(value),
+            // 금액 값(금액 · 수수료 · 이자)은 쉼표 뒤에서만 줄을 바꾼다 — keepAll 만이면 200% 에서 숫자 가운데가 끊긴다
+            keepAllAmount(value),
             semanticsLabel: value,
             textAlign: TextAlign.end,
             maxLines: maxLines,

@@ -43,6 +43,8 @@ List<String> _lines(WidgetTester tester) {
       text.substring(b.start, b.end).replaceAll(RegExp('[⁠​]'), '').trimRight(),
     );
     start = b.end;
+    // 강제 줄바꿈(\n)은 줄 경계 밖에 남는다 — 건너뛰어 다음 줄로
+    if (start < text.length && text[start] == '\n') start++;
   }
   return out;
 }
@@ -75,4 +77,27 @@ void main() {
     }
     expect(lines.join(), big);
   });
+
+  // Typography v114 · 웹 withCommaBreaks 의 금액 상자 — 금액 낱말이 줄보다 길면 앞 말은 앞 줄에 홀로 남고
+  // 금액은 새 줄 맨 앞에서 시작해 쉼표 뒤로 꺾는다(탐욕 채움 "이체 123," / "456,789원" 방지). 뒤 말도 새 줄에서.
+  const webShape = {
+    '이체 123,456,789원': ['이체', '123,456,', '789원'],
+    '한도 1,000,000원': ['한도', '1,000,', '000원'],
+    '이체 123,456,789원 입금': ['이체', '123,456,', '789원', '입금'],
+  };
+  for (final e in webShape.entries) {
+    testWidgets('긴 금액은 새 줄 맨 앞에서 시작한다: ${e.key}', (tester) async {
+      // 200% · 글자 하나 28 — 240 은 여덟 글자("123,456,")까지 들어가고 금액 낱말 하나는 넘친다
+      await tester.pumpWidget(_host(KeepAllFitText(e.key), 2, 240));
+      expect(_lines(tester), e.value);
+      final p = tester.renderObject<RenderParagraph>(
+        find.descendant(
+          of: find.byType(KeepAllFitText),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(p.text.toPlainText().contains('\n'), isTrue);
+      expect(find.bySemanticsLabel(e.key), findsOneWidget);
+    });
+  }
 }
