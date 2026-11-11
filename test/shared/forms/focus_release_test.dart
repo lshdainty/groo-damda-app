@@ -10,7 +10,7 @@ import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import '../../support/plain_text.dart';
 
 void main() {
-  for (final mode in ['old', 'release', 'row']) {
+  for (final mode in ['release', 'row']) {
     testWidgets('겹친 시트를 닫은 뒤 초점 — $mode', (tester) async {
       tester.view.physicalSize = const Size(1170, 2400);
       tester.view.devicePixelRatio = 3.0;
@@ -37,14 +37,10 @@ void main() {
                         TextButton(
                           focusNode: row,
                           onPressed: () async {
-                            if (mode == 'old') {
-                              FocusScope.of(c).unfocus();
-                            } else {
-                              releaseFocusForSheet(
-                                c,
-                                returnTo: mode == 'row' ? row : null,
-                              );
-                            }
+                            releaseFocusForSheet(
+                              c,
+                              returnTo: mode == 'row' ? row : null,
+                            );
                             await PBottomSheet.show<void>(
                               c,
                               builder: (c2) => PBottomSheetContent(
@@ -77,13 +73,8 @@ void main() {
       // 겹친 시트 닫기
       await tester.tap(find.bySemanticsLabel('닫기').last);
       await tester.pumpAndSettle();
-      if (mode == 'old') {
-        // 지금 동작 — 거래처로 돌아온다(결함 재현)
-        expect(merchant.hasFocus, isTrue);
-      } else {
-        expect(merchant.hasFocus, isFalse, reason: '거래처로 돌아가지 않는다');
-        if (mode == 'row') expect(row.hasFocus, isTrue, reason: '연 줄로 돌아온다');
-      }
+      expect(merchant.hasFocus, isFalse, reason: '거래처로 돌아가지 않는다');
+      if (mode == 'row') expect(row.hasFocus, isTrue, reason: '연 줄로 돌아온다');
     });
   }
 }
