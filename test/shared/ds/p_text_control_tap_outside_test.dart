@@ -105,7 +105,7 @@ void main() {
     expect(a.hasFocus, isFalse);
   });
 
-  testWidgets('끌어서 스크롤한 손짓은 키보드를 내리지 않는다', (tester) async {
+  testWidgets('끌기로 시작한 손짓도 키보드를 내린다(누르는 순간에 푼다)', (tester) async {
     await pumpForm(tester);
     await tester.tap(find.byType(TextField).first);
     await tester.pump();
@@ -115,7 +115,7 @@ void main() {
       const Duration(milliseconds: 200),
     );
     await tester.pumpAndSettle();
-    expect(a.hasFocus, isTrue);
+    expect(a.hasFocus, isFalse);
   });
 
   testWidgets('DA-06 재현 — 글자를 친 직후 시트 머리 [완료] 한 번 탭이 먹는다', (tester) async {

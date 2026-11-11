@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart' show Material, MaterialType, TextField;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -214,38 +213,17 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
     child: child,
   );
 
-  /// 칸 밖을 눌렀다 — 눌렀다 떼는 한 번(끌지 않은)이 끝났는데도 초점이 이 칸에 남아 있으면 키보드를 내린다
-  /// (시험 2026-11-11 DA-03 ②: 시트 빈 곳을 눌러도 키보드가 안 내려갔다).
-  /// 누르는 순간이 아니라 뗄 때 판다 — 다른 칸을 눌렀으면 그 칸이 초점을 가져가 이 칸은 건드리지 않고(키보드가 내렸다
-  /// 올라오지 않는다), 단추 · 줄을 누른 것은 누름이 한 번에 먹는다(누르는 사이 레이아웃이 바뀌지 않는다).
-  /// 끌어 스크롤한 손짓은 키보드를 내리지 않는다.
+  /// 칸 밖을 눌렀다 — 초점이 이 칸에 있으면 키보드를 내린다(시험 2026-11-11 DA-03 ②: 시트 빈 곳을 눌러도 키보드가
+  /// 안 내려갔다). 누르는 순간에 푼다 — 단추가 일 끝에 칸으로 초점을 다시 보내는 경우(검증 실패 → 별칭 칸)를 뗄 때 푸는 쪽이
+  /// 덮어쓰기 때문이다. 누른 자리가 다른 입력 칸이면 건드리지 않는다(그 칸이 초점을 가져가 키보드가 내렸다 올라오지 않는다).
+  /// 단추 탭은 누르는 자리가 이미 정해진 뒤라 레이아웃이 움직여도 한 번에 먹는다.
   void _handleTapOutside(PointerDownEvent down) {
     if (!focusNode.hasFocus) return;
-    final pointer = down.pointer;
-    final router = GestureBinding.instance.pointerRouter;
-    void route(PointerEvent e) {
-      if (e is PointerMoveEvent) {
-        if ((e.position - down.position).distance > kTouchSlop) {
-          router.removeRoute(pointer, route);
-        }
-      } else if (e is PointerUpEvent) {
-        router.removeRoute(pointer, route);
-        // 다른 칸이 초점을 가져갔으면 hasFocus 가 아니다. 단추 탭이 이 프레임에 일을 마치도록 한 박자 뒤에 내린다
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (mounted && focusNode.hasFocus) {
-            // 초점을 범위 맨 위로 보내지 않고 직전 초점(시트 몸통)으로 돌린다 — Esc 같은 키가 시트에 계속 닿는다
-            focusNode.unfocus(
-              disposition: UnfocusDisposition.previouslyFocusedChild,
-            );
-          }
-        });
-        SchedulerBinding.instance.scheduleFrame();
-      } else if (e is PointerCancelEvent) {
-        router.removeRoute(pointer, route);
-      }
-    }
-
-    router.addRoute(pointer, route);
+    final result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, down.position, down.viewId);
+    if (result.path.any((e) => e.target is RenderEditable)) return;
+    // 초점을 범위 맨 위로 보내지 않고 직전 초점(시트 몸통)으로 돌린다 — Esc 같은 키가 시트에 계속 닿는다
+    focusNode.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
   }
 
   /// 상자를 눌렀다 — 붙이개 · 사이를 눌러도 입력으로 포커스가 간다.
