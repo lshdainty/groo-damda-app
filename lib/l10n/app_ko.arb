@@ -2165,6 +2165,25 @@
       }
     }
   },
+  "linkReauthTitle": "{name} 계정 연결",
+  "@linkReauthTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "linkReauthIntro": "{name} 계정을 연결하려면 본인 확인이 필요해요.",
+  "@linkReauthIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "linkReauthConfirm": "연결하기",
+  "linkReauthFailed": "본인 확인을 하지 못했어요. 잠시 뒤 다시 시도해주세요.",
+  "linkReauthStartFailed": "계정을 연결하지 못했어요. 본인 확인부터 다시 해주세요.",
   "accountUnlinkedToast": "Google 연결을 해제했어요.",
   "accountSecuritiesDesc": "토스 · 나무 등 증권사 API 키를 연결해요",
   "accountBilling": "구독 · 결제",

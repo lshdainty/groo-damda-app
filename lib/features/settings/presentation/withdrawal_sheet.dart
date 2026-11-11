@@ -9,6 +9,7 @@ import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/settings/application/withdrawal_providers.dart';
 import 'package:groo_damda_app/features/settings/domain/withdrawal_check.dart';
+import 'package:groo_damda_app/features/settings/presentation/reauth_form.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
@@ -16,7 +17,6 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
-import 'package:groo_damda_app/shared/ds/input_otp/p_input_otp.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -56,15 +56,6 @@ class _DirtyProbe {
   bool Function() dirty = () => false;
 }
 
-/// 서버 `REAUTH_FAILED`(AUTH_021) — 비밀번호 · 코드가 틀렸거나 지났다.
-const _kReauthFailed = 'AUTH_021';
-
-/// 서버 `REAUTH_LOCKED`(AUTH_022, 429) — 5번 틀려 잠겼다. 코드를 다시 받아야 풀린다.
-const _kReauthLocked = 'AUTH_022';
-
-/// 본인 확인 방법. 비밀번호가 없는 소셜 전용 계정은 코드 말고 길이 없다.
-enum _Method { password, emailCode }
-
 class _WithdrawSheet extends ConsumerStatefulWidget {
   const _WithdrawSheet({required this.probe});
   final _DirtyProbe probe;
@@ -81,7 +72,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
 
   /// 1 = 무엇을 잃는지, 2 = 본인 확인.
   int _step = 1;
-  _Method _method = _Method.password;
+  ReauthMethod _method = ReauthMethod.password;
   DateTime? _codeSentAt;
   bool _submitting = false;
   String? _reauthError;
@@ -147,7 +138,9 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
   bool get _canSubmit {
     if (_submitting) return false;
     if (_step == 1) return true;
-    return _method == _Method.password ? _passwordCtrl.text.isNotEmpty : true;
+    return _method == ReauthMethod.password
+        ? _passwordCtrl.text.isNotEmpty
+        : true;
   }
 
   void _back() {
@@ -157,7 +150,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
     });
   }
 
-  void _setMethod(_Method m) {
+  void _setMethod(ReauthMethod m) {
     setState(() {
       _method = m;
       _reauthError = null;
@@ -169,7 +162,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
       setState(() => _step = 2);
       return;
     }
-    if (_method == _Method.emailCode && _codeCtrl.text.length < 6) {
+    if (_method == ReauthMethod.emailCode && _codeCtrl.text.length < 6) {
       setState(
         () =>
             _reauthError = AppLocalizations.of(context).withdrawCodeIncomplete,
@@ -211,7 +204,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
       final repo = await repoFuture;
       String ticket;
       try {
-        ticket = method == _Method.password
+        ticket = method == ReauthMethod.password
             ? await repo.verifyPassword(password)
             : await repo.verifyEmailCode(code);
       } on ApiException catch (e) {
@@ -220,13 +213,12 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
         // 서버 글은 화면에 내지 않는다(Writing 오류). 틀림 · 지남(AUTH_021)만 그 칸의 글이고,
         // 네트워크 · 서버 오류는 해지 실패 글이다.
         setState(() {
-          _reauthError = e.code == _kReauthLocked
-              ? l.withdrawLocked
-              : e.code == _kReauthFailed
-              ? (method == _Method.emailCode
-                    ? l.withdrawCodeWrong
-                    : l.withdrawPasswordWrong)
-              : l.withdrawFailed;
+          _reauthError = reauthErrorText(
+            l,
+            e,
+            method,
+            fallback: l.withdrawFailed,
+          );
           _submitting = false;
         });
         return;
@@ -319,7 +311,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
         ),
       ];
     } else {
-      body = _reauthBody(l);
+      body = _reauthBody();
       footer = [
         PButton(
           label: l.actionBack,
@@ -436,87 +428,17 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
     );
   }
 
-  Widget _reauthBody(AppLocalizations l) {
-    final password = _method == _Method.password;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (password) ...[
-          PField(
-            label: l.passwordCurrent,
-            invalid: _reauthError != null,
-            errorMessage: _reauthError,
-            child: PInput(
-              controller: _passwordCtrl,
-              obscureText: true,
-              placeholder: l.withdrawPasswordPlaceholder,
-              autofillHints: const [AutofillHints.password],
-              onChanged: (_) => setState(() => _reauthError = null),
-            ),
-          ),
-          const SizedBox(height: PSpacing.x4),
-          _linkButton(
-            l.withdrawUseEmailCode,
-            () => _setMethod(_Method.emailCode),
-          ),
-        ] else ...[
-          PField(
-            label: l.withdrawCodeLabel,
-            description: l.withdrawCodeDescription,
-            invalid: _reauthError != null,
-            errorMessage: _reauthError,
-            child: PInputOtp(
-              controller: _codeCtrl,
-              focusNode: _codeFocus,
-              placeholder: l.withdrawCodePlaceholder,
-              // 고치기 시작하면 설명 줄로 돌아온다
-              onChanged: (_) => setState(() => _reauthError = null),
-            ),
-          ),
-          const SizedBox(height: PSpacing.x3),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: PInputOtpResend(
-              sentAt: _codeSentAt,
-              codeFocusNode: _codeFocus,
-              firstLabel: l.withdrawSendCode,
-              readyLabel: l.withdrawResendCode,
-              cooldownLabel: l.withdrawResendCooldown,
-              onResend: _sendCode,
-              disabled: _submitting,
-            ),
-          ),
-          // 스팸함 안내 — 사용자 결정(10-24) 05-2 Q1 A: 남긴다. 코드를 **보낸 뒤에만** 보인다(보내기 전엔 찾을 메일이 없다).
-          // [코드 받기] 아래 12 · t4 fg-neutral-subtle, 오류 때도 남는다.
-          if (_codeSentAt != null) ...[
-            const SizedBox(height: PSpacing.x3),
-            PText(
-              '${l.withdrawCodeSent} ${l.withdrawCodeHint}',
-              style: PTypography.t4.copyWith(
-                color: context.colors.fgNeutralSubtle,
-              ),
-            ),
-          ],
-          // [비밀번호로 확인하기] 위 16(웹 gap-x4 와 같은 값 — migration/i05-2-q 그림)
-          const SizedBox(height: PSpacing.x4),
-          _linkButton(
-            l.withdrawUsePassword,
-            () => _setMethod(_Method.password),
-          ),
-        ],
-      ],
-    );
-  }
-
-  /// 칸 아래 줄 끝의 글 버튼(R16, ghost small).
-  Widget _linkButton(String label, VoidCallback onPressed) => Align(
-    alignment: AlignmentDirectional.centerEnd,
-    child: PButton(
-      label: label,
-      variant: PButtonVariant.ghost,
-      size: PButtonSize.small,
-      onPressed: _submitting ? null : onPressed,
-    ),
+  /// 본인 확인 칸 — 소셜 연동 확인 시트와 같은 부품이다(문구 · 간격 한 벌).
+  Widget _reauthBody() => ReauthForm(
+    method: _method,
+    passwordController: _passwordCtrl,
+    codeController: _codeCtrl,
+    codeFocusNode: _codeFocus,
+    error: _reauthError,
+    codeSentAt: _codeSentAt,
+    busy: _submitting,
+    onMethodChanged: _setMethod,
+    onSendCode: _sendCode,
+    onEdited: () => setState(() => _reauthError = null),
   );
 }
