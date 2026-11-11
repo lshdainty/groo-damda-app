@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -198,7 +199,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
   }
 
   Future<void> _pickTag() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<String>(
       context,
       builder: (sheetContext) {
@@ -257,7 +258,7 @@ class _MemoFormState extends ConsumerState<_MemoForm> {
   }
 
   Future<void> _pickColor() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await showColorPickSheet(
       context,
       title: AppLocalizations.of(context).memoFieldColor,

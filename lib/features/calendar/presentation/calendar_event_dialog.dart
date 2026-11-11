@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/patch.dart';
@@ -310,7 +311,7 @@ class _CalendarEventFormSheetState
   Future<void> _pickCalendar() async {
     final l = AppLocalizations.of(context);
     final options = _calendarSources();
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final v = await showCalendarChoiceSheet(
       context,
       title: l.calFieldCalendar,
@@ -331,7 +332,7 @@ class _CalendarEventFormSheetState
   Future<void> _pickLabel() async {
     final l = AppLocalizations.of(context);
     final labels = _labelSources();
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final v = await showCalendarChoiceSheet(
       context,
       title: l.calFieldLabel,
@@ -349,7 +350,7 @@ class _CalendarEventFormSheetState
 
   Future<void> _pickRecurrence() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final v = await showCalendarChoiceSheet(
       context,
       title: l.calRepeat,
@@ -365,7 +366,7 @@ class _CalendarEventFormSheetState
 
   Future<void> _pickReminders() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final v = await showCalendarMultiChoiceSheet(
       context,
       title: l.calFieldReminder,
@@ -381,7 +382,7 @@ class _CalendarEventFormSheetState
 
   Future<void> _pickDay(bool isStart) async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final cur = isStart ? _start : _end;
     final picked = await showCalendarDaySheet(
       context,
@@ -409,7 +410,7 @@ class _CalendarEventFormSheetState
 
   Future<void> _pickTime(bool isStart) async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final cur = isStart ? _start : _end;
     final picked = await showTimeSheet(
       context,

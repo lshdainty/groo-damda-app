@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
@@ -404,7 +405,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
       kind == 'EXPENSE' ? l.expTypeExpense : l.expTypeIncome;
 
   Future<void> _pickKind() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<String>(
       context,
       builder: (sheetContext) {
@@ -433,7 +434,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   }
 
   Future<void> _pickParent(List<ExpenseCategory> options) async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<int>(
       context,
       builder: (sheetContext) {
@@ -492,7 +493,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   }
 
   Future<void> _pickColor() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await showColorPickSheet(
       context,
       title: AppLocalizations.of(context).calFieldColor,
@@ -504,7 +505,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   }
 
   Future<void> _pickIcon() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     await showPIconPickerSheet(
       context,
       value: _icon,

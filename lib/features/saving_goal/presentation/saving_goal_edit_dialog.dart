@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
@@ -261,7 +262,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   }
 
   Future<void> _pickDate() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<DateTime>(
       context,
       dismissible: false,
@@ -299,7 +300,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   }
 
   Future<void> _pickIcon() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     await showPIconPickerSheet(
       context,
       value: _icon,
@@ -308,7 +309,7 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
   }
 
   Future<void> _pickColor() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await showColorPickSheet(
       context,
       title: AppLocalizations.of(context).savingGoalColorLabel,

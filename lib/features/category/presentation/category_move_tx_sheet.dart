@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
@@ -154,7 +155,7 @@ class _MoveTxFormState extends ConsumerState<_MoveTxForm> {
   }
 
   Future<void> _pickTarget() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<int>(
       context,
       builder: (sheetContext) {
