@@ -18,7 +18,9 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 ///
 /// **시트가 확인과 연결 시작을 둘 다 한다** — 티켓은 10분 · 단회라 들고 다니지 않는다. 연결 시작까지
 /// 되면 브라우저로 열 주소(`startUrl`)를 돌려주며 닫히고, 닫기만 하면 null 이다. 연결 시작이
-/// 실패하면 시트가 그대로 남아 오류를 말하고, 다시 누르면 본인 확인부터 다시 한다.
+/// 실패하면 시트가 그대로 남아 오류를 말하고 칸을 비운다 — 다시 누르면 본인 확인부터 다시 한다.
+///
+/// 문구는 웹 `LinkReauthDialog` 와 한 벌이다 — 한쪽만 고치지 마라.
 ///
 /// 모양은 이용 해지 시트의 본인 확인 단계 그대로다([ReauthForm]) — ds Bottom Sheet 입력 폼이라 바깥
 /// 누르기 · 끌어내리기로 닫히지 않고, 칸에 값이 있으면 ✕ · 뒤로 가기가 "작성한 내용이 사라져요" 를 먼저 묻는다.
@@ -100,7 +102,7 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
     super.dispose();
   }
 
-  /// 코드 방식은 6자리 전에도 [확인] 을 켜 두고 누르면 칸 오류로 알린다(input-otp.md) — 해지와 같다.
+  /// 코드 방식은 6자리 전에도 [연결하기] 를 켜 두고 누르면 칸 오류로 알린다(input-otp.md) — 해지와 같다.
   bool get _canSubmit {
     if (_submitting) return false;
     return _method == ReauthMethod.password
@@ -184,10 +186,12 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
           reauthToken: ticket,
         );
       } on ApiException {
-        // 티켓 거절(400) · 네트워크 — 티켓은 이미 썼다. 다시 누르면 본인 확인부터 다시 한다.
+        // 티켓 거절(400) · 네트워크 — 티켓은 이미 썼을 수 있다. 칸을 비워 본인 확인부터 다시 하게 한다(웹과 같다).
         if (!mounted) return;
+        _passwordCtrl.clear();
+        _codeCtrl.clear();
         setState(() {
-          _error = l.linkReauthFailed;
+          _error = l.linkReauthStartFailed;
           _submitting = false;
         });
         return;
@@ -204,7 +208,7 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return PBottomSheetContent(
-      title: l.linkReauthTitle,
+      title: l.linkReauthTitle(widget.providerName),
       description: l.linkReauthIntro(widget.providerName),
       closeLabel: l.actionClose,
       scrollFog: false,
@@ -222,7 +226,7 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
       ),
       footer: [
         PButton(
-          label: l.actionConfirm,
+          label: l.linkReauthConfirm,
           variant: PButtonVariant.neutralSolid,
           size: PButtonSize.large,
           loading: _submitting,

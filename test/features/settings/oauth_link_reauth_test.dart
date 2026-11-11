@@ -229,16 +229,16 @@ void main() {
   });
 
   group('본인 확인 시트', () {
-    testWidgets('안내 · 비밀번호 칸 · 바닥 [확인] 하나', (tester) async {
+    testWidgets('제목 · 안내 · 비밀번호 칸 · 바닥 [연결하기] 하나', (tester) async {
       await _open(tester, reauth: _Reauth(), link: _Link());
-      expect(findText(_l.linkReauthTitle), findsWidgets);
+      expect(findText(_l.linkReauthTitle('Google')), findsWidgets);
       expect(findText(keepAll(_l.linkReauthIntro('Google'))), findsOneWidget);
       expect(_l.linkReauthIntro('Google'), contains('Google'));
       final buttons = tester
           .widgetList<PButton>(find.byType(PButton))
           .where((b) => b.size == PButtonSize.large)
           .toList();
-      expect(buttons.single.label, _l.actionConfirm);
+      expect(buttons.single.label, _l.linkReauthConfirm);
       expect(buttons.single.variant, PButtonVariant.neutralSolid);
       expect(buttons.single.onPressed, isNull, reason: '비밀번호를 넣기 전엔 막는다');
     });
@@ -249,7 +249,7 @@ void main() {
       final h = await _open(tester, reauth: reauth, link: link);
       await tester.enterText(find.byType(TextField).first, 'secret');
       await tester.pump();
-      await tester.tap(findText(_l.actionConfirm));
+      await tester.tap(findText(_l.linkReauthConfirm));
       await tester.pumpAndSettle();
       expect(_log, ['verifyPassword', 'startLink']);
       expect(reauth.purposes, ['oauth-link']);
@@ -257,7 +257,7 @@ void main() {
       // 시트는 열 주소를 들고 닫힌다
       expect(h.closed, isTrue);
       expect(h.result, 'https://sso.example/start');
-      expect(findText(_l.linkReauthTitle), findsNothing);
+      expect(findText(_l.linkReauthTitle('Google')), findsNothing);
     });
 
     testWidgets('비밀번호가 틀리면 연결을 시작하지 않는다 · 서버 글을 내지 않는다', (tester) async {
@@ -269,7 +269,7 @@ void main() {
       final h = await _open(tester, reauth: reauth, link: link);
       await tester.enterText(find.byType(TextField).first, 'wrong');
       await tester.pump();
-      await tester.tap(findText(_l.actionConfirm));
+      await tester.tap(findText(_l.linkReauthConfirm));
       await tester.pumpAndSettle();
       expect(_log, ['verifyPassword']);
       expect(link.tickets, isEmpty);
@@ -286,7 +286,7 @@ void main() {
       await _open(tester, reauth: reauth, link: _Link());
       await tester.enterText(find.byType(TextField).first, 'secret');
       await tester.pump();
-      await tester.tap(findText(_l.actionConfirm));
+      await tester.tap(findText(_l.linkReauthConfirm));
       await tester.pumpAndSettle();
       expect(findTextContaining(_l.withdrawLocked), findsWidgets);
       expect(_log, ['verifyPassword']);
@@ -299,14 +299,27 @@ void main() {
       final h = await _open(tester, reauth: reauth, link: link);
       await tester.enterText(find.byType(TextField).first, 'secret');
       await tester.pump();
-      await tester.tap(findText(_l.actionConfirm));
+      await tester.tap(findText(_l.linkReauthConfirm));
       await tester.pumpAndSettle();
-      expect(findText(keepAll(_l.linkReauthFailed)), findsOneWidget);
+      expect(findText(keepAll(_l.linkReauthStartFailed)), findsOneWidget);
       expect(findText('ticket raw'), findsNothing);
       expect(h.closed, isFalse);
+      // 티켓을 이미 썼을 수 있다 — 칸을 비워 본인 확인부터 다시 하게 한다(웹과 같다)
+      expect(
+        tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+        isEmpty,
+      );
+      expect(
+        tester
+            .widget<PButton>(findWidgetWithText(PButton, _l.linkReauthConfirm))
+            .onPressed,
+        isNull,
+      );
 
       link.error = null;
-      await tester.tap(findText(_l.actionConfirm));
+      await tester.enterText(find.byType(TextField).first, 'secret');
+      await tester.pump();
+      await tester.tap(findText(_l.linkReauthConfirm));
       await tester.pumpAndSettle();
       expect(_log, [
         'verifyPassword',
@@ -317,6 +330,26 @@ void main() {
       // 앞서 쓴 티켓을 다시 내밀지 않는다
       expect(link.tickets, ['ticket-1', 'ticket-2']);
       expect(h.result, 'https://sso.example/start');
+    });
+
+    testWidgets('본인 확인 단계 실패(네트워크 · 쿨다운)는 확인 실패 글 · 칸은 그대로', (tester) async {
+      final reauth = _Reauth(
+        verifyPw: (_) async =>
+            throw ApiException(code: 'NETWORK', message: 'net raw'),
+      );
+      await _open(tester, reauth: reauth, link: _Link());
+      await tester.enterText(find.byType(TextField).first, 'secret');
+      await tester.pump();
+      await tester.tap(findText(_l.linkReauthConfirm));
+      await tester.pumpAndSettle();
+      expect(findText(keepAll(_l.linkReauthFailed)), findsOneWidget);
+      expect(findText(keepAll(_l.linkReauthStartFailed)), findsNothing);
+      expect(findText('net raw'), findsNothing);
+      expect(_log, ['verifyPassword']);
+      expect(
+        tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+        'secret',
+      );
     });
 
     testWidgets('메일 코드 — 코드 받기 · 6자리 확인 뒤 oauth-link 로 연결', (tester) async {
@@ -332,14 +365,14 @@ void main() {
       // 6자리 전 — 칸 오류, 아무것도 부르지 않는다
       await tester.enterText(find.byType(TextField).first, '123');
       await tester.pump();
-      await tester.tap(findText(_l.actionConfirm));
+      await tester.tap(findText(_l.linkReauthConfirm));
       await tester.pumpAndSettle();
       expect(findText(keepAll(_l.withdrawCodeIncomplete)), findsOneWidget);
       expect(_log, isEmpty);
 
       await tester.enterText(find.byType(TextField).first, '123456');
       await tester.pump();
-      await tester.tap(findText(_l.actionConfirm));
+      await tester.tap(findText(_l.linkReauthConfirm));
       await tester.pumpAndSettle();
       expect(_log, ['verifyEmailCode', 'startLink']);
       expect(reauth.purposes, ['oauth-link']);
@@ -441,12 +474,39 @@ void main() {
     expect(link.tickets, isEmpty);
   });
 
-  test('문구 — ko · en 모두 있고 en 은 provider 이름을 끼운다', () {
+  test('문구 — ko · en 모두 있고 provider 이름을 끼운다', () {
     for (final l in [AppLocalizationsKo(), AppLocalizationsEn()]) {
-      expect(l.linkReauthTitle, isNotEmpty);
-      expect(l.linkReauthFailed, isNotEmpty);
+      expect(l.linkReauthTitle('Google'), contains('Google'));
       expect(l.linkReauthIntro('Google'), contains('Google'));
+      expect(l.linkReauthConfirm, isNotEmpty);
+      expect(l.linkReauthFailed, isNotEmpty);
+      expect(l.linkReauthStartFailed, isNotEmpty);
     }
+  });
+
+  // 웹 translations.csv `account.linkReauth.*` 와 글자 그대로 같다 — 한쪽만 고치지 마라.
+  test('문구가 웹과 한 벌이다', () {
+    final ko = AppLocalizationsKo();
+    final en = AppLocalizationsEn();
+    expect(ko.linkReauthTitle('Google'), 'Google 계정 연결');
+    expect(en.linkReauthTitle('Google'), 'Connect your Google account');
+    expect(ko.linkReauthIntro('Google'), 'Google 계정을 연결하려면 본인 확인이 필요해요.');
+    expect(
+      en.linkReauthIntro('Google'),
+      "To connect your Google account, we need to confirm it's you.",
+    );
+    expect(ko.linkReauthConfirm, '연결하기');
+    expect(en.linkReauthConfirm, 'Connect');
+    expect(ko.linkReauthFailed, '본인 확인을 하지 못했어요. 잠시 뒤 다시 시도해주세요.');
+    expect(
+      en.linkReauthFailed,
+      "Couldn't confirm it's you. Please try again shortly.",
+    );
+    expect(ko.linkReauthStartFailed, '계정을 연결하지 못했어요. 본인 확인부터 다시 해주세요.');
+    expect(
+      en.linkReauthStartFailed,
+      "Couldn't connect the account. Please confirm it's you again.",
+    );
   });
 }
 
