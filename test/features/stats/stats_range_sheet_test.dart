@@ -6,6 +6,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_model.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_range_sheet.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/p_date_picker.dart';
 import '../../support/plain_text.dart';
@@ -172,14 +173,30 @@ void main() {
       expect(got!.prev.to, DateTime(2026, 8, 31));
     });
 
-    testWidgets('완료 없이 닫으면 null — 고르던 것은 버린다', (tester) async {
+    testWidgets('달력 위를 아래로 끌어도 · 바깥을 눌러도 안 닫히고 ✕ 로만 닫는다(DA-36)', (
+      tester,
+    ) async {
       StatsPeriod? got = month;
-      await _open(tester, month, (p) => got = p);
-      await tester.tap(findText('지난 달'));
+      var closed = false;
+      await _open(tester, month, (p) {
+        got = p;
+        closed = true;
+      });
+      await tester.pump(const Duration(milliseconds: 700));
+      final top = tester.getTopLeft(find.byType(PBottomSheetContent)).dy;
+      await tester.fling(find.byType(PDatePicker), const Offset(0, 400), 2000);
       await tester.pumpAndSettle();
+      expect(closed, isFalse, reason: '달력 위 끌기로 시트가 닫히면 안 된다');
+      expect(tester.getTopLeft(find.byType(PBottomSheetContent)).dy, top);
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
-      expect(got, isNull);
+      expect(closed, isFalse, reason: '바깥 누르기로 닫히면 안 된다');
+      await tester.tap(findText('지난 달'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('닫기').first);
+      await tester.pumpAndSettle();
+      expect(closed, isTrue);
+      expect(got, isNull, reason: '✕ 로 닫으면 고르던 것은 버린다');
     });
   });
 }
