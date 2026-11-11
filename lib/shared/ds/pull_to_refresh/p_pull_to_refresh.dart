@@ -43,7 +43,12 @@ class PPullToRefresh extends StatefulWidget {
     required this.onRefresh,
     required this.child,
     this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.indicatorTopInset = 0,
   });
+
+  /// 지시자 칸이 시작하는 위쪽 거리. 목록 위에 겹쳐 서는 머리(원장의 숨는 머리)가 있으면 그 높이를 준다 — 0 이면 지시자가
+  /// 영역 맨 위에 서서 머리 뒤에 가려진다(DA-27). 머리는 목록이 맨 위일 때(당길 수 있을 때) 다 드러나 있으므로 높이 그대로다.
+  final double indicatorTopInset;
 
   final Future<void> Function() onRefresh;
   final Widget child;
@@ -223,7 +228,7 @@ class PPullToRefreshState extends State<PPullToRefresh>
                   Transform.translate(offset: Offset(0, offset), child: child),
             ),
             Positioned(
-              top: 0,
+              top: widget.indicatorTopInset,
               left: 0,
               right: 0,
               height: kPullToRefreshThreshold,
