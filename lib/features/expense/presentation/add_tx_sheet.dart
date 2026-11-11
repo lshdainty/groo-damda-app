@@ -2226,7 +2226,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                         !c.merchantCtrl.value.composing.isCollapsed) {
                       return;
                     }
-                    _save();
+                    // 키보드 ✓ 는 저장하지 않고 키보드만 내린다(사용자 결정 2026-11-11) — 저장은 바닥 [추가] 로만
+                    _merchantFocus.unfocus();
                   },
                 ),
               ),
