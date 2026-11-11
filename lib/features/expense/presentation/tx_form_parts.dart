@@ -294,8 +294,11 @@ class TxRow extends StatelessWidget {
     this.maxLines,
     this.locked = false,
     this.errorMessage,
+    this.focusNode,
   });
 
+  /// 줄의 초점 — 겹친 시트를 닫으면 초점이 이 줄로 돌아온다.
+  final FocusNode? focusNode;
   final String title;
   final IconData icon;
   final VoidCallback? onTap;
@@ -331,6 +334,7 @@ class TxRow extends StatelessWidget {
       title: title,
       prefix: Icon(icon, size: 22),
       onTap: locked ? null : onTap,
+      focusNode: focusNode,
       semanticHint: errorMessage,
       suffix: valueWidget == null && !(chevron && !locked)
           ? null

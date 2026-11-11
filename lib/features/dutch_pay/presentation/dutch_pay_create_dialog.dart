@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/clock/clock.dart';
@@ -166,12 +167,12 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
       _amountFocus.requestFocus();
       return;
     }
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     setState(() => _step = 2);
   }
 
   Future<void> _pickDate() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<DateTime>(
       context,
       dismissible: false,
@@ -236,7 +237,7 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
   }
 
   Future<void> _pickPayer() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final people = _list();
     final picked = await PBottomSheet.show<int>(
       context,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -158,7 +159,7 @@ class _TodoFormSheetState extends ConsumerState<TodoFormSheet> {
   String _fmtDate(DateTime d) => todoYmd(d);
 
   Future<void> _pickDate() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<DateTime>(
       context,
       dismissible: false,

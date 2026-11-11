@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/currency.dart';
@@ -323,7 +324,7 @@ class _TradeBodyState extends ConsumerState<_TradeBody> {
 
   Future<void> _pickSettlement(List<Asset> options) async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await PBottomSheet.show<int>(
       context,
       builder: (sheetContext) => PBottomSheetContent(

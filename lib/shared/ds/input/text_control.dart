@@ -8,8 +8,12 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/bottom_sheet_parts.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+
+/// 시트 본문 아래 끝 흐림 깊이(scroll-fog.yaml 시트 본문 fogEnd 80)
+const double _sheetFogEnd = 80;
 
 /// 입력(PInput) · 여러 줄 입력(PTextarea)이 함께 받는 값 — 상태는 [PTextControlState].
 ///
@@ -209,6 +213,19 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
     child: child,
   );
 
+  /// 칸 밖을 눌렀다 — 초점이 이 칸에 있으면 키보드를 내린다(시험 2026-11-11 DA-03 ②: 시트 빈 곳을 눌러도 키보드가
+  /// 안 내려갔다). 누르는 순간에 푼다 — 단추가 일 끝에 칸으로 초점을 다시 보내는 경우(검증 실패 → 별칭 칸)를 뗄 때 푸는 쪽이
+  /// 덮어쓰기 때문이다. 누른 자리가 다른 입력 칸이면 건드리지 않는다(그 칸이 초점을 가져가 키보드가 내렸다 올라오지 않는다).
+  /// 단추 탭은 누르는 자리가 이미 정해진 뒤라 레이아웃이 움직여도 한 번에 먹는다.
+  void _handleTapOutside(PointerDownEvent down) {
+    if (!focusNode.hasFocus) return;
+    final result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, down.position, down.viewId);
+    if (result.path.any((e) => e.target is RenderEditable)) return;
+    // 초점을 범위 맨 위로 보내지 않고 직전 초점(시트 몸통)으로 돌린다 — Esc 같은 키가 시트에 계속 닿는다
+    focusNode.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+  }
+
   /// 상자를 눌렀다 — 붙이개 · 사이를 눌러도 입력으로 포커스가 간다.
   void focusFromBox() {
     if (disabled || focusNode.hasFocus) return;
@@ -306,6 +323,11 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
           inputFormatters: widget.inputFormatters,
           onChanged: widget.onChanged,
           onSubmitted: onSubmitted,
+          onTapOutside: _handleTapOutside,
+          // 키보드가 올라와 초점 칸을 보이게 스크롤할 때, 시트 본문 아래 끝 흐림(80) 위로 올라오게 한다(시험 2026-11-11 7)
+          scrollPadding: PBottomSheetScope.maybeOf(context) == null
+              ? const EdgeInsets.all(20)
+              : const EdgeInsets.fromLTRB(20, 20, 20, 20 + _sheetFogEnd),
           autofillHints: autofillHints,
           mouseCursor: disabled
               ? SystemMouseCursors.forbidden

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
@@ -339,7 +340,7 @@ class _SplitStepFlowState extends ConsumerState<SplitStepFlow> {
   }
 
   Future<void> _pickItemCategory() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await showCategoryPickSheet(
       context,
       kind: _e.expenseType == 'INCOME' ? 'INCOME' : 'EXPENSE',

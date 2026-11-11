@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
@@ -651,7 +652,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
 
   // ── 고르기 ────────────────────────────────────────────────
   Future<void> _pickCategory() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await showCategoryPickSheet(
       context,
       kind: _type == 'INCOME' ? 'INCOME' : 'EXPENSE',
@@ -808,7 +809,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
   };
 
   Future<void> _pickPayment() async {
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final income = _type == 'INCOME';
     final picked = await PBottomSheet.show<String>(
       context,

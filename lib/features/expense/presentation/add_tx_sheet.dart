@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/shared/forms/focus_release.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
@@ -309,6 +310,11 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   final _merchantFocus = FocusNode();
   final _subFocus = FocusNode();
   final _smsFocus = FocusNode();
+  // 겹친 시트를 연 줄 — 시트를 닫으면 초점이 거래처 칸이 아니라 이 줄로 돌아온다
+  final _categoryRowFocus = FocusNode();
+  final _methodRowFocus = FocusNode();
+  final _assetRowFocus = FocusNode();
+  final _toAssetRowFocus = FocusNode();
   final _smsCtrl = TextEditingController();
   final _presetNameCtrl = TextEditingController();
   final _presetAmountCtrl = TextEditingController();
@@ -391,6 +397,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
     _merchantFocus.dispose();
     _subFocus.dispose();
     _smsFocus.dispose();
+    _categoryRowFocus.dispose();
+    _methodRowFocus.dispose();
+    _assetRowFocus.dispose();
+    _toAssetRowFocus.dispose();
     _smsCtrl.dispose();
     _presetNameCtrl.dispose();
     _presetAmountCtrl.dispose();
@@ -773,7 +783,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   Future<void> _pickCategory() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context, returnTo: _categoryRowFocus);
     final v = await _sheet<int>(
       l.expCategory,
       CategoryPickBody(kind: _input.type, selectedRowId: _input.categoryRowId),
@@ -788,7 +798,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   Future<void> _pickAsset({required bool income, bool to = false}) async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(
+      context,
+      returnTo: to ? _toAssetRowFocus : _assetRowFocus,
+    );
     final c = _input;
     final bool transfer = c.type == 'TRANSFER';
     // 후보는 시트 안에서 받은 목록으로 거른다 — 못 받았다가 [다시 시도] 로 받아 오면 시트를 닫지 않아도 채워진다
@@ -848,7 +861,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   Future<void> _pickMethod() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context, returnTo: _methodRowFocus);
     final c = _input;
     final title = c.type == 'INCOME' ? l.expIncomeMethod : l.expPaymentMethod;
     final v = await _sheet<String>(
@@ -883,7 +896,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   Future<void> _pickInstallment() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final v = await _sheet<int>(
       l.expInstallment,
       PickList<int>(
@@ -905,7 +918,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   Future<void> _pickCurrencyChip() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final v = await _sheet<String>(
       l.expCurrency,
       PickList<String>(
@@ -923,7 +936,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   Future<void> _pickDay() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final picked = await showCalendarDaySheet(
       context,
       title: l.expDate,
@@ -938,7 +951,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
 
   Future<void> _pickTime() async {
     final l = AppLocalizations.of(context);
-    FocusScope.of(context).unfocus();
+    releaseFocusForSheet(context);
     final t = _input.time;
     final picked = await showTimeSheet(
       context,
@@ -2213,7 +2226,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                         !c.merchantCtrl.value.composing.isCollapsed) {
                       return;
                     }
-                    _save();
+                    // 키보드 ✓ 는 저장하지 않고 키보드만 내린다(사용자 결정 2026-11-11) — 저장은 바닥 [추가] 로만
+                    _merchantFocus.unfocus();
                   },
                 ),
               ),
@@ -2245,6 +2259,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             if (!isTransfer) ...[
               TxRow(
                 key: const ValueKey('tx-row-category'),
+                focusNode: _categoryRowFocus,
                 title: l.expCategory,
                 icon: LucideIcons.tags,
                 value: catValue,
@@ -2255,6 +2270,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
               ),
               TxRow(
                 key: const ValueKey('tx-row-method'),
+                focusNode: _methodRowFocus,
                 title: isIncome ? l.expIncomeMethod : l.expPaymentMethod,
                 icon: LucideIcons.creditCard,
                 value: c.paymentMethod.isEmpty
@@ -2268,6 +2284,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
               ),
               TxRow(
                 key: const ValueKey('tx-row-asset'),
+                focusNode: _assetRowFocus,
                 title: isIncome ? l.expDepositAccount : l.expAccountCard,
                 icon: LucideIcons.wallet,
                 value: assetName(c.assetRowId),
@@ -2306,6 +2323,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             ] else ...[
               TxRow(
                 key: const ValueKey('tx-row-from'),
+                focusNode: _assetRowFocus,
                 title: l.transferFromLabel,
                 icon: LucideIcons.wallet,
                 value: assetName(c.assetRowId),
@@ -2316,6 +2334,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
               ),
               TxRow(
                 key: const ValueKey('tx-row-to'),
+                focusNode: _toAssetRowFocus,
                 title: l.transferToLabel,
                 icon: LucideIcons.wallet,
                 value: assetName(c.toAssetRowId),
