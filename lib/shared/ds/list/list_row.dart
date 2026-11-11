@@ -8,6 +8,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 
 // List 의 줄 틀 — 줄의 종류(보기만 · 누르는 · 링크 · 컨트롤 · 부모)가 함께 쓰는 짜임. 화면에서 직접 쓰지 않는다 —
 // PListItem · PListButtonItem · PListLinkItem · PListSwitchItem · PListCheckItem · PListRadioItem · PListParentItem
@@ -152,6 +153,15 @@ class PListValue extends StatelessWidget {
         ),
       );
 
+  /// 앞 말 + 금액이 한 문장인 값(거래 · 이체 상세 키-값 줄) — 칸 폭을 보고 **띄어쓰기에서 먼저 넘기고 쉼표 뒤는 낱말 하나가
+  /// 칸보다 길 때만** 꺾는다([KeepAllFitText]). 줄 끝 오른쪽 맞춤이고, 본문 아래로 내려가면 [alignListValueStart] 가 왼쪽으로 돌린다.
+  /// 줄 배치는 [PListValue.amount] 와 같다(값 노드라 본문 최소 폭만 남기고 줄고, 좁으면 본문 아래로 내려간다).
+  PListValue.fit(String text, {Key? key, TextStyle? style})
+    : this(
+        key: key,
+        child: KeepAllFitText(text, textAlign: TextAlign.end, style: style),
+      );
+
   final Widget child;
   final bool mergeSemantics;
 
@@ -195,6 +205,7 @@ Widget alignListValueStart(Widget w) {
       child: alignListValueStart(w.child),
     );
   }
+  if (w is KeepAllFitText && isEnd(w.textAlign)) return w.alignedStart();
   if (w is Text && isEnd(w.textAlign)) {
     final span = w.textSpan;
     return span != null

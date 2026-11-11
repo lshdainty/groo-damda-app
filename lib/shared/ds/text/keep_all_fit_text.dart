@@ -18,6 +18,15 @@ class KeepAllFitText extends StatelessWidget {
   final TextAlign? textAlign;
   final int? maxLines;
 
+  /// 줄 끝 맞춤을 시작 맞춤으로 바꾼 같은 글 — 목록 값이 본문 아래로 내려갈 때 쓴다.
+  KeepAllFitText alignedStart() => KeepAllFitText(
+    text,
+    key: key,
+    style: style,
+    textAlign: TextAlign.start,
+    maxLines: maxLines,
+  );
+
   @override
   Widget build(BuildContext context) {
     final resolved = DefaultTextStyle.of(context).style.merge(style);
