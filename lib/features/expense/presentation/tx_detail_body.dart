@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 import 'package:groo_damda_app/shared/widgets/p_day_group.dart';
 
 /// 거래 상세 · 이체 상세가 함께 쓰는 본문 조각(I-21 B · C). 상세는 읽는 상세다 — 머리(타일 + 이름 + 금액 + 날짜) → 상태 Callout →
@@ -209,9 +210,8 @@ class TxKvRow extends StatelessWidget {
 /// 값 위젯 — 줄 수와 상관없이 오른쪽 맞춤(규칙 ①).
 Widget txKvValue(BuildContext context, String value, {Color? color}) {
   final c = context.colors;
-  return Text(
-    keepAllRange(value),
-    semanticsLabel: value,
+  return KeepAllFitText(
+    value,
     textAlign: TextAlign.end,
     style: TextStyle(color: color ?? c.fgNeutralMuted),
   );

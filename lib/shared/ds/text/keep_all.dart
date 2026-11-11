@@ -1,4 +1,11 @@
-import 'package:flutter/widgets.dart' show StringCharacters;
+import 'package:flutter/widgets.dart'
+    show
+        StringCharacters,
+        TextDirection,
+        TextPainter,
+        TextScaler,
+        TextSpan,
+        TextStyle;
 
 /// 낱말 단위 줄바꿈(DESIGN.md v114 — 웹의 word-break: keep-all) — 낱말 안의 글자 사이에 이음 문자(U+2060 WORD
 /// JOINER)를 넣어 띄어쓰기에서만 줄이 바뀌게 한다. 한 줄보다 긴 낱말은 Flutter 가 칸 끝에서 끊는다(웹의
@@ -52,3 +59,27 @@ String keepAllRange(String text) => keepAllAmount(text)
       '–${String.fromCharCode(0x2060)}',
       '–${String.fromCharCode(0x200B)}',
     );
+
+/// 칸 폭에 맞춰 줄바꿈 자리를 고른다 — 띄어쓰기에서 먼저 꺾고, **쉼표(구간 기호) 뒤 줄바꿈은 그 낱말 하나만으로 한 줄이 넘칠 때만**
+/// 쓴다(금액의 마지막 수단). `한도 1,000,000원` 이 `한도 1,` / `000,000원` 으로 갈라지지 않고 `한도` / `1,000,000원` 이 된다
+/// (DA-31). 글자 크기 · 폭이 줄바꿈을 정하므로 [style] · [scaler] · [maxWidth](칸 폭)가 필요하다. 보이는 글에만 쓴다 —
+/// 읽는 이름은 원래 글로 넘긴다.
+String keepAllFit(
+  String text, {
+  required TextStyle style,
+  required TextScaler scaler,
+  required double maxWidth,
+}) {
+  double width(String t) => (TextPainter(
+    text: TextSpan(text: t, style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: scaler,
+    maxLines: 1,
+  )..layout()).width;
+  return text
+      .split(' ')
+      .map(
+        (w) => w.isEmpty || width(w) <= maxWidth ? keepAll(w) : keepAllRange(w),
+      )
+      .join(' ');
+}

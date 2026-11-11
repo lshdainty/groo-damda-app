@@ -43,6 +43,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
@@ -955,9 +956,8 @@ class KvRow extends StatelessWidget {
             const SizedBox(width: PSpacing.x4),
             Expanded(
               child: sub == null
-                  ? Text(
-                      keepAllRange(v),
-                      semanticsLabel: v,
+                  ? KeepAllFitText(
+                      v,
                       textAlign: TextAlign.end,
                       style: PTypography.t5.copyWith(
                         color: c.fgNeutralMuted,
@@ -967,18 +967,16 @@ class KvRow extends StatelessWidget {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          keepAllRange(v),
-                          semanticsLabel: v,
+                        KeepAllFitText(
+                          v,
                           textAlign: TextAlign.end,
                           style: PTypography.t5.copyWith(
                             color: c.fgNeutralMuted,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                        Text(
-                          keepAllRange(sub!),
-                          semanticsLabel: sub,
+                        KeepAllFitText(
+                          sub!,
                           textAlign: TextAlign.end,
                           style: PTypography.t3.copyWith(
                             color: c.fgNeutralSubtle,
@@ -2768,12 +2766,10 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                   children: [
                     Flexible(
                       flex: 3,
-                      child: Text(
+                      child: KeepAllFitText(
                         masked
                             ? '••••••'
-                            : keepAllAmount(
-                                l.assetLimitOf(won(used), won(limit)),
-                              ),
+                            : l.assetLimitOf(won(used), won(limit)),
                         style: PTypography.t3.copyWith(
                           color: c.fgNeutralSubtle,
                         ),
@@ -2782,14 +2778,12 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                     const SizedBox(width: PSpacing.x2),
                     Flexible(
                       flex: 2,
-                      child: Text(
+                      child: KeepAllFitText(
                         masked
                             ? '••••••'
-                            : keepAllAmount(
-                                over
-                                    ? l.dsProgressOver(won(used - limit))
-                                    : l.assetLimitRemain(won(limit - used)),
-                              ),
+                            : (over
+                                  ? l.dsProgressOver(won(used - limit))
+                                  : l.assetLimitRemain(won(limit - used))),
                         textAlign: TextAlign.end,
                         style: PTypography.t3.copyWith(
                           color: over ? c.fgCritical : c.fgNeutralSubtle,
