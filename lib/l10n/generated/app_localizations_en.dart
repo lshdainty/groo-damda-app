@@ -3821,6 +3821,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get linkReauthTitle => 'Verify it\'s you';
+
+  @override
+  String linkReauthIntro(String name) {
+    return 'To connect your $name account, please confirm it\'s you.';
+  }
+
+  @override
+  String get linkReauthFailed =>
+      'Couldn\'t start connecting. Please try again shortly.';
+
+  @override
   String get accountUnlinkedToast => 'Disconnected the Google account.';
 
   @override

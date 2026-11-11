@@ -6895,6 +6895,24 @@ abstract class AppLocalizations {
   /// **'{name} 계정이 연결됐어요.'**
   String accountLinkedToast(String name);
 
+  /// No description provided for @linkReauthTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'본인 확인'**
+  String get linkReauthTitle;
+
+  /// No description provided for @linkReauthIntro.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 계정을 연결하려면 본인 확인이 필요해요.'**
+  String linkReauthIntro(String name);
+
+  /// No description provided for @linkReauthFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결을 시작하지 못했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get linkReauthFailed;
+
   /// No description provided for @accountUnlinkedToast.
   ///
   /// In ko, this message translates to:

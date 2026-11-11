@@ -63,12 +63,23 @@ class OAuthLinkRepository {
   }
 
   /// 연동 시작 — 브라우저로 열 주소(`startUrl`)를 받는다.
-  Future<String> startLink(String provider, String returnUrl) async {
+  ///
+  /// [reauthToken] 은 방금 받은 연동용 재인증 티켓(목적 `oauth-link`)이다. 로그인 쿠키만
+  /// 훔친 사람이 자기 소셜 계정을 붙여 계정을 영구히 가져가지 못하게 서버가 요구한다(보안 점검 S-2).
+  /// 티켓은 단회라 이 요청이 실패하면 본인 확인부터 다시 한다.
+  Future<String> startLink(
+    String provider,
+    String returnUrl, {
+    required String reauthToken,
+  }) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/oauth/link/$provider',
         data: {'returnUrl': returnUrl},
-        options: _quiet,
+        options: Options(
+          extra: {kSilentErrorToast: true},
+          headers: {'X-Reauth-Token': reauthToken},
+        ),
       );
       final body = ApiResponse<Map<String, dynamic>>.fromJson(
         res.data ?? const {},

@@ -3732,6 +3732,17 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get linkReauthTitle => '본인 확인';
+
+  @override
+  String linkReauthIntro(String name) {
+    return '$name 계정을 연결하려면 본인 확인이 필요해요.';
+  }
+
+  @override
+  String get linkReauthFailed => '연결을 시작하지 못했어요. 잠시 뒤 다시 시도해주세요.';
+
+  @override
   String get accountUnlinkedToast => 'Google 연결을 해제했어요.';
 
   @override

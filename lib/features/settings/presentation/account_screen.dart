@@ -16,6 +16,7 @@ import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/core/update/app_update.dart';
 import 'package:groo_damda_app/features/settings/application/oauth_link_providers.dart';
 import 'package:groo_damda_app/features/settings/data/oauth_link_repository.dart';
+import 'package:groo_damda_app/features/settings/presentation/oauth_link_reauth_sheet.dart';
 import 'package:groo_damda_app/features/settings/presentation/password_change_dialog.dart';
 import 'package:groo_damda_app/features/settings/presentation/withdrawal_sheet.dart';
 import 'package:groo_damda_app/features/subscription/application/subscription_providers.dart';
@@ -97,10 +98,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   Future<void> _link() async {
     if (_linking) return;
     final l = AppLocalizations.of(context);
+    // 본인 확인 먼저(보안 점검 S-2) — 시트가 확인 · 연결 시작까지 하고 열 주소를 준다. 닫으면 null.
+    final startUrl = await showOAuthLinkReauthSheet(
+      context,
+      provider: 'google',
+      providerName: 'Google',
+      returnUrl: Env.oauthLinkReturnUri,
+    );
+    if (startUrl == null || !mounted) return;
     setState(() => _linking = true);
     try {
-      final repo = await ref.read(oauthLinkRepositoryProvider.future);
-      final startUrl = await repo.startLink('google', Env.oauthLinkReturnUri);
       // 로그인과 같은 까닭으로 시스템 브라우저 — 복귀는 딥링크 리스너가 받는다.
       final launched = await launchUrl(
         Uri.parse(startUrl),
@@ -111,7 +118,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     } catch (_) {
       if (!mounted) return;
       setState(() => _linking = false);
-      // 연결 시작 실패 — critical 한 문장 + [다시 시도](같은 연결을 다시 시작한다)
+      // 브라우저를 못 열었다 — critical 한 문장 + [다시 시도](티켓은 이미 썼으니 본인 확인부터 다시)
       _toast(
         l.accountLinkError,
         tone: PSnackbarTone.critical,

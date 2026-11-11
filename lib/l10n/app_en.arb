@@ -2123,6 +2123,16 @@
       }
     }
   },
+  "linkReauthTitle": "Verify it's you",
+  "linkReauthIntro": "To connect your {name} account, please confirm it's you.",
+  "@linkReauthIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "linkReauthFailed": "Couldn't start connecting. Please try again shortly.",
   "accountUnlinkedToast": "Disconnected the Google account.",
   "accountSecuritiesDesc": "Connect API keys for Toss, Namu, and more",
   "accountBilling": "Subscription & Billing",
