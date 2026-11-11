@@ -2,6 +2,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart'
+    show previousBlueOf;
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
@@ -102,7 +104,7 @@ void main() {
             .barGroups[0]
             .barRods;
         expect(rods[0].color, c.chartBlue);
-        expect(rods[1].color, c.chartBlueWeak);
+        expect(rods[1].color, previousBlueOf(c));
       });
 
       testWidgets('지표 타일 weak 점은 옅은 색', (tester) async {
@@ -125,7 +127,7 @@ void main() {
         final dot = tester.widget<Container>(
           find.byKey(const ValueKey('chart-legend-dot')),
         );
-        expect((dot.decoration as BoxDecoration).color, c.chartBlueWeak);
+        expect((dot.decoration as BoxDecoration).color, previousBlueOf(c));
       });
     });
   }
