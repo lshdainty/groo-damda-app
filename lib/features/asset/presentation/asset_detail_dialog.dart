@@ -947,7 +947,8 @@ class KvRow extends StatelessWidget {
             ConstrainedBox(
               constraints: BoxConstraints(maxWidth: box.maxWidth * 0.4),
               child: Text(
-                label,
+                keepAll(label),
+                semanticsLabel: label,
                 style: PTypography.t5.copyWith(color: c.fgNeutral),
               ),
             ),
@@ -955,7 +956,8 @@ class KvRow extends StatelessWidget {
             Expanded(
               child: sub == null
                   ? Text(
-                      v,
+                      keepAllRange(v),
+                      semanticsLabel: v,
                       textAlign: TextAlign.end,
                       style: PTypography.t5.copyWith(
                         color: c.fgNeutralMuted,
@@ -966,7 +968,8 @@ class KvRow extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          v,
+                          keepAllRange(v),
+                          semanticsLabel: v,
                           textAlign: TextAlign.end,
                           style: PTypography.t5.copyWith(
                             color: c.fgNeutralMuted,
@@ -974,7 +977,8 @@ class KvRow extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          sub!,
+                          keepAllRange(sub!),
+                          semanticsLabel: sub,
                           textAlign: TextAlign.end,
                           style: PTypography.t3.copyWith(
                             color: c.fgNeutralSubtle,
@@ -1118,7 +1122,7 @@ class TradeDetailBody extends StatelessWidget {
                 ? (masked ? '••••' : tradeSignedKrw(pl))
                 : null,
           ),
-          KvRow(label: l.tradeDateTime, value: keepAll(tradeDateTimeText(tr))),
+          KvRow(label: l.tradeDateTime, value: tradeDateTimeText(tr)),
         ],
       ),
       footerRow: Align(
@@ -1411,12 +1415,11 @@ class _HeroCard extends StatelessWidget {
               value: masked
                   ? '••••••'
                   : foreign
-                  ? keepAllAmount(foreignText(asset.cashBalance!))
-                  : keepAllAmount('${krw(asset.cashBalance!)}${wonUnit()}'),
+                  ? foreignText(asset.cashBalance!)
+                  : '${krw(asset.cashBalance!)}${wonUnit()}',
+              // 줄바꿈 규칙(낱말 · 쉼표)은 KvRow 가 입힌다 — 여기서 미리 입히면 읽는 이름에 이음 문자가 섞인다
               sub: foreign && !masked
-                  ? keepAllAmount(
-                      l.fxApproxKrw(krwSigned(cashKrw, false, unit: true)),
-                    )
+                  ? l.fxApproxKrw(krwSigned(cashKrw, false, unit: true))
                   : null,
             ),
             KvRow(
@@ -1424,9 +1427,7 @@ class _HeroCard extends StatelessWidget {
               label: l.assetHoldingBalance,
               value: masked
                   ? '••••••'
-                  : keepAllAmount(
-                      '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
-                    ),
+                  : '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
             ),
           ],
         ],

@@ -210,7 +210,7 @@ class TxKvRow extends StatelessWidget {
 Widget txKvValue(BuildContext context, String value, {Color? color}) {
   final c = context.colors;
   return Text(
-    keepAll(value),
+    keepAllRange(value),
     semanticsLabel: value,
     textAlign: TextAlign.end,
     style: TextStyle(color: color ?? c.fgNeutralMuted),

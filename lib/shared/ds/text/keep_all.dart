@@ -39,3 +39,16 @@ String keepAllAmount(String amount) =>
 // 포매터가 \u 이스케이프를 보이지 않는 글자 그대로 풀어 버려, 코드 값으로 만든다
 final String _commaJoined = ',${String.fromCharCode(0x2060)}';
 final String _commaBreak = ',${String.fromCharCode(0x200B)}';
+
+/// 키-값 줄의 값 — [keepAllAmount] 에 더해 **구간 기호(`~` · `–`) 뒤에서도** 줄을 바꿀 수 있게 한다. "10월 1일~10월 31일" 은 공백이
+/// 없어 한 낱말로 묶이는데, 글자 200% 에서 그 낱말이 한 줄보다 길면 Flutter 가 칸 끝에서 끊어 "10 / 월" 처럼 낱말 가운데서
+/// 갈라졌다(DA-31). 날짜 한 덩어리(`10월` · `31일`)는 그대로 묶어 두고 구간 기호 뒤에서만 끊는다.
+String keepAllRange(String text) => keepAllAmount(text)
+    .replaceAll(
+      '~${String.fromCharCode(0x2060)}',
+      '~${String.fromCharCode(0x200B)}',
+    )
+    .replaceAll(
+      '–${String.fromCharCode(0x2060)}',
+      '–${String.fromCharCode(0x200B)}',
+    );
