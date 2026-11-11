@@ -116,21 +116,25 @@ class _SheetLayoutDelegate extends SingleChildLayoutDelegate {
   _SheetLayoutDelegate({
     required this.host,
     required this.keyboard,
+    required this.topInset,
     required Listenable relayout,
   }) : super(relayout: relayout);
 
   final _SheetHostState host;
   final double keyboard;
 
+  /// 위 안전 영역(상태 표시줄 · 다이내믹 아일랜드) — 키보드가 올라와 시트가 늘어나도 이 밑까지만 선다
+  final double topInset;
+
   @override
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // 높이는 화면의 90% 를 넘지 않고, 키보드가 올라오면 그 위에 선다
+    // 높이는 화면의 90% 를 넘지 않고, 키보드가 올라오면 그 위에 서되 위 안전 영역은 침범하지 않는다
     final maxHeight = math.min(
       constraints.maxHeight * kBottomSheetMaxHeightFactor,
-      constraints.maxHeight - keyboard,
+      constraints.maxHeight - keyboard - topInset,
     );
     return BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: maxHeight);
   }
@@ -147,7 +151,9 @@ class _SheetLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_SheetLayoutDelegate oldDelegate) =>
-      oldDelegate.keyboard != keyboard || oldDelegate.host != host;
+      oldDelegate.keyboard != keyboard ||
+      oldDelegate.topInset != topInset ||
+      oldDelegate.host != host;
 }
 
 class _Repaint extends ChangeNotifier {
@@ -480,6 +486,8 @@ class _SheetHostState extends State<_SheetHost>
   @override
   Widget build(BuildContext context) {
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    // viewPadding 은 키보드가 먹지 않는 기기 고유 위 여백이다
+    final topInset = MediaQuery.viewPaddingOf(context).top;
 
     Widget sheet = PBottomSheetScope(
       controller: this,
@@ -524,6 +532,7 @@ class _SheetHostState extends State<_SheetHost>
           delegate: _SheetLayoutDelegate(
             host: this,
             keyboard: keyboard,
+            topInset: topInset,
             relayout: _layoutSignal,
           ),
           child: sheet,
