@@ -665,7 +665,8 @@ class _ComplianceSection extends StatelessWidget {
           barColor: (i, c) {
             final r = list[i];
             if (r.compliancePercent > 100) return c.chartRed;
-            return i == active ? c.chartBlue : c.chartBlueWeak;
+            // 고른 달이 아닌 지난 달 막대는 회색(통계 비교의 지난 기간과 같은 색 — DA-10, 2026-11-11)
+            return i == active ? c.chartBlue : previousPeriodGrayOf(c);
           },
           barLabel: (i, v) => formatProgress(v),
           referenceLines: const [100],

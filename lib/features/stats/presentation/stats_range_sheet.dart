@@ -17,7 +17,7 @@ const statsRangePresets = <PDatePreset>[
 ];
 
 /// 통계 기간 고르기 시트 — ds Date Picker 기간(칸 하나 · 이어지는 달 · 빠른 기간 칩 · 바닥 "초기화" + "완료").
-/// 시작 · 끝 두 칸을 두지 않는다. "완료" 는 끝까지 고르기 전에는 막힌다. 취소(바깥 · 끌어내리기 · 닫기)하면 null.
+/// 시작 · 끝 두 칸을 두지 않는다. "완료" 는 끝까지 고르기 전에는 막힌다. ✕ · 뒤로 가기로 닫으면 null(바깥 누르기 · 끌어내리기로는 닫히지 않는다).
 /// [today] 는 시험 · 하네스가 오늘을 고정할 때만 준다.
 Future<StatsPeriod?> showStatsRangeSheet(
   BuildContext context,
@@ -28,6 +28,8 @@ Future<StatsPeriod?> showStatsRangeSheet(
   final now = today ?? DateTime.now();
   final picked = await PBottomSheet.show<PDateRange>(
     context,
+    // 달력을 위아래로 굴리다 시트째 닫히지 않게 — 웹 RangePickerSheet(dismissible={false}) · 가계부 필터 기간 시트와 같다(DA-36)
+    dismissible: false,
     builder: (_) {
       // 열 때는 지금 기간에서 시작한다. 초기화는 비워서 다시 고르게 한다.
       PDateRange? draft = PDateRange(start: current.from, end: current.to);

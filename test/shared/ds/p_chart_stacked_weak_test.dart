@@ -102,7 +102,7 @@ void main() {
             .barGroups[0]
             .barRods;
         expect(rods[0].color, c.chartBlue);
-        expect(rods[1].color, c.chartBlueWeak);
+        expect(rods[1].color, previousPeriodGrayOf(c));
       });
 
       testWidgets('지표 타일 weak 점은 옅은 색', (tester) async {
@@ -125,7 +125,10 @@ void main() {
         final dot = tester.widget<Container>(
           find.byKey(const ValueKey('chart-legend-dot')),
         );
-        expect((dot.decoration as BoxDecoration).color, c.chartBlueWeak);
+        expect(
+          (dot.decoration as BoxDecoration).color,
+          previousPeriodGrayOf(c),
+        );
       });
     });
   }

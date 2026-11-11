@@ -43,6 +43,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
@@ -947,14 +948,15 @@ class KvRow extends StatelessWidget {
             ConstrainedBox(
               constraints: BoxConstraints(maxWidth: box.maxWidth * 0.4),
               child: Text(
-                label,
+                keepAll(label),
+                semanticsLabel: label,
                 style: PTypography.t5.copyWith(color: c.fgNeutral),
               ),
             ),
             const SizedBox(width: PSpacing.x4),
             Expanded(
               child: sub == null
-                  ? Text(
+                  ? KeepAllFitText(
                       v,
                       textAlign: TextAlign.end,
                       style: PTypography.t5.copyWith(
@@ -965,7 +967,7 @@ class KvRow extends StatelessWidget {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
+                        KeepAllFitText(
                           v,
                           textAlign: TextAlign.end,
                           style: PTypography.t5.copyWith(
@@ -973,7 +975,7 @@ class KvRow extends StatelessWidget {
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                        Text(
+                        KeepAllFitText(
                           sub!,
                           textAlign: TextAlign.end,
                           style: PTypography.t3.copyWith(
@@ -1118,7 +1120,7 @@ class TradeDetailBody extends StatelessWidget {
                 ? (masked ? '••••' : tradeSignedKrw(pl))
                 : null,
           ),
-          KvRow(label: l.tradeDateTime, value: keepAll(tradeDateTimeText(tr))),
+          KvRow(label: l.tradeDateTime, value: tradeDateTimeText(tr)),
         ],
       ),
       footerRow: Align(
@@ -1411,12 +1413,11 @@ class _HeroCard extends StatelessWidget {
               value: masked
                   ? '••••••'
                   : foreign
-                  ? keepAllAmount(foreignText(asset.cashBalance!))
-                  : keepAllAmount('${krw(asset.cashBalance!)}${wonUnit()}'),
+                  ? foreignText(asset.cashBalance!)
+                  : '${krw(asset.cashBalance!)}${wonUnit()}',
+              // 줄바꿈 규칙(낱말 · 쉼표)은 KvRow 가 입힌다 — 여기서 미리 입히면 읽는 이름에 이음 문자가 섞인다
               sub: foreign && !masked
-                  ? keepAllAmount(
-                      l.fxApproxKrw(krwSigned(cashKrw, false, unit: true)),
-                    )
+                  ? l.fxApproxKrw(krwSigned(cashKrw, false, unit: true))
                   : null,
             ),
             KvRow(
@@ -1424,9 +1425,7 @@ class _HeroCard extends StatelessWidget {
               label: l.assetHoldingBalance,
               value: masked
                   ? '••••••'
-                  : keepAllAmount(
-                      '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
-                    ),
+                  : '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
             ),
           ],
         ],
@@ -2767,12 +2766,10 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                   children: [
                     Flexible(
                       flex: 3,
-                      child: Text(
+                      child: KeepAllFitText(
                         masked
                             ? '••••••'
-                            : keepAllAmount(
-                                l.assetLimitOf(won(used), won(limit)),
-                              ),
+                            : l.assetLimitOf(won(used), won(limit)),
                         style: PTypography.t3.copyWith(
                           color: c.fgNeutralSubtle,
                         ),
@@ -2781,14 +2778,12 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                     const SizedBox(width: PSpacing.x2),
                     Flexible(
                       flex: 2,
-                      child: Text(
+                      child: KeepAllFitText(
                         masked
                             ? '••••••'
-                            : keepAllAmount(
-                                over
-                                    ? l.dsProgressOver(won(used - limit))
-                                    : l.assetLimitRemain(won(limit - used)),
-                              ),
+                            : (over
+                                  ? l.dsProgressOver(won(used - limit))
+                                  : l.assetLimitRemain(won(limit - used))),
                         textAlign: TextAlign.end,
                         style: PTypography.t3.copyWith(
                           color: over ? c.fgCritical : c.fgNeutralSubtle,

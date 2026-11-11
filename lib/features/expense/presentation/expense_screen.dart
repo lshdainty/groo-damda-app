@@ -696,6 +696,8 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
         );
       }
       return PPullToRefresh(
+        // 머리가 목록 위에 겹쳐 서 있다 — 지시자 칸을 머리 아래에서 시작해야 가려지지 않는다(DA-27)
+        indicatorTopInset: headerHeight,
         onRefresh: () async {
           ref.invalidate(monthExpensesProvider(_key));
           await ref.read(monthExpensesProvider(_key).future);

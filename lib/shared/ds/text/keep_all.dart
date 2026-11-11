@@ -1,4 +1,11 @@
-import 'package:flutter/widgets.dart' show StringCharacters;
+import 'package:flutter/widgets.dart'
+    show
+        StringCharacters,
+        TextDirection,
+        TextPainter,
+        TextScaler,
+        TextSpan,
+        TextStyle;
 
 /// 낱말 단위 줄바꿈(DESIGN.md v114 — 웹의 word-break: keep-all) — 낱말 안의 글자 사이에 이음 문자(U+2060 WORD
 /// JOINER)를 넣어 띄어쓰기에서만 줄이 바뀌게 한다. 한 줄보다 긴 낱말은 Flutter 가 칸 끝에서 끊는다(웹의
@@ -39,3 +46,40 @@ String keepAllAmount(String amount) =>
 // 포매터가 \u 이스케이프를 보이지 않는 글자 그대로 풀어 버려, 코드 값으로 만든다
 final String _commaJoined = ',${String.fromCharCode(0x2060)}';
 final String _commaBreak = ',${String.fromCharCode(0x200B)}';
+
+/// 키-값 줄의 값 — [keepAllAmount] 에 더해 **구간 기호(`~` · `–`) 뒤에서도** 줄을 바꿀 수 있게 한다. "10월 1일~10월 31일" 은 공백이
+/// 없어 한 낱말로 묶이는데, 글자 200% 에서 그 낱말이 한 줄보다 길면 Flutter 가 칸 끝에서 끊어 "10 / 월" 처럼 낱말 가운데서
+/// 갈라졌다(DA-31). 날짜 한 덩어리(`10월` · `31일`)는 그대로 묶어 두고 구간 기호 뒤에서만 끊는다.
+String keepAllRange(String text) => keepAllAmount(text)
+    .replaceAll(
+      '~${String.fromCharCode(0x2060)}',
+      '~${String.fromCharCode(0x200B)}',
+    )
+    .replaceAll(
+      '–${String.fromCharCode(0x2060)}',
+      '–${String.fromCharCode(0x200B)}',
+    );
+
+/// 칸 폭에 맞춰 줄바꿈 자리를 고른다 — 띄어쓰기에서 먼저 꺾고, **쉼표(구간 기호) 뒤 줄바꿈은 그 낱말 하나만으로 한 줄이 넘칠 때만**
+/// 쓴다(금액의 마지막 수단). `한도 1,000,000원` 이 `한도 1,` / `000,000원` 으로 갈라지지 않고 `한도` / `1,000,000원` 이 된다
+/// (DA-31). 글자 크기 · 폭이 줄바꿈을 정하므로 [style] · [scaler] · [maxWidth](칸 폭)가 필요하다. 보이는 글에만 쓴다 —
+/// 읽는 이름은 원래 글로 넘긴다.
+String keepAllFit(
+  String text, {
+  required TextStyle style,
+  required TextScaler scaler,
+  required double maxWidth,
+}) {
+  double width(String t) => (TextPainter(
+    text: TextSpan(text: t, style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: scaler,
+    maxLines: 1,
+  )..layout()).width;
+  return text
+      .split(' ')
+      .map(
+        (w) => w.isEmpty || width(w) <= maxWidth ? keepAll(w) : keepAllRange(w),
+      )
+      .join(' ');
+}

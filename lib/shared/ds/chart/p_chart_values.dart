@@ -40,8 +40,11 @@ enum PChartColor {
   };
 
   /// 같은 계열 색의 옅은 단계(weak) — 강조하지 않는 비교 계열(지난 달 · 지난 기간).
+  ///
+  /// **파랑(통계 비교의 지난 기간)은 회색**(DA-10, 사용자 결정 2026-11-11 "B 회색") — 옛 `chart-blue-weak` 는 라이트 1.26:1 · 다크
+  /// 1.38:1 로 바탕에 묻혔다. 이번 기간 색(chart-blue)과 색상이 갈려 구별되고 바탕 대비 3:1 이상이다([previousPeriodGrayOf]).
   Color weakOf(PColors c) => switch (this) {
-    PChartColor.blue => c.chartBlueWeak,
+    PChartColor.blue => previousPeriodGrayOf(c),
     PChartColor.green => c.chartGreenWeak,
     PChartColor.orange => c.chartOrangeWeak,
     PChartColor.violet => c.chartVioletWeak,
@@ -317,3 +320,8 @@ List<Color> heatTextColors(PColors c) => [
           : c.staticWhite;
     }(),
 ];
+
+/// 지난 기간 막대 색 — 라이트 gray-500 `#8A91A0`(흰 바탕 3.16:1) · 다크 gray-600 `#838997`(카드 `#242938` 4.13:1). 팔레트 값이다
+/// (웹 · 디자인시스템과 같은 hex). 바탕이 어두운지는 `bgLayerDefault` 의 밝기로 가른다.
+Color previousPeriodGrayOf(PColors c) =>
+    c.bgLayerDefault.computeLuminance() < 0.5 ? c.gray600 : c.gray500;

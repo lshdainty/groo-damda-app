@@ -209,8 +209,10 @@ class TxKvRow extends StatelessWidget {
 /// 값 위젯 — 줄 수와 상관없이 오른쪽 맞춤(규칙 ①).
 Widget txKvValue(BuildContext context, String value, {Color? color}) {
   final c = context.colors;
+  // ds List 의 값 칸이 제 폭을 재어 줄 수 · 자리를 정한다(고유 폭 계산) — 칸 폭을 보는 위젯(LayoutBuilder)은 못 넣는다.
+  // 그래서 여기는 낱말 단위 + 쉼표 · 구간 기호 뒤 줄바꿈(keepAllRange)까지만 한다.
   return Text(
-    keepAll(value),
+    keepAllRange(value),
     semanticsLabel: value,
     textAlign: TextAlign.end,
     style: TextStyle(color: color ?? c.fgNeutralMuted),
