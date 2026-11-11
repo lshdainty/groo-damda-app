@@ -232,7 +232,12 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
         router.removeRoute(pointer, route);
         // 다른 칸이 초점을 가져갔으면 hasFocus 가 아니다. 단추 탭이 이 프레임에 일을 마치도록 한 박자 뒤에 내린다
         SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (mounted && focusNode.hasFocus) focusNode.unfocus();
+          if (mounted && focusNode.hasFocus) {
+            // 초점을 범위 맨 위로 보내지 않고 직전 초점(시트 몸통)으로 돌린다 — Esc 같은 키가 시트에 계속 닿는다
+            focusNode.unfocus(
+              disposition: UnfocusDisposition.previouslyFocusedChild,
+            );
+          }
         });
         SchedulerBinding.instance.scheduleFrame();
       } else if (e is PointerCancelEvent) {
