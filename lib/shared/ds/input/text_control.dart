@@ -9,8 +9,12 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_sheet/bottom_sheet_parts.dart';
 import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+
+/// 시트 본문 아래 끝 흐림 깊이(scroll-fog.yaml 시트 본문 fogEnd 80)
+const double _sheetFogEnd = 80;
 
 /// 입력(PInput) · 여러 줄 입력(PTextarea)이 함께 받는 값 — 상태는 [PTextControlState].
 ///
@@ -337,6 +341,10 @@ abstract class PTextControlState<W extends PTextControl> extends State<W> {
           onChanged: widget.onChanged,
           onSubmitted: onSubmitted,
           onTapOutside: _handleTapOutside,
+          // 키보드가 올라와 초점 칸을 보이게 스크롤할 때, 시트 본문 아래 끝 흐림(80) 위로 올라오게 한다(시험 2026-11-11 7)
+          scrollPadding: PBottomSheetScope.maybeOf(context) == null
+              ? const EdgeInsets.all(20)
+              : const EdgeInsets.fromLTRB(20, 20, 20, 20 + _sheetFogEnd),
           autofillHints: autofillHints,
           mouseCursor: disabled
               ? SystemMouseCursors.forbidden
