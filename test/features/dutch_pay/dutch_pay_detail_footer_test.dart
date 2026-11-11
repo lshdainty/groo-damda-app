@@ -1,4 +1,4 @@
-// 더치페이 상세 시트 — 바닥은 주 동작 + 왼쪽 [삭제] 둘, [일괄 요청] 은 머리 ⋮ 메뉴(bottom-sheet.yaml headerAction).
+// 더치페이 상세 시트 — 바닥은 주 동작 + 왼쪽 [삭제] 둘, 머리 ⋮ 없음(메뉴는 실행만 담는다 — 막힌 줄 하나뿐인 메뉴는 두지 않는다).
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -92,9 +92,7 @@ Future<void> _png(WidgetTester tester, String name) async {
 }
 
 void main() {
-  testWidgets('진행 중 — 바닥 단추는 [삭제] · [모두 받음] 둘, [일괄 요청] 은 바닥에 없다', (
-    tester,
-  ) async {
+  testWidgets('진행 중 — 바닥 단추는 [삭제] · [모두 받음] 둘', (tester) async {
     await _open(tester);
     await tester.pumpWidget(_app(_d()));
     await tester.pumpAndSettle();
@@ -109,20 +107,23 @@ void main() {
     await _png(tester, 'dutch-detail-open');
   });
 
-  testWidgets('머리 ⋮ — "{정산 이름} 더보기", 누르면 막힌 [일괄 요청] 줄과 이유가 뜬다', (tester) async {
+  testWidgets('머리 ⋮ 없다 — 진행 중에도 [일괄 요청] 줄이 어디에도 없고 참여자 줄 막힌 [요청] 은 남는다', (
+    tester,
+  ) async {
     await _open(tester);
     await tester.pumpWidget(_app(_d()));
     await tester.pumpAndSettle();
     await tester.tap(findText('open'));
     await tester.pumpAndSettle();
-    final more = find.bySemanticsLabel('회식 1 더보기');
-    expect(more, findsOneWidget);
-    await tester.tap(more);
-    await tester.pumpAndSettle();
-    expect(findText('일괄 요청'), findsOneWidget);
-    // 막힌 줄 — 이유 글이 줄 설명으로 붙는다(바닥 Callout 의 같은 글과 둘)
-    expect(findText('송금 요청은 곧 열려요.'), findsNWidgets(2));
-    await _png(tester, 'dutch-detail-menu');
+    expect(find.bySemanticsLabel('회식 1 더보기'), findsNothing);
+    expect(findTextContaining('더보기'), findsNothing);
+    expect(findText('일괄 요청'), findsNothing);
+    final req = tester
+        .widgetList<PButton>(find.byType(PButton))
+        .where((b) => b.label == '요청');
+    expect(req, isNotEmpty);
+    expect(req.every((b) => b.onPressed == null), isTrue);
+    await _png(tester, 'dutch-detail-nomenu');
   });
 
   testWidgets('완료 — 바닥은 [삭제] 하나 · 머리 ⋮ 없다', (tester) async {

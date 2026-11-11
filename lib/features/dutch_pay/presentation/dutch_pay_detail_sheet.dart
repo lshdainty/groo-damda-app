@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -17,12 +16,11 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
-import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 정산 상세(I-15 38 · 39 · 40) — ds Bottom Sheet 조회. 머리 제목 = 정산 이름(줄바꿈), 본문 = "{날짜 (요일)} · {장소}" · 총액(t9 24 / 32 · 700 ·
 /// 쉼표 뒤에서만 줄바꿈) · "1인당 … · {n}명" · 선 · "참여자 · {n}" + ds List 줄(앞 Avatar 36 · 이름 · 설명 · 뒤 Badge 또는 [받음]).
-/// 바닥: 진행 중 = [삭제] ghost critical + [모두 받음] · 완료 = [삭제] 하나. [일괄 요청] 은 머리 ⋮ 메뉴(막힘). 송금 요청 · 일괄 요청은 줄만 남기고 막는다
+/// 바닥: 진행 중 = [삭제] ghost critical + [모두 받음] · 완료 = [삭제] 하나. [일괄 요청] 은 두지 않는다(머리 ⋮ 도 없다 — 메뉴는 실행만 담고, 막힌 줄 하나뿐인 메뉴는 누를 일이 없다). 참여자 줄 [요청] 은 막힌 채 남긴다
 /// (서버에 요청 API 가 없다 — 10-30 결정, 이유 줄 Callout).
 ///
 /// **몫은 저장된 값(`p.amount`)** — 나머지 원이 있는 사람은 그 값이 보인다. 결제자 줄은 몫이 다른 사람과 다를 때만 "· 몫 …" 을 붙인다.
@@ -204,8 +202,6 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
     return PBottomSheetContent(
       title: d.title,
       closeLabel: l.actionClose,
-      // 동작이 여럿이면 머리 ⋮ 하나(bottom-sheet.yaml headerAction) — 바닥은 주 동작 + 왼쪽 [삭제] 만. 진행 중일 때만 [일괄 요청] 이 있다
-      headerAction: d.isSettled ? null : _headerAction(l, d),
       // 참여자 수는 사용자 데이터라 늘어나는 목록 — 끝 흐림을 건다
       scrollFog: true,
       flushBody: true,
@@ -272,33 +268,6 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
           // 완료 정산의 [삭제] 는 폭 전체가 아니라 왼쪽 · 내용 폭
           ? Row(children: [deleteButton])
           : _footer(context, deleteButton, settleAll),
-    );
-  }
-
-  /// 머리 ⋮ — [일괄 요청] 은 아직 열리지 않았다(서버에 요청 API 가 없다 — 10-30 결정). 줄은 남기고 막는다, 이유는 설명 줄.
-  Widget _headerAction(AppLocalizations l, DutchPay d) {
-    return PButton.icon(
-      icon: LucideIcons.ellipsisVertical,
-      semanticLabel: l.recMoreOf(d.title),
-      variant: PButtonVariant.ghost,
-      ghostColor: PButtonGhostColor.neutralSubtle,
-      size: PButtonSize.small,
-      onPressed: _busy
-          ? null
-          : () => PMenuSheet.show(
-              context,
-              title: d.title,
-              groups: [
-                PMenuSheetGroup([
-                  PMenuSheetItem(
-                    label: l.dutchRequestAll,
-                    description: l.dutchRequestSoon,
-                    icon: LucideIcons.send,
-                    enabled: false,
-                  ),
-                ]),
-              ],
-            ),
     );
   }
 

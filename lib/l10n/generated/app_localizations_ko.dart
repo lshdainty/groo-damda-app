@@ -2808,9 +2808,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get dutchRequestAll => '일괄 요청';
-
-  @override
   String get dutchNoName => '(이름 없음)';
 
   @override

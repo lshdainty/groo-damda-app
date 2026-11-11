@@ -2871,9 +2871,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dutchRequestAll => 'Request all';
-
-  @override
   String get dutchNoName => '(No name)';
 
   @override

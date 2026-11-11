@@ -5131,12 +5131,6 @@ abstract class AppLocalizations {
   /// **'\"{title}\" 더치페이를 삭제할까요? 삭제한 더치페이는 되돌릴 수 없어요.'**
   String dutchDeleteConfirm(String title);
 
-  /// No description provided for @dutchRequestAll.
-  ///
-  /// In ko, this message translates to:
-  /// **'일괄 요청'**
-  String get dutchRequestAll;
-
   /// No description provided for @dutchNoName.
   ///
   /// In ko, this message translates to:
