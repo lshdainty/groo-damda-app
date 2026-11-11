@@ -2472,7 +2472,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              PText.amount(
+              // 앞 말 + 금액 — 띄어쓰기에서 먼저 넘기고 쉼표 뒤는 금액이 칸보다 길 때만(keepAllFit, Typography v114)
+              KeepAllFitText(
                 '${masked ? '••••••' : l.assetInstallmentPrincipal(won(due.principalAmount))}${due.recordOnly ? ' · ${l.expRecordOnlyBadge}' : ''}',
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),

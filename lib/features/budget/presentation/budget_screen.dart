@@ -29,7 +29,7 @@ import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart'
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
-import 'package:groo_damda_app/shared/ds/text/p_text.dart';
+import 'package:groo_damda_app/shared/ds/text/keep_all_fit_text.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
@@ -366,7 +366,8 @@ class _TotalSection extends StatelessWidget {
           PCallout(description: l.budgetOverallCapEmptyHint),
           if (categoryLimitSum > 0) ...[
             const _Gap(PSpacing.x2),
-            PText.amount(
+            // 앞 말 + 금액 — 띄어쓰기에서 먼저 넘기고 쉼표 뒤는 금액이 칸보다 길 때만(keepAllFit, Typography v114)
+            KeepAllFitText(
               '${l.budgetCurrentCategorySum}: ${won(categoryLimitSum)}',
               style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
             ),

@@ -319,6 +319,10 @@ class TxRow extends StatelessWidget {
     final shown = has ? value! : placeholder;
     final valueWidget = shown == null
         ? null
+        : has && dot == null && maxLines == null && _amountWord.hasMatch(shown)
+        // 금액이 든 값 — 띄어쓰기에서 먼저 넘기고 쉼표 뒤는 금액 낱말이 칸보다 길 때만 꺾는다(Typography v114,
+        // 웹 RowValue 의 withCommaBreaks 와 같다). keepAll 만 걸면 글자 200% 에서 숫자 가운데가 끊긴다
+        ? PListValue.fit(shown)
         : has
         ? CalendarRowValue(
             text: shown,
@@ -356,6 +360,8 @@ class TxRow extends StatelessWidget {
     );
   }
 }
+
+final RegExp _amountWord = RegExp(r'\d,\d');
 
 /// 칸 · 줄 아래 오류 한 줄(t3 · fg-critical · 아이콘 16).
 class TxFieldError extends StatelessWidget {
