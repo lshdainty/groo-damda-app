@@ -287,7 +287,8 @@ class PResultSection extends StatelessWidget {
         // 글 버튼(D2 — SEED Text Button: t4 · 700 · fg-neutral-muted · 36)
         : PTextButton(
             label: secondary.label,
-            onPressed: secondary.loading ? null : secondary.onPressed,
+            onPressed: secondary.onPressed,
+            loading: secondary.loading,
           );
     const secondaryHeight = 36.0;
     return Column(

@@ -20,7 +20,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 정산 상세(I-15 38 · 39 · 40) — ds Bottom Sheet 조회. 머리 제목 = 정산 이름(줄바꿈), 본문 = "{날짜 (요일)} · {장소}" · 총액(t9 24 / 32 · 700 ·
 /// 쉼표 뒤에서만 줄바꿈) · "1인당 … · {n}명" · 선 · "참여자 · {n}" + ds List 줄(앞 Avatar 36 · 이름 · 설명 · 뒤 Badge 또는 [받음]).
-/// 바닥: 진행 중 = [삭제] ghost critical + [일괄 요청](막힘) + [모두 받음] · 완료 = [삭제] 하나. 송금 요청 · 일괄 요청은 단추만 남기고 막는다
+/// 바닥: 진행 중 = [삭제] ghost critical + [모두 받음] · 완료 = [삭제] 하나. [일괄 요청] 은 두지 않는다(머리 ⋮ 도 없다 — 메뉴는 실행만 담고, 막힌 줄 하나뿐인 메뉴는 누를 일이 없다). 참여자 줄 [요청] 은 막힌 채 남긴다
 /// (서버에 요청 API 가 없다 — 10-30 결정, 이유 줄 Callout).
 ///
 /// **몫은 저장된 값(`p.amount`)** — 나머지 원이 있는 사람은 그 값이 보인다. 결제자 줄은 몫이 다른 사람과 다를 때만 "· 몫 …" 을 붙인다.
@@ -190,13 +190,6 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
             }),
     );
 
-    final requestAll = PButton(
-      label: l.dutchRequestAll,
-      variant: PButtonVariant.neutralWeak,
-      size: PButtonSize.large,
-      semanticLabel: '${l.dutchRequestAll}. ${l.dutchRequestSoon}',
-      onPressed: null,
-    );
     final settleAll = PButton(
       label: l.dutchSettleAll,
       size: PButtonSize.large,
@@ -274,24 +267,18 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
       footerRow: d.isSettled
           // 완료 정산의 [삭제] 는 폭 전체가 아니라 왼쪽 · 내용 폭
           ? Row(children: [deleteButton])
-          : _footer(context, deleteButton, requestAll, settleAll),
+          : _footer(context, deleteButton, settleAll),
     );
   }
 
-  /// 바닥 줄 — 보통은 한 줄(삭제 · 일괄 요청 · 모두 받음). 글자를 크게 키우면 글이 겹치므로 세로로 쌓는다(주 버튼이 위).
-  Widget _footer(
-    BuildContext context,
-    Widget deleteButton,
-    Widget requestAll,
-    Widget settleAll,
-  ) {
+  /// 바닥 줄 — 왼쪽 [삭제] 내용 폭 + 남은 폭 [모두 받음]. 글자를 크게 키우면 글이 겹치므로 세로로 쌓는다(주 버튼이 위).
+  Widget _footer(BuildContext context, Widget deleteButton, Widget settleAll) {
     if (MediaQuery.textScalerOf(context).scale(16) > 22) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: PSpacing.x2,
         children: [
           settleAll,
-          requestAll,
           Row(children: [deleteButton]),
         ],
       );
@@ -300,8 +287,6 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
       spacing: PSpacing.x2,
       children: [
         deleteButton,
-        // [일괄 요청] 은 글 폭, 주 버튼 [모두 받음] 이 남은 폭을 채운다(웹과 같다)
-        requestAll,
         Expanded(child: settleAll),
       ],
     );
