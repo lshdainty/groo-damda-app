@@ -128,4 +128,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(doneTaps, 1);
   });
+
+  testWidgets('DA-06 재현 2 — 키보드(viewInsets)가 떠 시트가 줄어든 채로도 한 번 탭이 먹는다', (
+    tester,
+  ) async {
+    await pumpForm(tester, inSheet: true);
+    await tester.tap(find.byType(TextField).first);
+    await tester.pump();
+    tester.view.viewInsets = const FakeViewPadding(bottom: 1008);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'a');
+    await tester.pump();
+    await tester.tap(findText('완료'));
+    await tester.pumpAndSettle();
+    expect(doneTaps, 1);
+  });
 }
