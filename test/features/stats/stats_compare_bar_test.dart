@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart'
-    show previousBlueOf;
+    show previousPeriodGrayOf;
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
@@ -136,15 +136,24 @@ void main() {
                 as BoxDecoration,
         ];
         expect(decos[0].color, c.chartBlue, reason: 'dark=$dark 이번');
-        expect(decos[1].color, previousBlueOf(c), reason: 'dark=$dark 지난');
+        expect(
+          decos[1].color,
+          previousPeriodGrayOf(c),
+          reason: 'dark=$dark 지난',
+        );
         // DA-10 — 지난 기간 막대는 바탕 대비 3:1 이상(WCAG 비텍스트 대비)
         expect(
           _contrast(decos[1].color!, c.bgLayerDefault),
           greaterThanOrEqualTo(3.0),
           reason: 'dark=$dark 지난 기간 막대 대비',
         );
-        // 이번 기간 막대와는 구별된다(서로 다른 색)
+        // 이번 기간 막대와는 구별된다(서로 다른 색) · 팔레트 회색과 같은 hex
         expect(decos[1].color, isNot(decos[0].color));
+        expect(
+          decos[1].color,
+          dark ? const Color(0xFF838997) : const Color(0xFF8A91A0),
+          reason: 'dark=$dark 지난 기간 = 팔레트 회색(gray-600 다크 · gray-500 라이트)',
+        );
         expect(decos[0].border, isNull);
         expect(decos[1].border, isNull);
       }
