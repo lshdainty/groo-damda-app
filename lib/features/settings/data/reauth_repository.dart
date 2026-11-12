@@ -6,13 +6,18 @@ import 'package:groo_damda_app/core/network/silent_error_toast.dart';
 
 /// 재인증 티켓을 어디에 쓰는지 — 서버가 티켓에 새겨 두고, 다른 곳에 내밀면 거절한다.
 ///
-/// 빼면 서버는 [withdraw] 로 읽는다. 그래서 연동은 반드시 [oauthLink] 를 실어야 한다.
+/// 빼면 서버는 [withdraw] 로 읽는다. 그래서 연동은 반드시 [oauthLink] 를, 해제는 [oauthUnlink] 를
+/// 실어야 한다.
 abstract final class ReauthPurpose {
   /// 이용 해지.
   static const withdraw = 'withdraw';
 
   /// 소셜 계정 연동 시작.
   static const oauthLink = 'oauth-link';
+
+  /// 소셜 계정 연동 해제(보안 점검 S-2 잔여). 시작과 나눈다 — 같은 값이면 해제하려고 받은 티켓으로
+  /// 연동을 시작할 수 있고, 그 반대도 된다.
+  static const oauthUnlink = 'oauth-unlink';
 }
 
 /// 본인 확인(재인증) — 해지와 소셜 연동이 같이 쓴다.

@@ -253,6 +253,27 @@ void main() {
       expect(code.data, {'code': '123456', 'purpose': 'oauth-link'});
     });
 
+    test(
+      '해제용 확인은 purpose=oauth-unlink 를 싣는다 — 연결용과 다른 값(보안 점검 S-2 잔여)',
+      () async {
+        final adapter = _Capture();
+        final repo = ReauthRepository(Dio()..httpClientAdapter = adapter);
+        await repo.verifyPassword('pw', purpose: ReauthPurpose.oauthUnlink);
+        await repo.verifyEmailCode(
+          '123456',
+          purpose: ReauthPurpose.oauthUnlink,
+        );
+        expect(adapter.requests[0].data, {
+          'password': 'pw',
+          'purpose': 'oauth-unlink',
+        });
+        expect(adapter.requests[1].data, {
+          'code': '123456',
+          'purpose': 'oauth-unlink',
+        });
+      },
+    );
+
     // 서버가 실제로 읽는 리터럴로 본다 — 상수끼리 견주면 둘 다 틀려도 초록불이 난다.
     test('해지는 purpose=withdraw 를 밝힌다(빼지 않는다)', () async {
       final adapter = _Capture();
@@ -507,7 +528,7 @@ void main() {
       expect(req.extra[kSilentErrorToast], isTrue);
     });
 
-    testWidgets('비밀번호 확인(oauth-link) 뒤에만 해제하고, 그 티켓을 싣고, true 로 닫힌다', (
+    testWidgets('비밀번호 확인(oauth-unlink) 뒤에만 해제하고, 그 티켓을 싣고, true 로 닫힌다', (
       tester,
     ) async {
       final reauth = _Reauth();
@@ -520,7 +541,8 @@ void main() {
       await tester.tap(findText(_l.unlinkReauthConfirm));
       await tester.pumpAndSettle();
       expect(_log, ['verifyPassword', 'unlink']);
-      expect(reauth.purposes, ['oauth-link']);
+      // 해제 전용 용도 — 연결용(oauth-link) 티켓과 바꿔 쓸 수 없다(보안 점검 S-2 잔여)
+      expect(reauth.purposes, ['oauth-unlink']);
       expect(link.unlinkTickets, ['ticket-1']);
       expect(h.result, isTrue);
     });
