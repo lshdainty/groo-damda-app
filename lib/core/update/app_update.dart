@@ -57,6 +57,26 @@ class AppRelease {
   /// AltStore 가 안 깔려 있으면 딥링크가 열리지 않는다. 그때 대신 보낼 안내 페이지.
   String get fallbackUrl => '${Env.webBaseUrl}/download';
 
+  /// 버전 파일이 알려 주는 파일 이름의 꼴 — 영문 · 숫자로 시작하고 영문 · 숫자 · `.` `_` `-` 만,
+  /// 128자까지(CI 가 쓰는 `groo-desk-1.2.3.apk` 꼴).
+  ///
+  /// 이 이름은 받을 주소에도, **앱 캐시에 저장할 경로**에도 그대로 붙는다. `../` 나 `/` 가
+  /// 섞이면 캐시 밖 앱 내부 파일을 덮어쓸 수 있다(보안 점검 CLI-3) — 꼴이 다르면 버전 파일을
+  /// 통째로 믿지 않는다.
+  static final RegExp _apkName = RegExp(
+    r'^[A-Za-z0-9][A-Za-z0-9._-]{0,123}\.apk$',
+  );
+  static final RegExp _ipaName = RegExp(
+    r'^[A-Za-z0-9][A-Za-z0-9._-]{0,123}\.ipa$',
+  );
+
+  /// 안드로이드 파일 이름으로 써도 되는가 — 경로 조작(`..` 포함)을 거절한다.
+  static bool isSafeApkName(String name) =>
+      _apkName.hasMatch(name) && !name.contains('..');
+
+  static bool _isSafeIpaName(String name) =>
+      _ipaName.hasMatch(name) && !name.contains('..');
+
   static AppRelease? tryParse(Object? json) {
     if (json is! Map) return null;
     final version = json['version'];
@@ -64,6 +84,8 @@ class AppRelease {
     final android = json['android'];
     final ios = json['ios'];
     if (version is! String || build is! num || android is! String) return null;
+    // 파일 이름이 이상하면 버전 파일째 거절한다 — "확인 못 함" 으로 남아 강제 업데이트도 걸지 않는다.
+    if (!isSafeApkName(android)) return null;
     final notes = json['notes'];
     final minBuild = json['minBuildNumber'];
     return AppRelease(
@@ -73,7 +95,7 @@ class AppRelease {
       // ios·notes·minBuildNumber 는 나중에 붙었다. 옛 version.json 을 읽어도 죽지
       // 않게 비워 둔다 — 특히 강제 하한은 0 으로 봐야 한다. 값을 못 읽었다고
       // 사용자를 앱 밖으로 밀어내면 안 된다.
-      iosFile: ios is String ? ios : '',
+      iosFile: ios is String && _isSafeIpaName(ios) ? ios : '',
       notes: notes is String ? notes : '',
       minBuildNumber: minBuild is num ? minBuild.toInt() : 0,
     );

@@ -1967,6 +1967,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get updateSheetFailed => '앱에서 받지 못해 브라우저로 열어요.';
 
   @override
+  String get updateApkRejected => '받은 파일이 이 앱의 새 버전이 아니라서 설치하지 않았어요.';
+
+  @override
   String get updateTitle => '업데이트';
 
   @override

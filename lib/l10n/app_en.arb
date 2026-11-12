@@ -1165,6 +1165,7 @@
   "updateSheetDownloading": "Downloading",
   "updateSheetOpening": "Opening the installer",
   "updateSheetFailed": "Couldn't download in the app, so we're opening your browser.",
+  "updateApkRejected": "The downloaded file isn't an update for this app, so we didn't install it.",
   "updateTitle": "Update",
   "updateGateTitle": "Version {version} is here",
   "@updateGateTitle": {

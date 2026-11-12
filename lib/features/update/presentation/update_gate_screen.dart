@@ -276,7 +276,9 @@ class _Actions extends ConsumerWidget {
         onPressed: onCancel,
       ),
       primary: PButton(
-        label: progress.stage == ApkStage.failed
+        label:
+            progress.stage == ApkStage.failed ||
+                progress.stage == ApkStage.rejected
             ? l.updateSheetRetry
             : l.updateGateInstall,
         size: PButtonSize.large,
@@ -293,13 +295,22 @@ class _Actions extends ConsumerWidget {
       return;
     }
 
-    final ok = await ref
+    final result = await ref
         .read(apkInstallerProvider.notifier)
         .downloadAndOpen(release);
-    if (ok || !context.mounted) return;
+    if (result == ApkInstallResult.opened || !context.mounted) return;
+
+    final l = AppLocalizations.of(context);
+    // 받은 파일이 이 앱이 아니면 설치하지 않고 알리기만 한다 — 브라우저로 넘기면 같은 파일을
+    // 받아 깔게 될 뿐이다(보안 점검 CLI-3).
+    if (result == ApkInstallResult.rejected) {
+      PSnackbar.maybeOf(
+        context,
+      )?.show(message: l.updateApkRejected, tone: PSnackbarTone.critical);
+      return;
+    }
 
     // 앱 안에서 못 받았으면 브라우저에 넘긴다. 거기서는 받아지는 경우가 있다.
-    final l = AppLocalizations.of(context);
     PSnackbar.maybeOf(
       context,
     )?.show(message: l.updateSheetFailed, tone: PSnackbarTone.critical);
