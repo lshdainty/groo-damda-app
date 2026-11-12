@@ -111,10 +111,70 @@ class _Link extends OAuthLinkRepository {
     return 'https://sso.example/start';
   }
 
+  /// 해제에 실린 티켓 — 확인 전에 해제를 부르면 안 된다(S-2 잔여)
+  final unlinkTickets = <String>[];
+  bool linked = false;
+
   @override
-  Future<List<OAuthProviderInfo>> providers() async => const [
-    OAuthProviderInfo(type: 'GOOGLE', name: 'Google', linked: false),
+  Future<void> unlink(String provider, {required String reauthToken}) async {
+    _log.add('unlink');
+    unlinkTickets.add(reauthToken);
+    final e = error;
+    if (e != null) throw e;
+  }
+
+  @override
+  Future<List<OAuthProviderInfo>> providers() async => [
+    OAuthProviderInfo(type: 'GOOGLE', name: 'Google', linked: linked),
   ];
+}
+
+/// 해제 시트를 띄우는 단추 — 시트가 돌려준 값을 [_UnlinkHarness.result] 에 적는다.
+class _UnlinkHarness {
+  bool? result;
+}
+
+Future<_UnlinkHarness> _openUnlink(
+  WidgetTester tester, {
+  required _Reauth reauth,
+  required _Link link,
+}) async {
+  tester.view.physicalSize = const Size(360 * 3, 780 * 3);
+  tester.view.devicePixelRatio = 3.0;
+  addTearDown(tester.view.reset);
+  final h = _UnlinkHarness();
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        reauthRepositoryProvider.overrideWith((ref) async => reauth),
+        oauthLinkRepositoryProvider.overrideWith((ref) async => link),
+      ],
+      child: MaterialApp(
+        theme: GrooTheme.light(),
+        locale: const Locale('ko'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (c) => TextButton(
+              onPressed: () async {
+                h.result = await showOAuthUnlinkReauthSheet(
+                  c,
+                  provider: 'google',
+                  providerName: 'Google',
+                );
+              },
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(findText('open'));
+  await tester.pumpAndSettle();
+  return h;
 }
 
 final _l = lookupAppLocalizations(const Locale('ko'));
@@ -434,6 +494,50 @@ void main() {
     });
   });
 
+  // S-2 잔여 — 해제도 로그인 쿠키만으로 되면 쿠키를 쥔 사람이 구글 연결을 끊어 복구 수단을 없앤다
+  group('해제 전 본인 확인', () {
+    test('해제는 티켓을 X-Reauth-Token 헤더에 싣는다', () async {
+      final adapter = _Capture();
+      final repo = OAuthLinkRepository(Dio()..httpClientAdapter = adapter);
+      await repo.unlink('google', reauthToken: 'ticket-u');
+      final req = adapter.requests.single;
+      expect(req.method, 'DELETE');
+      expect(req.path, '/oauth/link/google');
+      expect(req.headers['X-Reauth-Token'], 'ticket-u');
+      expect(req.extra[kSilentErrorToast], isTrue);
+    });
+
+    testWidgets('비밀번호 확인(oauth-link) 뒤에만 해제하고, 그 티켓을 싣고, true 로 닫힌다', (
+      tester,
+    ) async {
+      final reauth = _Reauth();
+      final link = _Link();
+      final h = await _openUnlink(tester, reauth: reauth, link: link);
+      expect(findText(keepAll(_l.unlinkReauthIntro('Google'))), findsOneWidget);
+      expect(_log, isEmpty, reason: '열기만 해서는 해제하지 않는다');
+      await tester.enterText(find.byType(TextField).first, 'secret');
+      await tester.pump();
+      await tester.tap(findText(_l.unlinkReauthConfirm));
+      await tester.pumpAndSettle();
+      expect(_log, ['verifyPassword', 'unlink']);
+      expect(reauth.purposes, ['oauth-link']);
+      expect(link.unlinkTickets, ['ticket-1']);
+      expect(h.result, isTrue);
+    });
+
+    testWidgets('해제가 실패하면 시트가 남아 본인 확인부터 다시 받는다', (tester) async {
+      final link = _Link()..error = ApiException(code: 'X', message: 'raw');
+      final h = await _openUnlink(tester, reauth: _Reauth(), link: link);
+      await tester.enterText(find.byType(TextField).first, 'secret');
+      await tester.pump();
+      await tester.tap(findText(_l.unlinkReauthConfirm));
+      await tester.pumpAndSettle();
+      expect(findText(keepAll(_l.unlinkReauthFailed)), findsOneWidget);
+      expect(findText('raw'), findsNothing);
+      expect(h.result, isNull, reason: '시트는 닫히지 않았다');
+    });
+  });
+
   testWidgets('계정 화면 — Google [연결] 은 본인 확인 시트부터 연다', (tester) async {
     tester.view.physicalSize = const Size(360 * 3, 780 * 3);
     tester.view.devicePixelRatio = 3.0;
@@ -472,6 +576,67 @@ void main() {
     expect(findText(keepAll(_l.linkReauthIntro('Google'))), findsOneWidget);
     expect(_log, isEmpty, reason: '본인 확인 전에는 연결을 시작하지 않는다');
     expect(link.tickets, isEmpty);
+  });
+
+  // 웹 translations.csv `account.unlinkReauth.*` 와 글자 그대로 같다 — 한쪽만 고치지 마라.
+  testWidgets('계정 화면 — Google [해제] 도 본인 확인 시트부터 연다(S-2 잔여)', (tester) async {
+    tester.view.physicalSize = const Size(360 * 3, 780 * 3);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+    final link = _Link()..linked = true;
+    final router = GoRouter(
+      initialLocation: '/account',
+      routes: [
+        GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith(_User.new),
+          reauthRepositoryProvider.overrideWith((ref) async => _Reauth()),
+          oauthLinkRepositoryProvider.overrideWith((ref) async => link),
+        ],
+        child: MaterialApp.router(
+          theme: GrooTheme.light(),
+          locale: const Locale('ko'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    final connect = findWidgetWithText(PButton, _l.accountDisconnect);
+    await tester.ensureVisible(connect);
+    await tester.pumpAndSettle();
+    await tester.tap(connect);
+    await tester.pumpAndSettle();
+    expect(findText(keepAll(_l.unlinkReauthIntro('Google'))), findsOneWidget);
+    expect(_log, isEmpty, reason: '본인 확인 전에는 해제하지 않는다');
+    expect(link.unlinkTickets, isEmpty);
+  });
+
+  // 웹 translations.csv `account.unlinkReauth.*` 와 글자 그대로 같다 — 한쪽만 고치지 마라.
+  test('해제 문구가 웹과 한 벌이다', () {
+    final ko = AppLocalizationsKo();
+    final en = AppLocalizationsEn();
+    expect(ko.unlinkReauthTitle('Google'), 'Google 연결 해제');
+    expect(en.unlinkReauthTitle('Google'), 'Disconnect your Google account');
+    expect(ko.unlinkReauthIntro('Google'), 'Google 계정 연결을 해제하려면 본인 확인이 필요해요.');
+    expect(
+      en.unlinkReauthIntro('Google'),
+      "To disconnect your Google account, we need to confirm it's you.",
+    );
+    expect(ko.unlinkReauthConfirm, '해제하기');
+    expect(en.unlinkReauthConfirm, 'Disconnect');
+    expect(ko.unlinkReauthFailed, '연결을 해제하지 못했어요. 본인 확인부터 다시 해주세요.');
+    expect(
+      en.unlinkReauthFailed,
+      "Couldn't disconnect the account. Please confirm it's you again.",
+    );
   });
 
   test('문구 — ko · en 모두 있고 provider 이름을 끼운다', () {
