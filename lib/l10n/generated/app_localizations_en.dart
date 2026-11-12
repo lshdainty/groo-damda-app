@@ -1352,7 +1352,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calCalendarNameFieldPlaceholder => 'Calendar name';
 
   @override
-  String get calInviteCodePlaceholder => 'e.g. 3F9A1C2B';
+  String get calInviteCodePlaceholder => 'Paste the invite code you received';
 
   @override
   String get calRecurrenceNone => 'Does not repeat';
@@ -1653,7 +1653,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calRegenerateFailed => 'Couldn\'t create a new invite code.';
 
   @override
-  String get calInviteNone => 'No invite code';
+  String get calInviteNone => 'Sharing off';
+
+  @override
+  String get calInviteOffHint =>
+      'Create an invite code to let others join this calendar.';
+
+  @override
+  String get calCreateCode => 'Create';
+
+  @override
+  String get calStopSharing => 'Turn off';
+
+  @override
+  String get calStopSharingFailed => 'Could not turn off the invite code.';
+
+  @override
+  String get calSharingStopped =>
+      'Invite code turned off. Current members stay.';
+
+  @override
+  String get calJoinRateLimited =>
+      'Too many incorrect invite codes. Please try again later.';
 
   @override
   String get calJoinCodeRequired => 'Please enter the invite code.';

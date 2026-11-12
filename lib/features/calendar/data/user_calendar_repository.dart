@@ -103,6 +103,18 @@ class UserCalendarRepository {
     }
   }
 
+  /// 공유 끄기 — 초대 코드를 지워 새로 참여할 수 없게 한다. 이미 참여한 멤버는 그대로다.
+  Future<void> stopSharing(int id) async {
+    try {
+      await _dio.delete<dynamic>(
+        '/calendar/calendars/$id/invite-code',
+        options: _silent,
+      );
+    } catch (e, s) {
+      throwAsApiException(e, s);
+    }
+  }
+
   /// 틀린 코드 · 이미 참여는 칸 아래 오류로 알린다 — 요청에 kSilentErrorToast 표식을 싣는다(실패는 화면이 말한다).
   Future<UserCalendar> joinByCode(String inviteCode) async {
     try {

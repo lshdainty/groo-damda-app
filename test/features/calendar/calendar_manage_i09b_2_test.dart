@@ -38,6 +38,10 @@ class _Repo extends UserCalendarRepository {
   int joins = 0;
   int deletes = 0;
   int roleChanges = 0;
+  int stops = 0;
+
+  @override
+  Future<void> stopSharing(int id) async => stops++;
 
   @override
   Future<List<CalendarMember>> members(int id) async => const [
@@ -140,6 +144,59 @@ void main() {
   }
 
   group('관리 페이지', () {
+    testWidgets(
+      '공유 켜짐 — 32자 코드 · [복사] · [새로 만들기] · [끄기], 끄기를 누르면 서버로 간다(DAM-4)',
+      (tester) async {
+        await size(tester);
+        final repo = _Repo();
+        const code = '0123456789ABCDEF0123456789ABCDEF';
+        await tester.pumpWidget(
+          app(
+            const CalendarManageScreen(calendarId: 2),
+            repo,
+            list: const [
+              dflt,
+              UserCalendar(
+                rowId: 2,
+                calendarName: '가족 일정',
+                inviteCode: code,
+                memberCount: 3,
+              ),
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(findText(code), findsOneWidget);
+        expect(findText('복사'), findsOneWidget);
+        expect(findText('새로 만들기'), findsOneWidget);
+        await tester.tap(findText('끄기'));
+        await tester.pumpAndSettle();
+        expect(repo.stops, 1);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('공유 꺼짐(코드 없음) — "공유 꺼짐" 과 [만들기] 만, [복사] · [끄기] 는 없다(DAM-4)', (
+      tester,
+    ) async {
+      await size(tester);
+      await tester.pumpWidget(
+        app(
+          const CalendarManageScreen(calendarId: 2),
+          _Repo(),
+          list: const [
+            dflt,
+            UserCalendar(rowId: 2, calendarName: '가족 일정', memberCount: 1),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(findPlain('공유 꺼짐'), findsOneWidget);
+      expect(findText('만들기'), findsOneWidget);
+      expect(findText('복사'), findsNothing);
+      expect(findText('끄기'), findsNothing);
+    });
+
     testWidgets('소유자 — 이름 · 색상 줄 · 초대 코드 · 멤버 아바타 + 권한 배지 · 삭제 줄', (
       tester,
     ) async {
@@ -252,23 +309,6 @@ void main() {
       expect(findPlain('편집 가능으로'), findsNothing);
     });
 
-    testWidgets('초대 코드가 없는 캘린더 — "초대 코드 없음" · [복사] 없음 · [새로 만들기] 만', (
-      tester,
-    ) async {
-      await size(tester);
-      await tester.pumpWidget(
-        app(
-          const CalendarManageScreen(calendarId: 2),
-          _Repo(),
-          list: const [UserCalendar(rowId: 2, calendarName: '코드 없는 캘린더')],
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(findText('초대 코드 없음'), findsOneWidget);
-      expect(findText('복사'), findsNothing);
-      expect(findText('새로 만들기'), findsOneWidget);
-    });
-
     testWidgets('캘린더를 지우면 이 페이지 하나만 닫힌다(목록은 남는다)', (tester) async {
       await size(tester);
       final repo = _Repo();
@@ -374,14 +414,32 @@ void main() {
       expect(findPlain('이미 참여한 캘린더예요.'), findsOneWidget);
     });
 
-    testWidgets('영문 · 숫자 8자만 받는다', (tester) async {
+    testWidgets('붙여 넣은 공백 · 하이픈은 거르고 영문 · 숫자 32자만 받는다(DAM-4)', (tester) async {
       await open(tester, _Repo());
-      await tester.enterText(find.byType(EditableText), 'ab-12 345678901');
+      await tester.enterText(
+        find.byType(EditableText),
+        '0123 4567-89ab cdef!0123456789abcdef99',
+      );
       final text = tester
           .widget<EditableText>(find.byType(EditableText))
           .controller
           .text;
-      expect(text, 'ab123456');
+      expect(text, '0123456789abcdef0123456789abcdef');
+    });
+
+    testWidgets('틀린 시도 한도(CAL_017) — 칸 아래 "잠시 뒤 다시"', (tester) async {
+      final repo = _Repo()..joinError = 'CAL_017';
+      await open(tester, repo);
+      await tester.enterText(
+        find.byType(EditableText),
+        '0123456789ABCDEF0123456789ABCDEF',
+      );
+      await tester.tap(findText('참여').last);
+      await tester.pumpAndSettle();
+      expect(
+        findPlain('초대 코드를 너무 많이 잘못 입력했어요. 잠시 뒤 다시 시도해주세요.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('성공 — 시트가 닫히고 스낵바', (tester) async {
