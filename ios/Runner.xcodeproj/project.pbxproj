@@ -209,6 +209,7 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				C47E496C2CB4F5413E849DE0 /* [CP] Embed Pods Frameworks */,
+				5EC5C1D0A1B2C3D4E5F60718 /* Allow Local Networking (Debug) */,
 			);
 			buildRules = (
 			);
@@ -374,6 +375,22 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		5EC5C1D0A1B2C3D4E5F60718 /* Allow Local Networking (Debug) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
+			);
+			name = "Allow Local Networking (Debug)";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# 보안 점검 CLI-5: 로컬망 HTTP 예외는 Debug 빌드에만 넣는다(로컬 도커 http://localhost 용).\n# Release·Profile 은 Info.plist 원본 그대로(예외 없음)다.\nif [ \"${CONFIGURATION}\" != \"Debug\" ]; then\n  exit 0\nfi\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Delete :NSAppTransportSecurity\" \"$PLIST\" 2>/dev/null || true\n/usr/libexec/PlistBuddy -c \"Add :NSAppTransportSecurity dict\" -c \"Add :NSAppTransportSecurity:NSAllowsLocalNetworking bool true\" \"$PLIST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
