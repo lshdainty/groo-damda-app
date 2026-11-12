@@ -54,4 +54,11 @@ class ApkVerifierTest {
             ApkVerifier.sha256Hex("abc".toByteArray()),
         )
     }
+
+    @Test
+    fun `서명을 첫 방식으로 못 읽으면 옛 방식으로 한 번 더 읽는다 — 안드로이드 9 아카이브`() {
+        assertEquals(setOf("b"), ApkVerifier.orFallback(emptySet()) { setOf("b") })
+        assertEquals(setOf("a"), ApkVerifier.orFallback(setOf("a")) { error("부르면 안 된다") })
+        assertEquals(emptySet<String>(), ApkVerifier.orFallback(emptySet()) { error("읽기 실패") })
+    }
 }

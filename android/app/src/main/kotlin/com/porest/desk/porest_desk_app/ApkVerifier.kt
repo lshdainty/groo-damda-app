@@ -32,9 +32,30 @@ object ApkVerifier {
         return decide(
             archivePackage = archive?.packageName,
             ownPackage = context.packageName,
-            archiveSigners = archive?.let(::signerDigests).orEmpty(),
+            archiveSigners = orFallback(archive?.let(::signerDigests).orEmpty()) {
+                legacyArchiveSigners(pm, path)
+            },
             ownSigners = installed?.let(::signerDigests).orEmpty(),
         )
+    }
+
+    /**
+     * 첫 값이 비었을 때만 대체 경로를 읽는다.
+     *
+     * <p>안드로이드 9(API 28)는 **아카이브 파일**에 `GET_SIGNING_CERTIFICATES` 를 줘도
+     * `signingInfo` 를 채우지 않는다(설치된 앱은 채운다, API 29 부터 아카이브도 채운다).
+     * 그대로 두면 정상 APK 도 [UNREADABLE] 로 거절돼 그 기기는 앱 안에서 업데이트할 길이
+     * 없어진다. 그래서 비었으면 옛 `GET_SIGNATURES`(`info.signatures`)로 한 번 더 읽는다.
+     * 키 교체를 쓰지 않으므로 두 방식이 같은 인증서를 돌려준다.
+     */
+    internal fun orFallback(primary: Set<String>, fallback: () -> Set<String>): Set<String> =
+        primary.ifEmpty { runCatching(fallback).getOrNull().orEmpty() }
+
+    @Suppress("DEPRECATION")
+    private fun legacyArchiveSigners(pm: PackageManager, path: String): Set<String> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return emptySet() // 이미 GET_SIGNATURES 로 읽었다
+        val info = pm.getPackageArchiveInfo(path, PackageManager.GET_SIGNATURES) ?: return emptySet()
+        return info.signatures?.map { sha256Hex(it.toByteArray()) }?.toSet().orEmpty()
     }
 
     /**
