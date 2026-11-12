@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
+import 'package:groo_damda_app/core/lock/screen_protection.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
@@ -131,9 +132,24 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
     }
   }
 
+  /// 네이티브 화면 보호에 마지막으로 보낸 값 — 같은 값을 매 빌드 다시 보내지 않는다.
+  bool? _appliedProtection;
+
+  /// 앱 잠금 · 금액 가리기 중에는 OS 쪽 화면 보호를 건다(보안 점검 CLI-5) — 덮개(Flutter)는
+  /// 백그라운드 진입 때 앱 스위처 스냅샷보다 늦게 그려질 수 있다.
+  ///
+  /// `ref.listen` 은 처음 값을 알려 주지 않고, 이 State 는 계정이 바뀌어 컨테이너가 갈려도
+  /// 살아남는다(app.dart builder 주석) — 그래서 매 빌드 지금 값을 보고 달라졌을 때만 보낸다.
+  void _syncScreenProtection(bool wanted) {
+    if (_appliedProtection == wanted) return;
+    _appliedProtection = wanted;
+    ref.read(screenProtectionProvider).apply(wanted);
+  }
+
   @override
   Widget build(BuildContext context) {
     final locked = ref.watch(appLockedProvider);
+    _syncScreenProtection(ref.watch(screenProtectionWantedProvider));
     ref.listen(appLockedProvider, (prev, next) {
       // 잠기는 순간 자동 프롬프트 — 단 포그라운드일 때만. 백그라운드 진입으로 잠긴
       // 경우는 여기서 띄우면 안 되고(화면 밖 프롬프트), resumed 핸들러가 띄운다.

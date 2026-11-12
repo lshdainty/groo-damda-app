@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import android.view.WindowManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -38,6 +39,9 @@ class MainActivity : FlutterFragmentActivity() {
         // 설치 차단 안내는 결제 감지와 무관해 채널을 따로 둔다.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_CHANNEL)
             .setMethodCallHandler { call, result -> handleDevice(call, result) }
+        // 화면 보호(보안 점검 CLI-5) — 앱 잠금 · 금액 가리기 중에는 캡처 · 녹화 · 최근 앱 미리보기를 막는다.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PRIVACY_CHANNEL)
+            .setMethodCallHandler { call, result -> handlePrivacy(call, result) }
     }
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
@@ -98,6 +102,32 @@ class MainActivity : FlutterFragmentActivity() {
                 result.success(
                     if (text == null) null else mapOf("text" to text, "id" to id)
                 )
+            }
+            else -> result.notImplemented()
+        }
+    }
+
+    /**
+     * 창에 FLAG_SECURE 를 걸거나 푼다.
+     *
+     * <p>잠금 화면 · 금액 가리기는 Flutter 가 그리는 덮개라, 앱이 나가는 순간 시스템이 찍는
+     * 최근 앱 미리보기보다 늦을 수 있다. FLAG_SECURE 가 걸린 창은 미리보기 · 스크린샷 ·
+     * 화면 녹화에 내용이 나가지 않는다. 켜고 끄는 판단은 Dart(screen_protection.dart)가 한다.
+     */
+    private fun handlePrivacy(call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            "setProtected" -> {
+                val on = call.argument<Boolean>("on")
+                if (on == null) {
+                    result.error("bad_args", "on is required", null)
+                    return
+                }
+                if (on) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                }
+                result.success(null)
             }
             else -> result.notImplemented()
         }
@@ -197,6 +227,7 @@ class MainActivity : FlutterFragmentActivity() {
     companion object {
         private const val CHANNEL = "porest/sms_android"
         private const val DEVICE_CHANNEL = "porest/device_guide"
+        private const val PRIVACY_CHANNEL = "porest/screen_privacy"
         private const val REQUEST_CODE = 6301
 
         const val EXTRA_SMS_TEXT = "porest.sms.text"
