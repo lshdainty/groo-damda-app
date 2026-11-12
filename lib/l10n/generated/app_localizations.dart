@@ -3697,6 +3697,12 @@ abstract class AppLocalizations {
   /// **'앱에서 받지 못해 브라우저로 열어요.'**
   String get updateSheetFailed;
 
+  /// No description provided for @updateApkRejected.
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 파일이 이 앱의 새 버전이 아니라서 설치하지 않았어요.'**
+  String get updateApkRejected;
+
   /// No description provided for @updateTitle.
   ///
   /// In ko, this message translates to:

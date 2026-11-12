@@ -47,6 +47,9 @@ class MainActivity : FlutterFragmentActivity() {
         // 화면 보호(보안 점검 CLI-5) — 앱 잠금 · 금액 가리기 중에는 캡처 · 녹화 · 최근 앱 미리보기를 막는다.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PRIVACY_CHANNEL)
             .setMethodCallHandler { call, result -> handlePrivacy(call, result) }
+        // 앱 업데이트 — 받은 APK 를 설치 화면에 넘기기 전에 이 앱인지 대조한다(보안 점검 CLI-3).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, UPDATE_CHANNEL)
+            .setMethodCallHandler { call, result -> handleUpdate(call, result) }
     }
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
@@ -132,6 +135,28 @@ class MainActivity : FlutterFragmentActivity() {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                 }
                 result.success(null)
+            }
+            else -> result.notImplemented()
+        }
+    }
+
+    /**
+     * 받은 APK 대조. APK 를 풀고 인증서를 해시하느라 수백 ms 가 걸릴 수 있어 UI 스레드 밖에서
+     * 하고, 결과만 UI 스레드에서 돌려준다.
+     */
+    private fun handleUpdate(call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            "verifyApk" -> {
+                val path = call.argument<String>("path")
+                if (path.isNullOrEmpty()) {
+                    result.error("bad_args", "path is required", null)
+                    return
+                }
+                val app = applicationContext
+                Thread {
+                    val verdict = ApkVerifier.verify(app, path)
+                    runOnUiThread { result.success(verdict) }
+                }.start()
             }
             else -> result.notImplemented()
         }
@@ -232,6 +257,7 @@ class MainActivity : FlutterFragmentActivity() {
         private const val CHANNEL = "porest/sms_android"
         private const val DEVICE_CHANNEL = "porest/device_guide"
         private const val PRIVACY_CHANNEL = "porest/screen_privacy"
+        private const val UPDATE_CHANNEL = "porest/app_update"
         private const val REQUEST_CODE = 6301
 
         const val EXTRA_SMS_ID = "porest.sms.id"

@@ -2027,6 +2027,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t download in the app, so we\'re opening your browser.';
 
   @override
+  String get updateApkRejected =>
+      'The downloaded file isn\'t an update for this app, so we didn\'t install it.';
+
+  @override
   String get updateTitle => 'Update';
 
   @override

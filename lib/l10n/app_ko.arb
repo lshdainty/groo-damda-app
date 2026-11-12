@@ -1212,6 +1212,7 @@
   "updateSheetDownloading": "받는 중이에요",
   "updateSheetOpening": "설치 화면을 여는 중이에요",
   "updateSheetFailed": "앱에서 받지 못해 브라우저로 열어요.",
+  "updateApkRejected": "받은 파일이 이 앱의 새 버전이 아니라서 설치하지 않았어요.",
   "updateTitle": "업데이트",
   "updateGateTitle": "새 버전 {version}이 나왔어요",
   "@updateGateTitle": {
