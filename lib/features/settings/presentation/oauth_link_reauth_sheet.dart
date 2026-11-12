@@ -40,7 +40,7 @@ Future<String?> showOAuthLinkReauthSheet(
 /// 소셜 계정 연결 **해제** 전 본인 확인 — 보안 점검 S-2 잔여.
 ///
 /// 해제도 로그인 쿠키만으로 되면, 쿠키를 쥔 사람이 본인의 구글 연결을 끊어 복구 수단을 없앤다. 연결과 같은
-/// 시트 · 같은 티켓 용도(`oauth-link`)로 확인한 뒤 시트가 해제까지 하고 `true` 를 돌려주며 닫힌다. 닫기만
+/// 시트로, 해제 전용 티켓 용도(`oauth-unlink`)로 확인한 뒤 시트가 해제까지 하고 `true` 를 돌려주며 닫힌다. 닫기만
 /// 하면 `false`. 해제가 실패하면 시트가 남아 오류를 말하고 칸을 비운다(연결과 같다). 문구는 웹
 /// `LinkReauthDialog` 해제 모드(`account.unlinkReauth.*`)와 한 벌이다.
 Future<bool> showOAuthUnlinkReauthSheet(
@@ -201,16 +201,14 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
       final reauth = await reauthFuture;
       // 매번 새 티켓을 받는다 — 단회라 앞서 실패한 연결 시작의 티켓은 다시 못 쓴다.
       final String ticket;
+      // 연결과 해제는 티켓 용도가 다르다 — 서로 바꿔 쓸 수 없게(보안 점검 S-2 잔여)
+      final purpose = widget.unlink
+          ? ReauthPurpose.oauthUnlink
+          : ReauthPurpose.oauthLink;
       try {
         ticket = method == ReauthMethod.password
-            ? await reauth.verifyPassword(
-                password,
-                purpose: ReauthPurpose.oauthLink,
-              )
-            : await reauth.verifyEmailCode(
-                code,
-                purpose: ReauthPurpose.oauthLink,
-              );
+            ? await reauth.verifyPassword(password, purpose: purpose)
+            : await reauth.verifyEmailCode(code, purpose: purpose);
       } on ApiException catch (e) {
         if (!mounted) return;
         setState(() {
