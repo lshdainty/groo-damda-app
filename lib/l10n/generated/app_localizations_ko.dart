@@ -1328,7 +1328,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calCalendarNameFieldPlaceholder => '캘린더 이름';
 
   @override
-  String get calInviteCodePlaceholder => '예: 3F9A1C2B';
+  String get calInviteCodePlaceholder => '받은 초대 코드를 붙여 넣으세요';
 
   @override
   String get calRecurrenceNone => '반복 안 함';
@@ -1621,7 +1621,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calRegenerateFailed => '초대 코드를 새로 만들지 못했어요.';
 
   @override
-  String get calInviteNone => '초대 코드 없음';
+  String get calInviteNone => '공유 꺼짐';
+
+  @override
+  String get calInviteOffHint => '초대 코드를 만들면 다른 사람이 이 캘린더에 참여할 수 있어요.';
+
+  @override
+  String get calCreateCode => '만들기';
+
+  @override
+  String get calStopSharing => '끄기';
+
+  @override
+  String get calStopSharingFailed => '초대 코드를 끄지 못했어요.';
+
+  @override
+  String get calSharingStopped => '초대 코드를 껐어요. 이미 참여한 사람은 그대로예요.';
+
+  @override
+  String get calJoinRateLimited => '초대 코드를 너무 많이 잘못 입력했어요. 잠시 뒤 다시 시도해주세요.';
 
   @override
   String get calJoinCodeRequired => '초대 코드를 입력해주세요.';

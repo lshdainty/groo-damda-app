@@ -27,8 +27,9 @@ import 'package:groo_damda_app/shared/forms/save_failure.dart';
 /// 캘린더 이름 최대 글자 수 — 서버 `FieldLimits.NAME_MAX`.
 const int kCalendarNameMax = 50;
 
-/// 초대 코드 길이 — 서버 코드는 대문자 16진 8자(`UserCalendar.java`).
-const int kInviteCodeLength = 8;
+/// 초대 코드 길이 — 서버 코드는 대문자 16진 32자(128비트, `UserCalendar.java`). 공유를 켤 때만 생긴다.
+/// 손으로 치기보다 받은 코드를 붙여 넣는 칸이다 — 섞인 공백 · 하이픈은 거르고 32자에서 멈춘다(보안 점검 DAM-4).
+const int kInviteCodeLength = 32;
 
 /// 새 캘린더 · 캘린더 이름 바꾸기 · 초대 코드로 참여(I-09b 24 · 34 · 36) — 모두 ds Bottom Sheet 입력 폼이다.
 /// 바깥 · 끌기로 닫히지 않고, 바뀐 값이 있으면 닫기 전에 "작성한 내용이 사라져요" 를 묻는다. 바닥은 버튼 하나.
@@ -452,6 +453,9 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
             _codeError = l.calJoinInvalidCode;
           case 'CAL_011':
             _codeError = l.calJoinAlreadyMember;
+          case 'CAL_017':
+            // 틀린 시도 한도(사용자 · IP 별 10분) — 잠시 뒤 다시
+            _codeError = l.calJoinRateLimited;
           default:
             _saveError = saveFailureText(l, e, l.calJoinFailed);
         }
@@ -491,7 +495,7 @@ class _JoinFormState extends ConsumerState<_JoinForm> {
                 controller: _codeCtrl,
                 focusNode: widget.codeFocus,
                 placeholder: l.calInviteCodePlaceholder,
-                // 영문 · 숫자만, 최대 8 — 보내기 전에 대문자로 바꾼다
+                // 영문 · 숫자만(붙여 넣은 공백 · 하이픈은 걸러진다), 최대 32 — 보내기 전에 대문자로 바꾼다
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
                   LengthLimitingTextInputFormatter(kInviteCodeLength),

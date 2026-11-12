@@ -212,6 +212,7 @@ class _ManageBody extends ConsumerStatefulWidget {
 
 class _ManageBodyState extends ConsumerState<_ManageBody> {
   bool _regenerating = false;
+  bool _stopping = false;
   bool _colorBusy = false;
 
   UserCalendar get cal => widget.calendar;
@@ -281,6 +282,38 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
       );
     } finally {
       if (mounted) setState(() => _regenerating = false);
+    }
+  }
+
+  Future<void> _stopSharing() async {
+    if (_stopping) return;
+    final l = AppLocalizations.of(context);
+    final snack = PSnackbar.maybeOf(context);
+    final container = ProviderScope.containerOf(context);
+    final id = cal.rowId;
+    Future<void> request() async {
+      final repo = await container.read(userCalendarRepositoryProvider.future);
+      await repo.stopSharing(id);
+      container.invalidate(userCalendarListProvider);
+      snack?.show(message: l.calSharingStopped, tone: PSnackbarTone.positive);
+    }
+
+    setState(() => _stopping = true);
+    try {
+      await request();
+    } catch (e) {
+      showConfirmFailSnackbar(
+        snack,
+        error: e,
+        message: l.calStopSharingFailed,
+        retryLabel: l.actionRetry,
+        retry: request,
+        // 응답을 못 받았다 — 코드가 지워졌을 수 있다. 다시 받아 보이는 상태를 맞춘다
+        unconfirmedMessage: unconfirmedWriteText(l, WriteKind.process),
+        onUnconfirmed: () => container.invalidate(userCalendarListProvider),
+      );
+    } finally {
+      if (mounted) setState(() => _stopping = false);
     }
   }
 
@@ -456,10 +489,11 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
           ),
           _InviteBlock(
             code: (cal.inviteCode ?? '').trim(),
-            hint: l.calInviteHint,
             regenerating: _regenerating,
+            stopping: _stopping,
             onCopy: _copyCode,
             onRegenerate: _regenerate,
+            onStop: _stopSharing,
           ),
         ],
         PListHeader(
@@ -568,20 +602,24 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
 }
 
 /// 초대 코드 덩어리 — 코드(t8 700 · 고정폭 숫자) + [복사] [새로 만들기], 아래 안내. 좁으면 버튼 묶음이 다음 줄로 내려간다.
+/// 초대 코드 — 공유를 켤 때만 있다(보안 점검 DAM-4: 새 캘린더 · 기본 캘린더는 꺼진 채 시작).
+/// 없으면 "공유 꺼짐" + [만들기], 있으면 32자 코드 + [복사] · [새로 만들기] · [끄기]. 코드는 길어 손으로 옮기기보다 복사해 보낸다.
 class _InviteBlock extends StatelessWidget {
   const _InviteBlock({
     required this.code,
-    required this.hint,
     required this.regenerating,
+    required this.stopping,
     required this.onCopy,
     required this.onRegenerate,
+    required this.onStop,
   });
 
   final String code;
-  final String hint;
   final bool regenerating;
+  final bool stopping;
   final VoidCallback onCopy;
   final VoidCallback onRegenerate;
+  final VoidCallback onStop;
 
   @override
   Widget build(BuildContext context) {
@@ -603,7 +641,7 @@ class _InviteBlock extends StatelessWidget {
             spacing: PSpacing.x3,
             runSpacing: PSpacing.x3,
             children: [
-              // 코드가 없는 캘린더(옛 캘린더 — 초대 코드 칸이 비어 있다)는 값 자리에 글, [복사] 는 숨긴다
+              // 공유가 꺼진 캘린더(코드 없음)는 값 자리에 글, [복사] · [끄기] 는 숨긴다
               if (code.isEmpty)
                 PText(
                   l.calInviteNone,
@@ -622,9 +660,10 @@ class _InviteBlock extends StatelessWidget {
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              // 버튼이 셋까지 늘어 좁은 폭 · 영어에서 한 줄을 넘칠 수 있다 — 줄을 바꿔 받는다
+              Wrap(
                 spacing: PSpacing.x2,
+                runSpacing: PSpacing.x2,
                 children: [
                   if (code.isNotEmpty)
                     PButton(
@@ -634,18 +673,29 @@ class _InviteBlock extends StatelessWidget {
                       onPressed: onCopy,
                     ),
                   PButton(
-                    label: l.calRegenerate,
+                    label: code.isEmpty ? l.calCreateCode : l.calRegenerate,
                     variant: PButtonVariant.neutralWeak,
                     size: PButtonSize.small,
                     loading: regenerating,
                     onPressed: regenerating ? null : onRegenerate,
                   ),
+                  if (code.isNotEmpty)
+                    PButton(
+                      label: l.calStopSharing,
+                      variant: PButtonVariant.neutralWeak,
+                      size: PButtonSize.small,
+                      loading: stopping,
+                      onPressed: stopping ? null : onStop,
+                    ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: PSpacing.x2),
-          Text(hint, style: PTypography.t3.copyWith(color: c.fgNeutralSubtle)),
+          PText(
+            code.isEmpty ? l.calInviteOffHint : l.calInviteHint,
+            style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+          ),
         ],
       ),
     );

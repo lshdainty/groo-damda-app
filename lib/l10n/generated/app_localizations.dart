@@ -2512,7 +2512,7 @@ abstract class AppLocalizations {
   /// No description provided for @calInviteCodePlaceholder.
   ///
   /// In ko, this message translates to:
-  /// **'예: 3F9A1C2B'**
+  /// **'받은 초대 코드를 붙여 넣으세요'**
   String get calInviteCodePlaceholder;
 
   /// No description provided for @calRecurrenceNone.
@@ -3034,8 +3034,44 @@ abstract class AppLocalizations {
   /// No description provided for @calInviteNone.
   ///
   /// In ko, this message translates to:
-  /// **'초대 코드 없음'**
+  /// **'공유 꺼짐'**
   String get calInviteNone;
+
+  /// No description provided for @calInviteOffHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 만들면 다른 사람이 이 캘린더에 참여할 수 있어요.'**
+  String get calInviteOffHint;
+
+  /// No description provided for @calCreateCode.
+  ///
+  /// In ko, this message translates to:
+  /// **'만들기'**
+  String get calCreateCode;
+
+  /// No description provided for @calStopSharing.
+  ///
+  /// In ko, this message translates to:
+  /// **'끄기'**
+  String get calStopSharing;
+
+  /// No description provided for @calStopSharingFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 끄지 못했어요.'**
+  String get calStopSharingFailed;
+
+  /// No description provided for @calSharingStopped.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 껐어요. 이미 참여한 사람은 그대로예요.'**
+  String get calSharingStopped;
+
+  /// No description provided for @calJoinRateLimited.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 너무 많이 잘못 입력했어요. 잠시 뒤 다시 시도해주세요.'**
+  String get calJoinRateLimited;
 
   /// No description provided for @calJoinCodeRequired.
   ///
