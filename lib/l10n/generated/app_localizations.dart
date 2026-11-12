@@ -6925,6 +6925,30 @@ abstract class AppLocalizations {
   /// **'계정을 연결하지 못했어요. 본인 확인부터 다시 해주세요.'**
   String get linkReauthStartFailed;
 
+  /// No description provided for @unlinkReauthTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 연결 해제'**
+  String unlinkReauthTitle(String name);
+
+  /// No description provided for @unlinkReauthIntro.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 계정 연결을 해제하려면 본인 확인이 필요해요.'**
+  String unlinkReauthIntro(String name);
+
+  /// No description provided for @unlinkReauthConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'해제하기'**
+  String get unlinkReauthConfirm;
+
+  /// No description provided for @unlinkReauthFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결을 해제하지 못했어요. 본인 확인부터 다시 해주세요.'**
+  String get unlinkReauthFailed;
+
   /// No description provided for @accountUnlinkedToast.
   ///
   /// In ko, this message translates to:

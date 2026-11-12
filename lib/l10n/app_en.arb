@@ -2142,6 +2142,24 @@
   "linkReauthConfirm": "Connect",
   "linkReauthFailed": "Couldn't confirm it's you. Please try again shortly.",
   "linkReauthStartFailed": "Couldn't connect the account. Please confirm it's you again.",
+  "unlinkReauthTitle": "Disconnect your {name} account",
+  "@unlinkReauthTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "unlinkReauthIntro": "To disconnect your {name} account, we need to confirm it's you.",
+  "@unlinkReauthIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "unlinkReauthConfirm": "Disconnect",
+  "unlinkReauthFailed": "Couldn't disconnect the account. Please confirm it's you again.",
   "accountUnlinkedToast": "Disconnected the Google account.",
   "accountSecuritiesDesc": "Connect API keys for Toss, Namu, and more",
   "accountBilling": "Subscription & Billing",

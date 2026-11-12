@@ -130,23 +130,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   Future<void> _unlink() async {
     if (_unlinking) return;
     final l = AppLocalizations.of(context);
+    // 본인 확인 먼저(보안 점검 S-2 잔여) — 시트가 확인 · 해제까지 하고, 실패 글은 시트 칸 밑에 선다(웹과 같다).
+    final unlinked = await showOAuthUnlinkReauthSheet(
+      context,
+      provider: 'google',
+      providerName: 'Google',
+    );
+    if (!unlinked || !mounted) return;
     setState(() => _unlinking = true);
-    try {
-      final repo = await ref.read(oauthLinkRepositoryProvider.future);
-      await repo.unlink('google');
-    } catch (_) {
-      // 서버 거절(마지막 로그인 수단 · 네트워크 오류 포함)은 글을 가르지 않고 고정 글 하나(웹과 같다)
-      if (mounted) {
-        setState(() => _unlinking = false);
-        // 다시 시도 — 같은 해제를 다시 요청한다(snackbar.md:71)
-        _toast(
-          l.accountUnlinkError,
-          tone: PSnackbarTone.critical,
-          action: PSnackbarAction(label: l.actionRetry, onPressed: _unlink),
-        );
-      }
-      return;
-    }
     _toast(l.accountUnlinkedToast);
     try {
       // 목록을 다시 받은 뒤 푼다 — 줄이 이전 상태로 잠깐 되돌아 보이지 않게. 다시 받기 실패는 줄이 [다시 시도] 로 말한다

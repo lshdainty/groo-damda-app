@@ -95,10 +95,19 @@ class OAuthLinkRepository {
     }
   }
 
-  /// 연동 해제. 유일한 로그인 수단이면 그루 계정이 거절한다 — 확인은 더하지 않는다.
-  Future<void> unlink(String provider) async {
+  /// 연동 해제. 유일한 로그인 수단이면 그루 계정이 거절한다.
+  ///
+  /// [reauthToken] 은 연결 시작과 같은 `oauth-link` 재인증 티켓이다(보안 점검 S-2 잔여) — 로그인
+  /// 쿠키만 쥔 사람이 본인의 구글 연결을 끊어 복구 수단을 없애지 못하게 서버가 요구한다. 단회다.
+  Future<void> unlink(String provider, {required String reauthToken}) async {
     try {
-      await _dio.delete<void>('/oauth/link/$provider', options: _quiet);
+      await _dio.delete<void>(
+        '/oauth/link/$provider',
+        options: Options(
+          extra: {kSilentErrorToast: true},
+          headers: {'X-Reauth-Token': reauthToken},
+        ),
+      );
     } catch (e, s) {
       throwAsApiException(e, s);
     }

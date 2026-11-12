@@ -3751,6 +3751,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get linkReauthStartFailed => '계정을 연결하지 못했어요. 본인 확인부터 다시 해주세요.';
 
   @override
+  String unlinkReauthTitle(String name) {
+    return '$name 연결 해제';
+  }
+
+  @override
+  String unlinkReauthIntro(String name) {
+    return '$name 계정 연결을 해제하려면 본인 확인이 필요해요.';
+  }
+
+  @override
+  String get unlinkReauthConfirm => '해제하기';
+
+  @override
+  String get unlinkReauthFailed => '연결을 해제하지 못했어요. 본인 확인부터 다시 해주세요.';
+
+  @override
   String get accountUnlinkedToast => 'Google 연결을 해제했어요.';
 
   @override

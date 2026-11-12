@@ -29,6 +29,43 @@ Future<String?> showOAuthLinkReauthSheet(
   required String provider,
   required String providerName,
   required String returnUrl,
+}) => _show(
+  context,
+  provider: provider,
+  providerName: providerName,
+  returnUrl: returnUrl,
+  unlink: false,
+);
+
+/// 소셜 계정 연결 **해제** 전 본인 확인 — 보안 점검 S-2 잔여.
+///
+/// 해제도 로그인 쿠키만으로 되면, 쿠키를 쥔 사람이 본인의 구글 연결을 끊어 복구 수단을 없앤다. 연결과 같은
+/// 시트 · 같은 티켓 용도(`oauth-link`)로 확인한 뒤 시트가 해제까지 하고 `true` 를 돌려주며 닫힌다. 닫기만
+/// 하면 `false`. 해제가 실패하면 시트가 남아 오류를 말하고 칸을 비운다(연결과 같다). 문구는 웹
+/// `LinkReauthDialog` 해제 모드(`account.unlinkReauth.*`)와 한 벌이다.
+Future<bool> showOAuthUnlinkReauthSheet(
+  BuildContext context, {
+  required String provider,
+  required String providerName,
+}) async =>
+    await _show(
+      context,
+      provider: provider,
+      providerName: providerName,
+      returnUrl: '',
+      unlink: true,
+    ) !=
+    null;
+
+/// 해제가 끝났다는 표식 — 시트가 돌려주는 값(연결은 열 주소).
+const _unlinked = 'unlinked';
+
+Future<String?> _show(
+  BuildContext context, {
+  required String provider,
+  required String providerName,
+  required String returnUrl,
+  required bool unlink,
 }) {
   final l = AppLocalizations.of(context);
   final probe = _DirtyProbe();
@@ -47,6 +84,7 @@ Future<String?> showOAuthLinkReauthSheet(
       provider: provider,
       providerName: providerName,
       returnUrl: returnUrl,
+      unlink: unlink,
     ),
   );
 }
@@ -62,8 +100,12 @@ class _LinkReauthSheet extends ConsumerStatefulWidget {
     required this.provider,
     required this.providerName,
     required this.returnUrl,
+    required this.unlink,
   });
   final _DirtyProbe probe;
+
+  /// 해제 모드 — 확인 뒤 연결 시작 대신 해제를 부른다.
+  final bool unlink;
 
   /// 서버 경로의 소문자 provider — "google".
   final String provider;
@@ -177,6 +219,26 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
         });
         return;
       }
+      if (widget.unlink) {
+        try {
+          final repo = await linkFuture;
+          await repo.unlink(widget.provider, reauthToken: ticket);
+        } on ApiException {
+          // 티켓 거절 · 마지막 로그인 수단 · 네트워크 — 티켓은 이미 썼을 수 있다. 본인 확인부터 다시(웹과 같다)
+          if (!mounted) return;
+          _passwordCtrl.clear();
+          _codeCtrl.clear();
+          setState(() {
+            _error = l.unlinkReauthFailed;
+            _submitting = false;
+          });
+          return;
+        }
+        sheet?.setBusy(false);
+        busy = false;
+        sheet?.close(_unlinked);
+        return;
+      }
       final String startUrl;
       try {
         final repo = await linkFuture;
@@ -208,8 +270,12 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return PBottomSheetContent(
-      title: l.linkReauthTitle(widget.providerName),
-      description: l.linkReauthIntro(widget.providerName),
+      title: widget.unlink
+          ? l.unlinkReauthTitle(widget.providerName)
+          : l.linkReauthTitle(widget.providerName),
+      description: widget.unlink
+          ? l.unlinkReauthIntro(widget.providerName)
+          : l.linkReauthIntro(widget.providerName),
       closeLabel: l.actionClose,
       scrollFog: false,
       body: ReauthForm(
@@ -226,7 +292,7 @@ class _LinkReauthSheetState extends ConsumerState<_LinkReauthSheet> {
       ),
       footer: [
         PButton(
-          label: l.linkReauthConfirm,
+          label: widget.unlink ? l.unlinkReauthConfirm : l.linkReauthConfirm,
           variant: PButtonVariant.neutralSolid,
           size: PButtonSize.large,
           loading: _submitting,
