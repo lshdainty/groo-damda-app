@@ -73,4 +73,9 @@ flutter {
 dependencies {
     // 위 isCoreLibraryDesugaringEnabled 와 한 쌍이다. 버전을 올릴 땐 둘을 같이 본다.
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
+    // 네이티브 단위 테스트(android/app/src/test) — `./gradlew :app:testDebugUnitTest`.
+    // org.json 은 android.jar 에 껍데기만 있어(호출하면 "not mocked") 실제 구현을 따로 단다.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }

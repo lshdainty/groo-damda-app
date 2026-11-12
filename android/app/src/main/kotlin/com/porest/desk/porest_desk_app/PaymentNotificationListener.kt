@@ -109,7 +109,7 @@ class PaymentNotificationListener : NotificationListenerService() {
 
         val launch = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra(MainActivity.EXTRA_SMS_TEXT, body)
+            // 수신함 번호만 싣는다 — 본문은 앱이 수신함에서 읽는다(보안 점검 CLI-4).
             putExtra(MainActivity.EXTRA_SMS_ID, id)
         }
         val pending = PendingIntent.getActivity(
