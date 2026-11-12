@@ -4,12 +4,9 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<!-- 개발용: localhost / 사내망 HTTP 허용. 프로덕션 빌드 전 제거 필수. -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
+	<!-- 로컬망 HTTP 예외(NSAllowsLocalNetworking)는 여기 두지 않는다 — 배포 빌드에 남는다(보안 점검 CLI-5).
+	     로컬 도커(config/local.json, http://localhost)에 붙는 개발 빌드를 위해 Debug 구성에서만
+	     Runner 의 "Allow Local Networking (Debug)" 빌드 단계가 빌드된 Info.plist 에 넣는다. -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
