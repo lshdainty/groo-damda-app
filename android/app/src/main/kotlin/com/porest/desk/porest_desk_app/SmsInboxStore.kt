@@ -68,6 +68,29 @@ object SmsInboxStore {
         }
     }
 
+    /** 수신함 항목 하나. */
+    data class Entry(val id: Long, val text: String, val receivedAt: Long)
+
+    /**
+     * 번호로 항목을 찾는다 — 알림을 눌러 들어올 때 본문을 인텐트가 아니라 여기서 읽는다.
+     * 없거나 본문이 비었으면 null.
+     */
+    fun find(context: Context, id: Long): Entry? =
+        findIn(prefs(context).getString(KEY_ENTRIES, null), id)
+
+    /** [find] 의 저장소 없는 몸통 — 저장된 JSON 문자열에서 찾는다(단위 테스트용으로 떼어 둔다). */
+    internal fun findIn(raw: String?, id: Long): Entry? {
+        val entries = parse(raw)
+        for (i in 0 until entries.length()) {
+            val o = entries.optJSONObject(i) ?: continue
+            if (o.optLong("id", -1L) != id) continue
+            val text = o.optString("text")
+            if (text.isEmpty()) return null
+            return Entry(id, text, o.optLong("receivedAt"))
+        }
+        return null
+    }
+
     fun remove(context: Context, id: Long) {
         val entries = readArray(context)
         val kept = JSONArray()
@@ -82,8 +105,11 @@ object SmsInboxStore {
         write(context, JSONArray())
     }
 
-    private fun readArray(context: Context): JSONArray {
-        val raw = prefs(context).getString(KEY_ENTRIES, null) ?: return JSONArray()
+    private fun readArray(context: Context): JSONArray =
+        parse(prefs(context).getString(KEY_ENTRIES, null))
+
+    private fun parse(raw: String?): JSONArray {
+        if (raw == null) return JSONArray()
         return runCatching { JSONArray(raw) }.getOrElse { JSONArray() }
     }
 

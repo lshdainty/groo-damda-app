@@ -26,8 +26,13 @@ import io.flutter.plugin.common.MethodChannel
  */
 class MainActivity : FlutterFragmentActivity() {
 
-    /** 알림을 눌러 들어왔을 때의 문자. Flutter 가 가져가면 비운다. */
-    private var pendingSmsText: String? = null
+    /**
+     * 알림을 눌러 들어왔을 때의 수신함 번호. Flutter 가 가져가면 비운다.
+     *
+     * <p>본문은 인텐트로 받지 않는다 — 이 화면은 런처라 외부에 열려 있어, 다른 앱이 아무 글이나
+     * 실어 보낼 수 있다(보안 점검 CLI-4). 번호만 받고 본문은 알림 리스너가 앱 저장소
+     * ([SmsInboxStore])에 남긴 것을 읽는다. 수신함에 없는 번호는 버린다.
+     */
     private var pendingSmsId: Long? = null
 
     private var permissionResult: MethodChannel.Result? = null
@@ -57,17 +62,18 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     /**
-     * 알림에서 들어온 문자를 붙잡아 둔다.
+     * 알림에서 들어온 수신함 번호를 붙잡아 둔다.
      *
      * Flutter 가 아직 붙기 전에 도착할 수 있어 바로 넘기지 못한다 —
-     * 들고 있다가 Dart 가 물어볼 때 건넨다.
+     * 들고 있다가 Dart 가 물어볼 때 건넨다. 본문은 그때 수신함에서 읽는다.
      */
     private fun capturePending(intent: Intent?) {
-        val text = intent?.getStringExtra(EXTRA_SMS_TEXT) ?: return
-        pendingSmsText = text
+        if (intent == null) return
+        // 옛 알림(본문을 싣던 빌드)이나 외부 앱이 실은 본문은 읽지 않고 지운다.
+        intent.removeExtra(LEGACY_EXTRA_SMS_TEXT)
+        if (!intent.hasExtra(EXTRA_SMS_ID)) return
         pendingSmsId = intent.getLongExtra(EXTRA_SMS_ID, -1L).takeIf { it >= 0 }
         // 화면 회전 등으로 같은 인텐트가 다시 오면 이미 처리한 문자가 되살아난다.
-        intent.removeExtra(EXTRA_SMS_TEXT)
         intent.removeExtra(EXTRA_SMS_ID)
     }
 
@@ -95,13 +101,11 @@ class MainActivity : FlutterFragmentActivity() {
                 result.success(null)
             }
             "consumePendingSms" -> {
-                val text = pendingSmsText
                 val id = pendingSmsId
-                pendingSmsText = null
                 pendingSmsId = null
-                result.success(
-                    if (text == null) null else mapOf("text" to text, "id" to id)
-                )
+                // 알림 리스너가 저장한 항목만 쓴다 — 없는 번호(지운 항목 · 지어낸 번호)는 아무것도 열지 않는다.
+                val entry = id?.let { SmsInboxStore.find(this, it) }
+                result.success(entry?.let { mapOf("text" to it.text, "id" to it.id) })
             }
             else -> result.notImplemented()
         }
@@ -230,7 +234,9 @@ class MainActivity : FlutterFragmentActivity() {
         private const val PRIVACY_CHANNEL = "porest/screen_privacy"
         private const val REQUEST_CODE = 6301
 
-        const val EXTRA_SMS_TEXT = "porest.sms.text"
         const val EXTRA_SMS_ID = "porest.sms.id"
+
+        /** 예전 알림이 본문을 싣던 키. 이제 읽지 않고 들어오면 지우기만 한다. */
+        private const val LEGACY_EXTRA_SMS_TEXT = "porest.sms.text"
     }
 }
