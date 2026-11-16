@@ -2848,6 +2848,7 @@
   "subCancelFailed": "Couldn't cancel the subscription.",
   "subNextBillingDate": "Next billing date",
   "subStartPro": "Start Pro",
+  "subStartProSoon": "Opening soon",
   "subLoadFailed": "Couldn't load your subscription",
   "subLoadFailedDesc": "Please try again in a moment.",
   "secLoadFailed": "Couldn't load your securities info",

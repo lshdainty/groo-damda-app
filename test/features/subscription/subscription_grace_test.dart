@@ -61,7 +61,14 @@ Widget _app(SubscriptionInfo? sub) => ProviderScope(
   overrides: [
     mySubscriptionProvider.overrideWith((ref) async => sub),
     subscriptionPlansProvider.overrideWith((ref) async => _plans),
-    myFeaturesProvider.overrideWith((ref) async => MyFeatures.empty),
+    // 자가 가입이 열린 서버 — Free 로 보일 때 [Pro 시작하기] 가 서는지를 본다(닫힘은 subscription_screen_test)
+    myFeaturesProvider.overrideWith(
+      (ref) async => const MyFeatures(
+        features: [],
+        connectedBrokers: [],
+        selfSignupEnabled: true,
+      ),
+    ),
   ],
   child: MaterialApp(
     theme: GrooTheme.light(),

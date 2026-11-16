@@ -5269,6 +5269,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subStartPro => 'Start Pro';
 
   @override
+  String get subStartProSoon => 'Opening soon';
+
+  @override
   String get subLoadFailed => 'Couldn\'t load your subscription';
 
   @override
