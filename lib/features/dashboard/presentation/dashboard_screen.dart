@@ -47,6 +47,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 const _tabular = [FontFeature.tabularFigures()];
 const _mask = '••••';
@@ -259,16 +260,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           // 이름도 같아서 열기 전에는 어느 쪽인지 알 길이 없다 — 홈 첫 줄에 못을 박아 둔다.
           // 운영 빌드에서는 아무것도 그리지 않는다. 보일 때만 회색 바닥 위에 위 8 · 아래 8 이다.
           if (Env.appEnv != 'prod')
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: PSpacing.x6,
-                vertical: PSpacing.x2,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: PBadge(
-                  label: Env.appEnv.toUpperCase(),
-                  tone: PBadgeTone.warning,
+            PScreenContent(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: PSpacing.x6,
+                  vertical: PSpacing.x2,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: PBadge(
+                    label: Env.appEnv.toUpperCase(),
+                    tone: PBadgeTone.warning,
+                  ),
                 ),
               ),
             ),
@@ -601,10 +604,13 @@ class _NetWorthBand extends StatelessWidget {
             ),
           ),
           const PCardHeroGlow(),
-          PCardScope(
-            variant: PCardVariant.hero,
-            body: PCardBody.content,
-            child: content,
+          // 그라데이션 바탕은 화면 끝까지, 글 · 단추는 안전 영역 안 · 넓은 화면에서 720 가운데
+          PScreenContent(
+            child: PCardScope(
+              variant: PCardVariant.hero,
+              body: PCardBody.content,
+              child: content,
+            ),
           ),
         ],
       ),

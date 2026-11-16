@@ -19,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 표시 설정 화면 — 흰 화면 하나(I-14 4-C · 14-1). 머리 = ds 상단 바(← + 제목).
 class AppearanceScreen extends StatelessWidget {
@@ -40,14 +41,16 @@ class AppearanceScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: ListView(
-        key: const ValueKey('appearance-body'),
-        // 상단 바 ↔ 첫 줄 12(T8) · 끝 24 + 안전 영역
-        padding: EdgeInsets.only(
-          top: PSpacing.x3,
-          bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
+      body: PScreenContent(
+        child: ListView(
+          key: const ValueKey('appearance-body'),
+          // 상단 바 ↔ 첫 줄 12(T8) · 끝 24 + 안전 영역
+          padding: EdgeInsets.only(
+            top: PSpacing.x3,
+            bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
+          ),
+          children: const [AppearanceSection()],
         ),
-        children: const [AppearanceSection()],
       ),
     );
   }

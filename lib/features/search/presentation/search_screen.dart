@@ -31,6 +31,7 @@ import 'package:groo_damda_app/features/expense/presentation/widgets/expense_row
 import 'package:groo_damda_app/features/expense/presentation/widgets/filter_bodies.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/ledger_day_group.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 유형 거르기 — 전체 · 지출 · 수입(서버 expenseType, 전체는 보내지 않는다).
 const String _typeAll = 'ALL';
@@ -200,44 +201,46 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         ),
       ),
-      body: PScrollAutoHide(
-        header: Padding(
-          // 칩 줄 — 위아래 6(웹 py-x1_5). 좌우 24 는 칩 줄이 스스로 둔다
-          padding: const EdgeInsets.symmetric(vertical: PSpacing.x1_5),
-          child: PChipRadioGroup<String>(
-            key: const ValueKey('search-type-chips'),
-            layout: PChipGroupLayout.scroll,
-            semanticLabel: l.searchTypeGroup,
-            value: _type,
-            onChanged: (v) {
-              setState(() => _type = v);
-              _runSearch();
-            },
-            children: [
-              for (final (value, label) in [
-                (_typeAll, l.expFilterAll),
-                ('EXPENSE', l.expFilterExpense),
-                ('INCOME', l.expFilterIncome),
-              ])
-                PChipRadio<String>(
-                  value: value,
-                  label: label,
-                  variant: PChipVariant.outlineStrong,
+      body: PScreenContent(
+        child: PScrollAutoHide(
+          header: Padding(
+            // 칩 줄 — 위아래 6(웹 py-x1_5). 좌우 24 는 칩 줄이 스스로 둔다
+            padding: const EdgeInsets.symmetric(vertical: PSpacing.x1_5),
+            child: PChipRadioGroup<String>(
+              key: const ValueKey('search-type-chips'),
+              layout: PChipGroupLayout.scroll,
+              semanticLabel: l.searchTypeGroup,
+              value: _type,
+              onChanged: (v) {
+                setState(() => _type = v);
+                _runSearch();
+              },
+              children: [
+                for (final (value, label) in [
+                  (_typeAll, l.expFilterAll),
+                  ('EXPENSE', l.expFilterExpense),
+                  ('INCOME', l.expFilterIncome),
+                ])
+                  PChipRadio<String>(
+                    value: value,
+                    label: label,
+                    variant: PChipVariant.outlineStrong,
+                  ),
+              ],
+            ),
+          ),
+          builder: (context, controller, headerHeight) => CustomScrollView(
+            controller: controller,
+            slivers: [
+              SliverPadding(padding: EdgeInsets.only(top: headerHeight)),
+              ..._body(l),
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
                 ),
+              ),
             ],
           ),
-        ),
-        builder: (context, controller, headerHeight) => CustomScrollView(
-          controller: controller,
-          slivers: [
-            SliverPadding(padding: EdgeInsets.only(top: headerHeight)),
-            ..._body(l),
-            SliverPadding(
-              padding: EdgeInsets.only(
-                bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
-              ),
-            ),
-          ],
         ),
       ),
     );

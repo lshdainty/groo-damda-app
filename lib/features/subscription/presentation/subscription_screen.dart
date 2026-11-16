@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 구독 관리 화면 — 흰 화면 하나(I-14 3-2A · 14-2). 옛 바텀시트(0.92 고정)를 대신한다.
 ///
@@ -233,206 +234,211 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              key: const ValueKey('subscription-body'),
-              padding: const EdgeInsets.only(bottom: PSpacing.x6),
-              children: [
-                if (failed)
-                  PResultSection(
-                    key: const ValueKey('subscription-failed'),
-                    kind: PResultKind.failure,
-                    size: PResultSize.medium,
-                    title: l.subLoadFailed,
-                    description: l.subLoadFailedDesc,
-                    placement: PResultPlacement.screen,
-                    primaryAction: PResultAction(
-                      label: l.actionRetry,
-                      loading: refetching,
-                      onPressed: _retry,
-                    ),
-                  )
-                else if (loading)
-                  loadingRegion(
-                    const _SkeletonRows(
-                      key: ValueKey('subscription-loading-current'),
-                      count: 1,
-                    ),
-                  )
-                else ...[
-                  // ── 지금 플랜 줄
-                  PList(
-                    children: [
-                      PListItem(
-                        key: const ValueKey('subscription-current'),
-                        prefix: const ExcludeSemantics(
-                          child: Icon(LucideIcons.sparkles),
-                        ),
-                        title: isPro ? l.subUsingPro : l.subUsingFree,
-                        detail: currentDesc,
+      body: PScreenContent(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                key: const ValueKey('subscription-body'),
+                padding: const EdgeInsets.only(bottom: PSpacing.x6),
+                children: [
+                  if (failed)
+                    PResultSection(
+                      key: const ValueKey('subscription-failed'),
+                      kind: PResultKind.failure,
+                      size: PResultSize.medium,
+                      title: l.subLoadFailed,
+                      description: l.subLoadFailedDesc,
+                      placement: PResultPlacement.screen,
+                      primaryAction: PResultAction(
+                        label: l.actionRetry,
+                        loading: refetching,
+                        onPressed: _retry,
                       ),
-                    ],
-                  ),
-                ],
-                // ── 안내 상자 — 서버 값이 아니라 늘 보인다
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    PSpacing.globalGutter,
-                    PSpacing.x2,
-                    PSpacing.globalGutter,
-                    PSpacing.x4,
-                  ),
-                  child: PCallout(
-                    key: const ValueKey('subscription-callout'),
-                    tone: PCalloutTone.informative,
-                    icon: LucideIcons.trendingUp,
-                    description: l.subSpotlightDesc,
-                  ),
-                ),
-                // 불러오는 중 — 요금 줄 둘 자리(안내 상자는 제자리에 있다)
-                if (loading)
-                  loadingRegion(
-                    const _SkeletonRows(
-                      key: ValueKey('subscription-loading-prices'),
-                      count: 2,
-                    ),
-                  ),
-                if (!failed && !loading) ...[
-                  // ── 주기 고르기 — 월간 · 연간 두 요금제가 다 있을 때만
-                  if (hasCycles)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        PSpacing.globalGutter,
-                        0,
-                        PSpacing.globalGutter,
-                        PSpacing.x4,
+                    )
+                  else if (loading)
+                    loadingRegion(
+                      const _SkeletonRows(
+                        key: ValueKey('subscription-loading-current'),
+                        count: 1,
                       ),
-                      child: PSegmentedControl<_Cycle>(
-                        semanticLabel: l.subCycleLabel,
-                        value: cycle,
-                        onChanged: _busy
-                            ? null
-                            : (v) => setState(() => _picked = v),
-                        items: [
-                          PSegmentedItem(
-                            value: _Cycle.monthly,
-                            label: l.subCycleMonthly,
+                    )
+                  else ...[
+                    // ── 지금 플랜 줄
+                    PList(
+                      children: [
+                        PListItem(
+                          key: const ValueKey('subscription-current'),
+                          prefix: const ExcludeSemantics(
+                            child: Icon(LucideIcons.sparkles),
                           ),
-                          PSegmentedItem(
-                            value: _Cycle.yearly,
-                            label: hasDiscount
-                                ? l.subCycleYearlyOff(savePct)
-                                : l.subCycleYearly,
-                          ),
-                        ],
-                      ),
+                          title: isPro ? l.subUsingPro : l.subUsingFree,
+                          detail: currentDesc,
+                        ),
+                      ],
                     ),
-                  // ── 요금 — List 줄 둘
-                  PList(
-                    children: [
-                      PListItem(
-                        key: const ValueKey('subscription-price-free'),
-                        title: 'Free',
-                        titleSuffix: isPro
-                            ? null
-                            : [PBadge(label: l.subCurrentPlan)],
-                        detail: l.subFreeCaption,
-                        suffix: PListValue.amount(
-                          krwSigned(0, false, unit: true),
-                        ),
-                      ),
-                      PListItem(
-                        key: const ValueKey('subscription-price-pro'),
-                        title: 'Pro',
-                        titleSuffix: proIsCurrent
-                            ? [PBadge(label: l.subCurrentPlan)]
-                            : null,
-                        detail: cycle == _Cycle.yearly && hasCycles
-                            ? (hasDiscount
-                                  ? l.subYearlyPerMonth(
-                                      krwSigned(
-                                        (yearly!.price! / 12).round(),
-                                        false,
-                                        unit: true,
-                                      ),
-                                      savePct,
-                                    )
-                                  : null)
-                            : l.subMonthlyBilling,
-                        suffix: planAmount == null
-                            ? null
-                            : PListValue.amount(planAmount),
-                      ),
-                    ],
-                  ),
-                ],
-                // ── 기능 비교 — 768 미만이라 표 대신 줄(table.md:139)
-                PListHeader(
-                  title: l.subFeatureCompare,
-                  variant: PListHeaderVariant.boldSolid,
-                  topInset: PSpacing.x6,
-                ),
-                PList(
-                  key: const ValueKey('subscription-features'),
-                  semanticLabel: l.subFeatureCompare,
-                  children: [
-                    for (final f in _featuresOf(l))
-                      PListItem(
-                        title: f.label,
-                        suffix: Text(
-                          f.free ? 'Free · Pro' : 'Pro',
-                          textAlign: TextAlign.end,
-                        ),
-                      ),
                   ],
-                ),
-              ],
-            ),
-          ),
-          // ── 바닥 띠 — 불러오는 중 · 실패에는 무엇을 누를지 몰라 그리지 않는다
-          if (!failed && !loading)
-            PSnackbarAvoidOverlap(
-              child: DecoratedBox(
-                key: const ValueKey('subscription-bottom'),
-                decoration: BoxDecoration(
-                  color: c.bgLayerDefault,
-                  border: Border(top: BorderSide(color: c.strokeNeutralSubtle)),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    PSpacing.globalGutter,
-                    PSpacing.x3,
-                    PSpacing.globalGutter,
-                    PSpacing.x4 + bottomInset,
+                  // ── 안내 상자 — 서버 값이 아니라 늘 보인다
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      PSpacing.globalGutter,
+                      PSpacing.x2,
+                      PSpacing.globalGutter,
+                      PSpacing.x4,
+                    ),
+                    child: PCallout(
+                      key: const ValueKey('subscription-callout'),
+                      tone: PCalloutTone.informative,
+                      icon: LucideIcons.trendingUp,
+                      description: l.subSpotlightDesc,
+                    ),
                   ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: isPro
-                        ? PButton(
-                            label: l.subCancel,
-                            variant: PButtonVariant.ghost,
-                            ghostColor: PButtonGhostColor.critical,
-                            size: PButtonSize.large,
-                            onPressed: () => _cancel(nextBill),
-                          )
-                        : PButton(
-                            label: selfSignupOpen
-                                ? l.subStartPro
-                                : l.subStartProSoon,
-                            size: PButtonSize.large,
-                            loading: _busy,
-                            // 요금제를 못 받았으면 무엇을 구독할지 모른다. 자가 가입이 닫혀 있으면 누를 수 없다
-                            onPressed: plan == null || _busy || !selfSignupOpen
-                                ? null
-                                : () => _subscribe(plan.planCode),
+                  // 불러오는 중 — 요금 줄 둘 자리(안내 상자는 제자리에 있다)
+                  if (loading)
+                    loadingRegion(
+                      const _SkeletonRows(
+                        key: ValueKey('subscription-loading-prices'),
+                        count: 2,
+                      ),
+                    ),
+                  if (!failed && !loading) ...[
+                    // ── 주기 고르기 — 월간 · 연간 두 요금제가 다 있을 때만
+                    if (hasCycles)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          PSpacing.globalGutter,
+                          0,
+                          PSpacing.globalGutter,
+                          PSpacing.x4,
+                        ),
+                        child: PSegmentedControl<_Cycle>(
+                          semanticLabel: l.subCycleLabel,
+                          value: cycle,
+                          onChanged: _busy
+                              ? null
+                              : (v) => setState(() => _picked = v),
+                          items: [
+                            PSegmentedItem(
+                              value: _Cycle.monthly,
+                              label: l.subCycleMonthly,
+                            ),
+                            PSegmentedItem(
+                              value: _Cycle.yearly,
+                              label: hasDiscount
+                                  ? l.subCycleYearlyOff(savePct)
+                                  : l.subCycleYearly,
+                            ),
+                          ],
+                        ),
+                      ),
+                    // ── 요금 — List 줄 둘
+                    PList(
+                      children: [
+                        PListItem(
+                          key: const ValueKey('subscription-price-free'),
+                          title: 'Free',
+                          titleSuffix: isPro
+                              ? null
+                              : [PBadge(label: l.subCurrentPlan)],
+                          detail: l.subFreeCaption,
+                          suffix: PListValue.amount(
+                            krwSigned(0, false, unit: true),
                           ),
+                        ),
+                        PListItem(
+                          key: const ValueKey('subscription-price-pro'),
+                          title: 'Pro',
+                          titleSuffix: proIsCurrent
+                              ? [PBadge(label: l.subCurrentPlan)]
+                              : null,
+                          detail: cycle == _Cycle.yearly && hasCycles
+                              ? (hasDiscount
+                                    ? l.subYearlyPerMonth(
+                                        krwSigned(
+                                          (yearly!.price! / 12).round(),
+                                          false,
+                                          unit: true,
+                                        ),
+                                        savePct,
+                                      )
+                                    : null)
+                              : l.subMonthlyBilling,
+                          suffix: planAmount == null
+                              ? null
+                              : PListValue.amount(planAmount),
+                        ),
+                      ],
+                    ),
+                  ],
+                  // ── 기능 비교 — 768 미만이라 표 대신 줄(table.md:139)
+                  PListHeader(
+                    title: l.subFeatureCompare,
+                    variant: PListHeaderVariant.boldSolid,
+                    topInset: PSpacing.x6,
+                  ),
+                  PList(
+                    key: const ValueKey('subscription-features'),
+                    semanticLabel: l.subFeatureCompare,
+                    children: [
+                      for (final f in _featuresOf(l))
+                        PListItem(
+                          title: f.label,
+                          suffix: Text(
+                            f.free ? 'Free · Pro' : 'Pro',
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // ── 바닥 띠 — 불러오는 중 · 실패에는 무엇을 누를지 몰라 그리지 않는다
+            if (!failed && !loading)
+              PSnackbarAvoidOverlap(
+                child: DecoratedBox(
+                  key: const ValueKey('subscription-bottom'),
+                  decoration: BoxDecoration(
+                    color: c.bgLayerDefault,
+                    border: Border(
+                      top: BorderSide(color: c.strokeNeutralSubtle),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      PSpacing.globalGutter,
+                      PSpacing.x3,
+                      PSpacing.globalGutter,
+                      PSpacing.x4 + bottomInset,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: isPro
+                          ? PButton(
+                              label: l.subCancel,
+                              variant: PButtonVariant.ghost,
+                              ghostColor: PButtonGhostColor.critical,
+                              size: PButtonSize.large,
+                              onPressed: () => _cancel(nextBill),
+                            )
+                          : PButton(
+                              label: selfSignupOpen
+                                  ? l.subStartPro
+                                  : l.subStartProSoon,
+                              size: PButtonSize.large,
+                              loading: _busy,
+                              // 요금제를 못 받았으면 무엇을 구독할지 모른다. 자가 가입이 닫혀 있으면 누를 수 없다
+                              onPressed:
+                                  plan == null || _busy || !selfSignupOpen
+                                  ? null
+                                  : () => _subscribe(plan.planCode),
+                            ),
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

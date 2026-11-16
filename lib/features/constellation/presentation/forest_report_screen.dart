@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 관측 리포트(I-11 15 ~ 21) — 상단 바 + 흰 면 하나: 주 고르기 → 날 줄 → 날짜 줄 → 관측 결과 → 별빛 모으기 → 별빛 분석 →
 /// 못다 켠 별. 주 · 날을 고르면 그 아래 전부가 바뀐다 — 조절하는 줄은 첫 내용과 한 덩어리다(틈 표 T7).
@@ -160,44 +161,46 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
           ),
         ),
       ),
-      body: ListView(
-        children: [
-          ForestWeekPicker(
-            label: rangeLabel,
-            canPrev: _week == 1,
-            canNext: _week == 0,
-            onPrev: () => _goWeek(0),
-            onNext: () => _goWeek(1),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: PSpacing.x3),
-            child: Row(
-              children: [
-                for (var i = 0; i < 7; i++)
-                  Expanded(
-                    child: _DayCell(
-                      date: days[i],
-                      dow: dows[i],
-                      isToday: _ymd(days[i]) == todayYmd,
-                      selected: _ymd(days[i]) == _sel,
-                      future: _ymd(days[i]).compareTo(todayYmd) > 0,
-                      onTap: () => setState(() => _sel = _ymd(days[i])),
+      body: PScreenContent(
+        child: ListView(
+          children: [
+            ForestWeekPicker(
+              label: rangeLabel,
+              canPrev: _week == 1,
+              canNext: _week == 0,
+              onPrev: () => _goWeek(0),
+              onNext: () => _goWeek(1),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: PSpacing.x3),
+              child: Row(
+                children: [
+                  for (var i = 0; i < 7; i++)
+                    Expanded(
+                      child: _DayCell(
+                        date: days[i],
+                        dow: dows[i],
+                        isToday: _ymd(days[i]) == todayYmd,
+                        selected: _ymd(days[i]) == _sel,
+                        future: _ymd(days[i]).compareTo(todayYmd) > 0,
+                        onTap: () => setState(() => _sel = _ymd(days[i])),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              PSpacing.x6,
-              PSpacing.x3,
-              PSpacing.x6,
-              0,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.x6,
+                PSpacing.x3,
+                PSpacing.x6,
+                0,
+              ),
+              child: _DateRow(date: selDate, showAsOf: isToday),
             ),
-            child: _DateRow(date: selDate, showAsOf: isToday),
-          ),
-          content,
-        ],
+            content,
+          ],
+        ),
       ),
     );
   }

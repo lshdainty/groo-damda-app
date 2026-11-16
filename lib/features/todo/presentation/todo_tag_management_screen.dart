@@ -8,6 +8,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/tag_settings.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 할 일 태그 관리(I-10 5A) — 설정 하위 풀스크린 화면. 본문은 메모 태그와 같은 한 부품([TagSettings])이다(I-15 24).
 /// 글과 데이터 길(할 일 태그 저장소)만 이 화면이 넘긴다. 사용 건수는 서버 집계(`usageCount`)다.
@@ -100,39 +101,47 @@ class _TodoTagManagementScreenState
           ),
         ),
       ),
-      body: TagSettings(
-        bodyKey: const ValueKey('todo-tags-body'),
-        controller: _scrollCtrl,
-        copy: _copy(l),
-        tags: list == null
-            ? null
-            : [
-                for (final t in list)
-                  TagItem(
-                    rowId: t.rowId,
-                    name: t.tagName,
-                    color: t.color,
-                    usageCount: t.usageCount,
-                  ),
-              ],
-        failed: list == null && async.loadFailed,
-        retrying: async.loadRetrying,
-        onRetry: () => ref.invalidate(todoTagListProvider),
-        create: (name, color) async {
-          final repo = await _container.read(todoTagRepositoryProvider.future);
-          await repo.create(tagName: name, color: color);
-          await _changed();
-        },
-        update: (id, name, color) async {
-          final repo = await _container.read(todoTagRepositoryProvider.future);
-          await repo.update(id: id, tagName: name, color: color);
-          await _changed();
-        },
-        remove: (id) async {
-          final repo = await _container.read(todoTagRepositoryProvider.future);
-          await repo.delete(id);
-          await _changed();
-        },
+      body: PScreenContent(
+        child: TagSettings(
+          bodyKey: const ValueKey('todo-tags-body'),
+          controller: _scrollCtrl,
+          copy: _copy(l),
+          tags: list == null
+              ? null
+              : [
+                  for (final t in list)
+                    TagItem(
+                      rowId: t.rowId,
+                      name: t.tagName,
+                      color: t.color,
+                      usageCount: t.usageCount,
+                    ),
+                ],
+          failed: list == null && async.loadFailed,
+          retrying: async.loadRetrying,
+          onRetry: () => ref.invalidate(todoTagListProvider),
+          create: (name, color) async {
+            final repo = await _container.read(
+              todoTagRepositoryProvider.future,
+            );
+            await repo.create(tagName: name, color: color);
+            await _changed();
+          },
+          update: (id, name, color) async {
+            final repo = await _container.read(
+              todoTagRepositoryProvider.future,
+            );
+            await repo.update(id: id, tagName: name, color: color);
+            await _changed();
+          },
+          remove: (id) async {
+            final repo = await _container.read(
+              todoTagRepositoryProvider.future,
+            );
+            await repo.delete(id);
+            await _changed();
+          },
+        ),
       ),
     );
   }

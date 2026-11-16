@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/pick_list.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 알림 "설정" 화면(I-15 48 ~ 54) — 흰 면 하나: 푸시 알림 스위치 줄 → "알림 종류" + 스위치 줄 일곱 → "예산 알림 기준" +
 /// Slider → "방해 금지 시간" → "소리 · 진동" → "이메일 알림". 묶음 제목은 목록 제목(boldSolid), 줄은 ds List.
@@ -55,25 +56,27 @@ class NotificationSettingsScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: prefsAsync.when(
-        // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
-        skipError: true,
-        loading: () => loadingRegionScroll(const _PrefsSkeleton()),
-        error: (e, _) => ListView(
-          children: [
-            PResultSection(
-              kind: PResultKind.failure,
-              title: l.notiSettingsLoadError,
-              description: l.notiSettingsLoadFailedDesc,
-              primaryAction: PResultAction(
-                label: l.actionRetry,
-                loading: prefsAsync.loadRetrying,
-                onPressed: () => ref.invalidate(userPreferencesProvider),
+      body: PScreenContent(
+        child: prefsAsync.when(
+          // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+          skipError: true,
+          loading: () => loadingRegionScroll(const _PrefsSkeleton()),
+          error: (e, _) => ListView(
+            children: [
+              PResultSection(
+                kind: PResultKind.failure,
+                title: l.notiSettingsLoadError,
+                description: l.notiSettingsLoadFailedDesc,
+                primaryAction: PResultAction(
+                  label: l.actionRetry,
+                  loading: prefsAsync.loadRetrying,
+                  onPressed: () => ref.invalidate(userPreferencesProvider),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          data: (prefs) => _Content(prefs: prefs, email: email),
         ),
-        data: (prefs) => _Content(prefs: prefs, email: email),
       ),
     );
   }

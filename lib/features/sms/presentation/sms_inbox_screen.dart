@@ -23,6 +23,7 @@ import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart'
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 아직 기록하지 않은 결제 알림 목록 (안드로이드). 흰 화면 하나(I-12 6-A).
 ///
@@ -155,61 +156,63 @@ class _SmsInboxScreenState extends ConsumerState<SmsInboxScreen>
           ],
         ),
       ),
-      body: PPullToRefresh(
-        onRefresh: _load,
-        child: PSwipeActionsProvider(
-          child: CustomScrollView(
-            key: const ValueKey('sms-inbox-body'),
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              // 알림 접근이 이 기능의 유일한 스위치다 — 카드사·은행 앱 푸시도,
-              // 결제 문자도 전부 이 경로로 읽는다. 꺼져 있으면 아무것도 안 들어온다.
-              // 알림 권한은 없어도 감지는 된다(수신함에 쌓인다) — 알림으로 바로
-              // 기록하러 가는 동선만 빠지므로 경고가 아니라 안내로 둔다.
-              // 상자 전체가 버튼이다(Callout actionable) — 위 16 · 좌우 24 · 아래 8 (T17 · T18)
-              if (!_notiAccess)
-                _notice(
-                  PCallout(
-                    key: const ValueKey('sms-callout-noti'),
-                    tone: PCalloutTone.warning,
-                    interaction: PCalloutInteraction.actionable,
-                    title: l.smsNotiAccessOffTitle,
-                    description: l.smsNotiAccessOffDesc,
-                    onPressed: SmsAndroid.openNotificationAccessSettings,
-                  ),
-                )
-              else if (!_granted)
-                _notice(
-                  PCallout(
-                    key: const ValueKey('sms-callout-permission'),
-                    tone: PCalloutTone.informative,
-                    interaction: PCalloutInteraction.actionable,
-                    title: l.smsPermissionOffTitle,
-                    description: l.smsPermissionOffDesc,
-                    onPressed: _requestPermission,
-                  ),
-                ),
-              if (entries != null && entries.isEmpty)
-                // 안내 상자 아래 남은 자리의 가운데 — 처음 읽는 동안(entries == null)은 비워 둔다
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: PResultSection(
-                      icon: LucideIcons.creditCard300,
-                      title: l.smsInboxEmpty,
-                      description: l.smsInboxEmptyDesc,
+      body: PScreenContent(
+        child: PPullToRefresh(
+          onRefresh: _load,
+          child: PSwipeActionsProvider(
+            child: CustomScrollView(
+              key: const ValueKey('sms-inbox-body'),
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // 알림 접근이 이 기능의 유일한 스위치다 — 카드사·은행 앱 푸시도,
+                // 결제 문자도 전부 이 경로로 읽는다. 꺼져 있으면 아무것도 안 들어온다.
+                // 알림 권한은 없어도 감지는 된다(수신함에 쌓인다) — 알림으로 바로
+                // 기록하러 가는 동선만 빠지므로 경고가 아니라 안내로 둔다.
+                // 상자 전체가 버튼이다(Callout actionable) — 위 16 · 좌우 24 · 아래 8 (T17 · T18)
+                if (!_notiAccess)
+                  _notice(
+                    PCallout(
+                      key: const ValueKey('sms-callout-noti'),
+                      tone: PCalloutTone.warning,
+                      interaction: PCalloutInteraction.actionable,
+                      title: l.smsNotiAccessOffTitle,
+                      description: l.smsNotiAccessOffDesc,
+                      onPressed: SmsAndroid.openNotificationAccessSettings,
+                    ),
+                  )
+                else if (!_granted)
+                  _notice(
+                    PCallout(
+                      key: const ValueKey('sms-callout-permission'),
+                      tone: PCalloutTone.informative,
+                      interaction: PCalloutInteraction.actionable,
+                      title: l.smsPermissionOffTitle,
+                      description: l.smsPermissionOffDesc,
+                      onPressed: _requestPermission,
                     ),
                   ),
-                )
-              else if (entries != null)
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    _buildGrouped(context, entries, now),
+                if (entries != null && entries.isEmpty)
+                  // 안내 상자 아래 남은 자리의 가운데 — 처음 읽는 동안(entries == null)은 비워 둔다
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: PResultSection(
+                        icon: LucideIcons.creditCard300,
+                        title: l.smsInboxEmpty,
+                        description: l.smsInboxEmptyDesc,
+                      ),
+                    ),
+                  )
+                else if (entries != null)
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      _buildGrouped(context, entries, now),
+                    ),
                   ),
-                ),
-              // 끝 여백 24 (T20)
-              SliverToBoxAdapter(child: SizedBox(height: bottom)),
-            ],
+                // 끝 여백 24 (T20)
+                SliverToBoxAdapter(child: SizedBox(height: bottom)),
+              ],
+            ),
           ),
         ),
       ),

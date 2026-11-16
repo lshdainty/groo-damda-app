@@ -27,6 +27,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/notification/application/notification_providers.dart';
 import 'package:groo_damda_app/features/notification/domain/notification.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 알림 목록(I-15 41 ~ 44) — 상단 바(← "알림" + ⚙ "알림 설정") → 흰 면 하나: 목록 머리 "읽지 않은 알림 N개" +
 /// 오른쪽 글 버튼 "모두 읽음" → 날짜 묶음("10월 23일 (금) · 오늘") + 줄. 바닥 고정 띠는 없다.
@@ -77,66 +78,68 @@ class NotificationScreen extends ConsumerWidget {
           ],
         ),
       ),
-      body: PPullToRefresh(
-        onRefresh: refresh,
-        child: listAsync.when(
-          // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
-          skipError: true,
-          loading: () => loadingRegionScroll(const _NotiSkeleton()),
-          error: (e, _) => ListView(
-            children: [
-              PResultSection(
-                kind: PResultKind.failure,
-                title: l.notiLoadFailed,
-                description: l.notiLoadFailedDesc,
-                primaryAction: PResultAction(
-                  label: l.actionRetry,
-                  loading: listAsync.loadRetrying,
-                  onPressed: () => ref.invalidate(notificationListProvider),
+      body: PScreenContent(
+        child: PPullToRefresh(
+          onRefresh: refresh,
+          child: listAsync.when(
+            // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+            skipError: true,
+            loading: () => loadingRegionScroll(const _NotiSkeleton()),
+            error: (e, _) => ListView(
+              children: [
+                PResultSection(
+                  kind: PResultKind.failure,
+                  title: l.notiLoadFailed,
+                  description: l.notiLoadFailedDesc,
+                  primaryAction: PResultAction(
+                    label: l.actionRetry,
+                    loading: listAsync.loadRetrying,
+                    onPressed: () => ref.invalidate(notificationListProvider),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          data: (items) {
-            if (items.isEmpty) {
+              ],
+            ),
+            data: (items) {
+              if (items.isEmpty) {
+                return ListView(
+                  children: [
+                    PResultSection(icon: LucideIcons.bell, title: l.notiEmpty),
+                  ],
+                );
+              }
+              final groups = _groupByDay(items, now);
               return ListView(
+                padding: const EdgeInsets.only(bottom: PSpacing.x6),
                 children: [
-                  PResultSection(icon: LucideIcons.bell, title: l.notiEmpty),
+                  if (unread > 0)
+                    _UnreadHead(
+                      count: unread,
+                      onMarkAll: () => _markAllRead(context, ref),
+                    ),
+                  for (var g = 0; g < groups.length; g++) ...[
+                    PListHeader(
+                      title: groups[g].label(l),
+                      // 첫 날짜 머리 위 8 · 그 뒤 묶음 위 16
+                      topInset: g == 0 ? PSpacing.x2 : PSpacing.x4,
+                    ),
+                    for (final n in groups[g].items)
+                      _NotiRow(
+                        key: ValueKey('noti-${n.rowId}'),
+                        noti: n,
+                        now: now,
+                        today: groups[g].isToday,
+                        onTap: () async {
+                          if (!n.isRead) {
+                            await _markReadOne(context, ref, n.rowId);
+                          }
+                        },
+                        onDelete: () => _delete(container, n),
+                      ),
+                  ],
                 ],
               );
-            }
-            final groups = _groupByDay(items, now);
-            return ListView(
-              padding: const EdgeInsets.only(bottom: PSpacing.x6),
-              children: [
-                if (unread > 0)
-                  _UnreadHead(
-                    count: unread,
-                    onMarkAll: () => _markAllRead(context, ref),
-                  ),
-                for (var g = 0; g < groups.length; g++) ...[
-                  PListHeader(
-                    title: groups[g].label(l),
-                    // 첫 날짜 머리 위 8 · 그 뒤 묶음 위 16
-                    topInset: g == 0 ? PSpacing.x2 : PSpacing.x4,
-                  ),
-                  for (final n in groups[g].items)
-                    _NotiRow(
-                      key: ValueKey('noti-${n.rowId}'),
-                      noti: n,
-                      now: now,
-                      today: groups[g].isToday,
-                      onTap: () async {
-                        if (!n.isRead) {
-                          await _markReadOne(context, ref, n.rowId);
-                        }
-                      },
-                      onDelete: () => _delete(container, n),
-                    ),
-                ],
-              ],
-            );
-          },
+            },
+          ),
         ),
       ),
     );

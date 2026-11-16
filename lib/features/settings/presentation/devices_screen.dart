@@ -24,6 +24,7 @@ import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// "로그인된 기기" — 계정 > 보안에서 들어온다. 흰 화면 하나(I-12 3-A).
 ///
@@ -131,92 +132,94 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
           ),
         ),
       ),
-      body: PPullToRefresh(
-        onRefresh: () async {
-          ref.invalidate(deviceSessionListProvider);
-          await ref.read(deviceSessionListProvider.future);
-        },
-        child: ListView(
-          key: const ValueKey('devices-body'),
-          padding: EdgeInsets.only(
-            bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
-          ),
-          children: [
-            // 안내 — 위 16 · 좌우 24 · 아래 8 (T8 · T9)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                PSpacing.globalGutter,
-                PSpacing.x4,
-                PSpacing.globalGutter,
-                PSpacing.x2,
-              ),
-              child: Text(
-                keepAll(l.devicesIntro),
-                key: const ValueKey('devices-intro'),
-                style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
-              ),
+      body: PScreenContent(
+        child: PPullToRefresh(
+          onRefresh: () async {
+            ref.invalidate(deviceSessionListProvider);
+            await ref.read(deviceSessionListProvider.future);
+          },
+          child: ListView(
+            key: const ValueKey('devices-body'),
+            padding: EdgeInsets.only(
+              bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
             ),
-            listAsync.when(
-              // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
-              skipError: true,
-              loading: () => loadingRegion(const _DevicesSkeleton()),
-              error: (e, _) => PResultSection(
-                kind: PResultKind.failure,
-                size: PResultSize.medium,
-                // 오류 원문은 화면에 내지 않는다
-                title: l.devicesLoadError,
-                description: l.devicesLoadErrorHint,
-                primaryAction: PResultAction(
-                  label: l.actionRetry,
-                  loading: listAsync.loadRetrying,
-                  onPressed: () => ref.invalidate(deviceSessionListProvider),
+            children: [
+              // 안내 — 위 16 · 좌우 24 · 아래 8 (T8 · T9)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  PSpacing.globalGutter,
+                  PSpacing.x4,
+                  PSpacing.globalGutter,
+                  PSpacing.x2,
+                ),
+                child: Text(
+                  keepAll(l.devicesIntro),
+                  key: const ValueKey('devices-intro'),
+                  style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
                 ),
               ),
-              data: (devices) => devices.isEmpty
-                  ? PResultSection(
-                      size: PResultSize.medium,
-                      icon: LucideIcons.monitorOff300,
-                      title: l.devicesEmpty,
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        PList(
-                          semanticLabel: l.devicesTitle,
-                          children: [
-                            for (final d in devices)
-                              _DeviceRow(
-                                device: d,
-                                now: now,
-                                busy: _revoking == d.sessionId,
-                                onRevoke: () => _revoke(d),
-                              ),
-                          ],
-                        ),
-                        // 비상 버튼이라 목록 아래에 둔다 — 위에 두면 기기 하나만
-                        // 끊으려던 손이 먼저 닿는다. 위 24 · 좌우 24 (T11)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            PSpacing.globalGutter,
-                            PSpacing.x6,
-                            PSpacing.globalGutter,
-                            0,
+              listAsync.when(
+                // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
+                skipError: true,
+                loading: () => loadingRegion(const _DevicesSkeleton()),
+                error: (e, _) => PResultSection(
+                  kind: PResultKind.failure,
+                  size: PResultSize.medium,
+                  // 오류 원문은 화면에 내지 않는다
+                  title: l.devicesLoadError,
+                  description: l.devicesLoadErrorHint,
+                  primaryAction: PResultAction(
+                    label: l.actionRetry,
+                    loading: listAsync.loadRetrying,
+                    onPressed: () => ref.invalidate(deviceSessionListProvider),
+                  ),
+                ),
+                data: (devices) => devices.isEmpty
+                    ? PResultSection(
+                        size: PResultSize.medium,
+                        icon: LucideIcons.monitorOff300,
+                        title: l.devicesEmpty,
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          PList(
+                            semanticLabel: l.devicesTitle,
+                            children: [
+                              for (final d in devices)
+                                _DeviceRow(
+                                  device: d,
+                                  now: now,
+                                  busy: _revoking == d.sessionId,
+                                  onRevoke: () => _revoke(d),
+                                ),
+                            ],
                           ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: PButton(
-                              label: l.devicesLogoutAll,
-                              variant: PButtonVariant.ghost,
-                              ghostColor: PButtonGhostColor.critical,
-                              size: PButtonSize.large,
-                              onPressed: _revokeAll,
+                          // 비상 버튼이라 목록 아래에 둔다 — 위에 두면 기기 하나만
+                          // 끊으려던 손이 먼저 닿는다. 위 24 · 좌우 24 (T11)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              PSpacing.globalGutter,
+                              PSpacing.x6,
+                              PSpacing.globalGutter,
+                              0,
+                            ),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: PButton(
+                                label: l.devicesLogoutAll,
+                                variant: PButtonVariant.ghost,
+                                ghostColor: PButtonGhostColor.critical,
+                                size: PButtonSize.large,
+                                onPressed: _revokeAll,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-            ),
-          ],
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

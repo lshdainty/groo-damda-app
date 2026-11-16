@@ -14,6 +14,7 @@ import 'package:groo_damda_app/shared/brand/groo_wordmark.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// SSO 로그인 화면 (OAuth 2.0 Authorization Code + PKCE, 시스템 브라우저 — RFC 8252).
 ///
@@ -143,41 +144,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       // 셸 밖 화면은 흰 면 하나(Q11 11B)
       backgroundColor: c.bgLayerDefault,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // 마크 — 나무 56 + 8 + 이름(5A). 이름이 화면 제목이다(머리말 1단계).
-                const Center(child: GrooWordmark.horizontal(asHeading: true)),
-                const SizedBox(height: PSpacing.x2),
-                PText(
-                  l.authLoginPrompt,
-                  textAlign: TextAlign.center,
-                  style: PTypography.t5.copyWith(color: c.fgNeutralMuted),
-                ),
-                const SizedBox(height: PSpacing.x8),
-                if (_error != null) ...[
-                  // 실패는 누른 자리 가까이 — 폼 맨 위 Callout(snackbar.md)
-                  PCallout(
-                    tone: PCalloutTone.critical,
-                    description: _error!,
-                    alert: true,
+      body: PScreenContent(
+        maxWidth: kFormMaxWidth,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 마크 — 나무 56 + 8 + 이름(5A). 이름이 화면 제목이다(머리말 1단계).
+                  const Center(child: GrooWordmark.horizontal(asHeading: true)),
+                  const SizedBox(height: PSpacing.x2),
+                  PText(
+                    l.authLoginPrompt,
+                    textAlign: TextAlign.center,
+                    style: PTypography.t5.copyWith(color: c.fgNeutralMuted),
                   ),
-                  const SizedBox(height: PSpacing.x4),
+                  const SizedBox(height: PSpacing.x8),
+                  if (_error != null) ...[
+                    // 실패는 누른 자리 가까이 — 폼 맨 위 Callout(snackbar.md)
+                    PCallout(
+                      tone: PCalloutTone.critical,
+                      description: _error!,
+                      alert: true,
+                    ),
+                    const SizedBox(height: PSpacing.x4),
+                  ],
+                  PButton(
+                    label: l.authSsoLogin,
+                    // 로딩 중에도 막지 않는다 — 막으면 회색 위에 원이 돈다(웹은 누름 색 + 원).
+                    // PButton 이 loading 중 누름을 삼킨다.
+                    onPressed: _login,
+                    loading: _busy || exchanging,
+                    size: PButtonSize.large,
+                  ),
                 ],
-                PButton(
-                  label: l.authSsoLogin,
-                  // 로딩 중에도 막지 않는다 — 막으면 회색 위에 원이 돈다(웹은 누름 색 + 원).
-                  // PButton 이 loading 중 누름을 삼킨다.
-                  onPressed: _login,
-                  loading: _busy || exchanging,
-                  size: PButtonSize.large,
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 class _SettingsItem {
   const _SettingsItem({
@@ -281,68 +282,70 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: ListView(
-        key: const ValueKey('settings-menu'),
-        // 끝 여백 24 — 흰 면 안(T3), 안전 영역은 더한다
-        padding: EdgeInsets.only(
-          bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
-        ),
-        children: [
-          // 내 정보 — 받는 동안은 Skeleton 줄, 정보가 없거나 실패면 줄을 숨긴다
-          if (user != null)
-            _AccountRow(
-              name: user.userName.isNotEmpty
-                  ? user.userName
-                  : l.accountDefaultName,
-              // 둘째 줄 = 이메일(I-12 Q1(d)), 없으면 "계정 관리"
-              detail: user.userEmail.isNotEmpty
-                  ? user.userEmail
-                  : l.settingsMenuAccountMgmt,
-              onTap: () => context.push('/account'),
-            )
-          else if (auth.isLoading)
-            loadingRegion(const _AccountRowSkeleton()),
+      body: PScreenContent(
+        child: ListView(
+          key: const ValueKey('settings-menu'),
+          // 끝 여백 24 — 흰 면 안(T3), 안전 영역은 더한다
+          padding: EdgeInsets.only(
+            bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
+          ),
+          children: [
+            // 내 정보 — 받는 동안은 Skeleton 줄, 정보가 없거나 실패면 줄을 숨긴다
+            if (user != null)
+              _AccountRow(
+                name: user.userName.isNotEmpty
+                    ? user.userName
+                    : l.accountDefaultName,
+                // 둘째 줄 = 이메일(I-12 Q1(d)), 없으면 "계정 관리"
+                detail: user.userEmail.isNotEmpty
+                    ? user.userEmail
+                    : l.settingsMenuAccountMgmt,
+                onTap: () => context.push('/account'),
+              )
+            else if (auth.isLoading)
+              loadingRegion(const _AccountRowSkeleton()),
 
-          for (final group in groups)
-            // 목록 제목 위 16 — 첫 묶음도 계정 줄 아래 16(T2)
-            Padding(
-              padding: const EdgeInsets.only(top: PSpacing.x4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  PListHeader(
-                    title: group.label,
-                    variant: PListHeaderVariant.boldSolid,
-                  ),
-                  PList(
-                    semanticLabel: group.label,
-                    children: [
-                      for (final item in group.items)
-                        item.external
-                            ? PListLinkItem(
-                                title: item.label,
-                                detail: item.desc,
-                                prefix: ExcludeSemantics(
-                                  child: Icon(item.icon),
+            for (final group in groups)
+              // 목록 제목 위 16 — 첫 묶음도 계정 줄 아래 16(T2)
+              Padding(
+                padding: const EdgeInsets.only(top: PSpacing.x4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    PListHeader(
+                      title: group.label,
+                      variant: PListHeaderVariant.boldSolid,
+                    ),
+                    PList(
+                      semanticLabel: group.label,
+                      children: [
+                        for (final item in group.items)
+                          item.external
+                              ? PListLinkItem(
+                                  title: item.label,
+                                  detail: item.desc,
+                                  prefix: ExcludeSemantics(
+                                    child: Icon(item.icon),
+                                  ),
+                                  suffix: _chevron,
+                                  onTap: () => item.onTap(context),
+                                )
+                              : PListButtonItem(
+                                  title: item.label,
+                                  detail: item.desc,
+                                  prefix: ExcludeSemantics(
+                                    child: Icon(item.icon),
+                                  ),
+                                  suffix: _chevron,
+                                  onTap: () => item.onTap(context),
                                 ),
-                                suffix: _chevron,
-                                onTap: () => item.onTap(context),
-                              )
-                            : PListButtonItem(
-                                title: item.label,
-                                detail: item.desc,
-                                prefix: ExcludeSemantics(
-                                  child: Icon(item.icon),
-                                ),
-                                suffix: _chevron,
-                                onTap: () => item.onTap(context),
-                              ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

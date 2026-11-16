@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/callout/feedback_parts.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 톤 — neutral(상태가 따로 없는 안내, 기본) · informative(새 버전 · 베타 · 권한 제한) · positive(승인됨 · 완료) ·
 /// warning(만료 임박 · 누락) · critical(연결 끊김 · 거절 · 편집 불가).
@@ -412,9 +413,12 @@ class _PPageBannerState extends State<PPageBanner> {
       return DecoratedBox(
         key: const ValueKey('page-banner-box'),
         decoration: BoxDecoration(color: background),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: _minHeight),
-          child: wrapInner == null ? inner : wrapInner(inner),
+        // 바탕은 화면 끝까지, 아이콘 · 글 · 화살표 · 닫기는 좌우 안전 영역 안
+        child: PScreenContent(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: _minHeight),
+            child: wrapInner == null ? inner : wrapInner(inner),
+          ),
         ),
       );
     }

@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
@@ -115,6 +116,13 @@ class PBottomSheetSurface extends StatelessWidget {
         final maxHeight = constraints.hasBoundedHeight
             ? constraints.maxHeight * maxHeightFactor
             : double.infinity;
+        // 좌우 안전 영역 — 시트는 가운데에 서므로 화면 끝과의 틈을 빼고 겹친 만큼만 비운다(접힌 폴더블 ·
+        // 가로로 돌린 폰에서 시트가 화면 폭을 다 쓰면 머리의 닫기가 옆 상태 칸에 들어가지 않게)
+        final screenWidth = MediaQuery.sizeOf(context).width;
+        final sheetWidth = math.min(constraints.maxWidth, kBottomSheetMaxWidth);
+        final gap = math.max(0.0, (screenWidth - sheetWidth) / 2);
+        final safeLeft = math.max(0.0, media.padding.left - gap);
+        final safeRight = math.max(0.0, media.padding.right - gap);
         return ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: kBottomSheetMaxWidth,
@@ -132,8 +140,20 @@ class PBottomSheetSurface extends StatelessWidget {
             child: Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.only(bottom: safeBottom),
-                  child: child,
+                  padding: EdgeInsets.only(
+                    left: safeLeft,
+                    right: safeRight,
+                    bottom: safeBottom,
+                  ),
+                  // 시트 안의 띠 · 본문은 다시 들이지 않는다 — 폭과 안전 영역은 시트가 정했다
+                  child: PScreenContent.handled(
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeLeft: true,
+                      removeRight: true,
+                      child: child,
+                    ),
+                  ),
                 ),
                 if (showHandle)
                   Positioned(

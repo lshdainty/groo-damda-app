@@ -36,6 +36,7 @@ import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/scroll/scroll_to_keyed.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 가계부 화면 — 백엔드 `/expenses` 직접 호출.
 class ExpenseScreen extends ConsumerStatefulWidget {
@@ -278,7 +279,9 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
   Widget build(BuildContext context) => ColoredBox(
     key: const ValueKey('expense-white-screen'),
     color: context.colors.bgLayerDefault,
-    child: PSwipeActionsProvider(child: _buildBody(context)),
+    child: PScreenContent(
+      child: PSwipeActionsProvider(child: _buildBody(context)),
+    ),
   );
 
   /// 보고 있는 달의 이체 조회 키 — 조회와 [다시 시도] 가 같은 키를 본다.
