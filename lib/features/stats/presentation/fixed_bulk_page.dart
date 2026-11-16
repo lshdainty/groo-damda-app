@@ -23,6 +23,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 거래를 고정으로 정리하는 페이지(I-08 Q5-A) — 기간 안 거래 묶음이 처음부터 길어 시트가 아니라 페이지다.
 /// 위 상단 바(← + 제목), 가운데 스크롤(설명 · 종류 · 방향 · 묶음 줄), 아래 바닥 [N건 적용] 하나. 앞 화면은 그대로 아래에 남는다.
@@ -197,10 +198,23 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
           ),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: PSpacing.x4),
-        children: [
-          if (_failed)
+      body: PScreenContent(
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: PSpacing.x4),
+          children: [
+            if (_failed)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  PSpacing.x6,
+                  PSpacing.x2,
+                  PSpacing.x6,
+                  0,
+                ),
+                child: FormErrorCallout(
+                  key: _errorKey,
+                  message: l.statsFixedBulkFailed,
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 PSpacing.x6,
@@ -208,68 +222,60 @@ class _FixedBulkPageState extends ConsumerState<FixedBulkPage> {
                 PSpacing.x6,
                 0,
               ),
-              child: FormErrorCallout(
-                key: _errorKey,
-                message: l.statsFixedBulkFailed,
+              child: Text(
+                keepAll(l.statsFixedBulkDesc(_rangeText(widget.range))),
+                style: PTypography.t3.copyWith(color: c.fgNeutralMuted),
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              PSpacing.x6,
-              PSpacing.x2,
-              PSpacing.x6,
-              0,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.x6,
+                PSpacing.x4,
+                PSpacing.x6,
+                PSpacing.x3,
+              ),
+              child: Column(
+                spacing: PSpacing.x2_5,
+                children: [
+                  PSegmentedControl<String>(
+                    value: _type,
+                    semanticLabel: l.statsFixedTrendKindAria,
+                    onChanged: (v) => setState(() {
+                      _type = v;
+                      _picked = {};
+                    }),
+                    items: [
+                      PSegmentedItem(
+                        value: 'EXPENSE',
+                        label: l.statsFixedKindExpense,
+                      ),
+                      PSegmentedItem(
+                        value: 'INCOME',
+                        label: l.statsFixedKindIncome,
+                      ),
+                    ],
+                  ),
+                  PSegmentedControl<bool>(
+                    value: _toFixed,
+                    semanticLabel: l.statsFixedBulkTargetAria,
+                    onChanged: (v) => setState(() => _toFixed = v),
+                    items: [
+                      PSegmentedItem(
+                        value: true,
+                        label: l.statsFixedBulkToFixed,
+                      ),
+                      PSegmentedItem(
+                        value: false,
+                        label: l.statsFixedBulkToVariable,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            child: Text(
-              keepAll(l.statsFixedBulkDesc(_rangeText(widget.range))),
-              style: PTypography.t3.copyWith(color: c.fgNeutralMuted),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              PSpacing.x6,
-              PSpacing.x4,
-              PSpacing.x6,
-              PSpacing.x3,
-            ),
-            child: Column(
-              spacing: PSpacing.x2_5,
-              children: [
-                PSegmentedControl<String>(
-                  value: _type,
-                  semanticLabel: l.statsFixedTrendKindAria,
-                  onChanged: (v) => setState(() {
-                    _type = v;
-                    _picked = {};
-                  }),
-                  items: [
-                    PSegmentedItem(
-                      value: 'EXPENSE',
-                      label: l.statsFixedKindExpense,
-                    ),
-                    PSegmentedItem(
-                      value: 'INCOME',
-                      label: l.statsFixedKindIncome,
-                    ),
-                  ],
-                ),
-                PSegmentedControl<bool>(
-                  value: _toFixed,
-                  semanticLabel: l.statsFixedBulkTargetAria,
-                  onChanged: (v) => setState(() => _toFixed = v),
-                  items: [
-                    PSegmentedItem(value: true, label: l.statsFixedBulkToFixed),
-                    PSegmentedItem(
-                      value: false,
-                      label: l.statsFixedBulkToVariable,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          body,
-        ],
+            body,
+          ],
+        ),
       ),
       // 바닥 버튼 하나 — 안전 영역 위에
       bottomNavigationBar: SafeArea(

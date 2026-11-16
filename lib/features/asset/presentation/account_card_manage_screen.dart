@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 계좌·카드 관리(I-17 25 ~ 33, 1-B) — 탭 없이 흰 면 하나에 종류별 묶음 한 목록.
 ///
@@ -151,44 +152,46 @@ class _AccountCardManageScreenState
           ],
         ),
       ),
-      body: PSwipeActionsProvider(
-        child: Builder(
-          builder: (context) {
-            if (loading) return loadingRegionScroll(const _ManageSkeleton());
-            if (failed) {
-              return _CenteredResult(
-                kind: PResultKind.failure,
-                title: l.assetManageLoadFailed,
-                description: l.dashFailDesc,
-                action: PResultAction(
-                  label: l.actionRetry,
-                  loading: assetsAsync.loadRetrying,
-                  onPressed: () => ref.invalidate(assetsProvider),
-                ),
+      body: PScreenContent(
+        child: PSwipeActionsProvider(
+          child: Builder(
+            builder: (context) {
+              if (loading) return loadingRegionScroll(const _ManageSkeleton());
+              if (failed) {
+                return _CenteredResult(
+                  kind: PResultKind.failure,
+                  title: l.assetManageLoadFailed,
+                  description: l.dashFailDesc,
+                  action: PResultAction(
+                    label: l.actionRetry,
+                    loading: assetsAsync.loadRetrying,
+                    onPressed: () => ref.invalidate(assetsProvider),
+                  ),
+                );
+              }
+              final raw = assetsAsync.value ?? const <Asset>[];
+              _openRequestedEdit(raw);
+              // 자산 화면과 같은 라이브 평가액(`value` — 다시 받는 동안 앞 값을 든다)으로 치환한다
+              final invMap =
+                  ref.watch(investmentValuationMapProvider).value ??
+                  const <int, InvestmentValuation>{};
+              final assets = applyLiveValuation(raw, liveValuationMap(invMap));
+              if (assets.isEmpty) {
+                // 자산 0개 — 상단 바 "추가" 가 있으니 버튼은 두지 않는다(31)
+                return _CenteredResult(
+                  kind: PResultKind.empty,
+                  icon: LucideIcons.landmark,
+                  title: l.assetEmptyState,
+                  description: l.assetManageEmptyHint,
+                );
+              }
+              return _ManageList(
+                assets: assets,
+                masked: masked,
+                originals: {for (final a in raw) a.rowId: a},
               );
-            }
-            final raw = assetsAsync.value ?? const <Asset>[];
-            _openRequestedEdit(raw);
-            // 자산 화면과 같은 라이브 평가액(`value` — 다시 받는 동안 앞 값을 든다)으로 치환한다
-            final invMap =
-                ref.watch(investmentValuationMapProvider).value ??
-                const <int, InvestmentValuation>{};
-            final assets = applyLiveValuation(raw, liveValuationMap(invMap));
-            if (assets.isEmpty) {
-              // 자산 0개 — 상단 바 "추가" 가 있으니 버튼은 두지 않는다(31)
-              return _CenteredResult(
-                kind: PResultKind.empty,
-                icon: LucideIcons.landmark,
-                title: l.assetEmptyState,
-                description: l.assetManageEmptyHint,
-              );
-            }
-            return _ManageList(
-              assets: assets,
-              masked: masked,
-              originals: {for (final a in raw) a.rowId: a},
-            );
-          },
+            },
+          ),
         ),
       ),
     );

@@ -22,6 +22,7 @@ import 'package:groo_damda_app/shared/ds/month_picker/p_month_picker.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -93,60 +94,66 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return ColoredBox(
       key: const ValueKey('calendar-band'),
       color: context.colors.bgLayerDefault,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          CalendarMonthRow(
-            month: _focused,
-            onPick: _showMonthYearPicker,
-            calendarCount: visibleCount,
-            dotColors: dotColors,
-            onFilterTap: _showFilterSheet,
-          ),
-          const CalendarWeekdayRow(),
-          Expanded(
-            // 좌우로 밀어 달을 옮긴다(예전 TableCalendar 페이지 넘김과 같은 손놀림)
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onHorizontalDragEnd: (d) {
-                final v = d.primaryVelocity ?? 0;
-                if (v.abs() < 300) return;
-                _moveMonth(v < 0 ? 1 : -1);
-              },
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    if (eventsFailed)
-                      PResultSection(
-                        kind: PResultKind.failure,
-                        title: AppLocalizations.of(context).calEventsLoadFailed,
-                        description: AppLocalizations.of(context).dashFailDesc,
-                        primaryAction: PResultAction(
-                          label: AppLocalizations.of(context).actionRetry,
-                          loading: eventsAsync.loadRetrying,
-                          onPressed: () =>
-                              ref.invalidate(monthEventsProvider(_key)),
+      child: PScreenContent(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CalendarMonthRow(
+              month: _focused,
+              onPick: _showMonthYearPicker,
+              calendarCount: visibleCount,
+              dotColors: dotColors,
+              onFilterTap: _showFilterSheet,
+            ),
+            const CalendarWeekdayRow(),
+            Expanded(
+              // 좌우로 밀어 달을 옮긴다(예전 TableCalendar 페이지 넘김과 같은 손놀림)
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onHorizontalDragEnd: (d) {
+                  final v = d.primaryVelocity ?? 0;
+                  if (v.abs() < 300) return;
+                  _moveMonth(v < 0 ? 1 : -1);
+                },
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (eventsFailed)
+                        PResultSection(
+                          kind: PResultKind.failure,
+                          title: AppLocalizations.of(
+                            context,
+                          ).calEventsLoadFailed,
+                          description: AppLocalizations.of(
+                            context,
+                          ).dashFailDesc,
+                          primaryAction: PResultAction(
+                            label: AppLocalizations.of(context).actionRetry,
+                            loading: eventsAsync.loadRetrying,
+                            onPressed: () =>
+                                ref.invalidate(monthEventsProvider(_key)),
+                          ),
+                        )
+                      else if (firstLoading)
+                        loadingRegionWithText(
+                          _CalendarGridSkeleton(month: _focused),
+                        )
+                      else
+                        CalendarMonthGrid(
+                          month: _focused,
+                          events: events,
+                          holidays: holidayMap,
+                          onDayTap: _openDayEventsSheet,
                         ),
-                      )
-                    else if (firstLoading)
-                      loadingRegionWithText(
-                        _CalendarGridSkeleton(month: _focused),
-                      )
-                    else
-                      CalendarMonthGrid(
-                        month: _focused,
-                        events: events,
-                        holidays: holidayMap,
-                        onDayTap: _openDayEventsSheet,
-                      ),
-                    // 플로팅 탭바 보상 — 마지막 주가 바 뒤로 가려지지 않게(셸 화면 공통). 틈이 아니다.
-                    SizedBox(height: bottomNavigationInset(context)),
-                  ],
+                      // 플로팅 탭바 보상 — 마지막 주가 바 뒤로 가려지지 않게(셸 화면 공통). 틈이 아니다.
+                      SizedBox(height: bottomNavigationInset(context)),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

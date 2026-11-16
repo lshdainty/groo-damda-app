@@ -17,6 +17,7 @@ import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/textarea/p_textarea.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 결제 문자를 붙여넣어 지출로 기록하는 화면. 흰 화면 하나, 버튼은 흐름 안(I-12 7-A).
 ///
@@ -153,30 +154,46 @@ class _SmsPasteScreenState extends ConsumerState<SmsPasteScreen> {
           ),
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          key: const ValueKey('sms-paste-body'),
-          padding: const EdgeInsets.only(bottom: PSpacing.x6),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 설명 — 위 16 · 좌우 24 · 아래 8
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  PSpacing.globalGutter,
-                  PSpacing.x4,
-                  PSpacing.globalGutter,
-                  PSpacing.x2,
+      body: PScreenContent(
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            key: const ValueKey('sms-paste-body'),
+            padding: const EdgeInsets.only(bottom: PSpacing.x6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 설명 — 위 16 · 좌우 24 · 아래 8
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    PSpacing.globalGutter,
+                    PSpacing.x4,
+                    PSpacing.globalGutter,
+                    PSpacing.x2,
+                  ),
+                  child: Text(
+                    keepAll(l.smsPasteDesc),
+                    semanticsLabel: l.smsPasteDesc,
+                    style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
+                  ),
                 ),
-                child: Text(
-                  keepAll(l.smsPasteDesc),
-                  semanticsLabel: l.smsPasteDesc,
-                  style: PTypography.t4.copyWith(color: c.fgNeutralSubtle),
-                ),
-              ),
-              // 서버 해석 실패 — 폼 맨 위 Callout critical(설명 아래 · 칸 위)
-              if (_serverFailed)
+                // 서버 해석 실패 — 폼 맨 위 Callout critical(설명 아래 · 칸 위)
+                if (_serverFailed)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      PSpacing.globalGutter,
+                      PSpacing.x2,
+                      PSpacing.globalGutter,
+                      0,
+                    ),
+                    child: PCallout(
+                      key: const ValueKey('sms-paste-server-failed'),
+                      tone: PCalloutTone.critical,
+                      description: l.smsParseFailed,
+                      alert: true,
+                    ),
+                  ),
+                // 칸 — 위 8(설명 아래). 인식 실패는 칸의 오류(테두리 + 글)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     PSpacing.globalGutter,
@@ -184,83 +201,69 @@ class _SmsPasteScreenState extends ConsumerState<SmsPasteScreen> {
                     PSpacing.globalGutter,
                     0,
                   ),
-                  child: PCallout(
-                    key: const ValueKey('sms-paste-server-failed'),
-                    tone: PCalloutTone.critical,
-                    description: l.smsParseFailed,
-                    alert: true,
+                  child: PField(
+                    label: l.smsPasteFieldLabel,
+                    invalid: notRecognized,
+                    errorMessage: notRecognized ? l.smsNotRecognized : null,
+                    child: PTextarea(
+                      controller: _textCtrl,
+                      placeholder: l.smsPastePlaceholder,
+                      // 최대 8줄 — 22 × 8 + 위아래 14
+                      maxHeight: 204,
+                      disabled: _parsing,
+                      // 값을 고치면 오류를 걷는다
+                      onChanged: (_) {
+                        if (_notice != null) setState(() => _notice = null);
+                      },
+                    ),
                   ),
                 ),
-              // 칸 — 위 8(설명 아래). 인식 실패는 칸의 오류(테두리 + 글)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  PSpacing.globalGutter,
-                  PSpacing.x2,
-                  PSpacing.globalGutter,
-                  0,
-                ),
-                child: PField(
-                  label: l.smsPasteFieldLabel,
-                  invalid: notRecognized,
-                  errorMessage: notRecognized ? l.smsNotRecognized : null,
-                  child: PTextarea(
-                    controller: _textCtrl,
-                    placeholder: l.smsPastePlaceholder,
-                    // 최대 8줄 — 22 × 8 + 위아래 14
-                    maxHeight: 204,
-                    disabled: _parsing,
-                    // 값을 고치면 오류를 걷는다
-                    onChanged: (_) {
-                      if (_notice != null) setState(() => _notice = null);
-                    },
+                // 취소 문자 — 오류가 아니라 안내. 칸 아래 16
+                if (_notice == _Notice.cancel)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      PSpacing.globalGutter,
+                      PSpacing.x4,
+                      PSpacing.globalGutter,
+                      0,
+                    ),
+                    child: PCallout(
+                      key: const ValueKey('sms-paste-cancel'),
+                      tone: PCalloutTone.informative,
+                      description: l.smsCancelNotice,
+                    ),
                   ),
-                ),
-              ),
-              // 취소 문자 — 오류가 아니라 안내. 칸 아래 16
-              if (_notice == _Notice.cancel)
+                // 버튼 둘 — 흐름 안. 칸(과 그 아래 글) 아래 24 · 좌우 24 · 사이 8 · 아래 24
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     PSpacing.globalGutter,
-                    PSpacing.x4,
+                    PSpacing.x6,
                     PSpacing.globalGutter,
                     0,
                   ),
-                  child: PCallout(
-                    key: const ValueKey('sms-paste-cancel'),
-                    tone: PCalloutTone.informative,
-                    description: l.smsCancelNotice,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PButton(
+                        label: l.smsPasteFromClipboard,
+                        variant: PButtonVariant.neutralWeak,
+                        size: PButtonSize.large,
+                        prefixIcon: LucideIcons.clipboard,
+                        onPressed: _parsing ? null : _pasteFromClipboard,
+                      ),
+                      const SizedBox(height: PSpacing.x2),
+                      PButton(
+                        label: l.smsPasteAction,
+                        variant: PButtonVariant.neutralSolid,
+                        size: PButtonSize.large,
+                        loading: _parsing,
+                        onPressed: _parse,
+                      ),
+                    ],
                   ),
                 ),
-              // 버튼 둘 — 흐름 안. 칸(과 그 아래 글) 아래 24 · 좌우 24 · 사이 8 · 아래 24
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  PSpacing.globalGutter,
-                  PSpacing.x6,
-                  PSpacing.globalGutter,
-                  0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    PButton(
-                      label: l.smsPasteFromClipboard,
-                      variant: PButtonVariant.neutralWeak,
-                      size: PButtonSize.large,
-                      prefixIcon: LucideIcons.clipboard,
-                      onPressed: _parsing ? null : _pasteFromClipboard,
-                    ),
-                    const SizedBox(height: PSpacing.x2),
-                    PButton(
-                      label: l.smsPasteAction,
-                      variant: PButtonVariant.neutralSolid,
-                      size: PButtonSize.large,
-                      loading: _parsing,
-                      onPressed: _parse,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

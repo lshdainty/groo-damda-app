@@ -36,6 +36,7 @@ import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/list_bleed_target.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 계정 화면 — 흰 화면 하나(I-14 1-B · 14-1).
 ///
@@ -228,138 +229,143 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
           ),
         ),
       ),
-      body: ListView(
-        key: const ValueKey('account-body'),
-        // 맨 아래 24 + 안전 영역(T5) — 흰 면이 화면 끝까지 닿는다
-        padding: EdgeInsets.only(
-          bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
-        ),
-        children: [
-          _AccountHead(
-            name: name,
-            email: user?.userEmail ?? '',
-            isPro: isSubscribed,
-            planKnown: subKnown,
-            joined: user?.joinedAt == null
-                ? null
-                : l.accountJoined(yearMonth(user!.joinedAt!)),
+      body: PScreenContent(
+        child: ListView(
+          key: const ValueKey('account-body'),
+          // 맨 아래 24 + 안전 영역(T5) — 흰 면이 화면 끝까지 닿는다
+          padding: EdgeInsets.only(
+            bottom: PSpacing.x6 + MediaQuery.paddingOf(context).bottom,
           ),
-          // ── 보안
-          _Group(
-            label: l.accountSecurity,
-            children: [
-              PListButtonItem(
-                prefix: _icon(LucideIcons.keyRound),
-                title: l.navChangePassword,
-                detail: l.accountPasswordDesc,
-                onTap: () => showPasswordChangeDialog(context),
-              ),
-              // 앱 잠금 — 로그인 세션과 별개로 앱 자체를 생체인증으로 잠근다. 켤 때만 인증을 거친다.
-              // 상태는 스위치가 말한다 — 옛 "사용 중 · 사용 안 함" 글은 걷었다.
-              PListSwitchItem(
-                prefix: _icon(LucideIcons.fingerprint),
-                title: l.appLockTitle,
-                detail: appLockBlocked ? l.appLockUnavailable : null,
-                checked: appLockOn,
-                onChanged: appLockBlocked
-                    ? null
-                    : (v) => setAppLockWithAuth(context, ref, v),
-              ),
-              // 금액 가리기 — 화면·카드 37장을 훑는 목록이라 자기 화면으로 보낸다. 몇 장을 가렸는지 줄에서 보인다.
-              PListButtonItem(
-                prefix: _icon(
-                  hiddenCount == 0 ? LucideIcons.eye : LucideIcons.eyeOff,
-                ),
-                title: l.hideAmountsTitle,
-                suffix: PListSuffix(
-                  children: [
-                    Text(
-                      '$hiddenCount / $hiddenTotal',
-                      textAlign: TextAlign.end,
-                    ),
-                    const Icon(LucideIcons.chevronRight),
-                  ],
-                ),
-                onTap: () => context.push('/settings/hide-amounts'),
-              ),
-              PListButtonItem(
-                prefix: _icon(LucideIcons.monitor),
-                title: l.accountDevices,
-                suffix: PListSuffix(
-                  children: [
-                    PText(l.accountCurrentDevice, textAlign: TextAlign.end),
-                    const Icon(LucideIcons.chevronRight),
-                  ],
-                ),
-                onTap: () => context.push('/settings/devices'),
-              ),
-            ],
-          ),
-          // ── 연결된 계정 — 연결할 수 있는 소셜은 Google 하나다(I-14 10)
-          _Group(
-            label: l.accountConnected,
-            children: [
-              _GoogleRow(
-                linking: _linking,
-                unlinking: _unlinking,
-                onLink: _link,
-                onUnlink: _unlink,
-              ),
-            ],
-          ),
-          // ── 구독·결제 — 14-1 은 지금 구독 시트를 연다(꺾쇠 없음 · 가격은 지금 값, 14-2 가 페이지 · 서버 값으로)
-          _Group(
-            label: l.accountBilling,
-            children: [
-              PListButtonItem(
-                // 설명이 두 줄을 넘을 수 있어 위에 맞춘다
-                align: PListAlign.top,
-                prefix: _icon(LucideIcons.sparkles),
-                title: '담다 Pro',
-                detail: proDesc,
-                suffix: PListSuffix(
-                  children: [?priceText, const Icon(LucideIcons.chevronRight)],
-                ),
-                onTap: () => context.push('/settings/subscription'),
-              ),
-            ],
-          ),
-          // ── 증권 데이터 연동 — 구독(Pro) 시에만. 증권사가 둘 이상이라 화면으로 분리했다.
-          if (hasSecurities)
+          children: [
+            _AccountHead(
+              name: name,
+              email: user?.userEmail ?? '',
+              isPro: isSubscribed,
+              planKnown: subKnown,
+              joined: user?.joinedAt == null
+                  ? null
+                  : l.accountJoined(yearMonth(user!.joinedAt!)),
+            ),
+            // ── 보안
             _Group(
-              label: l.subBrokerSectionTitle,
+              label: l.accountSecurity,
               children: [
                 PListButtonItem(
-                  prefix: _icon(LucideIcons.link),
-                  title: l.settingsSecuritiesLink,
-                  detail: l.accountSecuritiesDesc,
-                  suffix: const Icon(LucideIcons.chevronRight),
-                  onTap: () => context.push('/settings/securities'),
+                  prefix: _icon(LucideIcons.keyRound),
+                  title: l.navChangePassword,
+                  detail: l.accountPasswordDesc,
+                  onTap: () => showPasswordChangeDialog(context),
+                ),
+                // 앱 잠금 — 로그인 세션과 별개로 앱 자체를 생체인증으로 잠근다. 켤 때만 인증을 거친다.
+                // 상태는 스위치가 말한다 — 옛 "사용 중 · 사용 안 함" 글은 걷었다.
+                PListSwitchItem(
+                  prefix: _icon(LucideIcons.fingerprint),
+                  title: l.appLockTitle,
+                  detail: appLockBlocked ? l.appLockUnavailable : null,
+                  checked: appLockOn,
+                  onChanged: appLockBlocked
+                      ? null
+                      : (v) => setAppLockWithAuth(context, ref, v),
+                ),
+                // 금액 가리기 — 화면·카드 37장을 훑는 목록이라 자기 화면으로 보낸다. 몇 장을 가렸는지 줄에서 보인다.
+                PListButtonItem(
+                  prefix: _icon(
+                    hiddenCount == 0 ? LucideIcons.eye : LucideIcons.eyeOff,
+                  ),
+                  title: l.hideAmountsTitle,
+                  suffix: PListSuffix(
+                    children: [
+                      Text(
+                        '$hiddenCount / $hiddenTotal',
+                        textAlign: TextAlign.end,
+                      ),
+                      const Icon(LucideIcons.chevronRight),
+                    ],
+                  ),
+                  onTap: () => context.push('/settings/hide-amounts'),
+                ),
+                PListButtonItem(
+                  prefix: _icon(LucideIcons.monitor),
+                  title: l.accountDevices,
+                  suffix: PListSuffix(
+                    children: [
+                      PText(l.accountCurrentDevice, textAlign: TextAlign.end),
+                      const Icon(LucideIcons.chevronRight),
+                    ],
+                  ),
+                  onTap: () => context.push('/settings/devices'),
                 ),
               ],
             ),
-          // ── 계정 관리 — 로그아웃 · 이용 해지는 확인 · 시트를 여는 줄이라 꺾쇠가 없다
-          _Group(
-            label: l.accountManage,
-            children: [
-              PListButtonItem(
-                prefix: _icon(LucideIcons.logOut),
-                title: l.navLogout,
-                detail: l.accountLogoutDesc,
-                onTap: () => _confirmLogout(context, ref),
+            // ── 연결된 계정 — 연결할 수 있는 소셜은 Google 하나다(I-14 10)
+            _Group(
+              label: l.accountConnected,
+              children: [
+                _GoogleRow(
+                  linking: _linking,
+                  unlinking: _unlinking,
+                  onLink: _link,
+                  onUnlink: _unlink,
+                ),
+              ],
+            ),
+            // ── 구독·결제 — 14-1 은 지금 구독 시트를 연다(꺾쇠 없음 · 가격은 지금 값, 14-2 가 페이지 · 서버 값으로)
+            _Group(
+              label: l.accountBilling,
+              children: [
+                PListButtonItem(
+                  // 설명이 두 줄을 넘을 수 있어 위에 맞춘다
+                  align: PListAlign.top,
+                  prefix: _icon(LucideIcons.sparkles),
+                  title: '담다 Pro',
+                  detail: proDesc,
+                  suffix: PListSuffix(
+                    children: [
+                      ?priceText,
+                      const Icon(LucideIcons.chevronRight),
+                    ],
+                  ),
+                  onTap: () => context.push('/settings/subscription'),
+                ),
+              ],
+            ),
+            // ── 증권 데이터 연동 — 구독(Pro) 시에만. 증권사가 둘 이상이라 화면으로 분리했다.
+            if (hasSecurities)
+              _Group(
+                label: l.subBrokerSectionTitle,
+                children: [
+                  PListButtonItem(
+                    prefix: _icon(LucideIcons.link),
+                    title: l.settingsSecuritiesLink,
+                    detail: l.accountSecuritiesDesc,
+                    suffix: const Icon(LucideIcons.chevronRight),
+                    onTap: () => context.push('/settings/securities'),
+                  ),
+                ],
               ),
-              PListButtonItem(
-                prefix: _icon(LucideIcons.trash2, color: c.fgCritical),
-                title: l.accountWithdraw,
-                titleColor: c.fgCritical,
-                detail: l.accountWithdrawDesc,
-                onTap: () => showWithdrawalSheet(context),
-              ),
-            ],
-          ),
-          // 앱 버전 — 화면 맨 아래에 조용히 둔다. 스토어를 안 거치니 지금 깔린 게 어느 빌드인지 알 데가 여기밖에 없다.
-          const _AppVersionLine(),
-        ],
+            // ── 계정 관리 — 로그아웃 · 이용 해지는 확인 · 시트를 여는 줄이라 꺾쇠가 없다
+            _Group(
+              label: l.accountManage,
+              children: [
+                PListButtonItem(
+                  prefix: _icon(LucideIcons.logOut),
+                  title: l.navLogout,
+                  detail: l.accountLogoutDesc,
+                  onTap: () => _confirmLogout(context, ref),
+                ),
+                PListButtonItem(
+                  prefix: _icon(LucideIcons.trash2, color: c.fgCritical),
+                  title: l.accountWithdraw,
+                  titleColor: c.fgCritical,
+                  detail: l.accountWithdrawDesc,
+                  onTap: () => showWithdrawalSheet(context),
+                ),
+              ],
+            ),
+            // 앱 버전 — 화면 맨 아래에 조용히 둔다. 스토어를 안 거치니 지금 깔린 게 어느 빌드인지 알 데가 여기밖에 없다.
+            const _AppVersionLine(),
+          ],
+        ),
       ),
     );
   }

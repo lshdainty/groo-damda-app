@@ -40,6 +40,7 @@ import 'package:groo_damda_app/shared/scroll/hold_ids.dart';
 import 'package:groo_damda_app/shared/scroll/scroll_to_keyed.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 같은 줄의 두 번째 완료 누름을 무시하는 시간 — 따닥 막기(웹 `DOUBLE_CLICK_GUARD_MS`). 붙들기([kListHold] 700)보다 짧아야 한다.
 const Duration kTodoDoubleTapGuard = Duration(milliseconds: 600);
@@ -339,22 +340,24 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
           ),
         ),
       ),
-      body: Stack(
-        key: const ValueKey('todo-white-screen'),
-        children: [
-          PSwipeActionsProvider(
-            child: _layout(
-              all: all == null ? null : [for (final x in all) _effective(x)],
-              failed: failed,
+      body: PScreenContent(
+        child: Stack(
+          key: const ValueKey('todo-white-screen'),
+          children: [
+            PSwipeActionsProvider(
+              child: _layout(
+                all: all == null ? null : [for (final x in all) _effective(x)],
+                failed: failed,
+              ),
             ),
-          ),
-          // 떠 있는 [+] — 추가 시트를 연다(빠른 입력칸은 두지 않는다, 09-08).
-          PFloatingActionButton(
-            icon: LucideIcons.plus500,
-            label: l.todoAdd,
-            onPressed: () => showTodoEditDialog(context),
-          ),
-        ],
+            // 떠 있는 [+] — 추가 시트를 연다(빠른 입력칸은 두지 않는다, 09-08).
+            PFloatingActionButton(
+              icon: LucideIcons.plus500,
+              label: l.todoAdd,
+              onPressed: () => showTodoEditDialog(context),
+            ),
+          ],
+        ),
       ),
     );
   }

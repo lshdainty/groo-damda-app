@@ -25,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/swipe_actions/p_swipe_actions.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 메모 폰 화면(I-15 5 ~ 12) — 흰 면 하나: 상단 바(← "메모") → 밑줄형 검색칸 → 태그 칩 줄(가로로 밀림) → "고정 · N" + 줄 →
 /// "모든 메모 · N" + 줄 → 떠 있는 [+](메모 추가). 띠 · 카드 · 줄 사이 선이 없고 흰 면이 화면 아래 끝까지 닿는다.
@@ -161,77 +162,79 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
           ),
         ),
       ),
-      body: Stack(
-        key: const ValueKey('memo-white-screen'),
-        children: [
-          PSwipeActionsProvider(
-            child: PPullToRefresh(
-              onRefresh: _refresh,
-              child: ListView(
-                // 아래 96 은 떠 있는 [+] 가 마지막 줄을 가리지 않게 하는 흰 면 안 여백
-                padding: const EdgeInsets.only(bottom: 96),
-                children: [
-                  // 검색칸 — 밑줄형 large. 흰 면 안 위 4 · 좌우 24
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      PSpacing.globalGutter,
-                      PSpacing.x1,
-                      PSpacing.globalGutter,
-                      0,
-                    ),
-                    child: PInput(
-                      variant: PInputVariant.underline,
-                      placeholder: l.memoSearchHint,
-                      semanticLabel: l.memoSearchHint,
-                      prefixIcon: LucideIcons.search,
-                      clearable: true,
-                      textInputAction: TextInputAction.search,
-                      onChanged: (v) => setState(() => _query = v),
-                    ),
-                  ),
-                  if (!failed && !loading && all!.isNotEmpty)
-                    // 칩 줄 — 위 12 · 아래 4. 한 줄로 가로로 밀린다
+      body: PScreenContent(
+        child: Stack(
+          key: const ValueKey('memo-white-screen'),
+          children: [
+            PSwipeActionsProvider(
+              child: PPullToRefresh(
+                onRefresh: _refresh,
+                child: ListView(
+                  // 아래 96 은 떠 있는 [+] 가 마지막 줄을 가리지 않게 하는 흰 면 안 여백
+                  padding: const EdgeInsets.only(bottom: 96),
+                  children: [
+                    // 검색칸 — 밑줄형 large. 흰 면 안 위 4 · 좌우 24
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: PSpacing.x3,
-                        bottom: PSpacing.x1,
+                      padding: const EdgeInsets.fromLTRB(
+                        PSpacing.globalGutter,
+                        PSpacing.x1,
+                        PSpacing.globalGutter,
+                        0,
                       ),
-                      child: PChipRadioGroup<String>(
-                        layout: PChipGroupLayout.scroll,
-                        semanticLabel: l.memoTagFilter,
-                        value: _tagFilter,
-                        onChanged: (v) => setState(() => _tagFilter = v),
-                        children: [
-                          PChipRadio<String>(
-                            value: kMemoAllKey,
-                            label: l.memoAllChip,
-                            count: all.length,
-                            variant: PChipVariant.outlineStrong,
-                            size: PChipSize.small,
-                          ),
-                          for (final chip in chips)
+                      child: PInput(
+                        variant: PInputVariant.underline,
+                        placeholder: l.memoSearchHint,
+                        semanticLabel: l.memoSearchHint,
+                        prefixIcon: LucideIcons.search,
+                        clearable: true,
+                        textInputAction: TextInputAction.search,
+                        onChanged: (v) => setState(() => _query = v),
+                      ),
+                    ),
+                    if (!failed && !loading && all!.isNotEmpty)
+                      // 칩 줄 — 위 12 · 아래 4. 한 줄로 가로로 밀린다
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: PSpacing.x3,
+                          bottom: PSpacing.x1,
+                        ),
+                        child: PChipRadioGroup<String>(
+                          layout: PChipGroupLayout.scroll,
+                          semanticLabel: l.memoTagFilter,
+                          value: _tagFilter,
+                          onChanged: (v) => setState(() => _tagFilter = v),
+                          children: [
                             PChipRadio<String>(
-                              value: chip.key,
-                              label: memoTagLabel(l, chip.key),
-                              count: chip.count,
+                              value: kMemoAllKey,
+                              label: l.memoAllChip,
+                              count: all.length,
                               variant: PChipVariant.outlineStrong,
                               size: PChipSize.small,
                             ),
-                        ],
+                            for (final chip in chips)
+                              PChipRadio<String>(
+                                value: chip.key,
+                                label: memoTagLabel(l, chip.key),
+                                count: chip.count,
+                                variant: PChipVariant.outlineStrong,
+                                size: PChipSize.small,
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  body,
-                ],
+                    body,
+                  ],
+                ),
               ),
             ),
-          ),
-          // 떠 있는 [+] — 추가 폼을 연다
-          PFloatingActionButton(
-            icon: LucideIcons.plus500,
-            label: l.memoNew,
-            onPressed: () => showMemoEditDialog(context),
-          ),
-        ],
+            // 떠 있는 [+] — 추가 폼을 연다
+            PFloatingActionButton(
+              icon: LucideIcons.plus500,
+              label: l.memoNew,
+              onPressed: () => showMemoEditDialog(context),
+            ),
+          ],
+        ),
       ),
     );
   }

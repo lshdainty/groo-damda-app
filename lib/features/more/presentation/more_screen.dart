@@ -15,6 +15,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 class _NavItem {
   const _NavItem({
@@ -230,95 +231,97 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       key: const ValueKey('more-face'),
       // 흰 화면 하나 — 셸 바닥 위를 남은 높이까지 채운다
       color: context.colors.bgLayerDefault,
-      child: ListView(
-        // 하단 — 플로팅 탭바 자리는 흰 면 안(T7)
-        padding: EdgeInsets.only(bottom: bottomNavigationInset(context)),
-        children: [
-          // 메뉴 검색 — 밑줄 40, 좌우 24, 위 4(T4)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              PSpacing.globalGutter,
-              PSpacing.x1,
-              PSpacing.globalGutter,
-              0,
+      child: PScreenContent(
+        child: ListView(
+          // 하단 — 플로팅 탭바 자리는 흰 면 안(T7)
+          padding: EdgeInsets.only(bottom: bottomNavigationInset(context)),
+          children: [
+            // 메뉴 검색 — 밑줄 40, 좌우 24, 위 4(T4)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                PSpacing.globalGutter,
+                PSpacing.x1,
+                PSpacing.globalGutter,
+                0,
+              ),
+              child: PInput(
+                variant: PInputVariant.underline,
+                placeholder: l.moreSearchHint,
+                semanticLabel: l.moreSearchHint,
+                prefixIcon: LucideIcons.search,
+                clearable: true,
+                controller: _ctrl,
+                focusNode: _searchFocus,
+                textInputAction: TextInputAction.search,
+                onChanged: (v) => setState(() => _query = v),
+              ),
             ),
-            child: PInput(
-              variant: PInputVariant.underline,
-              placeholder: l.moreSearchHint,
-              semanticLabel: l.moreSearchHint,
-              prefixIcon: LucideIcons.search,
-              clearable: true,
-              controller: _ctrl,
-              focusNode: _searchFocus,
-              textInputAction: TextInputAction.search,
-              onChanged: (v) => setState(() => _query = v),
-            ),
-          ),
-          if (isSearching && visible.isEmpty)
-            PResultSection(
-              size: PResultSize.medium,
-              icon: LucideIcons.searchX300,
-              title: l.moreSearchEmpty,
-            )
-          else
-            for (int gi = 0; gi < visible.length; gi++)
-              // 첫 묶음 위 8(검색과 한 덩어리) · 나머지 위 16 (T5 · T6)
-              Padding(
-                padding: EdgeInsets.only(
-                  top: gi == 0 ? PSpacing.x2 : PSpacing.x4,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    PListHeader(
-                      title: visible[gi].label,
-                      variant: PListHeaderVariant.boldSolid,
-                    ),
-                    Semantics(
-                      container: true,
-                      explicitChildNodes: true,
-                      label: visible[gi].label,
-                      child: Padding(
-                        // 격자 좌우 12 + 칸 안 12 = 글 시작 24
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: PSpacing.x3,
-                        ),
-                        child: Column(
-                          children: [
-                            for (
-                              int r = 0;
-                              r < visible[gi].items.length;
-                              r += 2
-                            )
-                              // 같은 행 두 칸은 높은 쪽에 맞춘다
-                              IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(
-                                      child: _GridCell(
-                                        item: visible[gi].items[r],
+            if (isSearching && visible.isEmpty)
+              PResultSection(
+                size: PResultSize.medium,
+                icon: LucideIcons.searchX300,
+                title: l.moreSearchEmpty,
+              )
+            else
+              for (int gi = 0; gi < visible.length; gi++)
+                // 첫 묶음 위 8(검색과 한 덩어리) · 나머지 위 16 (T5 · T6)
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: gi == 0 ? PSpacing.x2 : PSpacing.x4,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PListHeader(
+                        title: visible[gi].label,
+                        variant: PListHeaderVariant.boldSolid,
+                      ),
+                      Semantics(
+                        container: true,
+                        explicitChildNodes: true,
+                        label: visible[gi].label,
+                        child: Padding(
+                          // 격자 좌우 12 + 칸 안 12 = 글 시작 24
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: PSpacing.x3,
+                          ),
+                          child: Column(
+                            children: [
+                              for (
+                                int r = 0;
+                                r < visible[gi].items.length;
+                                r += 2
+                              )
+                                // 같은 행 두 칸은 높은 쪽에 맞춘다
+                                IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        child: _GridCell(
+                                          item: visible[gi].items[r],
+                                        ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: r + 1 < visible[gi].items.length
-                                          ? _GridCell(
-                                              item: visible[gi].items[r + 1],
-                                            )
-                                          : const SizedBox.shrink(),
-                                    ),
-                                  ],
+                                      Expanded(
+                                        child: r + 1 < visible[gi].items.length
+                                            ? _GridCell(
+                                                item: visible[gi].items[r + 1],
+                                              )
+                                            : const SizedBox.shrink(),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-        ],
+          ],
+        ),
       ),
     );
   }

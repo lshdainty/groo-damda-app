@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 띠 사이 간격 — 회색 바닥이 8 만큼 비친다(SEED Divider "강함"). 맨 위 · 맨 아래에는 두지 않는다(I-05 74).
 const double kScreenBandGap = PSpacing.x2;
@@ -9,6 +10,8 @@ const double kScreenBandGap = PSpacing.x2;
 const double kScreenBandPaddingTop = PSpacing.x1;
 const double kScreenBandPaddingBottom = PSpacing.x2;
 
+/// 바탕은 화면 끝까지, 내용은 [PScreenContent] 로 좌우 안전 영역 안 · 넓은 화면에서 720 가운데에 둔다.
+///
 /// 화면 폭 흰 띠(`bg-layer-default`) 하나 — 띠 화면(설정 · 전체 · 캘린더 · 알림 · 폼)이 묶음마다 이것을 둔다.
 /// 바닥은 `bg-layer-basement` 이고 띠는 그 위에 8 띄워 쌓인다([PScreenBands]). 띠 안은 위 4 · 아래 8 이며 좌우는
 /// 안의 내용이 정한다(화면 가장자리 24). 숫자 · 그림 구역은 안쪽 24 를 가진 [PScreenSection] 이고,
@@ -30,7 +33,7 @@ class PScreenBand extends StatelessWidget {
             top: kScreenBandPaddingTop,
             bottom: kScreenBandPaddingBottom,
           ),
-          child: child,
+          child: PScreenContent(child: child),
         ),
       ),
     );
@@ -72,7 +75,9 @@ class PScreenSection extends StatelessWidget {
       color: context.colors.bgLayerDefault,
       child: SizedBox(
         width: double.infinity,
-        child: Padding(padding: padding, child: child),
+        child: PScreenContent(
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
   }
@@ -90,7 +95,10 @@ class PScreenBandBody extends StatelessWidget {
     return ColoredBox(
       key: const ValueKey('screen-band-body'),
       color: context.colors.bgLayerDefault,
-      child: SizedBox(width: double.infinity, child: child),
+      child: SizedBox(
+        width: double.infinity,
+        child: PScreenContent(child: child),
+      ),
     );
   }
 }
