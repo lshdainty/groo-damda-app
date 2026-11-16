@@ -37,6 +37,13 @@ class _FakeRepo extends SubscriptionRepository {
   }
 }
 
+/// 자가 가입이 열린 서버 — 시작 단추 시험의 기준. 닫힘 · 옛 서버는 아래 묶음이 따로 본다.
+const _openSignup = MyFeatures(
+  features: [],
+  connectedBrokers: [],
+  selfSignupEnabled: true,
+);
+
 String _end() {
   final iso = DateTime.now()
       .toUtc()
@@ -49,6 +56,7 @@ Future<_FakeRepo> _open(
   WidgetTester tester, {
   required List<SubscriptionPlanInfo> plans,
   SubscriptionInfo? sub,
+  MyFeatures features = _openSignup,
 }) async {
   tester.view.physicalSize = const Size(390 * 3, 1600 * 3);
   tester.view.devicePixelRatio = 3.0;
@@ -60,7 +68,7 @@ Future<_FakeRepo> _open(
         subscriptionRepositoryProvider.overrideWith((ref) async => repo),
         mySubscriptionProvider.overrideWith((ref) async => sub),
         subscriptionPlansProvider.overrideWith((ref) async => plans),
-        myFeaturesProvider.overrideWith((ref) async => MyFeatures.empty),
+        myFeaturesProvider.overrideWith((ref) async => features),
       ],
       child: MaterialApp(
         theme: GrooTheme.light(),
@@ -161,5 +169,54 @@ void main() {
     await _open(tester, plans: const []);
     expect(findPlain(l.subLoadFailed), findsOneWidget);
     expect(findText(l.subStartPro), findsNothing);
+  });
+
+  group('자가 가입 닫힘 — 결제 연동 전, 서버 설정이 연다', () {
+    testWidgets('닫혀 있으면 [추후 열릴 예정이에요] 로 막히고 눌러도 구독하지 않는다', (tester) async {
+      final repo = await _open(
+        tester,
+        plans: [_monthly, _yearly],
+        features: MyFeatures.empty,
+      );
+      expect(findText(l.subStartPro), findsNothing);
+      expect(findText(l.subStartProSoon), findsOneWidget);
+      await tester.tap(findText(l.subStartProSoon), warnIfMissed: false);
+      await tester.pumpAndSettle();
+      expect(repo.sent, isNull);
+    });
+
+    test('옛 서버 응답(값 없음)은 닫힘, true 일 때만 열림', () {
+      expect(
+        MyFeatures.fromJson(const {'features': []}).selfSignupEnabled,
+        isFalse,
+      );
+      expect(
+        MyFeatures.fromJson(const {
+          'features': [],
+          'subscriptionSelfSignupEnabled': true,
+        }).selfSignupEnabled,
+        isTrue,
+      );
+      expect(MyFeatures.empty.selfSignupEnabled, isFalse);
+    });
+
+    testWidgets('닫혀 있어도 이미 Pro 인 사람은 [구독 해지] 를 그대로 본다', (tester) async {
+      await _open(
+        tester,
+        plans: [_monthly, _yearly],
+        features: MyFeatures.empty,
+        sub: SubscriptionInfo(
+          planCode: 'M',
+          planName: '담다 Pro',
+          status: 'ACTIVE',
+          currentPeriodEnd: _end(),
+          autoRenew: true,
+          price: 9900,
+          durationMonths: 1,
+        ),
+      );
+      expect(findText(l.subCancel), findsOneWidget);
+      expect(findText(l.subStartProSoon), findsNothing);
+    });
   });
 }

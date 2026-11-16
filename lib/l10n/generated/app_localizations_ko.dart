@@ -5142,6 +5142,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get subStartPro => 'Pro 시작하기';
 
   @override
+  String get subStartProSoon => '추후 열릴 예정이에요';
+
+  @override
   String get subLoadFailed => '구독 정보를 불러오지 못했어요';
 
   @override

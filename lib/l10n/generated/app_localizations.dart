@@ -9493,6 +9493,12 @@ abstract class AppLocalizations {
   /// **'Pro 시작하기'**
   String get subStartPro;
 
+  /// No description provided for @subStartProSoon.
+  ///
+  /// In ko, this message translates to:
+  /// **'추후 열릴 예정이에요'**
+  String get subStartProSoon;
+
   /// No description provided for @subLoadFailed.
   ///
   /// In ko, this message translates to:

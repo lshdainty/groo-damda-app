@@ -158,6 +158,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     final plans = plansAsync.asData?.value ?? const <SubscriptionPlanInfo>[];
     final sub = subAsync.asData?.value?.resolvedWith(plans);
     final isPro = sub?.isActive ?? false;
+    // 자가 가입 열림 — 서버가 true 를 줄 때만. 옛 서버 · 불러오기 실패는 닫힘(서버도 SUBS_006 으로 거절한다).
+    // 일부 사용자는 관리자가 DB 로 켜고, 그 사람은 isPro 라 이 단추 대신 [구독 해지] 를 본다.
+    final selfSignupOpen =
+        featuresAsync.asData?.value.selfSignupEnabled ?? false;
     final refetching = subAsync.isLoading || plansAsync.isLoading;
     final dataFailed =
         (subAsync.hasError && !subAsync.hasValue) ||
@@ -414,11 +418,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                             onPressed: () => _cancel(nextBill),
                           )
                         : PButton(
-                            label: l.subStartPro,
+                            label: selfSignupOpen
+                                ? l.subStartPro
+                                : l.subStartProSoon,
                             size: PButtonSize.large,
                             loading: _busy,
-                            // 요금제를 못 받았으면 무엇을 구독할지 모른다
-                            onPressed: plan == null || _busy
+                            // 요금제를 못 받았으면 무엇을 구독할지 모른다. 자가 가입이 닫혀 있으면 누를 수 없다
+                            onPressed: plan == null || _busy || !selfSignupOpen
                                 ? null
                                 : () => _subscribe(plan.planCode),
                           ),

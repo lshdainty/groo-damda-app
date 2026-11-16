@@ -14,6 +14,7 @@ class MyFeatures {
     required this.features,
     required this.connectedBrokers,
     this.primaryBroker,
+    this.selfSignupEnabled = false,
   });
   final List<String> features;
 
@@ -22,6 +23,11 @@ class MyFeatures {
 
   /// 가계부 자산 평가에 쓰는 증권사. 연결이 없으면 null.
   final String? primaryBroker;
+
+  /// 화면에서 스스로 구독을 시작할 수 있는가(서버 `subscriptionSelfSignupEnabled`). 결제 연동 전이라 지금은
+  /// 서버가 닫아 두고 일부 사용자만 관리자가 켠다. **서버가 `true` 를 줄 때만 열림** — 값이 없는 옛 서버 응답 ·
+  /// 불러오기 실패([empty])는 닫힘이다. 닫혀 있으면 서버도 구독 요청을 거절한다(SUBS_006).
+  final bool selfSignupEnabled;
 
   bool get hasSecurities => features.contains('SECURITIES');
 
@@ -45,6 +51,7 @@ class MyFeatures {
                 ? const ['TOSS']
                 : const []),
       primaryBroker: j['primaryBroker'] as String?,
+      selfSignupEnabled: (j['subscriptionSelfSignupEnabled'] as bool?) ?? false,
     );
   }
 
