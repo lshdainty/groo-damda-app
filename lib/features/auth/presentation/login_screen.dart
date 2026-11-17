@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
-import 'package:groo_damda_app/core/auth/oauth_link_listener.dart';
-import 'package:groo_damda_app/core/auth/pkce.dart';
+import 'package:groo_damda_app/core/auth/oauth_login_launcher.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/shared/brand/groo_wordmark.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -23,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 ///    [OAuthFlowStore] 에 **먼저 보관**(브라우저에 가 있는 동안 프로세스가 죽어도 복구).
 /// 2. 시스템 브라우저로 SSO `/api/v1/oauth2/authorize` 오픈. SSO 에 Refresh 쿠키가
 ///    살아 있으면 무음 재인증으로 폼 없이 즉시 복귀한다.
+///    (1 · 2 는 [OAuthLoginLauncher] — 교환이 `AUTH_030` 으로 거절됐을 때의 다시 시작도 같은 길이다)
 /// 3. 로그인 완료 → SSO 서버가 302 로 `porestdesk://oauth/callback?code=&state=` 를
 ///    내려보냄 → OS 딥링크로 앱 복귀 → [oauthLinkListenerProvider] 가 state 검증 후
 ///    desk-back `/auth/exchange-code` 교환(BFF) → router 가 /home 으로.
@@ -65,8 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (_busy) return;
     final l = AppLocalizations.of(context);
     // 비-local 환경에서 SSO 가 HTTPS 가 아니면 거부 (자격증명 평문 전송/MITM 방지).
-    final ssoOrigin = Uri.tryParse(Env.ssoUrl);
-    if (Env.appEnv != 'local' && ssoOrigin?.scheme != 'https') {
+    if (!OAuthLoginLauncher.isSsoOriginSecure) {
       setState(() => _error = l.authSecurityNotHttps);
       return;
     }
@@ -75,37 +72,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _error = null;
     });
     try {
-      // 1) PKCE + state 생성(앱이 직접) → 브라우저로 나가기 전에 디스크 보관.
-      //    복귀가 콜드 스타트여도 리스너가 이걸 복원해 교환을 이어간다.
-      final verifier = generateCodeVerifier();
-      final challenge = codeChallengeS256(verifier);
-      final state = generateState();
-      final store = ref.read(oauthFlowStoreProvider);
-      await store.savePending(verifier: verifier, state: state);
-
-      // 로그아웃 직후 첫 로그인은 폼 강제(prompt=login) — 무음 재인증이 로그아웃을
-      // 되살리지 않게. 해제는 로그인 성공 시(리스너)에 한다.
-      final forcePrompt = await store.isForceLoginPrompt();
-
-      // 2) authorize URL 조립. challenge/state 는 base64url(no padding) 이라 URL-safe.
-      final authorizeUrl =
-          '${Env.ssoUrl}/api/v1/oauth2/authorize'
-          '?response_type=code'
-          '&client_id=${Env.oauthClientId}'
-          '&redirect_uri=${Uri.encodeComponent(Env.oauthRedirectUri)}'
-          '&code_challenge=$challenge'
-          '&code_challenge_method=S256'
-          '&state=${Uri.encodeComponent(state)}'
-          '${forcePrompt ? '&prompt=login' : ''}';
-
-      // 3) 시스템 브라우저로 — 복귀는 딥링크 리스너(oauthLinkListenerProvider)가 받는다.
-      final launched = await launchUrl(
-        Uri.parse(authorizeUrl),
-        mode: LaunchMode.externalApplication,
-      );
-      if (!launched) {
-        throw StateError('브라우저를 열 수 없습니다');
-      }
+      // PKCE 보관 → authorize 주소(로그아웃 직후 첫 로그인은 prompt=login) → 시스템
+      // 브라우저. 복귀는 딥링크 리스너(oauthLinkListenerProvider)가 받는다.
+      await ref.read(oauthLoginLauncherProvider).start();
       // 여기서 흐름이 앱 밖으로 나간다 — 버튼은 다시 눌러 재시도할 수 있게 되돌린다.
       // (교환 진행 상태는 authProvider 의 AsyncLoading 이 담당)
       if (!mounted) return;

@@ -13,9 +13,32 @@ import 'package:groo_damda_app/features/settings/application/oauth_link_provider
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 
-/// PKCE 흐름 보관소 — 로그인 화면(저장)과 콜백 리스너(복원)가 같은 인스턴스를 본다.
+/// PKCE 흐름 보관소 — 로그인 시작(저장)과 콜백 리스너(복원)가 같은 인스턴스를 본다.
 final oauthFlowStoreProvider = Provider<OAuthFlowStore>(
   (ref) => OAuthFlowStore(),
+);
+
+/// OAuth 콜백 처리기 — 보관소와 인증 상태를 묶는다.
+///
+/// 리스너 안에서 만들지 않고 따로 둔 이유: 테스트가 딥링크 플러그인(app_links) 없이
+/// 콜백 → 교환 → 인증 상태까지의 **실제 배선**을 그대로 태운다.
+final oauthCallbackHandlerProvider = Provider<OAuthCallbackHandler>(
+  (ref) => OAuthCallbackHandler(
+    store: ref.watch(oauthFlowStoreProvider),
+    exchange:
+        ({
+          required String code,
+          required String codeVerifier,
+          required bool forcedPrompt,
+        }) => ref
+            .read(authProvider.notifier)
+            .exchangeAndLoginWithCode(
+              code: code,
+              codeVerifier: codeVerifier,
+              redirectUri: Env.oauthRedirectUri,
+              forcedPrompt: forcedPrompt,
+            ),
+  ),
 );
 
 /// OAuth 콜백 딥링크 리스너.
@@ -32,16 +55,7 @@ final oauthFlowStoreProvider = Provider<OAuthFlowStore>(
 /// app_links 에 넘기지 않아 initial link 가 비어 있다(기존 문제, 후속: `SceneDelegate.scene(_:willConnectTo:options:)` 에서
 /// `AppLinks.shared.handleLink(url:)`). Android 는 둘 다 받는다.
 final oauthLinkListenerProvider = Provider<void>((ref) {
-  final handler = OAuthCallbackHandler(
-    store: ref.watch(oauthFlowStoreProvider),
-    exchange: ({required String code, required String codeVerifier}) => ref
-        .read(authProvider.notifier)
-        .exchangeAndLoginWithCode(
-          code: code,
-          codeVerifier: codeVerifier,
-          redirectUri: Env.oauthRedirectUri,
-        ),
-  );
+  final handler = ref.watch(oauthCallbackHandlerProvider);
 
   Future<void> onLink(Uri uri) async {
     // 소셜 계정 연동에서 돌아온 주소(`/linked`)는 로그인 콜백으로 넘기지 않는다 — 연결 상태를 다시 받고
@@ -69,6 +83,7 @@ final oauthLinkListenerProvider = Provider<void>((ref) {
     try {
       final result = await handler.handle(uri);
       if (result != OAuthCallbackResult.exchanged &&
+          result != OAuthCallbackResult.restartedWithPrompt &&
           result != OAuthCallbackResult.notCallback) {
         // 위조·중복·불완전 콜백 — 사용자에게 띄울 일은 아니고 진단용 로그만.
         debugPrint('OAuth callback ignored: $result');

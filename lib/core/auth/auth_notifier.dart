@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/core/auth/auth_events.dart';
 import 'package:groo_damda_app/core/auth/oauth_link_listener.dart';
+import 'package:groo_damda_app/core/auth/oauth_login_launcher.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/network/dio_provider.dart';
 import 'package:groo_damda_app/core/auth/auth_repository.dart';
@@ -50,10 +52,24 @@ class AuthNotifier extends AsyncNotifier<User?> {
   /// 3. AsyncData(user) → router redirect 가 /home 으로 이동
   ///
   /// 실패 시 [ApiException] 등을 그대로 throw — LoginScreen 의 catch 가 사용자에게 표시.
-  Future<void> exchangeAndLoginWithCode({
+  ///
+  /// **돌려주는 값** — 로그인이 끝났으면 `true`. `false` 는 실패가 아니라 "비밀번호를 다시
+  /// 받는 로그인으로 다시 보냈다" 다(로그인은 아직이다):
+  ///
+  /// 담다 로그아웃은 담다만 끝내고 그루 계정 로그인은 남긴다(보안 점검 CLI-6). 서버는
+  /// 로그아웃한 그 로그인으로 돌아온 코드를 `AUTH_030` 으로 거절한다. 평소에는 기기의
+  /// 강제 표시가 `prompt=login` 을 실어 이 거절을 만나지 않는다 — 만나는 것은 표시가
+  /// 없는데 그 로그인이 살아 있을 때다(앱 데이터를 지웠다 · 브라우저 쪽 로그인이 남았다).
+  /// 그때 강제 표시를 남기고 `prompt=login` 으로 **한 번** 다시 시작한다. 사용자에게는
+  /// 그루 계정의 로그인 폼이 뜨는 것으로 충분해 에러로 올리지 않는다.
+  ///
+  /// [forcedPrompt] 는 이 코드를 받아 온 시도가 이미 `prompt=login` 이었는지다. 폼을
+  /// 강제하고도 또 거절됐으면 다시 보내도 같다 — 맴돌지 않고 보통의 로그인 실패로 올린다.
+  Future<bool> exchangeAndLoginWithCode({
     required String code,
     required String codeVerifier,
     required String redirectUri,
+    bool forcedPrompt = false,
   }) async {
     final repo = await ref.read(authRepositoryProvider.future);
     state = const AsyncLoading();
@@ -65,9 +81,33 @@ class AuthNotifier extends AsyncNotifier<User?> {
       );
       final user = await repo.check();
       state = AsyncData(user);
+      return true;
     } catch (e, st) {
+      if (!forcedPrompt &&
+          e is ApiException &&
+          e.isLoggedOutSsoLogin &&
+          await _restartWithLoginPrompt()) {
+        // 에러로 올리면 브라우저가 다시 뜨기 전 로그인 화면에 실패 글이 번쩍인다.
+        state = const AsyncData(null);
+        return false;
+      }
       state = AsyncError(e, st);
       rethrow;
+    }
+  }
+
+  /// 살아 있는 그루 계정 로그인을 쓰지 않게 폼을 강제해(`prompt=login`) 로그인을 다시
+  /// 시작한다. 강제 표시도 남긴다 — 사용자가 브라우저를 닫고 버튼을 다시 눌러도 폼이
+  /// 뜨게(해제는 로그인 성공 시 콜백 처리기). 다시 시작하지 못했으면 `false` — 부른 쪽이
+  /// 원래 거절을 로그인 실패로 올린다.
+  Future<bool> _restartWithLoginPrompt() async {
+    try {
+      await ref.read(oauthFlowStoreProvider).markForceLoginPrompt();
+      await ref.read(oauthLoginLauncherProvider).start(forcePrompt: true);
+      return true;
+    } catch (e) {
+      debugPrint('OAuth restart with prompt=login failed: $e');
+      return false;
     }
   }
 

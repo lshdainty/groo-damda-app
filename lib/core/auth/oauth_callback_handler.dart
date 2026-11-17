@@ -21,9 +21,15 @@ class OAuthCallbackHandler {
   final OAuthFlowStore store;
 
   /// BFF 교환 — (code, codeVerifier) 를 받아 로그인 완료까지 책임진다. 실패는 throw.
-  final Future<void> Function({
+  ///
+  /// `forcedPrompt` 는 이 코드를 받아 온 시도를 `prompt=login` 으로 보냈는지다(보관분).
+  /// 로그인이 끝났으면 `true` 를 돌려준다. `false` 는 교환이 "담다에서 로그아웃한 그루 계정
+  /// 로그인" 이라 거절돼(`AUTH_030`) 폼을 강제한 로그인을 다시 시작했다는 뜻이다 —
+  /// 실패가 아니고, 로그인은 아직이다.
+  final Future<bool> Function({
     required String code,
     required String codeVerifier,
+    required bool forcedPrompt,
   })
   exchange;
 
@@ -59,7 +65,15 @@ class OAuthCallbackHandler {
     // state 까지 맞은 진짜 콜백 — 재배달·재사용 방어를 위해 교환 전에 소비 처리.
     // (인가코드는 1회용이라 교환 실패 후 재시도해도 어차피 처음부터 다시다)
     await store.clearPending();
-    await exchange(code: code, codeVerifier: pending.verifier);
+    final loggedIn = await exchange(
+      code: code,
+      codeVerifier: pending.verifier,
+      forcedPrompt: pending.forcedPrompt,
+    );
+    if (!loggedIn) {
+      // 폼을 강제한 로그인이 새로 시작됐다 — 강제 표시는 그 로그인이 성공할 때까지 남긴다.
+      return OAuthCallbackResult.restartedWithPrompt;
+    }
     await store.clearForceLoginPrompt();
     return OAuthCallbackResult.exchanged;
   }
@@ -74,4 +88,8 @@ enum OAuthCallbackResult {
   stateMismatch,
   noCode,
   exchanged,
+
+  /// 교환이 `AUTH_030`(담다에서 로그아웃한 그루 계정 로그인)으로 거절돼 `prompt=login`
+  /// 으로 로그인을 다시 시작했다 — 버린 콜백이 아니다.
+  restartedWithPrompt,
 }
