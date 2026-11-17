@@ -133,6 +133,24 @@ expect 'skip 은 빠진다' "$(notes base..HEAD)" <<'EOF'
 - 나를 쓸 수 있어요
 EOF
 
+# ── 4-1. "없음" 도 skip 과 같이 빠진다(업데이트 화면에 "· 없음" 이 실린 일, 2026-11-17).
+new_repo
+commit <<'EOF'
+fix(a): 내부 정리
+
+Release-Note: 없음
+Co-Authored-By: Someone <a@b.c>
+EOF
+commit <<'EOF'
+fix(b): 다
+
+Release-Note: 다가 고쳐졌어요
+EOF
+expect '없음 은 빠진다' "$(notes base..HEAD)" <<'EOF'
+버그 수정
+- 다가 고쳐졌어요
+EOF
+
 # ── 5. 노트 없는 feat 은 빠지고, 제목은 **절대** 출력에 없다.
 new_repo
 commit <<'EOF'
