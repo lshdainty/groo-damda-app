@@ -97,17 +97,16 @@ String dateRangeShortYear(DateTime from, DateTime to) {
   return '${one(from)}$sep${one(to)}';
 }
 
-/// 월 눈금 글 — 한 해 안이면 ko "1월" · en "Jan"(앞 0 없음), 해가 섞이면 ko 점 표기 "2025. 12." · en "Dec 2025"
-/// (점 표기는 한국어 전용, DESIGN.desk.md:3604). 통계 · 순자산 추이가 같이 쓴다.
-List<String> monthTicks(List<({int year, int month})> rows) {
-  final same = rows.isNotEmpty && rows.every((r) => r.year == rows.first.year);
-  return [
-    for (final r in rows)
-      same
-          ? monthOnly(DateTime(r.year, r.month))
-          : yearMonthDot(DateTime(r.year, r.month)),
-  ];
-}
+/// 월 눈금 글 — 월만 ko "1월" · en "Jan"(앞 0 없음). 눈금 사이에 해가 바뀌면 **해가 바뀌는 첫 눈금에만** 연월
+/// ko 점 표기 "2026. 1." · en "Jan 2026"(점 표기는 한국어 전용, DESIGN.desk.md:3604) — 스펙 chart.md "날짜 · 시각 눈금".
+/// 맨 첫 눈금은 바뀐 해가 아니라 월만이다(웹 `formatMonthTicks` 와 같다). 통계 · 순자산 추이가 같이 쓴다.
+/// 예전엔 해가 섞이면 눈금마다 연도를 붙여 가로축 글이 길어지고 맞붙었다(QA B5-2).
+List<String> monthTicks(List<({int year, int month})> rows) => [
+  for (var i = 0; i < rows.length; i++)
+    i > 0 && rows[i].year != rows[i - 1].year
+        ? yearMonthDot(DateTime(rows[i].year, rows[i].month))
+        : monthOnly(DateTime(rows[i].year, rows[i].month)),
+];
 
 /// 좁은 칸(차트 눈금 · 표 · 목록 끝)의 월 · 일 — ko "10. 29."(점 표기, 앞 0 없음), en "Oct 29".
 String monthDayDot(DateTime d) =>

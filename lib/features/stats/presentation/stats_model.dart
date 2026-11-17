@@ -280,7 +280,7 @@ List<int> statsWeekdaySums(List<Expense> exps) {
   return res;
 }
 
-/// 월 라벨 — [monthTicks](한 해 안이면 "1월", 해가 섞이면 점 표기 "2026. 1." · 영어 "Jan 2026").
+/// 월 라벨 — [monthTicks](월만 "1월", 해가 바뀌는 첫 눈금에만 점 표기 "2026. 1." · 영어 "Jan 2026").
 List<String> monthLabels(List<({int year, int month})> rows) =>
     monthTicks(rows);
 
