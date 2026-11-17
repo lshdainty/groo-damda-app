@@ -69,6 +69,7 @@ abstract class PCartesianChart extends StatefulWidget {
     this.headFormatter,
     this.valueFormatter,
     this.axisFormatter,
+    this.xTicks,
   });
 
   /// 요약 이름 — "10월 수입 · 지출 추이, 수입 4,200,000원 · 지출 1,240,000원".
@@ -93,8 +94,13 @@ abstract class PCartesianChart extends StatefulWidget {
   /// 툴팁 값 — 기본 원까지(빼기 U+2212).
   final String Function(double value)? valueFormatter;
 
-  /// 세로축 눈금 — 기본 만 · 억 · 조 단위.
+  /// 세로축 눈금 글을 통째로 바꾼다(가림 "••••" 등). 주지 않으면 ds 기본 [formatAxisWon] — 한 축은 한 단위라 그 축의
+  /// 눈금 묶음을 보고 만 단위 · 쉼표 정수를 정한다.
   final String Function(double value)? axisFormatter;
+
+  /// 가로 눈금 글 — 주면 [categories] 대신 이 글로 눈금을 그리고, 연도는 **보이는 눈금** 기준으로 붙인다(해가 바뀌는 칸이
+  /// 건너뛰기로 빠지면 다음 보이는 눈금이 이어받는다 — [chartXTickLabels]). 길이는 [categories] 와 같다. 툴팁 머리는 계속 [categories].
+  final List<PChartXTick>? xTicks;
 }
 
 /// 선(영역) 차트 — 곡선 monotone · 선 2 · 점 없음(가리킨 자리에만 계열 색 점 r 3 + 카드 면 색 테두리 2). [area] 면
@@ -111,6 +117,7 @@ class PLineChart extends PCartesianChart {
     super.headFormatter,
     super.valueFormatter,
     super.axisFormatter,
+    super.xTicks,
     this.area = true,
     this.dots = false,
   });
@@ -139,6 +146,7 @@ class PBarChart extends PCartesianChart {
     super.headFormatter,
     super.valueFormatter,
     super.axisFormatter,
+    super.xTicks,
     this.barColor,
     this.barLabel,
     this.referenceLines = const [],
@@ -184,7 +192,7 @@ class _Plan {
     required this.stepRight,
     required this.leftWidth,
     required this.rightWidth,
-    required this.labelInterval,
+    required this.bottomLabels,
     required this.endShift,
     required this.plotLeft,
     required this.plotWidth,
@@ -200,7 +208,9 @@ class _Plan {
   final double? stepRight;
   final double leftWidth;
   final double rightWidth;
-  final int labelInterval;
+
+  /// 가로 눈금마다 그릴 글 — 건너뛴 칸은 null(끝 눈금은 늘 남고, 연도는 보이는 눈금 기준).
+  final List<String?> bottomLabels;
 
   /// 끝 글 하나만 남는 좁은 폭 — 끝 글을 왼쪽으로 당기는 거리(오른쪽 여백을 줄인 만큼).
   final double endShift;
@@ -225,7 +235,22 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
   List<double> get _referenceValues => const [];
   bool get _stacked => false;
 
-  String _axisText(double v) => (widget.axisFormatter ?? formatAxisWon)(v);
+  /// 눈금 글 — [ticks] 는 그 축이 그리는 눈금 전부(한 축은 한 단위).
+  String _axisText(double v, List<double> ticks) =>
+      widget.axisFormatter?.call(v) ?? formatAxisWon(v, ticks);
+
+  /// 한 축의 눈금 값 — 아래 [below] 칸 ~ 위 [above] 칸.
+  List<double> _ticksOf(int below, int above, double step) => [
+    for (var t = -below; t <= above; t++) t * step,
+  ];
+
+  /// 가로 눈금 — [PCartesianChart.xTicks] 가 없으면 [PCartesianChart.categories] 그대로(연도 없음).
+  List<PChartXTick> get _xTicks =>
+      widget.xTicks ??
+      [
+        for (final cat in widget.categories)
+          (label: cat, yearLabel: null, year: null),
+      ];
   String _valueText(double v) => (widget.valueFormatter ?? formatWon)(v);
 
   List<PChartSeries> get _visible => [
@@ -287,22 +312,27 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
     final aboveFix = above == 0 && below == 0 ? 4 : above;
 
     final tickStyle = chartTickStyle(c);
-    double axisWidth(double step) => chartAxisWidth(
-      [for (var t = -below; t <= aboveFix; t++) _axisText(t * step)],
-      tickStyle,
-      scaler: scaler,
-    );
+    double axisWidth(double step) {
+      final ticks = _ticksOf(below, aboveFix, step);
+      return chartAxisWidth(
+        [for (final v in ticks) _axisText(v, ticks)],
+        tickStyle,
+        scaler: scaler,
+      );
+    }
 
     final leftW = _valueAxis ? axisWidth(l.step) : 0.0;
     final rightW = r == null ? 0.0 : axisWidth(r.step);
+    // 가장 긴 가로 눈금 글 — 모든 눈금이 보일 때의 글(해가 바뀌는 칸의 연도 글 포함)로 잰다
+    final xTicks = _xTicks;
     var labelW = 0.0;
-    for (final cat in widget.categories) {
-      labelW = math.max(labelW, measureText(cat, tickStyle, scaler: scaler));
+    for (final label in chartXTickFullLabels(xTicks)) {
+      labelW = math.max(labelW, measureText(label, tickStyle, scaler: scaler));
     }
     // 겹치면 끝(가장 최근) 글을 지키고 앞에서부터 건너뛴다(웹 recharts preserveEnd). 끝 글자가 반쯤 삐져나가므로 오른쪽 축이 없으면 그만큼 비워 둔다
     var rightPad = r == null ? math.max(PSpacing.x2, labelW / 2) : rightW;
     var plotW = math.max(1.0, width - leftW - rightPad);
-    final fit = math.max(1, (plotW / (labelW + PSpacing.x2)).floor());
+    final fit = math.max(1, (plotW / (labelW + kChartTickGap)).floor());
     // 글 하나도 둘이 못 들어가면 끝 글 하나만 남는다. 끝 글 몫으로 오른쪽을 labelW / 2 나 비우면 그릴 폭이 더 줄어
     // fl_chart 가 가로 눈금을 하나도 부르지 않는다(200% · 긴 달 글자) — 여백을 8 로 두고 끝 글을 왼쪽으로 당겨 오른쪽 끝에 맞춘다
     var endShift = 0.0;
@@ -319,7 +349,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
       stepRight: r?.step,
       leftWidth: leftW,
       rightWidth: rightPad,
-      labelInterval: interval,
+      bottomLabels: chartXTickLabels(xTicks, interval),
       endShift: endShift,
       plotLeft: leftW,
       plotWidth: plotW,
@@ -344,7 +374,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
         meta: meta,
         space: kChartTickMargin,
         child: Text(
-          _axisText(v * step),
+          _axisText(v * step, _ticksOf(p.below, p.above, step)),
           maxLines: 1,
           style: chartTickStyle(c, color: color),
         ),
@@ -390,9 +420,8 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
               return const SizedBox();
             }
             // fl_chart 는 간격에 안 맞아도 마지막 눈금을 더 찍는다 — 앞 글자와 겹쳐 "11월12월" 이 된다(막대 차트는 interval 을 아예 따르지 않아 칸마다 부른다 — 간격 칸만 그린다)
-            if ((widget.categories.length - 1 - i) % p.labelInterval != 0) {
-              return const SizedBox();
-            }
+            final label = i < p.bottomLabels.length ? p.bottomLabels[i] : null;
+            if (label == null) return const SizedBox();
             return SideTitleWidget(
               meta: meta,
               space: kChartTickMargin,
@@ -402,7 +431,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
                   0,
                 ),
                 child: Text(
-                  widget.categories[i],
+                  label,
                   maxLines: 1,
                   style: i == _emphasized
                       ? chartTickStyle(c).copyWith(
