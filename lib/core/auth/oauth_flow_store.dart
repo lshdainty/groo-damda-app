@@ -65,9 +65,11 @@ class OAuthFlowStore {
   /// 브라우저 쿠키(SSO Refresh)는 앱이 지울 수 없어, 이 표시가 없으면 로그아웃해도
   /// 로그인 버튼 한 번에 세션이 조용히 되살아난다.
   ///
-  /// 남기는 자리는 둘이다 — 로그아웃(`AuthNotifier.logout`), 그리고 교환이 `AUTH_030`
-  /// 으로 거절됐을 때(`AuthNotifier.exchangeAndLoginWithCode`). 뒤쪽은 이 표시가 사라진
-  /// 기기(앱 데이터 삭제 등)를 서버의 거절이 대신 잡아 준 경우다.
+  /// 남기는 자리는 셋이다 — 로그아웃(`AuthNotifier.logout`), 교환이 `AUTH_030` 으로
+  /// 거절됐을 때(`AuthNotifier.exchangeAndLoginWithCode`), 그리고 담다를 쓸 수 없는 그루
+  /// 계정이라 교환이 `AUTH_003` 으로 거절됐을 때(같은 자리). 가운데는 이 표시가 사라진
+  /// 기기(앱 데이터 삭제 등)를 서버의 거절이 대신 잡아 준 경우고, 마지막은 같은 계정으로
+  /// 맴돌지 않고 폼에서 계정을 바꿀 수 있게 하는 것이다.
   Future<void> markForceLoginPrompt() =>
       _storage.write(key: _kForcePrompt, value: '1');
 

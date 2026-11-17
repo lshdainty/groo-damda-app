@@ -175,8 +175,27 @@ void main() {
       expect(msg, contains(ko.withdrawIrreversibleRejoin));
     });
 
-    test('만료는 "다시 로그인" 을 말한다 — 무엇을 하면 되는지', () {
-      expect(loginErrorMessage(err('AUTH_003'), ko), ko.authLoginExpired);
+    // 서버 AUTH_003 은 "접근 권한 없음"(AUTH_ACCESS_DENIED) — 담다를 쓸 수 없는 그루 계정이다.
+    // 예전엔 "로그인 시간이 지났어요" 로 잘못 말해 같은 계정으로 다시 누르게 했다.
+    test('AUTH_003 은 담다를 쓸 수 있는 그루 계정으로 다시 로그인하라고 말한다', () {
+      final msg = loginErrorMessage(
+        ApiException(code: 'AUTH_003', message: '접근 권한이 없어요', statusCode: 403),
+        ko,
+      );
+      expect(msg, ko.authLoginAccessDenied);
+      expect(msg, contains('그루 담다를 쓸 수 있는 그루 계정'));
+      expect(msg, isNot(contains('시간이 지났')));
+      expect(
+        loginErrorMessage(
+          ApiException(code: 'AUTH_003', message: '', statusCode: 403),
+          AppLocalizationsEn(),
+        ),
+        contains('that can use 그루 담다'),
+      );
+    });
+
+    test('교환 실패(AUTH_004)는 이유를 지어내지 않고 로그인하지 못했다고 말한다', () {
+      expect(loginErrorMessage(err('AUTH_004'), ko), ko.authLoginFailed);
     });
 
     test('아는 게 없으면 서버 글을 붙이지 않고 로그인하지 못했다고만 말한다', () {

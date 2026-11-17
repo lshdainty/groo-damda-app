@@ -2663,8 +2663,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLoginFailed => 'Could not sign in.';
 
   @override
-  String get authLoginExpired =>
-      'Your sign-in timed out. Please sign in again.';
+  String get authLoginAccessDenied =>
+      'We couldn\'t verify your sign-in. Sign in again with a 그루 account that can use 그루 담다.';
 
   @override
   String get authLoginError => 'Could not complete sign-in.';

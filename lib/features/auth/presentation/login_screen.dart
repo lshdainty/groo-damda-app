@@ -41,9 +41,10 @@ String loginErrorMessage(Object? e, AppLocalizations l) => switch (e) {
   // 해지 완료 화면으로 보내 이 글은 안 보인다 — 그 길이 빠졌을 때의 대비다.
   ApiException(isWithdrawn: true) =>
     '${l.withdrawnTitle}\n${l.withdrawIrreversibleRejoin}',
-  // 딥링크 코드가 만료됐다 — 다시 누르면 된다. "실패" 라고만 하면 뭘 다시 해야
-  // 하는지 알 수 없다.
-  ApiException(code: 'AUTH_003') => l.authLoginExpired,
+  // 담다를 쓸 수 없는 그루 계정이다(서버 403 AUTH_003 — AUTH_ACCESS_DENIED). 다시 눌러도
+  // 같은 계정이면 결과가 같다 — 담다를 쓸 수 있는 계정으로 다시 로그인하라고 말한다. 다음
+  // 로그인 버튼은 폼을 강제해(prompt=login) 계정을 바꿀 수 있다(AuthNotifier).
+  ApiException(isServiceAccessDenied: true) => l.authLoginAccessDenied,
   // 서버가 준 글은 붙이지 않는다 — 코드 · 영어가 그대로 보이던 자리다(Writing 오류).
   _ => l.authLoginFailed,
 };
