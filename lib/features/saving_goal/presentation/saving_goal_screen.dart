@@ -13,10 +13,12 @@ import 'package:groo_damda_app/features/saving_goal/application/saving_goal_prov
 import 'package:groo_damda_app/features/saving_goal/domain/saving_goal.dart';
 import 'package:groo_damda_app/features/saving_goal/presentation/saving_goal_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
@@ -47,64 +49,88 @@ class SavingGoalScreen extends ConsumerWidget {
     final listAsync = ref.watch(savingGoalListProvider);
     final masked = ref.watch(hideCardProvider('asset.savingGoals'));
 
-    Widget content;
+    // 본문 — 실패 · 빈 화면은 상단 바 아래 남은 높이의 세로 가운데(result-section.md "놓인 자리의 가운데" ·
+    // content-placeholder.md "화면 전체는 large" · 프리셋 관리와 같다), 불러오는 중 · 목록은 위에서부터.
+    Widget body;
     final items = listAsync.value;
     if (items == null) {
-      content = listAsync.hasError
-          ? BudgetSection(
-              children: [
-                BudgetFailure(
-                  title: l.savingGoalFailTitle,
-                  retrying: listAsync.isLoading,
-                  onRetry: () => ref.invalidate(savingGoalListProvider),
+      body = listAsync.hasError
+          ? _centered(
+              PResultSection(
+                kind: PResultKind.failure,
+                size: PResultSize.large,
+                title: l.savingGoalFailTitle,
+                description: l.dashFailDesc,
+                primaryAction: PResultAction(
+                  label: l.actionRetry,
+                  loading: listAsync.loadRetrying,
+                  onPressed: () => ref.invalidate(savingGoalListProvider),
                 ),
-              ],
+              ),
             )
-          : loadingRegion(const _SavingGoalSkeleton());
+          : ListView(
+              padding: EdgeInsets.zero,
+              children: [loadingRegion(const _SavingGoalSkeleton())],
+            );
+    } else if (items.isEmpty) {
+      // 빈 화면 — 목록 제목 · "목표 추가" 글 버튼을 두지 않고 안내 한 줄 + 첫 동작(프리셋 관리와 같다)
+      body = _centered(
+        PResultSection(
+          kind: PResultKind.empty,
+          size: PResultSize.large,
+          icon: LucideIcons.piggyBank,
+          title: l.savingGoalEmptyTitle,
+          description: l.savingGoalEmptyDesc,
+          primaryAction: PResultAction(
+            label: l.savingGoalAddAction,
+            icon: LucideIcons.plus,
+            onPressed: () => showSavingGoalEditDialog(context),
+          ),
+        ),
+      );
     } else {
       final totalTarget = items.fold<int>(0, (s, g) => s + g.targetAmount);
       final totalCurrent = items.fold<int>(0, (s, g) => s + g.currentAmount);
       final totalPct = totalTarget > 0
           ? (totalCurrent / totalTarget * 100)
           : 0.0;
-      content = Column(
+      final content = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // 전체 진행률 — 띠 안 위 4 + 16 에서 라벨, 아래 24
-          if (items.isNotEmpty)
-            BudgetSection(
-              topPadding: PSpacing.x5,
-              children: [
-                Text(
-                  keepAll(l.savingGoalOverallProgress),
-                  style: PTypography.t3.copyWith(
-                    color: c.fgNeutralSubtle,
-                    fontWeight: FontWeight.w500,
+          BudgetSection(
+            topPadding: PSpacing.x5,
+            children: [
+              Text(
+                keepAll(l.savingGoalOverallProgress),
+                style: PTypography.t3.copyWith(
+                  color: c.fgNeutralSubtle,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const BudgetFull(child: SizedBox(height: PSpacing.x1)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: BudgetBigAmount(
+                      amount: budgetWon(totalCurrent, masked),
+                      limit: budgetWon(totalTarget, masked),
+                    ),
                   ),
-                ),
-                const BudgetFull(child: SizedBox(height: PSpacing.x1)),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: BudgetBigAmount(
-                        amount: budgetWon(totalCurrent, masked),
-                        limit: budgetWon(totalTarget, masked),
-                      ),
+                  const SizedBox(width: PSpacing.x2),
+                  Text(
+                    formatProgress(totalPct),
+                    style: PTypography.t9.copyWith(
+                      color: c.fgBrand,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: tabularFigures,
                     ),
-                    const SizedBox(width: PSpacing.x2),
-                    Text(
-                      formatProgress(totalPct),
-                      style: PTypography.t9.copyWith(
-                        color: c.fgBrand,
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: tabularFigures,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
+          ),
           // 목록 제목 위: 앞 구역 아래 24 + 8 + 제목 위 8 = 보이는 40
           const SizedBox(height: PSpacing.x2),
           PListHeader(
@@ -115,46 +141,43 @@ class SavingGoalScreen extends ConsumerWidget {
               onPressed: () => showSavingGoalEditDialog(context),
             ),
           ),
-          if (items.isEmpty)
-            BudgetEmptyLine(l.savingGoalEmpty)
-          else
-            PList(
-              children: [
-                for (final goal in items)
-                  // 밀면 수정·삭제가 바로 나온다. 탭은 그대로 수정으로 —
-                  // 스와이프는 지름길이지 유일한 경로가 아니다
-                  // (spec swipe-actions.md · WCAG 2.1.1).
-                  PSwipeActions(
-                    key: ValueKey('saving-goal-${goal.rowId}'),
-                    rowLabel: goal.title,
-                    actions: [
-                      PSwipeAction(
-                        label: l.actionEdit,
-                        icon: LucideIcons.pencil,
-                        kind: PSwipeActionKind.primary,
-                        onSelect: () =>
-                            showSavingGoalEditDialog(context, edit: goal),
-                      ),
-                      PSwipeAction(
-                        label: l.actionDelete,
-                        icon: LucideIcons.trash2,
-                        kind: PSwipeActionKind.destructive,
-                        // 확인은 ds 확인창이 받는다(같은 삭제는 어디서 불러도 같은 글).
-                        onSelect: () => _confirmDeleteGoal(context, ref, goal),
-                      ),
-                    ],
-                    child: _GoalRow(
-                      goal: goal,
-                      masked: masked,
-                      onEdit: () =>
+          PList(
+            children: [
+              for (final goal in items)
+                // 밀면 수정·삭제가 바로 나온다. 탭은 그대로 수정으로 —
+                // 스와이프는 지름길이지 유일한 경로가 아니다
+                // (spec swipe-actions.md · WCAG 2.1.1).
+                PSwipeActions(
+                  key: ValueKey('saving-goal-${goal.rowId}'),
+                  rowLabel: goal.title,
+                  actions: [
+                    PSwipeAction(
+                      label: l.actionEdit,
+                      icon: LucideIcons.pencil,
+                      kind: PSwipeActionKind.primary,
+                      onSelect: () =>
                           showSavingGoalEditDialog(context, edit: goal),
                     ),
+                    PSwipeAction(
+                      label: l.actionDelete,
+                      icon: LucideIcons.trash2,
+                      kind: PSwipeActionKind.destructive,
+                      // 확인은 ds 확인창이 받는다(같은 삭제는 어디서 불러도 같은 글).
+                      onSelect: () => _confirmDeleteGoal(context, ref, goal),
+                    ),
+                  ],
+                  child: _GoalRow(
+                    goal: goal,
+                    masked: masked,
+                    onEdit: () => showSavingGoalEditDialog(context, edit: goal),
                   ),
-              ],
-            ),
+                ),
+            ],
+          ),
           const SizedBox(height: PSpacing.x3),
         ],
       );
+      body = ListView(padding: EdgeInsets.zero, children: [content]);
     }
 
     return Scaffold(
@@ -177,13 +200,20 @@ class SavingGoalScreen extends ConsumerWidget {
               ref.invalidate(savingGoalListProvider);
               await ref.read(savingGoalListProvider.future);
             },
-            child: ListView(padding: EdgeInsets.zero, children: [content]),
+            child: body,
           ),
         ),
       ),
     );
   }
 }
+
+/// 본문 남은 높이를 최소 높이로 채워 가운데에 놓는다 — 스크롤이라 당겨서 새로 고침은 그대로 된다.
+Widget _centered(Widget child) => CustomScrollView(
+  slivers: [
+    SliverFillRemaining(hasScrollBody: false, child: Center(child: child)),
+  ],
+);
 
 /// 저축 목표 skeleton — 실제 구역과 같은 틀(전체 진행률 + 목록 제목 + 줄 3).
 class _SavingGoalSkeleton extends StatelessWidget {

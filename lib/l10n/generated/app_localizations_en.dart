@@ -4434,7 +4434,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savingGoalIconLabel => 'Icon';
 
   @override
-  String get savingGoalEmpty => 'No saving goals yet. Start with ‘Add goal’.';
+  String get savingGoalEmptyTitle => 'No savings goals yet';
+
+  @override
+  String get savingGoalEmptyDesc =>
+      'Create a goal to track how much you\'ve saved and how long is left.';
 
   @override
   String get savingGoalAchieved => 'Achieved';

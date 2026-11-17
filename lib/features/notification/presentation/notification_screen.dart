@@ -85,26 +85,22 @@ class NotificationScreen extends ConsumerWidget {
             // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
             skipError: true,
             loading: () => loadingRegionScroll(const _NotiSkeleton()),
-            error: (e, _) => ListView(
-              children: [
-                PResultSection(
-                  kind: PResultKind.failure,
-                  title: l.notiLoadFailed,
-                  description: l.notiLoadFailedDesc,
-                  primaryAction: PResultAction(
-                    label: l.actionRetry,
-                    loading: listAsync.loadRetrying,
-                    onPressed: () => ref.invalidate(notificationListProvider),
-                  ),
+            error: (e, _) => _centered(
+              PResultSection(
+                kind: PResultKind.failure,
+                title: l.notiLoadFailed,
+                description: l.notiLoadFailedDesc,
+                primaryAction: PResultAction(
+                  label: l.actionRetry,
+                  loading: listAsync.loadRetrying,
+                  onPressed: () => ref.invalidate(notificationListProvider),
                 ),
-              ],
+              ),
             ),
             data: (items) {
               if (items.isEmpty) {
-                return ListView(
-                  children: [
-                    PResultSection(icon: LucideIcons.bell, title: l.notiEmpty),
-                  ],
+                return _centered(
+                  PResultSection(icon: LucideIcons.bell, title: l.notiEmpty),
                 );
               }
               final groups = _groupByDay(items, now);
@@ -219,6 +215,14 @@ Future<void> _markAllReadDetached(
     );
   }
 }
+
+/// 결과(빈 화면 · 실패)는 상단 바 아래 남은 높이의 세로 가운데에 선다(result-section.md "놓인 자리의 가운데" ·
+/// 프리셋 관리와 같다) — 남은 높이를 최소 높이로 주는 스크롤이라 당겨서 새로 고침은 그대로 된다.
+Widget _centered(Widget child) => CustomScrollView(
+  slivers: [
+    SliverFillRemaining(hasScrollBody: false, child: Center(child: child)),
+  ],
+);
 
 /// 날짜(기기 시간대 달력 날) 하나의 알림 묶음 — 새것 위(서버 차례 그대로, 묶음 안 차례도).
 class _DayGroup {

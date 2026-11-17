@@ -198,7 +198,8 @@ class _AccountCardManageScreenState
   }
 }
 
-/// 폰 흰 면 위 결과 — 화면 전체를 차지하는 large.
+/// 폰 흰 면 위 결과 — 화면 전체를 차지하는 large. 상단 바 아래 남은 높이의 세로 가운데에 선다(result-section.md
+/// "놓인 자리의 가운데" · 프리셋 관리와 같다) — 높이 제한 없는 스크롤이라 남은 높이를 최소 높이로 준다.
 class _CenteredResult extends StatelessWidget {
   const _CenteredResult({
     required this.kind,
@@ -215,17 +216,19 @@ class _CenteredResult extends StatelessWidget {
   final PResultAction? action;
 
   @override
-  Widget build(BuildContext context) => ListView(
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
-        child: PResultSection(
-          kind: kind,
-          size: PResultSize.large,
-          icon: icon,
-          title: title,
-          description: description,
-          primaryAction: action,
+  Widget build(BuildContext context) => CustomScrollView(
+    slivers: [
+      SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: PResultSection(
+            kind: kind,
+            size: PResultSize.large,
+            icon: icon,
+            title: title,
+            description: description,
+            primaryAction: action,
+          ),
         ),
       ),
     ],

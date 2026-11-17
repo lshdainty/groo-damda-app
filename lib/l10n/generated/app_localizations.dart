@@ -7969,11 +7969,17 @@ abstract class AppLocalizations {
   /// **'아이콘'**
   String get savingGoalIconLabel;
 
-  /// No description provided for @savingGoalEmpty.
+  /// No description provided for @savingGoalEmptyTitle.
   ///
   /// In ko, this message translates to:
-  /// **'아직 저축 목표가 없어요. ‘목표 추가’로 시작해보세요.'**
-  String get savingGoalEmpty;
+  /// **'아직 저축 목표가 없어요'**
+  String get savingGoalEmptyTitle;
+
+  /// No description provided for @savingGoalEmptyDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'목표를 만들면 모은 금액과 남은 기간을 여기서 볼 수 있어요.'**
+  String get savingGoalEmptyDesc;
 
   /// No description provided for @savingGoalAchieved.
   ///
