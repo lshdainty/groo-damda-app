@@ -92,6 +92,11 @@ void main() {
     expect(body, findsOneWidget);
     expect(t.getRect(body).left, 0);
     expect(t.getRect(body).width, 360);
+    // 강조 바탕은 띠가 화면 끝까지 깐다(옆 상태 칸 뒤까지) — 줄이 칠하는 바탕은 안전 영역에서 멈춘다
+    final band = t.widget<ColoredBox>(
+      find.byKey(const ValueKey('screen-band-body')),
+    );
+    expect(band.color, t.element(body).colors.bgBrandWeak);
     final icon = t.widget<Icon>(find.byIcon(LucideIcons.clipboard));
     expect(icon.size, 24);
     final ctx = t.element(row);

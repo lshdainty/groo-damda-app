@@ -124,7 +124,9 @@ class _SmsClipboardBannerState extends ConsumerState<SmsClipboardBanner>
       key: const ValueKey('sms-clipboard-banner'),
       mainAxisSize: MainAxisSize.min,
       children: [
+        // 강조 바탕은 띠가 화면 끝까지 깐다 — 옆 상태 칸 뒤에서 멈추지 않게
         PScreenBandBody(
+          color: c.bgBrandWeak,
           child: PTouchTargetScope(
             child: PListButtonItem(
               title: l.smsClipboardBannerTitle,

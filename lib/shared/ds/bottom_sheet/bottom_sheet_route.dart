@@ -117,6 +117,7 @@ class _SheetLayoutDelegate extends SingleChildLayoutDelegate {
     required this.host,
     required this.keyboard,
     required this.topInset,
+    required this.sidePadding,
     required Listenable relayout,
   }) : super(relayout: relayout);
 
@@ -125,6 +126,9 @@ class _SheetLayoutDelegate extends SingleChildLayoutDelegate {
 
   /// 위 안전 영역(상태 표시줄 · 다이내믹 아일랜드) — 키보드가 올라와 시트가 늘어나도 이 밑까지만 선다
   final double topInset;
+
+  /// 좌우 안전 영역 — 시트는 그 안쪽 가운데에 선다([bottomSheetLeft])
+  final EdgeInsets sidePadding;
 
   @override
   Size getSize(BoxConstraints constraints) => constraints.biggest;
@@ -144,7 +148,7 @@ class _SheetLayoutDelegate extends SingleChildLayoutDelegate {
     host._screenHeight = size.height;
     host._sheetHeight = childSize.height;
     return Offset(
-      (size.width - childSize.width) / 2,
+      bottomSheetLeft(size.width, childSize.width, sidePadding),
       size.height - keyboard - childSize.height + host._translateY(),
     );
   }
@@ -153,6 +157,7 @@ class _SheetLayoutDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(_SheetLayoutDelegate oldDelegate) =>
       oldDelegate.keyboard != keyboard ||
       oldDelegate.topInset != topInset ||
+      oldDelegate.sidePadding != sidePadding ||
       oldDelegate.host != host;
 }
 
@@ -488,6 +493,7 @@ class _SheetHostState extends State<_SheetHost>
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     // viewPadding 은 키보드가 먹지 않는 기기 고유 위 여백이다
     final topInset = MediaQuery.viewPaddingOf(context).top;
+    final side = MediaQuery.paddingOf(context);
 
     Widget sheet = PBottomSheetScope(
       controller: this,
@@ -533,6 +539,7 @@ class _SheetHostState extends State<_SheetHost>
             host: this,
             keyboard: keyboard,
             topInset: topInset,
+            sidePadding: EdgeInsets.only(left: side.left, right: side.right),
             relayout: _layoutSignal,
           ),
           child: sheet,

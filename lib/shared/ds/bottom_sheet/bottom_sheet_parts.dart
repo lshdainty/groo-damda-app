@@ -12,6 +12,20 @@ import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
+/// 시트의 왼쪽 끝 — 좌우 안전 영역을 뺀 자리의 가운데에 선다(본문과 같은 세로 줄). 옆 상태 칸이 있는 폴더블처럼
+/// 좌우 안전 영역이 다르면 화면 가운데와 어긋난다. 시트가 그 자리보다 넓으면 화면 안에서 가장 가까운 곳에 서고,
+/// 겹친 안전 영역은 시트 안쪽이 비운다([PBottomSheetSurface]).
+double bottomSheetLeft(
+  double screenWidth,
+  double sheetWidth,
+  EdgeInsets padding,
+) {
+  final centered =
+      padding.left +
+      (screenWidth - padding.left - padding.right - sheetWidth) / 2;
+  return centered.clamp(0.0, math.max(0.0, screenWidth - sheetWidth));
+}
+
 /// 시트 최대 폭 — 그보다 좁은 화면은 화면 폭 전체, 넓으면 가운데(bottom-sheet.yaml root.maxWidth).
 const double kBottomSheetMaxWidth = 480;
 
@@ -120,9 +134,12 @@ class PBottomSheetSurface extends StatelessWidget {
         // 가로로 돌린 폰에서 시트가 화면 폭을 다 쓰면 머리의 닫기가 옆 상태 칸에 들어가지 않게)
         final screenWidth = MediaQuery.sizeOf(context).width;
         final sheetWidth = math.min(constraints.maxWidth, kBottomSheetMaxWidth);
-        final gap = math.max(0.0, (screenWidth - sheetWidth) / 2);
-        final safeLeft = math.max(0.0, media.padding.left - gap);
-        final safeRight = math.max(0.0, media.padding.right - gap);
+        final left = bottomSheetLeft(screenWidth, sheetWidth, media.padding);
+        final safeLeft = math.max(0.0, media.padding.left - left);
+        final safeRight = math.max(
+          0.0,
+          media.padding.right - (screenWidth - left - sheetWidth),
+        );
         return ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: kBottomSheetMaxWidth,
