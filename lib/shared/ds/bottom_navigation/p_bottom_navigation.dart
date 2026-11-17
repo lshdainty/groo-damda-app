@@ -69,6 +69,32 @@ bottomNavigationMetrics({
         addIcon: PSpacing.x6,
       );
 
+/// 펼친 바의 칸 폭 — 놓인 자리 폭 [available] 에서 바의 좌우 여백 · 안전 영역 · 안쪽 여백 · 칸 사이를 빼고 다섯으로 나눈다(최대
+/// 480). 320 화면에서 52.8 이다.
+@visibleForTesting
+double bottomNavigationCellWidth(
+  double available, {
+  EdgeInsets safe = EdgeInsets.zero,
+}) {
+  final m = bottomNavigationMetrics(compact: false, safe: safe);
+  final bar = math.min(
+    kBottomNavigationMaxWidth,
+    available - 2 * m.marginX - safe.left - safe.right,
+  );
+  // 칸은 탭 넷 + 가운데 + 하나, 칸 사이는 넷
+  const cells = kBottomNavigationItems + 1;
+  return (bar - 2 * m.paddingX - (cells - 1) * _cellGap) / cells;
+}
+
+/// 좁은 바인가 — 펼친 칸 폭이 + 원 44 보다 좁다(320 보다 좁은 화면 · Layout "지원 폭"). 줄어든 바처럼 라벨을 숨기고 + 원을 36 으로
+/// 둔다 — 라벨은 칸의 이름으로 남는다. 줄어듦([PBottomNavigationController.compact])과 따로 정해져, 바를 펴도 좁으면 라벨은 숨은
+/// 채다.
+@visibleForTesting
+bool bottomNavigationNarrow(
+  double available, {
+  EdgeInsets safe = EdgeInsets.zero,
+}) => bottomNavigationCellWidth(available, safe: safe) < PTouch.min;
+
 /// 본문 스크롤 아래 여백 — 바의 아래 자리 + 66 + 24. 끝까지 내리면 마지막 줄이 바 위 24 에서 끝난다. 바가 줄어도 그대로 둔다
 /// (줄 때마다 본문이 밀리지 않게) — 안전 영역이 없으면 104, 34 면 118.
 double bottomNavigationInset(BuildContext context) =>
@@ -197,6 +223,10 @@ class PBottomNavigationAdd {
 /// 펴진다. 라벨은 줄어들기 시작할 때 사라지고 다 펴진 뒤(200ms) 나타난다. 모션 줄이기면 바로 바뀐다. 화면 키보드가 올라오면 바를 가린다.
 /// 스낵바는 바 위 8 에 뜬다([PSnackbarAvoidOverlap] 로 감쌌다). 탭 바가 있는 화면에는 Floating Action Button 을 두지 않는다.
 ///
+/// 좁은 바 — 펼친 칸 폭이 + 원 44 보다 좁으면(320 보다 좁은 화면) 줄어든 바처럼 라벨을 숨기고 + 원을 36 으로 둔다. 바 높이 · 여백은
+/// 펼침 · 줄어듦 그대로다. 라벨은 칸의 이름으로 남아 보조 기술이 읽는다. 놓인 자리 폭으로 정하므로 펴기(화면 바뀜 · 위로 스크롤)가
+/// 덮어쓰지 않는다.
+///
 /// 뒤로 가기는 처리하지 않는다 — 콜백만 받는다.
 class PBottomNavigation extends StatefulWidget {
   PBottomNavigation({
@@ -282,12 +312,24 @@ class _PBottomNavigationState extends State<PBottomNavigation> {
   void _activate() => _controller.expand();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final safe = MediaQuery.paddingOf(context);
+      final narrow =
+          constraints.hasBoundedWidth &&
+          constraints.maxWidth > 0 &&
+          bottomNavigationNarrow(constraints.maxWidth, safe: safe);
+      return _bar(context, narrow: narrow);
+    },
+  );
+
+  Widget _bar(BuildContext context, {required bool narrow}) {
     final c = context.colors;
     final media = MediaQuery.of(context);
     final safe = media.padding;
     final compact = _controller.compact;
-    final labelsHidden = compact || !_labelsShown;
+    // 좁으면 펴도 라벨은 숨은 채다 — 줄어듦과 좁음은 서로 덮어쓰지 않는다
+    final labelsHidden = compact || narrow || !_labelsShown;
     final m = bottomNavigationMetrics(compact: compact, safe: safe);
     final reduce = media.disableAnimations;
     final duration = reduce ? Duration.zero : PDuration.d4;
@@ -299,7 +341,8 @@ class _PBottomNavigationState extends State<PBottomNavigation> {
       _cell(items[1], labelsHidden),
       _AddCell(
         add: widget.add,
-        compact: compact,
+        // 좁은 바의 + 는 줄어든 바와 같은 원 36 · + 20
+        compact: compact || narrow,
         onActivate: _activate,
         duration: duration,
       ),
@@ -496,7 +539,13 @@ class _AddCell extends StatelessWidget {
         onTap: onTap,
         child: child,
       ),
-      builder: (context, pressed, size) => Center(
+      // 원은 칸보다 클 수 있다 — 좁은 바(칸 약 29)에서도 원 36 을 찌그러뜨리지 않고 칸 가운데에 둔다. 칸 사이 2 와 옆 칸
+      // 아이콘 둘레까지 걸쳐도 아이콘에는 닿지 않는다. 칸이 44 이상이면(320 이상) 자리 · 크기가 그대로다
+      builder: (context, pressed, size) => OverflowBox(
+        minWidth: 0,
+        minHeight: 0,
+        maxWidth: PTouch.min,
+        maxHeight: PTouch.min,
         // 누름 축소의 기준은 칸이 아니라 원 지름이다 — 펼침 44 · 줄어듦 36
         child: PressScale(
           pressed: pressed,
