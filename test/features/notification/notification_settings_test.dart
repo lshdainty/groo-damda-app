@@ -12,7 +12,9 @@ import 'package:groo_damda_app/features/notification/data/user_preferences_repos
 import 'package:groo_damda_app/features/notification/presentation/notification_settings_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
+import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import '../../support/plain_text.dart';
 
 class _NoAuth extends AuthNotifier {
@@ -42,13 +44,18 @@ UserPreferences _prefs({bool push = true}) => UserPreferences(
 );
 
 class _Repo extends UserPreferencesRepository {
-  _Repo({this.push = true, this.fail = false}) : super(Dio());
+  _Repo({this.push = true, this.fail = false, this.getFails = false})
+    : super(Dio());
   final bool push;
   bool fail;
+  final bool getFails;
   int updates = 0;
 
   @override
-  Future<UserPreferences> get() async => _prefs(push: push);
+  Future<UserPreferences> get() async {
+    if (getFails) throw Exception('RAW_SERVER_TEXT');
+    return _prefs(push: push);
+  }
 
   @override
   Future<UserPreferences> update(
@@ -68,6 +75,7 @@ Future<void> _pump(WidgetTester tester, _Repo repo) async {
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ProviderScope(
+      retry: (_, _) => null,
       overrides: [
         userPreferencesRepositoryProvider.overrideWith((ref) async => repo),
         authProvider.overrideWith(_NoAuth.new),
@@ -127,5 +135,23 @@ void main() {
     expect(row.checked, isTrue, reason: '낙관 반영이 서버 값으로 되돌아온다');
     expect(findText('알림 설정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.'), findsOneWidget);
     expect(findText('다시 시도'), findsNothing);
+  });
+
+  testWidgets('불러오기 실패 — 결과 구역이 상단 바 아래 남은 자리의 세로 가운데(result-section.md)', (
+    tester,
+  ) async {
+    await _pump(tester, _Repo(getFails: true));
+    expect(find.byType(PResultSection), findsOneWidget);
+    expect(findTextContaining('RAW_SERVER_TEXT'), findsNothing);
+    final bar = tester.getRect(find.byType(PTopNavigation)).bottom;
+    final area = tester.getRect(find.byType(CustomScrollView));
+    expect(area.top, closeTo(bar, 1), reason: '본문은 상단 바 아래에서 시작한다');
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - area.top;
+    final below = area.bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '상단 바 바로 아래에 붙지 않는다');
+    expect(above, closeTo(below, 1));
   });
 }

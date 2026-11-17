@@ -61,16 +61,22 @@ class NotificationSettingsScreen extends ConsumerWidget {
           // 받아 둔 값이 있으면 다시 받기 실패에도 내용을 그린다 — 실패 화면은 값이 없을 때만(검수 M2, result-section.md:53)
           skipError: true,
           loading: () => loadingRegionScroll(const _PrefsSkeleton()),
-          error: (e, _) => ListView(
-            children: [
-              PResultSection(
-                kind: PResultKind.failure,
-                title: l.notiSettingsLoadError,
-                description: l.notiSettingsLoadFailedDesc,
-                primaryAction: PResultAction(
-                  label: l.actionRetry,
-                  loading: prefsAsync.loadRetrying,
-                  onPressed: () => ref.invalidate(userPreferencesProvider),
+          // 실패는 상단 바 아래 남은 높이의 세로 가운데(result-section.md "놓인 자리의 가운데" · 프리셋 관리와 같다)
+          error: (e, _) => CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: PResultSection(
+                    kind: PResultKind.failure,
+                    title: l.notiSettingsLoadError,
+                    description: l.notiSettingsLoadFailedDesc,
+                    primaryAction: PResultAction(
+                      label: l.actionRetry,
+                      loading: prefsAsync.loadRetrying,
+                      onPressed: () => ref.invalidate(userPreferencesProvider),
+                    ),
+                  ),
                 ),
               ),
             ],

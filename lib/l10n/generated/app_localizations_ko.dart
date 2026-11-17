@@ -4320,7 +4320,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get savingGoalIconLabel => '아이콘';
 
   @override
-  String get savingGoalEmpty => '아직 저축 목표가 없어요. ‘목표 추가’로 시작해보세요.';
+  String get savingGoalEmptyTitle => '아직 저축 목표가 없어요';
+
+  @override
+  String get savingGoalEmptyDesc => '목표를 만들면 모은 금액과 남은 기간을 여기서 볼 수 있어요.';
 
   @override
   String get savingGoalAchieved => '달성';

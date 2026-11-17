@@ -17,6 +17,7 @@ import 'package:groo_damda_app/features/notification/presentation/notification_s
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import '../../support/plain_text.dart';
 import '../../support/semantics.dart';
 
@@ -70,6 +71,7 @@ Future<void> _pump(
   WidgetTester tester,
   List<AppNotification> items, {
   Future<int> Function()? count,
+  Future<List<AppNotification>> Function()? load,
 }) async {
   tester.view.physicalSize = const Size(390 * 3, 844 * 3);
   tester.view.devicePixelRatio = 3.0;
@@ -92,9 +94,12 @@ Future<void> _pump(
 
   await tester.pumpWidget(
     ProviderScope(
+      retry: (_, _) => null,
       overrides: [
         nowTickProvider.overrideWith(_FixedNow.new),
-        notificationListProvider.overrideWith((ref) async => items),
+        notificationListProvider.overrideWith(
+          (ref) => load != null ? load() : Future.value(items),
+        ),
         unreadCountProvider.overrideWith(
           (ref) => (count ?? () async => 1234)(),
         ),
@@ -247,5 +252,55 @@ void main() {
   testWidgets('알림이 없으면 "아직 알림이 없어요"', (tester) async {
     await _pump(tester, const []);
     expect(findText('아직 알림이 없어요'), findsOneWidget);
+  });
+
+  // 결과 구역은 상단 바 아래 남은 높이의 세로 가운데에 선다 — 위에 붙어 서지 않는다(result-section.md · 프리셋 관리와 같다)
+  void expectCentered(WidgetTester tester) {
+    final bar = tester.getRect(find.byType(PTopNavigation)).bottom;
+    final area = tester.getRect(find.byType(CustomScrollView));
+    expect(area.top, closeTo(bar, 1), reason: '본문은 상단 바 아래에서 시작한다');
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - area.top;
+    final below = area.bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '상단 바 바로 아래에 붙지 않는다');
+    expect(above, closeTo(below, 1));
+  }
+
+  testWidgets('알림 0개 — 결과 구역이 남은 자리의 세로 가운데', (tester) async {
+    await _pump(tester, const []);
+    expectCentered(tester);
+  });
+
+  testWidgets('불러오기 실패 — 결과 구역이 남은 자리의 세로 가운데', (tester) async {
+    await _pump(
+      tester,
+      const [],
+      load: () async => throw Exception('RAW_SERVER_TEXT'),
+    );
+    expect(find.byType(PResultSection), findsOneWidget);
+    expect(findTextContaining('RAW_SERVER_TEXT'), findsNothing);
+    expectCentered(tester);
+  });
+
+  testWidgets('알림 0개 — 가운데 결과 구역에서도 당겨서 새로 고침이 된다', (tester) async {
+    var calls = 0;
+    await _pump(
+      tester,
+      const [],
+      load: () async {
+        calls++;
+        return const <AppNotification>[];
+      },
+    );
+    expect(calls, 1);
+    await tester.fling(
+      find.byKey(const ValueKey('result-section-content')),
+      const Offset(0, 400),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    expect(calls, 2);
   });
 }
