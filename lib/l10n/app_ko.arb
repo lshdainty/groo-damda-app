@@ -2624,6 +2624,7 @@
       }
     }
   },
+  "statsSavingsNoIncome": "수입이 없어 저축률을 낼 수 없어요",
   "statsDailyNetSavings": "일별 순저축",
   "statsMonthlyNetSavings": "월별 순저축",
   "statsCatTrendTitle": "주요 카테고리 월별 추이",

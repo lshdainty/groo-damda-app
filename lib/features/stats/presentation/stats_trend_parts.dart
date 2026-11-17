@@ -11,6 +11,8 @@ import 'package:groo_damda_app/features/stats/presentation/stats_model.dart';
 import 'package:groo_damda_app/features/stats/presentation/stats_parts.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
+import 'package:groo_damda_app/shared/ds/list/list_row.dart'
+    show kPListStackBelowEm;
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
@@ -106,6 +108,7 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
           label: name,
           height: 200,
           hidden: _hidden,
+          dots: trendNeedsDots(data, _hidden),
           categories: [for (final d in data) d.label],
           series: [
             PChartSeries(
@@ -142,6 +145,21 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
     );
   }
 }
+
+/// 0 이 대부분인 날마다의 합 — 켠 계열에서 값(0 이 아닌 점)이 있는 날이 [kTrendDotsMaxValues] 개 이하이면 늘 찍는 점(`dots`)을
+/// 켠다(chart.md "늘 찍는 점"). 곡선(monotone)이 하루 값을 앞뒤 날까지 산 모양으로 이어 그려 그 사이에도 쓴 것처럼 보이므로,
+/// 점이 실제로 값이 있는 날을 짚어 준다. 선 모양은 그대로 곡선이다.
+bool trendNeedsDots(List<TrendPoint> data, Set<String> hidden) {
+  final showIn = !hidden.contains('income');
+  final showOut = !hidden.contains('expense');
+  final valued = data
+      .where((d) => (showIn && d.income != 0) || (showOut && d.expense != 0))
+      .length;
+  return valued > 0 && valued <= kTrendDotsMaxValues;
+}
+
+/// 늘 찍는 점을 켜는 값 개수의 문턱(이하) — chart.md "늘 찍는 점".
+const int kTrendDotsMaxValues = 7;
 
 // ── 저축률 ──────────────────────────────────────────────────────
 
@@ -203,12 +221,11 @@ class StatsSavingsRateSection extends StatelessWidget {
     final avgOut = sumOut ~/ n;
     final avgSave = avgIn - avgOut;
     final single = period.seg == StatsSeg.month;
-    final saveRate = avgIn > 0
-        ? (avgSave / avgIn * 100).clamp(0.0, 100.0)
-        : 0.0;
-    final spendRate = avgIn > 0
-        ? (avgOut / avgIn * 100).clamp(0.0, 100.0)
-        : 0.0;
+    // 수입이 없으면 비율을 낼 수 없다 — 0 으로 나누지 않고 비율 자리를 모두 "—" 로 둔다(0% 로 꾸며 말하지 않는다)
+    final rates = savingsRates(avgIn: avgIn, avgOut: avgOut);
+    final saveRate = rates?.save;
+    final spendRate = rates?.spend;
+    String pct(double? v) => v == null ? kNoRate : formatProgress(v);
     final rows = <({String name, int value, Color dot})>[
       (
         name: single ? l.expTypeIncome : l.statsAvgIncome,
@@ -217,19 +234,24 @@ class StatsSavingsRateSection extends StatelessWidget {
       ),
       (
         name:
-            '${single ? l.expTypeExpense : l.statsAvgExpense} ${formatProgress(spendRate)}',
+            '${single ? l.expTypeExpense : l.statsAvgExpense} ${pct(spendRate)}',
         value: avgOut,
         dot: c.fgCritical,
       ),
       (
         name:
-            '${single ? l.statsNetSavings : l.statsAvgSavings} ${formatProgress(saveRate)}',
+            '${single ? l.statsNetSavings : l.statsAvgSavings} ${pct(saveRate)}',
         value: avgSave,
         dot: c.fgBrand,
       ),
     ];
     final insight = Text(
-      keepAll(l.statsSavingsInsight(formatProgress(saveRate))),
+      keepAll(
+        saveRate == null
+            ? l.statsSavingsNoIncome
+            : l.statsSavingsInsight(formatProgress(saveRate)),
+      ),
+      key: const ValueKey('savings-insight'),
       style: PTypography.t5.copyWith(
         color: c.fgNeutral,
         fontWeight: FontWeight.w700,
@@ -276,7 +298,7 @@ class StatsSavingsRateSection extends StatelessWidget {
             child: Row(
               spacing: PSpacing.x0_5,
               children: [
-                if (spendRate > 0)
+                if (spendRate != null && spendRate > 0)
                   Expanded(
                     flex: math.max(1, (spendRate * 100).round()),
                     child: DecoratedBox(
@@ -286,7 +308,7 @@ class StatsSavingsRateSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (saveRate > 0)
+                if (saveRate != null && saveRate > 0)
                   Expanded(
                     flex: math.max(1, (saveRate * 100).round()),
                     child: DecoratedBox(
@@ -296,7 +318,8 @@ class StatsSavingsRateSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (spendRate <= 0 && saveRate <= 0) const Spacer(),
+                if ((spendRate ?? 0) <= 0 && (saveRate ?? 0) <= 0)
+                  const Spacer(),
               ],
             ),
           ),
@@ -304,49 +327,102 @@ class StatsSavingsRateSection extends StatelessWidget {
         const SizedBox(height: PSpacing.x3),
         for (final (i, r) in rows.indexed) ...[
           if (i > 0) const SizedBox(height: PSpacing.x2),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: PSpacing.x2,
-                      height: PSpacing.x2,
-                      decoration: BoxDecoration(
-                        color: r.dot,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: PSpacing.x2),
-                    Flexible(
-                      child: Text(
-                        keepAll(r.name),
-                        style: PTypography.t5.copyWith(color: c.fgNeutral),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: PSpacing.x3),
-              Flexible(
-                child: Text(
-                  keepAllAmount(statsWon(r.value, masked)),
-                  semanticsLabel: statsWon(r.value, masked),
-                  textAlign: TextAlign.end,
-                  style: PTypography.t5.copyWith(
-                    color: c.fgNeutral,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: tabularFigures,
-                  ),
-                ),
-              ),
-            ],
+          StatsSavingsLegendRow(
+            name: r.name,
+            amount: statsWon(r.value, masked),
+            dot: r.dot,
           ),
         ],
       ],
+    );
+  }
+}
+
+/// 비율 자리에 낼 값이 없을 때(수입 0) — 퍼센트 규칙의 "숫자가 아니면 —" 와 같은 글자.
+const String kNoRate = '—';
+
+/// 저축률 · 지출 비율(0 ~ 100). 평균 수입이 0 이하면 낼 수 없어 null — 0 으로 나누지 않고, NaN · 무한이 화면에 나가지 않는다.
+({double save, double spend})? savingsRates({
+  required int avgIn,
+  required int avgOut,
+}) {
+  if (avgIn <= 0) return null;
+  return (
+    save: ((avgIn - avgOut) / avgIn * 100).clamp(0.0, 100.0),
+    spend: (avgOut / avgIn * 100).clamp(0.0, 100.0),
+  );
+}
+
+/// 저축률 범례 줄 — 점 8 + 이름(t5) · 금액(t5 700, 줄 끝). 도넛 범례 줄([PChartDonutLegend])과 같은 배치다 — 이름이 남은 폭을
+/// 먹고 금액은 줄 오른쪽 끝에 붙는다. 줄 안 폭이 글자 16개(16em)보다 좁으면(큰 글자) 이름이 한 글자 폭이 되지 않게 금액을
+/// 이름 아래로 내린다(같은 문턱 [kPListStackBelowEm]).
+class StatsSavingsLegendRow extends StatelessWidget {
+  const StatsSavingsLegendRow({
+    super.key,
+    required this.name,
+    required this.amount,
+    required this.dot,
+  });
+
+  final String name;
+
+  /// 원까지 — "−29,430원".
+  final String amount;
+  final Color dot;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final marker = Container(
+      width: PSpacing.x2,
+      height: PSpacing.x2,
+      decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+    );
+    final label = Text(
+      keepAll(name),
+      style: PTypography.t5.copyWith(color: c.fgNeutral),
+    );
+    final value = Text(
+      keepAllAmount(amount),
+      key: const ValueKey('savings-legend-amount'),
+      semanticsLabel: amount,
+      textAlign: TextAlign.end,
+      style: PTypography.t5.copyWith(
+        color: c.fgNeutral,
+        fontWeight: FontWeight.w700,
+        fontFeatures: tabularFigures,
+      ),
+    );
+    final narrowBelow =
+        kPListStackBelowEm *
+        MediaQuery.textScalerOf(context).scale(PTypography.t5.fontSize!);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < narrowBelow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                spacing: PSpacing.x2,
+                children: [
+                  marker,
+                  Flexible(child: label),
+                ],
+              ),
+              value,
+            ],
+          );
+        }
+        return Row(
+          children: [
+            marker,
+            const SizedBox(width: PSpacing.x2),
+            Expanded(child: label),
+            const SizedBox(width: PSpacing.x3),
+            value,
+          ],
+        );
+      },
     );
   }
 }
@@ -364,8 +440,8 @@ const double kSavingsSentenceMinEm = 8;
 class StatsSavingsRing extends StatelessWidget {
   const StatsSavingsRing({super.key, required this.rate});
 
-  /// 0 ~ 100
-  final double rate;
+  /// 0 ~ 100. null 이면 낼 수 없는 값(수입 0) — 가운데 "—" · 호 없음.
+  final double? rate;
 
   @override
   Widget build(BuildContext context) {
@@ -381,7 +457,7 @@ class StatsSavingsRing extends StatelessWidget {
           CustomPaint(
             size: Size(size, size),
             painter: SavingsRingPainter(
-              rate: rate,
+              rate: rate ?? 0,
               track: c.bgNeutralWeak,
               progress: c.fgBrand,
             ),
@@ -397,7 +473,7 @@ class StatsSavingsRing extends StatelessWidget {
                 ),
               ),
               Text(
-                formatProgress(rate),
+                rate == null ? kNoRate : formatProgress(rate!),
                 key: const ValueKey('savings-ring-value'),
                 style: PTypography.t9.copyWith(
                   color: c.fgNeutral,

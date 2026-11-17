@@ -4702,6 +4702,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get statsSavingsNoIncome =>
+      'No income, so there\'s no savings rate to show';
+
+  @override
   String get statsDailyNetSavings => 'Daily net savings';
 
   @override
