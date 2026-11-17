@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -162,6 +164,16 @@ Widget _icon(IconData data, double size, Color color) => ExcludeSemantics(
 /// 칩 글 한 줄의 높이(t4 14 / 19) — 위아래 여백 (높이 − 19) ÷ 2 의 19.
 @visibleForTesting
 const double kChipLineHeight = 19;
+
+/// 글 칩 하나의 높이 — 최소 [PChipSize] 높이, 글자를 키우면 글 줄을 따라 늘어난다(03-E 결정 1 C). 칩 줄이 차지할 자리를 미리
+/// 셈하는 부품(Date Picker 시트 본문의 멈추는 높이)이 쓴다.
+double chipHeight(PChipSize size, TextScaler scaler) {
+  final height = PChipMetrics.of(size).height;
+  return math.max(
+    height,
+    scaler.scale(kChipLineHeight) + height - kChipLineHeight,
+  );
+}
 
 /// 가로 스크롤 줄 · Chip Tabs 가 칩에 알려 주는 최대 폭 — 보이는 줄 폭(화면 여백 안). 줄바꿈 묶음 · 그 밖에서는 놓인
 /// 줄 폭이 곧 부모 제약이라 필요 없다(03-E 결정 2 A + 후속).

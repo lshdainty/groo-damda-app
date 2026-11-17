@@ -28,6 +28,9 @@ const _tabular = [FontFeature.tabularFigures()];
 /// (16 / 22 · 700)와 위 라벨(12) — 돈은 가운데서도 줄이지 않는다. 가운데에 들어가지 않으면 가운데 글을 그리지 않고
 /// [onFitChanged] 로 알린다 — 부르는 쪽이 목록 위에 합계를 둔다. 범례는 [PChartDonutLegend] 다.
 ///
+/// 그리는 자리가 [diameter] 보다 좁으면 자리 폭을 지름으로 쓰고 두께 · 가운데 글 자리도 그 지름으로 다시 낸다(320 보다 좁은
+/// 화면 — Layout "지원 폭").
+///
 /// 조각을 누르면 "■ 라벨 값" 툴팁이 뜬다 — 손을 떼도 남고, 다른 곳을 누르면 닫힌다.
 class PDonutChart extends StatefulWidget {
   const PDonutChart({
@@ -89,10 +92,20 @@ class _PDonutChartState extends State<PDonutChart> {
     });
   }
 
+  // 그리는 자리가 지름보다 좁으면(320 보다 좁은 화면) 자리 폭에 맞춰 지름을 줄인다 — 두께도 같은 셈(지름 ÷ 10 + 6)으로 다시
+  // 낸다. 도넛이 자리 밖으로 잘려 나가지 않게(chart.md 도넛 · Layout "지원 폭"). 자리가 지름 이상이면 쓰는 쪽이 준 지름 그대로다
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => _donut(
+      context,
+      constraints.hasBoundedWidth && constraints.maxWidth < widget.diameter
+          ? constraints.maxWidth
+          : widget.diameter,
+    ),
+  );
+
+  Widget _donut(BuildContext context, double d) {
     final c = context.colors;
-    final d = widget.diameter;
     final thickness = chartDonutThickness(d);
     final hole = d - 2 * thickness;
     final slices = [

@@ -184,6 +184,10 @@ class PDatePicker extends StatefulWidget {
 
   /// 시트 본문의 높이 — 이어지는 달을 [PBottomSheet] 에 넣을 때 본문 높이로 준다. 시트는 화면 높이의 90% 이고, 머리(위 24 ·
   /// 제목 30 · 아래 16)와 바닥(위 12 · 버튼 48 · 아래 16)과 안전 영역을 뺀 자리다.
+  ///
+  /// 시트가 낮아(320 보다 좁은 화면에서 바닥 버튼이 위아래로 쌓일 때 · 낮은 화면 · 큰 글자) 이어지는 달이 요일 줄 + 2주보다
+  /// 낮아지면 그 높이에서 멈춘다 — 빠른 기간 칩 줄 + 요일 줄 + 2주([sheetBodyMinHeight]). 시트 본문이 스크롤하고 머리 · 바닥은
+  /// 그대로 보인다(date-picker.md Visible Range · Layout "지원 폭").
   static double sheetBodyHeight(BuildContext context) {
     final media = MediaQuery.of(context);
     const header = PSpacing.x6 + 30 + PSpacing.x4;
@@ -192,8 +196,19 @@ class PDatePicker extends StatefulWidget {
       0.0,
       media.viewPadding.bottom - media.viewInsets.bottom,
     );
-    return math.max(0, media.size.height * 0.9 - header - footer - safeBottom);
+    return math.max(
+      sheetBodyMinHeight(media.textScaler),
+      media.size.height * 0.9 - header - footer - safeBottom,
+    );
   }
+
+  /// 시트 본문이 멈추는 높이 — 빠른 기간 칩 줄(칩 medium + 아래 12) + 요일 줄 + 2주. 글자 배율을 따라 칩 · 요일 줄 · 칸이
+  /// 커지는 만큼 커진다. 빠른 기간이 없는 달력(하루)도 같은 값이다 — 그때는 2주보다 조금 더 남는다.
+  static double sheetBodyMinHeight(TextScaler scaler) =>
+      chipHeight(PChipSize.medium, scaler) +
+      PSpacing.x3 +
+      datePickerRowHeight(scaler, lineHeight: 19) +
+      2 * datePickerCellHeight(scaler);
 
   @override
   State<PDatePicker> createState() => _PDatePickerState();

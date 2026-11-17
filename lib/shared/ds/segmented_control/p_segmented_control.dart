@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/notification_badge/p_notification_badge.dart';
 import 'package:groo_damda_app/shared/ds/checkbox/selection_control.dart';
+import 'package:groo_damda_app/shared/ds/support_width.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 /// 칸 하나 — 고르는 값 · 글 · 막힘 · 알림 점. 칸은 [PSegmentedControl.items] 에 차례대로 놓는다.
@@ -33,12 +34,14 @@ class PSegmentedItem<T> {
 /// 칸 하나의 색 — 고름 · 상태에서 정해진다(segmented-control.yaml 의 고름 규칙). 바탕 · 안쪽 1px 선은 칸에 칠해 알약을
 /// 덮고(누름 · 막힘), 평소에는 투명이다 — 고른 칸의 알약은 트랙이 따로 그린다. 앱 상태는 enabled · pressed · disabled
 /// (웹의 hovered 는 누름과 같고 focused 는 링이다 — 둘 다 앱에는 없다).
+/// [narrow](320 보다 좁은 화면)면 칸 폭이 고르지 않을 수 있어 미끄러지는 알약 대신 고른 칸이 알약의 바탕 · 안쪽 1px 를 칠한다.
 SelectionColors _look(
   PColors c, {
   required bool selected,
   required bool enabled,
   required bool pressed,
   required bool dark,
+  bool narrow = false,
 }) {
   const clear = Color(0x00000000);
   if (!enabled) {
@@ -55,6 +58,12 @@ SelectionColors _look(
     return pressed
         ? (
             background: c.bgLayerDefaultPressed,
+            border: c.strokeNeutralContrast,
+            foreground: c.fgNeutral,
+          )
+        : narrow
+        ? (
+            background: c.bgLayerDefault,
             border: c.strokeNeutralContrast,
             foreground: c.fgNeutral,
           )
@@ -82,6 +91,54 @@ const double _itemMinHeight = 34;
 const double _dotSize = 6;
 const double _dotGap = 2;
 
+/// 칸 글 — t5 16 · 700, 글자 크기 설정을 따르지 않는다(t5-static).
+final TextStyle _labelStyle = PTypography.t5.copyWith(
+  fontWeight: FontWeight.w700,
+);
+
+/// 칸 글에서 가장 긴 낱말의 폭 — 낱말 안에서 꺾지 않으려면 글 자리가 이만큼은 있어야 한다.
+double _longestWord(String label, TextDirection direction) {
+  final painter = TextPainter(
+    text: TextSpan(text: keepAll(label), style: _labelStyle),
+    textDirection: direction,
+    textScaler: TextScaler.noScaling,
+  )..layout();
+  final width = painter.minIntrinsicWidth.ceilToDouble();
+  painter.dispose();
+  return width;
+}
+
+/// 320 보다 좁은 화면의 칸 폭 — 칸은 트랙 폭을 똑같이 나누되 [mins](가장 긴 낱말 + 좌우 여백) 아래로 줄지 않는다. 최소가
+/// 몫보다 큰 칸은 최소로 두고 남은 폭을 나머지 칸이 똑같이 나눈다(웹 grid auto-cols-fr + min-content). 합이 [available] 보다
+/// 크면 트랙이 가로로 스크롤한다.
+@visibleForTesting
+List<double> segmentedNarrowWidths(List<double> mins, double available) {
+  final fixed = List<bool>.filled(mins.length, false);
+  while (true) {
+    var rest = available;
+    var free = 0;
+    for (var i = 0; i < mins.length; i++) {
+      if (fixed[i]) {
+        rest -= mins[i];
+      } else {
+        free++;
+      }
+    }
+    if (free == 0) return List<double>.of(mins);
+    final share = rest / free;
+    var changed = false;
+    for (var i = 0; i < mins.length; i++) {
+      if (!fixed[i] && mins[i] > share) {
+        fixed[i] = true;
+        changed = true;
+      }
+    }
+    if (!changed) {
+      return [for (var i = 0; i < mins.length; i++) fixed[i] ? mins[i] : share];
+    }
+  }
+}
+
 /// Segmented Control — 같은 내용을 2 ~ 4가지로 바로 거르거나 · 정렬하거나 · 다르게 보는 컨트롤. 구조는 SEED Segmented
 /// Control(2026-10-02), 수치 원본은 groo-design `specs/components/segmented-control.yaml`(값은
 /// `test/fixtures/design_spec/segmented-control.json` — 테스트가 위젯이 그 값과 같은지 본다). 웹(desk-front
@@ -107,6 +164,10 @@ const double _dotGap = 2;
 ///
 /// 읽기 — 트랙은 라디오 묶음이고 [semanticLabel] 이 이름이다(웹 aria-label — 없으면 이름 없는 묶음이 된다). 칸은
 /// 라디오(checked) 로 읽고, 알림 점이 있는 칸은 이름 뒤에 "새 소식"([notificationBadgeName] — 호출부가 넘기지 않는다)을 덧붙인다.
+///
+/// 320 보다 좁은 화면(Layout "지원 폭" — 작은 기기 · 분할 화면)에서 칸이 글보다 좁아지면 낱말 안에서 꺾지 않는다 — 칸은 가장 긴
+/// 낱말 + 좌우 여백 아래로 줄지 않고 줄 전체가 가로로 스크롤한다. 칸 폭이 고르지 않을 수 있어 미끄러지는 알약 대신 고른 칸이
+/// 알약의 바탕 · 안쪽 1px 를 칠한다. 320 이상에서는 아무것도 바뀌지 않는다.
 ///
 /// 칸은 2 ~ 4개다 — 5개 이상이면 Chip 의 하나 고르기 줄 · Select. 한 화면에 하나, 바꾸는 내용 바로 위에 둔다. 다른
 /// 구역으로 옮기면 Tabs, 저장할 폼 값은 Chip · Select 다. 칸 높이 34 는 스펙이 정한 값이다(누르는 영역 AAA 44 에는
@@ -156,6 +217,68 @@ class PSegmentedControl<T> extends StatelessWidget {
     final c = context.colors;
     final selectedIndex = items.indexWhere((item) => item.value == value);
     final round = BorderRadius.circular(PRounded.full);
+    final narrow = belowSupportWidth(context);
+    final Widget cells;
+    if (narrow) {
+      cells = LayoutBuilder(
+        builder: (context, constraints) {
+          final direction = Directionality.of(context);
+          final mins = [
+            for (final item in items)
+              _longestWord(item.label, direction) + 2 * itemInset,
+          ];
+          final widths = segmentedNarrowWidths(mins, constraints.maxWidth);
+          return SingleChildScrollView(
+            key: const ValueKey('segmented-scroll'),
+            scrollDirection: Axis.horizontal,
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    SizedBox(
+                      width: widths[i],
+                      child: _SegmentedItem<T>(
+                        item: items[i],
+                        selected: items[i].value == value,
+                        groupEnabled: onChanged != null,
+                        inset: itemInset,
+                        narrow: true,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      cells = Stack(
+        children: [
+          if (selectedIndex >= 0)
+            Positioned.fill(
+              child: _Indicator(index: selectedIndex, count: items.length),
+            ),
+          // 모든 칸이 같은 폭 · 가장 높은 칸에 맞춘 높이
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final item in items)
+                  Expanded(
+                    child: _SegmentedItem<T>(
+                      item: item,
+                      selected: item.value == value,
+                      groupEnabled: onChanged != null,
+                      inset: itemInset,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
     return RadioGroup<T>(
       groupValue: value,
       onChanged: (next) {
@@ -174,34 +297,7 @@ class PSegmentedControl<T> extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(PSpacing.x1),
-              child: Stack(
-                children: [
-                  if (selectedIndex >= 0)
-                    Positioned.fill(
-                      child: _Indicator(
-                        index: selectedIndex,
-                        count: items.length,
-                      ),
-                    ),
-                  // 모든 칸이 같은 폭 · 가장 높은 칸에 맞춘 높이
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final item in items)
-                          Expanded(
-                            child: _SegmentedItem<T>(
-                              item: item,
-                              selected: item.value == value,
-                              groupEnabled: onChanged != null,
-                              inset: itemInset,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              child: cells,
             ),
           ),
         ),
@@ -249,9 +345,13 @@ class _SegmentedItem<T> extends StatefulWidget {
     required this.selected,
     required this.groupEnabled,
     required this.inset,
+    this.narrow = false,
   });
 
   final double inset;
+
+  /// 320 보다 좁은 화면 — 고른 칸이 알약을 칠한다.
+  final bool narrow;
   final PSegmentedItem<T> item;
   final bool selected;
   final bool groupEnabled;
@@ -329,6 +429,7 @@ class _SegmentedItemState<T> extends State<_SegmentedItem<T>>
       selected: selected,
       enabled: enabled,
       pressed: pressed,
+      narrow: widget.narrow,
     );
     // 알림 점은 안 고른 칸에만 — 고르면 점도 "새 소식" 도 사라진다
     final showDot = item.notification && !selected;
@@ -353,10 +454,7 @@ class _SegmentedItemState<T> extends State<_SegmentedItem<T>>
             textAlign: TextAlign.center,
             // 칸 글은 -static 16 — 글자 크기 설정을 따르지 않는다(1.4.4 예외: 4칸이 한 줄에 들게, 03-B 결정 4 A)
             textScaler: TextScaler.noScaling,
-            style: PTypography.t5.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
+            style: _labelStyle.copyWith(color: color),
           ),
           if (showDot)
             // 글 끝에서 2 · 글 위쪽 — 띄워 두므로 칸 폭이 바뀌지 않는다
