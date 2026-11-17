@@ -82,7 +82,14 @@ class SmsParseResult {
   final num? originalAmount;
   final String? originalCurrency;
 
-  bool get isLowConfidence => confidence == 'LOW';
+  /// 사용자가 확인해야 하나 — 서버 확신이 낮거나(LOW), 금액 · 거래처 · 날짜 중 읽지 못한 칸이 있다.
+  /// 서버는 카드사만 알아보면 거래처 · 날짜가 없어도 MEDIUM 을 준다("신한카드 12,000원 승인") —
+  /// 확신만 보면 빈 거래처를 알리지 못한다(웹 `smsNeedsReview` 와 같다, QA damda-full-1116 B3).
+  bool get needsReview =>
+      confidence == 'LOW' ||
+      amount == null ||
+      (merchant?.trim().isEmpty ?? true) ||
+      (expenseDate?.isEmpty ?? true);
 
   factory SmsParseResult.fromJson(Map<String, dynamic> j) => SmsParseResult(
     matched: j['matched'] as bool? ?? false,

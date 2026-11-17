@@ -149,6 +149,8 @@ SmsDraft _with(String confidence) => SmsDraft(
     cancel: false,
     amount: 12000,
     merchant: '스타벅스',
+    // 다 읽은 문자 — 날짜까지 있어야 "확신 높음" 견본이 안내 없이 열린다(빈 칸도 안내 대상)
+    expenseDate: '2026-11-16T13:22',
     categoryRowId: 5,
     categoryName: '식비',
     assetRemembered: true,
