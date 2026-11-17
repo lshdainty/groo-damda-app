@@ -177,6 +177,7 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
+    final result = _result(l);
 
     return Scaffold(
       backgroundColor: c.bgLayerBasement,
@@ -193,57 +194,74 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
       body: PScreenBandBody(
         child: PPullToRefresh(
           onRefresh: () => _reset(),
-          child: ListView(
+          child: CustomScrollView(
             controller: _scroll,
             // 목록 끝 자리가 화면 아래 300 안에서 그려져야 다음 쪽을 부른다(Infinite List)
             scrollCacheExtent: const ScrollCacheExtent.pixels(
               kPInfiniteListReach,
             ),
-            padding: const EdgeInsets.only(bottom: PSpacing.screenBottom),
-            children: [
-              // 밑줄 검색칸 — 머리 아래 8
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  PSpacing.globalGutter,
-                  PSpacing.x2,
-                  PSpacing.globalGutter,
-                  0,
-                ),
-                child: PInput(
-                  variant: PInputVariant.underline,
-                  controller: _kwCtrl,
-                  placeholder: l.cardSearchHintFull,
-                  semanticLabel: l.cardSearchHintFull,
-                  prefixIcon: LucideIcons.search,
-                  clearable: true,
-                  textInputAction: TextInputAction.search,
-                  onChanged: _onSearchChanged,
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 밑줄 검색칸 — 머리 아래 8
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        PSpacing.globalGutter,
+                        PSpacing.x2,
+                        PSpacing.globalGutter,
+                        0,
+                      ),
+                      child: PInput(
+                        variant: PInputVariant.underline,
+                        controller: _kwCtrl,
+                        placeholder: l.cardSearchHintFull,
+                        semanticLabel: l.cardSearchHintFull,
+                        prefixIcon: LucideIcons.search,
+                        clearable: true,
+                        textInputAction: TextInputAction.search,
+                        onChanged: _onSearchChanged,
+                      ),
+                    ),
+                    // 거르기 칩 줄 — 검색칸 아래 12, 화면 끝까지
+                    Padding(
+                      padding: const EdgeInsets.only(top: PSpacing.x3),
+                      child: CardFilterBar(
+                        type: _type,
+                        benefit: _benefit,
+                        onType: (v) => _setFilters(type: v, benefit: _benefit),
+                        onBenefit: (v) => _setFilters(type: _type, benefit: v),
+                      ),
+                    ),
+                    // 개수 줄 — "총 n장" + 오른쪽 단종 카드 포함
+                    PListHeader(
+                      // 불러오는 중 · 첫 쪽 실패에서는 개수를 모른다(앞 조건의 숫자를 말하지 않는다)
+                      title:
+                          _initialLoading || (_error != null && _cards.isEmpty)
+                          ? ''
+                          : l.cardTotalCount(krw(_totalElements)),
+                      trailing: PCheckbox(
+                        size: PCheckboxSize.large,
+                        checked: _includeDiscontinued,
+                        onChanged: _toggleDiscontinued,
+                        label: l.cardIncludeDiscontinued,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              // 거르기 칩 줄 — 검색칸 아래 12, 화면 끝까지
-              Padding(
-                padding: const EdgeInsets.only(top: PSpacing.x3),
-                child: CardFilterBar(
-                  type: _type,
-                  benefit: _benefit,
-                  onType: (v) => _setFilters(type: v, benefit: _benefit),
-                  onBenefit: (v) => _setFilters(type: _type, benefit: v),
+              if (result != null)
+                // 결과(첫 쪽 실패 · 검색 0건)는 개수 줄 아래 남은 높이의 가운데 — 프리셋 관리와 같다(result-section.md)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: result),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.only(bottom: PSpacing.screenBottom),
+                  sliver: SliverList.list(children: _buildResults(l)),
                 ),
-              ),
-              // 개수 줄 — "총 n장" + 오른쪽 단종 카드 포함
-              PListHeader(
-                // 불러오는 중 · 첫 쪽 실패에서는 개수를 모른다(앞 조건의 숫자를 말하지 않는다)
-                title: _initialLoading || (_error != null && _cards.isEmpty)
-                    ? ''
-                    : l.cardTotalCount(krw(_totalElements)),
-                trailing: PCheckbox(
-                  size: PCheckboxSize.large,
-                  checked: _includeDiscontinued,
-                  onChanged: _toggleDiscontinued,
-                  label: l.cardIncludeDiscontinued,
-                ),
-              ),
-              ..._buildResults(l),
             ],
           ),
         ),
@@ -258,38 +276,40 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
     if (mounted) setState(() => _retryingFirst = false);
   }
 
-  /// 결과 영역 — 첫 쪽 Skeleton / 실패 / 0건 / 누적 목록 + 끝 줄.
-  List<Widget> _buildResults(AppLocalizations l) {
-    if (_initialLoading && !_retryingFirst) {
-      return [loadingRegion(const _RowsSkeleton(count: 6))];
-    }
+  /// 결과 구역 — 첫 쪽 실패 / 0건. 목록 · 스켈레톤이면 null(그때는 [_buildResults]).
+  Widget? _result(AppLocalizations l) {
+    if (_initialLoading && !_retryingFirst) return null;
 
     // 첫 쪽을 못 불러왔다 — 목록 자리가 Result Section 의 실패다(예외 · 서버 글은 쓰지 않는다)
     if ((_error != null || _retryingFirst) && _cards.isEmpty) {
-      return [
-        PResultSection(
-          kind: PResultKind.failure,
-          size: PResultSize.large,
-          title: l.cardListLoadFailed,
-          description: l.cardFailDesc,
-          primaryAction: PResultAction(
-            label: l.dsCommonRetry,
-            loading: _retryingFirst,
-            onPressed: _retryFirst,
-          ),
+      return PResultSection(
+        kind: PResultKind.failure,
+        size: PResultSize.large,
+        title: l.cardListLoadFailed,
+        description: l.cardFailDesc,
+        primaryAction: PResultAction(
+          label: l.dsCommonRetry,
+          loading: _retryingFirst,
+          onPressed: _retryFirst,
         ),
-      ];
+      );
     }
 
     if (_cards.isEmpty) {
-      return [
-        PResultSection(
-          size: PResultSize.large,
-          icon: LucideIcons.searchX,
-          title: l.cardNoResults,
-          description: l.cardNoResultsHint,
-        ),
-      ];
+      return PResultSection(
+        size: PResultSize.large,
+        icon: LucideIcons.searchX,
+        title: l.cardNoResults,
+        description: l.cardNoResultsHint,
+      );
+    }
+    return null;
+  }
+
+  /// 목록 영역 — 첫 쪽 Skeleton / 누적 목록 + 끝 줄.
+  List<Widget> _buildResults(AppLocalizations l) {
+    if (_initialLoading && !_retryingFirst) {
+      return [loadingRegion(const _RowsSkeleton(count: 6))];
     }
 
     return [

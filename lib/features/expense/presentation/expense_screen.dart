@@ -611,17 +611,17 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
           ),
         );
       }
+      // 결과 구역(실패 · 이 달 0건 · 걸러서 0건) — 날짜 묶음 목록과 달리 남는 머리 아래 남은 자리 가운데에 선다
+      Widget? result;
       if (failed) {
-        listChildren.add(
-          PResultSection(
-            kind: PResultKind.failure,
-            title: l.expLoadError,
-            description: l.expLoadErrorDesc,
-            primaryAction: PResultAction(
-              label: l.actionRetry,
-              loading: retrying,
-              onPressed: () => ref.invalidate(monthExpensesProvider(_key)),
-            ),
+        result = PResultSection(
+          kind: PResultKind.failure,
+          title: l.expLoadError,
+          description: l.expLoadErrorDesc,
+          primaryAction: PResultAction(
+            label: l.actionRetry,
+            loading: retrying,
+            onPressed: () => ref.invalidate(monthExpensesProvider(_key)),
           ),
         );
       } else if (loading) {
@@ -638,19 +638,17 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
         );
       } else if (groupKeys.isEmpty) {
         // 걸러서 0건(필터 · 자산이 걸림) ↔ 이 달 0건 — 갈래가 다르다. 버튼은 두지 않는다(추가는 탭 바 + 가 맡는다).
-        listChildren.add(
-          filterActive
-              ? PResultSection(
-                  title: l.expFilteredEmpty,
-                  description: l.expFilteredEmptyDesc,
-                  icon: LucideIcons.funnelX,
-                )
-              : PResultSection(
-                  title: l.txmEmptyMonth(_monthLabel(_month)),
-                  description: l.txmEmptyMonthDesc,
-                  icon: LucideIcons.receiptText,
-                ),
-        );
+        result = filterActive
+            ? PResultSection(
+                title: l.expFilteredEmpty,
+                description: l.expFilteredEmptyDesc,
+                icon: LucideIcons.funnelX,
+              )
+            : PResultSection(
+                title: l.txmEmptyMonth(_monthLabel(_month)),
+                description: l.txmEmptyMonthDesc,
+                icon: LucideIcons.receiptText,
+              );
       } else {
         for (var i = 0; i < groupKeys.length; i++) {
           final key = groupKeys[i];
@@ -672,8 +670,9 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
         }
       }
       // 지난달 이용 내역 보기 — 이 달이 비어 있어도 둔다(지난달로 가는 길). 필터 활성 시 숨김(사용자 결정). 줄을 덧붙이지 않고 달을 옮긴다.
+      final trailing = <Widget>[];
       if (!failed && !filterActive) {
-        listChildren.add(
+        trailing.add(
           Padding(
             padding: const EdgeInsets.fromLTRB(
               PSpacing.globalGutter,
@@ -705,18 +704,48 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
           ref.invalidate(monthExpensesProvider(_key));
           await ref.read(monthExpensesProvider(_key).future);
         },
-        child: ListView(
-          key: _listKey,
-          controller: controller,
-          // 위 — 숨는 머리 높이 / 아래 — 플로팅 탭바 보상.
-          padding: EdgeInsets.fromLTRB(
-            0,
-            headerHeight,
-            0,
-            bottomNavigationInset(ctx),
-          ),
-          children: listChildren,
-        ),
+        child: result == null
+            ? ListView(
+                key: _listKey,
+                controller: controller,
+                // 위 — 숨는 머리 높이 / 아래 — 플로팅 탭바 보상.
+                padding: EdgeInsets.fromLTRB(
+                  0,
+                  headerHeight,
+                  0,
+                  bottomNavigationInset(ctx),
+                ),
+                children: [...listChildren, ...trailing],
+              )
+            : CustomScrollView(
+                key: _listKey,
+                controller: controller,
+                slivers: [
+                  // 위 — 숨는 머리 높이 + 이체 못 받음 알림(맨 위에서 말한다)
+                  SliverPadding(
+                    padding: EdgeInsets.only(top: headerHeight),
+                    sliver: SliverList.list(children: listChildren),
+                  ),
+                  // 결과는 남은 높이의 가운데 — 프리셋 관리와 같다(result-section.md). 아래는 떠 있는 탭 바가 덮는 자리라 뺀다.
+                  // 지난달 보기는 결과 바로 아래 그대로(위 24) 한 덩어리로 선다.
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        bottom: bottomNavigationInset(ctx),
+                      ),
+                      child: Center(
+                        child: Column(
+                          key: const ValueKey('expense-result'),
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [result, ...trailing],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       );
     }
 

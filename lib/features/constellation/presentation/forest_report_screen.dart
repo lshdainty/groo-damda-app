@@ -162,43 +162,66 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
         ),
       ),
       body: PScreenContent(
-        child: ListView(
-          children: [
-            ForestWeekPicker(
-              label: rangeLabel,
-              canPrev: _week == 1,
-              canNext: _week == 0,
-              onPrev: () => _goWeek(0),
-              onNext: () => _goWeek(1),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: PSpacing.x3),
-              child: Row(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                key: const ValueKey('forest-report-head'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (var i = 0; i < 7; i++)
-                    Expanded(
-                      child: _DayCell(
-                        date: days[i],
-                        dow: dows[i],
-                        isToday: _ymd(days[i]) == todayYmd,
-                        selected: _ymd(days[i]) == _sel,
-                        future: _ymd(days[i]).compareTo(todayYmd) > 0,
-                        onTap: () => setState(() => _sel = _ymd(days[i])),
-                      ),
+                  ForestWeekPicker(
+                    label: rangeLabel,
+                    canPrev: _week == 1,
+                    canNext: _week == 0,
+                    onPrev: () => _goWeek(0),
+                    onNext: () => _goWeek(1),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: PSpacing.x3,
                     ),
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < 7; i++)
+                          Expanded(
+                            child: _DayCell(
+                              date: days[i],
+                              dow: dows[i],
+                              isToday: _ymd(days[i]) == todayYmd,
+                              selected: _ymd(days[i]) == _sel,
+                              future: _ymd(days[i]).compareTo(todayYmd) > 0,
+                              onTap: () => setState(() => _sel = _ymd(days[i])),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      PSpacing.x6,
+                      PSpacing.x3,
+                      PSpacing.x6,
+                      0,
+                    ),
+                    child: _DateRow(date: selDate, showAsOf: isToday),
+                  ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                PSpacing.x6,
-                PSpacing.x3,
-                PSpacing.x6,
-                0,
+            if (failed)
+              // 실패는 주 · 날 고르기 아래 남은 높이의 가운데 — 프리셋 관리와 같다(result-section.md)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: content),
+              )
+            else
+              // 아래 — 홈 표시줄 자리(옛 ListView 가 저절로 두던 아래 안전 영역)
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.paddingOf(context).bottom,
+                ),
+                sliver: SliverToBoxAdapter(child: content),
               ),
-              child: _DateRow(date: selDate, showAsOf: isToday),
-            ),
-            content,
           ],
         ),
       ),

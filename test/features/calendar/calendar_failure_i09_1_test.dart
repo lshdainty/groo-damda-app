@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/calendar/presentation/calendar_grid.dart
 import 'package:groo_damda_app/features/calendar/presentation/calendar_month_row.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 
@@ -130,5 +131,32 @@ void main() {
     expect(find.byType(CalendarMonthGrid), findsNothing);
     expect(find.byType(PResultSection), findsNothing);
     await tester.pump(const Duration(days: 2));
+  });
+
+  // 실패는 요일 줄 아래 남은 자리(떠 있는 탭 바가 덮는 아래는 뺀다)의 세로 가운데 — 위에 붙어 서지 않는다(result-section.md)
+  testWidgets('일정 질의 실패 — 결과가 요일 줄 아래 남은 자리의 세로 가운데', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      app([
+        userCalendarListProvider.overrideWith((ref) async => const [cal]),
+        monthEventsProvider.overrideWith(
+          (ref, key) async => throw StateError('x'),
+        ),
+      ]),
+    );
+    await tester.pumpAndSettle();
+    final top = tester.getRect(find.byType(CalendarWeekdayRow)).bottom;
+    final bottom =
+        tester.getRect(find.byType(CustomScrollView)).bottom -
+        bottomNavigationInset(tester.element(find.byType(CalendarScreen)));
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - top;
+    final below = bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '요일 줄 바로 아래에 붙지 않는다');
+    expect(above, closeTo(below, 1));
   });
 }

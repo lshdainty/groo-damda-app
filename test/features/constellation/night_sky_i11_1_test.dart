@@ -16,6 +16,10 @@ import 'package:groo_damda_app/features/constellation/presentation/constellation
 import 'package:groo_damda_app/features/constellation/presentation/forest_report_screen.dart';
 import 'package:groo_damda_app/features/constellation/presentation/night_sky_hero.dart';
 import 'package:groo_damda_app/features/constellation/presentation/night_sky_screen.dart';
+import 'package:groo_damda_app/features/todo/application/todo_providers.dart';
+import 'package:groo_damda_app/features/todo/domain/todo.dart';
+import 'package:groo_damda_app/features/todo/application/todo_providers.dart';
+import 'package:groo_damda_app/features/todo/domain/todo.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
@@ -345,6 +349,61 @@ void main() {
     expect(findText('다시 시도'), findsOneWidget);
   });
 
+  // 화면 전체 실패는 머리 아래 남은 높이의 세로 가운데 — 위에 붙어 서지 않는다(result-section.md)
+  void expectCentered(WidgetTester tester, {required double top}) {
+    final bottom = tester.getRect(find.byType(CustomScrollView)).bottom;
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - top;
+    final below = bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '위에 붙어 서지 않는다');
+    expect(above, closeTo(below, 1));
+  }
+
+  testWidgets('오늘 질의 실패 — 결과가 머리 아래 남은 자리의 세로 가운데', (tester) async {
+    await pumpApp(
+      tester,
+      const NightSkyScreen(),
+      overrides: _ov(failToday: true).cast(),
+    );
+    expectCentered(
+      tester,
+      top: tester.getRect(find.byType(CustomScrollView)).top,
+    );
+  });
+
+  testWidgets('오늘 질의 실패 — 가운데 결과 위에서도 당겨서 새로 고침이 된다', (tester) async {
+    var calls = 0;
+    await pumpApp(
+      tester,
+      const NightSkyScreen(),
+      overrides: [
+        todoListProvider.overrideWith((ref, filter) async => const <Todo>[]),
+        constellationTodayProvider.overrideWith((ref) async {
+          calls++;
+          throw 'x';
+        }),
+        constellationSkyProvider.overrideWith((ref) async => _sky()),
+        constellationCollectionProvider.overrideWith(
+          (ref) async => ConstellationCollectionData(
+            entries: _entries(),
+            collectedKinds: 3,
+            totalCollected: 132,
+          ),
+        ),
+      ].cast(),
+    );
+    expect(calls, 1);
+    await tester.fling(
+      find.byKey(const ValueKey('result-section-title')),
+      const Offset(0, 400),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+  });
+
   semTest('별자리 상세 — 이름 제목 · 키-값 줄 · 미수집', (tester) async {
     await pumpApp(
       tester,
@@ -385,6 +444,13 @@ void main() {
         expect(_t('관측 리포트를 불러오지 못했어요'), findsOneWidget);
         expect(findText('다시 시도'), findsOneWidget);
         expect(findText('관측 결과'), findsNothing);
+        // 실패는 주 · 날 고르기 아래 남은 높이의 세로 가운데(result-section.md)
+        expectCentered(
+          tester,
+          top: tester
+              .getRect(find.byKey(const ValueKey('forest-report-head')))
+              .bottom,
+        );
       });
     }
 
