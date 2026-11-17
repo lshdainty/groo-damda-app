@@ -2493,7 +2493,7 @@
     }
   },
   "savingGoalAddAction": "목표 추가",
-  "savingGoalManagePrompt": "설정에서 저축 목표를 추가해보세요.",
+  "savingGoalEmptyTitle": "저축 목표가 없어요",
   "savingGoalNoDeadline": "기한 없음",
   "savingGoalCurrentLabel": "현재 모은 금액",
   "savingGoalIconLabel": "아이콘",
