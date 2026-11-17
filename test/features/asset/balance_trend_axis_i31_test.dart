@@ -79,13 +79,14 @@ void main() {
     ) async {
       await _open(tester, scale);
       expect(find.byType(PLineChart), findsOneWidget);
-      // 머리 금액("−85,000,000원")이 아니라 눈금 글이 그려진다 — 눈금은 줄인 글("−2,500만")
-      // 가리지 않으면 ds 기본 눈금 글(한 축은 한 단위 — 이 축은 −1억 ~ 0 이라 만 단위)
+      // 머리 금액("−85,000,000원")이 아니라 눈금 글이 그려진다 — 눈금은 줄인 글("−0.2억")
+      // 가리지 않으면 ds 기본 눈금 글(한 축은 한 단위 — 이 축은 −1억 ~ 0, 간격 0.2억이라 모두 억 단위)
       expect(
         tester.widget<PLineChart>(find.byType(PLineChart)).axisFormatter,
         isNull,
       );
-      expect(findText('−2,500만'), findsOneWidget);
+      expect(findText('−0.2억'), findsOneWidget);
+      expect(findText('−2,500만'), findsNothing);
     });
   }
 
