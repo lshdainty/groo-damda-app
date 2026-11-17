@@ -169,19 +169,40 @@ void main() {
       expect(formatWon(1234.5), '1,235원');
     });
 
-    test('formatAxisWon — 1만 미만은 쉼표 정수, 그 위는 만 · 억 · 조 한 자리', () {
-      expect(formatAxisWon(0), '0');
-      expect(formatAxisWon(9999), '9,999');
-      expect(formatAxisWon(10000), '1만');
-      expect(formatAxisWon(12000), '1.2만');
-      expect(formatAxisWon(4000000), '400만');
-      expect(formatAxisWon(-30000000), '−3,000만');
-      expect(formatAxisWon(100000000), '1억');
-      expect(formatAxisWon(150000000), '1.5억');
-      expect(formatAxisWon(99999000), '9,999.9만');
-      expect(formatAxisWon(1000000000000), '1조');
-      expect(formatAxisWon(double.nan), '');
-      expect(formatAxisWon(-12000), '−1.2만');
+    test('formatAxisWon — 만 단위 축은 만 · 억 · 조에 소수 한 자리, 1만 미만 축은 쉼표 정수', () {
+      // 한 축의 눈금 글 — 눈금 묶음을 함께 넘긴다(한 축은 한 단위)
+      String one(num v) => formatAxisWon(v, [v]);
+      expect(one(0), '0');
+      expect(one(9999), '9,999');
+      expect(one(10000), '1만');
+      expect(one(12000), '1.2만');
+      expect(one(4000000), '400만');
+      expect(one(-30000000), '−3,000만');
+      expect(one(100000000), '1억');
+      expect(one(150000000), '1.5억');
+      expect(one(99999000), '9,999.9만');
+      expect(one(1000000000000), '1조');
+      expect(one(double.nan), '');
+      expect(one(-12000), '−1.2만');
+    });
+
+    test('formatAxisWon — 한 축은 한 단위: 가장 큰 절댓값이 1억 이상이면 억, 1만 이상이면 만', () {
+      List<String> axis(List<double> ticks) => [
+        for (final v in ticks) formatAxisWon(v, ticks),
+      ];
+      expect(axis([0, 5000, 10000, 15000]), ['0', '0.5만', '1만', '1.5만']);
+      expect(axis([0, 2000, 4000, 6000, 8000]), [
+        '0',
+        '2,000',
+        '4,000',
+        '6,000',
+        '8,000',
+      ]);
+      // 음수 쪽이 1만을 넘어도 그 축 전체가 만 단위
+      expect(axis([-10000, -5000, 0, 5000]), ['−1만', '−0.5만', '0', '0.5만']);
+      // 1억 이상이면 모두 억(5,000만 · 1억 섞임 없음), 조도 같은 셈
+      expect(axis([0, 50000000, 100000000]), ['0', '0.5억', '1억']);
+      expect(axis([0, 500000000000, 1000000000000]), ['0', '0.5조', '1조']);
     });
 
     test('눈금 — 0 은 늘 범위 안, 깔끔한 간격', () {

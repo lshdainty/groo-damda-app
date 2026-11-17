@@ -9,6 +9,7 @@ import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/features/stats/domain/fixed_split.dart';
 import 'package:groo_damda_app/features/stats/domain/stats_models.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/chart/p_chart_values.dart';
 
 // 통계 화면의 기간 · 집계(웹 `stats-model.ts` · `stats-range.ts` 짝). 화면 부품은 이것을 받아 그리기만 한다.
 
@@ -215,8 +216,12 @@ class TrendPoint {
     required this.label,
     required this.income,
     required this.expense,
+    this.tick,
   });
   final String label;
+
+  /// 가로 눈금(월별만) — 차트가 보이는 눈금에만 연도를 붙이도록 월 글 · 연월 글 · 해를 둔다. 일별은 null(연도 없음).
+  final PChartXTick? tick;
   final int income;
   final int expense;
   int get savings => income - expense;
@@ -284,6 +289,12 @@ List<int> statsWeekdaySums(List<Expense> exps) {
 List<String> monthLabels(List<({int year, int month})> rows) =>
     monthTicks(rows);
 
+/// 추이 점들의 가로 눈금 — 모든 점이 눈금([TrendPoint.tick])을 가질 때만(월별). 일별이면 null(차트가 [TrendPoint.label] 을 쓴다).
+List<PChartXTick>? trendXTicks(List<TrendPoint> points) =>
+    points.isEmpty || points.any((p) => p.tick == null)
+    ? null
+    : [for (final p in points) p.tick!];
+
 /// 추이 점 — 일별(단일 월 · 짧은 직접 기간) 또는 월별.
 ///
 /// 가로축은 오늘에서 끝난다 — 오늘 뒤 날짜 · 달을 0 으로 그리지 않는다(chart.md "축"). 오늘을 품은 기간만 오늘(월별은 이번 달)
@@ -319,13 +330,14 @@ List<TrendPoint> trendPoints(
         if (b.year < t.year || (b.year == t.year && b.month <= t.month)) b,
     ];
   }
-  final labels = monthLabels([
-    for (final b in buckets) (year: b.year, month: b.month),
-  ]);
+  final months = [for (final b in buckets) (year: b.year, month: b.month)];
+  final labels = monthLabels(months);
+  final ticks = monthAxisTicks(months);
   return [
     for (final (i, b) in buckets.indexed)
       TrendPoint(
         label: labels[i],
+        tick: ticks[i],
         income: b.totalIncome,
         expense: b.totalExpense,
       ),

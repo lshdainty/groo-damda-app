@@ -69,6 +69,10 @@ class NetWorthChart extends ConsumerWidget {
           label: name,
           height: height,
           categories: labels,
+          // 연도는 보이는 눈금 기준 — 해가 바뀌는 칸이 건너뛰기로 빠지면 다음 보이는 눈금이 이어받는다
+          xTicks: monthAxisTicks([
+            for (final p in points) (year: p.year, month: p.month),
+          ]),
           area: false,
           dots: true,
           series: [
@@ -79,7 +83,8 @@ class NetWorthChart extends ConsumerWidget {
               values: [for (final p in points) p.netWorth.toDouble()],
             ),
           ],
-          axisFormatter: (v) => masked ? kBudgetMask : formatAxisWon(v),
+          // 가리면 눈금도 점 — 안 가리면 ds 기본(한 축은 한 단위)
+          axisFormatter: masked ? (_) => kBudgetMask : null,
           valueFormatter: won,
         ),
         PChartDataTable(

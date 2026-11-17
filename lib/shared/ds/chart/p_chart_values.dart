@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart';
 
 /// Chart 의 값 · 숫자 · 색 — 수치 원본은 groo-design `specs/components/chart.yaml`(값은
 /// `test/fixtures/design_spec/chart.json`), 색은 DESIGN.md v110(차트 10색 — 라이트 팔레트 700 · 다크 800-dark) ·
@@ -153,24 +154,35 @@ String _group(int n) {
 
 int _jsRound(double x) => (x + 0.5).floor();
 
-/// 눈금 글자 — 1만 미만은 쉼표 정수, 그 위는 만 · 억 · 조에 소수 한 자리(.0 은 버린다). 빼기는 U+2212.
-String formatAxisWon(num value) {
+/// 축 단위 — 눈금 가운데 가장 큰 절댓값이 그 값 이상이면 그 축의 모든 눈금이 그 단위다(큰 것부터).
+const List<({double min, String label})> _kAxisUnits = [
+  (min: 1e12, label: '조'),
+  (min: 1e8, label: '억'),
+  (min: 1e4, label: '만'),
+];
+
+/// 눈금 글자 — **한 축은 한 단위**(chart.md "축 · 격자"). 그 축의 눈금([ticks]) 가운데 가장 큰 절댓값이 1억 이상이면
+/// 모든 눈금을 억 단위(0.5억 · 1억 · 1.5억), 1만 이상이면 만 단위(0.5만 · 1만 · 1.5만), 아니면 쉼표 정수(2,000 · 4,000)로
+/// 쓴다(조도 같은 셈). 값 하나만 보고 정하면 한 축에 "5,000 · 1만" · "5,000만 · 1억" 이 섞인다. 소수는 한 자리(.0 은
+/// 버린다) — 눈금 간격이 1 · 2 · 5 × 10ⁿ([niceChartAxis])이라 한 자리 안에서 글자가 눈금 위치와 맞는다. 0 은 "0",
+/// 빼기는 U+2212. [ticks] 는 그 축이 그리는 눈금 그대로다 — 세로축 폭도 같은 눈금 · 같은 글자로 잰다(웹 `formatAxisWon` 과 같다).
+String formatAxisWon(num value, Iterable<num> ticks) {
   final v = value.toDouble();
   if (!v.isFinite) return '';
   final sign = v < 0 ? kChartMinus : '';
   final n = v.abs();
-  if (n < 10000) return sign + _group(_jsRound(n));
-  var scaled = n / 10000;
-  var unit = '만';
-  for (final bigger in const ['억', '조']) {
-    if (_round1(scaled) < 10000) break;
-    scaled /= 10000;
-    unit = bigger;
+  var axisMax = n;
+  for (final t in ticks) {
+    final a = t.toDouble().abs();
+    if (a.isFinite && a > axisMax) axisMax = a;
   }
-  final r = _round1(scaled);
+  final unit = _kAxisUnits.where((u) => axisMax >= u.min).firstOrNull;
+  if (unit == null) return sign + _group(_jsRound(n));
+  if (n == 0) return '0';
+  final r = _round1(n / unit.min);
   final whole = r.truncate();
   final tenth = ((r - whole) * 10).round();
-  return '$sign${_group(whole)}${tenth == 0 ? '' : '.$tenth'}$unit';
+  return '$sign${_group(whole)}${tenth == 0 ? '' : '.$tenth'}${unit.label}';
 }
 
 /// 돈은 줄이지 않고 원까지(툴팁 · 지표 타일 · 도넛 가운데 · 열지도 칸 · 대체 표) — 빼기는 U+2212.
@@ -187,6 +199,9 @@ const double kChartTickSize = 11;
 /// 눈금과 그리는 자리 사이.
 const double kChartTickMargin = PSpacing.x2;
 
+/// 가로 눈금 글자 사이 최소 — `spacing-x2`(8). 겹치면 끝 눈금을 지키고 앞에서부터 건너뛴다(chart.md "큰 글자", 웹과 같다).
+const double kChartTickGap = PSpacing.x2;
+
 const _tabular = [FontFeature.tabularFigures()];
 
 /// 눈금 글자 — 11 / 15 · fg-neutral-subtle(이중 축이면 계열 색) · 고정폭 숫자.
@@ -195,6 +210,56 @@ TextStyle chartTickStyle(PColors c, {PChartColor? color}) =>
       color: color == null ? c.fgNeutralSubtle : color.of(c),
       fontFeatures: _tabular,
     );
+
+// ── 가로 눈금 · 연도 ─────────────────────────────────────────
+
+/// 가로 눈금 하나 — 연도 없는 글([label])과 해가 바뀔 때 쓰는 글([yearLabel]), 그 칸의 해([year]). 해가 없으면 연도를 붙이지 않는다.
+typedef PChartXTick = ({String label, String? yearLabel, int? year});
+
+/// 월 가로 눈금 — "1월" · 해가 바뀔 때 "2026. 1."(영어 "Jan" · "Jan 2026"). 차트가 **보이는 눈금**에 연도를 붙인다.
+List<PChartXTick> monthAxisTicks(List<({int year, int month})> rows) => [
+  for (final r in rows)
+    (
+      label: monthOnly(DateTime(r.year, r.month)),
+      yearLabel: yearMonthDot(DateTime(r.year, r.month)),
+      year: r.year,
+    ),
+];
+
+String _tickWithYear(PChartXTick t, int? prevYear) =>
+    t.yearLabel != null &&
+        t.year != null &&
+        prevYear != null &&
+        t.year != prevYear
+    ? t.yearLabel!
+    : t.label;
+
+/// 모든 눈금이 보일 때의 글 — 해가 바뀌는 첫 눈금에만 연도. 눈금 글자 폭을 재는 기준이다.
+List<String> chartXTickFullLabels(List<PChartXTick> ticks) => [
+  for (var i = 0; i < ticks.length; i++)
+    _tickWithYear(ticks[i], i > 0 ? ticks[i - 1].year : null),
+];
+
+/// 보이는 눈금의 글 — 건너뛴 눈금은 null. 끝(가장 최근) 눈금에서 [interval] 칸마다 남긴다(chart.md "큰 글자").
+///
+/// 연도는 **보이는 눈금** 기준이다: 앞에 보이는 눈금(첫 눈금이면 맨 앞 칸)과 해가 다르면 연도를 붙인다 — 해가 바뀌는 칸이
+/// 건너뛰기로 빠지면 그 뒤 처음 보이는 눈금이 연도를 이어받는다("12월 · 2026. 2. · 4월", 연도가 통째로 사라지지 않는다).
+/// 웹 `chartXTickLabels` 와 같은 셈.
+List<String?> chartXTickLabels(List<PChartXTick> ticks, int interval) {
+  final step = math.max(1, interval);
+  var prevYear = ticks.isEmpty ? null : ticks.first.year;
+  return [
+    for (var i = 0; i < ticks.length; i++)
+      if ((ticks.length - 1 - i) % step != 0)
+        null
+      else
+        () {
+          final label = _tickWithYear(ticks[i], prevYear);
+          if (ticks[i].year != null) prevYear = ticks[i].year;
+          return label;
+        }(),
+  ];
+}
 
 /// 세로축 폭 — 눈금 글자들 가운데 가장 긴 것을 재서 [margin] 을 더한다.
 ///
@@ -234,24 +299,32 @@ double measureText(
 /// 눈금 — [min] ~ [max] 를 [step] 간격으로. 값은 0 을 지난다(0 아래 · 위로 둘 다 있어도 0 에 눈금이 선다).
 typedef PChartAxis = ({double min, double max, double step});
 
-/// 값 범위 [lo] ~ [hi] 를 눈금 네 칸 안팎의 깔끔한 수로 늘린다 — 0 은 늘 범위 안이다. 값이 모두 0 이면 0 ~ 10,000.
+/// 값 범위 [lo] ~ [hi] 를 눈금 네 칸 안팎의 깔끔한 수로 늘린다 — 0 은 늘 범위 안이다. 값이 모두 0 이면 0 ~ 10,000(0.2만 간격).
+///
+/// 간격은 **1 · 2 · 5 × 10ⁿ 계열**만 쓴다(chart.md "축 · 격자") — 2,500 같은 2.5 간격은 만 단위로 줄이면 "0.25만" 이 되어
+/// 소수 한 자리로 반올림한 글자("0.3만")가 눈금 위치와 어긋난다. 2.5 를 빼면 2 와 5 사이가 벌어지므로, 5 를 골랐는데 2 로도
+/// 한 칸 더([intervals] + 1) 안에 들면 2 를 쓴다(0 ~ 1만 → 0 · 0.2만 · … · 1만). 웹 `niceAxis` 와 같은 셈.
 PChartAxis niceChartAxis(double lo, double hi, {int intervals = 4}) {
   var low = math.min(lo, 0.0);
   var high = math.max(hi, 0.0);
-  if (high == low) {
-    return (min: 0, max: 10000, step: 10000 / intervals);
-  }
+  if (high == low) high = low + 10000;
   final raw = (high - low) / intervals;
   final mag = math.pow(10, (math.log(raw) / math.ln10).floor()).toDouble();
   var step = mag * 10;
-  for (final m in const [1.0, 2.0, 2.5, 5.0, 10.0]) {
+  for (final m in const [1.0, 2.0, 5.0, 10.0]) {
     if (mag * m >= raw - 1e-9) {
       step = mag * m;
       break;
     }
   }
-  low = (low / step).floorToDouble() * step;
-  high = (high / step).ceilToDouble() * step;
+  if (step == mag * 5) {
+    final two = mag * 2;
+    final span =
+        (high / two - 1e-9).ceilToDouble() - (low / two + 1e-9).floorToDouble();
+    if (span <= intervals + 1) step = two;
+  }
+  low = (low / step + 1e-9).floorToDouble() * step;
+  high = (high / step - 1e-9).ceilToDouble() * step;
   return (min: low, max: high, step: step);
 }
 

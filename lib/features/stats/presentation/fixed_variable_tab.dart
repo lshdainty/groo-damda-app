@@ -399,8 +399,11 @@ class _RatioBar extends StatelessWidget {
 // ─── 월별 누적 막대 ──────────────────────────────────────────
 
 class _MonthRow {
-  const _MonthRow(this.label, this.fixed, this.variable);
+  const _MonthRow(this.label, this.tick, this.fixed, this.variable);
   final String label;
+
+  /// 가로 눈금 — 차트가 보이는 눈금에만 연도를 붙인다.
+  final PChartXTick tick;
   final int fixed;
   final int variable;
   int get total => fixed + variable;
@@ -409,14 +412,14 @@ class _MonthRow {
 List<_MonthRow> _toRows(
   List<({int year, int month, int total, int fixed})> src,
 ) {
-  final labels = monthLabels([
-    for (final r in src) (year: r.year, month: r.month),
-  ]);
+  final months = [for (final r in src) (year: r.year, month: r.month)];
+  final labels = monthLabels(months);
+  final ticks = monthAxisTicks(months);
   return [
     for (final (i, r) in src.indexed)
       () {
         final s = splitFixed(r.total, r.fixed);
-        return _MonthRow(labels[i], s.fixed, s.variable);
+        return _MonthRow(labels[i], ticks[i], s.fixed, s.variable);
       }(),
   ];
 }
@@ -555,6 +558,7 @@ class _MonthlyStackState extends ConsumerState<_MonthlyStack> {
           stacked: true,
           hidden: _hidden,
           categories: [for (final r in rows) r.label],
+          xTicks: [for (final r in rows) r.tick],
           series: [
             PChartSeries(
               key: 'fixed',

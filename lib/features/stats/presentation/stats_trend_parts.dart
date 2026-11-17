@@ -110,6 +110,7 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
           hidden: _hidden,
           dots: trendNeedsDots(data, _hidden),
           categories: [for (final d in data) d.label],
+          xTicks: trendXTicks(data),
           series: [
             PChartSeries(
               key: 'income',
@@ -590,6 +591,7 @@ class StatsSavingsBarsSection extends StatelessWidget {
           label: name,
           height: 180,
           categories: [for (final d in data) d.label],
+          xTicks: trendXTicks(data),
           series: [
             PChartSeries(
               key: 'savings',
@@ -681,9 +683,8 @@ class StatsCatTrendSection extends StatelessWidget {
       top,
       colorOf: (t) => savedChartColor(byId[t.categoryRowId]?.color),
     );
-    final labels = monthLabels([
-      for (final b in buckets) (year: b.year, month: b.month),
-    ]);
+    final months = [for (final b in buckets) (year: b.year, month: b.month)];
+    final labels = monthLabels(months);
     String money(int v) => statsWon(v, masked);
     final name = l.statsChartCatTrendName(period.label());
     final names = [
@@ -725,6 +726,7 @@ class StatsCatTrendSection extends StatelessWidget {
           height: 180,
           stacked: true,
           categories: labels,
+          xTicks: monthAxisTicks(months),
           series: [
             for (final (i, t) in colored.indexed)
               PChartSeries(

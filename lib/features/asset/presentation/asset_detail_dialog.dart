@@ -1503,7 +1503,8 @@ class _BalanceTrendChart extends StatelessWidget {
               values: [for (final p in list) p.krwOrBalance.toDouble()],
             ),
           ],
-          axisFormatter: (v) => masked ? kBudgetMask : formatAxisWon(v),
+          // 가리면 눈금도 점 — 안 가리면 ds 기본(한 축은 한 단위)
+          axisFormatter: masked ? (_) => kBudgetMask : null,
           valueFormatter: won,
         ),
         PChartDataTable(
