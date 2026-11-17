@@ -34,6 +34,7 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/features/money/presentation/money_bundle_screen.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
 import 'package:groo_damda_app/features/expense/presentation/widgets/transfer_row.dart';
+import 'package:groo_damda_app/shared/ds/bottom_navigation/p_bottom_navigation.dart';
 import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/scroll_auto_hide/p_scroll_auto_hide.dart';
@@ -789,6 +790,72 @@ void main() {
       );
       expect(section.kind, PResultKind.failure);
       expect(section.primaryAction?.label, '다시 시도');
+    });
+
+    // 결과(실패 · 이 달 0건 · 걸러서 0건)는 남는 머리(달 줄 · 주 달력 · 칩 줄) 아래, 떠 있는 탭 바 위 남은 자리의 세로 가운데.
+    // 이 달 0건의 지난달 보기 단추는 결과 바로 아래(위 24) 한 덩어리로 같이 선다(result-section.md)
+    void expectCentered(WidgetTester tester) {
+      final top = tester
+          .getRect(find.byKey(const ValueKey('pscrollautohide-pinned-bottom')))
+          .bottom;
+      final bottom =
+          tester.getRect(find.byType(CustomScrollView)).bottom -
+          bottomNavigationInset(tester.element(find.byType(ExpenseScreen)));
+      final r = tester.getRect(find.byKey(const ValueKey('expense-result')));
+      final above = r.top - top;
+      final below = bottom - r.bottom;
+      expect(above, greaterThan(40), reason: '머리 바로 아래에 붙지 않는다');
+      expect(above, closeTo(below, 1));
+    }
+
+    testWidgets('실패 · 이 달 0건 · 걸러서 0건 — 결과가 남은 자리의 세로 가운데', (tester) async {
+      await _pump(tester, expenses: (_) => Future.error(Exception('x')));
+      expectCentered(tester);
+
+      await tester.pumpWidget(const SizedBox());
+      await _pump(tester, expenses: (_) async => const []);
+      expect(findTextContaining('이용 내역 보기'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('expense-result')),
+          matching: findTextContaining('이용 내역 보기'),
+        ),
+        findsOneWidget,
+        reason: '지난달 보기는 결과 바로 아래 같은 덩어리',
+      );
+      expectCentered(tester);
+
+      await tester.pumpWidget(const SizedBox());
+      await _pump(tester, initialAssetId: 1, expenses: (_) async => const []);
+      expect(_text('조건에 맞는 거래가 없어요'), findsOneWidget);
+      expectCentered(tester);
+    });
+
+    testWidgets('이 달 0건 — 가운데 결과 위에서도 당겨서 새로 고침이 된다', (tester) async {
+      var calls = 0;
+      final now = DateTime.now();
+      await _pump(
+        tester,
+        expenses: (key) async {
+          if (key == (year: now.year, month: now.month)) calls++;
+          return const [];
+        },
+      );
+      final before = calls;
+      await tester.fling(
+        find.byKey(const ValueKey('result-section-title')),
+        const Offset(0, 400),
+        1000,
+      );
+      await tester.pumpAndSettle();
+      expect(calls, before + 1);
+    });
+
+    testWidgets('거래가 있으면 목록은 그대로 머리 아래부터 — 결과 덩어리가 없다', (tester) async {
+      await _pump(tester);
+      expect(find.byKey(const ValueKey('expense-result')), findsNothing);
+      expect(find.byType(ListView), findsWidgets);
+      expect(_text('점심 가게'), findsOneWidget);
     });
 
     testWidgets('달을 옮길 때 달 이름이 먼저 바뀌고 화면 통째 스켈레톤으로 돌아가지 않는다', (tester) async {

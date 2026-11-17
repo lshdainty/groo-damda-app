@@ -115,41 +115,60 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   if (v.abs() < 300) return;
                   _moveMonth(v < 0 ? 1 : -1);
                 },
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (eventsFailed)
-                        PResultSection(
-                          kind: PResultKind.failure,
-                          title: AppLocalizations.of(
-                            context,
-                          ).calEventsLoadFailed,
-                          description: AppLocalizations.of(
-                            context,
-                          ).dashFailDesc,
-                          primaryAction: PResultAction(
-                            label: AppLocalizations.of(context).actionRetry,
-                            loading: eventsAsync.loadRetrying,
-                            onPressed: () =>
-                                ref.invalidate(monthEventsProvider(_key)),
+                child: eventsFailed
+                    // 실패는 요일 줄 아래 남은 높이의 가운데 — 프리셋 관리와 같다(result-section.md). 아래는 떠 있는 탭 바가
+                    // 덮는 자리라 뺀다.
+                    ? CustomScrollView(
+                        slivers: [
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                bottom: bottomNavigationInset(context),
+                              ),
+                              child: Center(
+                                child: PResultSection(
+                                  kind: PResultKind.failure,
+                                  title: AppLocalizations.of(
+                                    context,
+                                  ).calEventsLoadFailed,
+                                  description: AppLocalizations.of(
+                                    context,
+                                  ).dashFailDesc,
+                                  primaryAction: PResultAction(
+                                    label: AppLocalizations.of(
+                                      context,
+                                    ).actionRetry,
+                                    loading: eventsAsync.loadRetrying,
+                                    onPressed: () => ref.invalidate(
+                                      monthEventsProvider(_key),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        )
-                      else if (firstLoading)
-                        loadingRegionWithText(
-                          _CalendarGridSkeleton(month: _focused),
-                        )
-                      else
-                        CalendarMonthGrid(
-                          month: _focused,
-                          events: events,
-                          holidays: holidayMap,
-                          onDayTap: _openDayEventsSheet,
+                        ],
+                      )
+                    : SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            if (firstLoading)
+                              loadingRegionWithText(
+                                _CalendarGridSkeleton(month: _focused),
+                              )
+                            else
+                              CalendarMonthGrid(
+                                month: _focused,
+                                events: events,
+                                holidays: holidayMap,
+                                onDayTap: _openDayEventsSheet,
+                              ),
+                            // 플로팅 탭바 보상 — 마지막 주가 바 뒤로 가려지지 않게(셸 화면 공통). 틈이 아니다.
+                            SizedBox(height: bottomNavigationInset(context)),
+                          ],
                         ),
-                      // 플로팅 탭바 보상 — 마지막 주가 바 뒤로 가려지지 않게(셸 화면 공통). 틈이 아니다.
-                      SizedBox(height: bottomNavigationInset(context)),
-                    ],
-                  ),
-                ),
+                      ),
               ),
             ),
           ],

@@ -124,6 +124,98 @@ void main() {
     expect(findTextContaining('1원은 나'), findsWidgets);
   });
 
+  // 결과(그 탭이 비어 있음 · 실패)는 탭 줄 아래 남은 높이의 세로 가운데 — 위에 붙어 서지 않는다(result-section.md)
+  void expectCentered(WidgetTester tester) {
+    final top = tester
+        .getRect(find.byKey(const ValueKey('dutch-list-band')))
+        .bottom;
+    final bottom = tester.getRect(find.byType(CustomScrollView)).bottom;
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - top;
+    final below = bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '탭 줄 바로 아래에 붙지 않는다');
+    expect(above, closeTo(below, 1));
+  }
+
+  testWidgets('탭이 비면 · 실패하면 결과가 탭 줄 아래 남은 자리의 세로 가운데', (tester) async {
+    tester.view.physicalSize = const Size(780, 1600);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    // 진행 중 하나 — 완료 · 친구 탭은 비었다(완료 탭)
+    await tester.pumpWidget(_app([_d(1)], const DutchPayScreen()));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('result-section-content')), findsNothing);
+    await tester.tap(findTextContaining('완료'));
+    await tester.pumpAndSettle();
+    expectCentered(tester);
+
+    // 아무것도 없으면 진행 중 탭부터 비어 있다
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(_app(const [], const DutchPayScreen()));
+    await tester.pumpAndSettle();
+    expectCentered(tester);
+
+    // 불러오기 실패
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          dutchPayListProvider.overrideWith((ref) async => throw 'x'),
+          hideCardProvider.overrideWith((ref, card) => false),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: const DutchPayScreen(),
+        ),
+      ),
+    );
+    // 요약 띠 숫자 자리는 받기 전 Skeleton 이 계속 돈다 — 정착을 기다리지 않고 시간만 보낸다
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(findText('다시 시도'), findsOneWidget);
+    expectCentered(tester);
+  });
+
+  testWidgets('비면 가운데 결과 위에서도 당겨서 새로 고침이 된다', (tester) async {
+    tester.view.physicalSize = const Size(780, 1600);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    var calls = 0;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          dutchPayListProvider.overrideWith((ref) async {
+            calls++;
+            return const <DutchPay>[];
+          }),
+          hideCardProvider.overrideWith((ref, card) => false),
+        ],
+        child: MaterialApp(
+          theme: GrooTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ko'),
+          home: const DutchPayScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(calls, 1);
+    await tester.fling(
+      find.byKey(const ValueKey('result-section-title')),
+      const Offset(0, 400),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+  });
+
   // iPhone Duo 안전 영역(groo-design Layout "Safe Area" · "콘텐츠 폭") — 탭 줄 · 목록 · [+] 가 옆 상태 칸(오른쪽 84)
   // 밑에 깔리지 않고, 넓은 화면(768 이상)에서는 본문처럼 720 안에 선다. 바탕 띠는 화면 끝까지 간다.
   for (final duo in [
@@ -173,6 +265,20 @@ void main() {
       await tester.tap(findTextContaining('완료'));
       await tester.pumpAndSettle();
       inside(find.byKey(const ValueKey('dutch-2')), '완료 줄');
+
+      // 빈 탭의 결과도 같은 자리 — 남은 자리 가운데에 서도 안전 영역 · 720 안(결과 좌우 48 은 그 안에서)
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(_app(const [], const DutchPayScreen()));
+      await tester.pumpAndSettle();
+      inside(find.byKey(const ValueKey('result-section-content')), '빈 결과');
+      final r = tester.getRect(
+        find.byKey(const ValueKey('result-section-content')),
+      );
+      expect(
+        r.center.dx,
+        closeTo((left + limit) / 2, 0.5),
+        reason: '내용 자리 가운데',
+      );
     });
   }
 }

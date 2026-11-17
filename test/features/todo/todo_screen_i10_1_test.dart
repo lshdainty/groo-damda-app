@@ -1071,6 +1071,75 @@ void main() {
       handle.dispose();
     });
 
+    // 결과(이 달 0건 · 걸러서 0건 · 실패)는 남는 머리(달 줄 · 주 달력 · 꺾쇠) 아래 남은 자리의 세로 가운데(result-section.md)
+    void expectCentered(WidgetTester tester) {
+      final top = tester
+          .getRect(find.byKey(const ValueKey('pscrollautohide-pinned-bottom')))
+          .bottom;
+      final bottom = tester.getRect(find.byType(CustomScrollView)).bottom;
+      final r = tester.getRect(
+        find.byKey(const ValueKey('result-section-content')),
+      );
+      final above = r.top - top;
+      final below = bottom - r.bottom;
+      expect(above, greaterThan(100), reason: '머리 바로 아래에 붙지 않는다');
+      expect(above, closeTo(below, 1));
+    }
+
+    testWidgets('이 달 0건 · 실패 · 걸러서 0건 — 결과가 남은 자리의 세로 가운데', (tester) async {
+      await pumpApp(tester, const TodoScreen(), overrides: todoOverrides());
+      expectCentered(tester);
+
+      await tester.pumpWidget(const SizedBox());
+      await pumpApp(
+        tester,
+        const TodoScreen(),
+        overrides: todoOverrides(listError: true),
+      );
+      expect(findText('다시 시도'), findsOneWidget);
+      expectCentered(tester);
+
+      await tester.pumpWidget(const SizedBox());
+      await pumpApp(
+        tester,
+        const TodoScreen(),
+        overrides: todoOverrides(todos: _basic()),
+      );
+      expect(find.byType(PResultSection), findsNothing);
+      expect(find.byType(ListView), findsWidgets, reason: '목록은 그대로 ListView');
+      final handle = tester.ensureSemantics();
+      await tester.tap(find.bySemanticsLabel('필터'));
+      await tester.pumpAndSettle();
+      await tester.tap(_chip('건강'));
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('완료한 할 일 숨기기'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is PButton && w.label == '완료'),
+      );
+      await tester.pumpAndSettle();
+      expect(findPlain('조건에 맞는 할 일이 없어요'), findsOneWidget);
+      expectCentered(tester);
+      handle.dispose();
+    });
+
+    testWidgets('이 달 0건 — 가운데 결과 위에서도 당겨서 새로 고침이 된다', (tester) async {
+      final repo = FakeTodoRepo();
+      await pumpApp(
+        tester,
+        const TodoScreen(),
+        overrides: todoOverrides(repo: repo),
+      );
+      final before = repo.listReads;
+      await tester.fling(
+        find.byKey(const ValueKey('result-section-title')),
+        const Offset(0, 400),
+        1000,
+      );
+      await tester.pumpAndSettle();
+      expect(repo.listReads, before + 1);
+    });
+
     testWidgets('불러오는 중 — 틀(상단 바 · 달 이름 · 요일)은 그리고 줄 자리만 Skeleton', (
       tester,
     ) async {

@@ -511,18 +511,18 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
     ) {
       _headerH = headerHeight;
       final children = <Widget>[];
+      // 결과 구역(실패 · 이 달 0건 · 걸러서 0건) — 날짜 묶음 목록과 달리 남는 머리 아래 남은 자리 가운데에 선다
+      Widget? result;
       if (failed) {
         // 질의 하나 = 실패 상자 하나 — 원문을 그리지 않는다.
-        children.add(
-          PResultSection(
-            kind: PResultKind.failure,
-            title: l.todoLoadError,
-            description: l.tdmLoadFailedDesc,
-            primaryAction: PResultAction(
-              label: l.actionRetry,
-              loading: retrying,
-              onPressed: () => ref.invalidate(todoListProvider(_allFilter)),
-            ),
+        result = PResultSection(
+          kind: PResultKind.failure,
+          title: l.todoLoadError,
+          description: l.tdmLoadFailedDesc,
+          primaryAction: PResultAction(
+            label: l.actionRetry,
+            loading: retrying,
+            onPressed: () => ref.invalidate(todoListProvider(_allFilter)),
           ),
         );
       } else if (loading) {
@@ -539,19 +539,17 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
         );
       } else if (groupKeys.isEmpty) {
         // 걸러서 0건 ↔ 이 달 0건 — 갈래가 다르다. 버튼은 두지 않는다(추가는 [+] 가 맡는다).
-        children.add(
-          _filter.active
-              ? PResultSection(
-                  title: l.tdmEmptyFilter,
-                  description: l.tdmEmptyFilterDesc,
-                  icon: LucideIcons.funnelX,
-                )
-              : PResultSection(
-                  title: l.tdmEmptyMonth(monthOnly(_month)),
-                  description: l.tdmEmptyMonthDesc,
-                  icon: LucideIcons.listChecks,
-                ),
-        );
+        result = _filter.active
+            ? PResultSection(
+                title: l.tdmEmptyFilter,
+                description: l.tdmEmptyFilterDesc,
+                icon: LucideIcons.funnelX,
+              )
+            : PResultSection(
+                title: l.tdmEmptyMonth(monthOnly(_month)),
+                description: l.tdmEmptyMonthDesc,
+                icon: LucideIcons.listChecks,
+              );
       } else {
         for (var i = 0; i < groupKeys.length; i++) {
           final key = groupKeys[i];
@@ -576,13 +574,26 @@ class _TodoScreenState extends ConsumerState<TodoScreen> {
           invalidateConstellation(ref);
           await ref.read(todoListProvider(_allFilter).future);
         },
-        child: ListView(
-          key: _listKey,
-          controller: controller,
-          // 위 — 숨는 머리 높이 / 아래 — 떠 있는 [+] 가 마지막 줄을 가리지 않게 96(흰 면 안이다).
-          padding: EdgeInsets.fromLTRB(0, headerHeight, 0, 96),
-          children: children,
-        ),
+        child: result == null
+            ? ListView(
+                key: _listKey,
+                controller: controller,
+                // 위 — 숨는 머리 높이 / 아래 — 떠 있는 [+] 가 마지막 줄을 가리지 않게 96(흰 면 안이다).
+                padding: EdgeInsets.fromLTRB(0, headerHeight, 0, 96),
+                children: children,
+              )
+            : CustomScrollView(
+                key: _listKey,
+                controller: controller,
+                slivers: [
+                  SliverToBoxAdapter(child: SizedBox(height: headerHeight)),
+                  // 결과는 숨는 머리 아래 남은 높이의 가운데 — 메모 · 프리셋 관리와 같다(result-section.md)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: result),
+                  ),
+                ],
+              ),
       );
     }
 

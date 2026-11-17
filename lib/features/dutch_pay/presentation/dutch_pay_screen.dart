@@ -71,6 +71,15 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
     final friends = items == null ? const <DutchFriend>[] : dutchFriends(items);
     final recv = dutchReceivable(active);
 
+    // 결과 구역(실패 · 그 탭이 비어 있음)인지 — 줄 · 스켈레톤과 달리 탭 아래 남은 자리 가운데에 선다
+    final result =
+        failed ||
+        (items != null &&
+            switch (_tab) {
+              _DutchTab.active => active.isEmpty,
+              _DutchTab.past => past.isEmpty,
+              _DutchTab.friends => friends.isEmpty,
+            });
     Widget content;
     if (failed) {
       content = PResultSection(
@@ -219,19 +228,40 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
                               ],
                             ),
                           ),
-                          content,
-                          // 떠 있는 [+] 가 마지막 줄을 가리지 않게 96(띠 안)
-                          const SizedBox(height: 96),
+                          if (!result) ...[
+                            content,
+                            // 떠 있는 [+] 가 마지막 줄을 가리지 않게 96(띠 안)
+                            const SizedBox(height: 96),
+                          ],
                         ],
                       ),
                     ),
                   ),
                 ),
-                // 줄이 적을 때 띠 바탕만 화면 끝까지 — 줄은 위 Sliver 가 그려 끝까지 스크롤된다
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: ColoredBox(color: context.colors.bgLayerDefault),
-                ),
+                if (result)
+                  // 결과(비어 있음 · 실패)는 탭 아래 남은 높이의 가운데 — 프리셋 관리와 같다(result-section.md).
+                  // 남은 자리는 높이를 재 보므로(LayoutBuilder 를 쓰는 PScreenContent 를 못 둔다) 같은 안쪽 여백을 직접 뺀다.
+                  SliverLayoutBuilder(
+                    builder: (context, box) => SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ColoredBox(
+                        color: context.colors.bgLayerDefault,
+                        child: Padding(
+                          padding: PScreenContent.insetsOf(
+                            context,
+                            box.crossAxisExtent,
+                          ),
+                          child: Center(child: content),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  // 줄이 적을 때 띠 바탕만 화면 끝까지 — 줄은 위 Sliver 가 그려 끝까지 스크롤된다
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: ColoredBox(color: context.colors.bgLayerDefault),
+                  ),
               ],
             ),
           ),

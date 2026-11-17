@@ -10,6 +10,7 @@ import 'package:groo_damda_app/features/card/domain/card_catalog.dart';
 import 'package:groo_damda_app/features/card/domain/card_catalog_page.dart';
 import 'package:groo_damda_app/features/card/presentation/card_benefits_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
+import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import '../../support/plain_text.dart';
 
 List<CardCatalogSummary> _cards(int from, int count) => [
@@ -110,11 +111,17 @@ void main() {
     await _settle(tester);
     expect(asked, [0]);
     // 끝까지 내리면 둘째 쪽을 부른다(300 안) — 실패한다
-    await tester.drag(find.byType(ListView).first, const Offset(0, -4000));
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, -4000),
+    );
     await _settle(tester);
     await tester.pump(const Duration(milliseconds: 100));
     expect(asked, [0, 1]);
-    await tester.drag(find.byType(ListView).first, const Offset(0, -4000));
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, -4000),
+    );
     await _settle(tester);
     expect(_text('더 불러오지 못했어요.'), findsOneWidget);
     expect(findTextContaining('boom'), findsNothing);
@@ -127,7 +134,10 @@ void main() {
     await _settle(tester);
     expect(asked, [0, 1, 1]);
     expect(_text('더 불러오지 못했어요.'), findsNothing);
-    await tester.drag(find.byType(ListView).first, const Offset(0, -4000));
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, -4000),
+    );
     await _settle(tester);
     expect(_text('지어낸 카드 24'), findsOneWidget);
     expect(_text('카드를 모두 봤어요.'), findsOneWidget);
@@ -139,5 +149,52 @@ void main() {
     expect(_text('지어낸 카드 4'), findsOneWidget);
     expect(_text('카드를 모두 봤어요.'), findsNothing);
     expect(_text('더 불러오지 못했어요.'), findsNothing);
+  });
+  // 결과(첫 쪽 실패 · 0건)는 개수 줄 아래 남은 높이의 세로 가운데 — 위에 붙어 서지 않는다(result-section.md)
+  void expectCentered(WidgetTester tester) {
+    final top = tester.getRect(find.byType(PListHeader)).bottom;
+    final bottom = tester.getRect(find.byType(CustomScrollView)).bottom;
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - top;
+    final below = bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '개수 줄 바로 아래에 붙지 않는다');
+    expect(above, closeTo(below, 1));
+  }
+
+  testWidgets('첫 쪽 실패 · 0건 — 결과가 개수 줄 아래 남은 자리의 세로 가운데', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_app({0: () => Exception('boom')}));
+    await _settle(tester);
+    expect(_text('카드를 불러오지 못했어요'), findsOneWidget);
+    expectCentered(tester);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(_app({0: () => _page(0, 0, last: true)}));
+    await _settle(tester);
+    expect(_text('카드를 불러오지 못했어요'), findsNothing);
+    expectCentered(tester);
+  });
+
+  testWidgets('0건 — 가운데 결과 위에서도 당겨서 새로 고침이 된다', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final asked = <int>[];
+    await tester.pumpWidget(
+      _app({0: () => _page(0, 0, last: true)}, asked: asked),
+    );
+    await _settle(tester);
+    expect(asked, [0]);
+    await tester.fling(
+      find.byKey(const ValueKey('result-section-title')),
+      const Offset(0, 400),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    expect(asked, [0, 0]);
   });
 }

@@ -60,26 +60,32 @@ class NightSkyScreen extends ConsumerWidget {
 
     final Widget body;
     if (todayQ.loadFailed) {
-      body = ListView(
-        children: [
-          PScreenSection(
-            padding: EdgeInsets.zero,
-            child: PResultSection(
-              kind: PResultKind.failure,
-              title: l.constFailToday,
-              description: l.constLoadFailedDesc,
-              primaryAction: PResultAction(
-                label: l.actionRetry,
-                loading: todayQ.loadRetrying,
-                onPressed: () {
-                  ref.invalidate(constellationTodayProvider);
-                  ref.invalidate(constellationSkyProvider);
-                  ref.invalidate(constellationCollectionProvider);
-                },
+      // 화면 전체 실패 — 머리 아래가 흰 면 하나이고 결과는 그 남은 높이의 가운데(프리셋 관리와 같다, result-section.md).
+      // 당겨서 새로 고침은 그대로 된다.
+      body = PScreenBandBody(
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: PResultSection(
+                  kind: PResultKind.failure,
+                  title: l.constFailToday,
+                  description: l.constLoadFailedDesc,
+                  primaryAction: PResultAction(
+                    label: l.actionRetry,
+                    loading: todayQ.loadRetrying,
+                    onPressed: () {
+                      ref.invalidate(constellationTodayProvider);
+                      ref.invalidate(constellationSkyProvider);
+                      ref.invalidate(constellationCollectionProvider);
+                    },
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     } else {
       body = ListView(
