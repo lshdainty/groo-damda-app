@@ -1598,7 +1598,7 @@
   "authLoginPrompt": "Sign in with your 그루 account.",
   "authSsoLogin": "Sign in with 그루",
   "authLoginFailed": "Could not sign in.",
-  "authLoginExpired": "Your sign-in timed out. Please sign in again.",
+  "authLoginAccessDenied": "We couldn't verify your sign-in. Sign in again with a 그루 account that can use 그루 담다.",
   "authLoginError": "Could not complete sign-in.",
   "authSecurityNotHttps": "The connection to the sign-in server is not secure.",
   "dutchSendRequest": "Request",

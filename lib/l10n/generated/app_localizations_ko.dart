@@ -2598,7 +2598,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authLoginFailed => '로그인하지 못했어요.';
 
   @override
-  String get authLoginExpired => '로그인 시간이 지났어요. 다시 로그인해주세요.';
+  String get authLoginAccessDenied =>
+      '로그인 정보를 확인하지 못했어요. 그루 담다를 쓸 수 있는 그루 계정으로 다시 로그인해주세요.';
 
   @override
   String get authLoginError => '로그인을 처리하지 못했어요.';

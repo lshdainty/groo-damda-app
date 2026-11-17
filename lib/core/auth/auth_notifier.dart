@@ -65,6 +65,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
   ///
   /// [forcedPrompt] 는 이 코드를 받아 온 시도가 이미 `prompt=login` 이었는지다. 폼을
   /// 강제하고도 또 거절됐으면 다시 보내도 같다 — 맴돌지 않고 보통의 로그인 실패로 올린다.
+  ///
+  /// 담다를 쓸 수 없는 그루 계정(`AUTH_003`)으로 거절되면 강제 표시만 남기고 로그인 실패로
+  /// 올린다 — 저절로 다시 시작하지 않는다(고르는 건 사용자다). 그루 계정 로그인이 살아 있어
+  /// 표시 없이 다시 누르면 같은 계정으로 코드가 나와 같은 거절이 끝없이 되풀이된다. 표시가
+  /// 있으면 다음 로그인 버튼이 `prompt=login` 으로 폼을 띄워 계정을 바꿀 수 있다.
   Future<bool> exchangeAndLoginWithCode({
     required String code,
     required String codeVerifier,
@@ -91,6 +96,9 @@ class AuthNotifier extends AsyncNotifier<User?> {
         state = const AsyncData(null);
         return false;
       }
+      if (e is ApiException && e.isServiceAccessDenied) {
+        await _markForceLoginPromptQuietly();
+      }
       state = AsyncError(e, st);
       rethrow;
     }
@@ -108,6 +116,15 @@ class AuthNotifier extends AsyncNotifier<User?> {
     } catch (e) {
       debugPrint('OAuth restart with prompt=login failed: $e');
       return false;
+    }
+  }
+
+  /// 강제 표시를 남긴다 — 저장에 실패해도 원래 거절을 그대로 올리도록 삼킨다.
+  Future<void> _markForceLoginPromptQuietly() async {
+    try {
+      await ref.read(oauthFlowStoreProvider).markForceLoginPrompt();
+    } catch (e) {
+      debugPrint('OAuth mark force prompt failed: $e');
     }
   }
 

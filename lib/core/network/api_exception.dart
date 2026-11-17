@@ -48,6 +48,16 @@ class ApiException implements Exception {
   /// [isWithdrawn] 과 같이 문구가 아니라 **코드로** 본다.
   bool get isLoggedOutSsoLogin => code == 'AUTH_030';
 
+  /// 그루 계정에 담다를 쓸 수 있는 권한이 없는가 — 인가코드 교환에서는 담다를 쓸 수 없는
+  /// 그루 계정(서비스 목록에 담다가 없다)으로 로그인했다는 뜻이다.
+  ///
+  /// desk-back `TokenExchangeService` 가 403 · `AUTH_003`(AUTH_ACCESS_DENIED)으로 거절한다
+  /// (해지한 계정은 따로 [isWithdrawn]). 그루 계정 로그인이 살아 있으면 다시 눌러도 같은 계정으로
+  /// 코드가 나와 같은 거절이 되풀이된다 — 다음 로그인은 폼을 강제해 계정을 바꿀 수 있게 한다.
+  ///
+  /// [isWithdrawn] 과 같이 문구가 아니라 **코드로** 본다.
+  bool get isServiceAccessDenied => code == 'AUTH_003';
+
   /// DioException 을 ApiException 으로 정규화.
   factory ApiException.fromDio(DioException e) {
     final res = e.response;

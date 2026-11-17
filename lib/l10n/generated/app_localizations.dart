@@ -4771,11 +4771,11 @@ abstract class AppLocalizations {
   /// **'로그인하지 못했어요.'**
   String get authLoginFailed;
 
-  /// No description provided for @authLoginExpired.
+  /// No description provided for @authLoginAccessDenied.
   ///
   /// In ko, this message translates to:
-  /// **'로그인 시간이 지났어요. 다시 로그인해주세요.'**
-  String get authLoginExpired;
+  /// **'로그인 정보를 확인하지 못했어요. 그루 담다를 쓸 수 있는 그루 계정으로 다시 로그인해주세요.'**
+  String get authLoginAccessDenied;
 
   /// No description provided for @authLoginError.
   ///

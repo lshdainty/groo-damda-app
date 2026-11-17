@@ -8,6 +8,8 @@
 // 붙잡는 것:
 //  - AUTH_030 → 강제 표시를 남기고 prompt=login 으로 **한 번** 다시 시작한다. 로그인 화면에 실패 글이 뜨지 않는다
 //  - 폼을 강제한 시도가 또 AUTH_030 → 다시 시작하지 않고 보통의 로그인 실패다(맴돌지 않는다)
+//  - AUTH_003(담다를 쓸 수 없는 그루 계정) → 저절로 다시 시작하지 않고 로그인 실패 + 강제 표시. 다음 로그인 버튼이
+//    prompt=login 으로 폼을 띄워 계정을 바꿀 수 있다(같은 계정으로 끝없이 되풀이되던 결함)
 //  - 다른 오류는 그대로 로그인 실패다 — 다시 시작하지도, 강제 표시를 남기지도 않는다
 //  - 강제 표시는 직접 누른 로그아웃이 남기고 로그인 성공이 지운다
 //
@@ -355,9 +357,86 @@ void main() {
     });
   });
 
+  group('AUTH_003 — 담다를 쓸 수 없는 그루 계정으로 로그인했다', () {
+    // 서버는 그루 계정의 서비스 목록에 담다가 없으면 403 · AUTH_003 으로 거절한다. 그루 계정 로그인이
+    // 살아 있어 폼 없이 다시 누르면 같은 계정으로 코드가 나와 같은 거절이 끝없이 되풀이됐다.
+    test('저절로 다시 시작하지 않고 로그인 실패다 — 강제 표시를 남기고 접근 거절 글을 말한다', () async {
+      final h = await _Harness.start();
+      h.server.reject('other', status: 403, error: 'AUTH_003');
+      await h.pressLogin();
+      expect(
+        h.launched.single.queryParameters.containsKey('prompt'),
+        isFalse,
+        reason: '전제 — 평소 로그인에는 prompt 가 없다',
+      );
+
+      await expectLater(
+        h.comeBackWith('other'),
+        throwsA(_apiError('AUTH_003')),
+      );
+
+      expect(h.launched, hasLength(1), reason: '저절로 브라우저를 다시 열지 않는다');
+      expect(h.auth.error, _apiError('AUTH_003'));
+      expect(await h.store.isForceLoginPrompt(), isTrue);
+      expect(await h.store.restorePending(), isNull);
+      expect(
+        loginErrorMessage(h.auth.error, _l),
+        _l.authLoginAccessDenied,
+        reason: '"로그인 시간이 지났어요" 가 아니라 담다를 쓸 수 있는 계정으로 다시 로그인하라는 글',
+      );
+    });
+
+    test('거절 뒤 로그인 버튼은 prompt=login 이고, 다른 계정으로 들어오면 표시가 지워진다', () async {
+      final h = await _Harness.start();
+      h.server.reject('other', status: 403, error: 'AUTH_003');
+      await h.pressLogin();
+      await expectLater(
+        h.comeBackWith('other'),
+        throwsA(_apiError('AUTH_003')),
+      );
+
+      await h.pressLogin();
+      expect(h.launched, hasLength(2));
+      expect(h.launched.last.queryParameters['prompt'], 'login');
+
+      expect(await h.comeBackWith('damda-user'), OAuthCallbackResult.exchanged);
+      expect(h.auth.value, _user);
+      expect(await h.store.isForceLoginPrompt(), isFalse);
+
+      // 다음 평소 로그인에는 다시 prompt 가 없다
+      await h.pressLogin();
+      expect(h.launched.last.queryParameters.containsKey('prompt'), isFalse);
+    });
+
+    test('폼에서 고른 계정도 담다를 못 쓰면 — 또 로그인 실패, 맴돌지 않고 다음 버튼도 폼이다', () async {
+      final h = await _Harness.start();
+      h.server
+        ..reject('other', status: 403, error: 'AUTH_003')
+        ..reject('other-again', status: 403, error: 'AUTH_003');
+      await h.pressLogin();
+      await expectLater(
+        h.comeBackWith('other'),
+        throwsA(_apiError('AUTH_003')),
+      );
+      await h.pressLogin();
+      expect(h.launched.last.queryParameters['prompt'], 'login');
+
+      await expectLater(
+        h.comeBackWith('other-again'),
+        throwsA(_apiError('AUTH_003')),
+      );
+
+      expect(h.launched, hasLength(2), reason: '누른 만큼만 열린다 — 저절로 다시 가지 않는다');
+      expect(h.exchanges, 2);
+      expect(await h.store.isForceLoginPrompt(), isTrue);
+      await h.pressLogin();
+      expect(h.launched.last.queryParameters['prompt'], 'login');
+    });
+  });
+
   group('다른 오류는 그대로 로그인 실패다', () {
     for (final (status, error) in [
-      (401, 'AUTH_003'),
+      (401, 'AUTH_004'),
       (403, 'USER_021'),
       (400, 'AUTH_099'),
       (500, 'COMMON_500'),
