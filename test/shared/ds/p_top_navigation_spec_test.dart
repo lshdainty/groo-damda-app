@@ -685,7 +685,7 @@ void main() {
       );
     });
 
-    testWidgets('위 안전 영역만큼 높아지고 바탕은 끝까지 · 내용은 그 아래 56 · 좌우 안전 영역을 더한다', (
+    testWidgets('위 안전 영역만큼 높아지고 바탕은 위 끝까지 · 내용은 그 아래 56 · 좌우는 안전 영역 안', (
       tester,
     ) async {
       for (final mode in Brightness.values) {
@@ -717,7 +717,9 @@ void main() {
         final first = tester.getRect(_iconButtonBox.first);
         expect(first.top, 47 + 6, reason: '버튼은 안전 영역 아래 56 안에 가운데로 선다');
         expect(first.left, 6 + 20);
-        expect(bar.right - tester.getRect(_iconButtonBox.last).right, 6 + 12);
+        // 좌우 안전 영역은 화면 칸(PScreenSideGutter)이 비운다 — 바는 그 안쪽에 서고 바 끝에서 6
+        expect(bar.left, 20);
+        expect(bar.right - tester.getRect(_iconButtonBox.last).right, 6);
         final c = tester.widget<Container>(
           find.byKey(const ValueKey('top-navigation')),
         );

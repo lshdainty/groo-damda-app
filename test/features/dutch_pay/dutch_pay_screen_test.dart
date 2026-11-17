@@ -150,10 +150,10 @@ void main() {
       final left = wide ? (inner - 720) / 2 : 0.0;
       final limit = wide ? left + 720 : inner;
 
-      // 바탕 띠는 화면 끝까지
+      // 바탕 띠는 상태 칸 앞에서 끊긴다 — 좌우 안전 영역 칸은 뒷배경(groo-design Layout "Safe Area")
       expect(
         tester.getRect(find.byKey(const ValueKey('dutch-list-band'))).right,
-        size.width,
+        inner,
       );
 
       void inside(Finder f, String what) {

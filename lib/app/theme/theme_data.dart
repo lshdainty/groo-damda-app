@@ -6,6 +6,7 @@ import 'package:groo_damda_app/app/theme/radius.dart';
 import 'package:groo_damda_app/app/theme/spacing.dart';
 import 'package:groo_damda_app/app/theme/tokens.dart';
 import 'package:groo_damda_app/app/theme/typography.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_side_gutter.dart';
 
 /// 그루 담다 모바일 앱의 light/dark ThemeData 빌더.
 ///
@@ -81,6 +82,8 @@ abstract final class GrooTheme {
 
     return base.copyWith(
       extensions: [tokens, colors, shadows, gradients],
+      // 화면 라우트는 모두 좌우 안전 영역 칸 안에 선다 — 그 칸은 뒷배경만(groo-design Layout "Safe Area")
+      pageTransitionsTheme: kSideGutterPageTransitionsTheme,
       // 스크롤바 — 전역 한 벌(groo-design scroll-area.yaml). 막대는 `stroke-neutral-solid` 6px 알약, 바탕은 투명이고
       // 올리거나 끌어도 모양이 바뀌지 않는다. 앱은 스크롤할 때만 보이는 플랫폼 스크롤바를 둔다(웹은 넘치면 늘 보인다).
       scrollbarTheme: ScrollbarThemeData(
