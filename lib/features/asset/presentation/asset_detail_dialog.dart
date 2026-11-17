@@ -20,6 +20,7 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart' as dsb;
 import 'package:groo_damda_app/shared/ds/menu_sheet/p_menu_sheet.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart' as dsk;
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
@@ -251,7 +252,8 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
                 ],
         ),
       ),
-      body: SafeArea(top: false, child: body),
+      // 흰 면은 화면 끝까지, 내용은 좌우 안전 영역 안 · 넓은 화면(768 이상)에서 720 가운데(groo-design Layout "콘텐츠 폭")
+      body: PScreenContent(child: SafeArea(top: false, child: body)),
     );
   }
 }
