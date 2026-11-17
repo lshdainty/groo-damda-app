@@ -16,19 +16,32 @@ class OAuthFlowStore {
 
   static const _kVerifier = 'oauth_pending_verifier';
   static const _kState = 'oauth_pending_state';
+  static const _kPendingForced = 'oauth_pending_forced_prompt';
   static const _kForcePrompt = 'oauth_force_login_prompt';
 
   /// 브라우저로 나가기 직전 호출 — 재시도 시 이전 흐름은 덮어쓴다.
+  ///
+  /// [forcedPrompt] 는 이 시도를 `prompt=login` 으로 보냈는지다. verifier · state 와 수명이
+  /// 같다 — 교환이 `AUTH_030` 으로 거절됐을 때 "폼을 강제하고도 거절됐는가" 를 가르는
+  /// 기준이라(그러면 다시 보내지 않는다), 브라우저에 가 있는 동안 프로세스가 죽어도 남아야 한다.
   Future<void> savePending({
     required String verifier,
     required String state,
+    bool forcedPrompt = false,
   }) async {
     await _storage.write(key: _kVerifier, value: verifier);
     await _storage.write(key: _kState, value: state);
+    // 지난 시도의 값이 남지 않게 아닐 때는 지운다.
+    if (forcedPrompt) {
+      await _storage.write(key: _kPendingForced, value: '1');
+    } else {
+      await _storage.delete(key: _kPendingForced);
+    }
   }
 
   /// 진행 중 흐름 복원. 없으면 null (콜백이 왔는데 흐름이 없다 = 무시 대상).
-  Future<({String verifier, String state})?> restorePending() async {
+  Future<({String verifier, String state, bool forcedPrompt})?>
+  restorePending() async {
     final verifier = await _storage.read(key: _kVerifier);
     final state = await _storage.read(key: _kState);
     if (verifier == null ||
@@ -37,18 +50,24 @@ class OAuthFlowStore {
         state.isEmpty) {
       return null;
     }
-    return (verifier: verifier, state: state);
+    final forced = await _storage.read(key: _kPendingForced);
+    return (verifier: verifier, state: state, forcedPrompt: forced == '1');
   }
 
   /// 교환을 마쳤거나(성공) 흐름을 소비했으면 지운다 — 같은 콜백의 중복 배달 방어.
   Future<void> clearPending() async {
     await _storage.delete(key: _kVerifier);
     await _storage.delete(key: _kState);
+    await _storage.delete(key: _kPendingForced);
   }
 
   /// 로그아웃 직후 첫 로그인은 무음 재인증 없이 폼을 강제한다(prompt=login).
   /// 브라우저 쿠키(SSO Refresh)는 앱이 지울 수 없어, 이 표시가 없으면 로그아웃해도
   /// 로그인 버튼 한 번에 세션이 조용히 되살아난다.
+  ///
+  /// 남기는 자리는 둘이다 — 로그아웃(`AuthNotifier.logout`), 그리고 교환이 `AUTH_030`
+  /// 으로 거절됐을 때(`AuthNotifier.exchangeAndLoginWithCode`). 뒤쪽은 이 표시가 사라진
+  /// 기기(앱 데이터 삭제 등)를 서버의 거절이 대신 잡아 준 경우다.
   Future<void> markForceLoginPrompt() =>
       _storage.write(key: _kForcePrompt, value: '1');
 

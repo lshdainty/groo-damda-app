@@ -38,6 +38,16 @@ class ApiException implements Exception {
   /// 문구가 아니라 **코드로** 본다 — 문구는 로케일마다 다르고 서버가 고치면 따라 바뀐다.
   bool get isWithdrawn => code == 'USER_021';
 
+  /// 담다에서 로그아웃한 그루 계정 로그인으로 돌아온 인가코드인가(보안 점검 CLI-6).
+  ///
+  /// 담다 로그아웃은 담다만 끝내고 그루 계정 로그인은 남긴다. desk-back 은 로그아웃한 그
+  /// 로그인을 기억해 두고, 같은 로그인으로 돌아온 `/auth/exchange-code` 를 401 · 이 코드로
+  /// 거절한다 — 비밀번호를 다시 넣어 새 로그인을 만들어야 들어온다. 이걸 못 알아보면 보통의
+  /// 로그인 실패로 보이고, 다시 눌러도 같은 거절만 되풀이된다.
+  ///
+  /// [isWithdrawn] 과 같이 문구가 아니라 **코드로** 본다.
+  bool get isLoggedOutSsoLogin => code == 'AUTH_030';
+
   /// DioException 을 ApiException 으로 정규화.
   factory ApiException.fromDio(DioException e) {
     final res = e.response;

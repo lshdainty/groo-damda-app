@@ -89,9 +89,14 @@ void main() {
   test('핸들러는 /linked 를 로그인 흐름으로 넘기지 않는다', () async {
     final handler = OAuthCallbackHandler(
       store: OAuthFlowStore(),
-      exchange: ({required code, required codeVerifier}) async {
-        fail('연동 복귀가 로그인 교환을 탔다');
-      },
+      exchange:
+          ({
+            required code,
+            required codeVerifier,
+            required forcedPrompt,
+          }) async {
+            fail('연동 복귀가 로그인 교환을 탔다');
+          },
     );
     expect(
       await handler.handle(

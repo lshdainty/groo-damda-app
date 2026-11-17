@@ -4,14 +4,18 @@
 //  - 마크: 나무 56 + 8 + 이름, 이름이 화면 제목(머리말 1단계), 나무는 의미 트리에 없다
 //  - 버튼: ds Button large · neutralSolid, 바닥은 흰 면, 브라우저를 여는 동안 딤 · 원 덮개가 없다
 //  - 실패: Callout(critical) 이 버튼 위에, 서버 글을 붙이지 않는다
+//  - 시작: 버튼은 로그인 시작(OAuthLoginLauncher)을 탄다 — 로그아웃 표시가 있으면 prompt=login
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
+import 'package:groo_damda_app/core/auth/oauth_login_launcher.dart';
 import 'package:groo_damda_app/core/auth/user.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/auth/presentation/login_screen.dart';
@@ -21,6 +25,7 @@ import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
+import '../../support/memory_secure_storage.dart';
 import '../../support/plain_text.dart';
 
 class _FakeAuth extends AuthNotifier {
@@ -38,6 +43,7 @@ Future<_FakeAuth> _pump(
   bool dark = false,
   double width = 360,
   double textScale = 1,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = Size(width * 3, 780 * 3);
   tester.view.devicePixelRatio = 3.0;
@@ -45,7 +51,7 @@ Future<_FakeAuth> _pump(
   final auth = _FakeAuth();
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [authProvider.overrideWith(() => auth)],
+      overrides: [authProvider.overrideWith(() => auth), ...overrides],
       child: MaterialApp(
         theme: dark ? GrooTheme.dark() : GrooTheme.light(),
         locale: Locale(locale),
@@ -197,6 +203,62 @@ void main() {
       lessThan(tester.getRect(find.byType(PButton)).top),
       reason: '자리는 버튼 위',
     );
+  });
+
+  // 버튼은 로그인 시작(OAuthLoginLauncher)을 탄다 — 교환이 AUTH_030 으로 거절됐을 때의 다시 시작과 같은 길이다.
+  testWidgets('버튼을 누르면 그루 계정 로그인 주소로 나간다 — 로그아웃 표시가 있으면 prompt=login', (
+    tester,
+  ) async {
+    final store = OAuthFlowStore(MemorySecureStorage());
+    final launched = <Uri>[];
+    await _pump(
+      tester,
+      overrides: [
+        oauthLoginLauncherProvider.overrideWithValue(
+          OAuthLoginLauncher(
+            store: store,
+            launch: (url) async {
+              launched.add(url);
+              return true;
+            },
+          ),
+        ),
+      ],
+    );
+
+    await tester.tap(find.byType(PButton));
+    await tester.pumpAndSettle();
+    expect(launched.single.path, '/api/v1/oauth2/authorize');
+    expect(launched.single.queryParameters.containsKey('prompt'), isFalse);
+    expect(await store.restorePending(), isNotNull);
+
+    // 브라우저에서 돌아와 다시 누를 수 있다(버튼이 로딩에 묶여 있지 않다).
+    await store.markForceLoginPrompt();
+    await tester.tap(find.byType(PButton));
+    await tester.pumpAndSettle();
+    expect(launched, hasLength(2));
+    expect(launched.last.queryParameters['prompt'], 'login');
+    expect(find.byType(PCallout), findsNothing);
+  });
+
+  testWidgets('브라우저를 열지 못하면 버튼 위 Callout — 다시 누를 수 있다', (tester) async {
+    await _pump(
+      tester,
+      overrides: [
+        oauthLoginLauncherProvider.overrideWithValue(
+          OAuthLoginLauncher(
+            store: OAuthFlowStore(MemorySecureStorage()),
+            launch: (_) async => false,
+          ),
+        ),
+      ],
+    );
+
+    await tester.tap(find.byType(PButton));
+    await tester.pumpAndSettle();
+
+    expect(findText('로그인을 처리하지 못했어요.'), findsOneWidget);
+    expect(tester.widget<PButton>(find.byType(PButton)).loading, isFalse);
   });
 
   // 로딩은 누름 색 위 원이다 — 막힌(disabled) 회색 위가 아니다(웹 button.tsx: aria-busy + 누름 삼킴).
