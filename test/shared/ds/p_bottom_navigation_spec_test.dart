@@ -554,6 +554,22 @@ void main() {
       expect(c.compact, isTrue);
     });
 
+    testWidgets('펴면(expand) 거리를 다시 센다 — 아래로 20 을 더 내려야 준다', (tester) async {
+      final (c, s) = await mount(tester);
+      s.jumpTo(300);
+      await tester.pump();
+      expect(c.compact, isTrue);
+      c.expand();
+      await tester.pump();
+      expect(c.compact, isFalse);
+      s.jumpTo(301); // 아래로 1 — 남은 거리로 바로 줄면 안 된다
+      await tester.pump();
+      expect(c.compact, isFalse);
+      s.jumpTo(320); // 아래로 20
+      await tester.pump();
+      expect(c.compact, isTrue);
+    });
+
     testWidgets('맨 위 40 안으로 오면 펴진다', (tester) async {
       final (c, s) = await mount(tester);
       s.jumpTo(300);

@@ -73,6 +73,9 @@ class _MobileScaffoldState extends ConsumerState<MobileScaffold> {
     final path = shellActivePath(router.uri, router.matchedLocation);
     if (path != _lastPath) {
       _lastPath = path;
+      // 보는 화면이 바뀌었다(branch 또는 가계부 묶음 탭) — 줄어든 바를 편다. 줄어든 채로
+      // 옮기면 라벨 없는 바만 남는다(bottom-navigation.md "줄어들기").
+      _tabBarCompact.expand();
       Future.microtask(() {
         if (!mounted) return;
         // 지금 어느 화면이 앞인지 적어 둔다 — 상주 화면이 "내가 보이는가" 를 알 수
