@@ -304,4 +304,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(offset(), before);
   });
+
+  group('보는 화면이 바뀌면 탭 바가 펴진다(bottom-navigation.md 줄어들기)', () {
+    PBottomNavigationController bar(WidgetTester tester) => tester
+        .widget<PBottomNavigation>(find.byType(PBottomNavigation))
+        .controller!;
+
+    testWidgets('줄어든 채로 경로가 바뀌면 펴진다', (tester) async {
+      final router = await pump(tester, '/home');
+      await tester.drag(find.byType(ListView).first, const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(bar(tester).compact, isTrue);
+
+      // 탭 칸을 누르지 않고 주소만 바꾼다 — 칸 누르기의 펴짐과 가른다
+      router.go('/expense');
+      await tester.pumpAndSettle();
+      expect(bar(tester).compact, isFalse);
+    });
+
+    testWidgets('줄어든 채로 가계부 묶음 탭을 옮기면 펴진다', (tester) async {
+      final router = await pump(tester, '/expense');
+      bar(tester).setCompact(true);
+      await tester.pumpAndSettle();
+      expect(bar(tester).compact, isTrue);
+
+      await tester.tap(findText('통계').first);
+      await tester.pumpAndSettle();
+      expect(router.state.uri.queryParameters['tab'], 'stats');
+      expect(bar(tester).compact, isFalse);
+    });
+
+    testWidgets('같은 화면의 쿼리만 바뀌면(?month=) 줄어든 채로 남는다', (tester) async {
+      final router = await pump(tester, '/expense');
+      bar(tester).setCompact(true);
+      await tester.pumpAndSettle();
+      router.go('/expense?month=2026-10');
+      await tester.pumpAndSettle();
+      expect(router.state.uri.queryParameters['month'], '2026-10');
+      expect(bar(tester).compact, isTrue);
+    });
+  });
 }

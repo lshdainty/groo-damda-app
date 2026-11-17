@@ -100,8 +100,13 @@ class PBottomNavigationController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 펴진다 — 줄어든 바를 누르거나 칸을 눌렀을 때.
-  void expand() => setCompact(false);
+  /// 펴진다 — 줄어든 바를 누르거나 칸을 눌렀을 때, 보는 화면이 바뀌었을 때(셸이 부른다).
+  /// 스크롤 거리도 다시 센다 — 줄던 거리가 남아 있으면 아래로 1 만 내려도 바로 다시 준다.
+  void expand() {
+    _direction = 0;
+    _distance = 0;
+    setCompact(false);
+  }
 
   /// 스크롤 알림을 센다. 알림은 위로 흘려보낸다(false).
   bool handleScroll(ScrollNotification notification) {
