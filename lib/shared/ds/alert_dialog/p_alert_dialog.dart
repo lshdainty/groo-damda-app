@@ -186,7 +186,14 @@ class PAlertDialogView extends StatelessWidget {
       },
       child: out,
     );
-    return Center(child: out);
+    // 좌우 안전 영역을 뺀 자리의 가운데 — 옆 상태 칸이 있는 폴더블에서도 본문과 같은 세로 줄에 선다
+    return Padding(
+      padding: EdgeInsets.only(
+        left: media.padding.left,
+        right: media.padding.right,
+      ),
+      child: Center(child: out),
+    );
   }
 
   Widget _footer() {

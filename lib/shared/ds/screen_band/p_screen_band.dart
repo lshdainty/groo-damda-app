@@ -86,15 +86,19 @@ class PScreenSection extends StatelessWidget {
 /// 띠 화면의 본문 전체를 **하나의 흰 띠**로 감싼다 — 머리 바로 아래부터 화면 폭 흰 띠가 남은 높이를 채운다.
 /// 묶음마다 띠를 나누지 않은 화면(목록 · 폼)이 쓰는 한 장 띠다. 묶음이 나뉘는 화면은 [PScreenBands] 로 띠를 직접 쌓는다.
 class PScreenBandBody extends StatelessWidget {
-  const PScreenBandBody({super.key, required this.child});
+  const PScreenBandBody({super.key, required this.child, this.color});
 
   final Widget child;
+
+  /// 띠 바탕 — 기본 `bg-layer-default`. 강조 줄 하나로 된 띠(List Highlight)는 줄의 강조 바탕을 띠가 화면 끝까지
+  /// 깐다 — 줄이 칠하는 바탕은 안전 영역 안 내용 자리에서 멈춘다.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
       key: const ValueKey('screen-band-body'),
-      color: context.colors.bgLayerDefault,
+      color: color ?? context.colors.bgLayerDefault,
       child: SizedBox(
         width: double.infinity,
         child: PScreenContent(child: child),

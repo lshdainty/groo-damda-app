@@ -16,6 +16,7 @@ import 'package:groo_damda_app/shared/ds/alert_dialog/p_alert_dialog.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
@@ -63,34 +64,37 @@ class UpdateGateScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: context.colors.bgLayerDefault,
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(PSpacing.x6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: PSpacing.x6),
-                _Header(release: release, currentBuild: status.currentBuild),
-                if (forced) ...[
+          // 넓은 화면(768 이상)에서는 본문 720 가운데
+          child: PScreenContent(
+            child: Padding(
+              padding: const EdgeInsets.all(PSpacing.x6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const SizedBox(height: PSpacing.x6),
-                  PCallout(
-                    tone: PCalloutTone.warning,
-                    description: AppLocalizations.of(
-                      context,
-                    ).updateRequiredDesc,
+                  _Header(release: release, currentBuild: status.currentBuild),
+                  if (forced) ...[
+                    const SizedBox(height: PSpacing.x6),
+                    PCallout(
+                      tone: PCalloutTone.warning,
+                      description: AppLocalizations.of(
+                        context,
+                      ).updateRequiredDesc,
+                    ),
+                  ],
+                  const SizedBox(height: PSpacing.x8),
+                  // 바뀐 내용은 길 수 있어 남는 공간을 다 쓰고 그 안에서 스크롤한다.
+                  // 노트가 비어 있으면(옛 version.json) 섹션 자체를 숨긴다.
+                  Expanded(child: _Changes(notes: release.notes)),
+                  const SizedBox(height: PSpacing.x6),
+                  _Actions(
+                    release: release,
+                    forced: forced,
+                    onCancel: () =>
+                        _cancel(context, ref, status: status, forced: forced),
                   ),
                 ],
-                const SizedBox(height: PSpacing.x8),
-                // 바뀐 내용은 길 수 있어 남는 공간을 다 쓰고 그 안에서 스크롤한다.
-                // 노트가 비어 있으면(옛 version.json) 섹션 자체를 숨긴다.
-                Expanded(child: _Changes(notes: release.notes)),
-                const SizedBox(height: PSpacing.x6),
-                _Actions(
-                  release: release,
-                  forced: forced,
-                  onCancel: () =>
-                      _cancel(context, ref, status: status, forced: forced),
-                ),
-              ],
+              ),
             ),
           ),
         ),
