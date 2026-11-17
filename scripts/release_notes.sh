@@ -40,7 +40,7 @@
 #
 #      여러 줄이면 `; ` 로 잇는다.
 #
-#      `Release-Note: skip` 이면 그 커밋은 아예 뺀다 — feat·fix 로 찍혔지만 쓰는
+#      `Release-Note: skip` 이면 그 커밋은 아예 뺀다(`none` · `없음` 도 같다) — feat·fix 로 찍혔지만 쓰는
 #      사람 눈에는 아무 일도 안 일어난 변경(내부 정리, 테스트 보강 등)에 쓴다.
 #
 # 노트가 없는 feat·fix 는 **목록에서 빠진다.** 제목 폴백은 없다 — 개발자 말투
@@ -129,7 +129,9 @@ printf '%s' "${RAW}" | awk -v RS="${RS}" -v FS="${US}" -v max="${MAX_LINES}" '
     }
 
     # 노트가 없으면 뺀다. `skip` 과 같은 취급이다 — 제목 폴백은 없다.
-    if (note == "" || tolower(note) == "skip" || tolower(note) == "none") next
+    # "없음" 도 같다 — 한국어로 "노트 없음" 을 뜻하려고 쓴 값이 업데이트 화면에 "· 없음" 으로
+    # 실린 적이 있다(2026-11-17, 720ec280).
+    if (note == "" || tolower(note) == "skip" || tolower(note) == "none" || note == "없음") next
 
     key = type "\034" note
     if (key in seen) next        # 같은 문장이 두 번(리버트·재적용) 나오면 한 번만
