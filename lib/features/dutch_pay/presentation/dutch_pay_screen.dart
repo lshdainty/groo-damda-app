@@ -21,6 +21,7 @@ import 'package:groo_damda_app/shared/ds/progress/p_progress.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
+import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/tag_group/p_tag_group.dart';
@@ -178,48 +179,51 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
                 const SliverToBoxAdapter(
                   child: SizedBox(height: kScreenBandGap),
                 ),
-                // 목록 띠 — 화면 끝까지. Segmented 위 12 · 아래 4 는 목록과 한 덩어리
+                // 목록 띠 — 바탕은 화면 끝까지, 내용(Segmented · 줄)은 안전 영역 안 · 넓은 화면 720 가운데.
+                // Segmented 위 12 · 아래 4 는 목록과 한 덩어리
                 SliverToBoxAdapter(
                   child: ColoredBox(
                     key: const ValueKey('dutch-list-band'),
                     color: context.colors.bgLayerDefault,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            PSpacing.globalGutter,
-                            PSpacing.x3,
-                            PSpacing.globalGutter,
-                            PSpacing.x1,
+                    child: PScreenContent(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              PSpacing.globalGutter,
+                              PSpacing.x3,
+                              PSpacing.globalGutter,
+                              PSpacing.x1,
+                            ),
+                            child: PSegmentedControl<_DutchTab>(
+                              value: _tab,
+                              onChanged: (v) => setState(() => _tab = v),
+                              semanticLabel: l.dutchTitle,
+                              items: [
+                                PSegmentedItem(
+                                  value: _DutchTab.active,
+                                  label:
+                                      '${l.dutchTabActive}${waiting ? '' : ' ${active.length}'}',
+                                ),
+                                PSegmentedItem(
+                                  value: _DutchTab.past,
+                                  label:
+                                      '${l.dutchTabPast}${waiting ? '' : ' ${past.length}'}',
+                                ),
+                                PSegmentedItem(
+                                  value: _DutchTab.friends,
+                                  label:
+                                      '${l.dutchTabFriends}${waiting ? '' : ' ${friends.length}'}',
+                                ),
+                              ],
+                            ),
                           ),
-                          child: PSegmentedControl<_DutchTab>(
-                            value: _tab,
-                            onChanged: (v) => setState(() => _tab = v),
-                            semanticLabel: l.dutchTitle,
-                            items: [
-                              PSegmentedItem(
-                                value: _DutchTab.active,
-                                label:
-                                    '${l.dutchTabActive}${waiting ? '' : ' ${active.length}'}',
-                              ),
-                              PSegmentedItem(
-                                value: _DutchTab.past,
-                                label:
-                                    '${l.dutchTabPast}${waiting ? '' : ' ${past.length}'}',
-                              ),
-                              PSegmentedItem(
-                                value: _DutchTab.friends,
-                                label:
-                                    '${l.dutchTabFriends}${waiting ? '' : ' ${friends.length}'}',
-                              ),
-                            ],
-                          ),
-                        ),
-                        content,
-                        // 떠 있는 [+] 가 마지막 줄을 가리지 않게 96(띠 안)
-                        const SizedBox(height: 96),
-                      ],
+                          content,
+                          // 떠 있는 [+] 가 마지막 줄을 가리지 않게 96(띠 안)
+                          const SizedBox(height: 96),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -231,10 +235,13 @@ class _DutchPayScreenState extends ConsumerState<DutchPayScreen> {
               ],
             ),
           ),
-          PFloatingActionButton(
-            icon: LucideIcons.plus500,
-            label: l.dutchCreate,
-            onPressed: () => showDutchPayCreateDialog(context),
+          // 떠 있는 [+] 도 본문과 같은 자리(안전 영역 안 · 넓은 화면 720 안)에 선다
+          PScreenContent(
+            child: PFloatingActionButton(
+              icon: LucideIcons.plus500,
+              label: l.dutchCreate,
+              onPressed: () => showDutchPayCreateDialog(context),
+            ),
           ),
         ],
       ),
