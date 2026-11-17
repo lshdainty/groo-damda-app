@@ -97,25 +97,25 @@ void main() {
     expect(findText('500만'), findsWidgets);
   });
 
-  testWidgets('1만 아래 눈금에도 콤마가 붙는다 — 웹 `8,000` 과 같은 글자', (tester) async {
-    // 8,000 → nice ceil 5틱: 0 / 2,000 / 4,000 / 6,000 / 8,000
-    await _pumpTrend(tester, 8000);
+  testWidgets('1만 아래 눈금에도 콤마가 붙는다 — 웹 `4,000` 과 같은 글자', (tester) async {
+    // 지출 4,000 → 1,000 간격. 수입(0) 축이 0 ~ 1만 다섯 칸이라 두 축이 칸 수를 맞춰 0 ~ 5,000 —
+    // 가장 큰 눈금이 1만 미만이라 모두 쉼표 정수다(한 축은 한 단위)
+    await _pumpTrend(tester, 4000);
 
-    expect(findText('8,000'), findsWidgets);
-    expect(findText('8000'), findsNothing);
-    expect(findText('2,000'), findsWidgets);
+    expect(findText('4,000'), findsWidgets);
+    expect(findText('4000'), findsNothing);
+    expect(findText('1,000'), findsWidgets);
   });
 
-  testWidgets('만 눈금의 소수 첫째 자리를 깎지 않는다 — `2.5만` 이지 `3만` 이 아니다', (tester) async {
-    // 100,000 → nice ceil 5틱: 0 / 25,000 / 50,000 / 75,000 / 100,000
-    // 축 전용 함수는 만을 정수로 반올림해 `3만` · `8만` 으로 찍었다 — 눈금 간격이
-    // 2.5만인데 라벨은 3-5-8-10 으로 뛰어 축을 읽으면 값이 틀린다.
+  testWidgets('만 눈금은 1 · 2 · 5 간격 — `2.5만` 같은 간격 없이 눈금값 그대로', (tester) async {
+    // 100,000 → 2만 간격: 0 / 2만 / 4만 / 6만 / 8만 / 10만(chart.md "축 · 격자" — 2.5 간격은 쓰지 않는다).
+    // 옛 축 전용 함수는 만을 정수로 반올림해 2.5만을 `3만` 으로 찍었다 — 글자가 눈금값과 달랐다.
     await _pumpTrend(tester, 100000);
 
-    expect(findText('2.5만'), findsWidgets);
-    expect(findText('7.5만'), findsWidgets);
+    expect(findText('2만'), findsWidgets);
+    expect(findText('8만'), findsWidgets);
+    expect(findText('2.5만'), findsNothing);
     expect(findText('3만'), findsNothing);
-    expect(findText('8만'), findsNothing);
   });
 
   testWidgets('억 눈금에 `.0` 을 남기지 않는다 — 도넛 중앙과 같은 `5억`', (tester) async {

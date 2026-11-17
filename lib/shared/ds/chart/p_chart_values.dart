@@ -154,13 +154,18 @@ String _group(int n) {
 
 int _jsRound(double x) => (x + 0.5).floor();
 
-/// 만 단위로 쓰는 축의 문턱 — 눈금 가운데 가장 큰 절댓값이 이 이상이면 그 축의 모든 눈금이 만 단위다.
-const double _kAxisMan = 10000;
+/// 축 단위 — 눈금 가운데 가장 큰 절댓값이 그 값 이상이면 그 축의 모든 눈금이 그 단위다(큰 것부터).
+const List<({double min, String label})> _kAxisUnits = [
+  (min: 1e12, label: '조'),
+  (min: 1e8, label: '억'),
+  (min: 1e4, label: '만'),
+];
 
-/// 눈금 글자 — **한 축은 한 단위**(chart.md "축 · 격자"). 그 축의 눈금([ticks]) 가운데 가장 큰 절댓값이 1만 이상이면
-/// 모든 눈금을 만 단위(0.5만 · 1만 · 1.5만 — 억 · 조에 이르는 값은 그 단위)로, 아니면 모두 쉼표 정수(2,500 · 5,000)로 쓴다.
-/// 값 하나만 보고 정하면 한 축에 "5,000 · 1만" 이 섞인다. 소수는 한 자리(.0 은 버린다), 0 은 "0", 빼기는 U+2212.
-/// [ticks] 는 그 축이 그리는 눈금 그대로다 — 세로축 폭도 같은 눈금 · 같은 글자로 잰다(웹 `formatAxisWon` 과 같다).
+/// 눈금 글자 — **한 축은 한 단위**(chart.md "축 · 격자"). 그 축의 눈금([ticks]) 가운데 가장 큰 절댓값이 1억 이상이면
+/// 모든 눈금을 억 단위(0.5억 · 1억 · 1.5억), 1만 이상이면 만 단위(0.5만 · 1만 · 1.5만), 아니면 쉼표 정수(2,000 · 4,000)로
+/// 쓴다(조도 같은 셈). 값 하나만 보고 정하면 한 축에 "5,000 · 1만" · "5,000만 · 1억" 이 섞인다. 소수는 한 자리(.0 은
+/// 버린다) — 눈금 간격이 1 · 2 · 5 × 10ⁿ([niceChartAxis])이라 한 자리 안에서 글자가 눈금 위치와 맞는다. 0 은 "0",
+/// 빼기는 U+2212. [ticks] 는 그 축이 그리는 눈금 그대로다 — 세로축 폭도 같은 눈금 · 같은 글자로 잰다(웹 `formatAxisWon` 과 같다).
 String formatAxisWon(num value, Iterable<num> ticks) {
   final v = value.toDouble();
   if (!v.isFinite) return '';
@@ -171,19 +176,13 @@ String formatAxisWon(num value, Iterable<num> ticks) {
     final a = t.toDouble().abs();
     if (a.isFinite && a > axisMax) axisMax = a;
   }
-  if (axisMax < _kAxisMan) return sign + _group(_jsRound(n));
+  final unit = _kAxisUnits.where((u) => axisMax >= u.min).firstOrNull;
+  if (unit == null) return sign + _group(_jsRound(n));
   if (n == 0) return '0';
-  var scaled = n / 10000;
-  var unit = '만';
-  for (final bigger in const ['억', '조']) {
-    if (_round1(scaled) < 10000) break;
-    scaled /= 10000;
-    unit = bigger;
-  }
-  final r = _round1(scaled);
+  final r = _round1(n / unit.min);
   final whole = r.truncate();
   final tenth = ((r - whole) * 10).round();
-  return '$sign${_group(whole)}${tenth == 0 ? '' : '.$tenth'}$unit';
+  return '$sign${_group(whole)}${tenth == 0 ? '' : '.$tenth'}${unit.label}';
 }
 
 /// 돈은 줄이지 않고 원까지(툴팁 · 지표 타일 · 도넛 가운데 · 열지도 칸 · 대체 표) — 빼기는 U+2212.
@@ -300,24 +299,32 @@ double measureText(
 /// 눈금 — [min] ~ [max] 를 [step] 간격으로. 값은 0 을 지난다(0 아래 · 위로 둘 다 있어도 0 에 눈금이 선다).
 typedef PChartAxis = ({double min, double max, double step});
 
-/// 값 범위 [lo] ~ [hi] 를 눈금 네 칸 안팎의 깔끔한 수로 늘린다 — 0 은 늘 범위 안이다. 값이 모두 0 이면 0 ~ 10,000.
+/// 값 범위 [lo] ~ [hi] 를 눈금 네 칸 안팎의 깔끔한 수로 늘린다 — 0 은 늘 범위 안이다. 값이 모두 0 이면 0 ~ 10,000(0.2만 간격).
+///
+/// 간격은 **1 · 2 · 5 × 10ⁿ 계열**만 쓴다(chart.md "축 · 격자") — 2,500 같은 2.5 간격은 만 단위로 줄이면 "0.25만" 이 되어
+/// 소수 한 자리로 반올림한 글자("0.3만")가 눈금 위치와 어긋난다. 2.5 를 빼면 2 와 5 사이가 벌어지므로, 5 를 골랐는데 2 로도
+/// 한 칸 더([intervals] + 1) 안에 들면 2 를 쓴다(0 ~ 1만 → 0 · 0.2만 · … · 1만). 웹 `niceAxis` 와 같은 셈.
 PChartAxis niceChartAxis(double lo, double hi, {int intervals = 4}) {
   var low = math.min(lo, 0.0);
   var high = math.max(hi, 0.0);
-  if (high == low) {
-    return (min: 0, max: 10000, step: 10000 / intervals);
-  }
+  if (high == low) high = low + 10000;
   final raw = (high - low) / intervals;
   final mag = math.pow(10, (math.log(raw) / math.ln10).floor()).toDouble();
   var step = mag * 10;
-  for (final m in const [1.0, 2.0, 2.5, 5.0, 10.0]) {
+  for (final m in const [1.0, 2.0, 5.0, 10.0]) {
     if (mag * m >= raw - 1e-9) {
       step = mag * m;
       break;
     }
   }
-  low = (low / step).floorToDouble() * step;
-  high = (high / step).ceilToDouble() * step;
+  if (step == mag * 5) {
+    final two = mag * 2;
+    final span =
+        (high / two - 1e-9).ceilToDouble() - (low / two + 1e-9).floorToDouble();
+    if (span <= intervals + 1) step = two;
+  }
+  low = (low / step + 1e-9).floorToDouble() * step;
+  high = (high / step - 1e-9).ceilToDouble() * step;
   return (min: low, max: high, step: step);
 }
 

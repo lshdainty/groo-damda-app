@@ -174,4 +174,51 @@ void main() {
     expect(findText('1.5만'), findsOneWidget);
     expect(findText('5,000'), findsNothing);
   });
+
+  group('눈금 간격 1 · 2 · 5 × 10ⁿ · 한 축은 한 단위(만 · 억)', () {
+    /// 값 범위의 눈금 글 — 차트가 그리는 셈 그대로(niceChartAxis → 눈금 → formatAxisWon).
+    List<String> drawn(double lo, double hi) {
+      final a = niceChartAxis(lo, hi);
+      final ticks = [
+        for (var v = a.min; v <= a.max + a.step / 2; v += a.step) v,
+      ];
+      return [for (final v in ticks) formatAxisWon(v, ticks)];
+    }
+
+    test('0 ~ 1만 — 0.2만 간격(2,500 간격의 "0.3만" · "0.8만" 이 나오지 않는다)', () {
+      expect(drawn(0, 10000), ['0', '0.2만', '0.4만', '0.6만', '0.8만', '1만']);
+    });
+    test('0 ~ 8,000 — 모두 쉼표 정수', () {
+      expect(drawn(0, 8000), ['0', '2,000', '4,000', '6,000', '8,000']);
+    });
+    test('0 ~ 3만 · 0 ~ 1.5억', () {
+      expect(drawn(0, 30000), ['0', '1만', '2만', '3만']);
+      expect(drawn(0, 150000000), ['0', '0.5억', '1억', '1.5억']);
+    });
+    test('5,000만 ~ 1억 이 섞인 값 — 모두 억(5,000만 · 1억 섞임 없음)', () {
+      expect(drawn(50000000, 100000000), [
+        '0',
+        '0.2억',
+        '0.4억',
+        '0.6억',
+        '0.8억',
+        '1억',
+      ]);
+    });
+    test('음수 축', () {
+      expect(drawn(-25000, 60000), ['−4만', '−2만', '0', '2만', '4만', '6만']);
+      expect(drawn(-30000000, 10000000), [
+        '−3,000만',
+        '−2,000만',
+        '−1,000만',
+        '0',
+        '1,000만',
+      ]);
+    });
+    test('모두 0 — 기본 축 0 ~ 1만도 같은 계열(0.2만 간격)', () {
+      expect(drawn(0, 0), drawn(0, 10000));
+      final zero = niceChartAxis(0, 0);
+      expect((zero.min, zero.max, zero.step), (0, 10000, 2000));
+    });
+  });
 }
