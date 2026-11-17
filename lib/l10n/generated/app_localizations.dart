@@ -7945,12 +7945,6 @@ abstract class AppLocalizations {
   /// **'목표 추가'**
   String get savingGoalAddAction;
 
-  /// No description provided for @savingGoalEmptyTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'저축 목표가 없어요'**
-  String get savingGoalEmptyTitle;
-
   /// No description provided for @savingGoalNoDeadline.
   ///
   /// In ko, this message translates to:

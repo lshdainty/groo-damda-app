@@ -4308,9 +4308,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get savingGoalAddAction => '목표 추가';
 
   @override
-  String get savingGoalEmptyTitle => '저축 목표가 없어요';
-
-  @override
   String get savingGoalNoDeadline => '기한 없음';
 
   @override

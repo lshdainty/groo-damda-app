@@ -826,6 +826,7 @@ class AssetSavingGoalsSection extends StatelessWidget {
               size: PResultSize.medium,
               icon: LucideIcons.piggyBank,
               title: l.savingGoalEmptyTitle,
+              description: l.savingGoalEmptyDesc,
               headingLevel: 3,
               placement: PResultPlacement.card,
               primaryAction: PResultAction(

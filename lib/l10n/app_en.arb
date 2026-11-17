@@ -2451,7 +2451,6 @@
     }
   },
   "savingGoalAddAction": "Add goal",
-  "savingGoalEmptyTitle": "No saving goals yet",
   "savingGoalNoDeadline": "No deadline",
   "savingGoalCurrentLabel": "Amount saved",
   "savingGoalIconLabel": "Icon",

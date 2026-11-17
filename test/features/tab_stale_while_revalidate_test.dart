@@ -333,7 +333,7 @@ void main() {
     testWidgets('재조회 중에도 빈 상태 제목이 그대로 — 스켈레톤이 끼어들지 않는다', (tester) async {
       await pump(tester, serveGoals: true);
       await tester.pumpAndSettle();
-      expect(findPlain('저축 목표가 없어요'), findsOneWidget);
+      expect(findPlain('아직 저축 목표가 없어요'), findsOneWidget);
 
       await _refetch(
         tester,
@@ -341,7 +341,7 @@ void main() {
         savingGoalListProvider,
       );
 
-      expect(findPlain('저축 목표가 없어요'), findsOneWidget);
+      expect(findPlain('아직 저축 목표가 없어요'), findsOneWidget);
       expect(find.byType(dsskel.PSkeleton), findsNothing);
     });
   });

@@ -51,14 +51,17 @@ void main() {
     l = await AppLocalizations.delegate.load(const Locale('ko'));
   });
 
-  testWidgets('비어 있으면 제목 "저축 목표가 없어요" + [목표 추가] — 설정 안내는 없다', (tester) async {
+  testWidgets('비어 있으면 제목 "아직 저축 목표가 없어요" · 설명 + [목표 추가] — 설정 안내는 없다', (
+    tester,
+  ) async {
     await _pump(tester);
 
     final section = tester.widget<PResultSection>(find.byType(PResultSection));
     expect(section.kind, PResultKind.empty);
     expect(section.size, PResultSize.medium);
     expect(section.placement, PResultPlacement.card);
-    expect(findText('저축 목표가 없어요'), findsOneWidget);
+    expect(findText('아직 저축 목표가 없어요'), findsOneWidget);
+    expect(findText('목표를 만들면 모은 금액과 남은 기간을 여기서 볼 수 있어요.'), findsOneWidget);
     expect(findTextContaining('설정에서'), findsNothing);
     expect(
       find.ancestor(
