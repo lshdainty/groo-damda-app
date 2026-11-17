@@ -320,6 +320,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
   final _presetAmountCtrl = TextEditingController();
   String? _smsError;
   bool _smsBusy = false;
+
+  /// 문자를 다 읽지 못했다(확신 낮음 · 빈 칸) — 2단계 맨 위 Callout 이 확인을 부탁한다
   bool _smsLow = false;
   String? _presetNameError;
   String? _presetFormError;
@@ -366,8 +368,8 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         ? widget.replaceOf
         : null;
     _smsDraft = widget.smsDraft;
-    // 붙여넣기 화면 길은 초안을 들고 열린다 — 확신 낮은 안내를 시트 Callout 이 맡는다(B5)
-    _smsLow = widget.smsDraft?.parsed.isLowConfidence ?? false;
+    // 붙여넣기 화면 길은 초안을 들고 열린다 — 다 읽지 못한 문자 안내를 시트 Callout 이 맡는다(B5)
+    _smsLow = widget.smsDraft?.parsed.needsReview ?? false;
     _startedAtOne =
         _edit == null &&
         widget.editTransfer == null &&
@@ -995,7 +997,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         _smsDraft = SmsDraft(text: text, parsed: parsed);
         _clearPresetMark();
         _seed();
-        _smsLow = parsed.isLowConfidence;
+        _smsLow = parsed.needsReview;
         _errs = _Errs();
         _dropUnknownRefs();
         _step = _S.two;
@@ -2182,7 +2184,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _failureCallout(),
-          // 낮은 확신 문자 — 칸 위 안내
+          // 다 읽지 못한 문자(확신 낮음 · 빈 칸) — 칸 위 안내
           if (_smsLow)
             Padding(
               padding: const EdgeInsets.fromLTRB(
