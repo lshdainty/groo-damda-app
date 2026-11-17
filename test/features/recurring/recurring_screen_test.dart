@@ -162,4 +162,37 @@ void main() {
     expect(plain('반복 거래 추가'), findsOneWidget);
     expect(plain('추가'), findsNothing);
   });
+
+  testWidgets('비면 결과 구역이 본문 남은 자리의 세로 가운데 — 위 · 아래 여백이 같다(프리셋 관리와 같다)', (
+    tester,
+  ) async {
+    await _pump(tester, const []);
+    final area = tester.getRect(find.byType(CustomScrollView));
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - area.top;
+    final below = area.bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '위에 붙어 서지 않는다');
+    expect(above, closeTo(below, 1));
+  });
+
+  testWidgets('비면 가운데 결과 구역에서도 당겨서 새로 고침이 된다', (tester) async {
+    var calls = 0;
+    await pumpApp(tester, const RecurringScreen(), [
+      recurringListProvider.overrideWith((ref) async {
+        calls++;
+        return const <RecurringTransaction>[];
+      }),
+      categoriesProvider.overrideWith((ref) async => const []),
+    ]);
+    expect(calls, 1);
+    await tester.fling(
+      find.byKey(const ValueKey('result-section-content')),
+      const Offset(0, 400),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+  });
 }
