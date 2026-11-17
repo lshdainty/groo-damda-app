@@ -285,16 +285,38 @@ List<String> monthLabels(List<({int year, int month})> rows) =>
     monthTicks(rows);
 
 /// 추이 점 — 일별(단일 월 · 짧은 직접 기간) 또는 월별.
+///
+/// 가로축은 오늘에서 끝난다 — 오늘 뒤 날짜 · 달을 0 으로 그리지 않는다(chart.md "축"). 오늘을 품은 기간만 오늘(월별은 이번 달)
+/// 에서 자르고, 지난 기간은 끝까지 둔다. 오늘은 사용자 기기 시계([statsNow] — 기간 이름 "이번 달" 과 같은 값)다.
+/// 추이 선과 일별 · 월별 순저축 막대가 이 점을 같이 먹는다.
 List<TrendPoint> trendPoints(
   StatsPeriod period,
   RangeSummary? summary,
-  List<Expense> expenses,
-) {
-  final buckets = summary?.monthlyBuckets ?? const <RangeMonthlyBucket>[];
+  List<Expense> expenses, {
+  DateTime? today,
+}) {
+  final t = today ?? statsNow();
+  final day = DateTime(t.year, t.month, t.day);
+  var buckets = summary?.monthlyBuckets ?? const <RangeMonthlyBucket>[];
   if (period.useDailyTrend(buckets.length)) {
+    final inRange = !day.isBefore(period.from) && day.isBefore(period.to);
     return [
-      for (final v in dailyTrendOf(expenses, period.from, period.to))
+      for (final v in dailyTrendOf(
+        expenses,
+        period.from,
+        inRange ? day : period.to,
+      ))
         TrendPoint(label: v.label, income: v.income, expense: v.expense),
+    ];
+  }
+  final startsBefore =
+      buckets.isNotEmpty &&
+      (buckets.first.year < t.year ||
+          (buckets.first.year == t.year && buckets.first.month <= t.month));
+  if (startsBefore) {
+    buckets = [
+      for (final b in buckets)
+        if (b.year < t.year || (b.year == t.year && b.month <= t.month)) b,
     ];
   }
   final labels = monthLabels([

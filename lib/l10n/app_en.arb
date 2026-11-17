@@ -2575,6 +2575,7 @@
   "statsAvgSavings": "Avg savings",
   "statsSavingsRate": "Savings rate",
   "statsSavingsInsight": "You're saving {pct} of your average income",
+  "statsSavingsNoIncome": "No income, so there's no savings rate to show",
   "statsDailyNetSavings": "Daily net savings",
   "statsMonthlyNetSavings": "Monthly net savings",
   "statsCatTrendTitle": "Top categories over time",

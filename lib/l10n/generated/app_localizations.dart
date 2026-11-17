@@ -8455,6 +8455,12 @@ abstract class AppLocalizations {
   /// **'월 평균 수입의 {pct}를 저축하고 있어요'**
   String statsSavingsInsight(String pct);
 
+  /// No description provided for @statsSavingsNoIncome.
+  ///
+  /// In ko, this message translates to:
+  /// **'수입이 없어 저축률을 낼 수 없어요'**
+  String get statsSavingsNoIncome;
+
   /// No description provided for @statsDailyNetSavings.
   ///
   /// In ko, this message translates to:

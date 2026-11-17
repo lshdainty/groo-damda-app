@@ -4583,6 +4583,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get statsSavingsNoIncome => '수입이 없어 저축률을 낼 수 없어요';
+
+  @override
   String get statsDailyNetSavings => '일별 순저축';
 
   @override
