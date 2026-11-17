@@ -274,9 +274,7 @@
 
 ## P. 카드
 
-- [x] **#370 카드 사용 가능 혜택(availableBenefits) API** (commit `93a04ff`) — `availableBenefits(cardRowId, expenseCategoryRowId?)` 추가. UI 자동 추천은 후속
 - [x] **#371 CardPerformance 도메인 + 진척 바** (commit `de447c1`) — `domain/card_performance.dart` + repo + provider + `card_performance_bar.dart` 위젯 + AssetDetailDialog 카드 자산일 때 노출
-- [x] **#372 CardBenefitMapping 도메인 + 매핑 다이얼로그** (commit `3dee797`) — domain/repo/provider + 매핑 관리 dialog (혜택→카테고리 매핑, 시스템/커스텀 구분), CardScreen AppBar 진입점
 - [x] **#373 CardCatalogCombobox** (commit `ff38c92`) — `showCardCatalogPicker` BottomSheet (검색+신용/체크 칩+페이지) → CardCatalogSummary 반환
 - [x] **#374 카드 검색 benefitType / includeDiscontinued 필터** (commit `93a04ff`) — 칩 + 단종 토글 추가
 - [x] **#375 카드 카탈로그 페이지네이션** (commit `93a04ff`) — `CardCatalogPage` + paginator (이전/다음, 총 N건)
@@ -314,7 +312,6 @@
 ## V. 라우팅 / 테마
 
 - [x] **#430 카드 상세 paramized 라우트** (commit `ff38c92`) — `/cards/:id` 라우트 추가, card_screen 의 직접 push → context.push('/cards/N')
-- [ ] **#431 card-settings 라우트** (M) — #372 와 묶임
 - [ ] **#432 PDensity.cozy 키 정렬** (S) — front `cozy` ↔ Flutter `comfortable` 직렬화 키 mismatch. front prefs 동기화 시 깨짐
 
 ## W. 카테고리 색 팔레트
@@ -360,6 +357,6 @@
 2. **#240 AssetDetailDialog**, **#270 RecurringFromTxDialog 풀 폼**, **#291 DutchPayFromTxDialog 풀 폼** — 이미 진입점은 있지만 UX 깊이가 얕은 항목
 3. **#230-#233 대시보드** — 홈 화면이 약함. summary endpoint + 5종 카드
 4. **#380-#381 알림 채널** — UX 핵심 (FCM 도입은 권한 풀린 뒤)
-5. **#390 파일 첨부**, **#372 CardBenefitMapping** — 큰 도메인이라 별도 스프린트
+5. **#390 파일 첨부** — 큰 도메인이라 별도 스프린트
 6. **#400-#407 디자인 시스템** — 디자인 일관성. i18n 직후 또는 병행
 7. 나머지는 우선순위 낮게 분산
