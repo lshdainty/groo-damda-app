@@ -2451,7 +2451,6 @@
     }
   },
   "savingGoalAddAction": "Add goal",
-  "savingGoalManagePrompt": "Add saving goals in Settings.",
   "savingGoalNoDeadline": "No deadline",
   "savingGoalCurrentLabel": "Amount saved",
   "savingGoalIconLabel": "Icon",

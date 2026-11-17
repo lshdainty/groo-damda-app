@@ -7945,12 +7945,6 @@ abstract class AppLocalizations {
   /// **'목표 추가'**
   String get savingGoalAddAction;
 
-  /// No description provided for @savingGoalManagePrompt.
-  ///
-  /// In ko, this message translates to:
-  /// **'설정에서 저축 목표를 추가해보세요.'**
-  String get savingGoalManagePrompt;
-
   /// No description provided for @savingGoalNoDeadline.
   ///
   /// In ko, this message translates to:

@@ -4422,9 +4422,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savingGoalAddAction => 'Add goal';
 
   @override
-  String get savingGoalManagePrompt => 'Add saving goals in Settings.';
-
-  @override
   String get savingGoalNoDeadline => 'No deadline';
 
   @override

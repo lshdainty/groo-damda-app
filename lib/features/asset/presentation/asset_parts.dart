@@ -21,6 +21,7 @@ import 'package:groo_damda_app/features/asset/presentation/widgets/asset_logo.da
 import 'package:groo_damda_app/features/asset/presentation/widgets/net_worth_chart.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
 import 'package:groo_damda_app/features/saving_goal/domain/saving_goal.dart';
+import 'package:groo_damda_app/features/saving_goal/presentation/saving_goal_edit_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/async/stale_value_callout.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
@@ -605,6 +606,12 @@ Widget _failureBody(
   child: BudgetFailure(title: title, retrying: retrying, onRetry: onRetry),
 );
 
+/// 구역 안 빈 결과 — 실패([_failureBody])와 같은 좌우 24 · 아래 12.
+Widget _emptyBody(Widget child) => Padding(
+  padding: const EdgeInsets.fromLTRB(PSpacing.x6, 0, PSpacing.x6, PSpacing.x3),
+  child: child,
+);
+
 /// 자산 묶음(56) — 머리(R4 제목 + 오른쪽 합계 R13 줄 금액) 아래 줄. 합계 색은 중립이고 빼기 부호가 말한다(D1).
 class AssetGroupSection extends StatelessWidget {
   const AssetGroupSection({
@@ -780,7 +787,8 @@ class AssetSavingGoalRow extends StatelessWidget {
   }
 }
 
-/// 저축 목표 구역 — 머리 오른쪽 "전체 보기"(저축 목표 화면으로).
+/// 저축 목표 구역 — 머리 오른쪽 "전체 보기"(저축 목표 화면으로). 비어 있으면 Result Section empty "처음" 갈래(medium,
+/// 실패와 같은 자리 · 크기) + [목표 추가] — 저축 목표 추가 시트를 바로 연다.
 class AssetSavingGoalsSection extends StatelessWidget {
   const AssetSavingGoalsSection({
     super.key,
@@ -812,7 +820,22 @@ class AssetSavingGoalsSection extends StatelessWidget {
         else if (loading)
           loadingRegionWithText(const _GoalRowsSkeleton())
         else if (goals.isEmpty)
-          BudgetEmptyLine(l.savingGoalManagePrompt)
+          _emptyBody(
+            PResultSection(
+              kind: PResultKind.empty,
+              size: PResultSize.medium,
+              icon: LucideIcons.piggyBank,
+              title: l.savingGoalEmptyTitle,
+              description: l.savingGoalEmptyDesc,
+              headingLevel: 3,
+              placement: PResultPlacement.card,
+              primaryAction: PResultAction(
+                label: l.savingGoalAddAction,
+                icon: LucideIcons.plus,
+                onPressed: () => showSavingGoalEditDialog(context),
+              ),
+            ),
+          )
         else
           PList(
             semanticLabel: l.navSavingGoals,
