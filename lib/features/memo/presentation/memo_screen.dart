@@ -96,6 +96,8 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
       });
     }
 
+    // 결과 구역(실패 · 비어 있음 · 검색 0건)인지 — 목록 · 스켈레톤과 달리 남은 자리 가운데에 선다
+    final result = failed || (!loading && filtered.isEmpty);
     final Widget body;
     if (failed) {
       // 질의 하나 = 실패 상자 하나 — 원문을 그리지 않는다.
@@ -169,60 +171,77 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
             PSwipeActionsProvider(
               child: PPullToRefresh(
                 onRefresh: _refresh,
-                child: ListView(
-                  // 아래 96 은 떠 있는 [+] 가 마지막 줄을 가리지 않게 하는 흰 면 안 여백
-                  padding: const EdgeInsets.only(bottom: 96),
-                  children: [
-                    // 검색칸 — 밑줄형 large. 흰 면 안 위 4 · 좌우 24
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        PSpacing.globalGutter,
-                        PSpacing.x1,
-                        PSpacing.globalGutter,
-                        0,
-                      ),
-                      child: PInput(
-                        variant: PInputVariant.underline,
-                        placeholder: l.memoSearchHint,
-                        semanticLabel: l.memoSearchHint,
-                        prefixIcon: LucideIcons.search,
-                        clearable: true,
-                        textInputAction: TextInputAction.search,
-                        onChanged: (v) => setState(() => _query = v),
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // 검색칸 — 밑줄형 large. 흰 면 안 위 4 · 좌우 24
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              PSpacing.globalGutter,
+                              PSpacing.x1,
+                              PSpacing.globalGutter,
+                              0,
+                            ),
+                            child: PInput(
+                              variant: PInputVariant.underline,
+                              placeholder: l.memoSearchHint,
+                              semanticLabel: l.memoSearchHint,
+                              prefixIcon: LucideIcons.search,
+                              clearable: true,
+                              textInputAction: TextInputAction.search,
+                              onChanged: (v) => setState(() => _query = v),
+                            ),
+                          ),
+                          if (!failed && !loading && all!.isNotEmpty)
+                            // 칩 줄 — 위 12 · 아래 4. 한 줄로 가로로 밀린다
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: PSpacing.x3,
+                                bottom: PSpacing.x1,
+                              ),
+                              child: PChipRadioGroup<String>(
+                                layout: PChipGroupLayout.scroll,
+                                semanticLabel: l.memoTagFilter,
+                                value: _tagFilter,
+                                onChanged: (v) =>
+                                    setState(() => _tagFilter = v),
+                                children: [
+                                  PChipRadio<String>(
+                                    value: kMemoAllKey,
+                                    label: l.memoAllChip,
+                                    count: all.length,
+                                    variant: PChipVariant.outlineStrong,
+                                    size: PChipSize.small,
+                                  ),
+                                  for (final chip in chips)
+                                    PChipRadio<String>(
+                                      value: chip.key,
+                                      label: memoTagLabel(l, chip.key),
+                                      count: chip.count,
+                                      variant: PChipVariant.outlineStrong,
+                                      size: PChipSize.small,
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    if (!failed && !loading && all!.isNotEmpty)
-                      // 칩 줄 — 위 12 · 아래 4. 한 줄로 가로로 밀린다
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: PSpacing.x3,
-                          bottom: PSpacing.x1,
-                        ),
-                        child: PChipRadioGroup<String>(
-                          layout: PChipGroupLayout.scroll,
-                          semanticLabel: l.memoTagFilter,
-                          value: _tagFilter,
-                          onChanged: (v) => setState(() => _tagFilter = v),
-                          children: [
-                            PChipRadio<String>(
-                              value: kMemoAllKey,
-                              label: l.memoAllChip,
-                              count: all.length,
-                              variant: PChipVariant.outlineStrong,
-                              size: PChipSize.small,
-                            ),
-                            for (final chip in chips)
-                              PChipRadio<String>(
-                                value: chip.key,
-                                label: memoTagLabel(l, chip.key),
-                                count: chip.count,
-                                variant: PChipVariant.outlineStrong,
-                                size: PChipSize.small,
-                              ),
-                          ],
-                        ),
+                    if (result)
+                      // 결과(비어 있음 · 검색 0건 · 실패)는 남은 높이의 가운데 — 프리셋 관리와 같다(result-section.md)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(child: body),
+                      )
+                    else
+                      // 아래 96 은 떠 있는 [+] 가 마지막 줄을 가리지 않게 하는 흰 면 안 여백
+                      SliverPadding(
+                        padding: const EdgeInsets.only(bottom: 96),
+                        sliver: SliverToBoxAdapter(child: body),
                       ),
-                    body,
                   ],
                 ),
               ),

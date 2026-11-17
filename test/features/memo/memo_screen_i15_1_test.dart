@@ -357,6 +357,56 @@ void main() {
     },
   );
 
+  // 결과 구역은 검색칸 아래 남은 높이의 가운데에 선다 — 위에 붙어 서지 않는다(result-section.md · 프리셋 관리와 같다)
+  void expectCentered(WidgetTester tester) {
+    final top = tester.getRect(find.byType(PInput)).bottom;
+    final bottom = tester.getRect(find.byType(CustomScrollView)).bottom;
+    final r = tester.getRect(
+      find.byKey(const ValueKey('result-section-content')),
+    );
+    final above = r.top - top;
+    final below = bottom - r.bottom;
+    expect(above, greaterThan(100), reason: '검색칸 바로 아래에 붙지 않는다');
+    expect(above, closeTo(below, 1));
+  }
+
+  testWidgets('메모 0개 · 실패 · 검색 0건 — 결과 구역이 남은 자리의 세로 가운데', (tester) async {
+    await _pump(tester, memos: const []);
+    expectCentered(tester);
+
+    await _pump(tester, error: true);
+    expectCentered(tester);
+
+    await _pump(tester);
+    await tester.enterText(find.byType(PInput), '없는검색어');
+    await tester.pumpAndSettle();
+    expectCentered(tester);
+  });
+
+  testWidgets('메모 0개 — 가운데 결과 구역에서도 당겨서 새로 고침이 된다', (tester) async {
+    var calls = 0;
+    await pumpApp(
+      tester,
+      const MemoScreen(),
+      overrides: [
+        memoRepositoryProvider.overrideWith((ref) async => _Repo()),
+        memoListProvider.overrideWith((ref) async {
+          calls++;
+          return const <Memo>[];
+        }),
+        memoTagListProvider.overrideWith((ref) async => _tags),
+      ].cast(),
+    );
+    expect(calls, 1);
+    await tester.fling(
+      find.byKey(const ValueKey('result-section-content')),
+      const Offset(0, 400),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+  });
+
   testWidgets('검색 0건 — "결과가 없어요" · 다른 검색어 안내', (tester) async {
     await _pump(tester);
     await tester.enterText(find.byType(PInput), '없는검색어');

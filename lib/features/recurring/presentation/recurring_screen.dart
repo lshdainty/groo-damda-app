@@ -109,36 +109,37 @@ class _RecurringScreenState extends ConsumerState<RecurringScreen> {
     );
   }
 
-  Widget _failure(AppLocalizations l) => ListView(
-    padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
-    children: [
-      PResultSection(
-        kind: PResultKind.failure,
-        size: PResultSize.large,
-        title: l.recLoadFailed,
-        description: l.dashFailDesc,
-        primaryAction: PResultAction(
-          label: l.actionRetry,
-          loading: ref.watch(recurringListProvider).loadRetrying,
-          onPressed: () => ref.invalidate(recurringListProvider),
-        ),
-      ),
+  /// 결과는 본문 남은 높이의 가운데에 놓는다(프리셋 관리와 같다, result-section.md) — 새로 고침은 그대로 된다.
+  Widget _centered(Widget child) => CustomScrollView(
+    slivers: [
+      SliverFillRemaining(hasScrollBody: false, child: Center(child: child)),
     ],
   );
 
-  /// 빈 화면 — 머리 버튼이 없어서 본문 버튼이 하나다.
-  Widget _empty(AppLocalizations l) => ListView(
-    padding: const EdgeInsets.symmetric(vertical: PSpacing.x6),
-    children: [
-      PResultSection(
-        kind: PResultKind.empty,
-        size: PResultSize.large,
-        icon: LucideIcons.repeat,
-        title: l.recEmptyTitle,
-        description: l.recEmptyDesc,
-        primaryAction: PResultAction(label: l.recAddButton, onPressed: _add),
+  Widget _failure(AppLocalizations l) => _centered(
+    PResultSection(
+      kind: PResultKind.failure,
+      size: PResultSize.large,
+      title: l.recLoadFailed,
+      description: l.dashFailDesc,
+      primaryAction: PResultAction(
+        label: l.actionRetry,
+        loading: ref.watch(recurringListProvider).loadRetrying,
+        onPressed: () => ref.invalidate(recurringListProvider),
       ),
-    ],
+    ),
+  );
+
+  /// 빈 화면 — 머리 버튼이 없어서 본문 버튼이 하나다.
+  Widget _empty(AppLocalizations l) => _centered(
+    PResultSection(
+      kind: PResultKind.empty,
+      size: PResultSize.large,
+      icon: LucideIcons.repeat,
+      title: l.recEmptyTitle,
+      description: l.recEmptyDesc,
+      primaryAction: PResultAction(label: l.recAddButton, onPressed: _add),
+    ),
   );
 
   Widget _list(
