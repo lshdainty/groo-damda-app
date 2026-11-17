@@ -12,6 +12,7 @@ import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_screen.
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
+import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import '../../support/plain_text.dart';
 
 DutchPayParticipant _p(
@@ -122,4 +123,56 @@ void main() {
     // 1인당 줄: 나머지 1원은 몫이 큰 사람(나)
     expect(findTextContaining('1원은 나'), findsWidgets);
   });
+
+  // iPhone Duo 안전 영역(groo-design Layout "Safe Area" · "콘텐츠 폭") — 탭 줄 · 목록 · [+] 가 옆 상태 칸(오른쪽 84)
+  // 밑에 깔리지 않고, 넓은 화면(768 이상)에서는 본문처럼 720 안에 선다. 바탕 띠는 화면 끝까지 간다.
+  for (final duo in [
+    (name: '접힘', size: const Size(466, 678)),
+    (name: '펼침', size: const Size(951, 669)),
+  ]) {
+    testWidgets('Duo ${duo.name} — 탭 줄 · 줄 · [+] 가 상태 칸 왼쪽(넓으면 720 안)', (
+      tester,
+    ) async {
+      const right = 84.0;
+      final size = duo.size;
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      tester.view.padding = const FakeViewPadding(right: right);
+      tester.view.viewPadding = tester.view.padding;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _app([_d(1), _d(2, settled: true)], const DutchPayScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      final inner = size.width - right;
+      final wide = size.width >= 768;
+      final left = wide ? (inner - 720) / 2 : 0.0;
+      final limit = wide ? left + 720 : inner;
+
+      // 바탕 띠는 화면 끝까지
+      expect(
+        tester.getRect(find.byKey(const ValueKey('dutch-list-band'))).right,
+        size.width,
+      );
+
+      void inside(Finder f, String what) {
+        final r = tester.getRect(f);
+        expect(r.right, lessThanOrEqualTo(limit + 0.01), reason: '$what 오른쪽 끝');
+        expect(r.left, greaterThanOrEqualTo(left - 0.01), reason: '$what 왼쪽 끝');
+      }
+
+      inside(
+        find.byWidgetPredicate((w) => w is PSegmentedControl),
+        'Segmented',
+      );
+      inside(find.byKey(const ValueKey('dutch-1')), '진행 중 줄');
+      inside(find.byKey(const ValueKey('floating-action-button')), '[+]');
+
+      // 완료 탭 · 친구 탭 줄도 같은 자리
+      await tester.tap(findTextContaining('완료'));
+      await tester.pumpAndSettle();
+      inside(find.byKey(const ValueKey('dutch-2')), '완료 줄');
+    });
+  }
 }
