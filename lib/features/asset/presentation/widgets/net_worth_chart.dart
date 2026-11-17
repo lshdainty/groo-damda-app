@@ -56,7 +56,7 @@ class NetWorthChart extends ConsumerWidget {
     }
 
     String won(num v) => masked ? kBudgetMask : formatWon(v);
-    // 날짜 규칙 — 월은 앞 0 을 채우지 않고, 해가 섞이면 해를 붙인다(통계와 같은 규칙)
+    // 날짜 규칙 — 월은 앞 0 을 채우지 않고, 해가 바뀌는 첫 눈금에만 해를 붙인다(통계와 같은 규칙)
     final labels = monthTicks([
       for (final p in points) (year: p.year, month: p.month),
     ]);

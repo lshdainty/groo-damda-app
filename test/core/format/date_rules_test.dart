@@ -50,15 +50,76 @@ void main() {
     expect(monthDayDow(DateTime(2100, 1, 1)), '2100년 1월 1일 (금)');
   });
 
-  test('통계 월 눈금 — 한 해 안이면 "1월", 해가 섞이면 "2026. 1."', () {
+  test('통계 월 눈금 — 월만 "1월", 해가 바뀌는 첫 눈금에만 "2026. 1."', () {
     expect(monthLabels([(year: 2026, month: 1), (year: 2026, month: 12)]), [
       '1월',
       '12월',
     ]);
     expect(monthLabels([(year: 2025, month: 12), (year: 2026, month: 1)]), [
-      '2025. 12.',
+      '12월',
       '2026. 1.',
     ]);
+  });
+
+  // 스펙 chart.md "날짜 · 시각 눈금" — 눈금 사이에 해가 바뀌면 해가 바뀌는 첫 눈금에만 연도(웹 formatMonthTicks 와 같다)
+  group('월 눈금 — 연도는 해가 바뀌는 첫 눈금에만', () {
+    test('12칸이 해를 넘으면 연도는 한 번', () {
+      final rows = [
+        for (var i = 0; i < 12; i++)
+          (year: 2025 + (i + 4) ~/ 12, month: (i + 4) % 12 + 1),
+      ];
+      final ticks = monthTicks(rows);
+      expect(ticks, [
+        '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월', //
+        '2026. 1.', '2월', '3월', '4월',
+      ]);
+      expect(ticks.where((t) => t.contains('2026')), hasLength(1));
+      expect(ticks.where((t) => t.contains('2025')), isEmpty);
+    });
+
+    test('해가 두 번 바뀌면 바뀌는 눈금마다 한 번씩', () {
+      expect(
+        monthTicks([
+          (year: 2024, month: 11),
+          (year: 2024, month: 12),
+          (year: 2025, month: 1),
+          (year: 2025, month: 6),
+          (year: 2025, month: 12),
+          (year: 2026, month: 1),
+          (year: 2026, month: 2),
+        ]),
+        ['11월', '12월', '2025. 1.', '6월', '12월', '2026. 1.', '2월'],
+      );
+    });
+
+    test('한 해 안이면 연도가 없다', () {
+      final ticks = monthTicks([
+        for (var m = 1; m <= 12; m++) (year: 2026, month: m),
+      ]);
+      expect(ticks, [for (var m = 1; m <= 12; m++) '$m월']);
+    });
+
+    test('맨 첫 눈금은 해가 바뀐 눈금이 아니다 — 1월로 시작해도 월만', () {
+      expect(monthTicks([(year: 2026, month: 1), (year: 2026, month: 2)]), [
+        '1월',
+        '2월',
+      ]);
+      expect(monthTicks([]), isEmpty);
+    });
+
+    test('영어 — "Dec · Jan 2026 · Feb"', () {
+      final prev = Intl.defaultLocale;
+      Intl.defaultLocale = 'en';
+      addTearDown(() => Intl.defaultLocale = prev);
+      expect(
+        monthTicks([
+          (year: 2025, month: 12),
+          (year: 2026, month: 1),
+          (year: 2026, month: 2),
+        ]),
+        ['Dec', 'Jan 2026', 'Feb'],
+      );
+    });
   });
 
   group('영어 — 구간은 en dash(로케일 문구), 점 표기는 한국어 전용', () {
@@ -79,13 +140,13 @@ void main() {
       );
     });
 
-    test('월 눈금 · 마감 — "Jan" / "Dec 2025 · Jan 2026"(점 표기 없음)', () {
+    test('월 눈금 · 마감 — "Jan" / "Dec · Jan 2026"(점 표기 없음)', () {
       expect(monthLabels([(year: 2026, month: 1), (year: 2026, month: 12)]), [
         'Jan',
         'Dec',
       ]);
       expect(monthLabels([(year: 2025, month: 12), (year: 2026, month: 1)]), [
-        'Dec 2025',
+        'Dec',
         'Jan 2026',
       ]);
       expect(yearMonthDot(DateTime(2026, 1)), 'Jan 2026');
@@ -200,9 +261,9 @@ void main() {
     expect(monthDayDot(DateTime(2026, 10, 29)), 'Oct 29');
   });
 
-  test('월 눈금 — 해가 섞이면 해를 붙인다(순자산 추이도 같은 규칙)', () {
+  test('월 눈금 — 해가 바뀌는 첫 눈금에만 해를 붙인다(순자산 추이도 같은 규칙)', () {
     expect(monthTicks([(year: 2025, month: 12), (year: 2026, month: 1)]), [
-      '2025. 12.',
+      '12월',
       '2026. 1.',
     ]);
   });
@@ -214,9 +275,9 @@ void main() {
       [for (var m = 1; m <= 12; m++) '$m월'],
     ),
     (
-      '순자산 추이 x 눈금 — 해를 넘으면 해를 붙인다(통계와 같은 규칙)',
+      '순자산 추이 x 눈금 — 해가 바뀌는 첫 눈금에만 해를 붙인다(통계와 같은 규칙)',
       [(2025, 11), (2025, 12), (2026, 1)],
-      ['2025. 11.', '2025. 12.', '2026. 1.'],
+      ['11월', '12월', '2026. 1.'],
     ),
   ]) {
     testWidgets(title, (tester) async {
