@@ -296,6 +296,32 @@ double measureText(
   return w;
 }
 
+/// 눈금 글 한 줄의 높이 — 글자 크기 설정을 따른다(11 / 15 를 [scaler] 로 키운 줄 높이 — 100% 15 · 200% 30).
+double chartTickLineHeight(
+  TextStyle style, {
+  TextScaler scaler = TextScaler.noScaling,
+}) {
+  final p = TextPainter(
+    text: TextSpan(text: '0', style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: scaler,
+    maxLines: 1,
+  )..layout();
+  final h = p.preferredLineHeight;
+  p.dispose();
+  return h;
+}
+
+/// 세로 눈금 칸 수의 기본 — 눈금 네 칸 안팎([niceChartAxis]).
+const int kChartAxisIntervals = 4;
+
+/// 그리는 높이 [plotHeight] 에 눈금 글이 겹치지 않고 들어가는 칸 수 — 눈금 사이 ≥ 눈금 글 줄 높이 [lineHeight]
+/// (chart.md "세로 눈금이 겹치면 수를 줄입니다"). 칸 수 = ⌊그리는 높이 ÷ 줄 높이⌋, 적어도 1. 웹과 같은 셈.
+int chartAxisMaxIntervals(double plotHeight, double lineHeight) {
+  if (!(lineHeight > 0)) return kChartAxisIntervals;
+  return math.max(1, (plotHeight / lineHeight + 1e-9).floor());
+}
+
 /// 눈금 — [min] ~ [max] 를 [step] 간격으로. 값은 0 을 지난다(0 아래 · 위로 둘 다 있어도 0 에 눈금이 선다).
 typedef PChartAxis = ({double min, double max, double step});
 
@@ -304,7 +330,11 @@ typedef PChartAxis = ({double min, double max, double step});
 /// 간격은 **1 · 2 · 5 × 10ⁿ 계열**만 쓴다(chart.md "축 · 격자") — 2,500 같은 2.5 간격은 만 단위로 줄이면 "0.25만" 이 되어
 /// 소수 한 자리로 반올림한 글자("0.3만")가 눈금 위치와 어긋난다. 2.5 를 빼면 2 와 5 사이가 벌어지므로, 5 를 골랐는데 2 로도
 /// 한 칸 더([intervals] + 1) 안에 들면 2 를 쓴다(0 ~ 1만 → 0 · 0.2만 · … · 1만). 웹 `niceAxis` 와 같은 셈.
-PChartAxis niceChartAxis(double lo, double hi, {int intervals = 4}) {
+PChartAxis niceChartAxis(
+  double lo,
+  double hi, {
+  int intervals = kChartAxisIntervals,
+}) {
   var low = math.min(lo, 0.0);
   var high = math.max(hi, 0.0);
   if (high == low) high = low + 10000;

@@ -87,10 +87,14 @@ void main() {
     expect(n2, lessThan(n1));
   });
 
-  testWidgets('200% — 눈금 글이 온전하다("1,500억" 이 그대로 그려진다)', (tester) async {
+  testWidgets('200% — 눈금 글이 온전하다("1,000억" 이 그대로 그려진다)', (tester) async {
     await tester.pumpWidget(_host(2));
     await tester.pump(const Duration(seconds: 1));
-    expect(findText('1,500억'), findsOneWidget);
+    // 높이 140 · 200% 는 눈금 글 줄(30)이 500억 간격 눈금 사이보다 커서 칸 수를 줄인다(0 · 1,000억 · 2,000억 — chart.md
+    // "세로 눈금이 겹치면 수를 줄입니다"). 글자는 "1,5" 처럼 잘리지 않는다
+    expect(findText('1,000억'), findsOneWidget);
+    expect(findText('2,000억'), findsOneWidget);
+    expect(findText('1,500억'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

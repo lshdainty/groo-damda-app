@@ -70,6 +70,7 @@ abstract class PCartesianChart extends StatefulWidget {
     this.valueFormatter,
     this.axisFormatter,
     this.xTicks,
+    this.xTickPeers = const [],
   });
 
   /// 요약 이름 — "10월 수입 · 지출 추이, 수입 4,200,000원 · 지출 1,240,000원".
@@ -101,6 +102,18 @@ abstract class PCartesianChart extends StatefulWidget {
   /// 가로 눈금 글 — 주면 [categories] 대신 이 글로 눈금을 그리고, 연도는 **보이는 눈금** 기준으로 붙인다(해가 바뀌는 칸이
   /// 건너뛰기로 빠지면 다음 보이는 눈금이 이어받는다 — [chartXTickLabels]). 길이는 [categories] 와 같다. 툴팁 머리는 계속 [categories].
   final List<PChartXTick>? xTicks;
+
+  /// 같은 화면 · 같은 기간의 다른 차트(같은 폭 띠에 놓인다) — 이 차트들과 함께 **그리는 자리가 가장 좁은 차트로** 가로 눈금
+  /// 건너뛰기를 한 번 세고 모두 그 간격을 쓴다(chart.md "같은 화면 · 같은 기간 차트는 같은 날짜 글"). 축 수가 달라 그리는 폭이
+  /// 달라도 위아래 차트가 같은 날짜를 보인다. 상대 차트도 이 차트를 넘겨 서로 가리킨다 — 상대의 [xTickPeers] 는 보지 않는다.
+  /// 그리지 않고 폭만 잰다([categories] 길이와 가로 눈금 글이 같아야 한다).
+  final List<PCartesianChart> xTickPeers;
+
+  /// 맨 위 여백 · 세로축 · 쌓기 · 기준선 — 눈금을 정하는 값(막대 차트가 덮어쓴다).
+  double get _topPadding => kChartTopPad;
+  bool get _hasValueAxis => true;
+  bool get _isStacked => false;
+  List<double> get _referenceValues => const [];
 }
 
 /// 선(영역) 차트 — 곡선 monotone · 선 2 · 점 없음(가리킨 자리에만 계열 색 점 r 3 + 카드 면 색 테두리 2). [area] 면
@@ -118,6 +131,7 @@ class PLineChart extends PCartesianChart {
     super.valueFormatter,
     super.axisFormatter,
     super.xTicks,
+    super.xTickPeers,
     this.area = true,
     this.dots = false,
   });
@@ -147,6 +161,7 @@ class PBarChart extends PCartesianChart {
     super.valueFormatter,
     super.axisFormatter,
     super.xTicks,
+    super.xTickPeers,
     this.barColor,
     this.barLabel,
     this.referenceLines = const [],
@@ -180,6 +195,19 @@ class PBarChart extends PCartesianChart {
   final bool stacked;
 
   @override
+  double get _topPadding =>
+      kChartTopPad + (barLabel == null ? 0 : _kBarLabelRoom);
+
+  @override
+  bool get _hasValueAxis => showValueAxis;
+
+  @override
+  bool get _isStacked => stacked;
+
+  @override
+  List<double> get _referenceValues => referenceLines;
+
+  @override
   State<PBarChart> createState() => _PBarChartState();
 }
 
@@ -192,8 +220,8 @@ class _Plan {
     required this.stepRight,
     required this.leftWidth,
     required this.rightWidth,
+    required this.labelWidth,
     required this.bottomLabels,
-    required this.endShift,
     required this.plotLeft,
     required this.plotWidth,
     required this.bottomReserved,
@@ -209,11 +237,12 @@ class _Plan {
   final double leftWidth;
   final double rightWidth;
 
+  /// 가장 긴 가로 눈금 글의 폭(글자 배율 포함).
+  final double labelWidth;
+
   /// 가로 눈금마다 그릴 글 — 건너뛴 칸은 null(끝 눈금은 늘 남고, 연도는 보이는 눈금 기준).
   final List<String?> bottomLabels;
 
-  /// 끝 글 하나만 남는 좁은 폭 — 끝 글을 왼쪽으로 당기는 거리(오른쪽 여백을 줄인 만큼).
-  final double endShift;
   final double plotLeft;
   final double plotWidth;
 
@@ -224,33 +253,168 @@ class _Plan {
   double get maxY => above.toDouble();
 }
 
+/// 한 축의 눈금 값 — 아래 [below] 칸 ~ 위 [above] 칸.
+List<double> _ticksOf(int below, int above, double step) => [
+  for (var t = -below; t <= above; t++) t * step,
+];
+
+String _axisTextOf(PCartesianChart w, double v, List<double> ticks) =>
+    w.axisFormatter?.call(v) ?? formatAxisWon(v, ticks);
+
+List<PChartXTick> _xTicksOf(PCartesianChart w) =>
+    w.xTicks ??
+    [for (final cat in w.categories) (label: cat, yearLabel: null, year: null)];
+
+/// 차트 하나를 [width] 에 놓았을 때의 눈금 · 폭 — 그리지 않고 잰다. [interval] 은 이 차트만 보고 센 가로 눈금 건너뛰기다.
+typedef _Measure = ({
+  int below,
+  int above,
+  double stepLeft,
+  double? stepRight,
+  double leftWidth,
+  double rightWidth,
+  double labelWidth,
+  double plotWidth,
+  double bottomReserved,
+  int interval,
+});
+
+/// 눈금을 정한다 — 숨긴 계열도 포함해 정한다(지표 타일을 눌러도 축이 흔들리지 않는다).
+_Measure _measure(
+  PCartesianChart w,
+  double width,
+  PColors c,
+  TextScaler scaler,
+) {
+  final leftSeries = [
+    for (final s in w.series)
+      if (!s.onRight) s,
+  ];
+  final rightSeries = [
+    for (final s in w.series)
+      if (s.onRight) s,
+  ];
+  ({double? lo, double? hi}) rangeOf(List<PChartSeries> list) {
+    double? lo;
+    double? hi;
+    if (w._isStacked) {
+      // 쌓은 막대 — 칸마다 계열을 더한 합으로 눈금을 정한다
+      for (var i = 0; i < w.categories.length; i++) {
+        var sum = 0.0;
+        for (final s in list) {
+          final v = i < s.values.length ? s.values[i] : null;
+          if (v != null && v > 0) sum += v;
+        }
+        lo = 0;
+        hi = hi == null ? sum : math.max(hi, sum);
+      }
+    } else {
+      for (final s in list) {
+        for (final v in s.values) {
+          if (v == null) continue;
+          lo = lo == null ? v : math.min(lo, v);
+          hi = hi == null ? v : math.max(hi, v);
+        }
+      }
+    }
+    for (final v in w._referenceValues) {
+      lo = lo == null ? v : math.min(lo, v);
+      hi = hi == null ? v : math.max(hi, v);
+    }
+    return (lo: lo, hi: hi);
+  }
+
+  final leftRange = rangeOf(leftSeries.isEmpty ? rightSeries : leftSeries);
+  final rightRange = rightSeries.isEmpty || leftSeries.isEmpty
+      ? null
+      : rangeOf(rightSeries);
+
+  final tickStyle = chartTickStyle(c);
+  // 아래 눈금(가로축) 자리 — 글자 배율을 곱한 눈금 줄 높이 + 사이 8. 그리는 높이는 차트 높이에서 이것과 맨 위 여백을 뺀 것
+  final tickLine = chartTickLineHeight(tickStyle, scaler: scaler);
+  final bottomReserved = tickLine + kChartTickMargin;
+  final plotHeight = math.max(1.0, w.height - w._topPadding - bottomReserved);
+  // 세로 눈금이 겹치면 수를 줄인다(chart.md "큰 글자") — 눈금 사이가 눈금 글 줄 높이보다 좁으면 들어가는 칸 수로 1 · 2 · 5 축을
+  // 다시 센다. 이중 축은 두 축의 0 을 맞춘 뒤(아래 · 위 칸 수 중 큰 쪽)의 칸 수로 본다 — 한 축은 한 단위 그대로다
+  final maxIntervals = w._hasValueAxis
+      ? chartAxisMaxIntervals(plotHeight, tickLine)
+      : kChartAxisIntervals;
+  late PChartAxis l;
+  PChartAxis? r;
+  late int above;
+  late int below;
+  for (var n = kChartAxisIntervals; ; n--) {
+    l = niceChartAxis(leftRange.lo ?? 0, leftRange.hi ?? 0, intervals: n);
+    r = rightRange == null
+        ? null
+        : niceChartAxis(rightRange.lo ?? 0, rightRange.hi ?? 0, intervals: n);
+    int ticksAbove(PChartAxis a) => (a.max / a.step).round();
+    int ticksBelow(PChartAxis a) => (-a.min / a.step).round();
+    above = math.max(ticksAbove(l), r == null ? 0 : ticksAbove(r));
+    below = math.max(ticksBelow(l), r == null ? 0 : ticksBelow(r));
+    if (above + below <= maxIntervals || n <= 1) break;
+  }
+  // 맨 위 · 아래가 같은 칸 수라 위 · 아래가 없으면 한 칸은 둔다(모두 0 인 차트)
+  final aboveFix = above == 0 && below == 0
+      ? math.min(kChartAxisIntervals, maxIntervals)
+      : above;
+
+  double axisWidth(double step) {
+    final ticks = _ticksOf(below, aboveFix, step);
+    return chartAxisWidth(
+      [for (final v in ticks) _axisTextOf(w, v, ticks)],
+      tickStyle,
+      scaler: scaler,
+    );
+  }
+
+  final leftW = w._hasValueAxis ? axisWidth(l.step) : 0.0;
+  final rightW = r == null ? 0.0 : axisWidth(r.step);
+  // 가장 긴 가로 눈금 글 — 모든 눈금이 보일 때의 글(해가 바뀌는 칸의 연도 글 포함)로 잰다
+  var labelW = 0.0;
+  for (final label in chartXTickFullLabels(_xTicksOf(w))) {
+    labelW = math.max(labelW, measureText(label, tickStyle, scaler: scaler));
+  }
+  // 끝 글 자리는 비워 둔다(chart.md "큰 글자") — 끝 글은 그리는 자리 오른쪽 끝에 가운데를 두므로 오른쪽에 끝 글 폭의 절반을
+  // 비워 차트 끝을 넘지 않게 한다. 축 수와 관계없다 — 오른쪽 축이 있으면 그 축 자리(축 글 아래는 비어 있다)가 끝 글 반 폭보다
+  // 넓을 때 그대로 두고, 좁으면 끝 글 반 폭까지 넓힌다. 끝 글을 안으로 당기지 않으므로 건너뛴 간격이 끝까지 고르다
+  final rightPad = math.max(r == null ? PSpacing.x2 : rightW, labelW / 2);
+  final plotW = math.max(1.0, width - leftW - rightPad);
+  // 겹치면 끝(가장 최근) 글을 지키고 앞에서부터 건너뛴다(웹 recharts preserveEnd). 글이 둘도 못 들어가면 끝 글 하나만 남는다
+  final fit = math.max(1, (plotW / (labelW + kChartTickGap)).floor());
+  final interval = math.max(1, (w.categories.length / fit).ceil());
+  return (
+    below: below,
+    above: aboveFix,
+    stepLeft: l.step,
+    stepRight: r?.step,
+    leftWidth: leftW,
+    rightWidth: rightPad,
+    labelWidth: labelW,
+    plotWidth: plotW,
+    bottomReserved: bottomReserved,
+    interval: interval,
+  );
+}
+
 abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
   int? _active;
   Offset? _touch;
 
-  /// 맨 위 여백 · 세로축 · 강조 칸 · 기준선 — 막대 차트가 덮어쓴다.
-  double get _topPad => kChartTopPad;
-  bool get _valueAxis => true;
+  /// 맨 위 여백 · 세로축은 위젯이 정한다([PCartesianChart.xTickPeers] 도 같은 값으로 잰다). 강조 칸은 막대 차트가 덮어쓴다.
+  double get _topPad => widget._topPadding;
+  bool get _valueAxis => widget._hasValueAxis;
   int? get _emphasized => null;
-  List<double> get _referenceValues => const [];
-  bool get _stacked => false;
+
+  /// 그려짐 동안 가로 눈금 글도 왼쪽에서 드러나는가(선 차트).
+  bool get _revealsLabels => false;
 
   /// 눈금 글 — [ticks] 는 그 축이 그리는 눈금 전부(한 축은 한 단위).
   String _axisText(double v, List<double> ticks) =>
-      widget.axisFormatter?.call(v) ?? formatAxisWon(v, ticks);
-
-  /// 한 축의 눈금 값 — 아래 [below] 칸 ~ 위 [above] 칸.
-  List<double> _ticksOf(int below, int above, double step) => [
-    for (var t = -below; t <= above; t++) t * step,
-  ];
+      _axisTextOf(widget, v, ticks);
 
   /// 가로 눈금 — [PCartesianChart.xTicks] 가 없으면 [PCartesianChart.categories] 그대로(연도 없음).
-  List<PChartXTick> get _xTicks =>
-      widget.xTicks ??
-      [
-        for (final cat in widget.categories)
-          (label: cat, yearLabel: null, year: null),
-      ];
+  List<PChartXTick> get _xTicks => _xTicksOf(widget);
   String _valueText(double v) => (widget.valueFormatter ?? formatWon)(v);
 
   List<PChartSeries> get _visible => [
@@ -260,100 +424,25 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
 
   bool get _dual => widget.series.any((s) => s.onRight);
 
-  /// 눈금을 정한다 — 숨긴 계열도 포함해 정한다(지표 타일을 눌러도 축이 흔들리지 않는다).
+  /// 눈금을 정한다 — 같은 화면 · 같은 기간 차트([PCartesianChart.xTickPeers])와 가로 눈금 건너뛰기를 맞춘다.
   _Plan _plan(double width, PColors c, TextScaler scaler) {
-    final leftSeries = [
-      for (final s in widget.series)
-        if (!s.onRight) s,
-    ];
-    final rightSeries = [
-      for (final s in widget.series)
-        if (s.onRight) s,
-    ];
-    PChartAxis axisOf(List<PChartSeries> list) {
-      double? lo;
-      double? hi;
-      if (_stacked) {
-        // 쌓은 막대 — 칸마다 계열을 더한 합으로 눈금을 정한다
-        for (var i = 0; i < widget.categories.length; i++) {
-          var sum = 0.0;
-          for (final s in list) {
-            final v = i < s.values.length ? s.values[i] : null;
-            if (v != null && v > 0) sum += v;
-          }
-          lo = 0;
-          hi = hi == null ? sum : math.max(hi, sum);
-        }
-      } else {
-        for (final s in list) {
-          for (final v in s.values) {
-            if (v == null) continue;
-            lo = lo == null ? v : math.min(lo, v);
-            hi = hi == null ? v : math.max(hi, v);
-          }
-        }
-      }
-      for (final v in _referenceValues) {
-        lo = lo == null ? v : math.min(lo, v);
-        hi = hi == null ? v : math.max(hi, v);
-      }
-      return niceChartAxis(lo ?? 0, hi ?? 0);
+    final own = _measure(widget, width, c, scaler);
+    var interval = own.interval;
+    for (final peer in widget.xTickPeers) {
+      interval = math.max(interval, _measure(peer, width, c, scaler).interval);
     }
-
-    final l = axisOf(leftSeries.isEmpty ? rightSeries : leftSeries);
-    final r = rightSeries.isEmpty || leftSeries.isEmpty
-        ? null
-        : axisOf(rightSeries);
-    int ticksAbove(PChartAxis a) => (a.max / a.step).round();
-    int ticksBelow(PChartAxis a) => (-a.min / a.step).round();
-    final above = math.max(ticksAbove(l), r == null ? 0 : ticksAbove(r));
-    final below = math.max(ticksBelow(l), r == null ? 0 : ticksBelow(r));
-    // 맨 위 · 아래가 같은 칸 수라 위 · 아래가 없으면 한 칸은 둔다(모두 0 인 차트)
-    final aboveFix = above == 0 && below == 0 ? 4 : above;
-
-    final tickStyle = chartTickStyle(c);
-    double axisWidth(double step) {
-      final ticks = _ticksOf(below, aboveFix, step);
-      return chartAxisWidth(
-        [for (final v in ticks) _axisText(v, ticks)],
-        tickStyle,
-        scaler: scaler,
-      );
-    }
-
-    final leftW = _valueAxis ? axisWidth(l.step) : 0.0;
-    final rightW = r == null ? 0.0 : axisWidth(r.step);
-    // 가장 긴 가로 눈금 글 — 모든 눈금이 보일 때의 글(해가 바뀌는 칸의 연도 글 포함)로 잰다
-    final xTicks = _xTicks;
-    var labelW = 0.0;
-    for (final label in chartXTickFullLabels(xTicks)) {
-      labelW = math.max(labelW, measureText(label, tickStyle, scaler: scaler));
-    }
-    // 겹치면 끝(가장 최근) 글을 지키고 앞에서부터 건너뛴다(웹 recharts preserveEnd). 끝 글자가 반쯤 삐져나가므로 오른쪽 축이 없으면 그만큼 비워 둔다
-    var rightPad = r == null ? math.max(PSpacing.x2, labelW / 2) : rightW;
-    var plotW = math.max(1.0, width - leftW - rightPad);
-    final fit = math.max(1, (plotW / (labelW + kChartTickGap)).floor());
-    // 글 하나도 둘이 못 들어가면 끝 글 하나만 남는다. 끝 글 몫으로 오른쪽을 labelW / 2 나 비우면 그릴 폭이 더 줄어
-    // fl_chart 가 가로 눈금을 하나도 부르지 않는다(200% · 긴 달 글자) — 여백을 8 로 두고 끝 글을 왼쪽으로 당겨 오른쪽 끝에 맞춘다
-    var endShift = 0.0;
-    if (fit < 2 && r == null) {
-      rightPad = PSpacing.x2;
-      endShift = math.max(0.0, labelW / 2 - rightPad);
-      plotW = math.max(1.0, width - leftW - rightPad);
-    }
-    final interval = math.max(1, (widget.categories.length / fit).ceil());
     return _Plan(
-      below: below,
-      above: aboveFix,
-      stepLeft: l.step,
-      stepRight: r?.step,
-      leftWidth: leftW,
-      rightWidth: rightPad,
-      bottomLabels: chartXTickLabels(xTicks, interval),
-      endShift: endShift,
-      plotLeft: leftW,
-      plotWidth: plotW,
-      bottomReserved: scaler.scale(15) + kChartTickMargin,
+      below: own.below,
+      above: own.above,
+      stepLeft: own.stepLeft,
+      stepRight: own.stepRight,
+      leftWidth: own.leftWidth,
+      rightWidth: own.rightWidth,
+      labelWidth: own.labelWidth,
+      bottomLabels: chartXTickLabels(_xTicks, interval),
+      plotLeft: own.leftWidth,
+      plotWidth: own.plotWidth,
+      bottomReserved: own.bottomReserved,
     );
   }
 
@@ -401,6 +490,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
                     side(v, meta, p.stepRight, rightColor),
               ),
             )
+          // 오른쪽 축이 없으면 끝 글 자리만 비운다
           : AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -408,42 +498,50 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
                 getTitlesWidget: (v, meta) => const SizedBox(),
               ),
             ),
+      // 가로 눈금 글은 자리만 잡고 [_bottomLabels] 가 그린다 — fl_chart 는 아래 눈금이 그림 안에 드는지 볼 때 좌우 축 자리 합을
+      // 높이에서도 빼서, 합이 차트 높이를 넘으면(낮은 차트 · 큰 글자 · 긴 세로 눈금 글) 가로 눈금을 하나도 그리지 않는다
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
           reservedSize: p.bottomReserved,
-          // 칸마다 부르고 끝에서 센 간격만 그린다 — fl_chart 의 간격은 앞(0)에서 세어 끝 글을 못 지킨다
-          interval: 1,
-          getTitlesWidget: (v, meta) {
-            final i = v.round();
-            if (v != i.toDouble() || i < 0 || i >= widget.categories.length) {
-              return const SizedBox();
-            }
-            // fl_chart 는 간격에 안 맞아도 마지막 눈금을 더 찍는다 — 앞 글자와 겹쳐 "11월12월" 이 된다(막대 차트는 interval 을 아예 따르지 않아 칸마다 부른다 — 간격 칸만 그린다)
-            final label = i < p.bottomLabels.length ? p.bottomLabels[i] : null;
-            if (label == null) return const SizedBox();
-            return SideTitleWidget(
-              meta: meta,
-              space: kChartTickMargin,
-              child: Transform.translate(
-                offset: Offset(
-                  i == widget.categories.length - 1 ? -p.endShift : 0,
-                  0,
-                ),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: i == _emphasized
-                      ? chartTickStyle(c).copyWith(
-                          color: c.fgNeutral,
-                          fontWeight: FontWeight.w700,
-                        )
-                      : chartTickStyle(c),
+          getTitlesWidget: (v, meta) => const SizedBox(),
+        ),
+      ),
+    );
+  }
+
+  /// 가로 눈금 글 — 끝에서 센 간격의 칸만(끝 글은 늘 남는다), 그 칸의 가운데 아래에 그린다. 끝 글은 그리는 자리 오른쪽에 비워 둔
+  /// 끝 글 반 폭 안에 든다.
+  Widget _bottomLabels(PColors c, _Plan p, double h) {
+    final top = _topPad + h - p.bottomReserved + kChartTickMargin;
+    final half = p.labelWidth / 2 + 1;
+    return IgnorePointer(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (var i = 0; i < widget.categories.length; i++)
+            if (i < p.bottomLabels.length && p.bottomLabels[i] != null)
+              Positioned(
+                left: _xOf(i, p) - half,
+                width: half * 2,
+                top: top,
+                // 글은 제 폭으로 칸 가운데에 선다(상자는 가장 긴 글 폭)
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    p.bottomLabels[i]!,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: i == _emphasized
+                        ? chartTickStyle(c).copyWith(
+                            color: c.fgNeutral,
+                            fontWeight: FontWeight.w700,
+                          )
+                        : chartTickStyle(c),
+                  ),
                 ),
               ),
-            );
-          },
-        ),
+        ],
       ),
     );
   }
@@ -551,6 +649,15 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
                     top: _topPad,
                     child: _chart(context, c, p, h, progress),
                   ),
+                  // 선은 그려짐과 함께 왼쪽에서 드러난다(가로 눈금 글도 그림과 같이)
+                  Positioned.fill(
+                    child: progress < 1 && _revealsLabels
+                        ? ClipRect(
+                            clipper: _RevealClipper(progress),
+                            child: _bottomLabels(c, p, h),
+                          )
+                        : _bottomLabels(c, p, h),
+                  ),
                   ?overlay,
                   if (_active != null) _tip(c, p, h),
                 ],
@@ -566,6 +673,9 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
 // ── 선 ───────────────────────────────────────────────────────
 
 class _PLineChartState extends _CartesianState<PLineChart> {
+  @override
+  bool get _revealsLabels => true;
+
   double get _minX => widget.categories.length <= 1 ? -0.5 : 0;
   double get _maxX => widget.categories.length <= 1
       ? 0.5
@@ -697,20 +807,7 @@ class _RevealClipper extends CustomClipper<Rect> {
 
 class _PBarChartState extends _CartesianState<PBarChart> {
   @override
-  double get _topPad =>
-      kChartTopPad + (widget.barLabel == null ? 0 : _kBarLabelRoom);
-
-  @override
-  bool get _valueAxis => widget.showValueAxis;
-
-  @override
   int? get _emphasized => widget.emphasizedIndex;
-
-  @override
-  List<double> get _referenceValues => widget.referenceLines;
-
-  @override
-  bool get _stacked => widget.stacked;
 
   @override
   List<PChartTooltipRow> _tipFooter(int index) {

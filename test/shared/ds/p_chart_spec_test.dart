@@ -1757,8 +1757,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(
         find.byWidgetPredicate((w) => w is ClipRect && w.clipper != null),
-        findsOneWidget,
-        reason: '그리는 중 — 가로로 드러난다',
+        findsNWidgets(2),
+        reason: '그리는 중 — 선과 가로 눈금 글이 함께 가로로 드러난다',
       );
       await tester.pump(const Duration(milliseconds: 250));
       // 다 그려진 뒤에는 늘 1
