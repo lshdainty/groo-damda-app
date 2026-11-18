@@ -34,14 +34,18 @@ class PChartSeries {
   Color colorOf(PColors c) => weak ? color.weakOf(c) : color.of(c);
 }
 
-/// 차트 맨 위 여백 — 맨 위 눈금 글자(15)의 윗 절반이 잘리지 않게.
+/// 차트 맨 위 여백의 바닥값 — 실제 위 여백은 글자 크기 · 막대 위 값 글을 따라 이보다 커진다([_Plan.topPad]).
 const double kChartTopPad = 8;
 
-/// 막대 위 값 글을 둘 때 더하는 맨 위 자리 — 글 16 + 사이 4.
-const double _kBarLabelRoom = 20;
+/// 막대 위 값 글과 막대 윗끝 사이(chart.md "막대 위 값 자리도 글을 따릅니다" — 자리 = 글 줄 높이 + 4).
+const double kChartBarLabelGap = PSpacing.x1;
 
-/// 아래 눈금(가로축) 자리 — 눈금 15 + 눈금과 그리는 자리 사이 8.
-const double kChartBottomReserved = 15 + kChartTickMargin;
+/// 막대 위 값 글 — t2 12 / 16 · 700 · fg-neutral · 고정폭 숫자(`barValue`).
+TextStyle chartBarValueStyle(PColors c) => PTypography.t2.copyWith(
+  color: c.fgNeutral,
+  fontWeight: FontWeight.w700,
+  fontFeatures: const [FontFeature.tabularFigures()],
+);
 
 /// 막대 최대 폭 · 한 묶음 안 막대 사이 · 위(아래) 모서리.
 const double kChartBarMaxWidth = 28;
@@ -109,8 +113,8 @@ abstract class PCartesianChart extends StatefulWidget {
   /// 그리지 않고 폭만 잰다([categories] 길이와 가로 눈금 글이 같아야 한다).
   final List<PCartesianChart> xTickPeers;
 
-  /// 맨 위 여백 · 세로축 · 쌓기 · 기준선 — 눈금을 정하는 값(막대 차트가 덮어쓴다).
-  double get _topPadding => kChartTopPad;
+  /// 세로축 · 쌓기 · 기준선 · 막대 위 값 글 — 눈금을 정하는 값(막대 차트가 덮어쓴다).
+  bool get _hasBarLabel => false;
   bool get _hasValueAxis => true;
   bool get _isStacked => false;
   List<double> get _referenceValues => const [];
@@ -195,8 +199,7 @@ class PBarChart extends PCartesianChart {
   final bool stacked;
 
   @override
-  double get _topPadding =>
-      kChartTopPad + (barLabel == null ? 0 : _kBarLabelRoom);
+  bool get _hasBarLabel => barLabel != null;
 
   @override
   bool get _hasValueAxis => showValueAxis;
@@ -225,6 +228,9 @@ class _Plan {
     required this.plotLeft,
     required this.plotWidth,
     required this.bottomReserved,
+    required this.topPad,
+    required this.xLabelGap,
+    required this.barLabelRoom,
   });
 
   /// 0 아래 · 위로 눈금이 몇 칸인가.
@@ -248,6 +254,15 @@ class _Plan {
 
   /// 아래 눈금(가로축) 자리 — 글자 배율을 곱한 눈금 높이 + 사이 8.
   final double bottomReserved;
+
+  /// 맨 위 여백 — max(8 + 막대 위 값 자리, ⌈세로 눈금 글 줄 높이 ÷ 2⌉)(chart.md "세로축 끝 글의 자리를 비웁니다").
+  final double topPad;
+
+  /// 그리는 자리 아래 ~ 가로 눈금 글 사이 — max(8, ⌈세로 눈금 글 줄 높이 ÷ 2⌉ + 4). 맨 아래 세로 눈금 글이 첫 가로 글과 겹치지 않는다.
+  final double xLabelGap;
+
+  /// 막대 위 값 자리 — 그 글 줄 높이 + 4(막대 위 값 글이 없으면 0).
+  final double barLabelRoom;
 
   double get minY => -below.toDouble();
   double get maxY => above.toDouble();
@@ -276,6 +291,9 @@ typedef _Measure = ({
   double labelWidth,
   double plotWidth,
   double bottomReserved,
+  double topPad,
+  double xLabelGap,
+  double barLabelRoom,
   int interval,
 });
 
@@ -330,10 +348,20 @@ _Measure _measure(
       : rangeOf(rightSeries);
 
   final tickStyle = chartTickStyle(c);
-  // 아래 눈금(가로축) 자리 — 글자 배율을 곱한 눈금 줄 높이 + 사이 8. 그리는 높이는 차트 높이에서 이것과 맨 위 여백을 뺀 것
+  // 세로축 끝 글의 자리(chart.md "세로축 끝 글의 자리를 비웁니다") — 세로 눈금 글은 눈금 선 가운데에 서서 맨 위 · 맨 아래 글이
+  // 그리는 자리 밖으로 줄 높이의 절반만큼 나간다. 위 여백은 max(지금 위 여백, ⌈줄 ÷ 2⌉), 가로 눈금 줄은 그리는 자리 아래
+  // max(8, ⌈줄 ÷ 2⌉ + 4) 에서 시작한다. 막대 위 값 자리는 그 글 줄 높이 + 4(고정 20 이 아니다). 그리는 높이는 차트 높이에서
+  // 위 여백과 아래 눈금 자리(가로 눈금 줄 + 그 사이)를 뺀 것이다
   final tickLine = chartTickLineHeight(tickStyle, scaler: scaler);
-  final bottomReserved = tickLine + kChartTickMargin;
-  final plotHeight = math.max(1.0, w.height - w._topPadding - bottomReserved);
+  final halfTick = (tickLine / 2).ceilToDouble();
+  final barLabelRoom = w._hasBarLabel
+      ? chartTickLineHeight(chartBarValueStyle(c), scaler: scaler) +
+            kChartBarLabelGap
+      : 0.0;
+  final topPad = math.max(kChartTopPad + barLabelRoom, halfTick);
+  final xLabelGap = math.max(kChartTickMargin, halfTick + PSpacing.x1);
+  final bottomReserved = tickLine + xLabelGap;
+  final plotHeight = math.max(1.0, w.height - topPad - bottomReserved);
   // 세로 눈금이 겹치면 수를 줄인다(chart.md "큰 글자") — 눈금 사이가 눈금 글 줄 높이보다 좁으면 들어가는 칸 수로 1 · 2 · 5 축을
   // 다시 센다. 이중 축은 두 축의 0 을 맞춘 뒤(아래 · 위 칸 수 중 큰 쪽)의 칸 수로 본다 — 한 축은 한 단위 그대로다
   final maxIntervals = w._hasValueAxis
@@ -393,6 +421,9 @@ _Measure _measure(
     labelWidth: labelW,
     plotWidth: plotW,
     bottomReserved: bottomReserved,
+    topPad: topPad,
+    xLabelGap: xLabelGap,
+    barLabelRoom: barLabelRoom,
     interval: interval,
   );
 }
@@ -401,8 +432,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
   int? _active;
   Offset? _touch;
 
-  /// 맨 위 여백 · 세로축은 위젯이 정한다([PCartesianChart.xTickPeers] 도 같은 값으로 잰다). 강조 칸은 막대 차트가 덮어쓴다.
-  double get _topPad => widget._topPadding;
+  /// 세로축은 위젯이 정한다([PCartesianChart.xTickPeers] 도 같은 값으로 잰다). 강조 칸은 막대 차트가 덮어쓴다.
   bool get _valueAxis => widget._hasValueAxis;
   int? get _emphasized => null;
 
@@ -443,6 +473,9 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
       plotLeft: own.leftWidth,
       plotWidth: own.plotWidth,
       bottomReserved: own.bottomReserved,
+      topPad: own.topPad,
+      xLabelGap: own.xLabelGap,
+      barLabelRoom: own.barLabelRoom,
     );
   }
 
@@ -513,7 +546,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
   /// 가로 눈금 글 — 끝에서 센 간격의 칸만(끝 글은 늘 남는다), 그 칸의 가운데 아래에 그린다. 끝 글은 그리는 자리 오른쪽에 비워 둔
   /// 끝 글 반 폭 안에 든다.
   Widget _bottomLabels(PColors c, _Plan p, double h) {
-    final top = _topPad + h - p.bottomReserved + kChartTickMargin;
+    final top = p.topPad + h - p.bottomReserved + p.xLabelGap;
     final half = p.labelWidth / 2 + 1;
     return IgnorePointer(
       child: Stack(
@@ -592,7 +625,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
     if (rows.isEmpty) return const SizedBox.shrink();
     rows.addAll(_tipFooter(i));
     final cat = widget.categories[i];
-    final dy = (_touch?.dy ?? plotHeight / 2) + _topPad;
+    final dy = (_touch?.dy ?? plotHeight / 2) + p.topPad;
     return PChartTipLayer(
       anchor: Offset(_xOf(i, p), dy),
       side: PChartTipSide.beside,
@@ -637,7 +670,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
               c,
               MediaQuery.textScalerOf(context),
             );
-            final h = math.max(1.0, widget.height - _topPad);
+            final h = math.max(1.0, widget.height - p.topPad);
             final overlay = _overlay(c, p, h);
             return TapRegion(
               // 다른 곳을 누르면 닫는다 — 손을 떼도 남는다
@@ -646,7 +679,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
                 clipBehavior: Clip.none,
                 children: [
                   Positioned.fill(
-                    top: _topPad,
+                    top: p.topPad,
                     child: _chart(context, c, p, h, progress),
                   ),
                   // 선은 그려짐과 함께 왼쪽에서 드러난다(가로 눈금 글도 그림과 같이)
@@ -870,8 +903,11 @@ class _PBarChartState extends _CartesianState<PBarChart> {
           if (v == null) continue;
           final text = label(i, v);
           if (text == null) continue;
-          // 막대 윗끝(음수는 쓰지 않는다) 바로 위 — 글 높이 16 · 사이 4
-          final top = _topPad + (p.maxY - _y(s, v, p)) / range * plotH - 20;
+          // 막대 윗끝(음수는 쓰지 않는다) 바로 위 — 글 줄 높이(글자 크기를 따름) + 사이 4
+          final top =
+              p.topPad +
+              (p.maxY - _y(s, v, p)) / range * plotH -
+              p.barLabelRoom;
           parts.add(
             Positioned(
               key: ValueKey('chart-bar-label-$i'),
@@ -883,11 +919,7 @@ class _PBarChartState extends _CartesianState<PBarChart> {
                   text,
                   textAlign: TextAlign.center,
                   maxLines: 1,
-                  style: PTypography.t2.copyWith(
-                    color: c.fgNeutral,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                  style: chartBarValueStyle(c),
                 ),
               ),
             ),
@@ -900,7 +932,7 @@ class _PBarChartState extends _CartesianState<PBarChart> {
       parts.add(
         Positioned(
           left: _xOf(_active!, p) - 0.5,
-          top: _topPad,
+          top: p.topPad,
           height: h - p.bottomReserved,
           width: 1,
           child: IgnorePointer(
