@@ -37,7 +37,8 @@ enum PFieldIndicator {
 }
 
 /// 머리 오른쪽 보조 액션 — 칸을 채우는 데 돕는 작은 텍스트 버튼(예시 보기 · 전체 선택).
-/// Field 가 Button ghost · neutralSubtle · xsmall · 오른쪽 flush 로 그린다.
+/// Field 가 Button ghost · neutralSubtle · xsmall 로 그린다. 글자만 있는 단추라 가장자리 맞춤(flush)은 쓰지 않는다 —
+/// Button 의 가장자리 맞춤은 앞 아이콘이 있는 ghost 만이다(field.md · button.md, groo-design #240).
 @immutable
 class PFieldAction {
   const PFieldAction({required this.label, required this.onPressed});
@@ -412,7 +413,6 @@ class _PFieldState extends State<PField> implements PFieldLink {
                       variant: PButtonVariant.ghost,
                       ghostColor: PButtonGhostColor.neutralSubtle,
                       size: PButtonSize.xsmall,
-                      flush: PButtonFlush.right,
                     )),
           control: widget.child,
           footer: footer,

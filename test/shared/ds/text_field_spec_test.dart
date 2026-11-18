@@ -1434,7 +1434,7 @@ void main() {
     });
 
     testWidgets(
-      '보조 액션 — Button ghost · neutralSubtle · xsmall · 오른쪽 flush. 위아래로 넘친 자리와 누르는 영역 44 도 받는다',
+      '보조 액션 — Button ghost · neutralSubtle · xsmall, flush 없음(#240). 위아래로 넘친 자리와 누르는 영역 44 도 받는다',
       (tester) async {
         var taps = 0;
         await tester.pumpWidget(
@@ -1458,10 +1458,13 @@ void main() {
         expect(button.variant, PButtonVariant.ghost);
         expect(button.ghostColor, PButtonGhostColor.neutralSubtle);
         expect(button.size, PButtonSize.xsmall);
-        expect(button.flush, PButtonFlush.right);
+        // 글자만 있는 ghost 라 가장자리 맞춤을 쓰지 않는다 — 버튼 상자가 머리 안쪽 여백(2, 웹 px-x0_5) 끝에 선다.
+        // flush 였을 땐 상자가 그 밖으로 밀려 글자 끝만 맞췄다
+        expect(button.flush, isNull);
 
         final field = tester.getRect(find.byType(PField));
         final action = tester.getRect(find.byType(PButton));
+        expect(action.right, field.right - 2);
         expect(action.top, field.top - 5);
         // Field 위로 넘친 자리(보이는 버튼의 위 5)
         await tester.tapAt(Offset(action.center.dx, field.top - 3));
