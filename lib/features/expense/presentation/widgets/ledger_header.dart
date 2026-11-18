@@ -757,10 +757,14 @@ class LedgerCalendarGrid extends StatelessWidget {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
+              // 요일 글은 글자 크기 200% 에서 멈춘다 — 날짜 숫자는 그 위로도 커진다
+              final dowScaler = weekdayRowScaler(
+                MediaQuery.textScalerOf(context),
+              );
               final dows = fitWeekdayRowLabels(
                 constraints.maxWidth / 7,
                 dowStyle,
-                MediaQuery.textScalerOf(context),
+                dowScaler,
               );
               return Row(
                 children: [
@@ -778,6 +782,7 @@ class LedgerCalendarGrid extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           softWrap: false,
+                          textScaler: dowScaler,
                           // 일 = 치명 · 토 = 브랜드 · 평일 = 옅은 중립 (뜻은 그대로, 색 역할 이름만)
                           style: dowStyle.copyWith(
                             color: i == 0

@@ -560,7 +560,7 @@
     }
   },
   "assetCancelPayment": "Cancel payment",
-  "assetCancelPaymentConfirm": "Reverts the {amount} KRW paid on {date}. The account balance and card billing return to the state before payment.",
+  "assetCancelPaymentConfirm": "Reverts the ₩{amount} paid on {date}. The account balance and card billing return to the state before payment.",
   "@assetCancelPaymentConfirm": {
     "placeholders": {
       "amount": {
@@ -1216,9 +1216,9 @@
   "budgetFormErrCategory": "Select a category.",
   "budgetFormErrTotal": "Enter the total budget.",
   "budgetFormErrAmount": "Enter the budget.",
-  "amountTooLarge": "Amount can be up to 10 billion won.",
+  "amountTooLarge": "Amount can be up to ₩10,000,000,000.",
   "amountTooLargeAt": "Amount can be up to {limit}.",
-  "amountLimitBalance": "100 billion won",
+  "amountLimitBalance": "₩100,000,000,000",
   "budgetPickUsed": "Already has a budget this month",
   "budgetPickAllBudgeted": "Every expense category already has a budget.",
   "budgetPickNoCategory": "There are no expense categories to budget.",
@@ -1776,7 +1776,7 @@
   "expAccountCard": "Account/Card",
   "expInterest": "Interest",
   "expInterestHint": "The interest portion — debt decreases only by the rest",
-  "expInterestSplit": "Principal {principal} · Interest {interest}",
+  "expInterestSplit": "Principal ₩{principal} · Interest ₩{interest}",
   "@expInterestSplit": {
     "placeholders": {
       "principal": {
@@ -2489,7 +2489,7 @@
     }
   },
   "savingGoalErrAmount": "Enter the target amount.",
-  "savingGoalErrAmountTooLarge": "Target amount can be up to 10 billion won.",
+  "savingGoalErrAmountTooLarge": "Target amount can be up to ₩10,000,000,000.",
   "savingGoalErrCurrentExceeds": "The amount saved can't be more than the target amount.",
   "savingGoalDeadlineClear": "Clear target date",
   "searchAdvancedFilter": "Advanced filter",
@@ -4455,14 +4455,14 @@
   "txfErrCategory": "Choose a category.",
   "txfErrFrom": "Choose the account to send from.",
   "txfErrTo": "Choose the account to send to.",
-  "txfErrFx": "Enter the exchange rate or the amount in won.",
+  "txfErrFx": "Enter the exchange rate or the ₩ amount.",
   "txfErrInterest": "Interest can't be more than the amount.",
   "txfSplitsLoading": "Loading the split items. Try again in a moment.",
   "txfSaveFailed": "Couldn't save. Please try again in a moment.",
   "txfAssetLoadFailed": "Couldn't load accounts and cards",
   "txfNoPickableAsset": "No account or card fits this payment method.",
   "txfNoPickableDepositAsset": "No deposit account matches this income method.",
-  "txfFxHint": "{local} {code} × {rate} = {krw}",
+  "txfFxHint": "{local} {code} × {rate} = ₩{krw}",
   "@txfFxHint": {
     "placeholders": {
       "local": {
@@ -4479,8 +4479,8 @@
       }
     }
   },
-  "txfKrwAmount": "Amount in won",
-  "txfInstallmentValue": "{months} months · about {amount} a month",
+  "txfKrwAmount": "Amount (₩)",
+  "txfInstallmentValue": "{months} months · about ₩{amount} a month",
   "@txfInstallmentValue": {
     "placeholders": {
       "months": {
@@ -4492,7 +4492,7 @@
     }
   },
   "txfSplitMismatchTitle": "The split items don't match the amount",
-  "txfSplitMismatchBody": "New total {total} · split total {sum} — {diffText}",
+  "txfSplitMismatchBody": "New total ₩{total} · split total ₩{sum} — {diffText}",
   "@txfSplitMismatchBody": {
     "placeholders": {
       "total": {
@@ -4506,7 +4506,7 @@
       }
     }
   },
-  "txfSplitOver": "{diff} over.",
+  "txfSplitOver": "₩{diff} over.",
   "@txfSplitOver": {
     "placeholders": {
       "diff": {
@@ -4514,7 +4514,7 @@
       }
     }
   },
-  "txfSplitShort": "{diff} short.",
+  "txfSplitShort": "₩{diff} short.",
   "@txfSplitShort": {
     "placeholders": {
       "diff": {
@@ -4576,7 +4576,7 @@
   "expSplitActProportional": "Proportional",
   "expSplitActLargest": "Apply to largest",
   "expSplitActAdjust": "Adjustment item",
-  "expSplitErrRemain": "Make the remaining amount 0.",
+  "expSplitErrRemain": "Make the remaining amount ₩0.",
   "expSplitErrCount": "Add at least two items.",
   "expSplitRemoveAll": "Undo split",
   "expSplitRemoveTitle": "Undo this split?",
@@ -4611,7 +4611,7 @@
   "dutchSharesOverErr": "The shares are {amount} over.",
   "@dutchSharesOverErr": {"placeholders": {"amount": {"type": "String"}}},
   "dutchSaveFailed": "Couldn't create the split. Please try again in a moment.",
-  "expSplitErrRow": "Give every item a category and an amount above 0.",
+  "expSplitErrRow": "Give every item a category and an amount above ₩0.",
   "dutchErrRatio": "Shares must be numbers above 0.",
   "dutchErrCustomEmpty": "Enter an amount for every participant.",
   "expRecurringOpenFailed": "Couldn't open the repeat settings.",

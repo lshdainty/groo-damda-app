@@ -90,35 +90,36 @@ String minusOf(int n) => n > 0 ? kMinus : (n < 0 ? '+' : '');
 /// 값은 반드시 `krwSigned(v.abs(), ...)` 처럼 **절댓값**으로 넘겨라.
 String plusOf(int n) => minusOf(-n);
 
-/// 차트 Y축·도넛 중앙 라벨 — 한국어 단위 축약(조/억/만).
+/// 규모 값 줄임 — 한국어 조 · 억 · 만, 영어 T · B · M · K(차트 축과 같은 셈 — 한 단위 · 소수 한 자리).
 /// Web `shared/lib/groo/format.ts` 의 `formatChartAxis` 와 **한 글자도 갈리면
 /// 안 된다** — 같은 화면을 두 플랫폼이 그린다.
 ///
-/// 규칙은 구간과 상관없이 하나다(QA #73).
+/// **사용자 돈(거래 · 잔액 · 평가액)에는 쓰지 않는다** — 돈은 줄이지 않는다(international-design, groo-design #252). 줄임은
+/// 규모를 보이는 값(시가총액 · 주식 수)에만 쓴다: `1.2조` · `₩1.2T`.
 ///
-///   n < 1만   정수 + 천단위 콤마   `5,000` · `9,999`
-///   1만 ~     만                 `1만` · `1.2만` · `1,230.5만`
-///   1억 ~     억                 `1.2억` · `5억` · `9,999억`
-///   1조 ~     조                 `1조` · `1.2조`
+/// 규칙은 구간과 상관없이 하나다(QA #73). 한국어는 만 단위, 영어는 천 단위로 센다.
+///
+///   ko  n < 1만   정수 + 천단위 콤마   `5,000` · `9,999`
+///       1만 ~     만                 `1만` · `1.2만` · `1,230.5만`
+///       1억 ~     억                 `1.2억` · `5억` · `9,999억`
+///       1조 ~     조                 `1조` · `1.2조`
+///   en  n < 1K    정수               `999`
+///       1K ~      K                  `1K` · `1.2K` · `999K`
+///       1M ~ · 1B ~ · 1T ~           `1.2M` · `1B` · `1.2T`
 ///
 /// 값은 늘 소수 첫째 자리까지 쓰고 `.0` 은 뗀다 — `5.0만` 이 아니라 `5만`(QA #73).
 /// 예전엔 구간마다 정밀도가 달라(10억 위는 정수 억, 10만 위는 정수 만) 같은 축
 /// 안에서 규칙이 바뀌었다. 1만 미만에 천단위 콤마가 없던 것도 여기서 같이 잡힌다
-/// (QA #70 — 웹은 `5,000`, 앱만 `5000` 이었다).
+/// (QA #70 — 웹은 `5,000`, 앱만 `5000` 이었다). 영어는 예전엔 intl compact(유효 숫자 셋 — `1.23K`)라 한국어와 셈이 달랐다.
 ///
 /// 반올림한 값이 다음 단위에 닿으면 그 단위로 올린다 — 99,999,999 는 `10,000만`
-/// 이 아니라 `1억`, 999,999,999,999 는 `10,000억` 이 아니라 `1조` 다.
+/// 이 아니라 `1억`, 999,999,999,999 는 `10,000억` 이 아니라 `1조`, 영어 999,999 는 `1,000K` 가 아니라 `1M` 이다.
 ///
-/// 음수 부호는 [kMinus](U+2212). en 로케일은 Intl compact 그대로 둔다.
+/// 음수 부호는 [kMinus](U+2212).
 String formatChartAxis(double v) {
-  // en: 로케일 compact 축약 (120M · 52K · −5.2M). intl 내장 en 데이터.
-  // 음수 부호는 ko 와 같이 U+2212 — intl 은 ASCII '-' 를 낸다.
-  if (localeIsEn()) {
-    final body = NumberFormat.compact(locale: 'en').format(v.abs());
-    return v < 0 ? '$kMinus$body' : body;
-  }
-
-  const units = ['', '만', '억', '조'];
+  final en = localeIsEn();
+  final units = en ? const ['', 'K', 'M', 'B', 'T'] : const ['', '만', '억', '조'];
+  final base = en ? 1000.0 : 10000.0;
   var scaled = v.abs();
   var unit = 0;
   while (unit < units.length - 1) {
@@ -127,17 +128,19 @@ String formatChartAxis(double v) {
     final shown = unit == 0
         ? scaled.roundToDouble()
         : (scaled * 10).roundToDouble() / 10;
-    if (shown < 10000) {
+    if (shown < base) {
       scaled = shown;
       break;
     }
-    scaled /= 10000;
+    scaled /= base;
     unit++;
   }
 
   // 정수부는 천단위 콤마, 소수부는 한 자리(0 이면 뗀다).
   final tenths = (scaled * 10).round();
-  final head = NumberFormat.decimalPattern('ko_KR').format(tenths ~/ 10);
+  final head = NumberFormat.decimalPattern(
+    en ? 'en' : 'ko_KR',
+  ).format(tenths ~/ 10);
   final frac = tenths % 10;
   final body = '$head${frac == 0 ? '' : '.$frac'}${units[unit]}';
   return v < 0 ? '$kMinus$body' : body;

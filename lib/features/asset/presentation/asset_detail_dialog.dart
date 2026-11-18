@@ -655,7 +655,7 @@ class _InvChangeLine extends ConsumerWidget {
           direction: up ? PDeltaDirection.up : PDeltaDirection.down,
           value: masked
               ? '••••'
-              : '${formatChangeRateAbs(pct)} · ${l.assetTodayChange(krwSigned(chg.abs(), false, sign: up ? '+' : '−'))}',
+              : '${formatChangeRateAbs(pct)} · ${l.assetTodayChange(krwSigned(chg.abs(), false, sign: up ? '+' : '−', unit: true))}',
         ),
       ),
     );

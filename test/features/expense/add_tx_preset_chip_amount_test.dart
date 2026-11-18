@@ -73,12 +73,13 @@ Future<void> _open(WidgetTester tester, ExpenseTemplate preset) async {
 }
 
 void main() {
-  testWidgets('1만 위 프리셋 금액은 `19k` 가 아니라 만 단위로 줄인다', (tester) async {
+  // 금액을 고르는 칩도 돈이라 줄이지 않는다 — 원까지(international-design, groo-design #252)
+  testWidgets('1만 위 프리셋 금액은 `19k` · `2만` 이 아니라 원까지', (tester) async {
     await _open(tester, _preset(19900));
 
     expect(findTextContaining('19k'), findsNothing);
-    // 소수 첫째 자리까지 반올림하고 `.0` 은 뗀다 — 1.99만 → `2만`.
-    expect(findTextContaining('2만'), findsOneWidget);
+    expect(findTextContaining('2만'), findsNothing);
+    expect(findTextContaining('19,900원'), findsOneWidget);
   });
 
   testWidgets('억을 넘겨도 `k` 로 뻗지 않는다', (tester) async {
@@ -86,7 +87,8 @@ void main() {
     await _open(tester, _preset(120000000));
 
     expect(findTextContaining('k'), findsNothing);
-    expect(findTextContaining('1.2억'), findsOneWidget);
+    expect(findTextContaining('1.2억'), findsNothing);
+    expect(findTextContaining('120,000,000원'), findsOneWidget);
   });
 
   testWidgets('1만 아래는 예전과 같은 글자 — 천단위 콤마 정수', (tester) async {

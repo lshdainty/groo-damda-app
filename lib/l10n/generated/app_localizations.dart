@@ -1864,7 +1864,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetTodayChange.
   ///
   /// In ko, this message translates to:
-  /// **'오늘 {amount}원'**
+  /// **'오늘 {amount}'**
   String assetTodayChange(String amount);
 
   /// No description provided for @assetSharesCount.

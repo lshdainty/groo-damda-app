@@ -6,7 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/format/date.dart' show fitWeekdayRowLabels;
+import 'package:groo_damda_app/core/format/date.dart'
+    show fitWeekdayRowLabels, weekdayRowScaler;
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/date_picker_dates.dart';
@@ -208,7 +209,7 @@ class PDatePicker extends StatefulWidget {
   static double sheetBodyMinHeight(TextScaler scaler) =>
       chipHeight(PChipSize.medium, scaler) +
       PSpacing.x3 +
-      datePickerRowHeight(scaler, lineHeight: 19) +
+      datePickerRowHeight(weekdayRowScaler(scaler), lineHeight: 19) +
       2 * datePickerCellHeight(scaler);
 
   @override
@@ -647,7 +648,8 @@ class _PDatePickerState extends State<PDatePicker> {
   Widget _weekdayRow(double cellW) {
     final c = context.colors;
     final l = widget.labels;
-    final scaler = MediaQuery.textScalerOf(context);
+    // 요일 글은 글자 크기 200% 에서 멈춘다(숫자 · 제목은 그 위로도 커진다)
+    final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
     final style = PTypography.t4.copyWith(
       color: c.fgNeutralSubtle,
       fontWeight: FontWeight.w500,
@@ -682,6 +684,7 @@ class _PDatePickerState extends State<PDatePicker> {
                       labels[i],
                       maxLines: 1,
                       softWrap: false,
+                      textScaler: scaler,
                       style: style,
                     ),
                   ),
@@ -808,7 +811,11 @@ class _PDatePickerState extends State<PDatePicker> {
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final title = l.month(_view.year, _view.month);
     final scaler = MediaQuery.textScalerOf(context);
-    final weekdayH = datePickerRowHeight(scaler, lineHeight: 19);
+    // 요일 줄은 글자 크기 200% 에서 멈춘다 — 줄 높이도 멈춘 글로 잰다
+    final weekdayH = datePickerRowHeight(
+      weekdayRowScaler(scaler),
+      lineHeight: 19,
+    );
     final cellH = datePickerCellHeight(scaler);
 
     final header = SizedBox(

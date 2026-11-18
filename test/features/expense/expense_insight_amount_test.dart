@@ -83,8 +83,9 @@ void main() {
   testWidgets('지난달 대비 11,881원 차이를 `1만원` 으로 깎지 않는다', (tester) async {
     await _pumpLedger(tester, thisMonth: 100000, lastMonth: 111881);
 
-    // 문장은 Text.rich 라 findRichText 로 본다.
-    expect(_rich('1.2만원'), findsOneWidget);
+    // 문장은 Text.rich 라 findRichText 로 본다. 문장 속 돈도 줄이지 않는다 — 원까지(groo-design #252)
+    expect(_rich('11,881원'), findsOneWidget);
+    expect(_rich('1.2만원'), findsNothing);
     expect(_rich('1만원'), findsNothing);
   });
 
