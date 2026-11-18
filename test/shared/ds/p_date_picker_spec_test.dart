@@ -2519,6 +2519,9 @@ void main() {
         calls.last,
         PDateRange(start: DateTime(2026, 10, 1), end: DateTime(2026, 10, 31)),
       );
+      // 칩 줄은 한 줄 가로 스크롤이다(#255) — 줄 끝 칩은 밀어서 보이게 한 뒤 누른다
+      await tester.ensureVisible(chip('최근 3개월'));
+      await tester.pumpAndSettle();
       await _tap(tester, chip('최근 3개월'));
       await tester.pumpAndSettle();
       expect(
@@ -2647,7 +2650,7 @@ void main() {
     );
 
     testWidgets(
-      'scroll 은 한 줄 가로 스크롤(시트의 이어지는 달) · wrap 은 줄바꿈(한 달) — 하루 · 여러 날 달력에는 칩 줄이 없다',
+      '빠른 기간은 이어지는 달 · 한 달 모두 한 줄 가로 스크롤(#255) — 하루 · 여러 날 달력에는 칩 줄이 없다',
       (tester) async {
         await _pump(tester, holder([], continuous: true));
         await tester.pumpAndSettle();
@@ -2667,7 +2670,7 @@ void main() {
                 find.byType(PChipRadioGroup<PDatePreset>),
               )
               .layout,
-          PChipGroupLayout.wrap,
+          PChipGroupLayout.scroll,
         );
         await _pump(
           tester,
