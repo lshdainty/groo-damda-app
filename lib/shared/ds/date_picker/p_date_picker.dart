@@ -786,7 +786,9 @@ class _PDatePickerState extends State<PDatePicker> {
     final active = _activePreset;
     return PChipRadioGroup<PDatePreset>(
       semanticLabel: l.presets,
-      layout: _continuous ? PChipGroupLayout.scroll : PChipGroupLayout.wrap,
+      // 빠른 기간은 어디서나 한 줄 가로 스크롤 · 양 끝 흐림(date-picker.md "빠른 기간", groo-design #255) — 줄을 바꿔 칩 줄이
+      // 높아지면 달력이 그만큼 낮아진다. 시트 안 고르기 묶음의 줄바꿈 규칙(chip.md)의 예외다
+      layout: PChipGroupLayout.scroll,
       value: active,
       onChanged: _choosePreset,
       children: [
@@ -1046,11 +1048,8 @@ class _PDatePickerState extends State<PDatePicker> {
     final presetBox = presets == null
         ? null
         : Padding(
-            padding: EdgeInsets.only(
-              bottom: PSpacing.x3,
-              left: _continuous ? 0 : widget.inset,
-              right: _continuous ? 0 : widget.inset,
-            ),
+            // 줄은 놓인 자리 끝까지 — 안쪽 여백(화면 여백 24)은 스크롤 줄이 스스로 둔다
+            padding: const EdgeInsets.only(bottom: PSpacing.x3),
             child: presets,
           );
     final live = _continuous
