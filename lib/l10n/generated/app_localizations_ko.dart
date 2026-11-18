@@ -964,7 +964,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetTodayChange(String amount) {
-    return '오늘 $amount원';
+    return '오늘 $amount';
   }
 
   @override

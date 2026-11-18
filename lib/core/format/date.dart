@@ -191,6 +191,14 @@ List<String> weekdayRowNarrowLabels() {
   ];
 }
 
+/// 요일 줄 글자 크기의 상한 — 200% 에서 멈춘다(date-picker.md "글자 크기 설정", groo-design #252). 320 폭에서 그보다 크면 한 글자
+/// (영어 "W")도 칸에 들지 않는다. 날짜 숫자 · 제목은 그 위로도 커진다. WCAG 1.4.4 의 200% 는 지킨다.
+const double kWeekdayRowMaxTextScale = 2.0;
+
+/// 요일 줄이 쓰는 글자 배율 — 화면 배율을 [kWeekdayRowMaxTextScale] 에서 멈춘다. 요일 글 · 줄 높이 · 칸 맞춤 셈이 모두 이 값을 쓴다.
+TextScaler weekdayRowScaler(TextScaler scaler) =>
+    scaler.clamp(maxScaleFactor: kWeekdayRowMaxTextScale);
+
 /// 요일 줄 글을 칸에 맞춘다 — [labels](두 글자)가 모두 칸 폭 [cellWidth] 안에 들면 그대로, 하나라도 넘치면 [narrow](한 글자).
 /// 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday). 폭은 화면 글자 크기([scaler])로 잰다.
 List<String> fitWeekdayRowLabels(

@@ -1067,7 +1067,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetCancelPaymentConfirm(String amount, String date) {
-    return 'Reverts the $amount KRW paid on $date. The account balance and card billing return to the state before payment.';
+    return 'Reverts the ₩$amount paid on $date. The account balance and card billing return to the state before payment.';
   }
 
   @override
@@ -2127,7 +2127,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetFormErrAmount => 'Enter the budget.';
 
   @override
-  String get amountTooLarge => 'Amount can be up to 10 billion won.';
+  String get amountTooLarge => 'Amount can be up to ₩10,000,000,000.';
 
   @override
   String amountTooLargeAt(String limit) {
@@ -2135,7 +2135,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get amountLimitBalance => '100 billion won';
+  String get amountLimitBalance => '₩100,000,000,000';
 
   @override
   String get budgetPickUsed => 'Already has a budget this month';
@@ -3025,7 +3025,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expInterestSplit(String principal, String interest) {
-    return 'Principal $principal · Interest $interest';
+    return 'Principal ₩$principal · Interest ₩$interest';
   }
 
   @override
@@ -4502,7 +4502,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savingGoalErrAmountTooLarge =>
-      'Target amount can be up to 10 billion won.';
+      'Target amount can be up to ₩10,000,000,000.';
 
   @override
   String get savingGoalErrCurrentExceeds =>
@@ -8385,7 +8385,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txfErrTo => 'Choose the account to send to.';
 
   @override
-  String get txfErrFx => 'Enter the exchange rate or the amount in won.';
+  String get txfErrFx => 'Enter the exchange rate or the ₩ amount.';
 
   @override
   String get txfErrInterest => 'Interest can\'t be more than the amount.';
@@ -8406,15 +8406,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String txfFxHint(String local, String code, String rate, String krw) {
-    return '$local $code × $rate = $krw';
+    return '$local $code × $rate = ₩$krw';
   }
 
   @override
-  String get txfKrwAmount => 'Amount in won';
+  String get txfKrwAmount => 'Amount (₩)';
 
   @override
   String txfInstallmentValue(String months, String amount) {
-    return '$months months · about $amount a month';
+    return '$months months · about ₩$amount a month';
   }
 
   @override
@@ -8422,17 +8422,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String txfSplitMismatchBody(String total, String sum, String diffText) {
-    return 'New total $total · split total $sum — $diffText';
+    return 'New total ₩$total · split total ₩$sum — $diffText';
   }
 
   @override
   String txfSplitOver(String diff) {
-    return '$diff over.';
+    return '₩$diff over.';
   }
 
   @override
   String txfSplitShort(String diff) {
-    return '$diff short.';
+    return '₩$diff short.';
   }
 
   @override
@@ -8579,7 +8579,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expSplitActAdjust => 'Adjustment item';
 
   @override
-  String get expSplitErrRemain => 'Make the remaining amount 0.';
+  String get expSplitErrRemain => 'Make the remaining amount ₩0.';
 
   @override
   String get expSplitErrCount => 'Add at least two items.';
@@ -8681,7 +8681,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expSplitErrRow =>
-      'Give every item a category and an amount above 0.';
+      'Give every item a category and an amount above ₩0.';
 
   @override
   String get dutchErrRatio => 'Shares must be numbers above 0.';

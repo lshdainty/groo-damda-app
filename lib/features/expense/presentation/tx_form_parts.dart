@@ -230,8 +230,9 @@ class TxPresetBlock extends StatelessWidget {
     final fixed = (p.lockAmount ?? 'N') == 'Y' && (p.amount ?? 0) > 0;
     return PChip(
       key: ValueKey('tx-preset-chip-${p.rowId}'),
+      // 금액을 고르는 칩도 돈이라 줄이지 않는다 — "12,000원" · "₩12,000"(international-design, groo-design #252)
       label: fixed
-          ? '${p.templateName}  ${formatChartAxis(p.amount!.toDouble())}'
+          ? '${p.templateName}  ${krwSigned(p.amount!, false, unit: true)}'
           : p.templateName,
       variant: PChipVariant.outlineWeak,
       selected: p.rowId == appliedId,

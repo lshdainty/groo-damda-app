@@ -71,7 +71,8 @@ class CalendarWeekdayRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final scaler = MediaQuery.textScalerOf(context);
+    // 요일 글은 글자 크기 200% 에서 멈춘다(date-picker.md "글자 크기 설정") — 날짜 숫자는 그 위로도 커진다
+    final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kCalendarGridInset),
       child: ConstrainedBox(
@@ -92,6 +93,7 @@ class CalendarWeekdayRow extends StatelessWidget {
                         labels[i],
                         maxLines: 1,
                         softWrap: false,
+                        textScaler: scaler,
                         style: PTypography.t3.copyWith(
                           color: switch (i) {
                             0 => c.fgCritical,

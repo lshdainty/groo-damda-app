@@ -834,12 +834,9 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
       // 5,000원 미만이면 "비슷해요" — 표기와 무관한 제품 문턱이라 그대로 둔다
       // (예전엔 만원 반올림 결과가 0 이냐로 갈랐다. 경계가 같은 5,000 이다).
       if (diff.abs() < 5000) return _plainInsight(l.txmInsightSame, subStyle);
-      // 축약은 차트 축·도넛 중앙과 같은 함수 하나를 쓴다. 예전엔 여기서 만원으로
-      // 반올림해 11,881 을 `1만원` 이라고 했다 — 문장이 실제보다 16% 적게 말했다
-      // (QA #38). 이제 `1.2만원` 이다.
-      final amount = localeIsEn()
-          ? '₩${krw(diff.abs())}'
-          : '${formatChartAxis(diff.abs().toDouble())}원';
+      // 문장 속 돈도 줄이지 않는다 — "11,881원" · "₩11,881"(international-design, groo-design #252). 예전엔 만원으로
+      // 반올림해 11,881 을 `1만원`(QA #38), 그 뒤엔 `1.2만원` 으로 줄여 말했다.
+      final amount = krwSigned(diff.abs(), false, unit: true);
       // 가림 점은 krw.dart 의 기본 마스크(6개)와 한 벌
       final shownAmount = masked ? kHideMask : amount;
       final less = diff > 0;
