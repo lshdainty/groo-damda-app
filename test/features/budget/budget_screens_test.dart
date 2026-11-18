@@ -18,6 +18,8 @@ import 'package:groo_damda_app/features/budget/application/budget_providers.dart
 import 'package:groo_damda_app/features/budget/data/budget_repository.dart';
 import 'package:groo_damda_app/features/budget/domain/budget.dart';
 import 'package:groo_damda_app/features/budget/domain/budget_compliance.dart';
+import 'package:groo_damda_app/core/clock/clock.dart';
+import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_screen.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_settings_screen.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -1124,5 +1126,46 @@ void main() {
       expect(find.byType(PAlertDialogView), findsNothing);
       expect(repo.deleted, [5]);
     });
+  });
+
+  // 일평균 지출 — 홈 · 통계와 같은 함수(DESIGN.md "하루 평균", groo-design #259). 오늘을 품은 달이면 첫날부터 오늘까지 지난
+  // 날수, half-up. 29,430 · 오늘 18일 → 1,635(18로) · 오늘 1일 → 29,430(1로)
+  group('일평균 지출 — 오늘까지 지난 날수', () {
+    for (final (today, expected) in [
+      (
+        DateTime(2026, 11, 18),
+        dailyAverageWon(
+          29430,
+          DateTime(2026, 11),
+          DateTime(2026, 11, 30),
+          DateTime(2026, 11, 18),
+        ),
+      ),
+      (DateTime(2026, 11, 1), 29430),
+    ]) {
+      testWidgets('오늘 ${today.month}월 ${today.day}일 → ${krw(expected)}원', (
+        tester,
+      ) async {
+        await _pump(
+          tester,
+          const BudgetScreen(),
+          overrides: [clockProvider.overrideWithValue(() => today)],
+          summaryOf: (r) async => RangeSummary(
+            startDate: r.startDate,
+            endDate: r.endDate,
+            totalExpense: 29430,
+          ),
+        );
+        final row = find.ancestor(
+          of: findText('일평균 지출'),
+          matching: find.byType(PListItem),
+        );
+        expect(row, findsOneWidget);
+        expect(
+          find.descendant(of: row, matching: findText('${krw(expected)}원')),
+          findsOneWidget,
+        );
+      });
+    }
   });
 }

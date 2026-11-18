@@ -326,20 +326,18 @@ class StatsCompareMetricsSection extends StatelessWidget {
     final totalPrev = prev!.totalExpense;
     final txNow = statsExpenseCount(nowExpenses!);
     final txPrev = statsExpenseCount(prevExpenses!);
-    final today = DateTime.now();
-    DateTime dOnly(DateTime d) => DateTime(d.year, d.month, d.day);
-    var nowEnd = period.to;
-    if (nowEnd.isAfter(today)) nowEnd = today;
-    final nowDays = (dOnly(nowEnd).difference(dOnly(period.from)).inDays + 1)
-        .clamp(1, 100000);
-    final prevDays =
-        (dOnly(period.prev.to).difference(dOnly(period.prev.from)).inDays + 1)
-            .clamp(1, 100000);
+    // 하루 평균 — 홈 · 하이라이트 · 예산과 같은 함수 · 같은 오늘(기기 시계 statsNow). 지난 기간은 기간 전체 날수
+    final today = statsNow();
     final rows = <({String label, int now, int prev, bool count})>[
       (
         label: l.statsCompareDailyAvg,
-        now: averageWon(totalNow, nowDays),
-        prev: averageWon(totalPrev, prevDays),
+        now: dailyAverageWon(totalNow, period.from, period.to, today),
+        prev: dailyAverageWon(
+          totalPrev,
+          period.prev.from,
+          period.prev.to,
+          today,
+        ),
         count: false,
       ),
       (label: l.statsCompareTxCount, now: txNow, prev: txPrev, count: true),

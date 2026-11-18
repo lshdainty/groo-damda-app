@@ -22,13 +22,35 @@ String krw(int n, {bool sign = false, bool abs = false}) {
 /// 이 값을 넣는다 — 영어에서 ₩ 가 빠지던 것을 막는다(international-design "문장 속 돈도 같은 표기").
 String krwWithUnit(int n) => krwSigned(n, false, unit: true);
 
-/// 원 단위 평균 — [total] ÷ [count] 를 반올림(half-up, .5 는 올림)한 정수 원(DESIGN.md "반올림은 반올림"). 하루 평균처럼 여러
+/// 원 단위 평균 — [total] ÷ [count] 를 반올림(half-up — .5 는 절댓값 쪽으로 올림, 음수도 −1.5 → −2)한 정수 원(DESIGN.md "반올림은 반올림"). 하루 평균처럼 여러
 /// 화면이 같은 값을 보이는 평균은 이 함수 하나로 낸다 — 한쪽은 버림(1,548) · 한쪽은 반올림(1,549) 이던 것을 막는다. [count] 가 0
 /// 이하면 0.
 int averageWon(int total, int count) {
   if (count <= 0) return 0;
-  return (total / count + 0.5).floor();
+  // 정수로 센다(웹과 같은 셈) — |합| ÷ 날수의 몫 q · 나머지 r, 2r ≥ 날수면 q + 1. 부호는 합을 따른다(1.5 → 2 · −1.5 → −2).
+  final abs = total.abs();
+  var q = abs ~/ count;
+  if (2 * (abs % count) >= count) q++;
+  return total < 0 ? -q : q;
 }
+
+/// 하루 평균에 쓰는 날수(DESIGN.md "하루 평균", groo-design #259) — 기간 [from] ~ [to](양 끝 포함)가 [today] 를 품으면 첫날부터
+/// 오늘까지(오늘 포함), 그 밖(지난 기간 · 아직 오지 않은 기간)은 기간 전체 날수다. 남은 날을 0 으로 넣어 나누면 이번 기간 평균이
+/// 작아 보이기 때문이다. 시 · 분은 보지 않는다(날짜로만 센다 — 서머타임에도 하루는 하루). 적어도 1.
+int averageDays(DateTime from, DateTime to, DateTime today) {
+  DateTime day(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+  final first = day(from);
+  final last = day(to);
+  final now = day(today);
+  final end = !now.isBefore(first) && !now.isAfter(last) ? now : last;
+  final days = end.difference(first).inDays + 1;
+  return days < 1 ? 1 : days;
+}
+
+/// 하루 평균(원) — [averageDays] 로 센 날수로 [total] 을 나눠 반올림(half-up)한다. 홈 · 통계(하이라이트 · 비교) · 예산이 모두 이
+/// 함수 하나를 쓴다 — 같은 기간 · 같은 오늘이면 어느 화면이든 같은 값이다. 오늘은 기기 시계(각 화면의 `…Now` 규약)다.
+int dailyAverageWon(int total, DateTime from, DateTime to, DateTime today) =>
+    averageWon(total, averageDays(from, to, today));
 
 /// web `HIDE_AMOUNTS_MASK` 정합 — 기본 마스크는 점 6개. 작은/compact 표기는 `mask: '••••'`(4개).
 const String kHideMask = '••••••';

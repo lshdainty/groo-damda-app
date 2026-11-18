@@ -983,11 +983,13 @@ class StatsHighlightsSection extends StatelessWidget {
       }
 
       final periodTotal = summary!.totalExpense;
-      final divisor = period.useDailyAvg
-          ? period.days
-          : summary!.monthlyBuckets.length.clamp(1, 9999);
-      // 평균은 한 함수 · 한 반올림(half-up) — 홈 · 통계 비교 · 예산과 같다
-      final avgValue = averageWon(periodTotal, divisor);
+      // 하루 평균은 홈 · 통계 비교 · 예산과 같은 함수(오늘을 품은 기간이면 오늘까지 지난 날수 · half-up). 월 평균은 달 수로
+      final avgValue = period.useDailyAvg
+          ? dailyAverageWon(periodTotal, period.from, period.to, statsNow())
+          : averageWon(
+              periodTotal,
+              summary!.monthlyBuckets.length.clamp(1, 9999),
+            );
 
       // 하루 평균 부제 — 월 모드는 전월 대비 Delta(기준 글은 Delta 뒤 옅은 글), 그 외 기간은 합계
       Widget avgDetail;
