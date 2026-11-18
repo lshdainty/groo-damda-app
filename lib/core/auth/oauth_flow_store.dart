@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'package:groo_damda_app/core/storage/app_secure_storage.dart';
 
 /// 진행 중인 OAuth 흐름의 PKCE 상태 보관소.
 ///
@@ -7,12 +10,17 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// 죽던 바로 그 지점이다. code_verifier/state 를 브라우저로 나가기 **전에** 디스크에
 /// 박아 두면 콜드 스타트로 돌아와도 교환을 이어갈 수 있다.
 ///
-/// code_verifier 는 인가코드와 교환 가능한 비밀이라 secure storage 에 둔다.
+/// code_verifier 는 인가코드와 교환 가능한 비밀이라 secure storage 에 둔다 — 옵션은 [appSecureStorage]
+/// 하나로 쿠키 저장소와 같게 둔다(다르면 Android 콜드 스타트에 보관분이 비어 보인다).
 class OAuthFlowStore {
   OAuthFlowStore([FlutterSecureStorage? storage])
-    : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? appSecureStorage;
 
   final FlutterSecureStorage _storage;
+
+  /// 쓰는 저장소 — 옵션이 쿠키 저장소와 같은지 시험이 본다.
+  @visibleForTesting
+  FlutterSecureStorage get storage => _storage;
 
   static const _kVerifier = 'oauth_pending_verifier';
   static const _kState = 'oauth_pending_state';

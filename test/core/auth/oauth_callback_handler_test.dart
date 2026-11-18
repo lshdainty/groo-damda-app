@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/core/auth/oauth_callback_handler.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
+import 'package:groo_damda_app/core/network/secure_cookie_storage.dart';
+import 'package:groo_damda_app/core/storage/app_secure_storage.dart';
 import '../../support/memory_secure_storage.dart';
 
 void main() {
@@ -228,6 +232,51 @@ void main() {
       await handler.handle(callback(code: 'c1', state: 's1'));
 
       expect(await store.isForceLoginPrompt(), isTrue);
+    });
+  });
+
+  group('Android 콜드 스타트', () {
+    test('로그인 흐름 보관소와 쿠키 저장소가 같은 보안 저장소(옵션)를 쓴다', () {
+      // 옵션이 다르면 Android 콜드 스타트에 보관분(verifier · state)이 비어 보여 로그인이 조용히 버려졌다
+      expect(identical(OAuthFlowStore().storage, appSecureStorage), isTrue);
+      expect(identical(SecureCookieStorage.storage, appSecureStorage), isTrue);
+    });
+
+    test('같은 콜백이 거의 동시에 두 번 와도(initial link + 스트림) 교환은 한 번이다', () async {
+      await store.savePending(verifier: 'v1', state: 's1');
+      final gate = Completer<void>();
+      var calls = 0;
+      final slow = OAuthCallbackHandler(
+        store: store,
+        exchange:
+            ({
+              required String code,
+              required String codeVerifier,
+              required bool forcedPrompt,
+            }) async {
+              calls++;
+              await gate.future;
+              return true;
+            },
+      );
+      final uri = callback(code: 'c1', state: 's1');
+
+      final first = slow.handle(uri);
+      final second = slow.handle(uri);
+      gate.complete();
+
+      expect(await first, OAuthCallbackResult.exchanged);
+      expect(await second, OAuthCallbackResult.duplicate);
+      expect(calls, 1, reason: '두 번 나가면 늦은 쪽이 쓴 코드(AUTH_004)로 거절돼 로그아웃된다');
+    });
+
+    test('앞 처리가 끝난 뒤 같은 콜백은 흐름이 소비돼 버린다', () async {
+      await store.savePending(verifier: 'v1', state: 's1');
+      final uri = callback(code: 'c1', state: 's1');
+
+      expect(await handler.handle(uri), OAuthCallbackResult.exchanged);
+      expect(await handler.handle(uri), OAuthCallbackResult.noPendingFlow);
+      expect(exchanged, hasLength(1));
     });
   });
 }
