@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
@@ -113,10 +115,31 @@ class CalendarWeekdayRow extends StatelessWidget {
   }
 }
 
-/// 칸 안 날 숫자 원의 한 변 — 글자가 커지면 따라 커진다.
-double calendarNumberBox(TextScaler s) => s
-    .scale(PTypography.t4.fontSize! * PTypography.t4.height!)
-    .clamp(kCalendarDayCircle, double.infinity);
+/// 칸 안 날 숫자 원의 한 변 — 26 이 최소이고 글을 따라 커진다(DESIGN.md Typography "글이 상자보다 커지는 자리는 그 값이 최소
+/// 높이라 글을 따라 늘어난다"). 글 줄 높이와 두 자리 날짜("28" · 오늘의 700 · 고정폭 숫자라 두 자리는 모두 같은 폭)의 폭 가운데
+/// 큰 값이다 — 줄 높이로만 키우면 안드로이드 비선형 글자 크기(작은 글은 설정만큼, 큰 값은 덜 커진다)에서 "10" 이 원보다 넓어
+/// 두 줄로 꺾여 잘린다(QA 320 · 200% "10" → "1"). 줄 높이도 `scale(19)` 가 아니라 글 크기를 키운 뒤 줄 비율을 곱한다.
+double calendarNumberBox(TextScaler s) {
+  final style = calendarDayNumberStyle(FontWeight.w700);
+  final line = s.scale(style.fontSize!) * style.height!;
+  final p = TextPainter(
+    text: TextSpan(text: '28', style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: s,
+    maxLines: 1,
+  )..layout();
+  final width = p.width;
+  p.dispose();
+  return [kCalendarDayCircle, line, width].reduce(math.max).ceilToDouble();
+}
+
+/// 날 숫자 글 — t4 14 / 19 · 고정폭 숫자(오늘은 700 · 나머지 500).
+TextStyle calendarDayNumberStyle(FontWeight weight, {Color? color}) =>
+    PTypography.t4.copyWith(
+      color: color,
+      fontWeight: weight,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
 
 /// 칸 안 칩 한 줄 높이 — 글자 크기를 곱한다.
 double calendarChipHeight(TextScaler s) =>
@@ -322,10 +345,9 @@ class CalendarDayCell extends StatelessWidget {
           : null,
       child: Text(
         '${day.day}',
-        style: PTypography.t4.copyWith(
+        style: calendarDayNumberStyle(
+          isToday && !isOutside ? FontWeight.w700 : FontWeight.w500,
           color: dayColor,
-          fontWeight: isToday && !isOutside ? FontWeight.w700 : FontWeight.w500,
-          fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
     );

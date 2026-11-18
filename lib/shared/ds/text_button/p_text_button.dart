@@ -8,7 +8,8 @@ import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 
 /// 글 버튼(SEED Text Button) — 카드 머리 "전체 보기" · 모두 펼치기 · 결과 둘째 버튼 · 목록 제목 동작의 모양.
-/// 수치 원본은 card.yaml `headerAction`(2026-10-16 사용자 결정, 글자 역할 D2): 보이는 상자 높이 36 · 좌우 14 · 모서리 8,
+/// 수치 원본은 card.yaml `headerAction`(2026-10-16 사용자 결정, 글자 역할 D2): 보이는 상자 높이 36(최소 — 큰 글자에서는 위아래 8 을
+/// 두고 글을 따라 늘어난다) · 좌우 14 · 모서리 8,
 /// 글 14/19 · 700 · `fg-neutral-muted`, 아이콘 · 꺾쇠 없음. 누르는 영역은 위아래로 넓혀 44(보이는 자리는 그대로)이고,
 /// 누르면 바탕 `bg-layer-default-pressed` + 2px 거리 축소다. 이름은 [semanticLabel] (없으면 글 그대로).
 ///
@@ -41,6 +42,9 @@ class PTextButton extends StatefulWidget {
 /// 보이는 상자 높이 · 좌우 여백.
 const double kTextButtonHeight = 36;
 const double kTextButtonPaddingX = PSpacing.x3_5;
+
+/// 위아래 여백 — 글이 커져 상자가 36 을 넘을 때 글 위아래에 둔다.
+const double kTextButtonPaddingY = PSpacing.x2;
 
 class _PTextButtonState extends State<PTextButton> {
   bool _pressed = false;
@@ -112,16 +116,22 @@ class _PTextButtonState extends State<PTextButton> {
       ),
       duration: PDuration.colorTransition,
       curve: PEasing.easing,
+      // 보이는 높이 36 은 최소 높이다 — 글이 커지면(큰 글자) 위아래 8 을 두고 글을 따라 늘어난다(DESIGN.md Typography "글이
+      // 상자보다 커지는 자리는 그 값이 최소 높이라 글을 따라 늘어난다" · 글자 역할 R16 "위아래 8"). 고정 36 이면 AX4 · AX5 에서
+      // 글 윗부분이 잘린다
       builder: (context, background, child) => Container(
         key: const ValueKey('text-button-box'),
-        height: kTextButtonHeight,
-        padding: const EdgeInsets.symmetric(horizontal: kTextButtonPaddingX),
-        alignment: Alignment.center,
+        constraints: const BoxConstraints(minHeight: kTextButtonHeight),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kTextButtonPaddingX,
+          vertical: kTextButtonPaddingY,
+        ),
         decoration: BoxDecoration(
           color: background,
           borderRadius: BorderRadius.circular(PRounded.r2),
         ),
-        child: child,
+        // 세로는 글 높이로 감싼다(위 최소 높이 안에서 가운데) — 가로 배치는 그대로
+        child: Align(heightFactor: 1, child: child),
       ),
       child: labelStack,
     );

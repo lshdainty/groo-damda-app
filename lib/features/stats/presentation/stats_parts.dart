@@ -684,6 +684,9 @@ class StatsHeatmapSection extends StatelessWidget {
       );
     }
     final days = weekdayLabels(mondayFirst: true);
+    // 칸 위 요일 머리 — 영어 두 글자 · 칸에 들지 않으면 한 글자(international-design.mdx "날짜"). 툴팁 · 표는 [days] 그대로
+    final heads = weekdayRowLabels(mondayFirst: true);
+    final narrowHeads = weekdayRowNarrowLabels(mondayFirst: true);
     final totalText = statsWon(total, masked);
     final name = l.statsChartHeatName(period.label(), totalText);
     final rowDefs = [
@@ -700,7 +703,12 @@ class StatsHeatmapSection extends StatelessWidget {
           rows: rowDefs,
           columns: [
             for (var i = 0; i < days.length; i++)
-              PHeatmapColumn(key: 'col$i', label: days[i]),
+              PHeatmapColumn(
+                key: 'col$i',
+                label: days[i],
+                head: heads[i],
+                narrowHead: narrowHeads[i],
+              ),
           ],
           values: [
             for (final row in matrix)

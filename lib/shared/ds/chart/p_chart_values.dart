@@ -247,11 +247,29 @@ String _tickWithYear(PChartXTick t, int? prevYear) =>
     ? t.yearLabel!
     : t.label;
 
-/// 모든 눈금이 보일 때의 글 — 해가 바뀌는 첫 눈금에만 연도. 눈금 글자 폭을 재는 기준이다.
+/// 모든 눈금이 보일 때의 글 — 해가 바뀌는 첫 눈금에만 연도. 글 폭은 이것이 아니라 [chartXTickDrawableLabels] 로 잰다.
 List<String> chartXTickFullLabels(List<PChartXTick> ticks) => [
   for (var i = 0; i < ticks.length; i++)
     _tickWithYear(ticks[i], i > 0 ? ticks[i - 1].year : null),
 ];
+
+/// 그려질 수 있는 가로 눈금 글 전부 — 눈금마다 연도 없는 글과, 첫 눈금과 해가 다르면 연도 글까지. 건너뛰기로 해가 바뀌는 칸이
+/// 빠지면 그 뒤 보이는 눈금이 연도를 이어받으므로([chartXTickLabels]) 끝 글 하나만 남을 때 끝 글이 "11월" 이 아니라
+/// "2026. 11." 이 된다. 가로 눈금 글 폭 · 끝 글 자리(chart.md "끝 글 자리는 비워 둔다")는 이 글들로 잰다 — 모든 눈금이 보일 때의
+/// 글([chartXTickFullLabels])로만 재면 연도를 이어받은 긴 끝 글이 잰 폭보다 넓어 잘린다.
+List<String> chartXTickDrawableLabels(List<PChartXTick> ticks) {
+  final first = ticks.isEmpty ? null : ticks.first.year;
+  return [
+    for (final t in ticks) ...[
+      t.label,
+      if (t.yearLabel != null &&
+          t.year != null &&
+          first != null &&
+          t.year != first)
+        t.yearLabel!,
+    ],
+  ];
+}
 
 /// 보이는 눈금의 글 — 건너뛴 눈금은 null. 끝(가장 최근) 눈금에서 [interval] 칸마다 남긴다(chart.md "큰 글자").
 ///
