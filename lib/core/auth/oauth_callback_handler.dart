@@ -36,7 +36,24 @@ class OAuthCallbackHandler {
   /// 처리 결과 — 호출측(리스너)이 로그로 남길 수 있게 이유를 돌려준다.
   /// 사용자에게 보여줄 에러는 exchange 실패(throw)뿐이다 — 나머지는 위조·중복·잡음이라
   /// 조용히 버리는 게 맞다.
+  ///
+  /// 같은 콜백이 처리되는 동안 또 오면 [OAuthCallbackResult.duplicate] 로 버린다. Android 콜드 스타트는
+  /// `getInitialLink` 와 링크 스트림 첫 이벤트가 같은 주소를 거의 동시에 준다 — 둘 다 보관분을 지우기 전에 읽어
+  /// 교환이 두 번 나가고, 늦은 쪽이 쓴 코드로 거절돼(`AUTH_004`) 앞쪽 로그인까지 로그아웃시켰다.
   Future<OAuthCallbackResult> handle(Uri uri) async {
+    final key = uri.toString();
+    if (!_inFlight.add(key)) return OAuthCallbackResult.duplicate;
+    try {
+      return await _handle(uri);
+    } finally {
+      _inFlight.remove(key);
+    }
+  }
+
+  /// 지금 처리 중인 콜백 주소.
+  final Set<String> _inFlight = {};
+
+  Future<OAuthCallbackResult> _handle(Uri uri) async {
     if (uri.scheme != Env.authCallbackScheme) {
       return OAuthCallbackResult.notCallback;
     }
@@ -85,6 +102,9 @@ enum OAuthCallbackResult {
   /// 연동 복귀 딥링크 — 로그인 콜백이 아니라 연결된 계정 줄이 받는다.
   linkReturn,
   noPendingFlow,
+
+  /// 같은 콜백을 처리하는 중에 또 왔다(Android 콜드 스타트의 initial link + 스트림) — 버린다.
+  duplicate,
   stateMismatch,
   noCode,
   exchanged,
