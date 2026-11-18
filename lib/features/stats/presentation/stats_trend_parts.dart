@@ -68,7 +68,7 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
         ],
       );
     }
-    if (data.isEmpty || data.every((p) => p.income == 0 && p.expense == 0)) {
+    if (!_trendChartShown(data)) {
       return statsSection(
         header: head,
         children: [BudgetEmptyLine(l.statsNoTrendData)],
@@ -104,30 +104,13 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
           onHiddenChanged: (h) => setState(() => _hidden = h),
         ),
         const SizedBox(height: PSpacing.x2),
-        PLineChart(
+        _trendChart(
+          l,
+          data,
+          masked: masked,
           label: name,
-          height: 200,
           hidden: _hidden,
-          dots: trendNeedsDots(data, _hidden),
-          categories: [for (final d in data) d.label],
-          xTicks: trendXTicks(data),
-          series: [
-            PChartSeries(
-              key: 'income',
-              label: l.expTypeIncome,
-              color: PChartColor.blue,
-              values: [for (final d in data) d.income.toDouble()],
-            ),
-            PChartSeries(
-              key: 'expense',
-              label: l.expTypeExpense,
-              color: PChartColor.red,
-              onRight: true,
-              values: [for (final d in data) d.expense.toDouble()],
-            ),
-          ],
-          axisFormatter: maskFormatter(masked),
-          valueFormatter: maskFormatter(masked),
+          xTickPeers: [_savingsChart(l, data, masked: masked)],
         ),
         PChartDataTable(
           caption: name,
@@ -145,6 +128,84 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
       ],
     );
   }
+}
+
+/// 수입 · 지출 추이 선을 그리는가 — 점이 없거나 수입 · 지출이 모두 0 이면 빈 줄이다.
+bool _trendChartShown(List<TrendPoint> data) =>
+    data.any((p) => p.income != 0 || p.expense != 0);
+
+// 수입 · 지출 추이 선과 순저축 막대는 같은 점(같은 기간)을 먹는다 — 그리는 자리가 가장 좁은 차트로 가로 눈금 건너뛰기를 한 번
+// 세어 위아래가 같은 날짜 글을 쓴다(chart.md "같은 화면 · 같은 기간 차트는 같은 날짜 글"). 두 차트는 같은 폭 띠에 놓이므로 서로를
+// [PCartesianChart.xTickPeers] 로 넘긴다 — 넘기는 쪽은 그리지 않고 폭만 재므로 이름은 비워 둔다.
+
+/// 수입 · 지출 추이 — 선(영역) 이중 축(왼쪽 수입 · 오른쪽 지출).
+PLineChart _trendChart(
+  AppLocalizations l,
+  List<TrendPoint> data, {
+  required bool masked,
+  String label = '',
+  Set<String> hidden = const {},
+  List<PCartesianChart> xTickPeers = const [],
+}) => PLineChart(
+  label: label,
+  height: 200,
+  hidden: hidden,
+  dots: trendNeedsDots(data, hidden),
+  categories: [for (final d in data) d.label],
+  xTicks: trendXTicks(data),
+  xTickPeers: xTickPeers,
+  series: [
+    PChartSeries(
+      key: 'income',
+      label: l.expTypeIncome,
+      color: PChartColor.blue,
+      values: [for (final d in data) d.income.toDouble()],
+    ),
+    PChartSeries(
+      key: 'expense',
+      label: l.expTypeExpense,
+      color: PChartColor.red,
+      onRight: true,
+      values: [for (final d in data) d.expense.toDouble()],
+    ),
+  ],
+  axisFormatter: maskFormatter(masked),
+  valueFormatter: maskFormatter(masked),
+);
+
+/// 월별 · 일별 순저축 — 막대(음수는 아래로 · 빨강).
+PBarChart _savingsChart(
+  AppLocalizations l,
+  List<TrendPoint> data, {
+  required bool masked,
+  String label = '',
+  List<PCartesianChart> xTickPeers = const [],
+}) => PBarChart(
+  label: label,
+  height: 180,
+  categories: [for (final d in data) d.label],
+  xTicks: trendXTicks(data),
+  xTickPeers: xTickPeers,
+  series: [
+    PChartSeries(
+      key: 'savings',
+      label: l.statsNetSavings,
+      color: PChartColor.blue,
+      values: [for (final d in data) d.savings.toDouble()],
+    ),
+  ],
+  barColor: (i, colors) =>
+      data[i].savings < 0 ? colors.chartRed : colors.chartBlue,
+  axisFormatter: maskFormatter(masked),
+  valueFormatter: (v) => _savingsText(v, masked),
+);
+
+/// 순저축 글 — 부호를 붙인 원까지("+12,000원" · "−3,000원"), 가리면 가림 글.
+String _savingsText(double v, bool masked) {
+  if (masked) return kBudgetMask;
+  final n = v.round();
+  final text = statsWon(n.abs(), false);
+  return n > 0 ? '+$text' : (n < 0 ? '$kChartMinus$text' : text);
 }
 
 /// 0 이 대부분인 날마다의 합 — 켠 계열에서 값(0 이 아닌 점)이 있는 날이 [kTrendDotsMaxValues] 개 이하이면 늘 찍는 점(`dots`)을
@@ -576,34 +637,19 @@ class StatsSavingsBarsSection extends StatelessWidget {
         children: [BudgetEmptyLine(l.statsNoMonthlyData)],
       );
     }
-    String signed(double v) {
-      final n = v.round();
-      final text = statsWon(n.abs(), false);
-      return n > 0 ? '+$text' : (n < 0 ? '$kChartMinus$text' : text);
-    }
-
-    String shown(double v) => masked ? kBudgetMask : signed(v);
+    String shown(double v) => _savingsText(v, masked);
     final name = l.statsChartSavingsName(period.label(), title);
     return statsSection(
       header: head,
       children: [
-        PBarChart(
+        _savingsChart(
+          l,
+          data,
+          masked: masked,
           label: name,
-          height: 180,
-          categories: [for (final d in data) d.label],
-          xTicks: trendXTicks(data),
-          series: [
-            PChartSeries(
-              key: 'savings',
-              label: l.statsNetSavings,
-              color: PChartColor.blue,
-              values: [for (final d in data) d.savings.toDouble()],
-            ),
+          xTickPeers: [
+            if (_trendChartShown(data)) _trendChart(l, data, masked: masked),
           ],
-          barColor: (i, colors) =>
-              data[i].savings < 0 ? colors.chartRed : colors.chartBlue,
-          axisFormatter: maskFormatter(masked),
-          valueFormatter: shown,
         ),
         PChartDataTable(
           caption: name,
