@@ -231,6 +231,7 @@ class _Plan {
     required this.topPad,
     required this.xLabelGap,
     required this.barLabelRoom,
+    required this.shownTicks,
   });
 
   /// 0 아래 · 위로 눈금이 몇 칸인가.
@@ -264,6 +265,10 @@ class _Plan {
   /// 막대 위 값 자리 — 그 글 줄 높이 + 4(막대 위 값 글이 없으면 0).
   final double barLabelRoom;
 
+  /// 세로 눈금 글을 둘 칸(0 에서 센 칸 — 위 +, 아래 −). null 이면 모두. 가장 적은 축도 들지 않으면 큰 쪽 끝 하나(0 은 함께
+  /// 들어갈 때만)다 — 격자선은 그대로 긋는다([_measure]).
+  final Set<int>? shownTicks;
+
   double get minY => -below.toDouble();
   double get maxY => above.toDouble();
 }
@@ -294,6 +299,7 @@ typedef _Measure = ({
   double topPad,
   double xLabelGap,
   double barLabelRoom,
+  Set<int>? shownTicks,
   int interval,
 });
 
@@ -386,6 +392,20 @@ _Measure _measure(
   final aboveFix = above == 0 && below == 0
       ? math.min(kChartAxisIntervals, maxIntervals)
       : above;
+  // 가장 적은 축도 들지 않으면 큰 쪽 끝 글만(chart.md "큰 글자", groo-design #253) — 칸을 가장 적게 줄여도(0 을 품어야 하는
+  // −50만 · 0 · 50만, 양수만이면 0 · 50만) 눈금 사이가 글 줄 높이보다 좁으면, 절댓값이 큰 쪽 끝 글 하나를 남기고 0 은 그 끝과
+  // 겹치지 않을 때만 둔다. 나머지 글은 빼고 격자선 · 차트 높이는 그대로다. 이중 축은 두 축이 같은 칸이라 같은 자리 글만 남는다
+  Set<int>? shownTicks;
+  final total = aboveFix + below;
+  if (w._hasValueAxis && total > 0 && plotHeight / total < tickLine - 1e-6) {
+    // 끝 눈금의 절댓값이 같으면(−50만 · 50만) 값의 절댓값이 큰 쪽(데이터가 닿는 쪽) 끝을 남긴다
+    final topIsBig = aboveFix != below
+        ? aboveFix > below
+        : (leftRange.hi ?? 0).abs() >= (leftRange.lo ?? 0).abs();
+    final big = topIsBig ? aboveFix : -below;
+    final zeroFits = big.abs() * plotHeight / total >= tickLine - 1e-6;
+    shownTicks = {big, if (zeroFits) 0};
+  }
 
   double axisWidth(double step) {
     final ticks = _ticksOf(below, aboveFix, step);
@@ -424,6 +444,7 @@ _Measure _measure(
     topPad: topPad,
     xLabelGap: xLabelGap,
     barLabelRoom: barLabelRoom,
+    shownTicks: shownTicks,
     interval: interval,
   );
 }
@@ -476,6 +497,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
       topPad: own.topPad,
       xLabelGap: own.xLabelGap,
       barLabelRoom: own.barLabelRoom,
+      shownTicks: own.shownTicks,
     );
   }
 
@@ -492,6 +514,10 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
         : null;
     Widget side(double v, TitleMeta meta, double? step, PChartColor? color) {
       if (v != v.roundToDouble() || step == null) return const SizedBox();
+      // 가장 적은 축도 들지 않으면 큰 쪽 끝 글(과 들어가면 0)만 — 격자선은 그대로다
+      if (p.shownTicks != null && !p.shownTicks!.contains(v.round())) {
+        return const SizedBox();
+      }
       return SideTitleWidget(
         meta: meta,
         space: kChartTickMargin,
@@ -914,12 +940,21 @@ class _PBarChartState extends _CartesianState<PBarChart> {
               left: _xOf(i, p) - 40,
               width: 80,
               top: top,
+              // 값 글 뒤에 카드 면 색 바탕(글 상자 크기) — 기준선(예산 100% 점선) · 격자가 글을 가로지르지 않고 글 뒤로
+              // 숨는다(chart.md "막대 위 값 자리도 글을 따릅니다", groo-design #253). 점선을 끊는 셈은 하지 않는다
               child: IgnorePointer(
-                child: Text(
-                  text,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  style: chartBarValueStyle(c),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ColoredBox(
+                    key: ValueKey('chart-bar-label-bg-$i'),
+                    color: c.bgLayerDefault,
+                    child: Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: chartBarValueStyle(c),
+                    ),
+                  ),
                 ),
               ),
             ),
