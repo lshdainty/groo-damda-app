@@ -1,5 +1,7 @@
 // 선 차트 축 — 글자 배율 200% 에서도 눈금 글이 온전한지, 가로축 마지막 글자가 앞 글자와 겹치지 않는지(I-05 57).
 // 눈금 칸은 글자 배율을 곱한 폭으로 잡힌다 — 1배로 재면 "1,500억" 이 "1,5" 로 잘렸다.
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -71,10 +73,15 @@ void main() {
         reason:
             '${scale * 100}% 세로축 칸 폭 ≥ 눈금 글자 폭($widest) — 안 그러면 "1,5" 로 잘린다',
       );
+      // 가로축 자리 = 눈금 줄 높이(배율 곱) + 그리는 자리와 사이 max(8, ⌈줄 ÷ 2⌉ + 4)(chart.md "세로축 끝 글의 자리를 비웁니다")
+      final line = TextScaler.linear(scale).scale(15);
       expect(
         titles.bottomTitles.sideTitles.reservedSize,
-        TextScaler.linear(scale).scale(15) + 8,
-        reason: '가로축 자리 = 눈금 높이(배율 곱) + 8',
+        moreOrLessEquals(
+          line + math.max(8, (line / 2).ceilToDouble() + 4),
+          epsilon: 0.01,
+        ),
+        reason: '100% 15 + 8 · 200% 30 + 19',
       );
     }
     // 글이 커지면 달 글자 간격이 넓어져 붙지 않는다(보이는 달 수가 줄어든다)
