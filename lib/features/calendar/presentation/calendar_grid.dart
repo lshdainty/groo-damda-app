@@ -63,36 +63,48 @@ List<DateTime> calendarGridDays(DateTime month) {
   ];
 }
 
-/// 요일 줄 — 높이 32 · t3 · 평일 fg-neutral-subtle · 일 fg-critical · 토 지금 색 그대로(fg-brand).
+/// 요일 줄 — 높이 32 · t3 · 평일 fg-neutral-subtle · 일 fg-critical · 토 지금 색 그대로(fg-brand). 영어는 두 글자(Su … Sa),
+/// 칸에 들지 않는 폭 · 글자 크기에서만 한 글자(S … S) — 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday).
 class CalendarWeekdayRow extends StatelessWidget {
   const CalendarWeekdayRow({super.key});
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final labels = weekdayLabels();
+    final scaler = MediaQuery.textScalerOf(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kCalendarGridInset),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: kCalendarWeekdayRowHeight),
-        child: Row(
-          children: [
-            for (var i = 0; i < 7; i++)
-              Expanded(
-                child: Center(
-                  child: Text(
-                    labels[i],
-                    style: PTypography.t3.copyWith(
-                      color: switch (i) {
-                        0 => c.fgCritical,
-                        6 => c.fgBrand,
-                        _ => c.fgNeutralSubtle,
-                      },
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final labels = fitWeekdayRowLabels(
+              constraints.maxWidth / 7,
+              PTypography.t3,
+              scaler,
+            );
+            return Row(
+              children: [
+                for (var i = 0; i < 7; i++)
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        labels[i],
+                        maxLines: 1,
+                        softWrap: false,
+                        style: PTypography.t3.copyWith(
+                          color: switch (i) {
+                            0 => c.fgCritical,
+                            6 => c.fgBrand,
+                            _ => c.fgNeutralSubtle,
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );

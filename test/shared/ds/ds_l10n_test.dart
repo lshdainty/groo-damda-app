@@ -44,7 +44,9 @@ void main() {
     expect(icon.countLabel(2), '2 results');
     final date = PDatePickerLabels.of(c);
     expect(date.root, 'Select date');
-    expect(date.weekdays.first, 'Sun');
+    // 영어 요일 줄은 두 글자 · 칸에 들지 않으면 한 글자(date-picker.md ⓔ Weekday, groo-design #250)
+    expect(date.weekdays.first, 'Su');
+    expect(date.weekdaysNarrow?.first, 'S');
     expect(date.weekdaysLong.first, 'Sunday');
     expect(date.day(DateTime(2026, 10, 15)), 'Thursday, Oct 15, 2026');
     expect(date.presetNames[PDatePreset.thisWeek], 'This week');

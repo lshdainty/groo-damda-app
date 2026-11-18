@@ -148,6 +148,7 @@ class PDatePickerLabels {
     required this.today,
     required this.presets,
     required this.weekdays,
+    this.weekdaysNarrow,
     required this.weekdaysLong,
     required this.month,
     required this.day,
@@ -174,9 +175,12 @@ class PDatePickerLabels {
   /// 빠른 기간 칩 묶음 이름.
   final String presets;
 
-  /// 보이는 요일(일요일부터 일곱) · 읽는 요일.
+  /// 보이는 요일(일요일부터 일곱 — 영어는 두 글자 "Su") · 읽는 요일.
   final List<String> weekdays;
   final List<String> weekdaysLong;
+
+  /// 칸에 [weekdays] 가 들지 않는 폭 · 글자 크기에서 쓰는 한 글자 요일(영어 "S"). 없으면 [weekdays] 그대로.
+  final List<String>? weekdaysNarrow;
 
   /// 달 제목 · 알림 — month 는 1 ~ 12.
   final String Function(int year, int month) month;
@@ -207,12 +211,21 @@ class PDatePickerLabels {
     if (l == null) return ko;
     final en = Localizations.localeOf(context).languageCode == 'en';
     final base = DateTime(2023, 12, 31); // 일요일
-    final short = [
-      for (var i = 0; i < 7; i++)
-        en
-            ? DateFormat.E('en').format(base.add(Duration(days: i)))
-            : _weekdays[i],
-    ];
+    // 영어 요일은 두 글자(Su Mo Tu We Th Fr Sa) — 칸에 들지 않으면 한 글자(S M T W T F S, date-picker.md ⓔ Weekday)
+    final short = en
+        ? [
+            for (var i = 0; i < 7; i++)
+              DateFormat.E(
+                'en',
+              ).format(base.add(Duration(days: i))).substring(0, 2),
+          ]
+        : _weekdays;
+    final narrow = en
+        ? [
+            for (var i = 0; i < 7; i++)
+              DateFormat.EEEEE('en').format(base.add(Duration(days: i))),
+          ]
+        : null;
     final long = [
       for (var i = 0; i < 7; i++)
         en
@@ -229,6 +242,7 @@ class PDatePickerLabels {
       today: l.dsDateToday,
       presets: l.dsDatePresets,
       weekdays: short,
+      weekdaysNarrow: narrow,
       weekdaysLong: long,
       month: (year, month) => en
           ? DateFormat.yMMM('en').format(DateTime(year, month))
