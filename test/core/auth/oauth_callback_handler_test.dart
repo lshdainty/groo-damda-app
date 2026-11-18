@@ -89,7 +89,7 @@ void main() {
 
     test('콜백 스킴이 아니면 손대지 않는다', () async {
       final result = await handler.handle(
-        Uri.parse('https://desk.porest.cloud/x'),
+        Uri.parse('https://damda.hangroo.io/x'),
       );
 
       expect(result, OAuthCallbackResult.notCallback);
