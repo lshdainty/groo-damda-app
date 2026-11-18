@@ -713,6 +713,10 @@ class LedgerCalendarGrid extends StatelessWidget {
                         '${cellData.d}',
                         maxLines: 1,
                         softWrap: false,
+                        // 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 칸 금액은 그 위로도 커진다
+                        textScaler: weekdayRowScaler(
+                          MediaQuery.textScalerOf(context),
+                        ),
                         style: PTypography.t5.copyWith(
                           fontWeight: isSel || isToday
                               ? FontWeight.w700
@@ -757,7 +761,7 @@ class LedgerCalendarGrid extends StatelessWidget {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              // 요일 글은 글자 크기 200% 에서 멈춘다 — 날짜 숫자는 그 위로도 커진다
+              // 요일 글 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258)
               final dowScaler = weekdayRowScaler(
                 MediaQuery.textScalerOf(context),
               );
