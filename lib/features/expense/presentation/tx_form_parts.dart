@@ -16,7 +16,6 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
-import 'package:groo_damda_app/shared/ds/scroll_fog/p_scroll_fog.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/features/category/presentation/category_tile.dart';
@@ -196,26 +195,26 @@ class TxPresetBlock extends StatelessWidget {
         else if (top.isEmpty)
           _note(context, l.txfNoPresets)
         else
-          SizedBox(
-            height: 36,
-            // 가로 스크롤 줄은 끝 흐림 32(Scroll Fog row) — 칩 필터 바와 같은 방식
-            child: PScrollFog(
-              key: const ValueKey('tx-preset-chips'),
-              use: PScrollFogUse.row,
-              child: Row(
-                spacing: PSpacing.x2,
-                children: [
-                  for (final p in top) _chip(context, l, p),
-                  if (hasMore)
-                    // 칩 묶음은 한 변형(outlineWeak) — "모두 보기" 도 같다
-                    PChip(
-                      label: l.txfShowAll,
-                      variant: PChipVariant.outlineWeak,
-                      suffixIcon: LucideIcons.chevronRight,
-                      onPressed: onShowAll,
-                    ),
-                ],
-              ),
+          // 폼 안의 고르기 묶음은 줄을 바꾼다 — 칩 사이 · 줄 사이 8(chip.md "묶음 배치", groo-design #254). 가로 스크롤
+          // 한 줄은 목록 위 필터 바 · 제안 줄 몫이다
+          Padding(
+            key: const ValueKey('tx-preset-chips'),
+            padding: const EdgeInsets.symmetric(
+              horizontal: PSpacing.globalGutter,
+            ),
+            child: ChipLayout(
+              layout: PChipGroupLayout.wrap,
+              children: [
+                for (final p in top) _chip(context, l, p),
+                if (hasMore)
+                  // 칩 묶음은 한 변형(outlineWeak) — "모두 보기" 도 같다
+                  PChip(
+                    label: l.txfShowAll,
+                    variant: PChipVariant.outlineWeak,
+                    suffixIcon: LucideIcons.chevronRight,
+                    onPressed: onShowAll,
+                  ),
+              ],
             ),
           ),
         const SizedBox(height: PSpacing.x2),

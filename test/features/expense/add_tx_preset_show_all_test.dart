@@ -84,13 +84,12 @@ Future<void> _open(
   await tester.pumpAndSettle();
 }
 
-/// 프리셋 칩 줄 — ListView 가 아니라 끝 흐림 가로 줄(PScrollFog Row, bf4df171)이다.
-Finder _chipRow() => find
-    .descendant(
-      of: find.byKey(const ValueKey('tx-preset-chips')),
-      matching: find.byType(Scrollable),
-    )
-    .first;
+/// 프리셋 칩 묶음은 줄을 바꾼다(chip.md "묶음 배치", groo-design #254) — 끝 칩 "모두 보기" 도 묶음 안에 보인다.
+/// 시트가 길면 그 자리까지 내려 본다.
+Future<void> _revealShowAll(WidgetTester tester, AppLocalizations l) async {
+  await tester.ensureVisible(findText(l.txfShowAll));
+  await tester.pumpAndSettle();
+}
 
 void main() {
   late AppLocalizations l;
@@ -100,8 +99,7 @@ void main() {
 
   testWidgets('지금 종류가 9개면 "모두 보기" 가 보이고, 누르면 아홉째도 고를 수 있다', (tester) async {
     await _open(tester, _nine());
-    await tester.drag(_chipRow(), const Offset(-3000, 0));
-    await tester.pumpAndSettle();
+    await _revealShowAll(tester, l);
     expect(findText(l.txfShowAll), findsOneWidget);
     await tester.tap(findText(l.txfShowAll));
     await tester.pumpAndSettle();
@@ -116,8 +114,7 @@ void main() {
 
   testWidgets('찾기 0건이면 "찾는 프리셋이 없어요."', (tester) async {
     await _open(tester, _nine());
-    await tester.drag(_chipRow(), const Offset(-3000, 0));
-    await tester.pumpAndSettle();
+    await _revealShowAll(tester, l);
     await tester.tap(findText(l.txfShowAll));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).last, '없는이름');
@@ -137,8 +134,7 @@ void main() {
         return [_cat];
       },
     );
-    await tester.drag(_chipRow(), const Offset(-3000, 0));
-    await tester.pumpAndSettle();
+    await _revealShowAll(tester, l);
     await tester.tap(findText(l.txfShowAll));
     await tester.pumpAndSettle();
     expect(findText(l.presetCategoryLoadFailed), findsOneWidget);
