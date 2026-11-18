@@ -259,6 +259,17 @@ class _TrendTab extends ConsumerWidget {
     final points = loading
         ? null
         : trendPoints(period, summary, expensesAsync.value ?? const []);
+    // 카테고리 월별 추이는 여러 달(2+)일 때만 — 단일 월은 카테고리 탭 도넛이 담당(웹 showCatTrend)
+    final showCatTrend = !rangeFailed && buckets >= 2;
+    // 보이는 같은 기간 · 같은 눈금 단위 차트를 한 묶음으로 — 가로 눈금 건너뛰기를 가장 좁은 차트로 한 번 센다
+    final peers = statsTrendPeers(
+      l,
+      points: trendFailed ? null : points,
+      daily: daily,
+      catSummary: showCatTrend ? summary : null,
+      categories: categoriesAsync.value,
+      masked: masked,
+    );
 
     final bands = <Widget>[
       budgetBand([
@@ -286,6 +297,7 @@ class _TrendTab extends ConsumerWidget {
                 points: points,
                 daily: daily,
                 masked: masked,
+                xTickPeers: peers.others(trend: false),
               ),
       ]),
       if (!rangeFailed)
@@ -303,16 +315,17 @@ class _TrendTab extends ConsumerWidget {
             points: points,
             daily: daily,
             masked: masked,
+            xTickPeers: peers.others(savings: false),
           ),
         ]),
-      // 카테고리 월별 추이는 여러 달(2+)일 때만 — 단일 월은 카테고리 탭 도넛이 담당(웹 showCatTrend)
-      if (!rangeFailed && buckets >= 2)
+      if (showCatTrend)
         budgetBand([
           StatsCatTrendSection(
             period: period,
             summary: summary,
             categories: categoriesAsync.value,
             masked: masked,
+            xTickPeers: peers.others(catTrend: false),
           ),
         ]),
     ];

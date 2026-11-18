@@ -295,6 +295,23 @@ List<PChartXTick>? trendXTicks(List<TrendPoint> points) =>
     ? null
     : [for (final p in points) p.tick!];
 
+/// 월별 버킷을 이번 달에서 자른다 — 가로축은 오늘에서 끝난다(chart.md "오늘 뒤는 그리지 않습니다"). 오늘을 품은(이번 달 이전에
+/// 시작한) 기간만 이번 달 뒤 달을 버리고, 앞날에서 시작하는 기간은 그대로 둔다(그릴 달이 하나도 없어지지 않게). 월별 수입 · 지출
+/// 추이 · 순저축 · 주요 카테고리 월별 추이가 같은 자르기를 쓴다 — 끝 칸이 같아야 묶은 차트의 날짜 글도 같다.
+List<RangeMonthlyBucket> bucketsToToday(
+  List<RangeMonthlyBucket> buckets, {
+  DateTime? today,
+}) {
+  final t = today ?? statsNow();
+  bool notAfter(RangeMonthlyBucket b) =>
+      b.year < t.year || (b.year == t.year && b.month <= t.month);
+  if (buckets.isEmpty || !notAfter(buckets.first)) return buckets;
+  return [
+    for (final b in buckets)
+      if (notAfter(b)) b,
+  ];
+}
+
 /// 추이 점 — 일별(단일 월 · 짧은 직접 기간) 또는 월별.
 ///
 /// 가로축은 오늘에서 끝난다 — 오늘 뒤 날짜 · 달을 0 으로 그리지 않는다(chart.md "축"). 오늘을 품은 기간만 오늘(월별은 이번 달)
@@ -320,16 +337,7 @@ List<TrendPoint> trendPoints(
         TrendPoint(label: v.label, income: v.income, expense: v.expense),
     ];
   }
-  final startsBefore =
-      buckets.isNotEmpty &&
-      (buckets.first.year < t.year ||
-          (buckets.first.year == t.year && buckets.first.month <= t.month));
-  if (startsBefore) {
-    buckets = [
-      for (final b in buckets)
-        if (b.year < t.year || (b.year == t.year && b.month <= t.month)) b,
-    ];
-  }
+  buckets = bucketsToToday(buckets, today: t);
   final months = [for (final b in buckets) (year: b.year, month: b.month)];
   final labels = monthLabels(months);
   final ticks = monthAxisTicks(months);

@@ -29,10 +29,14 @@ class StatsTrendSection extends StatefulWidget {
     required this.points,
     required this.daily,
     required this.masked,
+    this.xTickPeers = const [],
   });
 
   final StatsPeriod period;
   final VoidCallback onPickPeriod;
+
+  /// 같은 화면 · 같은 기간 · 같은 눈금 단위의 다른 차트([statsTrendPeers]) — 가로 눈금 건너뛰기를 함께 센다.
+  final List<PCartesianChart> xTickPeers;
 
   /// null 이면 첫 불러오기.
   final List<TrendPoint>? points;
@@ -110,7 +114,7 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
           masked: masked,
           label: name,
           hidden: _hidden,
-          xTickPeers: [_savingsChart(l, data, masked: masked)],
+          xTickPeers: widget.xTickPeers,
         ),
         PChartDataTable(
           caption: name,
@@ -134,9 +138,53 @@ class _StatsTrendSectionState extends State<StatsTrendSection> {
 bool _trendChartShown(List<TrendPoint> data) =>
     data.any((p) => p.income != 0 || p.expense != 0);
 
-// 수입 · 지출 추이 선과 순저축 막대는 같은 점(같은 기간)을 먹는다 — 그리는 자리가 가장 좁은 차트로 가로 눈금 건너뛰기를 한 번
-// 세어 위아래가 같은 날짜 글을 쓴다(chart.md "같은 화면 · 같은 기간 차트는 같은 날짜 글"). 두 차트는 같은 폭 띠에 놓이므로 서로를
-// [PCartesianChart.xTickPeers] 로 넘긴다 — 넘기는 쪽은 그리지 않고 폭만 재므로 이름은 비워 둔다.
+/// 통계 › 추이 한 화면의 가로 눈금 묶음 — 보이는 차트마다 폭만 재는 짝(그리지 않으므로 이름은 비운다). 없는 차트는 null.
+typedef StatsTrendPeers = ({
+  PLineChart? trend,
+  PBarChart? savings,
+  PBarChart? catTrend,
+});
+
+/// 같은 기간 · 같은 눈금 단위(날 · 달) 차트는 화면에 보이는 것을 모두 한 묶음으로, 그리는 자리가 가장 좁은 차트로 가로 눈금
+/// 건너뛰기를 한 번 센다(chart.md "같은 화면 · 같은 기간 차트는 같은 날짜 글", groo-design #247 · #248). 수입 · 지출 추이와 순저축은
+/// 같은 점([points] — 실패 · 불러오는 중이면 null)을 먹고, 주요 카테고리 월별 추이([catSummary] — 띠가 없으면 null)는 달 눈금이라
+/// 추이가 월별일 때만 묶는다(날별 대 월별은 묶지 않는다). 세 차트는 같은 폭 띠에 놓여 서로를 [PCartesianChart.xTickPeers] 로 넘긴다
+/// — [StatsTrendPeers.others] 로 자기를 뺀 짝을 고른다.
+StatsTrendPeers statsTrendPeers(
+  AppLocalizations l, {
+  required List<TrendPoint>? points,
+  required bool daily,
+  required RangeSummary? catSummary,
+  required List<ExpenseCategory>? categories,
+  required bool masked,
+  DateTime? today,
+}) {
+  final cat = catSummary == null || daily
+      ? null
+      : _catTrendOf(l, catSummary, categories, today: today);
+  return (
+    trend: points != null && _trendChartShown(points)
+        ? _trendChart(l, points, masked: masked)
+        : null,
+    savings: points != null && points.isNotEmpty
+        ? _savingsChart(l, points, masked: masked)
+        : null,
+    catTrend: cat == null ? null : _catTrendChart(cat, masked: masked),
+  );
+}
+
+/// [StatsTrendPeers] 에서 자기를 뺀 짝.
+extension StatsTrendPeersOthers on StatsTrendPeers {
+  List<PCartesianChart> others({
+    bool trend = true,
+    bool savings = true,
+    bool catTrend = true,
+  }) => [
+    if (trend) ?this.trend,
+    if (savings) ?this.savings,
+    if (catTrend) ?this.catTrend,
+  ];
+}
 
 /// 수입 · 지출 추이 — 선(영역) 이중 축(왼쪽 수입 · 오른쪽 지출).
 PLineChart _trendChart(
@@ -608,6 +656,7 @@ class StatsSavingsBarsSection extends StatelessWidget {
     required this.points,
     required this.daily,
     required this.masked,
+    this.xTickPeers = const [],
   });
 
   final StatsPeriod period;
@@ -616,6 +665,9 @@ class StatsSavingsBarsSection extends StatelessWidget {
   final List<TrendPoint>? points;
   final bool daily;
   final bool masked;
+
+  /// 같은 화면 · 같은 기간 · 같은 눈금 단위의 다른 차트([statsTrendPeers]).
+  final List<PCartesianChart> xTickPeers;
 
   @override
   Widget build(BuildContext context) {
@@ -647,9 +699,7 @@ class StatsSavingsBarsSection extends StatelessWidget {
           data,
           masked: masked,
           label: name,
-          xTickPeers: [
-            if (_trendChartShown(data)) _trendChart(l, data, masked: masked),
-          ],
+          xTickPeers: xTickPeers,
         ),
         PChartDataTable(
           caption: name,
@@ -668,6 +718,82 @@ class StatsSavingsBarsSection extends StatelessWidget {
 
 // ── 주요 카테고리 월별 추이 ──────────────────────────────────────
 
+/// 주요 카테고리 월별 추이의 값 — 지출 TOP 3 · 색 · 이번 달에서 자른 달.
+typedef _CatTrend = ({
+  List<PChartColored<CategoryBreakdown>> colored,
+  List<String> names,
+  List<RangeMonthlyBucket> buckets,
+  List<({int year, int month})> months,
+  List<String> labels,
+});
+
+int _catPart(RangeMonthlyBucket b, CategoryBreakdown t) => b.categoryExpenses
+    .firstWhere(
+      (ce) => ce.categoryRowId == t.categoryRowId,
+      orElse: () => const CategoryAmount(),
+    )
+    .amount;
+
+/// 지출 TOP 3 와 그 달별 금액. 그릴 것이 없으면(TOP 이 없거나 달마다 합이 0) null. 가로축은 이번 달에서 끝난다
+/// ([bucketsToToday] — 수입 · 지출 추이와 같은 자르기).
+_CatTrend? _catTrendOf(
+  AppLocalizations l,
+  RangeSummary s,
+  List<ExpenseCategory>? categories, {
+  DateTime? today,
+}) {
+  final top =
+      (s.categoryBreakdown.where((b) => b.expenseType == 'EXPENSE').toList()
+            ..sort((a, b) => b.totalAmount.compareTo(a.totalAmount)))
+          .take(3)
+          .toList();
+  final buckets = bucketsToToday(s.monthlyBuckets, today: today);
+  final maxSum = buckets.fold<int>(
+    0,
+    (m, b) => math.max(m, top.fold<int>(0, (a, t) => a + _catPart(b, t))),
+  );
+  if (top.isEmpty || maxSum <= 0) return null;
+  final byId = catIndex(categories);
+  final colored = assignChartColors<CategoryBreakdown>(
+    top,
+    colorOf: (t) => savedChartColor(byId[t.categoryRowId]?.color),
+  );
+  final months = [for (final b in buckets) (year: b.year, month: b.month)];
+  return (
+    colored: colored,
+    names: [for (final t in colored) t.item.categoryName ?? l.statsUnassigned],
+    buckets: buckets,
+    months: months,
+    labels: monthLabels(months),
+  );
+}
+
+/// 주요 카테고리 월별 추이 — 쌓은 막대.
+PBarChart _catTrendChart(
+  _CatTrend t, {
+  required bool masked,
+  String label = '',
+  List<PCartesianChart> xTickPeers = const [],
+}) => PBarChart(
+  label: label,
+  height: 180,
+  stacked: true,
+  categories: t.labels,
+  xTicks: monthAxisTicks(t.months),
+  xTickPeers: xTickPeers,
+  series: [
+    for (final (i, c) in t.colored.indexed)
+      PChartSeries(
+        key: 'c$i',
+        label: t.names[i],
+        color: c.color,
+        values: [for (final b in t.buckets) _catPart(b, c.item).toDouble()],
+      ),
+  ],
+  axisFormatter: maskFormatter(masked),
+  valueFormatter: maskFormatter(masked),
+);
+
 /// 주요 카테고리(지출 TOP 3) 월별 추이 — ds 쌓은 막대.
 class StatsCatTrendSection extends StatelessWidget {
   const StatsCatTrendSection({
@@ -676,6 +802,8 @@ class StatsCatTrendSection extends StatelessWidget {
     required this.summary,
     required this.categories,
     required this.masked,
+    this.xTickPeers = const [],
+    this.today,
   });
 
   final StatsPeriod period;
@@ -684,6 +812,12 @@ class StatsCatTrendSection extends StatelessWidget {
   final RangeSummary? summary;
   final List<ExpenseCategory>? categories;
   final bool masked;
+
+  /// 같은 화면 · 같은 기간 · 같은 눈금 단위의 다른 차트([statsTrendPeers]).
+  final List<PCartesianChart> xTickPeers;
+
+  /// 가로축이 끝나는 오늘 — 기본은 [statsNow].
+  final DateTime? today;
 
   @override
   Widget build(BuildContext context) {
@@ -702,40 +836,18 @@ class StatsCatTrendSection extends StatelessWidget {
         ],
       );
     }
-    final top =
-        (s.categoryBreakdown.where((b) => b.expenseType == 'EXPENSE').toList()
-              ..sort((a, b) => b.totalAmount.compareTo(a.totalAmount)))
-            .take(3)
-            .toList();
-    final buckets = s.monthlyBuckets;
-    int partOf(RangeMonthlyBucket b, CategoryBreakdown t) => b.categoryExpenses
-        .firstWhere(
-          (ce) => ce.categoryRowId == t.categoryRowId,
-          orElse: () => const CategoryAmount(),
-        )
-        .amount;
-    final maxSum = buckets.fold<int>(
-      0,
-      (m, b) => math.max(m, top.fold<int>(0, (a, t) => a + partOf(b, t))),
-    );
-    if (top.isEmpty || maxSum <= 0) {
+    final t = _catTrendOf(l, s, categories, today: today);
+    if (t == null) {
       return statsSection(
         header: head,
         children: [BudgetEmptyLine(l.statsNoData)],
       );
     }
-    final byId = catIndex(categories);
-    final colored = assignChartColors<CategoryBreakdown>(
-      top,
-      colorOf: (t) => savedChartColor(byId[t.categoryRowId]?.color),
-    );
-    final months = [for (final b in buckets) (year: b.year, month: b.month)];
-    final labels = monthLabels(months);
+    final colored = t.colored;
+    final names = t.names;
+    final labels = t.labels;
     String money(int v) => statsWon(v, masked);
     final name = l.statsChartCatTrendName(period.label());
-    final names = [
-      for (final t in colored) t.item.categoryName ?? l.statsUnassigned,
-    ];
     return statsSection(
       header: head,
       children: [
@@ -767,24 +879,7 @@ class StatsCatTrendSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: PSpacing.x2),
-        PBarChart(
-          label: name,
-          height: 180,
-          stacked: true,
-          categories: labels,
-          xTicks: monthAxisTicks(months),
-          series: [
-            for (final (i, t) in colored.indexed)
-              PChartSeries(
-                key: 'c$i',
-                label: names[i],
-                color: t.color,
-                values: [for (final b in buckets) partOf(b, t.item).toDouble()],
-              ),
-          ],
-          axisFormatter: maskFormatter(masked),
-          valueFormatter: maskFormatter(masked),
-        ),
+        _catTrendChart(t, masked: masked, label: name, xTickPeers: xTickPeers),
         PChartDataTable(
           caption: name,
           columns: [
@@ -792,8 +887,8 @@ class StatsCatTrendSection extends StatelessWidget {
             for (final n in names) PChartDataColumn(n),
           ],
           rows: [
-            for (final (bi, b) in buckets.indexed)
-              [labels[bi], for (final t in colored) money(partOf(b, t.item))],
+            for (final (bi, b) in t.buckets.indexed)
+              [labels[bi], for (final c in colored) money(_catPart(b, c.item))],
           ],
         ),
       ],
