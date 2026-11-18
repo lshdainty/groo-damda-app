@@ -472,7 +472,7 @@
   "assetHoldingBalance": "평가금액",
   "assetHoldingsSummaryUnknown": "{count}종목 · —",
   "@assetHoldingsSummaryUnknown": {"placeholders": {"count": {"type": "int"}}, "description": "투자 편집 보유 머리 요약 — 연동 시세를 못 받아 합계를 모를 때(0 이라 하지 않는다)"},
-  "assetHoldingsSummary": "{count}종목 · {amount}원",
+  "assetHoldingsSummary": "{count}종목 · {amount}",
   "@assetHoldingsSummary": {
     "placeholders": {
       "count": {
@@ -601,7 +601,7 @@
     }
   },
   "assetCancelPayment": "결제 취소",
-  "assetCancelPaymentConfirm": "{date}에 낸 {amount}원을 되돌려요. 통장 잔액과 카드 청구가 결제 전으로 돌아가요.",
+  "assetCancelPaymentConfirm": "{date}에 낸 {amount}을 되돌려요. 통장 잔액과 카드 청구가 결제 전으로 돌아가요.",
   "@assetCancelPaymentConfirm": {
     "placeholders": {
       "amount": {
@@ -613,7 +613,7 @@
     }
   },
   "assetInstallmentPayoff": "남은 할부 한 번에 정리",
-  "assetInstallmentPayoffConfirm": "남은 할부 {amount}원을 이번 결제 예정액에 한 번에 넣을까요? 다음 회차부터는 청구되지 않아요.",
+  "assetInstallmentPayoffConfirm": "남은 할부 {amount}을 이번 결제 예정액에 한 번에 넣을까요? 다음 회차부터는 청구되지 않아요.",
   "@assetInstallmentPayoffConfirm": {
     "placeholders": {
       "amount": {
@@ -1073,8 +1073,7 @@
     }
   },
   "dashDailyAvgPrefix": "하루 평균 ",
-  "dashSpentMasked": " 썼어요.",
-  "dashSpentUnit": "원 썼어요.",
+  "dashSpentSuffix": " 썼어요.",
   "dashVsPrevPrefix": " 전월 대비 ",
   "dashSaving": " 절약 중이에요.",
   "dashSpentMore": " 더 썼어요.",
@@ -1818,7 +1817,7 @@
   "expAccountCard": "계좌 · 카드",
   "expInterest": "이자",
   "expInterestHint": "상환액 중 이자 몫 — 부채는 이자를 뺀 만큼만 줄어들어요",
-  "expInterestSplit": "원금 {principal}원 · 이자 {interest}원",
+  "expInterestSplit": "원금 {principal} · 이자 {interest}",
   "@expInterestSplit": {
     "placeholders": {
       "principal": {
@@ -4749,7 +4748,7 @@
   "txfSaveFailed": "저장하지 못했어요. 잠시 뒤 다시 시도해주세요.",
   "txfAssetLoadFailed": "계좌 · 카드를 불러오지 못했어요",
   "txfNoPickableAsset": "이 결제 수단에 맞는 계좌 · 카드가 없어요.",
-  "txfFxHint": "{local} {code} × {rate} = {krw}원",
+  "txfFxHint": "{local} {code} × {rate} = {krw}",
   "@txfFxHint": {
     "placeholders": {
       "local": {
@@ -4767,7 +4766,7 @@
     }
   },
   "txfKrwAmount": "원화 금액",
-  "txfInstallmentValue": "{months}개월 · 매달 약 {amount}원",
+  "txfInstallmentValue": "{months}개월 · 매달 약 {amount}",
   "@txfInstallmentValue": {
     "placeholders": {
       "months": {
@@ -4779,7 +4778,7 @@
     }
   },
   "txfSplitMismatchTitle": "나눈 내역과 금액이 달라요",
-  "txfSplitMismatchBody": "새 총액 {total}원 · 나눈 합계 {sum}원 — {diffText}",
+  "txfSplitMismatchBody": "새 총액 {total} · 나눈 합계 {sum} — {diffText}",
   "@txfSplitMismatchBody": {
     "placeholders": {
       "total": {
@@ -4793,7 +4792,7 @@
       }
     }
   },
-  "txfSplitOver": "{diff}원 넘쳐요.",
+  "txfSplitOver": "{diff} 넘쳐요.",
   "@txfSplitOver": {
     "placeholders": {
       "diff": {
@@ -4801,7 +4800,7 @@
       }
     }
   },
-  "txfSplitShort": "{diff}원 모자라요.",
+  "txfSplitShort": "{diff} 모자라요.",
   "@txfSplitShort": {
     "placeholders": {
       "diff": {

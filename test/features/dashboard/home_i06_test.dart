@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:groo_damda_app/app/env.dart';
@@ -119,11 +120,12 @@ Future<void> _pump(
   Set<String> hidden = const {},
   Brightness brightness = Brightness.light,
   String locale = 'ko',
+  Map<String, Object> prefs = const {},
 }) async {
   tester.view.physicalSize = Size(width * 2, 4000 * 2);
   tester.view.devicePixelRatio = 2.0;
   addTearDown(tester.view.reset);
-  SharedPreferences.setMockInitialValues({});
+  SharedPreferences.setMockInitialValues(prefs);
   final overrides = [
     hideCardsRepositoryProvider.overrideWith(
       (ref) async => OkHideCardsRepository(),
@@ -895,6 +897,49 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
       expect(starts.length, n);
+    });
+  });
+
+  // 하루 평균 — 단위는 금액에 붙고(영어 ₩), 평균은 통계 비교 · 예산과 같은 반올림(half-up)이다(QA 2026-11-19: 홈 1,548 · 비교 1,549,
+  // 영어 "Daily average 1,548 spent." 에 ₩ 없음)
+  group('하루 평균 — 단위 · 반올림', () {
+    late DateTime Function() saved;
+    setUp(() {
+      saved = dashboardNow;
+      final now = DateTime.now();
+      // 10일 — 3,912,345,678 ÷ 10 = 391,234,567.8 → 반올림 391,234,568(버림이면 …567)
+      dashboardNow = () => DateTime(now.year, now.month, 10);
+    });
+    tearDown(() {
+      dashboardNow = saved;
+      Intl.defaultLocale = null;
+    });
+
+    String note(WidgetTester tester, String prefix) => plainOf(
+      tester
+          .widget<RichText>(
+            find.byWidgetPredicate(
+              (w) =>
+                  w is RichText &&
+                  plainOf(w.text.toPlainText()).startsWith(prefix),
+            ),
+          )
+          .text
+          .toPlainText(),
+    );
+
+    testWidgets('한국어 — "하루 평균 391,234,568원 썼어요."', (tester) async {
+      await _pump(tester);
+      expect(note(tester, '하루 평균'), startsWith('하루 평균 391,234,568원 썼어요.'));
+    });
+
+    testWidgets('영어 — "Daily average ₩391,234,568 spent."', (tester) async {
+      // 돈 · 날짜 포맷터의 로케일은 설정(pd-locale)이 배선한다 — 앱은 화면 로케일로 맞춘다(syncIntlLocale)
+      await _pump(tester, locale: 'en', prefs: {'pd-locale': 'en'});
+      expect(
+        note(tester, 'Daily average'),
+        startsWith('Daily average ₩391,234,568 spent.'),
+      );
     });
   });
 }

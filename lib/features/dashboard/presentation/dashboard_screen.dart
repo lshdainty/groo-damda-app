@@ -792,7 +792,8 @@ class _MonthSection extends StatelessWidget {
     final isCurMonth = today.year == month.year && today.month == month.month;
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     final dayOfMonth = isCurMonth ? today.day : daysInMonth;
-    final dailyAvg = expense ~/ (dayOfMonth < 1 ? 1 : dayOfMonth);
+    // 하루 평균 — 통계 비교 · 예산과 같은 함수 · 같은 반올림(half-up)
+    final dailyAvg = averageWon(expense, dayOfMonth < 1 ? 1 : dayOfMonth);
     final savingsPct = prevExpense > 0
         ? ((prevExpense - expense) / prevExpense) * 100
         : 0.0;
@@ -854,16 +855,14 @@ class _MonthSection extends StatelessWidget {
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
                 children: [
                   TextSpan(text: keepAll(l.dashDailyAvgPrefix), style: note),
+                  // 단위는 금액에 붙인다(ko "1,548원" · en "₩1,548") — 글은 뒤 말만 든다
                   TextSpan(
-                    text: keepAllAmount(krwMasked(dailyAvg, expenseMasked)),
+                    text: keepAllAmount(
+                      krwSigned(dailyAvg, expenseMasked, unit: true),
+                    ),
                     style: strong,
                   ),
-                  TextSpan(
-                    text: keepAll(
-                      expenseMasked ? l.dashSpentMasked : l.dashSpentUnit,
-                    ),
-                    style: note,
-                  ),
+                  TextSpan(text: keepAll(l.dashSpentSuffix), style: note),
                   if (prevExpense > 0) ...[
                     TextSpan(text: keepAll(l.dashVsPrevPrefix), style: note),
                     TextSpan(

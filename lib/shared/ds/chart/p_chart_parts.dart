@@ -149,8 +149,11 @@ class PChartTooltipRow extends StatelessWidget {
         ),
         const SizedBox(width: PSpacing.x3),
         Expanded(
+          // 금액은 쉼표 뒤에서만 줄을 바꾼다(DESIGN.md "줄바꿈" 의 금액 예외) — 칸보다 긴 금액이 세 자리 묶음 가운데서 갈라지지
+          // 않게. 읽는 이름은 원래 글
           child: Text(
-            value,
+            keepAllAmount(value),
+            semanticsLabel: value,
             key: const ValueKey('chart-tooltip-value'),
             textAlign: TextAlign.end,
             style: PTypography.t3.copyWith(

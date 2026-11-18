@@ -1732,7 +1732,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetHoldingsSummary.
   ///
   /// In ko, this message translates to:
-  /// **'{count}종목 · {amount}원'**
+  /// **'{count}종목 · {amount}'**
   String assetHoldingsSummary(int count, String amount);
 
   /// No description provided for @assetHoldingRep.
@@ -2014,7 +2014,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetCancelPaymentConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'{date}에 낸 {amount}원을 되돌려요. 통장 잔액과 카드 청구가 결제 전으로 돌아가요.'**
+  /// **'{date}에 낸 {amount}을 되돌려요. 통장 잔액과 카드 청구가 결제 전으로 돌아가요.'**
   String assetCancelPaymentConfirm(String amount, String date);
 
   /// No description provided for @assetInstallmentPayoff.
@@ -2026,7 +2026,7 @@ abstract class AppLocalizations {
   /// No description provided for @assetInstallmentPayoffConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'남은 할부 {amount}원을 이번 결제 예정액에 한 번에 넣을까요? 다음 회차부터는 청구되지 않아요.'**
+  /// **'남은 할부 {amount}을 이번 결제 예정액에 한 번에 넣을까요? 다음 회차부터는 청구되지 않아요.'**
   String assetInstallmentPayoffConfirm(String amount);
 
   /// No description provided for @assetInstallmentPayoffUndo.
@@ -3235,17 +3235,11 @@ abstract class AppLocalizations {
   /// **'하루 평균 '**
   String get dashDailyAvgPrefix;
 
-  /// No description provided for @dashSpentMasked.
+  /// No description provided for @dashSpentSuffix.
   ///
   /// In ko, this message translates to:
   /// **' 썼어요.'**
-  String get dashSpentMasked;
-
-  /// No description provided for @dashSpentUnit.
-  ///
-  /// In ko, this message translates to:
-  /// **'원 썼어요.'**
-  String get dashSpentUnit;
+  String get dashSpentSuffix;
 
   /// No description provided for @dashVsPrevPrefix.
   ///
@@ -5404,7 +5398,7 @@ abstract class AppLocalizations {
   /// No description provided for @expInterestSplit.
   ///
   /// In ko, this message translates to:
-  /// **'원금 {principal}원 · 이자 {interest}원'**
+  /// **'원금 {principal} · 이자 {interest}'**
   String expInterestSplit(String principal, String interest);
 
   /// No description provided for @expMemoPlaceholder.
@@ -14632,7 +14626,7 @@ abstract class AppLocalizations {
   /// No description provided for @txfFxHint.
   ///
   /// In ko, this message translates to:
-  /// **'{local} {code} × {rate} = {krw}원'**
+  /// **'{local} {code} × {rate} = {krw}'**
   String txfFxHint(String local, String code, String rate, String krw);
 
   /// No description provided for @txfKrwAmount.
@@ -14644,7 +14638,7 @@ abstract class AppLocalizations {
   /// No description provided for @txfInstallmentValue.
   ///
   /// In ko, this message translates to:
-  /// **'{months}개월 · 매달 약 {amount}원'**
+  /// **'{months}개월 · 매달 약 {amount}'**
   String txfInstallmentValue(String months, String amount);
 
   /// No description provided for @txfSplitMismatchTitle.
@@ -14656,19 +14650,19 @@ abstract class AppLocalizations {
   /// No description provided for @txfSplitMismatchBody.
   ///
   /// In ko, this message translates to:
-  /// **'새 총액 {total}원 · 나눈 합계 {sum}원 — {diffText}'**
+  /// **'새 총액 {total} · 나눈 합계 {sum} — {diffText}'**
   String txfSplitMismatchBody(String total, String sum, String diffText);
 
   /// No description provided for @txfSplitOver.
   ///
   /// In ko, this message translates to:
-  /// **'{diff}원 넘쳐요.'**
+  /// **'{diff} 넘쳐요.'**
   String txfSplitOver(String diff);
 
   /// No description provided for @txfSplitShort.
   ///
   /// In ko, this message translates to:
-  /// **'{diff}원 모자라요.'**
+  /// **'{diff} 모자라요.'**
   String txfSplitShort(String diff);
 
   /// No description provided for @txfMatchSplits.

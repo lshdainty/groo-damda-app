@@ -548,7 +548,7 @@ void main() {
       lessThanOrEqualTo(2 * 22 + 1),
       reason: '한 줄(t5 22 × 2) 이다',
     );
-    final summary = tester.getRect(findPlain(l.assetHoldingsSummary(1, '0')));
+    final summary = tester.getRect(findPlain(l.assetHoldingsSummary(1, '0원')));
     expect(summary.top, greaterThanOrEqualTo(label.bottom));
   });
 
@@ -560,7 +560,9 @@ void main() {
       (c) => showAssetEditForm(c, _invest),
       assets: const [_bank, _invest],
     );
-    final text = tester.widget<Text>(findPlain(l.assetHoldingsSummary(1, '0')));
+    final text = tester.widget<Text>(
+      findPlain(l.assetHoldingsSummary(1, '0원')),
+    );
     expect(text.style?.fontSize, PTypography.t5.fontSize);
     expect(text.style?.fontWeight, FontWeight.w700);
   });

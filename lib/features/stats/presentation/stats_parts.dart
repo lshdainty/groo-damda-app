@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/change_rate.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
@@ -977,7 +978,8 @@ class StatsHighlightsSection extends StatelessWidget {
       final divisor = period.useDailyAvg
           ? period.days
           : summary!.monthlyBuckets.length.clamp(1, 9999);
-      final avgValue = divisor > 0 ? periodTotal ~/ divisor : 0;
+      // 평균은 한 함수 · 한 반올림(half-up) — 홈 · 통계 비교 · 예산과 같다
+      final avgValue = averageWon(periodTotal, divisor);
 
       // 하루 평균 부제 — 월 모드는 전월 대비 Delta(기준 글은 Delta 뒤 옅은 글), 그 외 기간은 합계
       Widget avgDetail;

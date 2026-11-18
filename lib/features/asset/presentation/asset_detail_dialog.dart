@@ -2260,7 +2260,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     return _confirmThen(
       title: l.assetInstallmentPayoff,
       description: l.assetInstallmentPayoffConfirm(
-        widget.masked ? '••••' : krw(installmentPayoffAmount(due)),
+        widget.masked ? '••••' : krwWithUnit(installmentPayoffAmount(due)),
       ),
       failedMessage: l.assetInstallmentPayoffFailed,
       kind: WriteKind.process,
@@ -2296,7 +2296,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     return _confirmThen(
       title: l.assetCancelPayment,
       description: l.assetCancelPaymentConfirm(
-        widget.masked ? '••••' : krw(billing.billingAmount),
+        widget.masked ? '••••' : krwWithUnit(billing.billingAmount),
         _paymentDateLabel(billing.paymentDate),
       ),
       failedMessage: l.assetCancelPaymentFailed,

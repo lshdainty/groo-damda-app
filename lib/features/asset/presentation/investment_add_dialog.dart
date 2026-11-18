@@ -723,7 +723,7 @@ class _HoldingsEditor extends StatelessWidget {
         keepAll(
           totalUnknown
               ? l.assetHoldingsSummaryUnknown(rows.length)
-              : l.assetHoldingsSummary(rows.length, krw(total)),
+              : l.assetHoldingsSummary(rows.length, krwWithUnit(total)),
         ),
         textAlign: TextAlign.end,
         // 머리 값 글 — slider.yaml headerValue(t5 · 700 · fg-neutral · 고른 숫자 모양)

@@ -2148,7 +2148,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             groupDecimal(trimNum(c.origAmountOrNull)),
             c.currency,
             groupDecimal(trimNum(c.fxRateOrNull)),
-            krw(c.amountInt),
+            krwWithUnit(c.amountInt),
           )
         : null;
 
@@ -2315,7 +2315,7 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
                       ? (c.amountInt > 0
                             ? l.txfInstallmentValue(
                                 '${c.installmentMonths}',
-                                krw(c.amountInt ~/ c.installmentMonths),
+                                krwWithUnit(c.amountInt ~/ c.installmentMonths),
                               )
                             : l.expInstallmentMonths(c.installmentMonths))
                       : l.expLumpSum,
@@ -2530,11 +2530,13 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             tone: PCalloutTone.warning,
             title: l.txfSplitMismatchTitle,
             description: l.txfSplitMismatchBody(
-              krw(c.amountInt),
-              krw(_splitSum),
+              krwWithUnit(c.amountInt),
+              krwWithUnit(_splitSum),
               c.amountInt - _splitSum > 0
-                  ? l.txfSplitOver(krw((c.amountInt - _splitSum).abs()))
-                  : l.txfSplitShort(krw((c.amountInt - _splitSum).abs())),
+                  ? l.txfSplitOver(krwWithUnit((c.amountInt - _splitSum).abs()))
+                  : l.txfSplitShort(
+                      krwWithUnit((c.amountInt - _splitSum).abs()),
+                    ),
             ),
             actions: [
               PButton(
@@ -2701,8 +2703,10 @@ class _TxFormFlowState extends ConsumerState<TxFormFlow> {
             ? null
             : (amount > 0 && interest > 0
                   ? l.expInterestSplit(
-                      krw(amount - interest < 0 ? 0 : amount - interest),
-                      krw(interest),
+                      krwWithUnit(
+                        amount - interest < 0 ? 0 : amount - interest,
+                      ),
+                      krwWithUnit(interest),
                     )
                   : l.expInterestHint),
         onChanged: (_) => setState(() {}),
