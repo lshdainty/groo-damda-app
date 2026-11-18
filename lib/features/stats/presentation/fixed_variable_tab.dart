@@ -488,7 +488,8 @@ class _MonthlyStackState extends ConsumerState<_MonthlyStack> {
         trendAsync != null && trendAsync.isLoading && !trendAsync.hasValue;
     final rows = useRange
         ? _toRows([
-            for (final b in s.monthlyBuckets)
+            // 가로축은 이번 달에서 끝난다 — 서버는 기간 끝까지 0 인 달을 채워 보낸다(chart.md "오늘 뒤는 그리지 않습니다")
+            for (final b in bucketsToToday(s.monthlyBuckets))
               (
                 year: b.year,
                 month: b.month,
