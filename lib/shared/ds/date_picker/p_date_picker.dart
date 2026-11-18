@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart' show fitWeekdayRowLabels;
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/date_picker_dates.dart';
@@ -647,6 +648,18 @@ class _PDatePickerState extends State<PDatePicker> {
     final c = context.colors;
     final l = widget.labels;
     final scaler = MediaQuery.textScalerOf(context);
+    final style = PTypography.t4.copyWith(
+      color: c.fgNeutralSubtle,
+      fontWeight: FontWeight.w500,
+    );
+    // 영어 두 글자가 칸에 들지 않는 폭 · 글자 크기에서만 한 글자로 — 요일 글은 줄을 바꾸지 않는다
+    final labels = fitWeekdayRowLabels(
+      cellW,
+      style,
+      scaler,
+      labels: l.weekdays,
+      narrow: l.weekdaysNarrow ?? l.weekdays,
+    );
     return Semantics(
       container: true,
       explicitChildNodes: true,
@@ -666,11 +679,10 @@ class _PDatePickerState extends State<PDatePicker> {
                   width: cellW,
                   child: Center(
                     child: Text(
-                      l.weekdays[i],
-                      style: PTypography.t4.copyWith(
-                        color: c.fgNeutralSubtle,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      labels[i],
+                      maxLines: 1,
+                      softWrap: false,
+                      style: style,
                     ),
                   ),
                 ),

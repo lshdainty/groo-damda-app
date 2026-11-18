@@ -744,7 +744,8 @@ class LedgerCalendarGrid extends StatelessWidget {
       return Expanded(child: inner);
     }
 
-    final dows = weekdayLabels();
+    // 요일 글 — 영어 두 글자(Su … Sa), 칸에 들지 않는 폭 · 글자 크기에서만 한 글자(date-picker.md ⓔ Weekday)
+    final dowStyle = PTypography.t2.copyWith(fontWeight: FontWeight.w400);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         PSpacing.x4,
@@ -754,33 +755,43 @@ class LedgerCalendarGrid extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              for (var i = 0; i < 7; i++)
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      0,
-                      PSpacing.x1_5,
-                      0,
-                      PSpacing.x2,
-                    ),
-                    child: Text(
-                      dows[i],
-                      textAlign: TextAlign.center,
-                      // 일 = 치명 · 토 = 브랜드 · 평일 = 옅은 중립 (뜻은 그대로, 색 역할 이름만)
-                      style: PTypography.t2.copyWith(
-                        fontWeight: FontWeight.w400,
-                        color: i == 0
-                            ? c.fgCritical
-                            : i == 6
-                            ? c.fgBrand
-                            : c.fgNeutralSubtle,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final dows = fitWeekdayRowLabels(
+                constraints.maxWidth / 7,
+                dowStyle,
+                MediaQuery.textScalerOf(context),
+              );
+              return Row(
+                children: [
+                  for (var i = 0; i < 7; i++)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          0,
+                          PSpacing.x1_5,
+                          0,
+                          PSpacing.x2,
+                        ),
+                        child: Text(
+                          dows[i],
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          softWrap: false,
+                          // 일 = 치명 · 토 = 브랜드 · 평일 = 옅은 중립 (뜻은 그대로, 색 역할 이름만)
+                          style: dowStyle.copyWith(
+                            color: i == 0
+                                ? c.fgCritical
+                                : i == 6
+                                ? c.fgBrand
+                                : c.fgNeutralSubtle,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-            ],
+                ],
+              );
+            },
           ),
           for (final w in expanded ? weeks : [weeks[selWeek]])
             Row(

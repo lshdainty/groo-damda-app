@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
+import 'package:groo_damda_app/core/format/format_locale.dart';
 
 /// Chart 의 값 · 숫자 · 색 — 수치 원본은 groo-design `specs/components/chart.yaml`(값은
 /// `test/fixtures/design_spec/chart.json`), 색은 DESIGN.md v110(차트 10색 — 라이트 팔레트 700 · 다크 800-dark) ·
@@ -154,16 +155,24 @@ String _group(int n) {
 
 int _jsRound(double x) => (x + 0.5).floor();
 
-/// 축 단위 — 눈금 가운데 가장 큰 절댓값이 그 값 이상이면 그 축의 모든 눈금이 그 단위다(큰 것부터).
+/// 축 단위 — 눈금 가운데 가장 큰 절댓값이 그 값 이상이면 그 축의 모든 눈금이 그 단위다(큰 것부터). 한국어는 만 단위로 센다.
 const List<({double min, String label})> _kAxisUnits = [
   (min: 1e12, label: '조'),
   (min: 1e8, label: '억'),
   (min: 1e4, label: '만'),
 ];
 
+/// 영어 축 단위 — 천 단위로 센다(K · M · B, international-design "영어 줄임은 K · M · B"). 1,000M 이 아니라 1B 다.
+const List<({double min, String label})> _kAxisUnitsEn = [
+  (min: 1e9, label: 'B'),
+  (min: 1e6, label: 'M'),
+  (min: 1e3, label: 'K'),
+];
+
 /// 눈금 글자 — **한 축은 한 단위**(chart.md "축 · 격자"). 그 축의 눈금([ticks]) 가운데 가장 큰 절댓값이 1억 이상이면
 /// 모든 눈금을 억 단위(0.5억 · 1억 · 1.5억), 1만 이상이면 만 단위(0.5만 · 1만 · 1.5만), 아니면 쉼표 정수(2,000 · 4,000)로
-/// 쓴다(조도 같은 셈). 값 하나만 보고 정하면 한 축에 "5,000 · 1만" · "5,000만 · 1억" 이 섞인다. 소수는 한 자리(.0 은
+/// 쓴다(조도 같은 셈). 영어(앱 로케일)는 천 단위로 — 1B 이상 B, 1M 이상 M, 1K 이상 K, 아니면 쉼표 정수(0.5K · 1K · 500K ·
+/// 1M · 1.5B). 값 하나만 보고 정하면 한 축에 "5,000 · 1만" · "5,000만 · 1억" 이 섞인다. 소수는 한 자리(.0 은
 /// 버린다) — 눈금 간격이 1 · 2 · 5 × 10ⁿ([niceChartAxis])이라 한 자리 안에서 글자가 눈금 위치와 맞는다. 0 은 "0",
 /// 빼기는 U+2212. [ticks] 는 그 축이 그리는 눈금 그대로다 — 세로축 폭도 같은 눈금 · 같은 글자로 잰다(웹 `formatAxisWon` 과 같다).
 String formatAxisWon(num value, Iterable<num> ticks) {
@@ -176,7 +185,8 @@ String formatAxisWon(num value, Iterable<num> ticks) {
     final a = t.toDouble().abs();
     if (a.isFinite && a > axisMax) axisMax = a;
   }
-  final unit = _kAxisUnits.where((u) => axisMax >= u.min).firstOrNull;
+  final units = localeIsEn() ? _kAxisUnitsEn : _kAxisUnits;
+  final unit = units.where((u) => axisMax >= u.min).firstOrNull;
   if (unit == null) return sign + _group(_jsRound(n));
   if (n == 0) return '0';
   final r = _round1(n / unit.min);
@@ -185,10 +195,13 @@ String formatAxisWon(num value, Iterable<num> ticks) {
   return '$sign${_group(whole)}${tenth == 0 ? '' : '.$tenth'}${unit.label}';
 }
 
-/// 돈은 줄이지 않고 원까지(툴팁 · 지표 타일 · 도넛 가운데 · 열지도 칸 · 대체 표) — 빼기는 U+2212.
+/// 돈은 줄이지 않고 원까지(툴팁 · 지표 타일 · 도넛 가운데 · 열지도 칸 · 대체 표) — 빼기는 U+2212. 한국어 "1,240,000원",
+/// 영어(앱 로케일) "₩1,240,000" — 통화 기호를 앞에, 빼기는 기호 앞("−₩1,000", international-design · 앱 `krwSigned` 와 같다).
 String formatWon(num value) {
   final v = value.toDouble();
-  return '${v < 0 ? kChartMinus : ''}${_group(_jsRound(v.abs()))}원';
+  final sign = v < 0 ? kChartMinus : '';
+  final body = _group(_jsRound(v.abs()));
+  return localeIsEn() ? '$sign₩$body' : '$sign$body원';
 }
 
 // ── 축 · 격자 ─────────────────────────────────────────────────
