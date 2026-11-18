@@ -884,7 +884,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetHoldingsSummary(int count, String amount) {
-    return '$count종목 · $amount원';
+    return '$count종목 · $amount';
   }
 
   @override
@@ -1047,7 +1047,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetCancelPaymentConfirm(String amount, String date) {
-    return '$date에 낸 $amount원을 되돌려요. 통장 잔액과 카드 청구가 결제 전으로 돌아가요.';
+    return '$date에 낸 $amount을 되돌려요. 통장 잔액과 카드 청구가 결제 전으로 돌아가요.';
   }
 
   @override
@@ -1055,7 +1055,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String assetInstallmentPayoffConfirm(String amount) {
-    return '남은 할부 $amount원을 이번 결제 예정액에 한 번에 넣을까요? 다음 회차부터는 청구되지 않아요.';
+    return '남은 할부 $amount을 이번 결제 예정액에 한 번에 넣을까요? 다음 회차부터는 청구되지 않아요.';
   }
 
   @override
@@ -1733,10 +1733,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dashDailyAvgPrefix => '하루 평균 ';
 
   @override
-  String get dashSpentMasked => ' 썼어요.';
-
-  @override
-  String get dashSpentUnit => '원 썼어요.';
+  String get dashSpentSuffix => ' 썼어요.';
 
   @override
   String get dashVsPrevPrefix => ' 전월 대비 ';
@@ -2955,7 +2952,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String expInterestSplit(String principal, String interest) {
-    return '원금 $principal원 · 이자 $interest원';
+    return '원금 $principal · 이자 $interest';
   }
 
   @override
@@ -8180,7 +8177,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String txfFxHint(String local, String code, String rate, String krw) {
-    return '$local $code × $rate = $krw원';
+    return '$local $code × $rate = $krw';
   }
 
   @override
@@ -8188,7 +8185,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String txfInstallmentValue(String months, String amount) {
-    return '$months개월 · 매달 약 $amount원';
+    return '$months개월 · 매달 약 $amount';
   }
 
   @override
@@ -8196,17 +8193,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String txfSplitMismatchBody(String total, String sum, String diffText) {
-    return '새 총액 $total원 · 나눈 합계 $sum원 — $diffText';
+    return '새 총액 $total · 나눈 합계 $sum — $diffText';
   }
 
   @override
   String txfSplitOver(String diff) {
-    return '$diff원 넘쳐요.';
+    return '$diff 넘쳐요.';
   }
 
   @override
   String txfSplitShort(String diff) {
-    return '$diff원 모자라요.';
+    return '$diff 모자라요.';
   }
 
   @override

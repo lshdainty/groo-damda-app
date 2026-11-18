@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -337,8 +338,8 @@ class StatsCompareMetricsSection extends StatelessWidget {
     final rows = <({String label, int now, int prev, bool count})>[
       (
         label: l.statsCompareDailyAvg,
-        now: (totalNow / nowDays).round(),
-        prev: (totalPrev / prevDays).round(),
+        now: averageWon(totalNow, nowDays),
+        prev: averageWon(totalPrev, prevDays),
         count: false,
       ),
       (label: l.statsCompareTxCount, now: txNow, prev: txPrev, count: true),

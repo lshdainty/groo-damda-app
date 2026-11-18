@@ -431,7 +431,7 @@
   "assetHoldingBalance": "Holdings",
   "assetHoldingsSummaryUnknown": "{count} holdings · —",
   "@assetHoldingsSummaryUnknown": {"placeholders": {"count": {"type": "int"}}},
-  "assetHoldingsSummary": "{count} holdings · ₩{amount}",
+  "assetHoldingsSummary": "{count} holdings · {amount}",
   "@assetHoldingsSummary": {
     "placeholders": {
       "count": {
@@ -560,7 +560,7 @@
     }
   },
   "assetCancelPayment": "Cancel payment",
-  "assetCancelPaymentConfirm": "Reverts the ₩{amount} paid on {date}. The account balance and card billing return to the state before payment.",
+  "assetCancelPaymentConfirm": "Reverts the {amount} paid on {date}. The account balance and card billing return to the state before payment.",
   "@assetCancelPaymentConfirm": {
     "placeholders": {
       "amount": {
@@ -572,7 +572,7 @@
     }
   },
   "assetInstallmentPayoff": "Pay off remaining",
-  "assetInstallmentPayoffConfirm": "Add the remaining ₩{amount} to this billing cycle? No further installments will be charged.",
+  "assetInstallmentPayoffConfirm": "Add the remaining {amount} to this billing cycle? No further installments will be charged.",
   "@assetInstallmentPayoffConfirm": {
     "placeholders": {
       "amount": {
@@ -1032,8 +1032,7 @@
     }
   },
   "dashDailyAvgPrefix": "Daily average ",
-  "dashSpentMasked": " spent.",
-  "dashSpentUnit": " spent.",
+  "dashSpentSuffix": " spent.",
   "dashVsPrevPrefix": ", vs last month ",
   "dashSaving": " saved.",
   "dashSpentMore": " more.",
@@ -1776,7 +1775,7 @@
   "expAccountCard": "Account/Card",
   "expInterest": "Interest",
   "expInterestHint": "The interest portion — debt decreases only by the rest",
-  "expInterestSplit": "Principal ₩{principal} · Interest ₩{interest}",
+  "expInterestSplit": "Principal {principal} · Interest {interest}",
   "@expInterestSplit": {
     "placeholders": {
       "principal": {
@@ -4462,7 +4461,7 @@
   "txfAssetLoadFailed": "Couldn't load accounts and cards",
   "txfNoPickableAsset": "No account or card fits this payment method.",
   "txfNoPickableDepositAsset": "No deposit account matches this income method.",
-  "txfFxHint": "{local} {code} × {rate} = ₩{krw}",
+  "txfFxHint": "{local} {code} × {rate} = {krw}",
   "@txfFxHint": {
     "placeholders": {
       "local": {
@@ -4480,7 +4479,7 @@
     }
   },
   "txfKrwAmount": "Amount (₩)",
-  "txfInstallmentValue": "{months} months · about ₩{amount} a month",
+  "txfInstallmentValue": "{months} months · about {amount} a month",
   "@txfInstallmentValue": {
     "placeholders": {
       "months": {
@@ -4492,7 +4491,7 @@
     }
   },
   "txfSplitMismatchTitle": "The split items don't match the amount",
-  "txfSplitMismatchBody": "New total ₩{total} · split total ₩{sum} — {diffText}",
+  "txfSplitMismatchBody": "New total {total} · split total {sum} — {diffText}",
   "@txfSplitMismatchBody": {
     "placeholders": {
       "total": {
@@ -4506,7 +4505,7 @@
       }
     }
   },
-  "txfSplitOver": "₩{diff} over.",
+  "txfSplitOver": "{diff} over.",
   "@txfSplitOver": {
     "placeholders": {
       "diff": {
@@ -4514,7 +4513,7 @@
       }
     }
   },
-  "txfSplitShort": "₩{diff} short.",
+  "txfSplitShort": "{diff} short.",
   "@txfSplitShort": {
     "placeholders": {
       "diff": {

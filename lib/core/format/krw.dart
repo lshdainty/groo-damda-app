@@ -18,6 +18,18 @@ String krw(int n, {bool sign = false, bool abs = false}) {
   return formatted;
 }
 
+/// 단위까지 붙인 금액 — ko "1,548원" · en "₩1,548"(음수는 "−1,000원" · "−₩1,000"). 문장 속 돈은 글(ARB)이 단위를 들지 않고
+/// 이 값을 넣는다 — 영어에서 ₩ 가 빠지던 것을 막는다(international-design "문장 속 돈도 같은 표기").
+String krwWithUnit(int n) => krwSigned(n, false, unit: true);
+
+/// 원 단위 평균 — [total] ÷ [count] 를 반올림(half-up, .5 는 올림)한 정수 원(DESIGN.md "반올림은 반올림"). 하루 평균처럼 여러
+/// 화면이 같은 값을 보이는 평균은 이 함수 하나로 낸다 — 한쪽은 버림(1,548) · 한쪽은 반올림(1,549) 이던 것을 막는다. [count] 가 0
+/// 이하면 0.
+int averageWon(int total, int count) {
+  if (count <= 0) return 0;
+  return (total / count + 0.5).floor();
+}
+
 /// web `HIDE_AMOUNTS_MASK` 정합 — 기본 마스크는 점 6개. 작은/compact 표기는 `mask: '••••'`(4개).
 const String kHideMask = '••••••';
 

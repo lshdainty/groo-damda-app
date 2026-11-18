@@ -904,7 +904,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetHoldingsSummary(int count, String amount) {
-    return '$count holdings · ₩$amount';
+    return '$count holdings · $amount';
   }
 
   @override
@@ -1067,7 +1067,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetCancelPaymentConfirm(String amount, String date) {
-    return 'Reverts the ₩$amount paid on $date. The account balance and card billing return to the state before payment.';
+    return 'Reverts the $amount paid on $date. The account balance and card billing return to the state before payment.';
   }
 
   @override
@@ -1075,7 +1075,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetInstallmentPayoffConfirm(String amount) {
-    return 'Add the remaining ₩$amount to this billing cycle? No further installments will be charged.';
+    return 'Add the remaining $amount to this billing cycle? No further installments will be charged.';
   }
 
   @override
@@ -1770,10 +1770,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashDailyAvgPrefix => 'Daily average ';
 
   @override
-  String get dashSpentMasked => ' spent.';
-
-  @override
-  String get dashSpentUnit => ' spent.';
+  String get dashSpentSuffix => ' spent.';
 
   @override
   String get dashVsPrevPrefix => ', vs last month ';
@@ -3025,7 +3022,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expInterestSplit(String principal, String interest) {
-    return 'Principal ₩$principal · Interest ₩$interest';
+    return 'Principal $principal · Interest $interest';
   }
 
   @override
@@ -8406,7 +8403,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String txfFxHint(String local, String code, String rate, String krw) {
-    return '$local $code × $rate = ₩$krw';
+    return '$local $code × $rate = $krw';
   }
 
   @override
@@ -8414,7 +8411,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String txfInstallmentValue(String months, String amount) {
-    return '$months months · about ₩$amount a month';
+    return '$months months · about $amount a month';
   }
 
   @override
@@ -8422,17 +8419,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String txfSplitMismatchBody(String total, String sum, String diffText) {
-    return 'New total ₩$total · split total ₩$sum — $diffText';
+    return 'New total $total · split total $sum — $diffText';
   }
 
   @override
   String txfSplitOver(String diff) {
-    return '₩$diff over.';
+    return '$diff over.';
   }
 
   @override
   String txfSplitShort(String diff) {
-    return '₩$diff short.';
+    return '$diff short.';
   }
 
   @override
