@@ -1,5 +1,6 @@
 // 조회 실패 공용 알림(I-wrap-b2b 2-1 · 2-2) — 값이 있는 채 다시 받기 실패는 "새로 고치지 못했어요." 하나, 참조 조회가 값 없이
 // 실패하면 "일부 정보를 불러오지 못했어요." + [다시 시도]. 폴링 · 401 · 처음 받기 실패는 빼고, 403 · 404 는 빼지 않는다.
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override, ProviderListenable;
@@ -8,6 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/query_failure/query_failure_marks.dart';
 import 'package:groo_damda_app/app/query_failure/query_failure_observer.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
+import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/auth/auth_repository.dart';
+import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
+import 'package:groo_damda_app/core/auth/oauth_link_listener.dart';
+import 'package:groo_damda_app/core/auth/user.dart';
 import 'package:groo_damda_app/core/lifecycle/screen_visibility.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/asset/application/asset_providers.dart';
@@ -20,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/pull_to_refresh/p_pull_to_refresh.dart';
 import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
+import '../support/memory_secure_storage.dart';
 import '../support/plain_text.dart';
 
 const _refresh = '새로 고치지 못했어요.';
@@ -43,6 +50,22 @@ class _Q {
 
 ApiException _api(int status, [String code = 'X']) =>
     ApiException(code: code, message: '서버 원문 $status', statusCode: status);
+
+/// 로그인 전 서버 — 세션 검사는 401(로그아웃 상태), 인가코드 교환은 [exchangeError] 로 거절한다.
+class _SignedOutRepo extends AuthRepository {
+  _SignedOutRepo(this.exchangeError) : super(Dio());
+  final Object exchangeError;
+
+  @override
+  Future<User> check() async => throw _api(401, 'AUTH_001');
+
+  @override
+  Future<void> exchangeCode({
+    required String code,
+    required String codeVerifier,
+    required String redirectUri,
+  }) async => throw exchangeError;
+}
 
 class _Harness {
   late ProviderContainer container;
@@ -235,6 +258,58 @@ void main() {
       expect(idle.builds, before, reason: 'riverpod 3 은 구독자 없는 조회를 다시 만들지 않는다');
       expect(findText(_refresh), findsNothing);
     });
+  });
+
+  // QA(Android, PR #592 뒤) — 담다를 쓸 수 없는 계정으로 로그인하면 교환이 403 AUTH_003 으로 거절되고 로그인 화면이 거절 글을
+  // 보인다. 그 아래 "새로 고치지 못했어요." 가 함께 떴다. 로그아웃 상태의 authProvider 는 값(null)을 들고 있고, riverpod 3 은
+  // `state = AsyncError(..)` 에 앞 값을 이어 붙여 "값이 있는 채 다시 받기 실패" 로 보였다. 인증 상태의 실패는 로그인 흐름
+  // (로그인 화면 Callout · 해지 완료 화면)이 말한다 — 공용 새로 고침 스낵바는 보지 않는다.
+  group('로그인 흐름의 실패(authProvider)', () {
+    for (final (name, error) in [
+      ('담다를 쓸 수 없는 계정(403 AUTH_003)', _api(403, 'AUTH_003')),
+      ('해지한 계정(403 USER_021)', _api(403, 'USER_021')),
+      ('서버 장애(500)', _api(500)),
+    ]) {
+      testWidgets('로그아웃 상태에서 교환이 거절돼도 새로 고침 스낵바는 뜨지 않는다 — $name', (
+        tester,
+      ) async {
+        final h = await _pump(
+          tester,
+          watch: [authProvider],
+          overrides: [
+            authRepositoryProvider.overrideWith(
+              (ref) async => _SignedOutRepo(error),
+            ),
+            oauthFlowStoreProvider.overrideWithValue(
+              OAuthFlowStore(MemorySecureStorage()),
+            ),
+          ],
+        );
+        expect(h.container.read(authProvider).value, isNull, reason: '전제');
+        await expectLater(
+          h.container
+              .read(authProvider.notifier)
+              .exchangeAndLoginWithCode(
+                code: 'c',
+                codeVerifier: 'v',
+                redirectUri: 'porestdesk://oauth/callback',
+              ),
+          throwsA(isA<ApiException>()),
+        );
+        await tester.pump();
+        final auth = h.container.read(authProvider);
+        expect(auth.hasError, isTrue, reason: '전제 — 로그인 화면이 이 오류로 글을 그린다');
+        expect(
+          auth.hasValue,
+          isTrue,
+          reason: '전제 — riverpod 3 이 앞 값(null)을 이어 붙인다',
+        );
+        await tester.pump(kQueryFailureGather);
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(findText(_refresh), findsNothing);
+        await tester.pumpAndSettle(const Duration(seconds: 5));
+      });
+    }
   });
 
   group('일부 정보를 불러오지 못했어요(참조 조회)', () {

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/misc.dart'
     show ProviderBase, ProviderException;
 
 import 'package:groo_damda_app/app/query_failure/query_failure_marks.dart';
+import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/lifecycle/screen_visibility.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
@@ -29,6 +30,9 @@ const Duration kQueryFailureGather = Duration(milliseconds: 300);
 ///      공개 API 는 없다(`getAllProviderElements` · `ProviderElement.isActive` 는 @internal) — 따로 세지 않는다. 남는 틈은
 ///      다시 받는 도중에 화면을 떠난 경우뿐이다
 ///    - 401(로그인 흐름이 맡는다). 403 · 404 는 빼지 않는다 — 다른 기기에서 지운 경우라 보는 내용이 낡았다는 걸 알린다
+///    - 인증 상태([authProvider]) — 그 실패는 로그인 흐름이 말한다(로그인 화면 Callout · 해지 완료 화면). 로그아웃 상태도
+///      값(null)을 들고 있고 riverpod 3 은 `state = AsyncError(..)` 에 앞 값을 이어 붙여, 인가코드 교환 거절(403 AUTH_003 ·
+///      USER_021 등)이 "값이 있는 채 다시 받기 실패" 로 보인다 — 거절 안내 아래 이 스낵바가 함께 떴다(QA, PR #592 뒤)
 ///    - 참조 조회([isReferenceProvider] — 아래 2 가 맡는다, 둘이 함께 뜨지 않게)
 /// 2. 참조 조회가 값 없이 실패했다 → [ReferenceFailureNotice] 가 "일부 정보를 불러오지 못했어요." + [다시 시도].
 ///
@@ -98,6 +102,8 @@ final class QueryFailureObserver extends ProviderObserver {
       reference.update(context.container, provider, newValue);
       return;
     }
+    // 인증 상태의 실패는 로그인 흐름이 말한다(위 1 의 빼는 것)
+    if (identical(provider, authProvider)) return;
     if (newValue.isLoading || !newValue.hasError) return;
     if (isPollingProvider(provider)) {
       _markQuiet(newValue);
