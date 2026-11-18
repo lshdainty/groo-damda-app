@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'package:groo_damda_app/core/format/date.dart' show fitWeekdayRowLabels;
 import 'package:groo_damda_app/l10n/ds_l10n.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_parts.dart';
@@ -16,12 +17,22 @@ class PHeatmapRow {
   final String? sub;
 }
 
-/// 열지도 칸 열 — 요일 하나("수" · 12 · fg-neutral-subtle).
+/// 열지도 칸 열 — 요일 하나("수" · 12 · fg-neutral-subtle). [label] 은 툴팁 · 읽는 이름의 글이고, 칸 위 머리는 [head](없으면
+/// [label])다. 요일 머리는 영어 두 글자("Mo")이고 칸에 들지 않으면 한 글자([narrowHead] — "M")로 줄인다 — 모든 칸에
+/// [narrowHead] 가 있을 때 칸 하나라도 두 글자가 넘치면 모두 한 글자다. 줄은 바꾸지 않는다(international-design.mdx "날짜",
+/// groo-design #256 — 날짜 고르기 · 캘린더의 요일 줄과 같은 판정 [fitWeekdayRowLabels]).
 class PHeatmapColumn {
-  const PHeatmapColumn({required this.key, required this.label});
+  const PHeatmapColumn({
+    required this.key,
+    required this.label,
+    this.head,
+    this.narrowHead,
+  });
 
   final String key;
   final String label;
+  final String? head;
+  final String? narrowHead;
 }
 
 const _tabular = [FontFeature.tabularFigures()];
@@ -247,6 +258,19 @@ class _PHeatmapState extends State<PHeatmap> {
           final scaler = MediaQuery.textScalerOf(context);
           final rowH = math.max(cell, scaler.scale(hasSub ? 33.0 : 18.0));
           final headH = scaler.scale(16.0);
+          final headStyle = PTypography.t2.copyWith(color: c.fgNeutralSubtle);
+          final wideHeads = [
+            for (final col in widget.columns) col.head ?? col.label,
+          ];
+          final heads = widget.columns.every((col) => col.narrowHead != null)
+              ? fitWeekdayRowLabels(
+                  cell,
+                  headStyle,
+                  scaler,
+                  labels: wideHeads,
+                  narrow: [for (final col in widget.columns) col.narrowHead!],
+                )
+              : wideHeads;
           double cellLeft(int col) =>
               kHeatLabelColumn + kHeatGap + col * (cell + kHeatGap);
           double cellTop(int row) => headH + kHeatGap + row * (rowH + kHeatGap);
@@ -270,13 +294,13 @@ class _PHeatmapState extends State<PHeatmap> {
                             SizedBox(
                               width: cell,
                               child: Text(
-                                widget.columns[col].label,
+                                heads[col],
                                 key: ValueKey('chart-heatmap-column-$col'),
+                                semanticsLabel: widget.columns[col].label,
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
-                                style: PTypography.t2.copyWith(
-                                  color: c.fgNeutralSubtle,
-                                ),
+                                softWrap: false,
+                                style: headStyle,
                               ),
                             ),
                             if (col < cols - 1) const SizedBox(width: kHeatGap),

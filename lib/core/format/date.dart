@@ -169,22 +169,23 @@ List<String> weekdayLabels({bool mondayFirst = false}) {
       : const ['일', '월', '화', '수', '목', '금', '토'];
 }
 
-/// 달력 · 기간 시트의 요일 줄 글 7개(일요일부터) — 한국어 "일 … 토", 영어는 두 글자 "Su Mo Tu We Th Fr Sa"(date-picker.md
-/// ⓔ Weekday). 칸에 두 글자가 들지 않는 폭 · 글자 크기면 [weekdayRowNarrowLabels] 로 줄인다([fitWeekdayRowLabels]).
-/// 차트 요일 축은 [weekdayLabels](영어 "Sun") 그대로다.
-List<String> weekdayRowLabels() {
-  if (!localeIsEn()) return weekdayLabels();
-  final base = DateTime(2023, 12, 31); // 일요일
+/// 일곱 칸 위 요일 머리 글 7개 — 날짜 고르기 달력 · 캘린더 화면 · 열지도 어디서나 같다(international-design.mdx "날짜",
+/// groo-design #256). 한국어 "일 … 토", 영어는 두 글자 "Su Mo Tu We Th Fr Sa"(date-picker.md ⓔ Weekday) — 넓어도 세 글자로 늘리지
+/// 않는다. 칸에 두 글자가 들지 않는 폭 · 글자 크기면 [weekdayRowNarrowLabels] 로 줄인다([fitWeekdayRowLabels]). [mondayFirst] 면
+/// 월요일부터(열지도). 요일 비교 막대 차트의 가로축은 [weekdayLabels](영어 "Sun") 그대로다.
+List<String> weekdayRowLabels({bool mondayFirst = false}) {
+  if (!localeIsEn()) return weekdayLabels(mondayFirst: mondayFirst);
+  final base = mondayFirst ? DateTime(2024, 1, 1) : DateTime(2023, 12, 31);
   return [
     for (var i = 0; i < 7; i++)
       DateFormat.E('en').format(base.add(Duration(days: i))).substring(0, 2),
   ];
 }
 
-/// 요일 줄을 한 글자로 줄인 7개 — 영어 "S M T W T F S", 한국어는 [weekdayRowLabels] 와 같다(이미 한 글자).
-List<String> weekdayRowNarrowLabels() {
-  if (!localeIsEn()) return weekdayLabels();
-  final base = DateTime(2023, 12, 31);
+/// 요일 머리를 한 글자로 줄인 7개 — 영어 "S M T W T F S", 한국어는 [weekdayRowLabels] 와 같다(이미 한 글자).
+List<String> weekdayRowNarrowLabels({bool mondayFirst = false}) {
+  if (!localeIsEn()) return weekdayLabels(mondayFirst: mondayFirst);
+  final base = mondayFirst ? DateTime(2024, 1, 1) : DateTime(2023, 12, 31);
   return [
     for (var i = 0; i < 7; i++)
       DateFormat.EEEEE('en').format(base.add(Duration(days: i))),

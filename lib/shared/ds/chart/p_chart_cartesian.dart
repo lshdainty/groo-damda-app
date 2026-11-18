@@ -418,9 +418,10 @@ _Measure _measure(
 
   final leftW = w._hasValueAxis ? axisWidth(l.step) : 0.0;
   final rightW = r == null ? 0.0 : axisWidth(r.step);
-  // 가장 긴 가로 눈금 글 — 모든 눈금이 보일 때의 글(해가 바뀌는 칸의 연도 글 포함)로 잰다
+  // 가장 긴 가로 눈금 글 — 그려질 수 있는 글 전부로 잰다. 건너뛰기로 해가 바뀌는 칸이 빠지면 뒤 눈금(끝 글 하나만 남으면 끝 글)이
+  // 연도를 이어받아 길어진다("11월" → "2026. 11.") — 그 글까지 재야 끝 글 자리 · 글 상자가 모자라지 않는다
   var labelW = 0.0;
-  for (final label in chartXTickFullLabels(_xTicksOf(w))) {
+  for (final label in chartXTickDrawableLabels(_xTicksOf(w))) {
     labelW = math.max(labelW, measureText(label, tickStyle, scaler: scaler));
   }
   // 끝 글 자리는 비워 둔다(chart.md "큰 글자") — 끝 글은 그리는 자리 오른쪽 끝에 가운데를 두므로 오른쪽에 끝 글 폭의 절반을

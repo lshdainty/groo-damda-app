@@ -537,9 +537,15 @@ class StatsSavingsLegendRow extends StatelessWidget {
   }
 }
 
-/// 저축률 고리 한 변 — 글자 배율 × 108(100% 108 · 200% 216).
-double savingsRingSize(BuildContext context) =>
-    MediaQuery.textScalerOf(context).scale(kSavingsRingBase);
+/// 저축률 고리 한 변 — 글자 배율 × 108(100% 108 · 200% 216). 글자 배율은 고리 안 글(라벨 t2 · 값 t9)이 실제로 커진 배율
+/// 가운데 큰 값이다 — `scale(108)` 로 세면 안드로이드 비선형 글자 크기(작은 글은 설정만큼, 큰 값은 덜 커진다)에서 고리는 거의
+/// 그대로이고 안의 글만 커져 넘친다(QA 320 · 200% "BOTTOM OVERFLOWED BY 4.0 PIXELS"). 선형 배율(iOS)에서는 같은 값이다.
+double savingsRingSize(BuildContext context) {
+  final scaler = MediaQuery.textScalerOf(context);
+  double ratio(TextStyle t) => scaler.scale(t.fontSize!) / t.fontSize!;
+  return kSavingsRingBase *
+      math.max(ratio(PTypography.t2), ratio(PTypography.t9));
+}
 
 const double kSavingsRingBase = 108;
 
