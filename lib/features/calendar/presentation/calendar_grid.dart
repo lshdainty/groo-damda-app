@@ -73,7 +73,7 @@ class CalendarWeekdayRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    // 요일 글은 글자 크기 200% 에서 멈춘다(date-picker.md "글자 크기 설정") — 날짜 숫자는 그 위로도 커진다
+    // 요일 글 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(date-picker.md "글자 크기 설정", groo-design #258)
     final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kCalendarGridInset),
@@ -116,10 +116,12 @@ class CalendarWeekdayRow extends StatelessWidget {
 }
 
 /// 칸 안 날 숫자 원의 한 변 — 26 이 최소이고 글을 따라 커진다(DESIGN.md Typography "글이 상자보다 커지는 자리는 그 값이 최소
-/// 높이라 글을 따라 늘어난다"). 글 줄 높이와 두 자리 날짜("28" · 오늘의 700 · 고정폭 숫자라 두 자리는 모두 같은 폭)의 폭 가운데
+/// 높이라 글을 따라 늘어난다"). 날짜 숫자는 글자 크기 200% 에서 멈추므로([weekdayRowScaler], groo-design #258) 원도 멈춘 글로
+/// 잰다 — [s] 는 화면 배율 그대로 넘긴다. 글 줄 높이와 두 자리 날짜("28" · 오늘의 700 · 고정폭 숫자라 두 자리는 모두 같은 폭)의 폭 가운데
 /// 큰 값이다 — 줄 높이로만 키우면 안드로이드 비선형 글자 크기(작은 글은 설정만큼, 큰 값은 덜 커진다)에서 "10" 이 원보다 넓어
 /// 두 줄로 꺾여 잘린다(QA 320 · 200% "10" → "1"). 줄 높이도 `scale(19)` 가 아니라 글 크기를 키운 뒤 줄 비율을 곱한다.
-double calendarNumberBox(TextScaler s) {
+double calendarNumberBox(TextScaler screen) {
+  final s = weekdayRowScaler(screen);
   final style = calendarDayNumberStyle(FontWeight.w700);
   final line = s.scale(style.fontSize!) * style.height!;
   final p = TextPainter(
@@ -345,6 +347,10 @@ class CalendarDayCell extends StatelessWidget {
           : null,
       child: Text(
         '${day.day}',
+        // 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 일정 칩 글은 그 위로도 커진다
+        textScaler: weekdayRowScaler(MediaQuery.textScalerOf(context)),
+        maxLines: 1,
+        softWrap: false,
         style: calendarDayNumberStyle(
           isToday && !isOutside ? FontWeight.w700 : FontWeight.w500,
           color: dayColor,

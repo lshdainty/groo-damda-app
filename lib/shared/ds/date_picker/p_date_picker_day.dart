@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart' show weekdayRowScaler;
 
 // 날짜 칸 하나 — 달력(p_date_picker.dart)이 그리고, 카탈로그 견본이 상태별로 한 칸씩 그린다. 웹
 // `date-picker-day.tsx` 와 같은 값 · 같은 겹침 규칙이다.
@@ -16,10 +17,15 @@ const double kDatePickerDaySize = 42;
 /// 숫자 글의 줄 높이(t5 16 / 22) — 글자 배율을 곱하면 칸이 얼마나 커야 하는지 나온다.
 const double _kDayLineHeight = 22;
 
-/// 칸 높이 — 최소 48, 글이 원 42 보다 크면 글 + 위아래 3. 글자 200% 면 44 + 6 = 50(6주 300).
+/// 칸 높이 — 최소 48, 글이 원 42 보다 크면 글 + 위아래 3. 날짜 숫자는 글자 크기 200% 에서 멈추므로([weekdayRowScaler],
+/// groo-design #258) 칸도 멈춘 글로 잰다 — 200% 이상이면 44 + 6 = 50(6주 300). [scaler] 는 화면 배율 그대로 넘긴다.
 double datePickerCellHeight(TextScaler scaler) => math.max(
   kDatePickerCellHeight,
-  math.max(kDatePickerDaySize, scaler.scale(_kDayLineHeight)) + 6,
+  math.max(
+        kDatePickerDaySize,
+        weekdayRowScaler(scaler).scale(_kDayLineHeight),
+      ) +
+      6,
 );
 
 /// 머리 · 요일 줄 · 달 이름 줄 높이 — 최소 48, 글줄([lineHeight])이 더 크면 그만큼.
@@ -189,10 +195,12 @@ class _PDatePickerDayCellState extends State<PDatePickerDayCell> {
     final strike = s.disabled && !s.readOnly && !(s.rangeStart && !s.complete);
     final tappable = !s.disabled && !s.readOnly;
 
+    // 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 칸 높이도 같은 배율로 잰다
     final text = Text(
       '${widget.date.day}',
       maxLines: 1,
       softWrap: false,
+      textScaler: weekdayRowScaler(MediaQuery.textScalerOf(context)),
       style: datePickerDayText(textColor, bold: s.today).copyWith(
         decoration: strike ? TextDecoration.lineThrough : TextDecoration.none,
         decorationColor: textColor,
@@ -296,6 +304,9 @@ class PDatePickerOutsideCell extends StatelessWidget {
                   key: const ValueKey('date-outside'),
                   maxLines: 1,
                   softWrap: false,
+                  textScaler: weekdayRowScaler(
+                    MediaQuery.textScalerOf(context),
+                  ),
                   style: datePickerDayText(c.fgDisabled),
                 ),
               )

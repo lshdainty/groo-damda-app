@@ -1,6 +1,6 @@
 // 돈 표기 · 요일 글 상한 — groo-design #252(international-design.mdx · date-picker.md, 사용자 결정).
 //
-// ⓐ 요일 줄 글자 크기는 200% 에서 멈춘다(기간 시트 · 달력 탭 · 가계부 달력) — 300% 에서도 한 줄 · 칸 안. 날짜 숫자는 그대로 커진다
+// ⓐ 요일 줄 글자 크기는 200% 에서 멈춘다(기간 시트 · 달력 탭 · 가계부 달력) — 300% 에서도 한 줄 · 칸 안. 날짜 숫자도 200% 에서 멈춘다(groo-design #258)
 // ⓑ 금액 프리셋 칩은 줄이지 않는다 — "12,000원" · "₩12,000"
 // ⓒ 규모 값(시가총액 · 주식 수)만 줄인다 — 차트 축과 같은 셈(한 단위 · 소수 한 자리, 조 · 억 · 만 / T · B · M · K)
 // ⓓ 문장 속 돈은 영어도 ₩ — 영어 ARB 에 "won" 이 없다
@@ -125,7 +125,7 @@ void main() {
           _weekdays(tester, find.byKey(const ValueKey('date-weekdays'))),
           _one,
         );
-        // 날짜 숫자는 그대로 커진다
+        // 날짜 숫자도 요일처럼 200% 에서 멈춘다(일곱 칸 격자, groo-design #258)
         final day = tester.renderObject<RenderParagraph>(
           find
               .descendant(
@@ -134,7 +134,10 @@ void main() {
               )
               .first,
         );
-        expect(day.textScaler.scale(10), moreOrLessEquals(10 * scale));
+        expect(
+          day.textScaler.scale(10),
+          moreOrLessEquals(10 * (scale < 2 ? scale : 2)),
+        );
       });
 
       testWidgets('달력 탭 요일 줄 · 글자 ${(scale * 100).round()}%', (tester) async {

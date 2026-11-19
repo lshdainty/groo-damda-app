@@ -208,6 +208,11 @@ class _DayCell extends StatelessWidget {
             const SizedBox(height: PSpacing.x1),
             Text(
               '$dayNum',
+              key: const ValueKey('my-sky-day-number'),
+              maxLines: 1,
+              softWrap: false,
+              // 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258)
+              textScaler: weekdayRowScaler(MediaQuery.textScalerOf(context)),
               style: PTypography.t2.copyWith(
                 fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
                 color: isToday ? c.fgBrand : c.fgNeutralSubtle,

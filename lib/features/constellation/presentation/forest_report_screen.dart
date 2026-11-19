@@ -180,20 +180,35 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
                     padding: const EdgeInsets.symmetric(
                       horizontal: PSpacing.x3,
                     ),
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < 7; i++)
-                          Expanded(
-                            child: _DayCell(
-                              date: days[i],
-                              dow: dows[i],
-                              isToday: _ymd(days[i]) == todayYmd,
-                              selected: _ymd(days[i]) == _sel,
-                              future: _ymd(days[i]).compareTo(todayYmd) > 0,
-                              onTap: () => setState(() => _sel = _ymd(days[i])),
-                            ),
-                          ),
-                      ],
+                    // 7일 띠 요일 머리 — 영어 두 글자(Mo … Su), 칸에 들지 않으면 한 글자. 글자 크기 200% 에서 멈춘다
+                    // (international-design.mdx "날짜" · DESIGN.md "지원 폭", groo-design #256 · #258). 아래 요일 막대의
+                    // 가로축은 차트 축이라 [dows](영어 "Mon") 그대로다
+                    child: LayoutBuilder(
+                      builder: (context, box) {
+                        final heads = fitWeekdayRowLabels(
+                          box.maxWidth / 7,
+                          _dayCellDowStyle,
+                          weekdayRowScaler(MediaQuery.textScalerOf(context)),
+                          labels: weekdayRowLabels(mondayFirst: true),
+                          narrow: weekdayRowNarrowLabels(mondayFirst: true),
+                        );
+                        return Row(
+                          children: [
+                            for (var i = 0; i < 7; i++)
+                              Expanded(
+                                child: _DayCell(
+                                  date: days[i],
+                                  dow: heads[i],
+                                  isToday: _ymd(days[i]) == todayYmd,
+                                  selected: _ymd(days[i]) == _sel,
+                                  future: _ymd(days[i]).compareTo(todayYmd) > 0,
+                                  onTap: () =>
+                                      setState(() => _sel = _ymd(days[i])),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   Padding(
@@ -293,6 +308,9 @@ class ForestWeekPicker extends StatelessWidget {
   }
 }
 
+/// 7일 띠 요일 글 — t3 13.
+const TextStyle _dayCellDowStyle = PTypography.t3;
+
 /// 날 줄 한 칸 — 요일(오늘이면 "오늘" brand 700) + 날짜 원(고른 날 brand 채움 · 오는 날 옅은 글, 누르지 못한다).
 class _DayCell extends StatelessWidget {
   const _DayCell({
@@ -315,7 +333,8 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
-    final scaler = MediaQuery.textScalerOf(context);
+    // 요일 머리 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 원도 멈춘 글로 잰다
+    final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
     return LayoutBuilder(
       builder: (context, box) {
         // 원은 글자 크기를 따라 늘되 칸 폭을 넘지 않는다(200% 에서도 7칸이 한 줄).
@@ -342,16 +361,21 @@ class _DayCell extends StatelessWidget {
                   children: [
                     Text(
                       isToday ? l.dateToday : dow,
+                      key: const ValueKey('forest-day-dow'),
                       maxLines: 1,
-                      style: PTypography.t3.copyWith(
+                      softWrap: false,
+                      textScaler: scaler,
+                      style: _dayCellDowStyle.copyWith(
                         color: isToday ? c.fgBrand : c.fgNeutralSubtle,
                         fontWeight: isToday ? FontWeight.w700 : null,
                       ),
                     ),
                     const SizedBox(height: PSpacing.x1),
                     Container(
+                      // 원이 칸 폭에서 멈춰 글 줄(200% 44)보다 작으면 상자만 글 줄만큼 늘어난다 — 원(BoxShape.circle)은
+                      // 짧은 변 지름으로 그대로 그리고, 숫자 줄이 원 상자에 잘리지 않는다
                       width: circle,
-                      height: circle,
+                      constraints: BoxConstraints(minHeight: circle),
                       alignment: Alignment.center,
                       decoration: selected
                           ? BoxDecoration(
@@ -361,6 +385,10 @@ class _DayCell extends StatelessWidget {
                           : null,
                       child: Text(
                         '${date.day}',
+                        key: const ValueKey('forest-day-number'),
+                        maxLines: 1,
+                        softWrap: false,
+                        textScaler: scaler,
                         style: PTypography.t5.copyWith(
                           color: selected
                               ? c.staticWhite

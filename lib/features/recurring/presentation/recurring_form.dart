@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,7 @@ import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/core/format/date.dart' show weekdayRowScaler;
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/core/sync/keep_alive_refresh.dart';
@@ -1727,6 +1730,13 @@ class _DayGrid extends StatelessWidget {
           builder: (context, box) {
             const gap = PSpacing.x1;
             final w = (box.maxWidth - gap * 6) / 7;
+            // 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258). 칸 높이 40 은 최소이고 멈춘 글 줄이
+            // 더 크면 그만큼 늘어난다(DESIGN.md Typography "글이 상자보다 커지는 자리")
+            final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
+            final h = math.max(
+              40.0,
+              scaler.scale(PTypography.t5.fontSize!) * PTypography.t5.height!,
+            );
             return Wrap(
               spacing: gap,
               runSpacing: gap,
@@ -1744,7 +1754,7 @@ class _DayGrid extends StatelessWidget {
                       onTap: () => onChanged(d),
                       child: SizedBox(
                         width: w,
-                        height: 40,
+                        height: h,
                         child: Center(
                           child: Container(
                             alignment: Alignment.center,
@@ -1759,6 +1769,10 @@ class _DayGrid extends StatelessWidget {
                                 : null,
                             child: Text(
                               '$d',
+                              key: const ValueKey('recurring-day-number'),
+                              maxLines: 1,
+                              softWrap: false,
+                              textScaler: scaler,
                               style: PTypography.t5.copyWith(
                                 color: d == value
                                     ? c.fgNeutralInverted

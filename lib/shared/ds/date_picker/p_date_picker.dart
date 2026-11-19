@@ -648,7 +648,7 @@ class _PDatePickerState extends State<PDatePicker> {
   Widget _weekdayRow(double cellW) {
     final c = context.colors;
     final l = widget.labels;
-    // 요일 글은 글자 크기 200% 에서 멈춘다(숫자 · 제목은 그 위로도 커진다)
+    // 요일 글은 글자 크기 200% 에서 멈춘다(날짜 숫자도 같다 — groo-design #258, 제목은 그 위로도 커진다)
     final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
     final style = PTypography.t4.copyWith(
       color: c.fgNeutralSubtle,
