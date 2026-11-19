@@ -102,5 +102,12 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- 로그인 · 소셜 연결은 앱 안 창(Custom Tabs)으로 연다(oauth_browser.dart).
+             Android 11+ 는 패키지 가시성 때문에 이게 없으면 Custom Tabs 를 지원하는 브라우저를 찾지 못한다
+             (url_launcher 의 supportsLaunchMode · CustomTabsClient.getPackageName 이 비어 나온다).
+             여는 일 자체는 기본 브라우저로 보내는 VIEW 인텐트라 이것 없이도 되지만, 지원 여부를 묻는 길을 살려 둔다. -->
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService"/>
+        </intent>
     </queries>
 </manifest>

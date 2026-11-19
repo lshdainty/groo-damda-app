@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/auth/oauth_browser.dart';
 import 'package:groo_damda_app/core/auth/oauth_callback_handler.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
 import 'package:groo_damda_app/core/auth/oauth_link_return.dart';
@@ -55,9 +56,30 @@ final oauthCallbackHandlerProvider = Provider<OAuthCallbackHandler>(
 /// app_links 에 넘기지 않아 initial link 가 비어 있다(기존 문제, 후속: `SceneDelegate.scene(_:willConnectTo:options:)` 에서
 /// `AppLinks.shared.handleLink(url:)`). Android 는 둘 다 받는다.
 final oauthLinkListenerProvider = Provider<void>((ref) {
+  final onLink = ref.watch(oauthLinkHandlerProvider);
+
+  final appLinks = AppLinks();
+  // 콜드 스타트 분 — 놓친 initial link 를 먼저 소화하고 스트림을 켠다.
+  unawaited(() async {
+    // 시작 링크는 프로세스당 한 번만 묻는다 — 로그아웃 뒤 다음 사람의 리스너가 옛 복귀를 또 받으면 안 된다
+    if (!takeInitialLinkTurn()) return;
+    final uri = await appLinks.getInitialLink();
+    if (uri != null) onLink(uri);
+  }());
+  final sub = appLinks.uriLinkStream.listen(onLink);
+  ref.onDispose(sub.cancel);
+});
+
+/// 들어온 딥링크 하나를 처리한다 — 로그인 콜백(`/callback`)과 소셜 연동 복귀(`/linked`) 둘 다.
+///
+/// 리스너와 나눠 둔 이유: 테스트가 딥링크 플러그인(app_links) 없이 "복귀하면 앱 안 창을 닫는가" 를 본다.
+final oauthLinkHandlerProvider = Provider<Future<void> Function(Uri)>((ref) {
   final handler = ref.watch(oauthCallbackHandlerProvider);
 
   Future<void> onLink(Uri uri) async {
+    // 돌아왔다 — 로그인 · 연동을 띄운 앱 안 창(SFSafariViewController · Custom Tabs)을 먼저 닫는다.
+    // 두 길(콜백 · `/linked`) 모두다. 기다리지 않고 오류는 삼킨다 — 콜드 스타트는 닫을 창이 없다.
+    closeOAuthBrowser();
     // 소셜 계정 연동에서 돌아온 주소(`/linked`)는 로그인 콜백으로 넘기지 않는다 — 연결 상태를 다시 받고
     // 결과를 알린다. 서버(그루 계정)가 쓴 글은 내지 않고 고정 글만 쓴다. 콜드 스타트(initial link)도 같은 길이다.
     final back = parseOAuthLinkReturn(uri);
@@ -94,16 +116,7 @@ final oauthLinkListenerProvider = Provider<void>((ref) {
     }
   }
 
-  final appLinks = AppLinks();
-  // 콜드 스타트 분 — 놓친 initial link 를 먼저 소화하고 스트림을 켠다.
-  unawaited(() async {
-    // 시작 링크는 프로세스당 한 번만 묻는다 — 로그아웃 뒤 다음 사람의 리스너가 옛 복귀를 또 받으면 안 된다
-    if (!takeInitialLinkTurn()) return;
-    final uri = await appLinks.getInitialLink();
-    if (uri != null) onLink(uri);
-  }());
-  final sub = appLinks.uriLinkStream.listen(onLink);
-  ref.onDispose(sub.cancel);
+  return onLink;
 });
 
 bool _initialAsked = false;

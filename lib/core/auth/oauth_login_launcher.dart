@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:groo_damda_app/app/env.dart';
+import 'package:groo_damda_app/core/auth/oauth_browser.dart';
 import 'package:groo_damda_app/core/auth/oauth_flow_store.dart';
 import 'package:groo_damda_app/core/auth/oauth_link_listener.dart';
 import 'package:groo_damda_app/core/auth/pkce.dart';
 
-/// 그루 계정 로그인(OAuth 2.0 Authorization Code + PKCE)을 시스템 브라우저에서 시작한다.
+/// 그루 계정 로그인(OAuth 2.0 Authorization Code + PKCE)을 앱 안 창([openOAuthBrowser] —
+/// iOS SFSafariViewController · Android Custom Tabs)에서 시작한다.
 ///
 /// 화면 밖에 둔 이유: 시작하는 자리가 둘이다 — 로그인 화면의 버튼, 그리고 교환이
 /// `AUTH_030` 으로 거절됐을 때 인증 상태(`AuthNotifier`)가 폼을 강제해 한 번 다시
@@ -16,7 +17,7 @@ class OAuthLoginLauncher {
 
   final OAuthFlowStore store;
 
-  /// 주소를 시스템 브라우저로 연다 — 못 열면 false.
+  /// 주소를 앱 안 창으로 연다 — 못 열었거나 불러오기 전에 닫혔으면 false(또는 throw).
   /// 주입받는 이유: 테스트가 플러그인 채널 없이 "어떤 주소로 나갔는가" 를 본다.
   final Future<bool> Function(Uri url) launch;
 
@@ -25,7 +26,7 @@ class OAuthLoginLauncher {
   static bool get isSsoOriginSecure =>
       Env.appEnv == 'local' || Uri.tryParse(Env.ssoUrl)?.scheme == 'https';
 
-  /// PKCE 를 만들어 보관하고 authorize 주소를 시스템 브라우저로 연다. 복귀는 딥링크
+  /// PKCE 를 만들어 보관하고 authorize 주소를 앱 안 창으로 연다. 복귀는 딥링크
   /// 리스너([oauthLinkListenerProvider])가 받는다. 못 열면 throw.
   ///
   /// `prompt=login`(살아 있는 그루 계정 로그인을 쓰지 않고 폼을 강제)은 기기에 강제
@@ -59,7 +60,7 @@ class OAuthLoginLauncher {
         '&state=${Uri.encodeComponent(state)}'
         '${prompt ? '&prompt=login' : ''}';
 
-    // 3) 시스템 브라우저로.
+    // 3) 앱 안 창으로. 돌아오면 리스너가 창을 닫는다(closeOAuthBrowser).
     final launched = await launch(Uri.parse(authorizeUrl));
     if (!launched) {
       throw StateError('브라우저를 열 수 없습니다');
@@ -70,6 +71,6 @@ class OAuthLoginLauncher {
 final oauthLoginLauncherProvider = Provider<OAuthLoginLauncher>(
   (ref) => OAuthLoginLauncher(
     store: ref.watch(oauthFlowStoreProvider),
-    launch: (url) => launchUrl(url, mode: LaunchMode.externalApplication),
+    launch: openOAuthBrowser,
   ),
 );
