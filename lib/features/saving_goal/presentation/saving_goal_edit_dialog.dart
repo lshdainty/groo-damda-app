@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
+import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/shared/forms/save_failure.dart';
@@ -620,29 +621,15 @@ class _GoalFormState extends ConsumerState<_GoalForm> {
             ],
       // 수정 — 바닥 왼쪽 [삭제](밀기와 같은 동작 · 확인창 한 번). 밀기는 지름길이라 닫는 길은 여기에도 있다
       footerRow: _isEdit
-          ? Row(
-              spacing: PSpacing.x2,
-              children: [
-                // 내용 폭 ghost critical — 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
-                Transform.translate(
-                  offset: const Offset(-20, 0),
-                  child: PButton(
-                    label: l.actionDelete,
-                    variant: PButtonVariant.ghost,
-                    ghostColor: PButtonGhostColor.critical,
-                    size: PButtonSize.large,
-                    onPressed: _submitting ? null : _delete,
-                  ),
-                ),
-                Expanded(
-                  child: PButton(
-                    label: l.actionSave,
-                    size: PButtonSize.large,
-                    loading: _submitting,
-                    onPressed: _submitting ? null : _onSubmit,
-                  ),
-                ),
-              ],
+          ? PFormDeleteFooter(
+              deleteLabel: l.actionDelete,
+              onDelete: _submitting ? null : _delete,
+              save: PButton(
+                label: l.actionSave,
+                size: PButtonSize.large,
+                loading: _submitting,
+                onPressed: _submitting ? null : _onSubmit,
+              ),
             )
           : null,
     );

@@ -174,6 +174,18 @@ void main() {
 
       await tester.tap(findPlain('옛이름').first);
       await tester.pumpAndSettle();
+
+      // 바닥 왼쪽 [삭제] 는 바닥 여백 24 에서 시작해 글자만큼, [저장] 이 남은 폭 — 옛 Transform(−20) 으로 옮기지 않는다
+      final footerBox = tester.getRect(
+        find.byKey(const ValueKey('p-bottom-sheet-footer')),
+      );
+      Finder btn(String label) =>
+          find.byWidgetPredicate((w) => w is dsb.PButton && w.label == label);
+      final del = tester.getRect(btn(l.actionDelete));
+      final save = tester.getRect(btn(l.actionSave));
+      expect(del.left, closeTo(footerBox.left + 24, 0.5));
+      expect(save.left, closeTo(del.right + 8, 0.5));
+      expect(save.right, closeTo(footerBox.right - 24, 0.5));
       await tester.enterText(find.byType(EditableText), '새이름');
       await tester.pumpAndSettle();
       await tester.tap(_button(l.actionSave));

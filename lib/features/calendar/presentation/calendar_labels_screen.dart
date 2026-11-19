@@ -28,6 +28,7 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/top_navigation/p_top_navigation.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
+import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/forms/name_policy.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
@@ -442,22 +443,10 @@ class _LabelFormState extends ConsumerState<_LabelForm> {
       ),
       footer: isEdit ? const [] : [save],
       footerRow: isEdit
-          ? Row(
-              spacing: PSpacing.x2,
-              children: [
-                // 내용 폭 ghost critical — 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
-                Transform.translate(
-                  offset: const Offset(-20, 0),
-                  child: dsb.PButton(
-                    label: l.actionDelete,
-                    variant: dsb.PButtonVariant.ghost,
-                    ghostColor: dsb.PButtonGhostColor.critical,
-                    size: dsb.PButtonSize.large,
-                    onPressed: _submitting ? null : _delete,
-                  ),
-                ),
-                Expanded(child: save),
-              ],
+          ? PFormDeleteFooter(
+              deleteLabel: l.actionDelete,
+              onDelete: _submitting ? null : _delete,
+              save: save,
             )
           : null,
     );

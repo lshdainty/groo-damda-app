@@ -30,6 +30,7 @@ import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ui/confirm_fail_snackbar.dart';
 import 'package:groo_damda_app/shared/forms/form_error_callout.dart';
+import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 import 'package:groo_damda_app/shared/forms/picker_row.dart';
 import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
@@ -476,29 +477,15 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
             ],
       // 카테고리 예산 수정 — 바닥 왼쪽 [삭제](밀기와 같은 동작 · 확인창 한 번). 밀기는 지름길이라 닫는 길은 여기에도 있다
       footerRow: canDelete
-          ? Row(
-              spacing: PSpacing.x2,
-              children: [
-                // 내용 폭 ghost critical — 안쪽 여백 20 을 바깥으로 내어 글이 화면 여백 24 에 선다
-                Transform.translate(
-                  offset: const Offset(-20, 0),
-                  child: PButton(
-                    label: l.actionDelete,
-                    variant: PButtonVariant.ghost,
-                    ghostColor: PButtonGhostColor.critical,
-                    size: PButtonSize.large,
-                    onPressed: _submitting ? null : _delete,
-                  ),
-                ),
-                Expanded(
-                  child: PButton(
-                    label: l.actionSave,
-                    size: PButtonSize.large,
-                    loading: _submitting,
-                    onPressed: _submitting ? null : _onSubmit,
-                  ),
-                ),
-              ],
+          ? PFormDeleteFooter(
+              deleteLabel: l.actionDelete,
+              onDelete: _submitting ? null : _delete,
+              save: PButton(
+                label: l.actionSave,
+                size: PButtonSize.large,
+                loading: _submitting,
+                onPressed: _submitting ? null : _onSubmit,
+              ),
             )
           : null,
     );
