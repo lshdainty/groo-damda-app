@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
+import 'package:groo_damda_app/core/auth/oauth_browser.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/lock/app_lock.dart';
@@ -60,6 +60,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   bool _linking = false;
   bool _unlinking = false;
 
+  /// 연결하러 앱 안 창을 띄웠다 — 돌아오면(resumed) 목록을 다시 받는다.
+  /// [_linking](버튼 로딩)과 따로 둔다: iOS 의 앱 안 창(SFSafariViewController)은 앱을 백그라운드로
+  /// 보내지 않아 resumed 가 오지 않는다 — 로딩을 resumed 에 걸면 창을 그냥 닫았을 때 영원히 돈다.
+  bool _awaitingLinkReturn = false;
+
   @override
   void initState() {
     super.initState();
@@ -72,7 +77,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     super.dispose();
   }
 
-  /// 브라우저에서 그냥 돌아온 경우(딥링크가 없다) — 목록을 다시 받고 `loading` 을 푼다.
+  /// 브라우저에서 그냥 돌아온 경우(딥링크가 없다) — 목록을 다시 받는다(Android Custom Tabs ·
+  /// 바깥 브라우저는 앱이 백그라운드로 갔다 온다).
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -80,8 +86,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       ref.invalidate(appLockSupportedProvider);
       ref.read(appLockUnavailableNowProvider.notifier).set(false);
     }
-    if (state != AppLifecycleState.resumed || !_linking) return;
-    setState(() => _linking = false);
+    if (state != AppLifecycleState.resumed || !_awaitingLinkReturn) return;
+    _awaitingLinkReturn = false;
+    if (_linking) setState(() => _linking = false);
     ref.invalidate(oauthProvidersProvider);
   }
 
@@ -109,14 +116,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     if (startUrl == null || !mounted) return;
     setState(() => _linking = true);
     try {
-      // 로그인과 같은 까닭으로 시스템 브라우저 — 복귀는 딥링크 리스너가 받는다.
-      final launched = await launchUrl(
-        Uri.parse(startUrl),
-        mode: LaunchMode.externalApplication,
-      );
+      // 로그인과 같은 앱 안 창 — 복귀(`/linked`)는 딥링크 리스너가 받아 창을 닫고 목록을 다시 받는다.
+      _awaitingLinkReturn = true;
+      final launched = await openOAuthBrowser(Uri.parse(startUrl));
       if (!launched) throw StateError('browser');
-      // 흐름이 앱 밖으로 나갔다 — loading 은 돌아올 때(resumed · 딥링크) 푼다.
+      // 흐름이 앱 안 창으로 넘어갔다 — 로딩은 여기서 푼다(창이 화면을 덮는다). 창을 그냥 닫아도
+      // 버튼이 돌지 않고 다시 누를 수 있다.
+      if (!mounted) return;
+      setState(() => _linking = false);
     } catch (_) {
+      _awaitingLinkReturn = false;
       if (!mounted) return;
       setState(() => _linking = false);
       // 브라우저를 못 열었다 — critical 한 문장 + [다시 시도](티켓은 이미 썼으니 본인 확인부터 다시)

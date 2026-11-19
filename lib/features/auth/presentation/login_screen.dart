@@ -13,19 +13,19 @@ import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
-/// SSO 로그인 화면 (OAuth 2.0 Authorization Code + PKCE, 시스템 브라우저 — RFC 8252).
+/// SSO 로그인 화면 (OAuth 2.0 Authorization Code + PKCE, 앱 안 브라우저 창 — RFC 8252 in-app browser tab).
 ///
 /// 흐름:
 /// 1. 앱이 PKCE(code_verifier/code_challenge) + state 를 직접 생성,
 ///    [OAuthFlowStore] 에 **먼저 보관**(브라우저에 가 있는 동안 프로세스가 죽어도 복구).
-/// 2. 시스템 브라우저로 SSO `/api/v1/oauth2/authorize` 오픈. SSO 에 Refresh 쿠키가
+/// 2. 앱 안 창(iOS SFSafariViewController · Android Custom Tabs)으로 SSO `/api/v1/oauth2/authorize` 오픈. SSO 에 Refresh 쿠키가
 ///    살아 있으면 무음 재인증으로 폼 없이 즉시 복귀한다.
 ///    (1 · 2 는 [OAuthLoginLauncher] — 교환이 `AUTH_030` 으로 거절됐을 때의 다시 시작도 같은 길이다)
 /// 3. 로그인 완료 → SSO 서버가 302 로 `porestdesk://oauth/callback?code=&state=` 를
 ///    내려보냄 → OS 딥링크로 앱 복귀 → [oauthLinkListenerProvider] 가 state 검증 후
-///    desk-back `/auth/exchange-code` 교환(BFF) → router 가 /home 으로.
+///    desk-back `/auth/exchange-code` 교환(BFF) → router 가 /home 으로. 리스너가 앱 안 창을 닫는다.
 ///
-/// 인앱 WebView 가 아니라 시스템 브라우저인 이유: Google 소셜 로그인이 임베디드
+/// 인앱 WebView 가 아니라 브라우저 엔진 창인 이유: Google 소셜 로그인이 임베디드
 /// WebView 를 차단한다(403 disallowed_useragent). 예전 시스템 브라우저 시절의 두 버그는
 /// 구조적으로 재발하지 않는다 — iOS 핸드오프는 서버 302 bounce 가, Android 백그라운드
 /// 상태 유실은 PKCE 디스크 보관([OAuthFlowStore])이 막는다.
@@ -73,10 +73,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _error = null;
     });
     try {
-      // PKCE 보관 → authorize 주소(로그아웃 직후 첫 로그인은 prompt=login) → 시스템
-      // 브라우저. 복귀는 딥링크 리스너(oauthLinkListenerProvider)가 받는다.
+      // PKCE 보관 → authorize 주소(로그아웃 직후 첫 로그인은 prompt=login) → 앱 안
+      // 창. 복귀는 딥링크 리스너(oauthLinkListenerProvider)가 받는다.
       await ref.read(oauthLoginLauncherProvider).start();
-      // 여기서 흐름이 앱 밖으로 나간다 — 버튼은 다시 눌러 재시도할 수 있게 되돌린다.
+      // 여기서 흐름이 앱 안 창으로 넘어간다 — 버튼은 되돌린다. 사용자가 창을 그냥 닫아도(취소)
+      // 로딩이 남지 않고 다시 누를 수 있다.
       // (교환 진행 상태는 authProvider 의 AsyncLoading 이 담당)
       if (!mounted) return;
       setState(() => _busy = false);
