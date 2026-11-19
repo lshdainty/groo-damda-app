@@ -295,10 +295,10 @@ void main() {
           final deco = _decoration(tester, _box);
 
           // 상자 — 높이 · 모서리 · 아이콘만 있으면 원
-          k.px('root.height', rect.height);
+          k.px('root.minHeight', rect.height);
           if (iconOnly) k.px('root.width', rect.width);
           k.radius('root.radius', deco);
-          m(['root.height', 'root.width', 'root.radius']);
+          m(['root.minHeight', 'root.width', 'root.radius']);
 
           // 색 — 바탕 · 안쪽 1px 선 · 글자(글자색은 글 · 아이콘이 따른다)
           k.color('root.background', deco.color!);
@@ -468,7 +468,7 @@ void main() {
           tester.getSize(_box).width,
           closeTo(label.width + 2 * (want['root.paddingX']! as num), 0.01),
         );
-        expect(tester.getSize(_box).height, want['root.height']);
+        expect(tester.getSize(_box).height, want['root.minHeight']);
       }
     });
 
@@ -478,7 +478,7 @@ void main() {
       for (final size in PChipSize.values) {
         final want = _spec.resolve({'size': size.name}, 'enabled');
         final m = PChipMetrics.of(size);
-        expect(m.height, want['root.height']);
+        expect(m.height, want['root.minHeight']);
         expect(m.paddingX, want['root.paddingX']);
         expect(m.minWidth, want['root.minWidth']);
         expect(m.prefixIcon, want['prefixIcon.size']);
@@ -743,7 +743,7 @@ void main() {
             await tester.pump(const Duration(milliseconds: 400));
             final rect = tester.getRect(_pillBox);
             final deco = _decoration(tester, _pillBox);
-            k.px('root.height', rect.height);
+            k.px('root.minHeight', rect.height);
             k.radius('root.radius', deco);
             k.color('root.background', deco.color!);
             k.border('root', deco);

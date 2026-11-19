@@ -3,7 +3,7 @@
   "source": "specs/components/time-picker.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "휠 — Wheel Picker medium, 칼럼 셋",
@@ -58,7 +58,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "height",
-      "note": "44 × 5 — Wheel Picker medium"
+      "note": "44 × 5 — Wheel Picker medium. 휠 항목 글은 글자 크기를 따르지 않습니다(wheel-picker.yaml) — 고른 값은 시각 칸(Input Button)에서 크게 읽습니다"
     },
     {
       "rule": 0,

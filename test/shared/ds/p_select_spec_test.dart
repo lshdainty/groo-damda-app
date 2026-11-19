@@ -482,10 +482,10 @@ void main() {
         k.px('content.paddingY', first.top - box.top);
 
         // 선택지 — 높이 46 · 설명이 있으면 66 · 좌우 16 · 앞 아이콘 22 · 사이 12
-        k.px('item.height', first.height);
+        k.px('item.minHeight', first.height);
         final second = tester.getRect(_row('국민 주계좌'));
         if ((second.height - 66).abs() > 0.5) {
-          k.fail('item.height(설명 있음): 스펙 66 · 실제 ${second.height}');
+          k.fail('item.minHeight(설명 있음): 스펙 66 · 실제 ${second.height}');
         }
         final icons = find.byKey(const ValueKey('select-item-icon'));
         final iconRect = tester.getRect(icons.first);

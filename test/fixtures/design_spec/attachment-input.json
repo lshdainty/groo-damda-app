@@ -3,7 +3,7 @@
   "source": "specs/components/attachment-input.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "첨부 칸 전체 — 드롭존(있으면)과 항목 줄을 세로로 담는다. 라벨 · 설명 · 오류는 Field 가 둘레에서 그린다",
@@ -639,7 +639,7 @@
       "enabled": {
         "dropzone": {
           "display": "보임",
-          "height": 120,
+          "minHeight": 120,
           "gap": 8,
           "paddingX": 16,
           "radius": 12,
@@ -811,7 +811,7 @@
       "properties": [
         "opacity"
       ],
-      "note": "사진 1 → 0.5(SEED opacity 0.2s, 사용자 결정 13B) — 모션 줄이기면 바로"
+      "note": "사진 1 → 0.5 — 모션 줄이기면 바로"
     },
     "올리는 중 — 채움": {
       "duration": "300ms",
@@ -828,14 +828,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "gap",
-      "note": "드롭존 ↔ 항목 줄 8 — SEED attachment-input root gap"
+      "note": "드롭존 ↔ 항목 줄 8"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "items",
       "prop": "gap",
-      "note": "항목 사이 8 — SEED items gap"
+      "note": "항목 사이 8"
     },
     {
       "rule": 0,
@@ -849,14 +849,14 @@
       "state": "enabled",
       "slot": "items",
       "prop": "paddingTop",
-      "note": "× 의 누르는 자리 44 가 위로 16(걸침 4 + 보이지 않는 여백 12) 나가도 가로 스크롤 줄(overflow)에 잘리지 않게 — 같은 만큼 위로 당긴다(marginTop −16). SEED container 는 4(× 만 걸치는 만큼)라 누르는 자리 위 12 가 잘려 44 × 32 가 된다"
+      "note": "× 의 누르는 자리 44 가 위로 16(걸침 4 + 보이지 않는 여백 12) 나가도 가로 스크롤 줄(overflow)에 잘리지 않게 — 같은 만큼 위로 당긴다(marginTop −16)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "items",
       "prop": "bleedX",
-      "note": "줄을 화면(시트 · 대화상자 본문) 가장자리까지 넓히고 같은 만큼 안쪽 여백 — 첫 항목은 다른 칸과 같은 자리에서 시작한다. 앱 — 칸이 제 상자 밖을 받지 못한다(Flutter). 놓는 화면이 칸을 화면 폭에 두고 안쪽 여백 24 를 준다(SEED --seed-attachment-input-extend-x · Chip scroll 줄과 같은 방법). Field 안이면 Field 의 머리 · 꼬리를 24 들여 라벨이 다른 칸과 같은 자리에 선다. 여백 안에 둔 채 쓰지 않는다 — 흐림 20 이 첨부 타일을 깎는다(Q-016-2)"
+      "note": "줄을 화면(시트 · 대화상자 본문) 가장자리까지 넓히고 같은 만큼 안쪽 여백 — 첫 항목은 다른 칸과 같은 자리에서 시작한다. 앱 — 칸이 제 상자 밖을 받지 못한다(Flutter). 놓는 화면이 칸을 화면 폭에 두고 안쪽 여백 24 를 준다(Chip scroll 줄과 같은 방법). Field 안이면 Field 의 머리 · 꼬리를 24 들여 라벨이 다른 칸과 같은 자리에 선다. 여백 안에 둔 채 쓰지 않는다 — 흐림 20 이 첨부 타일을 깎는다"
     },
     {
       "rule": 0,
@@ -870,7 +870,7 @@
       "state": "enabled",
       "slot": "trigger",
       "prop": "size",
-      "note": "정사각 — SEED trigger. 큰 글자에서 상자 · 아이콘 · × 는 글자 배율만큼 커진다 — 웹은 rem 이라 이미 그렇고, 앱은 타일 · 사진 80 · 파일 카드 160 · 썸네일 48 · 아이콘 24 · × 20(누르는 44 · 위 여백 16) · × 아이콘 10 에 글자 배율(textScaler)을 곱한다. 200% 에서 사진 160 · 파일 카드 320 × 160 — 이름 네 줄 + 크기 한 줄이 다 보이고, 실패한 사진의 \"다시 시도\" 가 잘리지 않는다. 한 화면에 타일이 하나 반 정도만 보이고 나머지는 옆으로 민다. 80 고정 + 줄 줄이기(B)는 고르지 않았다(2026-10-17 사용자 결정 — 03-B 결정 3 A)"
+      "note": "정사각. 큰 글자에서 글을 담은 상자는 글자 배율만큼 커진다 — 웹은 rem 이라 이미 그렇고, 앱은 타일 · 사진 80 · 파일 카드 160 에 글자 배율(textScaler)을 곱한다. 썸네일 48 · 아이콘 24 · × 20(누르는 44 · 위 여백 16) · × 아이콘 10 · 올리는 중 원 24 · 대표 띠 24 는 px 그대로다(웹 · 앱 같음). 200% 에서 사진 160 · 파일 카드 320 × 160 — 이름 네 줄 + 크기 한 줄이 다 보이고, 실패한 사진의 \"다시 시도\" 가 잘리지 않는다. 한 화면에 타일이 하나 반 정도만 보이고 나머지는 옆으로 민다"
     },
     {
       "rule": 0,
@@ -878,13 +878,6 @@
       "slot": "trigger",
       "prop": "borderWidth",
       "note": "안쪽에 그린다(inset)"
-    },
-    {
-      "rule": 0,
-      "state": "enabled",
-      "slot": "trigger",
-      "prop": "background",
-      "note": "SEED bg.transparent"
     },
     {
       "rule": 0,
@@ -899,13 +892,6 @@
       "slot": "trigger",
       "prop": "name",
       "note": "\"영수증 첨부, 3/10\" — 아이콘 · 개수는 이름에 함께 읽힌다"
-    },
-    {
-      "rule": 0,
-      "state": "enabled",
-      "slot": "triggerIcon",
-      "prop": "size",
-      "note": "SEED x6"
     },
     {
       "rule": 0,
@@ -954,28 +940,28 @@
       "state": "enabled",
       "slot": "item",
       "prop": "gap",
-      "note": "파일 카드의 썸네일 ↔ 이름 10 — SEED x2_5"
+      "note": "파일 카드의 썸네일 ↔ 이름 10"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "item",
       "prop": "name",
-      "note": "보조 기술에는 늘 전체 이름 — 줄인 이름이 아니다(\"2026-10-15_카드영수증_….pdf, 9.8MB, 올리는 중 40%\")"
+      "note": "보조 기술에는 늘 전체 이름 — 줄인 이름이 아니다(\"카드영수증_….pdf, 9.8MB, 올리는 중 40%\")"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "item",
       "prop": "press",
-      "note": "순서 바꾸기(onReorder) · 크게 보기(onPreview)를 줄 때만 — 누르는 자리는 항목 전체(× 는 따로). 사진을 누르면 바로 크게 보던 자리는 메뉴 첫 줄 \"크게 보기\" 로 옮긴다(사용자 결정 14A)"
+      "note": "순서 바꾸기(onReorder) · 크게 보기(onPreview)를 줄 때만 — 누르는 자리는 항목 전체(× 는 따로). 사진을 누르면 바로 크게 보던 자리는 메뉴 첫 줄 \"크게 보기\" 로 옮긴다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "item",
       "prop": "dragStart",
-      "note": "누르기(메뉴)와 끌기를 가른다 — 마우스는 누른 채 8px 넘게 움직이면, 터치는 250ms 누른 채 움직이면 끌기. 그 전에 움직이면 줄이 가로로 스크롤한다(groo — SEED 는 끌기만 있다). 앱도 터치 250ms 길게 누름(SEED Lynx long-press — Q-016-1)"
+      "note": "누르기(메뉴)와 끌기를 가른다 — 마우스는 누른 채 8px 넘게 움직이면, 터치는 250ms 누른 채 움직이면 끌기. 그 전에 움직이면 줄이 가로로 스크롤한다. 앱도 터치 250ms 길게 누름"
     },
     {
       "rule": 0,
@@ -990,13 +976,6 @@
       "slot": "item",
       "prop": "keys",
       "note": "웹 — 초점이 온 항목에서 Enter 는 메뉴, Space 는 들기 → ← → 로 옮기고 Space · Enter 로 놓기 · Esc 그만두기(dnd-kit 키보드 — 순서 바꾸기를 줄 때만). 앱은 들기 대신 customSemanticsActions(앞으로 옮기기 · 뒤로 옮기기)와 메뉴"
-    },
-    {
-      "rule": 0,
-      "state": "enabled",
-      "slot": "thumbnail",
-      "prop": "size",
-      "note": "SEED x12"
     },
     {
       "rule": 0,
@@ -1045,14 +1024,14 @@
       "state": "enabled",
       "slot": "name",
       "prop": "wordBreak",
-      "note": "글자 단위 — 파일 이름은 문장이 아니라 이름표라 Typography v114(단어 단위)의 예외다(사용자 결정 2026-10-15 마무리 11D). 같은 칸에 이름이 가장 많이 든다 — SEED 레시피와 같다"
+      "note": "글자 단위 — 파일 이름은 문장이 아니라 이름표라 Typography 의 단어 단위 줄바꿈의 예외다. 같은 칸에 이름이 가장 많이 든다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "name",
       "prop": "maxLines",
-      "note": "네 줄(64) + 크기 한 줄(15) = 79 — 80 상자에 든다(따라오는 것). SEED 는 줄을 자르지 않아 다섯 줄부터 상자를 넘는다"
+      "note": "네 줄(64) + 크기 한 줄(15) = 79 — 80 상자에 든다"
     },
     {
       "rule": 0,
@@ -1066,7 +1045,7 @@
       "state": "enabled",
       "slot": "name",
       "prop": "overflow",
-      "note": "네 줄에 다 들면 그대로. 넘치면 셋째 줄 끝을 \"…\" 로 줄이고 넷째 줄에 확장자(\".xlsx\")를 둔다 — 끝을 자르면(11B) 확장자가 사라진다. 전체 이름은 항목 이름(보조 기술)에 늘 있다(사용자 결정 11D)"
+      "note": "네 줄에 다 들면 그대로. 넘치면 셋째 줄 끝을 \"…\" 로 줄이고 넷째 줄에 확장자(\".xlsx\")를 둔다 — 끝을 자르면 확장자가 사라진다. 전체 이름은 항목 이름(보조 기술)에 늘 있다"
     },
     {
       "rule": 0,
@@ -1129,7 +1108,7 @@
       "state": "enabled",
       "slot": "actionButton",
       "prop": "gap",
-      "note": "아이콘 ↔ 글 4 — SEED item-action-button"
+      "note": "아이콘 ↔ 글 4"
     },
     {
       "rule": 0,
@@ -1157,7 +1136,7 @@
       "state": "enabled",
       "slot": "badge",
       "prop": "display",
-      "note": "badge 를 줄 때만 — 지금 쓰는 자리는 없다(3A — SEED 그대로 둔다)"
+      "note": "badgeLabel 을 줄 때만"
     },
     {
       "rule": 0,
@@ -1185,14 +1164,14 @@
       "state": "enabled",
       "slot": "badge",
       "prop": "background",
-      "note": "검정 65% — 두 모드 같다. overlay-dim-light(50%)면 흰 사진 위 흰 글이 3.95 로 모자란다(Image Frame Indicator 와 같은 까닭). SEED bg.overlay 는 들이지 않았다"
+      "note": "검정 65% — 두 모드 같다. overlay-dim-light(50%)면 흰 사진 위 흰 글이 3.95 로 모자란다(Image Frame Indicator 와 같은 까닭)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "badge",
       "prop": "typography",
-      "note": "12 / 16 · 한 줄"
+      "note": "12 / 16 · 한 줄 — 사진 위 표식이라 글자 크기 설정을 따르지 않는다(웹 text-t2-static, 앱 TextScaler.noScaling). 띠 높이 24 도 그대로다"
     },
     {
       "rule": 0,
@@ -1206,14 +1185,14 @@
       "state": "enabled",
       "slot": "badge",
       "prop": "label",
-      "note": "바꿀 수 있다(badgeLabel) — SEED 예제는 \"대표사진\""
+      "note": "바꿀 수 있다(badgeLabel)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "removeButton",
       "prop": "size",
-      "note": "원 — SEED x5"
+      "note": "원"
     },
     {
       "rule": 0,
@@ -1234,21 +1213,21 @@
       "state": "enabled",
       "slot": "removeButton",
       "prop": "iconSize",
-      "note": "lucide x · 선 2.5 — SEED x2_5"
+      "note": "lucide x · 선 2.5"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "removeButton",
       "prop": "touchTarget",
-      "note": "보이는 20 둘레로 12 씩 보이지 않는 여백 — 이웃 항목과는 8 띄어 있어 사진 위로 겹친다(×가 위). AA ✓ · AAA ✓. 앱 — 보이는 자리는 그대로, 누르는 44 는 항목 자리의 위 16 · 끝 항목 오른쪽 16 을 레이아웃에 두어 받는다(부모 상자 밖도 받는다). 칸 위에 라벨이 없어도 위 16 이 잘리지 않는다(Q-016-3)"
+      "note": "보이는 20 둘레로 12 씩 보이지 않는 여백 — 이웃 항목과는 8 띄어 있어 사진 위로 겹친다(×가 위). AA ✓ · AAA ✓. 앱 — 보이는 자리는 그대로, 누르는 44 는 항목 자리의 위 16 · 끝 항목 오른쪽 16 을 레이아웃에 두어 받는다(부모 상자 밖도 받는다). 칸 위에 라벨이 없어도 위 16 이 잘리지 않는다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "removeButton",
       "prop": "hitOrder",
-      "note": "이웃 항목과 겹친 8 × 28 도 × 가 받는다 — 웹 z 1, 앱은 줄이 × 를 이웃 항목보다 먼저 묻는다(Q-016-3)"
+      "note": "이웃 항목과 겹친 8 × 28 도 × 가 받는다 — 웹 z 1, 앱은 줄이 × 를 이웃 항목보다 먼저 묻는다"
     },
     {
       "rule": 0,
@@ -1367,63 +1346,63 @@
       "state": "hovered",
       "slot": "trigger",
       "prop": "background",
-      "note": "웹 — 누름과 같은 바탕(v106)"
+      "note": "웹 — 누름과 같은 바탕"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "trigger",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝(button.yaml 25-26)"
+      "note": "투명 누름의 불투명 짝(button.yaml 과 같다)"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "trigger",
       "prop": "scale",
-      "note": "타일만(SEED scaleScope self) — 80 은 78/80(v104)"
+      "note": "타일만 — 80 은 78/80"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "removeButton",
       "prop": "scale",
-      "note": "×만 — 기준 길이 24(v104 — 가장 작은 기준)"
+      "note": "×만 — 기준 길이 24(가장 작은 기준)"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "actionButton",
       "prop": "scale",
-      "note": "다시 시도만 — SEED scaleScope self"
+      "note": "다시 시도만"
     },
     {
       "rule": 0,
       "state": "dragging",
       "slot": "item",
       "prop": "scale",
-      "note": "끄는 항목이 2px 줄어든 채 손가락을 따라간다(SEED aria-grabbed). 사진은 불투명도 0.5 · 파일 카드는 글 · 아이콘 fg-disabled(아래 kind — SEED 그대로, 사용자 결정 13B)"
+      "note": "끄는 항목이 2px 줄어든 채 손가락을 따라간다. 사진은 불투명도 0.5 · 파일 카드는 글 · 아이콘 fg-disabled(아래 kind)"
     },
     {
       "rule": 0,
       "state": "dragging",
       "slot": "removeButton",
       "prop": "display",
-      "note": "끄는 동안 × 와 구멍이 사라진다(SEED)"
+      "note": "끄는 동안 × 와 구멍이 사라진다"
     },
     {
       "rule": 0,
       "state": "readonly",
       "slot": "removeButton",
       "prop": "iconColor",
-      "note": "SEED 처럼 × 는 막힌 모습으로 남는다 — 지울 수 없다는 것을 보인다"
+      "note": "× 는 막힌 모습으로 남는다 — 지울 수 없다는 것을 보인다"
     },
     {
       "rule": 0,
       "state": "readonly",
       "slot": "item",
       "prop": "cursor",
-      "note": "순서를 바꾸지 못한다 · 메뉴를 열지 않는다 — 누르면 바로 크게 보기(onPreview 를 줄 때만). 사진은 불투명도 0.5 · 파일 카드는 글 · 아이콘 fg-disabled(아래 kind — SEED 그대로, 13B)"
+      "note": "순서를 바꾸지 못한다 · 메뉴를 열지 않는다 — 누르면 바로 크게 보기(onPreview 를 줄 때만). 사진은 불투명도 0.5 · 파일 카드는 글 · 아이콘 fg-disabled(아래 kind)"
     },
     {
       "rule": 0,
@@ -1431,13 +1410,6 @@
       "slot": "item",
       "prop": "press",
       "note": "메뉴 대신 — 고칠 수 있는 동작이 없다"
-    },
-    {
-      "rule": 0,
-      "state": "disabled",
-      "slot": "triggerIcon",
-      "prop": "color",
-      "note": "SEED trigger disabled"
     },
     {
       "rule": 0,
@@ -1479,35 +1451,35 @@
       "state": "enabled",
       "slot": "item",
       "prop": "borderColor",
-      "note": "사진 위 투명 윤곽 1px(v118) — 검정 4.7% · 다크 흰 5%. 흰 사진이 바탕에 묻히지 않고 어두운 사진 둘레에 테가 생기지 않는다. SEED stroke.neutral-subtle(투명)과 같은 값"
+      "note": "사진 위 투명 윤곽 1px — 검정 4.7% · 다크 흰 5%. 흰 사진이 바탕에 묻히지 않고 어두운 사진 둘레에 테가 생기지 않는다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "item",
       "prop": "transitionProperty",
-      "note": "읽기 전용 · 끄는 중의 흐림이 서서히 — SEED opacity 0.2s"
+      "note": "읽기 전용 · 끄는 중의 흐림이 서서히"
     },
     {
       "rule": 1,
       "state": "readonly",
       "slot": "item",
       "prop": "opacity",
-      "note": "SEED rootage attachment-input-item image readonly — v106(불투명도로 흐리지 않는다)의 예외, 사용자 결정 2026-10-15 마무리 13B. 사진 · 대표 띠 · 윤곽이 함께 흐려진다"
+      "note": "\"불투명도로 흐리지 않는다\" 의 예외 — 사진 · 대표 띠 · 윤곽이 함께 흐려진다"
     },
     {
       "rule": 1,
       "state": "dragging",
       "slot": "item",
       "prop": "opacity",
-      "note": "SEED rootage attachment-input-item image dragging — 끄는 사진(13B). 놓으면 1 로 돌아간다"
+      "note": "끄는 사진 — 놓으면 1 로 돌아간다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "item",
       "prop": "width",
-      "note": "SEED item file — 큰 글자에서는 글자 배율만큼(200% 320, trigger.size 비고)"
+      "note": "큰 글자에서는 글자 배율만큼(200% 320, trigger.size 비고)"
     },
     {
       "rule": 2,
@@ -1542,21 +1514,21 @@
       "state": "readonly",
       "slot": "thumbnailIcon",
       "prop": "color",
-      "note": "SEED item file readonly — 글 · 아이콘 색만 바뀐다(불투명도 아님, 사용자 결정 13B)"
+      "note": "글 · 아이콘 색만 바뀐다(불투명도 아님)"
     },
     {
       "rule": 2,
       "state": "dragging",
       "slot": "thumbnailIcon",
       "prop": "color",
-      "note": "SEED item file dragging — 끄는 카드의 글 · 아이콘. 색만 바뀐다(불투명도 아님)"
+      "note": "끄는 카드의 글 · 아이콘 — 색만 바뀐다(불투명도 아님)"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "backdrop",
       "prop": "background",
-      "note": "Progress Circle 의 \"사진 위 딤\" — 라이트 50% · 다크 65%(이미 정한 것 2026-10-03)"
+      "note": "Progress Circle 의 \"사진 위 딤\" — 라이트 50% · 다크 65%"
     },
     {
       "rule": 3,
@@ -1591,21 +1563,21 @@
       "state": "enabled",
       "slot": "actionButton",
       "prop": "color",
-      "note": "SEED item-action-button image — 아이콘 · 글"
+      "note": "아이콘 · 글"
     },
     {
       "rule": 6,
       "state": "enabled",
       "slot": "thumbnail",
       "prop": "display",
-      "note": "썸네일 · 이름 · 크기 자리를 다시 시도 하나가 채운다(SEED) — 어느 파일인지는 이름(보조 기술)이 읽는다"
+      "note": "썸네일 · 이름 · 크기 자리를 다시 시도 하나가 채운다 — 어느 파일인지는 이름(보조 기술)이 읽는다"
     },
     {
       "rule": 6,
       "state": "enabled",
       "slot": "actionButton",
       "prop": "color",
-      "note": "SEED item-action-button file — 흰 면 5.50 · 다크 6.09"
+      "note": "흰 면 5.50 · 다크 6.09"
     },
     {
       "rule": 6,
@@ -1619,7 +1591,7 @@
       "state": "enabled",
       "slot": "trigger",
       "prop": "ariaDisabled",
-      "note": "다 차면 막힌다(SEED maxFiles) — aria-disabled 라 초점은 남아 \"10/10, 사용할 수 없음\" 을 읽는다. 넘친 파일은 고르기 창에서 골라도 하나씩 거절한다"
+      "note": "다 차면 막힌다 — aria-disabled 라 초점은 남아 \"10/10, 사용할 수 없음\" 을 읽는다. 넘친 파일은 고르기 창에서 골라도 하나씩 거절한다"
     },
     {
       "rule": 7,
@@ -1653,8 +1625,8 @@
       "rule": 9,
       "state": "enabled",
       "slot": "dropzone",
-      "prop": "height",
-      "note": "SEED dropzone"
+      "prop": "minHeight",
+      "note": "최소 높이 — 큰 글자에서 안내 · 버튼을 따라 늘어난다"
     },
     {
       "rule": 9,
@@ -1675,14 +1647,14 @@
       "state": "enabled",
       "slot": "dropzone",
       "prop": "borderWidth",
-      "note": "늘 실선(사용자 결정 5A · 12A) — SEED rootage 설명은 평소 점선 · 끄는 동안 실선이지만 고르지 않았다(12B)"
+      "note": "늘 실선 — 끌기는 색 · 바탕으로 알린다"
     },
     {
       "rule": 9,
       "state": "enabled",
       "slot": "dropzone",
       "prop": "borderColor",
-      "note": "흰 면 4.18 · 다크 4.13(떠 있는 면 4.18 · 3.58) — 3:1 이상. SEED palette.gray-500 은 다크 표면 위 2.71"
+      "note": "흰 면 4.18 · 다크 4.13(떠 있는 면 4.18 · 3.58) — 3:1 이상"
     },
     {
       "rule": 9,
@@ -1731,7 +1703,7 @@
       "state": "disabled",
       "slot": "dropzone",
       "prop": "borderColor",
-      "note": "막히면 테두리도 옅게 — 짙은 테두리는 받을 수 있는 자리로 읽힌다(groo — SEED 는 테두리를 바꾸지 않는다)"
+      "note": "막히면 테두리도 옅게 — 짙은 테두리는 받을 수 있는 자리로 읽힌다"
     },
     {
       "rule": 9,
@@ -1742,38 +1714,31 @@
     },
     {
       "rule": 9,
-      "state": "disabled",
-      "slot": "dropzoneLabel",
-      "prop": "foreground",
-      "note": "SEED dropzone disabled"
-    },
-    {
-      "rule": 9,
       "state": "dragOver",
       "slot": "dropzone",
       "prop": "borderColor",
-      "note": "흰 면 16.41 · 다크 13.42 — 기본 테두리와 3.93 · 3.25 로 또렷이 갈린다(SEED stroke.neutral-solid 는 gray-500 과 1.32 · 1.53)"
+      "note": "흰 면 16.41 · 다크 13.42 — 기본 테두리와 3.93 · 3.25 로 또렷이 갈린다"
     },
     {
       "rule": 9,
       "state": "dragOver",
       "slot": "dropzone",
       "prop": "background",
-      "note": "SEED 문서 \"드래그 진입 시 영역 테두리와 배경색이 변경\" — 안내 글은 이 바탕 위 5.18 · 4.68"
+      "note": "끌고 들어오면 테두리와 바탕이 함께 바뀐다 — 안내 글은 이 바탕 위 5.18 · 4.68"
     },
     {
       "rule": 9,
       "state": "dragOver",
       "slot": "pickButton",
       "prop": "background",
-      "note": "그대로 — 끄는 동안 버튼 면이 끌기 바탕과 1.02 · 1.00:1 로 섞여 글만 남는다. 끄는 중엔 누를 일이 없어 그대로 둔다(사용자 결정 2026-10-15 마무리 12A — 늘 실선, 평소 점선(12B)은 고르지 않았다)"
+      "note": "그대로 — 끄는 동안 버튼 면이 끌기 바탕과 1.02 · 1.00:1 로 섞여 글만 남는다. 끄는 중엔 누를 일이 없어 그대로 둔다"
     },
     {
       "rule": 10,
       "state": "enabled",
       "slot": "dropzone",
       "prop": "borderColor",
-      "note": "다 찬 드롭존은 막힌 모습 — 끌어 와도 받지 않는다(SEED maxFiles)"
+      "note": "다 찬 드롭존은 막힌 모습 — 끌어 와도 받지 않는다"
     },
     {
       "rule": 10,

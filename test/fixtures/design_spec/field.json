@@ -3,7 +3,7 @@
   "source": "specs/components/field.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "Field — 머리 · 입력 · 꼬리를 세로로 쌓는다",
@@ -11,7 +11,7 @@
     "label": "라벨 — 칸 이름. 명사형 · 마침표 없이, 한 줄(길어도 두 줄)",
     "requiredIndicator": "필수 점 — 한 화면 칸의 2/3 미만이 필수일 때 필수 칸에만",
     "optionalIndicator": "\"선택\" 글자 — 2/3 이상이 필수일 때 선택 칸에만(둘을 섞지 않는다)",
-    "headerAction": "머리 오른쪽 자리 — 작은 텍스트 버튼 하나(보조 액션 — 예시 보기 · 전체 선택) 또는 Slider 의 머리 값 글(slider.yaml headerValue). 둘을 함께 두지 않는다(SEED Field Suffix Slot)",
+    "headerAction": "머리 오른쪽 자리 — 작은 텍스트 버튼 하나(보조 액션 — 예시 보기 · 전체 선택) 또는 Slider 의 머리 값 글(slider.yaml headerValue). 둘을 함께 두지 않는다",
     "footer": "꼬리 — 설명 또는 오류(왼쪽) · 글자 수(오른쪽)",
     "description": "설명 — 칸을 채우는 데 필요한 안내",
     "descriptionIcon": "설명 앞 아이콘 — 없어도 된다",
@@ -59,16 +59,17 @@
             "light": "#1A1F2E",
             "dark": "#F5F6FA"
           },
+          "minWidth": "50%",
           "wordBreak": "keep-all"
         },
         "requiredIndicator": {
-          "size": "0.375rem",
+          "size": 6,
           "color": {
             "light": "#D72323",
             "dark": "#FF8477"
           },
-          "marginTop": "0.25rem",
-          "marginLeft": "0.125rem"
+          "marginTop": 4,
+          "marginLeft": 2
         },
         "optionalIndicator": {
           "typography": {
@@ -220,35 +221,42 @@
       "state": "enabled",
       "slot": "header",
       "prop": "flexWrap",
-      "note": "머리는 줄을 바꿀 수 있다 — 라벨 옆에 보조 액션이 들 자리가 모자라면(큰 글자 · 좁은 칸) 액션이 라벨 아래 줄 오른쪽 끝으로 내려간다. 라벨을 한 글자 폭으로 눌러 세우지 않는다(2026-10-29 17-1 앱 — 200% 에서 라벨이 한 글자씩 깨졌다)"
+      "note": "머리는 줄을 바꿀 수 있다 — 라벨 옆에 보조 액션이 들 자리가 모자라면(큰 글자 · 좁은 칸) 액션이 라벨 아래 줄 오른쪽 끝으로 내려간다. 모자람은 반 폭 판정(카드 머리 · List Header 와 같다) — 라벨이 label.minWidth 를 지키고도 액션 + gap 이 남은 폭에 안 들 때다. 라벨을 한 글자 폭으로 눌러 세우지 않는다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "label",
+      "prop": "minWidth",
+      "note": "머리 오른쪽 자리(headerAction)가 있을 때만 — 머리 안쪽 폭의 절반을 라벨이 지키고(flex 1), 남은 폭에 액션이 안 들면 액션이 아래 줄로 간다. 웹 [&>:first-child:not(:last-child)]:min-w-[50%] · flex-1, 앱 PField 레이아웃"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "label",
       "prop": "wordBreak",
-      "note": "낱말 단위(Typography v114 — keep-all + break-word). 앱은 공용 글자 위젯의 이음 문자(U+2060)"
+      "note": "낱말 단위(Typography — keep-all + break-word). 앱은 공용 글자 위젯의 이음 문자(U+2060)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "requiredIndicator",
       "prop": "size",
-      "note": "6px — 동그란 점. 글자 크기를 따라 커진다. 점은 화면 읽기 프로그램에 숨기고 필수는 칸의 aria-required 가 알린다"
+      "note": "동그란 점 — 컨트롤 모양이라 글자 크기 설정을 따르지 않는다. 점은 화면 읽기 프로그램에 숨기고 필수는 칸의 aria-required 가 알린다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "requiredIndicator",
       "prop": "marginTop",
-      "note": "4px — 라벨 첫 줄 위쪽에 붙는다"
+      "note": "라벨 첫 줄 위쪽에 붙는다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "requiredIndicator",
       "prop": "marginLeft",
-      "note": "2px — 라벨 끝 바로 뒤"
+      "note": "라벨 끝 바로 뒤"
     },
     {
       "rule": 0,
@@ -269,14 +277,14 @@
       "state": "enabled",
       "slot": "optionalIndicator",
       "prop": "paddingLeft",
-      "note": "4px"
+      "note": "4px — 글과 함께 커진다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "headerAction",
       "prop": "marginY",
-      "note": "버튼일 때 — Button ghost · neutralSubtle · xsmall(32) · 오른쪽 flush — 머리 높이 22 를 바꾸지 않게 위아래로 넘친다. 누르는 영역은 버튼 그대로(44). 머리 값 글(Slider)은 줄 높이 22 라 넘치지 않는다(0)"
+      "note": "버튼일 때 — Button ghost · neutralSubtle · xsmall(32) — 글자만 있어 flush 없음 — 머리 높이 22 를 바꾸지 않게 위아래로 넘친다. 누르는 영역은 버튼 그대로(44). 머리 값 글(Slider)은 줄 높이 22 라 넘치지 않는다(0)"
     },
     {
       "rule": 0,
@@ -290,21 +298,21 @@
       "state": "enabled",
       "slot": "description",
       "prop": "wordBreak",
-      "note": "낱말 단위(v114) — 도움말이 낱말 가운데서 끊기지 않는다. 앱 PField 메시지에서 빠져 있던 것을 고쳤다(2026-10-25 I-20 앱)"
+      "note": "낱말 단위 — 도움말이 낱말 가운데서 끊기지 않는다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "descriptionIcon",
       "prop": "gap",
-      "note": "아이콘 ↔ 글. 아이콘은 첫 줄 가운데(위 1.5)"
+      "note": "아이콘 ↔ 글. 아이콘은 크기를 그대로 두고 첫 줄 가운데에 선다(100% 에서 위 1.5)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "errorMessage",
       "prop": "wordBreak",
-      "note": "낱말 단위(v114) — 도움말과 같다"
+      "note": "낱말 단위 — 도움말과 같다"
     },
     {
       "rule": 0,
@@ -318,7 +326,7 @@
       "state": "enabled",
       "slot": "errorIcon",
       "prop": "gap",
-      "note": "아이콘 ↔ 글. 아이콘은 첫 줄 가운데(위 1.5)"
+      "note": "아이콘 ↔ 글. 아이콘은 크기를 그대로 두고 첫 줄 가운데에 선다(100% 에서 위 1.5)"
     },
     {
       "rule": 0,
@@ -346,7 +354,7 @@
       "state": "enabled",
       "slot": "form",
       "prop": "gapX",
-      "note": "두 칸을 나란히 둘 때 — 라벨과 값이 짧을 때만(SEED). 형식이 정해진 값(전화번호 · 주민등록번호)은 나누지 않는다"
+      "note": "두 칸을 나란히 둘 때 — 라벨과 값이 짧을 때만. 형식이 정해진 값(전화번호 · 주민등록번호)은 나누지 않는다"
     },
     {
       "rule": 0,

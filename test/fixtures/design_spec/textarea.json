@@ -3,7 +3,7 @@
   "source": "specs/components/textarea.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "상자(Container) — 테두리 · 바탕 · 모서리. 넘치는 글은 상자 안에서 잘린다(모서리 밖으로 나가지 않는다)",
@@ -252,21 +252,21 @@
       "state": "enabled",
       "slot": "root",
       "prop": "transitionProperty",
-      "note": "덧그린 2px 의 색만 — 두께는 바로 바뀐다(SEED)"
+      "note": "덧그린 2px 의 색만 — 두께는 바로 바뀐다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "transitionDuration",
-      "note": "SEED 는 0.1s 를 바로 적었다"
+      "note": "100ms"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "value",
       "prop": "caretColor",
-      "note": "캐럿은 글자색 — 고른 글은 기기 기본 하이라이트(Input 과 같다, 사용자 결정 2026-10-08)"
+      "note": "캐럿은 글자색 — 고른 글은 기기 기본 하이라이트(Input 과 같다)"
     },
     {
       "rule": 0,
@@ -280,7 +280,7 @@
       "state": "focused",
       "slot": "root",
       "prop": "borderColor",
-      "note": "읽기 전용이면 바뀌지 않는다 — 읽기 전용은 포커스 표시가 없다(Input 과 같다, 사용자 결정 2026-10-08)"
+      "note": "읽기 전용이면 바뀌지 않는다 — 읽기 전용은 포커스 표시가 없다(Input 과 같다)"
     },
     {
       "rule": 0,
@@ -301,7 +301,7 @@
       "state": "disabled",
       "slot": "root",
       "prop": "background",
-      "note": "흐리게 하지 않는다(v106)"
+      "note": "흐리게 하지 않는다"
     },
     {
       "rule": 0,
@@ -315,14 +315,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "breakpoint",
-      "note": "미만은 large, 이상은 medium 의 값을 쓴다(SEED lg) — 앱은 늘 large"
+      "note": "미만은 large, 이상은 medium 의 값을 쓴다 — 앱은 늘 large"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "value",
       "prop": "minHeight",
-      "note": "3줄 — 줄 높이 22 × 3 + 위아래 14"
+      "note": "3줄 — 줄 높이 22 × 3 + 위아래 14. 글자 크기 설정을 따라 글이 커지면 이 최소 높이도 따라 커집니다(웹 rem)"
     },
     {
       "rule": 4,
@@ -336,7 +336,7 @@
       "state": "enabled",
       "slot": "value",
       "prop": "minHeight",
-      "note": "3줄 — 줄 높이 19 × 3 + 위아래 12 는 81, SEED 는 82"
+      "note": "3줄 — 줄 높이 19 × 3 + 위아래 12 는 81 이고, 82 로 둔다. 글자 크기 설정을 따라 글이 커지면 이 최소 높이도 따라 커집니다(웹 rem)"
     },
     {
       "rule": 5,
@@ -350,14 +350,14 @@
       "state": "enabled",
       "slot": "value",
       "prop": "minHeight",
-      "note": "2줄 — 이보다 낮게 두지 않는다(SEED 문서 70). 높이는 자리마다 정하고, 넘치면 칸 안에서 스크롤"
+      "note": "2줄 — 줄 높이 22 × 2 + 위아래 14. 이보다 낮게 두지 않는다. 글자 크기 설정을 따라 글이 커지면 이 최소 높이도 따라 커집니다(웹 rem). 높이는 자리마다 정하고, 넘치면 칸 안에서 스크롤"
     },
     {
       "rule": 7,
       "state": "enabled",
       "slot": "value",
       "prop": "minHeight",
-      "note": "2줄 — 줄 높이 19 × 2 + 위아래 12. 높이는 자리마다 정하고, 넘치면 칸 안에서 스크롤"
+      "note": "2줄 — 줄 높이 19 × 2 + 위아래 12. 글자 크기 설정을 따라 글이 커지면 이 최소 높이도 따라 커집니다(웹 rem). 높이는 자리마다 정하고, 넘치면 칸 안에서 스크롤"
     }
   ]
 }

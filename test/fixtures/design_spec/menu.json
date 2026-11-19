@@ -3,7 +3,7 @@
   "source": "specs/components/menu.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "content": "메뉴 — 트리거 아래(모자라면 위 · 옆) 8",
@@ -258,7 +258,7 @@
         "inset",
         "border-radius"
       ],
-      "note": "알약이 줄 폭 전체에서 좌우 0 → 8 들어오며 모서리 0 → 12 로 둥글어진다(SEED menu-item — 2026-10-15 사용자 결정 Q-009-3 안 B). 떠날 때는 거꾸로 펴지며 투명해진다"
+      "note": "알약이 줄 폭 전체에서 좌우 0 → 8 들어오며 모서리 0 → 12 로 둥글어진다. 떠날 때는 거꾸로 펴지며 투명해진다"
     },
     "누름": {
       "duration": "150ms",
@@ -274,7 +274,7 @@
       "state": "enabled",
       "slot": "content",
       "prop": "width",
-      "note": "글이 길면 줄을 바꾼다 — 폭을 늘리지 않는다"
+      "note": "고정 — 글이 길거나 글자가 커지면 줄을 바꿔 높이가 늘어난다. 폭을 늘리지 않는다"
     },
     {
       "rule": 0,
@@ -309,14 +309,14 @@
       "state": "enabled",
       "slot": "item",
       "prop": "height",
-      "note": "한 줄 — 설명이 있으면 57. 글이 길면 줄을 바꿔 늘어난다(말줄임 없음)"
+      "note": "최소 · 한 줄 — 설명이 있으면 57. 글이 길거나 글자가 커지면 줄을 바꿔 늘어난다(말줄임 없음)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "item",
       "prop": "transitionProperty",
-      "note": "알약 바탕 · 들임(0 → 8) · 모서리(0 → 12)가 함께 150ms 에 — SEED menu-item 은 들임 · 모서리 d3, 색 color-transition(둘 다 150ms) 이라 하나로 적었다(2026-10-15 사용자 결정 — 구현 세션 질문 Q-009-3, 안 B)"
+      "note": "알약 바탕 · 들임(0 → 8) · 모서리(0 → 12)가 함께 150ms 에 — 들임 · 모서리(d3)와 색(color-transition)이 둘 다 150ms 라 하나로 적는다"
     },
     {
       "rule": 0,
@@ -330,7 +330,7 @@
       "state": "enabled",
       "slot": "itemLabel",
       "prop": "typography",
-      "note": "단어 단위 줄바꿈(v114)"
+      "note": "단어 단위 줄바꿈"
     },
     {
       "rule": 0,
@@ -351,7 +351,7 @@
       "state": "enabled",
       "slot": "highlight",
       "prop": "insetX",
-      "note": "줄 폭 전체 — 마우스를 올리거나 누르면 8 로 들어온다(SEED menu-item enabled 에는 marginX 가 없다)"
+      "note": "줄 폭 전체 — 마우스를 올리거나 누르면 8 로 들어온다"
     },
     {
       "rule": 0,
@@ -386,21 +386,21 @@
       "state": "hovered",
       "slot": "highlight",
       "prop": "insetX",
-      "note": "좌우 8 들어온 알약 — 글은 알약 안쪽 8 지점에서 시작한다(SEED pressed marginX x2)"
+      "note": "좌우 8 들어온 알약 — 글은 알약 안쪽 8 지점에서 시작한다"
     },
     {
       "rule": 0,
       "state": "hovered",
       "slot": "highlight",
       "prop": "radius",
-      "note": "12(SEED pressed cornerRadius r3)"
+      "note": "12"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "item",
       "prop": "scale",
-      "note": "아이콘 · 글만 준다(SEED scaleScope: content) — 알약은 그대로. 모션 줄이기면 하지 않는다"
+      "note": "아이콘 · 글만 준다 — 알약은 그대로. 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 0,

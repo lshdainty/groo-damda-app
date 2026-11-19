@@ -3,7 +3,7 @@
   "source": "specs/components/list.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "목록(List) — 줄을 세로로 잇는다. 배경 · 줄 사이 간격 없음",
@@ -22,7 +22,8 @@
     "divider": "줄 사이 선(ListDivider) — 필요할 때만",
     "expandButton": "줄 앞 꺾쇠 단추 — 부모 줄의 하위 줄을 펼치고 접는다(누르는 44). 줄을 누르면 하는 일(편집)과 따로 눌린다",
     "subList": "하위 줄 묶음 — 부모 줄 바로 아래에서 펼치고 접힌다",
-    "focusRing": "키보드 포커스 링(웹) — 줄 안쪽"
+    "focusRing": "키보드 포커스 링(웹) — 줄 안쪽",
+    "indent": "들인 줄의 앞 빈 자리 — 위 스위치 줄의 앞 아이콘 자리만큼 비워 제목이 위 줄 제목 세로줄에 선다(알림 설정의 시작 · 종료)"
   },
   "axes": {
     "align": [
@@ -163,6 +164,9 @@
           "shrink": 1,
           "overflowWrap": "anywhere",
           "textAlign": "end"
+        },
+        "indent": {
+          "width": 22
         },
         "suffixIcon": {
           "size": 18,
@@ -461,7 +465,7 @@
       "properties": [
         "height"
       ],
-      "note": "Accordion 과 같은 300ms(2026-10-10 사용자 결정 3A)"
+      "note": "Accordion 과 같은 300ms"
     },
     "하위 줄 — 모션 줄이기": {
       "duration": "150ms",
@@ -469,7 +473,7 @@
       "properties": [
         "opacity"
       ],
-      "note": "높이를 움직이지 않고 하위 줄이 150ms 서서히 나타나고 사라진다(v104 · Accordion 과 같다)"
+      "note": "높이를 움직이지 않고 하위 줄이 150ms 서서히 나타나고 사라진다(Accordion 과 같다)"
     },
     "꺾쇠 단추 — 회전": {
       "duration": "300ms",
@@ -493,7 +497,7 @@
       "state": "enabled",
       "slot": "item",
       "prop": "paddingX",
-      "note": "화면 가장자리 규칙 24(SEED 16). 안쪽 여백을 바꿔도 이보다 좁히지 않는다"
+      "note": "화면 가장자리 규칙 24. 안쪽 여백을 바꿔도 이보다 좁히지 않는다"
     },
     {
       "rule": 0,
@@ -514,21 +518,21 @@
       "state": "enabled",
       "slot": "background",
       "prop": "transitionProperty",
-      "note": "누르면 바탕이 안쪽으로 들어오며 둥글어진다(SEED)"
+      "note": "누르면 바탕이 안쪽으로 들어오며 둥글어진다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "background",
       "prop": "transitionDuration",
-      "note": "SEED 는 바탕 색만 color-transition, 들임 · 모서리는 d3 — 둘 다 150ms 라 하나로 적었다"
+      "note": "바탕 색 · 들임 · 모서리 모두 150ms"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "content",
       "prop": "stackBelow",
-      "note": "줄 안 폭(줄 폭 − 좌우 여백, 앞 붙이개 · 꺾쇠 자리 포함)이 이보다 좁으면 width narrow — em 은 제목 글자(t5) 크기라 글자 배율을 따라 커진다. 보통 글자에서 256 이라 320 폰(줄 안 272)까지 한 줄이고, 360 폰(312)은 글자 약 122% 부터(130% 면 15em) 값이 아래로 간다. 웹은 16rem(t5 = 1rem) 컨테이너 쿼리, 앱은 LayoutBuilder 로 16 × t5 × 글자 배율 — 둘이 같은 값을 잰다(2026-10-17 사용자 결정 03-D 결정 1 B)"
+      "note": "줄 안 폭(줄 폭 − 좌우 여백, 앞 붙이개 · 꺾쇠 자리 포함)이 이보다 좁으면 width narrow — em 은 제목 글자(t5) 크기라 글자 배율을 따라 커진다. 보통 글자에서 256 이라 320 폰(줄 안 272)까지 한 줄이고, 360 폰(312)은 글자 약 122% 부터(130% 면 15em) 값이 아래로 간다. 웹은 16rem(t5 = 1rem) 컨테이너 쿼리, 앱은 LayoutBuilder 로 16 × t5 × 글자 배율 — 둘이 같은 값을 잰다"
     },
     {
       "rule": 0,
@@ -542,14 +546,14 @@
       "state": "enabled",
       "slot": "tile",
       "prop": "background",
-      "note": "카테고리 색의 옅은 바탕(v111) — 이체 줄은 회색(chart-gray-weak, 2026-10-04). 은행 · 카드 같은 물건 줄은 Logo Tile(logo-tile.yaml)"
+      "note": "카테고리 색의 옅은 바탕 — 이체 줄은 회색(chart-gray-weak). 은행 · 카드 같은 물건 줄은 Logo Tile(logo-tile.yaml)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "tile",
       "prop": "color",
-      "note": "카테고리 색 — 옅은 바탕 위 3:1 이상(가장 낮은 yellow 라이트 3.63). 이체 줄은 chart-gray. 아이콘이 없는 카테고리는 태그 아이콘(lucide tag) — 빈 칸 · 첫 글자를 넣지 않는다(2026-10-04)"
+      "note": "카테고리 색 — 옅은 바탕 위 3:1 이상(가장 낮은 yellow 라이트 3.63). 이체 줄은 chart-gray. 아이콘이 없는 카테고리는 태그 아이콘(lucide tag) — 빈 칸 · 첫 글자를 넣지 않는다"
     },
     {
       "rule": 0,
@@ -563,42 +567,42 @@
       "state": "enabled",
       "slot": "body",
       "prop": "flexGrow",
-      "note": "남는 폭을 본문이 쓰고, 값이 길면 본문이 먼저 양보한다(SEED content flexGrow 1)"
+      "note": "남는 폭을 본문이 쓰고, 값이 길면 본문이 먼저 양보한다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "body",
       "prop": "minWidth",
-      "note": "본문은 제목의 가장 긴 낱말 폭까지 준다 — 제목이 keep-all 이라 min-content 가 그 낱말이다. 뒤 여백 10 은 따로다. 옛 1em(\"장 / 소\" 로 쪼개짐)을 2026-10-30 사용자 결정 B 로 바꿨다. 상한 — 공백 없는 긴 제목은 (줄 안 폭 − 앞 붙이개)의 절반에서 글자 사이로 끊는다(웹 cqw 상한 · 앱 LayoutBuilder). 값이 본문 위로 넘쳐 겹치지 않게(2026-10-15 사용자 결정 — 구현 세션 질문 Q-001, 안 A)"
+      "note": "본문은 제목의 가장 긴 낱말 폭까지 준다 — 제목이 keep-all 이라 min-content 가 그 낱말이다. 뒤 여백 10 은 따로다. 상한 — 공백 없는 긴 제목은 (줄 안 폭 − 앞 붙이개)의 절반에서 글자 사이로 끊는다(웹 cqw 상한 · 앱 LayoutBuilder). 값이 본문 위로 넘쳐 겹치지 않게"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "title",
       "prop": "fontWeight",
-      "note": "SEED 와 같다 — 굵기는 목록 제목 · 금액 같은 자리에 남긴다(사용자 결정)"
+      "note": "굵기는 목록 제목 · 금액 같은 자리에 남긴다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "title",
       "prop": "overflowWrap",
-      "note": "낱말 단위(v114 — keep-all + break-word). 본문이 가장 긴 낱말보다 좁아지지 않으니 글자 사이에서 끊지 않는다(2026-10-30 결정 B — 옛 anywhere)"
+      "note": "낱말 단위(keep-all + break-word). 본문이 가장 긴 낱말보다 좁아지지 않으니 글자 사이에서 끊지 않는다. 구현(보이는 결과는 같다) — 웹은 제목의 계산값을 anywhere 로 두고 같은 글을 담은 높이 0 의 ::before(data-ruler · overflow-wrap normal · 최대 폭 = 상한)가 min-content 를 정한다. break-word 그대로면 제목 자신의 min-content 가 낱말 전체라 상한이 먹지 않는다. 앱은 TextPainter 로 낱말마다 폭을 재 가장 긴 것과 상한 가운데 작은 값을 본문 최소 폭으로 준다(listTitleMinWidth)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "detail",
       "prop": "overflowWrap",
-      "note": "글 설명도 제목처럼 — 본문이 낱말 하나보다 좁아질 때만 글자 사이에서 끊어 뒤 붙이개에 닿지 않는다(2026-10-15 사용자 결정 — 구현 세션 질문 Q-001, 안 A). Tag Group 설명은 그 스펙대로 한 줄 말줄임"
+      "note": "글 설명도 제목처럼 — 본문이 낱말 하나보다 좁아질 때만 글자 사이에서 끊어 뒤 붙이개에 닿지 않는다. Tag Group 설명은 그 스펙대로 한 줄 말줄임"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "suffix",
       "prop": "shrink",
-      "note": "줄지 않는다(SEED suffix flexShrink 0) — 값이 길면 본문이 제목의 가장 긴 낱말 폭까지 양보한다. 금액 · 화살표 · 컨트롤 · 작은 버튼은 한 덩어리로 선다. 값을 줄여 적는 것(억 단위 등)은 그 화면이 정한다"
+      "note": "줄지 않는다(flexShrink 0) — 값이 길면 본문이 제목의 가장 긴 낱말 폭까지 양보한다. 금액 · 화살표 · 컨트롤 · 작은 버튼은 한 덩어리로 선다. 값을 줄여 적는 것(억 단위 등)은 그 화면이 정한다"
     },
     {
       "rule": 0,
@@ -612,14 +616,21 @@
       "state": "enabled",
       "slot": "suffixText",
       "prop": "overflowWrap",
-      "note": "남는 폭보다 길면 줄 끝에서 끊는다 — 본문 위로 넘쳐 덮지 않는다(Q-001 A). 말줄임으로 자르지 않는다(10A)"
+      "note": "남는 폭보다 길면 줄 끝에서 끊는다 — 본문 위로 넘쳐 덮지 않는다. 말줄임으로 자르지 않는다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "suffixText",
       "prop": "textAlign",
-      "note": "줄 수와 상관없이 줄 끝 오른쪽 맞춤 — 모든 줄의 끝이 한 줄 값과 같은 세로선(2026-10-30 사용자 지적). 좁은 줄에서 본문 아래로 내려가면 narrow 의 start"
+      "note": "줄 수와 상관없이 줄 끝 오른쪽 맞춤 — 모든 줄의 끝이 한 줄 값과 같은 세로선. 좁은 줄에서 본문 아래로 내려가면 narrow 의 start"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "indent",
+      "prop": "width",
+      "note": "앞 아이콘(icon) 크기와 같다 — 뒤 prefix.paddingRight 12 와 함께 제목이 왼쪽 58(24 + 22 + 12)에서 시작한다. 하위 줄(nest child 104)과 다르다 — 접지 않고 위 줄에 딸린 값이다. 위 줄에 앞 아이콘이 없으면 들이지 않는다"
     },
     {
       "rule": 0,
@@ -633,7 +644,7 @@
       "state": "hovered",
       "slot": "background",
       "prop": "insetX",
-      "note": "바탕이 좌우로 6 들어온다(SEED marginX)"
+      "note": "바탕이 좌우로 6 들어온다"
     },
     {
       "rule": 0,
@@ -647,7 +658,7 @@
       "state": "pressed",
       "slot": "content",
       "prop": "scale",
-      "note": "콘텐츠 층만 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px. 줄은 폭 ÷ 4 가 기준이라 세로로는 1px 남짓 준다. 줄 안의 스위치 · 체크 · 라디오는 따로 줄지 않는다(v104)"
+      "note": "콘텐츠 층만 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px. 줄은 폭 ÷ 4 가 기준이라 세로로는 1px 남짓 준다. 줄 안의 스위치 · 체크 · 라디오는 따로 줄지 않는다"
     },
     {
       "rule": 0,
@@ -661,14 +672,14 @@
       "state": "enabled",
       "slot": "background",
       "prop": "background",
-      "note": "바탕만 바뀐다 — 점 · 막대는 두지 않는다(사용자 결정, SEED)"
+      "note": "바탕만 바뀐다 — 점 · 막대는 두지 않는다"
     },
     {
       "rule": 2,
       "state": "hovered",
       "slot": "detail",
       "prop": "foreground",
-      "note": "짙은 강조 바탕 위에서도 4.5:1 — fg-neutral-subtle 은 4.32:1 로 모자란다(사용자 결정 2026-10-01). 화살표는 그대로"
+      "note": "짙은 강조 바탕 위에서도 4.5:1 — fg-neutral-subtle 은 4.32:1 로 모자란다. 화살표는 그대로"
     },
     {
       "rule": 3,
@@ -682,14 +693,14 @@
       "state": "enabled",
       "slot": "body",
       "prop": "paddingRight",
-      "note": "옆에 아무것도 남지 않을 때 0 — 제목이 줄 안 폭을 다 쓴다. 꺾쇠 · 컨트롤 · 작은 버튼이 줄 끝에 남으면 regular 의 10 그대로(조작 요소는 줄 끝 그대로 — 2026-10-17 사용자 결정, 2026-10-22 I-02 검수에서 문구를 맞춤)"
+      "note": "옆에 아무것도 남지 않을 때 0 — 제목이 줄 안 폭을 다 쓴다. 꺾쇠 · 컨트롤 · 작은 버튼이 줄 끝에 남으면 regular 의 10 그대로(조작 요소는 줄 끝 그대로)"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "suffix",
       "prop": "placement",
-      "note": "값(글 값 · 금액 · 뒤 붙이개의 배지 — 배지는 누르지 않는 보이기만 하는 글이라 값 쪽이다, 2026-10-29 I-29)을 설명 아래에 둔다 — 본문 칸 안 왼쪽 맞춤, 폭은 본문 폭. 화살표 · 컨트롤 · 작은 버튼은 줄 끝 그대로(regular 와 같다 — 2026-10-17 사용자 결정, 누르는 자리를 옮기지 않는다)"
+      "note": "값(글 값 · 금액 · 뒤 붙이개의 배지 — 배지는 누르지 않는 보이기만 하는 글이라 값 쪽이다)을 설명 아래에 둔다 — 본문 칸 안 왼쪽 맞춤, 폭은 본문 폭. 화살표 · 컨트롤 · 작은 버튼은 줄 끝 그대로(regular 와 같다 — 누르는 자리를 옮기지 않는다)"
     },
     {
       "rule": 3,
@@ -703,21 +714,21 @@
       "state": "enabled",
       "slot": "suffix",
       "prop": "lineBreak",
-      "note": "금액은 쉼표 뒤에서만 줄을 바꾼다(Typography v114 의 예외 — 결정 2 B, 웹 <wbr> · 앱 U+200B), 글 값(이메일 · 계좌번호)은 Q-001 A 그대로 줄 끝에서 끊는다"
+      "note": "금액은 쉼표 뒤에서만 줄을 바꾼다(Typography 낱말 단위 줄바꿈의 예외 — 웹 <wbr> · 앱 U+200B), 글 값(이메일 · 계좌번호)은 regular 처럼 줄 끝에서 끊는다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "suffixText",
       "prop": "textAlign",
-      "note": "본문 아래로 내려간 글 값은 왼쪽 맞춤 — 평소의 end 를 여기서 바꾼다(list.md 큰 글자에서 값을 본문 아래로)"
+      "note": "본문 아래로 내려간 글 값은 왼쪽 맞춤 — 평소의 end 를 여기서 바꾼다(list.md 의 \"큰 글자에서 값을 본문 아래로\")"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "item",
       "prop": "paddingLeft",
-      "note": "줄 앞 4 — 꺾쇠 단추 44 와 그 뒤 4 를 지나 앞 붙이개가 52 에서 시작한다. 하위가 없는 부모 줄도 같은 자리를 비워 부모 타일이 모두 52 에 선다(사용자 결정 17B — 7C 그림의 24 는 고르지 않았다)"
+      "note": "줄 앞 4 — 꺾쇠 단추 44 와 그 뒤 4 를 지나 앞 붙이개가 52 에서 시작한다. 하위가 없는 부모 줄도 같은 자리를 비워 부모 타일이 모두 52 에 선다"
     },
     {
       "rule": 4,
@@ -759,14 +770,14 @@
       "state": "enabled",
       "slot": "expandButton",
       "prop": "touchTarget",
-      "note": "AA ✓ · AAA ✓ — 지금 웹 18 · 앱 24"
+      "note": "AA ✓ · AAA ✓"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "expandButton",
       "prop": "name",
-      "note": "고정 이름(레시피 expandLabel — 접는 줄이면 필수, 유니언 타입이라 빠뜨리면 타입 오류 · 하위가 없는 줄에도 준다) + aria-expanded · aria-controls(하위 줄 묶음) — 상태마다 \"접기 · 펼치기\" 로 바꾸지 않는다(사용자 결정 7C · Q-002)"
+      "note": "고정 이름(레시피 expandLabel — 접는 줄이면 필수, 유니언 타입이라 빠뜨리면 타입 오류 · 하위가 없는 줄에도 준다) + aria-expanded · aria-controls(하위 줄 묶음) — 상태마다 \"접기 · 펼치기\" 로 바꾸지 않는다"
     },
     {
       "rule": 4,
@@ -794,7 +805,7 @@
       "state": "pressed",
       "slot": "expandButton",
       "prop": "scale",
-      "note": "기준 44 → 0.955(v104) — 줄은 줄지 않는다"
+      "note": "기준 44 → 0.955 — 줄은 줄지 않는다"
     },
     {
       "rule": 4,
@@ -808,7 +819,7 @@
       "state": "enabled",
       "slot": "item",
       "prop": "paddingLeft",
-      "note": "부모의 제목 자리 = 4 + 꺾쇠 44 + 4 + 타일 40 + 12 — 하위 타일이 부모 제목 아래에서 시작한다(사용자 결정 17B — 7C 그림의 100 은 고르지 않았다). 누름 바탕은 줄 폭 그대로(좌우 6 들임)"
+      "note": "부모의 제목 자리 = 4 + 꺾쇠 44 + 4 + 타일 40 + 12 — 하위 타일이 부모 제목 아래에서 시작한다. 누름 바탕은 줄 폭 그대로(좌우 6 들임)"
     },
     {
       "rule": 6,
@@ -822,7 +833,7 @@
       "state": "enabled",
       "slot": "expandButton",
       "prop": "display",
-      "note": "꺾쇠 단추를 그리지 않고 같은 폭 44(+ 뒤 4)를 비운다 — 접는 화면과 부모 타일 자리(52)가 같다(17B). 이름 · aria-expanded · aria-controls 없음, 빈 자리는 aria-hidden(2026-10-15 사용자 결정 — 구현 세션 질문 Q-002, 안 B)"
+      "note": "꺾쇠 단추를 그리지 않고 같은 폭 44(+ 뒤 4)를 비운다 — 접는 화면과 부모 타일 자리(52)가 같다. 이름 · aria-expanded · aria-controls 없음, 빈 자리는 aria-hidden"
     },
     {
       "rule": 7,

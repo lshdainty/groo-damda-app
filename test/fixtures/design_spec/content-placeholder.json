@@ -3,7 +3,7 @@
   "source": "specs/components/content-placeholder.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "자리 — 담는 틀(이미지 틀)을 채운다. 모서리는 담는 틀이 자른다",
@@ -67,21 +67,21 @@
       "state": "enabled",
       "slot": "glyph",
       "prop": "size",
-      "note": "정사각 — 16 이상 160 이하로 자른다(SEED). 틀 폭이 그보다 좁으면 폭에 맞춘다"
+      "note": "정사각 — 16 이상 160 이하로 자른다. 틀 폭이 그보다 좁으면 폭에 맞춘다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "glyph",
       "prop": "color",
-      "note": "면 위 1.14 · 다크 1.20 — 장식(SEED gray-400 의 짝). 무엇이 없는지는 대체 글이 말한다"
+      "note": "면 위 1.14 · 다크 1.20 — 장식. 무엇이 없는지는 대체 글이 말한다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "glyph",
       "prop": "strokeWidth",
-      "note": "lucide 24 격자 기준 — 그림 크기를 따라 굵어진다(Result Section 아이콘과 같은 결, v106)"
+      "note": "lucide 24 격자 기준 — 그림 크기를 따라 굵어진다(Result Section 아이콘과 같은 결)"
     }
   ]
 }

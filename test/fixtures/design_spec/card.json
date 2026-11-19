@@ -3,13 +3,13 @@
   "source": "specs/components/card.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "카드 면 — 바닥(bg-layer-basement) 위 흰 면 + 1px 테두리, 그림자 없음",
     "header": "카드 머리 — 제목 + 오른쪽 동작 한 줄",
     "title": "머리 제목 — 무엇의 카드인지",
-    "headerAction": "머리 동작 — \"전체 보기\", 글 버튼(SEED Text Button)",
+    "headerAction": "머리 동작 — \"전체 보기\", 글 버튼",
     "content": "본문 — 글 · 숫자 · 차트 · 표(CardContent). 목록은 list",
     "list": "카드 안 목록 — List 줄이 가장자리까지, 누름 바탕은 동심 모서리",
     "statLabel": "지표 라벨 — \"이번 달 지출\"",
@@ -102,7 +102,7 @@
           }
         },
         "headerAction": {
-          "height": 36,
+          "minHeight": 36,
           "paddingLeft": 14,
           "paddingRight": 14,
           "radius": 8,
@@ -483,7 +483,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "borderColor",
-      "note": "카드 외곽(SEED 토큰 설명) — 면과 바닥이 1.08 · 다크 1.13 이라 선이 경계를 맡는다"
+      "note": "카드 외곽 — 면과 바닥이 1.08 · 다크 1.13 이라 선이 경계를 맡는다"
     },
     {
       "rule": 0,
@@ -504,14 +504,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "padding",
-      "note": "폭과 상관없이 24(14B) — List 줄 24 · Bottom Sheet 24 와 같다. 목록 카드는 좌우 0(body list)"
+      "note": "폭과 상관없이 24 — List 줄 24 · Bottom Sheet 24 와 같다. 목록 카드는 좌우 0(body list)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "gap",
-      "note": "위아래로 쌓인 카드 사이 8(SEED \"8px Gap\") — 폰 · 데스크톱 한 열. 데스크톱 격자의 칸 사이는 layout-gutter 24"
+      "note": "위아래로 쌓인 카드 사이 8 — 폰 · 데스크톱 한 열. 데스크톱 격자의 칸 사이는 layout-gutter 24"
     },
     {
       "rule": 0,
@@ -531,36 +531,36 @@
       "rule": 0,
       "state": "enabled",
       "slot": "headerAction",
-      "prop": "height",
-      "note": "보이는 상자 — SEED Text Button minHeight x9. 누를 때 바탕 bg-layer-default-pressed · 모서리 8. 2026-10-16 사용자 결정 — 글자 역할 D2(6B 의 32 를 바꿨다)"
+      "prop": "minHeight",
+      "note": "보이는 상자 — 누를 때 바탕 bg-layer-default-pressed · 모서리 8. 최소 높이라 큰 글자에서 글을 따라 늘어나고, 한 줄을 지킨다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "headerAction",
       "prop": "paddingRight",
-      "note": "좌우 14(SEED Text Button paddingX). 머리 줄 끝에서는 오른쪽 14 만큼 바깥으로 내어(margin-right −14) 글자 끝이 카드 여백 24 에 선다"
+      "note": "좌우 14. 머리 줄 끝에서는 오른쪽 14 만큼 바깥으로 내어(margin-right −14) 글자 끝이 카드 여백 24 에 선다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "headerAction",
       "prop": "fontWeight",
-      "note": "2026-10-16 사용자 결정 — 글자 역할 D2(SEED Text Button t4 · bold, 6B 의 500 을 바꿨다)"
+      "note": "글 버튼의 굵기(DESIGN.md Typography 의 \"글자 역할\")"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "headerAction",
       "prop": "foreground",
-      "note": "2026-10-16 사용자 결정 — 글자 역할 D2(SEED Text Button fg.neutral-muted, 6B 의 subtle 을 바꿨다). 꺾쇠(chevron)는 두지 않는다 — SEED Text Button 에 아이콘이 없다"
+      "note": "꺾쇠(chevron)는 두지 않는다 — 글 버튼은 글만 둔다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "headerAction",
       "prop": "touchTarget",
-      "note": "보이는 36 위아래로 4 씩 · 옆은 글 폭 + 여백(44 보다 좁으면 44). AA ✓ · AAA ✓. 앱 — 보이는 자리를 바꾸지 않고 누르는 영역만 위아래 4 넓힌다(부모 상자 밖도 받는다 — 머리 줄 높이 · 여백은 그대로). 6B 44 × 44 의 앱 풀이 — Q-011-8"
+      "note": "보이는 36 위아래로 4 씩 · 옆은 글 폭 + 여백(44 보다 좁으면 44). AA ✓ · AAA ✓. 앱 — 보이는 자리를 바꾸지 않고 누르는 영역만 위아래 4 넓힌다(부모 상자 밖도 받는다 — 머리 줄 높이 · 여백은 그대로). 44 × 44 의 앱 풀이"
     },
     {
       "rule": 0,
@@ -588,7 +588,7 @@
       "state": "enabled",
       "slot": "statValue",
       "prop": "lineBreak",
-      "note": "카드보다 긴 금액(큰 글자 · 큰 수)은 쉼표 뒤에서만 줄을 바꾼다 — 세 자리 묶음을 가르지 않는다. 금액 글을 만드는 함수가 보이는 글의 쉼표 뒤마다 웹 <wbr> · 앱 U+200B 를 넣는다(읽는 이름 · 복사에는 넣지 않는다). 묶음 하나가 칸보다 길 때만 v114 의 칸 끝 끊기. 글자를 줄여 맞추지 않는다(2026-10-17 사용자 결정 03-D 결정 2 B — Typography v114 의 예외)"
+      "note": "카드보다 긴 금액(큰 글자 · 큰 수)은 쉼표 뒤에서만 줄을 바꾼다 — 세 자리 묶음을 가르지 않는다. 금액 글을 만드는 함수가 보이는 글의 쉼표 뒤마다 웹 <wbr> · 앱 U+200B 를 넣는다(읽는 이름 · 복사에는 넣지 않는다). 묶음 하나가 칸보다 길 때만 Typography 줄바꿈 규칙의 칸 끝 끊기. 글자를 줄여 맞추지 않는다(Typography 줄바꿈 규칙의 예외)"
     },
     {
       "rule": 0,
@@ -658,7 +658,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "padding",
-      "note": "좌우 0 — Accordion 트리거가 제 좌우 24 · 위아래 16 을 가진다(accordion.yaml). 카드 상세의 혜택 · 유의사항(2026-10-10 사용자 결정 6A)"
+      "note": "좌우 0 — Accordion 트리거가 제 좌우 24 · 위아래 16 을 가진다(accordion.yaml). 카드 상세의 혜택 · 유의사항"
     },
     {
       "rule": 2,
@@ -693,14 +693,14 @@
       "state": "pressed",
       "slot": "root",
       "prop": "scale",
-      "note": "카드 전체(Root Scale) — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px(v104). 모션 줄이기면 하지 않는다"
+      "note": "카드 전체(Root Scale) — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px. 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 4,
       "state": "pressed",
       "slot": "root",
       "prop": "background",
-      "note": "바뀌지 않는다 — 채움 그라디언트에는 누름 색 짝이 없어 2px 축소만(SEED Feedback: 색은 -pressed 짝이 있는 표면에서만)"
+      "note": "바뀌지 않는다 — 채움 그라디언트에는 누름 색 짝이 없어 2px 축소만(색은 -pressed 짝이 있는 표면에서만 바뀐다)"
     },
     {
       "rule": 4,
@@ -714,7 +714,7 @@
       "state": "pressed",
       "slot": "root",
       "prop": "background",
-      "note": "축소하지 않는다 — 안의 버튼이 각자 제 누름을 가진다(SEED Feedback)"
+      "note": "축소하지 않는다 — 안의 버튼이 각자 제 누름을 가진다"
     },
     {
       "rule": 6,
@@ -728,14 +728,14 @@
       "state": "enabled",
       "slot": "statValue",
       "prop": "typography",
-      "note": "20 / 27 — 데스크톱 격자에 셋 · 넷씩 둘 때. 여백은 그대로 24. 폰은 지표 카드를 한 줄에 하나(large) — 둘씩이면 \"1,240,000원\" 20 / 700(120)이 칸 101 에 들어가지 않는다(360 폭 실측)"
+      "note": "20 / 27 — 데스크톱 격자에 셋 · 넷씩 둘 때. 여백은 그대로 24. 폰은 지표 카드를 한 줄에 하나(large) — 둘씩이면 \"1,240,000원\" 20 / 700(120)이 칸 101 에 들어가지 않는다(360 폭)"
     },
     {
       "rule": 8,
       "state": "enabled",
       "slot": "delta",
       "prop": "foreground",
-      "note": "▲ + 값(\"▲ 12%\") — 어디서나 오르면 빨강(증권과 같은 관례). 좋고 나쁨은 글이 말한다"
+      "note": "▲ + 값(\"▲ 12.00%\") — 어디서나 오르면 빨강(증권과 같은 관례). 좋고 나쁨은 글이 말한다"
     },
     {
       "rule": 9,
@@ -763,7 +763,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "gradientEnd",
-      "note": "그라디언트의 끝(오른쪽 아래) — 라이트 brand-900 #002460(지금 #012B68 에 가장 가까운 팔레트 단계, ΔE00 2.4) · 다크 brand-300-dark #1F3A69. 다크도 짙은 채움이다"
+      "note": "그라디언트의 끝(오른쪽 아래) — 라이트 brand-900 #002460 · 다크 brand-300-dark #1F3A69. 다크도 짙은 채움이다"
     },
     {
       "rule": 11,
@@ -784,7 +784,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "paddingBottom",
-      "note": "24 — 본문이 늘 content 라 목록 카드의 아래 12 를 받지 않는다(Q-011-7)"
+      "note": "24 — 본문이 늘 content 라 목록 카드의 아래 12 를 받지 않는다"
     },
     {
       "rule": 11,
@@ -805,7 +805,7 @@
       "state": "enabled",
       "slot": "heroLabel",
       "prop": "foreground",
-      "note": "흐리게(불투명도) 두지 않는다 — 흰 글자 그대로(v106)"
+      "note": "흐리게(불투명도) 두지 않는다 — 흰 글자 그대로"
     },
     {
       "rule": 11,
@@ -819,7 +819,7 @@
       "state": "enabled",
       "slot": "heroAmount",
       "prop": "fontWeight",
-      "note": "v100 — 지금 800"
+      "note": "지표 숫자와 같은 굵기"
     },
     {
       "rule": 11,
@@ -840,7 +840,7 @@
       "state": "enabled",
       "slot": "delta",
       "prop": "foreground",
-      "note": "방향과 상관없이 흰 ▲ · ▼ + 값(16A) — 증감 방향 색의 하나뿐인 예외. 빨강 · 파랑은 브랜드 채움 위 1.66 · 1.65 라 읽히지 않는다(Q-011-3)"
+      "note": "방향과 상관없이 흰 ▲ · ▼ + 값 — 증감 방향 색의 하나뿐인 예외. 빨강 · 파랑은 브랜드 채움 위 1.66 · 1.65 라 읽히지 않는다"
     },
     {
       "rule": 11,
@@ -854,7 +854,7 @@
       "state": "enabled",
       "slot": "deltaText",
       "prop": "foreground",
-      "note": "기준 글도 흰 글자 — 흐리게(불투명도) 두지 않는다(v106)"
+      "note": "기준 글도 흰 글자 — 흐리게(불투명도) 두지 않는다"
     }
   ]
 }

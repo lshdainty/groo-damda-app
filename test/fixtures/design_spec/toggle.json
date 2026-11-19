@@ -3,11 +3,11 @@
   "source": "specs/components/toggle.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
-    "root": "단추 — 보이는 40 · 누르는 44. 바탕은 켬 · 끔에 따라 바뀌지 않는다(누름 · 호버에만 칠한다)",
-    "icon": "아이콘 20 — 지금 상태를 그린다(키 보기는 가렸으면 eye-off, 모으기 단추는 같은 아이콘)",
+    "root": "단추 — 보이는 40 · 누르는 44. 바탕은 켬 · 끔에 따라 바뀌지 않음(누름 · 호버에만 칠함)",
+    "icon": "아이콘 20 — 지금 상태(키 보기는 가렸으면 eye-off, 모으기 단추는 같은 아이콘)",
     "focusRing": "키보드 포커스 링"
   },
   "axes": {
@@ -159,7 +159,7 @@
       "properties": [
         "scale"
       ],
-      "note": "단추 전체 2px 거리 축소 — 모션 줄이기면 하지 않는다"
+      "note": "단추 전체 2px 거리 축소 — 모션 줄이기에서는 하지 않습니다"
     },
     "켬 ↔ 끔 — 아이콘": {
       "duration": "0ms",
@@ -168,7 +168,7 @@
         "stroke-width",
         "color"
       ],
-      "note": "아이콘 · 굵기 · 색은 바로 바뀐다 — 손을 뗄 때(요청을 기다리지 않는다)"
+      "note": "아이콘 · 굵기 · 색은 손을 뗄 때 바로 바뀝니다(요청을 기다리지 않습니다)"
     }
   },
   "notes": [
@@ -177,133 +177,133 @@
       "state": "enabled",
       "slot": "root",
       "prop": "size",
-      "note": "Button medium · iconOnly 의 보이는 상자와 같다(기초 Iconography — 아이콘 버튼은 보이는 40)"
+      "note": "Button medium · iconOnly 의 보이는 상자와 같습니다(기초 Iconography — 아이콘 버튼은 보이는 40)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "radius",
-      "note": "누름 · 호버 바탕에만 보인다(Button medium 과 같다)"
+      "note": "누름 · 호버 바탕에만 보입니다(Button medium 과 같습니다)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "켬 · 끔에 따라 바뀌지 않는다 — 켜면 옅은 바탕(5B) · 반전(5C)은 고르지 않았다(사용자 결정 2026-10-09)"
+      "note": "켬 · 끔에 따라 바뀌지 않습니다 — 켜도 옅은 바탕 · 반전 상자를 깔지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "touchTarget",
-      "note": "보이는 40 둘레로 2 씩 넓힌다(v106). AA ✓ · AAA ✓"
+      "note": "보이는 40 둘레로 2 씩 넓힙니다. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "name",
-      "note": "aria-label 은 상태마다 바꾸지 않는다(\"관심 등록\" · \"App Key 보기\") — 켬은 aria-pressed 가 알린다(APG). 이름과 아이콘의 뜻이 반대로 읽히지 않게 아이콘은 지금 상태를 그린다. 설정으로 가는 금액 가리기 눈은 aria-pressed 없이 \"금액 가리기 설정\""
+      "note": "aria-label 은 상태마다 바꾸지 않습니다(\"관심 등록\" · \"App Key 보기\") — 켬은 aria-pressed 로 알립니다(APG). 이름과 아이콘의 뜻이 반대로 읽히지 않게 아이콘은 지금 상태를 그립니다. 설정으로 가는 금액 가리기 눈은 aria-pressed 없이 \"금액 가리기 설정\" 입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "icon",
       "prop": "size",
-      "note": "lucide 선 아이콘 — v106 가운데 단계"
+      "note": "lucide 선 아이콘 — UI 아이콘 16 · 20 · 24 의 가운데 단계"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "root",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝 — 켬 · 끔 같은 색"
+      "note": "불투명한 누름 바탕 — 켬 · 끔 같은 색"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "root",
       "prop": "scale",
-      "note": "기준 40 — Feedback 의 눌림 피드백(v104). 모션 줄이기면 하지 않는다"
+      "note": "기준 40 — Feedback 의 눌림 피드백. 모션 줄이기에서는 하지 않습니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "보이는 40 바깥 — 키보드 포커스에만"
+      "note": "보이는 40 바깥 — 키보드 포커스에만 그립니다"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "root",
       "prop": "cursor",
-      "note": "누름 바탕 · 축소 없음"
+      "note": "누름 바탕 · 축소가 없습니다"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "icon",
       "prop": "color",
-      "note": "켬 · 끔 모두 — 켬은 선 2.5 를 그대로 둬 무엇이 켜져 있었는지 보인다"
+      "note": "켬 · 끔 모두 — 켬은 선 2.5 를 그대로 둬 무엇이 켜져 있었는지 보입니다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "icon",
       "prop": "strokeWidth",
-      "note": "lucide 기본"
+      "note": "lucide 기본 굵기"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "icon",
       "prop": "color",
-      "note": "흰 표면 위 7.11 · 다크 7.70 — 끔도 흐리게(불투명도) 두지 않는다. 모으기 단추(관심 · 고정)는 사선 없는 같은 아이콘, 기능 단추(눈 · 종)는 지금 상태의 아이콘(-off 짝). 상단 바 안에서는 끔도 fg-neutral(19B)"
+      "note": "흰 표면 위 7.11 · 다크 7.70 — 끔도 불투명도로 흐리게 하지 않습니다. 모으기 단추(관심 · 고정)는 사선 없는 같은 아이콘, 기능 단추(눈 · 종)는 지금 상태의 아이콘(-off 짝)입니다. 상단 바 안에서는 끔도 fg-neutral 입니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "icon",
       "prop": "strokeWidth",
-      "note": "v106 — 켜짐 · 선택은 선 2.5. 앱은 lucide 굵기 글꼴 Lucide500 짝으로 낸다(코드로 선 굵기를 걸 수 없다 — 2026-10-15 구현 세션 질문 Q-010-3 정리, 2.5 는 2026-10-09 사용자 결정)"
+      "note": "켜짐 · 선택은 선 2.5 입니다. 앱은 코드로 선 굵기를 정할 수 없어 lucide 굵기 글꼴 Lucide500 짝으로 냅니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "icon",
       "prop": "color",
-      "note": "흰 표면 위 16.41 · 다크 13.42 — 끔(7.11 · 7.70)보다 짙다. 브랜드 색으로 칠하지 않는다"
+      "note": "흰 표면 위 16.41 · 다크 13.42 — 끔(7.11 · 7.70)보다 짙습니다. 브랜드 색으로 칠하지 않습니다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "icon",
       "prop": "color",
-      "note": "켬 · 끔 모두 흰색 — 순자산 카드 그라디언트 위 Desk 8.38 ~ 14.78 · 다크 8.36 ~ 11.25(장식 빛 위 가장 낮은 자리 4.88). 켬 · 끔은 아이콘 모양과 굵기(2.5 · 2)로 가른다. 금액 가리기 눈(설정으로 가는 버튼)은 aria-pressed 가 없어 선 2 그대로 — eye · eye-off 모양만 바뀐다"
+      "note": "켬 · 끔 모두 흰색 — 순자산 카드 그라디언트 위 Desk 8.38 ~ 14.78 · 다크 8.36 ~ 11.25(장식 빛 위 가장 낮은 자리 4.88). 켬 · 끔은 아이콘 모양과 굵기(2.5 · 2)로 구분합니다. 금액 가리기 눈(설정으로 가는 버튼)은 aria-pressed 가 없어 선 2 그대로이고, eye · eye-off 모양만 바뀝니다"
     },
     {
       "rule": 3,
       "state": "hovered",
       "slot": "root",
       "prop": "background",
-      "note": "브랜드 채움에는 누름 색 짝이 없다 — 축소만(Card 의 순자산 카드와 같다)"
+      "note": "브랜드 채움에는 누름 색 짝이 없어 축소만 합니다(Card 의 순자산 카드와 같습니다)"
     },
     {
       "rule": 3,
       "state": "pressed",
       "slot": "root",
       "prop": "background",
-      "note": "축소만 — 바탕은 칠하지 않는다"
+      "note": "축소만 합니다 — 바탕은 칠하지 않습니다"
     },
     {
       "rule": 3,
       "state": "focused",
       "slot": "focusRing",
       "prop": "color",
-      "note": "브랜드 채움 위 — stroke-focus-ring(#0147AD)은 채움(#0147AD → brand-900)에 묻힌다(라이트 1.00). 흰 링은 아이콘과 같은 8.38 ~ 14.78"
+      "note": "브랜드 채움 위 — stroke-focus-ring(#0147AD)은 채움(#0147AD → brand-900)에 묻힙니다(라이트 1.00). 흰 링은 아이콘과 같은 8.38 ~ 14.78 입니다"
     }
   ]
 }

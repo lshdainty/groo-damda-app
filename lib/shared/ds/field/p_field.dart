@@ -157,11 +157,13 @@ const double _footerGap = PSpacing.x2; // 설명 · 오류 ↔ 글자 수
 const double _messageIconSize = 16; // descriptionIcon · errorIcon
 const double _messageIconGap = PSpacing.x1_5;
 
-// 필수 점 · "선택" — 스펙은 rem(1rem = 16)이다. 라벨 글 안(WidgetSpan)에 두면 Flutter 가 라벨 글자의 배율
-// (글자 크기 설정 — textScaler.scale(16) ÷ 16)로 통째로 키운다 — 그래서 여기는 1배 값을 적는다.
-const double _dotSize = 6; // 0.375rem
-const double _dotMarginTop = 4; // 0.25rem — 라벨 첫 줄 위쪽에 붙는다
-const double _dotMarginStart = 2; // 0.125rem — 라벨 끝 바로 뒤
+// 필수 점 — 컨트롤 모양이라 px 그대로다(field.yaml requiredIndicator, groo-design #263). 라벨 글 안(WidgetSpan)에 두면 Flutter 가
+// 라벨 글자의 배율(textScaler.scale(16) ÷ 16)로 통째로 키우므로, 그리는 쪽에서 그 배율로 나눠 px 로 되돌린다.
+const double _dotSize = 6;
+const double _dotMarginTop = 4; // 라벨 첫 줄 위쪽에 붙는다
+const double _dotMarginStart = 2; // 라벨 끝 바로 뒤
+
+// "선택" — 글이라 글자 크기 설정을 따른다(rem, 1rem = 16). WidgetSpan 이 라벨 배율로 키우므로 여기는 1배 값을 적는다.
 const double _optionalPaddingStart = 4; // 0.25rem
 
 /// "선택" 의 줄 높이 — 라벨(t5)과 같은 22.
@@ -486,6 +488,10 @@ class _FieldLabel extends StatelessWidget {
     );
     // 라벨 줄 상자 — t5 22(1배. 배율은 Flutter 가 곱한다)
     final lineHeight = style.fontSize! * style.height!;
+    // WidgetSpan 이 곱하는 라벨 글자 배율 — 필수 점은 이것으로 나눠 px 그대로 그린다
+    final spanScale =
+        MediaQuery.textScalerOf(context).scale(style.fontSize!) /
+        style.fontSize!;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -500,13 +506,14 @@ class _FieldLabel extends StatelessWidget {
               if (indicator == PFieldIndicator.required)
                 WidgetSpan(
                   alignment: PlaceholderAlignment.middle,
+                  // 자리 높이는 라벨 한 줄(배율을 곱해 늘어난다), 점 · 위 4 · 앞 2 는 배율로 나눠 px 그대로
                   child: Padding(
                     padding: EdgeInsetsDirectional.only(
-                      start: _dotMarginStart,
-                      top: _dotMarginTop,
+                      start: _dotMarginStart / spanScale,
+                      top: _dotMarginTop / spanScale,
                       bottom: math.max(
                         0,
-                        lineHeight - _dotMarginTop - _dotSize,
+                        lineHeight - (_dotMarginTop + _dotSize) / spanScale,
                       ),
                     ),
                     child: DecoratedBox(
@@ -514,7 +521,7 @@ class _FieldLabel extends StatelessWidget {
                         color: c.fgCritical,
                         shape: BoxShape.circle,
                       ),
-                      child: const SizedBox.square(dimension: _dotSize),
+                      child: SizedBox.square(dimension: _dotSize / spanScale),
                     ),
                   ),
                 ),

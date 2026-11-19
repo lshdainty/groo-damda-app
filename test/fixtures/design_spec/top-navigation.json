@@ -3,20 +3,20 @@
   "source": "specs/components/top-navigation.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
-    "root": "바 — 화면 폭 · 높이 56(위 안전 영역은 더한다). 맨 위에 붙어 스크롤해도 그 자리에 있다",
+    "root": "바 — 화면 폭 · 높이 56(위 안전 영역은 더한다). 맨 위에 붙어 스크롤해도 그 자리에 있습니다",
     "leading": "왼쪽 자리 — standard 만. 아이콘 버튼 하나(← · ✕ · ☰)",
     "title": "제목 — 화면 이름 한 줄(h1). 넘치면 말줄임",
-    "trailing": "오른쪽 자리 — 아이콘 버튼 2개 권장 · 3개까지, 또는 글 버튼 하나. 넘치면 ⋯ 하나로 모은다",
-    "iconButton": "아이콘 버튼 — 상자 44 가 곧 누르는 영역, 아이콘 24, 버튼끼리 붙는다. 이름은 aria-label",
+    "trailing": "오른쪽 자리 — 아이콘 버튼 2개 권장 · 3개까지, 또는 글 버튼 하나. 넘치면 ⋯ 하나로 모읍니다",
+    "iconButton": "아이콘 버튼 — 상자 44 가 곧 누르는 영역, 아이콘 24, 버튼끼리 붙습니다. 이름은 aria-label",
     "textButton": "글 버튼 — 오른쪽 자리에 하나만(\"완료\" · \"모두 읽음\")",
-    "notification": "알림 점 — 벨 아이콘의 오른쪽 위(Notification Badge small). 숫자는 두지 않는다",
+    "notification": "알림 점 — 벨 아이콘의 오른쪽 위(Notification Badge small). 숫자는 두지 않습니다",
     "primaryButton": "주 버튼 — desktop 만. Button brandSolid small 하나(\"내역 추가\")",
     "searchField": "검색칸 — 거래 검색 화면의 제목 자리(보이지 않는 h1 \"검색\") · desktop 왼쪽. Text Field outline medium",
     "screenTitle": "화면 제목 — desktop 본문 맨 위 h1(ScreenTitle). 모든 데스크톱 화면에 하나",
-    "screenDescription": "화면 설명 — 제목 아래 한 줄(있을 때만). 길면 줄을 바꾼다",
+    "screenDescription": "화면 설명 — 제목 아래 한 줄(있을 때만). 길면 줄을 바꿉니다",
     "screenActions": "화면 동작 — 제목 줄 오른쪽 Button small 묶음(있을 때만)",
     "focusRing": "키보드 포커스 링(웹) — 버튼 상자 안쪽"
   },
@@ -361,7 +361,7 @@
       "properties": [
         "scale"
       ],
-      "note": "2px 거리 축소 — 모션 줄이기면 하지 않는다(바탕 색만)"
+      "note": "2px 거리 축소 — 모션 줄이기면 하지 않습니다(바탕 색만)"
     },
     "바탕 색": {
       "duration": "150ms",
@@ -377,105 +377,105 @@
       "state": "enabled",
       "slot": "root",
       "prop": "height",
-      "note": "폰 · 데스크톱 모든 화면(SEED — 2026-10-01 iOS · Android 56 으로 통일). 위 안전 영역(safe-area-inset-top)만큼 더 높아지고 내용은 그 아래 56 에 놓인다"
+      "note": "폰 · 데스크톱 모든 화면이 같습니다. 위 안전 영역(safe-area-inset-top)만큼 더 높아지고 내용은 그 아래 56 에 놓입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "paddingX",
-      "note": "화면 끝 → 버튼 상자 6(아이콘은 16, SEED rootage paddingX). 좌우 안전 영역을 더한다 — 바탕은 화면 끝까지"
+      "note": "화면 끝 → 버튼 상자 6(아이콘은 16). 좌우 안전 영역을 더합니다 — 바탕은 화면 끝까지 칠합니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "불투명(tone layer) — 사진 위 투명 바는 아래 tone 규칙"
+      "note": "불투명(tone layer)입니다 — 사진 위 투명 바는 아래 tone 규칙을 따릅니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "borderBottomWidth",
-      "note": "스크롤해도 선을 긋지 않는다(SEED Top Navigation — 2026-10-04 결정 3). 데스크톱 머리도 늘 있던 선을 걷는다"
+      "note": "스크롤해도 선을 긋지 않습니다. 데스크톱 머리에도 긋지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "shadow",
-      "note": "스크롤해도 그림자 없음 — 바와 목록이 한 면으로 보인다"
+      "note": "스크롤해도 그림자가 없습니다 — 바와 목록이 한 면으로 보입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "position",
-      "note": "스크롤해도 그 자리 — 숨지 않는다. 바 아래로 목록이 지나간다"
+      "note": "스크롤해도 그 자리에 있고 숨지 않습니다. 바 아래로 목록이 지나갑니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "zIndex",
-      "note": "z-sticky — specs/z-index.md L1"
+      "note": "z-sticky — specs/z-index.md 의 L1"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "title",
       "prop": "lineClamp",
-      "note": "한 줄 — 넘치면 말줄임(…). 오른쪽 자리와 겹치지 않는다"
+      "note": "한 줄 — 넘치면 말줄임(…)합니다. 오른쪽 자리와 겹치지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "title",
       "prop": "gap",
-      "note": "제목 끝 ↔ 오른쪽 자리 최소 8(SEED titleMinGap)"
+      "note": "제목 끝 ↔ 오른쪽 자리 최소 8"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "trailing",
       "prop": "gap",
-      "note": "버튼끼리 붙는다 — 아이콘 중심 간격 44"
+      "note": "버튼끼리 붙습니다 — 아이콘 중심 간격 44"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "trailing",
       "prop": "items",
-      "note": "넘치면 덜 쓰는 것을 ⋯ 하나에 모은다 — 1280 이상 Menu · 미만 Menu Sheet"
+      "note": "넘치면 덜 쓰는 것을 ⋯ 하나에 모읍니다 — 1280 이상 Menu · 미만 Menu Sheet"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "trailing",
       "prop": "bell",
-      "note": "알림 목록을 여는 곳(2026-10-16 사용자 결정 Q-017-3b B — Popover 의 1280 미만 Bottom Sheet 그대로). 데스크톱 벨은 aria-haspopup=\"dialog\" · aria-expanded"
+      "note": "알림 목록을 여는 곳입니다(Popover 의 1280 미만 Bottom Sheet 그대로). 데스크톱 벨은 aria-haspopup=\"dialog\" · aria-expanded"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "iconButton",
       "prop": "size",
-      "note": "보이는 상자 = 누르는 영역(SEED top-navigation-icon-button). 본문 아이콘 버튼(Button medium iconOnly 40 · 18)과 따로"
+      "note": "보이는 상자 = 누르는 영역입니다. 본문 아이콘 버튼(Button medium iconOnly 40 · 18)과 따로 둡니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "iconButton",
       "prop": "radius",
-      "note": "rootage r2 8 — 누를 때만 보인다"
+      "note": "8 — 누를 때만 보입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "iconButton",
       "prop": "iconSize",
-      "note": "lucide 선 아이콘(v106 — 상단은 선 아이콘)"
+      "note": "lucide 선 아이콘"
     },
     {
       "rule": 0,
@@ -489,28 +489,28 @@
       "state": "enabled",
       "slot": "iconButton",
       "prop": "strokeWidthOn",
-      "note": "그 자리에서 켜고 끄는 단추(aria-pressed=\"true\")의 켬(v106). 끔은 2. 다른 화면으로 가는 버튼에는 aria-pressed 를 달지 않는다 — 금액 가리기 눈은 상단 바에 두지 않는다(2026-10-16 Q-017-2b A · 3c B)"
+      "note": "그 자리에서 켜고 끄는 단추(aria-pressed=\"true\")의 켬. 끔은 2 입니다. 다른 화면으로 가는 버튼에는 aria-pressed 를 달지 않습니다 — 금액 가리기 눈은 상단 바에 두지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "iconButton",
       "prop": "color",
-      "note": "켜고 끄는 단추도 켬 · 끔 모두 이 색 — 끔을 흐리게(Toggle 의 fg-neutral-muted) 두지 않아 아이콘 줄이 고르다. 켬 · 끔은 굵기(2 · 2.5)와 아이콘(eye · eye-off)으로만 갈린다(사용자 결정 2026-10-09 19B)"
+      "note": "켜고 끄는 단추도 켬 · 끔 모두 이 색입니다 — 끔을 흐리게(Toggle 의 fg-neutral-muted) 두지 않아 아이콘 줄이 고릅니다. 켬 · 끔은 굵기(2 · 2.5)와 아이콘(eye · eye-off)으로만 갈립니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "iconButton",
       "prop": "background",
-      "note": "누를 때 · 마우스를 올릴 때만 칠한다 — 켜고 끄는 단추도 켬 · 끔에 따라 바뀌지 않는다"
+      "note": "누를 때 · 마우스를 올릴 때만 칠합니다 — 켜고 끄는 단추도 켬 · 끔에 따라 바뀌지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "iconButton",
       "prop": "touchTarget",
-      "note": "AA ✓ · AAA ✓ — 보이지 않는 여백을 더하지 않는다"
+      "note": "AA ✓ · AAA ✓ — 보이지 않는 여백을 더하지 않습니다"
     },
     {
       "rule": 0,
@@ -524,14 +524,14 @@
       "state": "enabled",
       "slot": "textButton",
       "prop": "typography",
-      "note": "16 / 22 — 글자 크기 설정을 1.2배까지 따른다(SEED, clamp(16px, 1rem, 19.2px))"
+      "note": "16 / 22 — 글자 크기 설정을 1.2배까지 따릅니다(clamp(16px, 1rem, 19.2px))"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "notification",
       "prop": "size",
-      "note": "Notification Badge small — 상단 바는 점만 둔다(숫자 '99+' 는 맨 오른쪽 버튼에서 화면 밖으로 8.5 나간다)"
+      "note": "Notification Badge small — 상단 바는 점만 둡니다(숫자 '99+' 는 맨 오른쪽 버튼에서 화면 밖으로 8.5 나갑니다)"
     },
     {
       "rule": 0,
@@ -559,7 +559,7 @@
       "state": "enabled",
       "slot": "searchField",
       "prop": "textField",
-      "note": "Text Field(input.yaml) 상자형 medium 40 · 앞 돋보기 16 · 지우기 18 — 바 56 안이라 폰에서도 medium(Text Field 의 '1280 이상' 규칙의 예외). 2026-10-16 Q-017-3a C · Q-017-5 정리. 칸 글자는 글자 크기 설정 1.0 ~ 1.2배(제목과 같은 상한 — 2026-11-06 B1 α)"
+      "note": "Text Field(input.yaml) 상자형 medium 40 · 앞 돋보기 16 · 지우기 18 — 바 56 안이라 폰에서도 medium 입니다(Text Field 의 '1280 이상' 규칙의 예외). 칸 글자는 글자 크기 설정 1.0 ~ 1.2배를 따릅니다(제목과 같은 상한)"
     },
     {
       "rule": 0,
@@ -573,21 +573,21 @@
       "state": "enabled",
       "slot": "searchField",
       "prop": "width",
-      "note": "검색 화면 — ← 다음 6(화면 끝에서 56)부터 오른쪽 자리 앞 8 까지(제목 자리 — SEED Standard Title Slot)"
+      "note": "검색 화면 — ← 다음 6(화면 끝에서 56)부터 오른쪽 자리 앞 8 까지(제목 자리)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "searchField",
       "prop": "heading",
-      "note": "화면 이름 대신 칸이 서므로 머리말은 보조 기술에만 — 화면을 옮기면 초점이 이 h1 로 온다"
+      "note": "화면 이름 대신 칸이 서므로 머리말은 보조 기술에만 둡니다 — 화면을 옮기면 초점이 이 h1 로 옵니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "screenTitle",
       "prop": "typography",
-      "note": "26 / 35 — 데스크톱 본문 맨 위 h1. 모든 데스크톱 화면에 하나(홈 · 캘린더도 — 2026-10-16 Q-018-2 정리)"
+      "note": "26 / 35 — 데스크톱 본문 맨 위 h1. 모든 데스크톱 화면에 하나 둡니다(홈 · 캘린더도)"
     },
     {
       "rule": 0,
@@ -601,56 +601,56 @@
       "state": "enabled",
       "slot": "screenTitle",
       "prop": "gap",
-      "note": "제목 덩어리(제목 + 설명) ↔ 버튼 줄 16 — 한 줄(2026-10-16 사용자 결정 Q-018-2 A)"
+      "note": "제목 덩어리(제목 + 설명) ↔ 버튼 줄 16 — 한 줄"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "screenDescription",
       "prop": "typography",
-      "note": "16 / 22 — 제목 아래. 길면 줄을 바꾸고 버튼은 그 자리에 남는다. 2026-10-16 사용자 결정 글자 역할 D6(화면 부제 — 전 13 / 18 · subtle)"
+      "note": "16 / 22 — 제목 아래. 길면 줄을 바꾸고 버튼은 그 자리에 남습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "screenDescription",
       "prop": "foreground",
-      "note": "떠 있는 표면 설명(R7)과 같은 뜻 — 바닥 위 6.58 · 다크 8.73. 2026-10-16 사용자 결정 글자 역할 D6"
+      "note": "떠 있는 표면 설명(R7)과 같은 뜻 — 바닥 위 6.58 · 다크 8.73"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "screenActions",
       "prop": "buttonSize",
-      "note": "Button small — 그 화면의 동작(필터 · 내보내기). 본문 바탕 bg-layer-basement 는 bg-neutral-weak 와 같은 gray-200 이라 neutralWeak 는 바탕에 묻힌다 — 테두리가 있는 neutralOutline 이 보인다"
+      "note": "Button small — 그 화면의 동작(필터 · 내보내기). 본문 바탕 bg-layer-basement 는 bg-neutral-weak 와 같은 gray-200 이라 neutralWeak 는 바탕에 묻힙니다 — 테두리가 있는 neutralOutline 이 보입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "screenActions",
       "prop": "align",
-      "note": "제목 덩어리의 아래 끝에 맞춘다(flex-end) — 설명이 있으면 설명 줄, 없으면 제목 줄과 같은 높이"
+      "note": "제목 덩어리의 아래 끝에 맞춥니다(flex-end) — 설명이 있으면 설명 줄, 없으면 제목 줄과 같은 높이"
     },
     {
       "rule": 0,
       "state": "hovered",
       "slot": "iconButton",
       "prop": "background",
-      "note": "누름과 같은 색(v106), 축소 없음"
+      "note": "누름과 같은 색, 축소 없음"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "iconButton",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝(바 바탕 bg-layer-default 위)"
+      "note": "바 바탕 bg-layer-default 위의 불투명한 누름 바탕"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "iconButton",
       "prop": "scale",
-      "note": "기준 44 → 0.955(SEED scaleScope: self · v104) — 모션 줄이기면 하지 않는다"
+      "note": "기준 44 → 0.955(버튼 상자 자신이 줄어듭니다) — 모션 줄이기면 하지 않습니다"
     },
     {
       "rule": 0,
@@ -664,49 +664,49 @@
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "상자 안쪽 — 붙은 이웃 버튼 · 화면 끝에 걸리지 않는다(SEED 웹 App Bar)"
+      "note": "상자 안쪽 — 붙은 이웃 버튼 · 화면 끝에 걸리지 않습니다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "trailing",
       "prop": "items",
-      "note": "Desk 탭 첫 화면(2026-10-16 사용자 결정 Q-017-2a A) — 검색은 어느 탭에서나 같은 거래 검색 화면, 벨은 알림 화면. 금액 가리기는 두지 않는다(순자산 카드의 눈 — Q-017-2b A)"
+      "note": "Desk 탭 첫 화면 — 검색은 어느 탭에서나 같은 거래 검색 화면, 벨은 알림 화면으로 갑니다. 금액 가리기는 두지 않습니다(순자산 카드의 눈)"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "title",
       "prop": "typography",
-      "note": "22 / 30 — 탭 첫 화면의 큰 제목(SEED Root 그림 약 22). 글자 크기 설정을 1.2배까지"
+      "note": "22 / 30 — 탭 첫 화면의 큰 제목. 글자 크기 설정을 1.2배까지 따릅니다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "title",
       "prop": "marginLeft",
-      "note": "화면 끝 → 제목 16(바의 6 을 포함한 거리) — 왼쪽 버튼이 없다"
+      "note": "화면 끝 → 제목 16(바의 6 을 포함한 거리) — 왼쪽 버튼이 없습니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "title",
       "prop": "typography",
-      "note": "18 / 24 — 글자 크기 설정을 1.2배까지 따른다(SEED, clamp(18px, 1.125rem, 21.6px))"
+      "note": "18 / 24 — 글자 크기 설정을 1.2배까지 따릅니다(clamp(18px, 1.125rem, 21.6px))"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "title",
       "prop": "marginLeft",
-      "note": "화면 끝 → 제목 56 = 6 + 왼쪽 버튼 44 + 6(SEED android)"
+      "note": "화면 끝 → 제목 56 = 6 + 왼쪽 버튼 44 + 6"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "root",
       "prop": "paddingLeft",
-      "note": "왼쪽 자리(검색칸)는 본문 여백 32 에서 시작한다"
+      "note": "왼쪽 자리(검색칸)는 본문 여백 32 에서 시작합니다"
     },
     {
       "rule": 3,
@@ -720,35 +720,35 @@
       "state": "enabled",
       "slot": "root",
       "prop": "position",
-      "note": "본문이 그 아래에서 스크롤된다 — 머리는 그 자리"
+      "note": "본문이 그 아래에서 스크롤되고 머리는 그 자리에 있습니다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "title",
       "prop": "display",
-      "note": "화면 제목은 본문 맨 위 h1(text-screen-title 26 / 35 700)이 맡는다"
+      "note": "화면 제목은 본문 맨 위 h1(text-screen-title 26 / 35 700)이 맡습니다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "trailing",
       "prop": "items",
-      "note": "금액 가리기 눈은 두지 않는다 — 홈 · 자산 순자산 카드의 눈이 맡는다(2026-10-16 사용자 결정 Q-017-3c = Q-018-3 B). 테마는 설정(메뉴 결정 ④)"
+      "note": "금액 가리기 눈은 두지 않습니다 — 홈 · 자산 순자산 카드의 눈이 맡습니다. 테마는 설정에 있습니다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "searchField",
       "prop": "width",
-      "note": "머리 왼쪽 — 본문 여백 32 에서. 거래 검색 화면의 입구(Enter 로 그 화면, 그 화면에서는 지금 검색어 — Q-017-3a C)"
+      "note": "머리 왼쪽 — 본문 여백 32 에서 시작합니다. 거래 검색 화면의 입구입니다(Enter 로 그 화면, 그 화면에서는 지금 검색어)"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "primaryButton",
       "prop": "buttonSize",
-      "note": "Button brandSolid small — 화면의 핵심 동작 하나. 아이콘 버튼 왼쪽에 둔다"
+      "note": "Button brandSolid small — 화면의 핵심 동작 하나. 아이콘 버튼 왼쪽에 둡니다"
     },
     {
       "rule": 3,
@@ -762,84 +762,84 @@
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "SEED tone transparent(gradient=false 의 바탕 #00000000) — 사진 위에 겹친다. 스크롤해 사진이 바 밑으로 지나가면 tone layer 로 바뀌어 바탕이 채워진다(SEED \"배경이 투명한 Top Navigation 을 사용하는 경우 스크롤할 때 배경색이 채워지는 동작\") — 선은 긋지 않는다"
+      "note": "바탕 없이(#00000000) 사진 위에 겹칩니다. 스크롤해 사진이 바 밑으로 지나가면 tone layer 로 바뀌어 바탕이 채워집니다 — 선은 긋지 않습니다"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "root",
       "prop": "position",
-      "note": "본문(사진)이 바 아래가 아니라 화면 맨 위(위 안전 영역 포함)에서 시작한다 — 바는 그 위에 얹힌다"
+      "note": "본문(사진)이 바 아래가 아니라 화면 맨 위(위 안전 영역 포함)에서 시작합니다 — 바는 그 위에 얹힙니다"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "root",
       "prop": "scrim",
-      "note": "SEED gradient=true(권장 — gradient=false 는 '권장하지 않습니다 … 가독성을 직접 확보해야') — 바 위 검정 35%(#00000059) → 아래 투명. groo 토큰이 없다 — 이 톤을 쓰는 화면을 이관할 때 정한다"
+      "note": "바 위 검정 35%(#00000059) → 아래 투명. 맞는 토큰이 없어 정하지 않았습니다 — 이 톤을 쓰는 화면을 만들 때 정합니다. 막 없이 쓰면 글자 대비를 그 화면이 직접 확보해야 합니다"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "root",
       "prop": "scrimBleedBottom",
-      "note": "SEED bleedBottom x5 — 막이 바 아래로 20 더 내려온다(막과 함께 쓴다)"
+      "note": "막이 바 아래로 20 더 내려옵니다(막과 함께 씁니다)"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "title",
       "prop": "foreground",
-      "note": "SEED palette.static-white — 두 모드 같다. 대비는 사진과 막이 정한다(막은 열린 일)"
+      "note": "흰 글자 — 두 모드가 같습니다. 대비는 사진과 막이 정합니다(막은 열린 일)"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "iconButton",
       "prop": "color",
-      "note": "SEED top-navigation-icon-button tone transparent"
+      "note": "흰 아이콘 — 두 모드가 같습니다"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "textButton",
       "prop": "foreground",
-      "note": "SEED top-navigation-text-button tone transparent"
+      "note": "흰 글자 — 두 모드가 같습니다"
     },
     {
       "rule": 4,
       "state": "hovered",
       "slot": "iconButton",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed(투명도 있는 누름 바탕) — groo 토큰이 없다. 불투명한 bg-layer-default-pressed 는 사진 위에 회색 상자가 되어 쓰지 않는다 — 정할 때까지 바탕 없이 축소만"
+      "note": "투명도 있는 누름 바탕이 필요한데 맞는 토큰이 없습니다. 불투명한 bg-layer-default-pressed 는 사진 위에서 회색 상자가 되어 쓰지 않습니다 — 정할 때까지 바탕 없이 축소만 합니다"
     },
     {
       "rule": 4,
       "state": "hovered",
       "slot": "textButton",
       "prop": "background",
-      "note": "아이콘 버튼과 같다"
+      "note": "아이콘 버튼과 같습니다"
     },
     {
       "rule": 4,
       "state": "pressed",
       "slot": "iconButton",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed — groo 토큰 없음. 정할 때까지 바탕 없이 2px 거리 축소만"
+      "note": "맞는 토큰이 없습니다 — 정할 때까지 바탕 없이 2px 거리 축소만 합니다"
     },
     {
       "rule": 4,
       "state": "pressed",
       "slot": "textButton",
       "prop": "background",
-      "note": "아이콘 버튼과 같다"
+      "note": "아이콘 버튼과 같습니다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "leading",
       "prop": "glyph",
-      "note": "이름 \"뒤로\" — 기본은 들어온 화면(History), 화면마다 상위 화면(Hierarchy)을 고를 수 있다(top-navigation.md 의 \"← 는 어디로\")"
+      "note": "이름 \"뒤로\" — 시트 · 대화상자 머리 ← 도 같은 꺾쇠입니다(돌아가기 모양은 어디서나 하나). 기본은 들어온 화면(History)이고, 화면마다 상위 화면(Hierarchy)을 고를 수 있습니다(top-navigation.md 의 \"← 는 어디로\")"
     },
     {
       "rule": 6,

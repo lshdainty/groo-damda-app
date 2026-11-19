@@ -3,11 +3,11 @@
   "source": "specs/components/scroll-auto-hide.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "숨는 영역 — 스크롤 상자 맨 위에 붙고(sticky) 스크롤 거리만큼 위로 옮겨 숨는다",
-    "scrollContainer": "스크롤 상자 — 쓰는 쪽(높이 · overflow). 숨는 영역은 이 안에 둔다"
+    "scrollContainer": "스크롤 상자 — 쓰는 쪽(높이 · overflow) 또는 창(문서 — document.scrollingElement, scroll · scrollend 는 document). 숨는 영역은 이 안에 둔다"
   },
   "axes": {
     "motionSetting": [
@@ -75,7 +75,7 @@
       "properties": [
         "transform"
       ],
-      "note": "50% 를 기준으로 다 숨거나 다 드러난다(SEED). 모션 줄이기면 없다(자동 숨김이 꺼진다)"
+      "note": "50% 를 기준으로 다 숨거나 다 드러난다. 모션 줄이기면 없다(자동 숨김이 꺼진다)"
     }
   },
   "notes": [
@@ -84,21 +84,28 @@
       "state": "shown",
       "slot": "scrollContainer",
       "prop": "overflowY",
-      "note": "숨는 영역은 이 상자 안에 둔다 — 상단 바 · 탭 아래부터가 스크롤 상자다(SEED — 스크롤 컨테이너 안에 배치)"
+      "note": "숨는 영역은 이 상자 안에 둔다 — 상단 바 · 탭 아래부터가 스크롤 상자다. 창(문서)이 스크롤 상자면 이 상자를 두지 않는다 — 스크롤 위치는 document.scrollingElement, scroll · scrollend 는 document 에서 받는다(담다 웹 폰 문서 스크롤)"
     },
     {
       "rule": 0,
       "state": "shown",
       "slot": "root",
       "prop": "position",
-      "note": "스크롤 상자 맨 위에 붙는다(SEED)"
+      "note": "스크롤 상자 맨 위에 붙는다"
+    },
+    {
+      "rule": 0,
+      "state": "shown",
+      "slot": "root",
+      "prop": "top",
+      "note": "스크롤 상자 맨 위 — 창이 스크롤 상자면 위에 붙은 상단 바 · 탭의 높이 합"
     },
     {
       "rule": 0,
       "state": "shown",
       "slot": "root",
       "prop": "transform",
-      "note": "옮기기만 한다 — 높이(레이아웃)를 바꾸지 않아 목록이 튀지 않는다. 루트의 transform 은 이 일에 쓰고, 다른 transform 은 자식에(SEED)"
+      "note": "옮기기만 한다 — 높이(레이아웃)를 바꾸지 않아 목록이 튀지 않는다. 루트의 transform 은 이 일에 쓰고, 다른 transform 은 자식에"
     },
     {
       "rule": 0,
@@ -119,35 +126,35 @@
       "state": "shown",
       "slot": "root",
       "prop": "snapDuration",
-      "note": "200ms — SEED 스냅과 같은 값"
+      "note": "200ms"
     },
     {
       "rule": 0,
       "state": "shown",
       "slot": "root",
       "prop": "snapEasing",
-      "note": "cubic-bezier(0, 0, 0.15, 1) — SEED enter 와 같은 값(v104)"
+      "note": "cubic-bezier(0, 0, 0.15, 1)"
     },
     {
       "rule": 0,
       "state": "shown",
       "slot": "root",
       "prop": "focus",
-      "note": "숨은 영역 안으로 키보드 초점이 오면 바로 다 드러낸다 — 보이지 않는 단추에 초점이 머물지 않는다(SEED)"
+      "note": "숨은 영역 안으로 키보드 초점이 오면 바로 다 드러낸다 — 보이지 않는 단추에 초점이 머물지 않는다"
     },
     {
       "rule": 0,
       "state": "shown",
       "slot": "root",
       "prop": "background",
-      "note": "쓰는 쪽이 정한다 — 원장 머리는 목록과 같은 흰 면. 바탕이 없으면 숨는 동안 아래 줄이 비친다(SEED)"
+      "note": "쓰는 쪽이 정한다 — 원장 머리는 목록과 같은 흰 면. 바탕이 없으면 숨는 동안 아래 줄이 비친다"
     },
     {
       "rule": 0,
       "state": "shown",
       "slot": "root",
       "prop": "zIndex",
-      "note": "스크롤 상자 안의 겹침 값 — List 줄 뒤 붙이개의 단추 · 링크(z 1) 위. 층 토큰(z-sticky)이 아니다(specs/z-index.md 쓰는 법). 지금 웹 원장 머리는 5"
+      "note": "스크롤 상자 안의 겹침 값 — List 줄 뒤 붙이개의 단추 · 링크(z 1) 위. 층 토큰(z-sticky)이 아니다(specs/z-index.md 쓰는 법)"
     },
     {
       "rule": 0,
@@ -161,7 +168,7 @@
       "state": "shown",
       "slot": "root",
       "prop": "follow",
-      "note": "모션 줄이기 — 위치 이동을 피하려 자동 숨김을 끈다(SEED). 머리는 늘 보이고 목록이 그 아래에서 스크롤한다"
+      "note": "모션 줄이기 — 위치 이동을 피하려 자동 숨김을 끈다. 머리는 늘 보이고 목록이 그 아래에서 스크롤한다"
     }
   ]
 }

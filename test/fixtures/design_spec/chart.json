@@ -3,7 +3,7 @@
   "source": "specs/components/chart.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "차트 상자 — 카드 본문 안, 폭 100%. 높이는 쓰는 자리가 정한다",
@@ -12,6 +12,12 @@
     "series": "계열 — 선 · 막대 · 조각 · 칸의 색",
     "line": "선 — 선 · 영역 차트",
     "bar": "막대",
+    "barValue": "막대 위 값 — 막대가 적어 글이 들어갈 때만(예산 이행률 \"88%\")",
+    "compareBar": "비교 막대 줄의 막대 — \"이름 | 막대 | 금액\" 으로 두 기간을 견준다(통계 비교). 트랙 없음",
+    "compareBarPrevious": "비교 막대 줄의 지난 기간 막대 — 회색(위 \"색\" 의 비교 계열)",
+    "compareLabel": "비교 막대 줄의 이름 — 기간(\"11월\" · \"10월\")",
+    "compareAmount": "비교 막대 줄의 금액 — 오른쪽 끝, 자르지 않는다",
+    "stockLegend": "주가(캔들) 차트 범례 — 그림 위 자기 줄의 시가 · 고가 · 저가 · 종가 · 거래량",
     "point": "가리킨 점 — 가리킨 자리에만",
     "crosshair": "가리킴 선 — 세로 점선",
     "tooltip": "툴팁 — 떠 있는 표면",
@@ -199,6 +205,65 @@
           },
           "numerals": "tabular-nums"
         },
+        "compareBar": {
+          "height": 8,
+          "radius": 9999,
+          "background": {
+            "light": "#1D6EC9",
+            "dark": "#69ABFF"
+          },
+          "gap": 10
+        },
+        "compareBarPrevious": {
+          "background": {
+            "light": "#8A91A0",
+            "dark": "#838997"
+          }
+        },
+        "compareLabel": {
+          "typography": {
+            "fontSize": 12,
+            "lineHeight": 16,
+            "fontWeight": 700,
+            "fontFamily": "Pretendard, Inter, sans-serif"
+          },
+          "fontWeight": 700,
+          "foreground": {
+            "light": "#62697A",
+            "dark": "#A2A8B7"
+          }
+        },
+        "compareAmount": {
+          "typography": {
+            "fontSize": 13,
+            "lineHeight": 18,
+            "fontWeight": 700,
+            "fontFamily": "Pretendard, Inter, sans-serif"
+          },
+          "fontWeight": 700,
+          "foreground": {
+            "light": "#1A1F2E",
+            "dark": "#F5F6FA"
+          },
+          "numerals": "tabular-nums"
+        },
+        "stockLegend": {
+          "typography": {
+            "fontSize": 13,
+            "lineHeight": 18,
+            "fontWeight": 400,
+            "fontFamily": "Pretendard, Inter, sans-serif"
+          },
+          "fontWeight": 400,
+          "foreground": {
+            "light": "#62697A",
+            "dark": "#A2A8B7"
+          },
+          "numerals": "tabular-nums",
+          "paddingY": 4,
+          "gap": 8,
+          "minHeight": "한 줄"
+        },
         "heatmapCell": {
           "aspectRatio": "1 / 1",
           "radius": 4,
@@ -268,6 +333,20 @@
           "maxWidth": 28,
           "radius": 4,
           "gap": 4
+        },
+        "barValue": {
+          "typography": {
+            "fontSize": 12,
+            "lineHeight": 16,
+            "fontWeight": 700,
+            "fontFamily": "Pretendard, Inter, sans-serif"
+          },
+          "fontWeight": 700,
+          "foreground": {
+            "light": "#1A1F2E",
+            "dark": "#F5F6FA"
+          },
+          "numerals": "tabular-nums"
         }
       }
     },
@@ -530,7 +609,7 @@
       "state": "enabled",
       "slot": "tickLabel",
       "prop": "typography",
-      "note": "11 / 15 — 돈 축은 \"만\" 단위로 줄인다(400만 · 1.2만, 빼기 U+2212). 축의 폭은 가장 긴 글자(\"−3,000만\")가 잘리지 않게"
+      "note": "11 / 15 — 돈 축은 \"만\" 단위로 줄인다(400만 · 1.2만, 빼기 U+2212). 축의 폭은 가장 긴 글자(\"−3,000만\")가 잘리지 않게. 글자 크기 설정을 따르지 않는다(웹 text-t1-static, 앱 TextScaler.noScaling) — 값은 툴팁 · 표로 보기에서 크게 읽는다. 가로 눈금은 겹치지 않게 건너뛴다 — 겹치면 끝(가장 최근) 글을 지키고 앞에서부터 건너뛴다(웹 recharts interval preserveEnd · 앱 같은 셈). 눈금이 통째로 사라지지 않는다"
     },
     {
       "rule": 0,
@@ -551,7 +630,7 @@
       "state": "enabled",
       "slot": "point",
       "prop": "size",
-      "note": "보통은 가리킨 자리에만 — 계열 색 원 + 카드 면 색 테두리 2. 점이 적은 추이는 채움 없이 값마다 찍어도 된다(chart.md \"어느 차트를 쓰나\"). 값마다 늘 찍는 점은 선 차트의 선택 dots(기본 꺼짐 — 웹 · 앱 같은 이름) — 이 원에서 테두리를 뺀 계열 색 원(지름 6 · 테두리 없음)이고, 가리키면 그 위에 이 점이 선다(2026-10-25 05-3 앱 PLineChart.dots)"
+      "note": "보통은 가리킨 자리에만 — 계열 색 원 + 카드 면 색 테두리 2. 점이 적은 추이는 채움 없이 값마다 찍어도 된다(chart.md \"어느 차트를 쓰나\"). 값마다 늘 찍는 점은 선 차트의 선택 dots(기본 꺼짐 — 웹 · 앱 같은 이름) — 이 원에서 테두리를 뺀 계열 색 원(지름 6 · 테두리 없음)이고, 가리키면 그 위에 이 점이 선다"
     },
     {
       "rule": 0,
@@ -586,7 +665,7 @@
       "state": "enabled",
       "slot": "tooltipRow",
       "prop": "foreground",
-      "note": "라벨(계열 이름) — 덧붙인 정보라 축 · 툴팁 머리와 같은 subtle(2026-10-16 사용자 결정 글자 역할 D5, 전 muted). 떠 있는 면 위 5.50 · 다크 5.27. 값은 fg-neutral · 700 · 고정폭 숫자, 오른쪽 맞춤. 돈은 줄이지 않고 원까지"
+      "note": "라벨(계열 이름) — 덧붙인 정보라 축 · 툴팁 머리와 같은 subtle(글자 역할). 떠 있는 면 위 5.50 · 다크 5.27. 값은 fg-neutral · 700 · 고정폭 숫자, 오른쪽 맞춤. 돈은 줄이지 않고 원까지"
     },
     {
       "rule": 0,
@@ -628,7 +707,7 @@
       "state": "enabled",
       "slot": "legendTile",
       "prop": "foreground",
-      "note": "이름 — 덧붙인 정보라 subtle(2026-10-16 사용자 결정 글자 역할 D5, 전 muted). chart-{색}-subtle 위 4.77 이상 · 다크 4.68 이상(회색 타일이 가장 낮다)"
+      "note": "이름 — 덧붙인 정보라 subtle(글자 역할). chart-{색}-subtle 위 4.77 이상 · 다크 4.68 이상(회색 타일이 가장 낮다)"
     },
     {
       "rule": 0,
@@ -649,49 +728,112 @@
       "state": "enabled",
       "slot": "donutCenter",
       "prop": "typography",
-      "note": "합계 16 / 22 · 700 — 돈은 줄이지 않는다. 가운데에 들어가지 않으면 가운데 글을 빼고 범례 위 합계로. 위 라벨 12 · fg-neutral-subtle"
+      "note": "합계 16 / 22 · 700 — 돈은 줄이지 않는다. 가운데에 들어가지 않으면 가운데 글을 빼고 범례 위 합계로. 위 라벨 12(text-t2-static) · fg-neutral-subtle. 도넛 모양과 함께 글자 크기 설정을 따르지 않는다(웹 -static, 앱 TextScaler.noScaling) — 합계는 범례 · 목록에서 크게 읽는다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "compareBar",
+      "prop": "height",
+      "note": "막대 줄의 막대 — Progress 막대와 같은 높이지만 트랙(바탕)이 없다. 길이는 두 값 가운데 큰 값을 100% 로 잰다. 한 줄에 들어가면 이름 · 막대(최소 64) · 금액이 한 줄, 아니면 위 줄(이름 · 금액) + 막대 줄 — 이름이 먼저 줄을 바꾸고 금액은 자르지 않는다(progress.md 의 이름 ↔ 오른쪽 글 규칙과 같다)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "compareBar",
+      "prop": "background",
+      "note": "이번 기간 — 강조 계열. 지난 기간은 compareBarPrevious(회색 — 위 \"색\" 의 비교 계열)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "compareBar",
+      "prop": "gap",
+      "note": "이름 ↔ 막대 ↔ 금액 · 두 줄 사이 10"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "compareBarPrevious",
+      "prop": "background",
+      "note": "지난 기간 — 회색, 테두리 없음. 바탕 대비 라이트 3.16 · 다크 4.13(그림 3:1). chart-blue-weak 는 바탕과 1.25 · 1.38:1 로 묻혀 쓰지 않는다. 역할 토큰 없이 팔레트를 가리킨다. 금액 글은 fg-neutral-muted"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "compareAmount",
+      "prop": "foreground",
+      "note": "이번 기간 — 지난 기간은 fg-neutral-muted. 돈은 원까지, 줄바꿈 없음"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "stockLegend",
+      "prop": "typography",
+      "note": "\"O 70,010 H … L … C … VOL 1.2M\" — 값 쌍은 한 덩어리로 줄을 바꾼다(쌍 안에서 끊지 않는다). 그림 위 자기 줄이라 큰 글자에서 줄이 늘면 카드가 커지고 차트 높이는 그대로다. 좌우 여백 없이 그래프 왼쪽 끝에 맞춘다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "stockLegend",
+      "prop": "foreground",
+      "note": "거래량 — 시가 · 고가 · 저가 · 종가는 봉의 방향 색(오름 fg-critical · 내림 fg-informative, Card 의 증감과 같다)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "stockLegend",
+      "prop": "gap",
+      "note": "값 쌍 사이"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "stockLegend",
+      "prop": "minHeight",
+      "note": "값이 오기 전에도 한 줄 높이를 잡아 둔다 — 채워질 때 차트가 밀리지 않게"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "heatmapCell",
       "prop": "aspectRatio",
-      "note": "정사각형 — 폭은 격자가 정한다(시간대 라벨 열 56 + 요일 일곱 칸, 사이 6). 2026-10-08 칸 폭은 1440 → 140 · 1280 → 117 · 1024 → 81 · 768 → 44 · 폰 390 → 35"
+      "note": "정사각형 — 폭은 격자가 정한다(시간대 라벨 열 56 + 요일 일곱 칸, 사이 6). 칸 폭은 1440 → 140 · 1280 → 117 · 1024 → 81 · 768 → 44 · 폰 390 → 35"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "heatmapCell",
       "prop": "background",
-      "note": "세기 다섯 — 브랜드 채움을 카드 면에 섞은 지금 제품 단계(가장 큰 칸 값의 8 · 22 · 45 · 75% 에서 끊는다). 값이 없는 칸은 bg-neutral-weak"
+      "note": "세기 다섯 — 브랜드 채움을 카드 면에 섞은 단계(가장 큰 칸 값의 8 · 22 · 45 · 75% 에서 끊는다). 값이 없는 칸은 bg-neutral-weak"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "heatmapValue",
       "prop": "threshold",
-      "note": "칸 폭 — 이보다 좁으면 칸에 글을 두지 않고 세기 색만 칠한다. 값은 툴팁 · 표로 보기에서 읽는다. 글자를 줄여 맞추지 않는다(지금은 1280 이상만 글이 보인다)"
+      "note": "칸 폭 — 이보다 좁으면 칸에 글을 두지 않고 세기 색만 칠한다. 값은 툴팁 · 표로 보기에서 읽는다. 글자를 줄여 맞추지 않는다(1280 이상에서 글이 보인다)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "heatmapValue",
       "prop": "typography",
-      "note": "11 / 15 — 금액은 원까지(\"123,456,789원\" 84 · \"99,999,999,999원\" 107 — 999억까지 칸 112 에 들어간다). 값이 없는 칸은 \"—\"(fg-neutral-subtle — 5.09 · 다크 4.68)"
+      "note": "11 / 15 — 글자 크기 설정을 따르지 않는다(웹 text-t1-static, 앱 TextScaler.noScaling). 금액은 원까지(\"123,456,789원\" 84 · \"99,999,999,999원\" 107 — 999억까지 칸 112 에 들어간다). 값이 없는 칸은 \"—\"(fg-neutral-subtle — 5.09 · 다크 4.68)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "heatmapValue",
       "prop": "foreground",
-      "note": "칸 바탕 위 4.5 를 넘는 쪽 — Desk 라이트 18 · 35 · 55% 는 fg-neutral(5.69 이상) · 76 · 100% 는 static-white(4.74 · 8.38), HR(v121 그루 초록) 라이트는 18 · 35 · 55% 가 fg-neutral(5.94 이상) · 76 · 100% 가 static-white(4.52 · 8.17), 다크는 둘 다 모두 fg-neutral(7.74 이상). 넷째 단계는 75% 였다 — 그루 초록에서 어느 글자도 4.5 에 못 미쳐(흰 4.40) 두 브랜드 함께 76% 로 올렸다(2026-10-22 사용자 결정 B, https://claude.ai/artifact/JftMz8DQo6yKaGJ5kS9N53). 칸마다 재지 않고 단계마다 정해 둔다"
+      "note": "칸 바탕 위 4.5 를 넘는 쪽 — Desk 라이트 18 · 35 · 55% 는 fg-neutral(5.69 이상) · 76 · 100% 는 static-white(4.74 · 8.38), HR(그루 초록) 라이트는 18 · 35 · 55% 가 fg-neutral(5.94 이상) · 76 · 100% 가 static-white(4.52 · 8.17), 다크는 둘 다 모두 fg-neutral(7.74 이상). 넷째 단계 76% 는 그루 초록에서도 흰 글자가 4.5 를 넘는 값이다. 칸마다 재지 않고 단계마다 정해 둔다"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "legendTile",
       "prop": "scale",
-      "note": "색 없이 축소만 — 바탕이 이미 켬 · 끔을 말해 누름에 색을 쓰지 않는다(SEED Feedback Color). 마우스로 누르면 끈 타일의 호버 바탕은 그대로 남는다(Q-012-2). 모션 줄이기면 하지 않는다"
+      "note": "색 없이 축소만 — 바탕이 이미 켬 · 끔을 말해 누름에 색을 쓰지 않는다. 마우스로 누르면 끈 타일의 호버 바탕은 그대로 남는다. 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 0,
@@ -722,6 +864,13 @@
       "note": "한 묶음 안 막대 사이"
     },
     {
+      "rule": 2,
+      "state": "enabled",
+      "slot": "barValue",
+      "prop": "typography",
+      "note": "막대 바로 위 — 글자 크기 설정을 따르지 않는다(웹 text-t2-static, 앱 TextScaler.noScaling). 막대가 적어(예산 이행률 6개월) 값 글이 막대 사이에 들어갈 때만 둔다. 많으면 툴팁 · 표로 보기로 읽는다"
+    },
+    {
       "rule": 3,
       "state": "enabled",
       "slot": "series",
@@ -740,7 +889,7 @@
       "state": "enabled",
       "slot": "series",
       "prop": "thickness",
-      "note": "정수로 반올림 — 지름 112 → 17 · 120 → 18 · 140 → 20 · 160 → 22 · 176 → 24 · 180 → 24. 문턱 없이 지름을 따라 고르게 굵어진다(2026-10-15 사용자 결정 — 구현 세션 질문 Q-012-5, 안 C). 조각 사이 0"
+      "note": "정수로 반올림 — 지름 112 → 17 · 120 → 18 · 140 → 20 · 160 → 22 · 176 → 24 · 180 → 24. 문턱 없이 지름을 따라 고르게 굵어진다. 조각 사이 0"
     },
     {
       "rule": 3,
@@ -761,14 +910,14 @@
       "state": "enabled",
       "slot": "heatmapCell",
       "prop": "gap",
-      "note": "칸 사이 6 — 가로 · 세로 같다. 왼쪽 시간대 라벨 열 56(이름 13 · 700 + 시간 11 · fg-neutral-subtle), 위 요일 머리 12 · fg-neutral-subtle"
+      "note": "칸 사이 6 — 가로 · 세로 같다. 왼쪽 시간대 라벨 열 56(이름 13 · 700 + 시간 11 · fg-neutral-subtle), 위 요일 머리 12 · fg-neutral-subtle — 라벨 · 머리도 글자 크기 설정을 따르지 않는다(웹 -static, 앱 TextScaler.noScaling)"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "tooltip",
       "prop": "placement",
-      "note": "화면에 자리가 모자랄 때만 칸 아래로 뒤집는다 — 떠 있는 층(z-floating)이라 카드 · 열지도 상자에 갇히지 않고, 첫 줄 칸도 카드 머리 위로 뜬다(Q-012-6). 가운데는 칸 가운데"
+      "note": "화면에 자리가 모자랄 때만 칸 아래로 뒤집는다 — 떠 있는 층(z-floating)이라 카드 · 열지도 상자에 갇히지 않고, 첫 줄 칸도 카드 머리 위로 뜬다. 가운데는 칸 가운데"
     },
     {
       "rule": 4,
@@ -796,14 +945,14 @@
       "state": "enabled",
       "slot": "legendTile",
       "prop": "background",
-      "note": "그 계열 색의 넓은 면 옅은 바탕(v111) — 테두리 없음. aria-pressed=\"true\". 호버 바탕 없음"
+      "note": "그 계열 색의 넓은 면 옅은 바탕 — 테두리 없음. aria-pressed=\"true\". 호버 바탕 없음"
     },
     {
       "rule": 6,
       "state": "disabled",
       "slot": "legendTile",
       "prop": "cursor",
-      "note": "켠 계열이 하나만 남은 타일 — 끌 수 없다를 커서가 알린다. v106 비활성 커서와 같다(2026-10-15 사용자 결정 — 구현 세션 질문 Q-012-3, 안 C). 포인터 이벤트는 끄지 않는다(끄면 커서가 안 보인다)"
+      "note": "켠 계열이 하나만 남은 타일 — 끌 수 없다를 커서가 알린다. 비활성 커서와 같다. 포인터 이벤트는 끄지 않는다(끄면 커서가 안 보인다)"
     },
     {
       "rule": 6,
@@ -824,7 +973,7 @@
       "state": "hovered",
       "slot": "legendTile",
       "prop": "background",
-      "note": "끈 타일만 — 켠 타일은 바탕이 계열 색이라 호버 바탕을 두지 않는다(Q-012-2)"
+      "note": "끈 타일만 — 켠 타일은 바탕이 계열 색이라 호버 바탕을 두지 않는다"
     },
     {
       "rule": 17,

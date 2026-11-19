@@ -3,7 +3,7 @@
   "source": "specs/components/notification-badge.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "점(small) · 숫자 알약(large) — 붙는 대상의 상자 위에 겹쳐 놓인다(자리를 차지하지 않는다)",
@@ -157,7 +157,7 @@
       "state": "enabled",
       "slot": "label",
       "prop": "typography",
-      "note": "11 / 15 — 글자 크기 설정을 따르지 않는 px(웹 text-t1-static, 앱 TextScaler.noScaling — SEED t1-static). 커지면 아이콘을 덮는다"
+      "note": "11 / 15 — 글자 크기 설정을 따르지 않는 px(웹 text-t1-static, 앱 TextScaler.noScaling). 커지면 아이콘을 덮는다"
     },
     {
       "rule": 2,
@@ -192,21 +192,21 @@
       "state": "enabled",
       "slot": "root",
       "prop": "right",
-      "note": "아이콘 상자 오른쪽에서 1 — 24 아이콘이면 x 17 ~ 23. 아이콘 안쪽에 놓인다(SEED: top 7 · right 7 + translate(100%, −100%))"
+      "note": "아이콘 상자 오른쪽에서 1 — 24 아이콘이면 x 17 ~ 23. 아이콘 안쪽에 놓인다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "root",
       "prop": "position",
-      "note": "24 아이콘이면 (16, 14) — left 16 · top −4. 위 · 오른쪽으로 튀어나와 숫자가 길수록 오른쪽으로 자란다(SEED: top 14 · right 8 + translate(100%, −100%)). 한 자리면 아이콘 버튼 44 안, 두 자리 · 99+ 는 버튼 밖으로 나간다"
+      "note": "24 아이콘이면 (16, 14) — left 16 · top −4. 위 · 오른쪽으로 튀어나와 숫자가 길수록 오른쪽으로 자란다. 한 자리면 아이콘 버튼 44 안, 두 자리 · 99+ 는 버튼 밖으로 나간다"
     },
     {
       "rule": 6,
       "state": "enabled",
       "slot": "root",
       "prop": "position",
-      "note": "글 상자 기준 — 마지막 글자 뒤 2, 위는 글 줄 상자의 위 끝(글자 상자보다 1 위). 탭 · 칸 폭과 줄 높이를 바꾸지 않는다(SEED: right −2 + translate(100%, 0)). Chip Tabs 만 칩 안 글 뒤 6 · 세로 가운데 흐름(chip-tabs.yaml)"
+      "note": "글 상자 기준 — 마지막 글자 뒤 2, 위는 글 줄 상자의 위 끝(글자 상자보다 1 위). 탭 · 칸 폭과 줄 높이를 바꾸지 않는다. Chip Tabs 만 칩 안 글 뒤 6 · 세로 가운데 흐름(chip-tabs.yaml)"
     },
     {
       "rule": 6,

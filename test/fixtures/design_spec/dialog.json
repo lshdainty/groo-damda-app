@@ -3,7 +3,7 @@
   "source": "specs/components/dialog.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "overlay": "딤 — 대화상자 뒤 화면 전체",
@@ -226,7 +226,7 @@
         "scale 1.3 → 1",
         "opacity 0 → 1"
       ],
-      "note": "크게 나타나며 줄어든다(SEED) — 모션 줄이기면 150ms 서서히 나타남"
+      "note": "크게 나타나며 줄어든다 — 모션 줄이기면 150ms 서서히 나타남"
     },
     "열림 — 딤": {
       "duration": "100ms",
@@ -271,7 +271,7 @@
       "state": "enabled",
       "slot": "overlay",
       "prop": "background",
-      "note": "groo 딤(v102)"
+      "note": "라이트 0.50 · 다크 0.65"
     },
     {
       "rule": 0,
@@ -299,7 +299,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "shadow",
-      "note": "그림자 없이 딤과 표면 색으로 뜬다(SEED · Elevation)"
+      "note": "그림자 없이 딤과 표면 색으로 뜬다(Elevation)"
     },
     {
       "rule": 0,
@@ -334,7 +334,7 @@
       "state": "enabled",
       "slot": "closeButton",
       "prop": "top",
-      "note": "아이콘이 대화상자 위에서 28 · 오른쪽 24 — 제목 첫 줄 가운데와 맞는다"
+      "note": "아이콘이 대화상자 위에서 28 · 오른쪽 24 — 자리를 px 로 박지 않고 제목 첫 줄 가운데(위 24 + 제목 줄 높이 ÷ 2)를 따른다. 제목 글자가 커져도 닫기는 크기를 그대로 둔다"
     },
     {
       "rule": 0,
@@ -369,7 +369,7 @@
       "state": "enabled",
       "slot": "footer",
       "prop": "buttonSize",
-      "note": "Button small(Button 결정)"
+      "note": "Button small"
     },
     {
       "rule": 0,
@@ -383,7 +383,7 @@
       "state": "pressed",
       "slot": "closeButton",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 떠 있는 표면 짝(v102)"
+      "note": "떠 있는 표면의 누름 색"
     },
     {
       "rule": 0,
@@ -411,7 +411,7 @@
       "state": "enabled",
       "slot": "headerAction",
       "prop": "centerY",
-      "note": "대화상자 위 24 + 줄 높이 30 의 절반 = 39 — 닫기 아이콘 가운데와 같다"
+      "note": "대화상자 위 24 + 제목 줄 높이의 절반(30 이면 39) — 닫기 아이콘 · 머리 ← 가운데와 같다. 제목 글자가 커지면 줄 높이를 따라 내려간다"
     },
     {
       "rule": 3,

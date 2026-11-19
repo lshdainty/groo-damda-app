@@ -488,7 +488,7 @@ void main() {
             'variant': wantVariant.name,
             'size': chipSize,
           }, 'enabled');
-          final chipHeight = (chipWant['root.height']! as num).toDouble();
+          final chipHeight = (chipWant['root.minHeight']! as num).toDouble();
           if ((chips.first.height - chipHeight).abs() > 0.01) {
             k.fail(
               'trigger.chipSize: ${want['trigger.chipSize']} — Chip 높이 $chipHeight · 실제 ${chips.first.height}',

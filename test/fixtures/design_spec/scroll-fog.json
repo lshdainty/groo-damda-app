@@ -3,7 +3,7 @@
   "source": "specs/components/scroll-fog.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "스크롤 상자 — 넘친 내용이 이 안에서 스크롤된다. 마스크를 이 상자에 건다",
@@ -121,7 +121,7 @@
       "state": "enabled",
       "slot": "fog",
       "prop": "size",
-      "note": "기본 깊이 — SEED 의 최소 20"
+      "note": "기본 깊이 — 최소 20"
     },
     {
       "rule": 1,
@@ -163,7 +163,7 @@
       "state": "enabled",
       "slot": "fog",
       "prop": "size",
-      "note": "좌우 20(SEED Chip Tabs 와 같다)"
+      "note": "좌우 20"
     },
     {
       "rule": 2,
@@ -184,7 +184,7 @@
       "state": "enabled",
       "slot": "fog",
       "prop": "size",
-      "note": "SEED Bottom Sheet 의 권장 — 아래가 깊어 더 있다는 것이 잘 보인다"
+      "note": "아래가 깊어 더 있다는 것이 잘 보인다"
     },
     {
       "rule": 3,
@@ -212,7 +212,7 @@
       "state": "enabled",
       "slot": "fog",
       "prop": "size",
-      "note": "SEED 의 화면 전체 세로 스크롤 권장 — 위는 머리(상단 바) 아래, 아래는 바닥 고정 버튼 위에서 끝난다"
+      "note": "위는 머리(상단 바) 아래, 아래는 바닥 고정 버튼 위에서 끝난다"
     },
     {
       "rule": 4,

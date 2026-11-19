@@ -3,7 +3,7 @@
   "source": "specs/components/collapsible.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "접는 자리 하나 — 트리거 + 펼친 내용. surface card 면 Card 면",
@@ -317,7 +317,7 @@
       "properties": [
         "height"
       ],
-      "note": "Accordion 과 같다(사용자 결정 3A) — 펼쳐도 초점 · 스크롤은 그대로"
+      "note": "Accordion 과 같다 — 펼쳐도 초점 · 스크롤은 그대로"
     },
     "꺾쇠 — 회전": {
       "duration": "300ms",
@@ -333,7 +333,7 @@
       "properties": [
         "opacity"
       ],
-      "note": "높이를 움직이지 않고 150ms 서서히(v104)"
+      "note": "높이를 움직이지 않고 150ms 서서히"
     },
     "누름 · 호버 — 바탕": {
       "duration": "150ms",
@@ -380,7 +380,7 @@
       "state": "enabled",
       "slot": "trigger",
       "prop": "touchTarget",
-      "note": "줄 폭 × 54 이상 — 글 단추 · 꺾쇠만 누르게 하지 않는다(사용자 결정 9A). AA ✓ · AAA ✓"
+      "note": "줄 폭 × 54 이상 — 글 단추 · 꺾쇠만 누르게 하지 않는다. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
@@ -408,14 +408,14 @@
       "state": "enabled",
       "slot": "title",
       "prop": "lineClamp",
-      "note": "늘 줄을 바꾼다(10A)"
+      "note": "늘 줄을 바꾼다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "description",
       "prop": "fontWeight",
-      "note": "SEED accordion-item description medium — 머리 제목 500 과 한 벌. 글자 역할 R9 의 \"여닫는 머리 설명\"(2026-10-17 사용자 결정 01T-005 — 줄 설명 400 에 맞추지 않는다)"
+      "note": "머리 이름 500 과 한 벌 — 여닫는 머리 설명이라 줄 설명 400 에 맞추지 않는다"
     },
     {
       "rule": 0,
@@ -464,7 +464,7 @@
       "state": "pressed",
       "slot": "content",
       "prop": "scale",
-      "note": "콘텐츠 층만 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px(v104)"
+      "note": "콘텐츠 층만 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px"
     },
     {
       "rule": 0,
@@ -492,7 +492,7 @@
       "state": "enabled",
       "slot": "panel",
       "prop": "display",
-      "note": "초점은 트리거에 그대로 · 저절로 스크롤하지 않는다(따라오는 것)"
+      "note": "초점은 트리거에 그대로 · 저절로 스크롤하지 않는다"
     },
     {
       "rule": 2,
@@ -506,7 +506,7 @@
       "state": "enabled",
       "slot": "panel",
       "prop": "paddingBottom",
-      "note": "8 — 줄마다 위아래 12 를 가져 마지막 줄의 글 아래로 20(비교 페이지 9A 의 분할 내역). 줄의 좌우는 0 — 패널의 좌우가 들인다"
+      "note": "8 — 줄마다 위아래 12 를 가져 마지막 줄의 글 아래로 20(거래 상세의 분할 내역). 줄의 좌우는 0 — 패널의 좌우가 들인다"
     },
     {
       "rule": 4,
@@ -548,7 +548,7 @@
       "state": "enabled",
       "slot": "box",
       "prop": "radius",
-      "note": "12 — 지금 분할 경고 상자의 모서리"
+      "note": "12 — 분할 경고 상자의 모서리"
     },
     {
       "rule": 5,

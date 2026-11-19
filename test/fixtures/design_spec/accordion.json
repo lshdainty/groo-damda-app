@@ -3,7 +3,7 @@
   "source": "specs/components/accordion.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "아코디언 — 항목을 세로로 잇는다. 항목은 2개 이상(하나면 Collapsible)",
@@ -22,7 +22,7 @@
     "divider": "항목 사이 선 — inline 만",
     "header": "목록 머리 — 시트 · 대화상자에서 아코디언 위 한 줄(제목 + 모두 펼치기). 카드 안이면 카드 머리가 이 자리다",
     "headerTitle": "목록 머리 제목 — \"혜택 상세 · 12건\"",
-    "expandAll": "모두 펼치기 — 목록 머리 오른쪽 글 단추(groo 확장). 펼치면 \"모두 접기\"",
+    "expandAll": "모두 펼치기 — 목록 머리 오른쪽 글 단추. 펼치면 \"모두 접기\"",
     "focusRing": "키보드 포커스 링(웹) — 트리거 안쪽"
   },
   "axes": {
@@ -183,7 +183,7 @@
           }
         },
         "expandAll": {
-          "height": 36,
+          "minHeight": 36,
           "paddingLeft": 14,
           "paddingRight": 14,
           "radius": 8,
@@ -397,7 +397,7 @@
       "properties": [
         "height"
       ],
-      "note": "SEED expandHeight · collapseHeight d6 · easing(사용자 결정 3A). 펼칠 때 저절로 스크롤하지 않는다"
+      "note": "높이 300ms. 펼칠 때 저절로 스크롤하지 않는다"
     },
     "꺾쇠 — 회전": {
       "duration": "300ms",
@@ -413,7 +413,7 @@
       "properties": [
         "opacity"
       ],
-      "note": "높이를 움직이지 않고 내용이 150ms 서서히 나타나고 사라진다(v104 — 200ms 넘는 움직임은 150ms 서서히)"
+      "note": "높이를 움직이지 않고 내용이 150ms 서서히 나타나고 사라진다(200ms 넘는 움직임은 150ms 서서히)"
     },
     "누름 · 호버 — 바탕": {
       "duration": "150ms",
@@ -447,7 +447,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "items",
-      "note": "항목이 하나면 Collapsible 이다(SEED Don't — 단일 Item)"
+      "note": "항목이 하나면 Collapsible 이다"
     },
     {
       "rule": 0,
@@ -461,7 +461,7 @@
       "state": "enabled",
       "slot": "heading",
       "prop": "level",
-      "note": "SEED headingLevel 기본 3 — 놓인 자리의 머리말 차례에 맞춘다. 대화상자 · 시트 · 카드 제목(h2) 아래면 h3, 그 위 머리말이 h3 이면 h4"
+      "note": "기본 3 — 놓인 자리의 머리말 차례에 맞춘다. 대화상자 · 시트 · 카드 제목(h2) 아래면 h3, 그 위 머리말이 h3 이면 h4"
     },
     {
       "rule": 0,
@@ -475,21 +475,21 @@
       "state": "enabled",
       "slot": "trigger",
       "prop": "paddingY",
-      "note": "SEED medium paddingY x4"
+      "note": "위아래 16"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "trigger",
       "prop": "paddingX",
-      "note": "화면 가장자리 규칙 24(SEED global-gutter 16)"
+      "note": "화면 가장자리 규칙 24"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "trigger",
       "prop": "touchTarget",
-      "note": "줄 폭 × 54 이상 — 꺾쇠만이 아니라 줄 전체가 누르는 자리(SEED). AA ✓ · AAA ✓"
+      "note": "줄 폭 × 54 이상 — 꺾쇠만이 아니라 줄 전체가 누르는 자리. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
@@ -503,7 +503,7 @@
       "state": "enabled",
       "slot": "content",
       "prop": "gap",
-      "note": "앞 아이콘 ↔ 본문 ↔ 꺾쇠 12 — SEED prefix paddingRight · suffixIcon paddingLeft x3"
+      "note": "앞 아이콘 ↔ 본문 ↔ 꺾쇠 12"
     },
     {
       "rule": 0,
@@ -517,7 +517,7 @@
       "state": "enabled",
       "slot": "prefixIcon",
       "prop": "size",
-      "note": "있을 때만 — SEED medium prefixIcon 22"
+      "note": "있을 때만"
     },
     {
       "rule": 0,
@@ -531,21 +531,21 @@
       "state": "enabled",
       "slot": "title",
       "prop": "fontWeight",
-      "note": "SEED medium"
+      "note": "설명 500 과 한 벌"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "title",
       "prop": "lineClamp",
-      "note": "늘 줄을 바꾼다 — 말줄임 · 줄 수 제한 없음(사용자 결정 10A, 단어 단위 v114)"
+      "note": "늘 줄을 바꾼다 — 말줄임 · 줄 수 제한 없음(단어 단위)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "description",
       "prop": "fontWeight",
-      "note": "SEED accordion-item description medium — 머리 제목 500 과 한 벌. 글자 역할 R9 의 \"여닫는 머리 설명\"(2026-10-17 사용자 결정 01T-005 — 줄 설명 400 에 맞추지 않는다)"
+      "note": "머리 제목 500 과 한 벌. 글자 역할 R9 의 \"여닫는 머리 설명\" — 줄 설명 400 에 맞추지 않는다"
     },
     {
       "rule": 0,
@@ -594,14 +594,14 @@
       "state": "enabled",
       "slot": "panel",
       "prop": "maxHeight",
-      "note": "패널 안에서 스크롤하지 않는다 — 길면 페이지 · 시트 본문이 스크롤한다(SEED Don't)"
+      "note": "패널 안에서 스크롤하지 않는다 — 길면 페이지 · 시트 본문이 스크롤한다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "panelText",
       "prop": "typography",
-      "note": "14 / 22 — 긴 글 보조. 비교 페이지가 그린 14 / 22 가 이 토큰 그대로다"
+      "note": "14 / 22 — 긴 글 보조"
     },
     {
       "rule": 0,
@@ -615,7 +615,7 @@
       "state": "enabled",
       "slot": "header",
       "prop": "minHeight",
-      "note": "모두 펼치기의 보이는 상자와 같은 높이 — 제목과 한 줄(2026-10-16 글자 역할 D2 — 글 버튼 36, 전 32)"
+      "note": "모두 펼치기의 보이는 상자와 같은 높이 — 제목과 한 줄(글 버튼 36)"
     },
     {
       "rule": 0,
@@ -635,8 +635,8 @@
       "rule": 0,
       "state": "enabled",
       "slot": "expandAll",
-      "prop": "height",
-      "note": "보이는 상자 — SEED Text Button(minHeight x9), Card 머리 동작과 같은 모양(card.yaml headerAction). 2026-10-16 사용자 결정 — 글자 역할 D2"
+      "prop": "minHeight",
+      "note": "보이는 상자 — Card 머리 동작과 같은 모양(card.yaml headerAction). 최소 높이라 큰 글자에서 글을 따라 늘어나고, 한 줄을 지킨다"
     },
     {
       "rule": 0,
@@ -650,14 +650,14 @@
       "state": "enabled",
       "slot": "expandAll",
       "prop": "fontWeight",
-      "note": "SEED Text Button t4 · bold — 2026-10-16 사용자 결정 글자 역할 D2(전 500)"
+      "note": "글 버튼 t4 · bold(글자 역할 R16)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "expandAll",
       "prop": "foreground",
-      "note": "SEED Text Button fg.neutral-muted — 2026-10-16 사용자 결정 글자 역할 D2(전 subtle). 아이콘은 두지 않는다(전 chevrons-up-down · chevrons-down-up 16) — 글이 \"모두 펼치기\" · \"모두 접기\" 로 바뀌며 상태를 말한다"
+      "note": "글 버튼 색(글자 역할 R16). 아이콘은 두지 않는다 — 글이 \"모두 펼치기\" · \"모두 접기\" 로 바뀌며 상태를 말한다"
     },
     {
       "rule": 0,
@@ -685,28 +685,28 @@
       "state": "hovered",
       "slot": "background",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝 — 시트 · 대화상자 위에서도 같은 값(bg-layer-floating-pressed 와 같다)"
+      "note": "불투명한 누름 바탕 — 시트 · 대화상자 위에서도 같은 값(bg-layer-floating-pressed 와 같다)"
     },
     {
       "rule": 0,
       "state": "hovered",
       "slot": "background",
       "prop": "insetX",
-      "note": "바탕이 좌우 6 들어온다(SEED marginX x1_5)"
+      "note": "바탕이 좌우 6 들어온다"
     },
     {
       "rule": 0,
       "state": "hovered",
       "slot": "background",
       "prop": "radius",
-      "note": "SEED cornerRadius x2_5 — separated 면(16) 안에서도 16 − 6 = 10 으로 동심"
+      "note": "모서리 10 — separated 면(16) 안에서도 16 − 6 = 10 으로 동심"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "content",
       "prop": "scale",
-      "note": "콘텐츠 층만(SEED scaleScope content) — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px(v104)"
+      "note": "콘텐츠 층만 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px"
     },
     {
       "rule": 0,
@@ -720,7 +720,7 @@
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "트리거 안쪽 — 카드 · 시트가 바깥 링을 자르지 않게(지금 웹 카드 혜택은 카드 셸에 잘려 안 보인다)"
+      "note": "트리거 안쪽 — 카드 · 시트가 바깥 링을 자르지 않게"
     },
     {
       "rule": 0,
@@ -755,14 +755,14 @@
       "state": "enabled",
       "slot": "divider",
       "prop": "background",
-      "note": "SEED dividerColor 와 같은 역할"
+      "note": "항목 사이 선"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "divider",
       "prop": "marginX",
-      "note": "들인 선 24 — List 의 들인 선과 같다(SEED dividerPaddingX 12 의 groo 짝)"
+      "note": "들인 선 24 — List 의 들인 선과 같다"
     },
     {
       "rule": 1,
@@ -776,21 +776,21 @@
       "state": "enabled",
       "slot": "root",
       "prop": "gap",
-      "note": "Card 사이 8(사용자 결정 1B) — SEED separated medium 12 는 카드에서 거절됐다(데이터 표시 5A)"
+      "note": "Card 사이 8"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "item",
       "prop": "borderColor",
-      "note": "Card 테두리 — SEED separated strokeColor 와 같은 역할"
+      "note": "Card 테두리"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "item",
       "prop": "radius",
-      "note": "Card 면 16(SEED r3 12) — 안의 누름 바탕은 16 − 6 = 10 으로 동심"
+      "note": "Card 면 16 — 안의 누름 바탕은 16 − 6 = 10 으로 동심"
     },
     {
       "rule": 2,
@@ -818,14 +818,14 @@
       "state": "enabled",
       "slot": "chevron",
       "prop": "rotate",
-      "note": "위로 — SEED Expanded"
+      "note": "위로"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "panel",
       "prop": "display",
-      "note": "펼쳐도 저절로 스크롤 · 초점 이동하지 않는다 — 초점은 트리거에 그대로(SEED)"
+      "note": "펼쳐도 저절로 스크롤 · 초점 이동하지 않는다 — 초점은 트리거에 그대로"
     },
     {
       "rule": 4,
@@ -846,7 +846,7 @@
       "state": "enabled",
       "slot": "trigger",
       "prop": "cursor",
-      "note": "트리거가 아니다 — 같은 위아래 16 · 좌우 24 로 높이 · 글 시작이 다른 항목과 같다(사용자 결정 5A)"
+      "note": "트리거가 아니다 — 같은 위아래 16 · 좌우 24 로 높이 · 글 시작이 다른 항목과 같다"
     },
     {
       "rule": 5,
@@ -860,7 +860,7 @@
       "state": "enabled",
       "slot": "chevron",
       "prop": "display",
-      "note": "꺾쇠를 두지 않는다 — 막힌 트리거 · 꺾쇠만 뒤집히는 줄은 고르지 않았다(5B · 5C)"
+      "note": "꺾쇠를 두지 않는다 — 막힌 트리거 · 꺾쇠만 뒤집히는 줄로 그리지 않는다"
     },
     {
       "rule": 5,

@@ -3,7 +3,7 @@
   "source": "specs/components/slider.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "Slider — 손잡이 줄 + 표식. 폭은 놓인 자리",
@@ -284,7 +284,7 @@
         "left",
         "width"
       ],
-      "note": "트랙을 누르거나 키보드로 옮길 때 150ms — 끄는 동안은 손가락을 1:1 로 따라가 전환이 없다(SEED). 모션 줄이기면 바로"
+      "note": "트랙을 누르거나 키보드로 옮길 때 150ms — 끄는 동안은 손가락을 1:1 로 따라가 전환이 없습니다. 모션 줄이기면 바로"
     },
     "손잡이 — 누름": {
       "duration": "150ms",
@@ -292,7 +292,7 @@
       "properties": [
         "scale"
       ],
-      "note": "20 → 24(SEED 1.2배)"
+      "note": "20 → 24(1.2배)"
     },
     "말풍선 — 나타남": {
       "duration": "200ms",
@@ -301,7 +301,7 @@
         "opacity",
         "transform"
       ],
-      "note": "0.9배 · 투명 0 · 아래 5 에서 제자리로(SEED). 모션 줄이기면 투명도만"
+      "note": "0.9배 · 투명 0 · 아래 5 에서 제자리로. 모션 줄이기면 투명도만"
     },
     "말풍선 — 사라짐": {
       "duration": "200ms",
@@ -310,7 +310,7 @@
         "opacity",
         "transform"
       ],
-      "note": "투명 0 · 아래 5 로(SEED)"
+      "note": "투명 0 · 아래 5 로"
     }
   },
   "notes": [
@@ -319,42 +319,42 @@
       "state": "enabled",
       "slot": "root",
       "prop": "width",
-      "note": "Field 의 입력 자리를 채운다 — 폭이 정해진 자리에 두지 않는다"
+      "note": "Field 의 입력 자리를 채웁니다 — 폭이 정해진 자리에 두지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "gap",
-      "note": "손잡이 줄 ↔ 표식 2(SEED)"
+      "note": "손잡이 줄 ↔ 표식 2"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "paddingTop",
-      "note": "말풍선 자리 — Field 머리 ↔ 손잡이 줄 32(Field 간격 8 + 24). 말풍선(26)은 손잡이(20) 위 12 에 뜨고 누른 손잡이를 따라 올라가지 않아 머리(라벨 · 머리 값)와 6 이 남는다. 비교 페이지 2C 그림의 자리(30)를 토큰으로. 누르는 자리는 손잡이 줄 44 그대로"
+      "note": "말풍선 자리 — Field 머리 ↔ 손잡이 줄 32(Field 간격 8 + 24). 말풍선(26)은 손잡이(20) 위 12 에 뜨고 누른 손잡이를 따라 올라가지 않아 머리(라벨 · 머리 값)와 6 이 남습니다. 누르는 자리는 손잡이 줄 44 그대로입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "commit",
-      "note": "끄는 동안은 화면(채움 · 손잡이 · 머리 값 · 말풍선)만 따라가고 손을 뗄 때 한 번 저장한다(onValueCommit · 앱 onChangeEnd). 키보드는 키마다 한 번. 요청 중에도 막지 않는다 — 실패하면 값을 되돌리고 Field 오류로 알린다(사용자 결정 2026-10-09)"
+      "note": "끄는 동안은 화면(채움 · 손잡이 · 머리 값 · 말풍선)만 따라가고 손을 뗄 때 한 번 저장합니다(onValueCommit · 앱 onChangeEnd). 키보드는 키마다 한 번입니다. 요청 중에도 막지 않습니다 — 실패하면 값을 되돌리고 Field 오류로 알립니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "control",
       "prop": "height",
-      "note": "줄 전체가 누르는 자리 — 손잡이 20 위아래 12 · 트랙 4 위아래 20 이 모두 눌린다(SEED 26 은 44 에 못 미친다)"
+      "note": "줄 전체가 누르는 자리 — 손잡이 20 위아래 12 · 트랙 4 위아래 20 이 모두 눌립니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "control",
       "prop": "touchTarget",
-      "note": "AA ✓ · AAA ✓. 손잡이 밖을 누르면 가장 가까운 손잡이가 그 자리(가장 가까운 단계)로 건너뛴다(Tap jump) — 누르기만 하면 말풍선은 뜨지 않는다"
+      "note": "AA ✓ · AAA ✓. 손잡이 밖을 누르면 가장 가까운 손잡이가 그 자리(가장 가까운 단계)로 건너뜁니다(Tap jump) — 누르기만 하면 말풍선은 뜨지 않습니다"
     },
     {
       "rule": 0,
@@ -368,49 +368,49 @@
       "state": "enabled",
       "slot": "control",
       "prop": "dragStart",
-      "note": "SEED dragStartDelay — 손잡이 밖을 짧게 누르면 그 자리로 건너뛰기만 한다(말풍선 없음). 150ms 넘게 누르고 있거나 3px 넘게 움직이면 끌기가 된다(손잡이 24 + 말풍선). 손잡이를 누르면 바로 끌기"
+      "note": "손잡이 밖을 짧게 누르면 그 자리로 건너뛰기만 합니다(말풍선 없음). 150ms 넘게 누르고 있거나 3px 넘게 움직이면 끌기가 됩니다(손잡이 24 + 말풍선). 손잡이를 누르면 바로 끌기입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "track",
       "prop": "background",
-      "note": "SEED palette.gray-400 의 역할 짝(같은 gray-400). 흰 표면 위 1.23 · 다크 1.56(시트 1.35) — 트랙은 범위의 바탕이고 값은 채움 · 손잡이가 말한다"
+      "note": "흰 표면 위 1.23 · 다크 1.56(시트 1.35) — 트랙은 범위의 바탕이고 값은 채움 · 손잡이가 알립니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "fill",
       "prop": "background",
-      "note": "SEED fg.neutral — 트랙 위 13.38 · 다크 8.62. 모서리는 따로 두지 않는다 — 트랙이 잘라 준다"
+      "note": "트랙 위 13.38 · 다크 8.62. 모서리는 따로 두지 않습니다 — 트랙이 잘라 줍니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "tick",
       "prop": "width",
-      "note": "트랙 높이(4) 그대로의 틈 — SEED thick. 연속 값의 가는 눈금(thin 1)은 두지 않는다"
+      "note": "트랙 높이(4) 그대로의 틈. 연속 값의 가는 눈금(thin 1)은 두지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "thumb",
       "prop": "background",
-      "note": "SEED bg.neutral-solid 의 역할 짝 — 라이트는 채움과 같은 #1A1F2E, 다크는 채움과 같은 #F5F6FA(SEED 도 다크에서 같다). 흰 표면 위 16.41 · 다크 13.42"
+      "note": "라이트는 채움과 같은 #1A1F2E, 다크는 채움과 같은 #F5F6FA. 흰 표면 위 16.41 · 다크 13.42"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "thumb",
       "prop": "borderWidth",
-      "note": "테두리 · 그림자 없음(사용자 결정 1B — 흰 손잡이 + 테두리 + 그림자는 고르지 않았다)"
+      "note": "테두리 · 그림자 없음 — 흰 손잡이 + 테두리 + 그림자로 그리지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "thumb",
       "prop": "inset",
-      "note": "트랙 안쪽 — 손잡이 가운데가 트랙 양 끝에서 반지름(10)만큼 들어온 자리까지만 간다. 손잡이가 트랙 밖으로 나가지 않는다(SEED). 채움도 그 가운데까지"
+      "note": "트랙 안쪽 — 손잡이 가운데가 트랙 양 끝에서 반지름(10)만큼 들어온 자리까지만 갑니다. 손잡이가 트랙 밖으로 나가지 않습니다. 채움도 그 가운데까지입니다"
     },
     {
       "rule": 0,
@@ -424,14 +424,14 @@
       "state": "enabled",
       "slot": "thumb",
       "prop": "keyboard",
-      "note": "APG — 포커스한 손잡이만 움직인다. 범위면 다른 손잡이 값이 끝이다(넘지 않는다). RTL 은 ← → 만 뒤집고 ↑ 는 늘 늘린다"
+      "note": "APG — 포커스한 손잡이만 움직입니다. 범위면 다른 손잡이 값이 끝입니다(넘지 않습니다). RTL 은 ← → 만 뒤집고 ↑ 는 늘 늘립니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "display",
-      "note": "끄는 동안(pressed) · 마우스를 손잡이에 올렸을 때(hovered) · 키보드 포커스일 때(focused)만 보인다. 보조 기술에는 숨긴다(aria-hidden) — 값은 손잡이의 aria-valuetext 가 읽힌다"
+      "note": "끄는 동안(pressed) · 마우스를 손잡이에 올렸을 때(hovered) · 키보드 포커스일 때(focused)만 보입니다. 보조 기술에는 숨깁니다(aria-hidden) — 값은 손잡이의 aria-valuetext 가 읽힙니다"
     },
     {
       "rule": 0,
@@ -451,6 +451,13 @@
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
+      "prop": "typography",
+      "note": "글자 크기 설정을 따라 커집니다 — 상자는 아래 끝(손잡이 위 12)을 지키고 위로 늘어납니다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "valueIndicator",
       "prop": "numerals",
       "note": "끄는 동안 숫자 폭이 흔들리지 않게"
     },
@@ -459,70 +466,77 @@
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "minWidth",
-      "note": "좌우 여백 8 × 2 + 화살표 8(SEED)"
+      "note": "좌우 여백 8 × 2 + 화살표 8"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "offsetY",
-      "note": "상자 아래 끝 ↔ 손잡이(20) 위 끝(SEED offsetY 12). 누른 손잡이가 1.2배로 커져도 말풍선은 그 자리 그대로다(눈으로는 10) — 화살표가 그 사이에서 손잡이 가운데를 가리킨다"
+      "note": "상자 아래 끝 ↔ 손잡이(20) 위 끝. 누른 손잡이가 1.2배로 커져도 말풍선은 그 자리 그대로입니다(눈으로는 10) — 화살표가 그 사이에서 손잡이 가운데를 가리킵니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "arrowWidth",
-      "note": "SEED valueIndicatorArrow width x2 — 상자 바탕과 같은 색"
+      "note": "상자 바탕과 같은 색"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "arrowHeight",
-      "note": "SEED valueIndicatorArrow height x1_5 — 상자 아래로 나온다"
+      "note": "상자 아래로 나옵니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "clamp",
-      "note": "손잡이가 트랙 끝에 가면 상자만 안쪽으로 밀리고 화살표는 손잡이 가운데를 그대로 가리킨다(SEED)"
+      "note": "손잡이가 트랙 끝에 가면 상자만 안쪽으로 밀리고 화살표는 손잡이 가운데를 그대로 가리킵니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "enterScale",
-      "note": "나타날 때 0.9배 · 투명 0 · 아래 5 에서 제자리로(SEED enterScale · enterOpacity)"
+      "note": "나타날 때 0.9배 · 투명 0 · 아래 5 에서 제자리로"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "enterOffsetY",
-      "note": "아래로 5 에서 시작한다 — 모션 줄이기면 확대 · 이동 없이 투명도만"
+      "note": "아래로 5 에서 시작합니다 — 모션 줄이기면 확대 · 이동 없이 투명도만"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "exitOpacity",
-      "note": "사라질 때 투명 0 · 아래 5 로(SEED exitOpacity — 확대는 그대로 1)"
+      "note": "사라질 때 투명 0 · 아래 5 로(확대는 그대로 1)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "markers",
+      "prop": "typography",
+      "note": "트랙에 붙은 눈금 표식이라 글자 크기를 따르지 않습니다(WCAG 1.4.4 예외) — 지금 값은 머리 값 · 말풍선이 크게 보입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "markers",
       "prop": "foreground",
-      "note": "흰 표면 7.11 · 다크 7.70(시트 6.67). 보조 기술에는 숨긴다(aria-hidden)"
+      "note": "흰 표면 7.11 · 다크 7.70(시트 6.67). 보조 기술에는 숨깁니다(aria-hidden)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "markers",
       "prop": "align",
-      "note": "최솟값은 왼쪽 끝, 최댓값은 오른쪽 끝에 글을 맞춘다 — 단계 표식(ticks discrete)의 가운데 것은 단계 자리 가운데"
+      "note": "최솟값은 왼쪽 끝, 최댓값은 오른쪽 끝에 글을 맞춥니다 — 단계 표식(ticks discrete)의 가운데 것은 단계 자리 가운데"
     },
     {
       "rule": 0,
@@ -536,14 +550,14 @@
       "state": "enabled",
       "slot": "headerValue",
       "prop": "content",
-      "note": "\"80%\" — formatValue 의 글. 범위면 \"30 ~ 70만원\". 보조 기술에는 숨긴다(값은 손잡이가 읽힌다)"
+      "note": "\"80%\" — formatValue 의 글. 범위면 \"30 ~ 70만원\". 보조 기술에는 숨깁니다(값은 손잡이가 읽힙니다)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "headerValue",
       "prop": "position",
-      "note": "Field 의 headerAction 자리(라벨 오른쪽)에 두는 글이다 — 줄 높이 22 가 머리 높이와 같아 라벨과 한 줄에 맞는다"
+      "note": "Field 의 headerAction 자리(라벨 오른쪽)에 두는 글입니다 — 줄 높이 22 가 머리 높이와 같아 라벨과 한 줄에 맞습니다"
     },
     {
       "rule": 0,
@@ -557,21 +571,21 @@
       "state": "focused",
       "slot": "valueIndicator",
       "prop": "display",
-      "note": "키보드로 옮기는 동안 늘 — 키를 누를 때마다 값이 바뀐다"
+      "note": "키보드로 옮기는 동안 늘 — 키를 누를 때마다 값이 바뀝니다"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "thumb",
       "prop": "size",
-      "note": "SEED 1.2배 — 끄는 동안 손가락 밑에서 손잡이가 보이게"
+      "note": "1.2배 — 끄는 동안 손가락 밑에서 손잡이가 보이게"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "thumb",
       "prop": "background",
-      "note": "채움과 같은 색 — 불투명도로 흐리게 하지 않는다(v106). Tab 순서에서 빠진다"
+      "note": "채움과 같은 색 — 불투명도로 흐리게 하지 않습니다. Tab 순서에서 빠집니다"
     },
     {
       "rule": 1,
@@ -592,35 +606,35 @@
       "state": "enabled",
       "slot": "fill",
       "prop": "span",
-      "note": "SEED range"
+      "note": "두 손잡이 가운데 사이를 채운다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "thumb",
       "prop": "name",
-      "note": "손잡이마다 범위에서 하는 일 — \"시작 · 끝\" 처럼 바꿀 수 있다(thumbLabels). 두 손잡이는 서로를 넘지 않는다"
+      "note": "손잡이마다 범위에서 하는 일 — \"시작 · 끝\" 처럼 바꿀 수 있습니다(thumbLabels). 두 손잡이는 서로를 넘지 않습니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "valueIndicator",
       "prop": "target",
-      "note": "두 손잡이 가운데 끌거나 마우스를 올리거나 포커스한 손잡이 위에만 뜬다"
+      "note": "두 손잡이 가운데 끌거나 마우스를 올리거나 포커스한 손잡이 위에만 뜹니다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "markers",
       "prop": "content",
-      "note": "양 끝 둘(SEED count 2) — 단계를 숫자로 늘어놓지 않는다(지금 제품의 숫자 여섯은 걷는다). 단계는 끄는 동안 말풍선으로 안다"
+      "note": "양 끝 둘 — 단계를 숫자로 늘어놓지 않습니다. 단계는 끄는 동안 말풍선으로 압니다"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "tick",
       "prop": "background",
-      "note": "흰 표면 위 — 놓인 표면과 같은 색으로 트랙 · 채움을 끊는다(SEED fg.on-neutral-solid 의 자리). 양 끝을 뺀 단계 자리마다(구간 − 1개)"
+      "note": "흰 표면 위 — 놓인 표면과 같은 색으로 트랙 · 채움을 끊습니다. 양 끝을 뺀 단계 자리마다(구간 − 1개)"
     },
     {
       "rule": 4,
@@ -634,7 +648,7 @@
       "state": "enabled",
       "slot": "tick",
       "prop": "position",
-      "note": "손잡이가 설 수 있는 자리와 같다 — 트랙 양 끝에서 10 들어온 범위를 구간 수로 똑같이 나눈다"
+      "note": "손잡이가 설 수 있는 자리와 같습니다 — 트랙 양 끝에서 10 들어온 범위를 구간 수로 똑같이 나눕니다"
     },
     {
       "rule": 4,
@@ -648,7 +662,7 @@
       "state": "enabled",
       "slot": "thumb",
       "prop": "snap",
-      "note": "끄는 동안에도 단계 자리로만 선다 · 트랙을 누르면 가장 가까운 단계로"
+      "note": "끄는 동안에도 단계 자리로만 섭니다 · 트랙을 누르면 가장 가까운 단계로"
     }
   ]
 }

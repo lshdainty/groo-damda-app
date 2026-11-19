@@ -3,7 +3,7 @@
   "source": "specs/components/table-pagination.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "줄 — 표 아래, 한 줄. 왼쪽 줄 수 · 오른쪽 범위 · 이전 · 다음",
@@ -11,7 +11,7 @@
     "pageSizeSuffix": "줄 수 뒤 글 — \"씩 보기\"",
     "pageRange": "범위 고르기 — Select medium \"11-20\" · 목록 최대 높이 240",
     "total": "전체 수 — \"/ 총 237개\"",
-    "arrow": "이전 · 다음 — Pagination 의 화살표 칸 40. 끝에서는 막힌다",
+    "arrow": "이전 · 다음 — Pagination 의 화살표 칸 40. 끝에서는 막힙니다",
     "focusRing": "키보드 포커스 링(웹)"
   },
   "axes": {
@@ -36,7 +36,7 @@
       "when": {},
       "enabled": {
         "root": {
-          "height": 40,
+          "minHeight": 40,
           "justifyContent": "space-between",
           "gap": 16,
           "marginTop": 12
@@ -196,8 +196,8 @@
       "rule": 0,
       "state": "enabled",
       "slot": "root",
-      "prop": "height",
-      "note": "한 줄 — 줄바꿈하지 않는다. 좁으면 표와 같은 가로 스크롤 상자 안에 둔다(SEED)"
+      "prop": "minHeight",
+      "note": "한 줄 — 줄바꿈하지 않습니다. 최소값이라 글자 크기 설정을 따라 고르기 · 글이 커지면 따라 높아집니다. 좁으면 표와 같은 가로 스크롤 상자 안에 둡니다"
     },
     {
       "rule": 0,
@@ -218,14 +218,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "marginTop",
-      "note": "표 아래 12 — 따로 정한 간격이 없는 컴포넌트 사이(v101 역할 간격). 이 12 는 넘김 줄이 갖는다 — Table 의 pagination 자리는 좌우 24 만 두고 위 여백을 더하지 않는다. 자리에 넣어도, 표 바로 뒤에 두어도 12 다(2026-10-17 사용자 결정 — 03-D 결정 5 B, Pagination root.marginTop 과 같은 방식)"
+      "note": "표 아래 12 — 따로 정한 간격이 없는 컴포넌트 사이의 역할 간격입니다. 이 12 는 넘김 줄이 갖습니다 — Table 의 pagination 자리는 좌우 24 만 두고 위 여백을 더하지 않으므로, 자리에 넣어도 표 바로 뒤에 두어도 12 입니다(Pagination root.marginTop 과 같은 방식)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "pageSize",
       "prop": "size",
-      "note": "높이 40 · 최소 폭 96 · 모서리 8 — 선택지 \"10개\" · \"25개\" · \"50개\"(3 ~ 4개를 넘지 않는다). 화면 폭과 상관없이 medium(Select 1280 규칙의 예외 — 사용자 결정 2026-10-08)"
+      "note": "높이 40 · 최소 폭 96 · 모서리 8 — 선택지 \"10개\" · \"25개\" · \"50개\"(3 ~ 4개를 넘지 않습니다). 화면 폭과 상관없이 medium 입니다(Select 1280 규칙의 예외)"
     },
     {
       "rule": 0,
@@ -239,14 +239,14 @@
       "state": "enabled",
       "slot": "pageRange",
       "prop": "size",
-      "note": "높이 40 · 최소 폭 96 — 선택지는 범위(\"1-10\" · \"11-20\" …). 200개를 넘으면 첫 · 마지막 · 지금 둘레만"
+      "note": "높이 40 · 최소 폭 96 — 선택지는 범위(\"1-10\" · \"11-20\" …). 200개를 넘으면 첫 · 마지막 · 지금 둘레만 둡니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "pageRange",
       "prop": "maxHeight",
-      "note": "열린 목록의 최대 높이 — Select 기본 480 대신(SEED)"
+      "note": "열린 목록의 최대 높이 — Select 기본 480 대신 씁니다"
     },
     {
       "rule": 0,
@@ -260,21 +260,21 @@
       "state": "enabled",
       "slot": "total",
       "prop": "numerals",
-      "note": "수는 세 자리마다 쉼표(\"1,240\")"
+      "note": "수는 세 자리마다 쉼표를 넣습니다(\"1,240\")"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "arrow",
       "prop": "size",
-      "note": "Pagination 의 화살표 칸 — 둘이 붙는다"
+      "note": "Pagination 의 화살표 칸 — 둘이 붙습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "arrow",
       "prop": "iconSize",
-      "note": "lucide chevron-left · chevron-right"
+      "note": "lucide chevron-left · chevron-right. 칸 · 아이콘은 px — 글자 크기를 따르지 않습니다"
     },
     {
       "rule": 0,
@@ -288,70 +288,70 @@
       "state": "enabled",
       "slot": "arrow",
       "prop": "transitionProperty",
-      "note": "바탕 색과 누름 축소 둘 다 — Pagination 화살표 칸과 같다(Q-011-6). 시간은 motion 절"
+      "note": "바탕 색과 누름 축소 둘 다 전환합니다 — Pagination 화살표 칸과 같습니다. 시간은 motion 절"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "arrow",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝"
+      "note": "불투명한 누름 바탕"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "arrow",
       "prop": "scale",
-      "note": "기준 40 → 0.95 — 모션 줄이기면 하지 않는다"
+      "note": "기준 40 → 0.95 — 모션 줄이기면 하지 않습니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "칸 바깥 — 고르기의 링은 Select 그대로"
+      "note": "칸 바깥 — 고르기의 링은 Select 그대로입니다"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "arrow",
       "prop": "color",
-      "note": "첫 범위의 이전 · 마지막 범위의 다음 — 숨기지 않고 막는다(Pagination 과 다르다). 범위 · 줄 수는 그대로(Q-011-5)"
+      "note": "첫 범위의 이전 · 마지막 범위의 다음 — 숨기지 않고 막습니다(Pagination 과 다릅니다). 범위 · 줄 수는 그대로입니다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "pageRange",
       "prop": "display",
-      "note": "\"11-20\" — 범위 고르기 · \"/ 총 N개\" 가 없다. 다음이 있는지만 안다"
+      "note": "\"11-20\" — 범위 고르기 · \"/ 총 N개\" 가 없습니다. 다음이 있는지만 압니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "pageRange",
       "prop": "disabled",
-      "note": "범위 고르기(Select disabled)를 막는다 — 고를 범위가 없다. 보이는 값 \"0-0\""
+      "note": "범위 고르기(Select disabled)를 막습니다 — 고를 범위가 없습니다. 보이는 값은 \"0-0\" 입니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "pageRange",
       "prop": "foreground",
-      "note": "막힌 범위 \"0-0\" — 글자 대비 예외(비활성)"
+      "note": "막힌 범위 \"0-0\" — 글자 대비 예외입니다(비활성)"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "total",
       "prop": "foreground",
-      "note": "\"/ 총 0개\" — 흐리게 하지 않는다"
+      "note": "\"/ 총 0개\" — 흐리게 하지 않습니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "arrow",
       "prop": "color",
-      "note": "이전 · 다음 둘 다 막힌다(aria-disabled). 줄 수 고르기는 그대로 바꿀 수 있다(Q-011-5)"
+      "note": "이전 · 다음 둘 다 막힙니다(aria-disabled). 줄 수 고르기는 그대로 바꿀 수 있습니다"
     }
   ]
 }

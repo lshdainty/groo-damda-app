@@ -3,7 +3,7 @@
   "source": "specs/components/wheel-picker.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "휠 — 칼럼 묶음을 가운데에 모은다",
@@ -151,7 +151,7 @@
       "properties": [
         "scroll"
       ],
-      "note": "모션 줄이기면 모든 이동을 바로(v104)"
+      "note": "모션 줄이기면 모든 이동을 바로"
     }
   },
   "notes": [
@@ -216,14 +216,14 @@
       "state": "enabled",
       "slot": "item",
       "prop": "typography",
-      "note": "26 / 35 — 글자 크기 설정을 따르지 않는 px(웹 text-t10-static, 앱 TextScaler.noScaling — SEED t10-static), 휠 칸이 넘치지 않게"
+      "note": "26 / 35 — 글자 크기 설정을 따르지 않는 px(웹 text-t10-static, 앱 TextScaler.noScaling), 휠 칸이 넘치지 않게"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "item",
       "prop": "typography",
-      "note": "20 / 27 — 글자 크기 설정을 따르지 않는 px(웹 text-t7-static, 앱 TextScaler.noScaling — SEED t7-static)"
+      "note": "20 / 27 — 글자 크기 설정을 따르지 않는 px(웹 text-t7-static, 앱 TextScaler.noScaling)"
     }
   ]
 }

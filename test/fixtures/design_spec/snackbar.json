@@ -3,16 +3,16 @@
   "source": "specs/components/snackbar.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
-    "region": "자리 — 화면 아래 가운데. 탭 바 · 플로팅 버튼 · 바닥 버튼을 피해 그 위에 선다",
+    "region": "자리 — 화면 아래 가운데. 탭 바 · 플로팅 버튼 · 바닥 버튼을 피해 그 위에 섭니다",
     "root": "띠 — 짙은 바탕(다크는 밝은 띠), 한 번에 하나",
     "icon": "아이콘 — 성공 · 실패에만",
     "content": "글과 액션 — 양 끝에 놓는다",
     "message": "글 — 무엇이 됐는지 먼저, 줄이지 않는다",
     "action": "액션 — 하나, 동작 이름(되돌리기 · 잔액 고치기)",
-    "closeButton": "보조 기술용 닫기 — 보이지 않고, 키보드 초점이 오면 띠 오른쪽 끝에 보인다",
+    "closeButton": "보조 기술용 닫기 — 보이지 않고, 키보드 초점이 오면 띠 오른쪽 끝에 보입니다",
     "focusRing": "키보드 포커스 링(웹)"
   },
   "axes": {
@@ -156,7 +156,7 @@
         "scale 0.8 → 1",
         "opacity 0 → 1"
       ],
-      "note": "가운데를 기준점으로 — 모션 줄이기면 투명도만(v104)"
+      "note": "가운데를 기준점으로 — 모션 줄이기면 투명도만"
     },
     "사라짐": {
       "duration": "100ms",
@@ -172,7 +172,7 @@
       "properties": [
         "지금 것 사라짐 → 새 것 나타남"
       ],
-      "note": "한 번에 하나 — 새 것이 오면 지금 것을 바로 바꾼다. 지금 것에 액션이 있으면 끝날 때까지 지키고 새 것은 그 뒤에(기다리는 것은 하나 — 2026-10-22 1B)"
+      "note": "한 번에 하나 — 새 것이 오면 지금 것을 바로 바꿉니다. 지금 것에 액션이 있으면 끝날 때까지 지키고 새 것은 그 뒤에 띄웁니다(기다리는 것은 하나)"
     }
   },
   "notes": [
@@ -188,28 +188,28 @@
       "state": "enabled",
       "slot": "region",
       "prop": "paddingBottom",
-      "note": "아래 8 + 안전 영역 — 탭 바 · 플로팅 버튼 · 바닥 버튼이 있으면 그 위 8(안전 영역과 둘 중 큰 쪽 — 탭 바는 안전 영역을 품고 있다). 화면 키보드가 올라와 있으면 키보드 바로 위 8 — 웹 폰 브라우저도 보이는 화면의 아래 끝을 잰다(2026-10-15 사용자 결정 — 구현 세션 질문 Q-003-1)"
+      "note": "아래 8 + 안전 영역 — 탭 바 · 플로팅 버튼 · 바닥 버튼이 있으면 그 위 8(안전 영역과 둘 중 큰 쪽 — 탭 바는 안전 영역을 품고 있다). 화면 키보드가 올라와 있으면 키보드 바로 위 8 — 웹 폰 브라우저도 보이는 화면의 아래 끝을 잽니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "region",
       "prop": "keyboardGap",
-      "note": "화면 키보드 위 끝 ↔ 띠 아래 끝 — 키보드도 피할 자리 하나다(안전 영역 · 탭 바 · 바닥 버튼과 넷 중 가장 위)"
+      "note": "화면 키보드 위 끝 ↔ 띠 아래 끝 — 키보드도 피할 자리 하나입니다(안전 영역 · 탭 바 · 바닥 버튼과 넷 중 가장 위)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "region",
       "prop": "offsetDuration",
-      "note": "피할 자리(탭 바 · 바닥 버튼 · 키보드)가 바뀌어 띠가 옮겨 갈 때 — 모션 줄이기면 바로(SEED snackbar.region.offsetDuration)"
+      "note": "피할 자리(탭 바 · 바닥 버튼 · 키보드)가 바뀌어 띠가 옮겨 갈 때 — 모션 줄이기면 바로"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "region",
       "prop": "offsetEasing",
-      "note": "SEED snackbar.region.offsetTimingFunction"
+      "note": "피할 자리가 바뀌어 띠가 옮겨 갈 때의 곡선"
     },
     {
       "rule": 0,
@@ -229,6 +229,13 @@
       "rule": 0,
       "state": "enabled",
       "slot": "root",
+      "prop": "minHeight",
+      "note": "최소값 — 글이 커지거나 줄이 늘면 띠가 따라 높아집니다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "root",
       "prop": "background",
       "note": "다크에서는 밝은 띠"
     },
@@ -237,21 +244,21 @@
       "state": "enabled",
       "slot": "root",
       "prop": "shadow",
-      "note": "그림자 없이 면 색으로 뜬다(SEED · Elevation)"
+      "note": "그림자 없이 면 색으로 뜹니다(Elevation)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "duration",
-      "note": "액션이 있으면 6000ms. 마우스 · 손가락 · 키보드 초점이 머무는 동안 멈추고, 떠나면 처음부터 다시 센다"
+      "note": "액션이 있으면 6000ms. 마우스 · 손가락 · 키보드 초점이 머무는 동안 멈추고, 떠나면 처음부터 다시 셉니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "icon",
       "prop": "size",
-      "note": "lucide 선 아이콘 — 체크(circle-check) · 느낌표(circle-alert). 오른쪽 여백 2 를 이 칸 안에 둬 그림은 22 다(SEED 와 같다 — 글은 띠 가장자리에서 40)"
+      "note": "lucide 선 아이콘 — 체크(circle-check) · 느낌표(circle-alert). 오른쪽 여백 2 를 이 칸 안에 둬 그림은 22 입니다(글은 띠 가장자리에서 40)"
     },
     {
       "rule": 0,
@@ -279,21 +286,28 @@
       "state": "enabled",
       "slot": "message",
       "prop": "typography",
-      "note": "단어 단위 줄바꿈(v114) — 줄 수를 자르지 않는다(2026-09-22). 두 줄 안에서 끝나게 쓴다"
+      "note": "글자 크기 설정을 따라 커집니다. 단어 단위 줄바꿈 — 줄 수를 자르지 않습니다. 두 줄 안에서 끝나게 씁니다(100% 기준)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "action",
+      "prop": "typography",
+      "note": "글자 크기 설정을 따라 커지고 한 줄을 지킵니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "action",
       "prop": "foreground",
-      "note": "반전 짝(v115) — 짙은 띠 위 Desk 6.90 · HR 6.88, 다크의 밝은 띠 위 7.76 · 7.56"
+      "note": "반전 짝 — 짙은 띠 위 Desk 6.90 · HR 6.88, 다크의 밝은 띠 위 7.76 · 7.56"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "action",
       "prop": "touchTarget",
-      "note": "띠 높이 안에서 위아래로 넓힌다"
+      "note": "띠 높이 안에서 위아래로 넓힙니다"
     },
     {
       "rule": 0,
@@ -307,7 +321,7 @@
       "state": "enabled",
       "slot": "closeButton",
       "prop": "size",
-      "note": "평소에는 보이지 않는다(보조 기술은 읽는다) — 키보드 초점이 오면 띠 오른쪽 끝에 X 16 으로 보인다"
+      "note": "평소에는 보이지 않습니다(보조 기술은 읽습니다) — 키보드 초점이 오면 띠 오른쪽 끝에 X 16 으로 보입니다"
     },
     {
       "rule": 0,
@@ -321,49 +335,49 @@
       "state": "enabled",
       "slot": "closeButton",
       "prop": "margin",
-      "note": "띠 여백(10) 안으로 들어와 띠 높이를 44 로 둔다"
+      "note": "띠 여백(10) 안으로 들어와 띠 높이를 44 로 둡니다"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "action",
       "prop": "scale",
-      "note": "글만 준다 — 모션 줄이기면 하지 않는다"
+      "note": "글만 줄입니다 — 모션 줄이기면 하지 않습니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "띠 · 닫기 — 안쪽 4. 링이 띠 글자색이라 바깥(페이지 위)에 그리면 보이지 않는다"
+      "note": "띠 · 닫기 — 안쪽 4. 링이 띠 글자색이라 바깥(페이지 위)에 그리면 보이지 않습니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "actionOffset",
-      "note": "액션 — 바깥 2. 띠 여백 안이라 띠 위에 그려진다"
+      "note": "액션 — 바깥 2. 띠 여백 안이라 띠 위에 그려집니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "color",
-      "note": "띠 글자색 — 브랜드 링은 짙은 띠 위에서 Desk 1.96 이라 3:1 에 못 미친다"
+      "note": "띠 글자색 — 브랜드 링은 짙은 띠 위에서 Desk 1.96 이라 3:1 에 못 미칩니다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "icon",
       "prop": "color",
-      "note": "반전 짝(v115) — 짙은 띠 위 6.87, 다크의 밝은 띠 위 4.70"
+      "note": "반전 짝 — 짙은 띠 위 6.87, 다크의 밝은 띠 위 4.70"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "icon",
       "prop": "color",
-      "note": "반전 짝(v115) — 짙은 띠 위 6.89, 다크의 밝은 띠 위 4.68"
+      "note": "반전 짝 — 짙은 띠 위 6.89, 다크의 밝은 띠 위 4.68"
     }
   ]
 }

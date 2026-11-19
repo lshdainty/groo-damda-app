@@ -3,7 +3,7 @@
   "source": "specs/components/tabs.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "list": "목록 — 탭을 담는 줄. 놓인 화면 · 구역 폭을 채우고 바닥에 구획 선",
@@ -251,21 +251,21 @@
       "state": "enabled",
       "slot": "list",
       "prop": "borderBottomColor",
-      "note": "안쪽 1px(inset) — 선이 탭 높이를 밀지 않는다. SEED stroke.neutral-muted 의 불투명 구획 선(v102)"
+      "note": "안쪽 1px(inset) — 선이 탭 높이를 밀지 않는다. 불투명 구획 선"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "list",
       "prop": "position",
-      "note": "화면 맨 위 1차 Line 은 어디서나 Top Navigation 바로 아래에 붙어 함께 고정된다(SEED Tabs stickyList — Desk 가계부 묶음 · 카테고리 지출 · 수입). 숨지 않는다 — 숨는 것은 그 아래 스크롤 상자의 Scroll Auto Hide 뿐(2026-10-16 구현 세션 질문 Q-017-5 정리)"
+      "note": "화면 맨 위 1차 Line 은 어디서나 Top Navigation 바로 아래에 붙어 함께 고정된다(Desk 가계부 묶음 · 카테고리 지출 · 수입). 숨지 않는다 — 숨는 것은 그 아래 스크롤 상자의 Scroll Auto Hide 뿐"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "trigger",
       "prop": "alignItems",
-      "note": "글을 아래로 붙인다 — 아래 10, 남는 높이는 위로(SEED)"
+      "note": "글을 아래로 붙인다 — 아래 10, 남는 높이는 위로"
     },
     {
       "rule": 0,
@@ -293,7 +293,7 @@
       "state": "enabled",
       "slot": "indicator",
       "prop": "radius",
-      "note": "끝이 각지다(SEED)"
+      "note": "끝이 각지다"
     },
     {
       "rule": 0,
@@ -301,6 +301,13 @@
       "slot": "indicator",
       "prop": "transitionProperty",
       "note": "고른 탭의 자리 · 폭으로 미끄러진다. 글자색은 전환 없이 바로 바뀐다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "notification",
+      "prop": "size",
+      "note": "px — 글자 크기를 따르지 않습니다"
     },
     {
       "rule": 0,
@@ -321,14 +328,14 @@
       "state": "pressed",
       "slot": "trigger",
       "prop": "scale",
-      "note": "기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px(SEED scaleScope: self · v104) — 모션 줄이기면 하지 않는다"
+      "note": "기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px(탭 자신 기준) — 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "탭 안쪽 — 이웃 탭 · 바닥 선에 걸리지 않는다. 모서리는 각지다(SEED)"
+      "note": "탭 안쪽 — 이웃 탭 · 바닥 선에 걸리지 않는다. 모서리는 각지다"
     },
     {
       "rule": 0,
@@ -356,21 +363,21 @@
       "state": "enabled",
       "slot": "list",
       "prop": "overflowX",
-      "note": "글이 칸을 넘으면 Fill 모양 그대로 목록만 가로 스크롤 — 스크롤바는 숨긴다(SEED, 2026-10-21 03-G 3B)"
+      "note": "글이 칸을 넘으면 Fill 모양 그대로 목록만 가로 스크롤 — 스크롤바는 숨긴다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "list",
       "prop": "scrollPadding",
-      "note": "넘쳐 스크롤할 때 고른 탭이 화면 밖이면 16 여유를 두고 가까운 쪽으로 스크롤한다 — Hug 와 같다(웹 · 앱이 이미 이렇게 한다, 2026-10-22 I-04 검수). 넘치지 않으면 하는 일이 없다"
+      "note": "넘쳐 스크롤할 때 고른 탭이 화면 밖이면 16 여유를 두고 가까운 쪽으로 스크롤한다 — Hug 와 같다(웹 · 앱 모두). 넘치지 않으면 하는 일이 없다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "trigger",
       "prop": "grow",
-      "note": "칸을 똑같이 나눈다 — 글이 칸보다 길면 그 탭만 넓어지고, 넘치면 Fill 모양 그대로 목록만 가로 스크롤(SEED, 2026-10-21 03-G 3B)"
+      "note": "칸을 똑같이 나눈다 — 글이 칸보다 길면 그 탭만 넓어지고, 넘치면 Fill 모양 그대로 목록만 가로 스크롤"
     },
     {
       "rule": 2,
@@ -384,7 +391,7 @@
       "state": "enabled",
       "slot": "list",
       "prop": "paddingX",
-      "note": "SEED 16 — 탭의 좌우 10 이 더해져 첫 글이 26 에서 시작한다"
+      "note": "16 — 탭의 좌우 10 이 더해져 첫 글이 26 에서 시작한다"
     },
     {
       "rule": 3,
@@ -417,16 +424,30 @@
     {
       "rule": 4,
       "state": "enabled",
+      "slot": "list",
+      "prop": "minHeight",
+      "note": "최소값 — 글자 크기 설정을 따라 글이 커지면 목록 · 탭이 따라 높아집니다"
+    },
+    {
+      "rule": 4,
+      "state": "enabled",
       "slot": "label",
       "prop": "typography",
-      "note": "14 / 19 — 글은 아래 10, 위 11"
+      "note": "14 / 19 — 글은 아래 10, 위 11. 글자 크기 설정을 따라 커집니다"
+    },
+    {
+      "rule": 5,
+      "state": "enabled",
+      "slot": "list",
+      "prop": "minHeight",
+      "note": "최소값 — 글자 크기 설정을 따라 글이 커지면 목록 · 탭이 따라 높아집니다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "label",
       "prop": "typography",
-      "note": "16 / 22 — 글은 아래 10, 위 12"
+      "note": "16 / 22 — 글은 아래 10, 위 12. 글자 크기 설정을 따라 커집니다"
     }
   ]
 }

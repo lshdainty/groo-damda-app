@@ -3,7 +3,7 @@
   "source": "specs/components/divider.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "1px 선 — 바깥 여백이 없다(사이 간격은 쓰는 자리가 정한다)"
@@ -95,7 +95,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "흰 바탕 1.15 · 다크 1.30(SEED 기본 neutral-muted 1.15 와 같은 진하기) — 장식이라 3:1 대상이 아니다"
+      "note": "흰 바탕 1.15 · 다크 1.30 — 장식이라 3:1 대상이 아니다"
     },
     {
       "rule": 0,
@@ -123,7 +123,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "marginX",
-      "note": "양끝 16(SEED inset) — 선 폭은 부모 폭 − 32(100% 에 여백을 더하지 않는다). 화면 여백 24 안의 내용에 맞출 때는 쓰는 자리가 여백을 더한다"
+      "note": "양끝 16 — 선 폭은 부모 폭 − 32(100% 에 여백을 더하지 않는다). 화면 여백 24 안의 내용에 맞출 때는 쓰는 자리가 여백을 더한다"
     },
     {
       "rule": 4,

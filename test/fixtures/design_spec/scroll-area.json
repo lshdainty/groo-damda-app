@@ -3,7 +3,7 @@
   "source": "specs/components/scroll-area.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "box": "스크롤 상자 — overflow 를 둔 요소(문서 전체 포함). 이름 · 초점 · 넘침 막기",
@@ -120,7 +120,7 @@
       "state": "enabled",
       "slot": "scrollbar",
       "prop": "width",
-      "note": "세로 스크롤바 — ::-webkit-scrollbar 전역 한 벌(지금 Desk 웹과 같다)"
+      "note": "세로 스크롤바 — ::-webkit-scrollbar 전역 한 벌"
     },
     {
       "rule": 0,
@@ -141,7 +141,7 @@
       "state": "enabled",
       "slot": "thumb",
       "prop": "background",
-      "note": "흰 면 4.18 · 바닥 3.87 · 떠 있는 표면 4.18 / 다크 4.13 · 4.68 · 3.58(≥ 3) — 지금 Desk 웹 #767C8B 와 같다"
+      "note": "흰 면 4.18 · 바닥 3.87 · 떠 있는 표면 4.18 / 다크 4.13 · 4.68 · 3.58(≥ 3)"
     },
     {
       "rule": 0,
@@ -155,7 +155,7 @@
       "state": "enabled",
       "slot": "track",
       "prop": "background",
-      "note": "바탕을 칠하지 않는다 — 지금 HR 의 회색 track 을 걷는다"
+      "note": "바탕을 칠하지 않는다 — 회색 track 을 두지 않는다"
     },
     {
       "rule": 0,
@@ -183,7 +183,7 @@
       "state": "enabled",
       "slot": "box",
       "prop": "overscrollBehavior",
-      "note": "끝에 닿아도 뒤 화면이 따라 스크롤되지 않게 — 시트 · 대화상자 · 팝오버의 본문과 그 안 상자(지금 웹 1곳 · HR 0)"
+      "note": "끝에 닿아도 뒤 화면이 따라 스크롤되지 않게 — 시트 · 대화상자 · 팝오버의 본문과 그 안 상자"
     },
     {
       "rule": 2,
