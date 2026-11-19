@@ -17,6 +17,7 @@ import 'package:groo_damda_app/shared/ds/callout/p_callout.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list_header.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 
 /// 정산 상세(I-15 38 · 39 · 40) — ds Bottom Sheet 조회. 머리 제목 = 정산 이름(줄바꿈), 본문 = "{날짜 (요일)} · {장소}" · 총액(t9 24 / 32 · 700 ·
 /// 쉼표 뒤에서만 줄바꿈) · "1인당 … · {n}명" · 선 · "참여자 · {n}" + ds List 줄(앞 Avatar 36 · 이름 · 설명 · 뒤 Badge 또는 [받음]).
@@ -176,19 +177,12 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
       );
     }
 
-    final deleteButton = PButton(
-      label: l.actionDelete,
-      variant: PButtonVariant.ghost,
-      ghostColor: PButtonGhostColor.critical,
-      size: PButtonSize.large,
-      flush: PButtonFlush.left,
-      onPressed: _busy
-          ? null
-          : () => _guard(() async {
-              final gone = await deleteDutchWithConfirm(context, d);
-              if (gone) _closeOnce();
-            }),
-    );
+    final Future<void> Function()? onDelete = _busy
+        ? null
+        : () => _guard(() async {
+            final gone = await deleteDutchWithConfirm(context, d);
+            if (gone) _closeOnce();
+          });
 
     final settleAll = PButton(
       label: l.dutchSettleAll,
@@ -263,32 +257,25 @@ class _DetailSheetState extends ConsumerState<_DetailSheet> {
           ),
         ],
       ),
-      // 완료 = [삭제] 하나(받을 것이 없다), 진행 중 = 왼쪽 [삭제] 내용 폭 + 남은 폭 [모두 받음]
+      // 완료 = [삭제] 하나(받을 것이 없다) · 왼쪽 글자만큼. 진행 중 = 왼쪽 [삭제] 글자만큼 + 남은 폭 [모두 받음] — 큰 글자로
+      // 한 줄에 안 들어가면 짝 버튼 판정대로 쌓는다(주 버튼이 위, bottom-sheet.md 바닥)
       footerRow: d.isSettled
-          // 완료 정산의 [삭제] 는 폭 전체가 아니라 왼쪽 · 내용 폭
-          ? Row(children: [deleteButton])
-          : _footer(context, deleteButton, settleAll),
-    );
-  }
-
-  /// 바닥 줄 — 왼쪽 [삭제] 내용 폭 + 남은 폭 [모두 받음]. 글자를 크게 키우면 글이 겹치므로 세로로 쌓는다(주 버튼이 위).
-  Widget _footer(BuildContext context, Widget deleteButton, Widget settleAll) {
-    if (MediaQuery.textScalerOf(context).scale(16) > 22) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: PSpacing.x2,
-        children: [
-          settleAll,
-          Row(children: [deleteButton]),
-        ],
-      );
-    }
-    return Row(
-      spacing: PSpacing.x2,
-      children: [
-        deleteButton,
-        Expanded(child: settleAll),
-      ],
+          ? Row(
+              children: [
+                PButton(
+                  label: l.actionDelete,
+                  variant: PButtonVariant.ghost,
+                  ghostColor: PButtonGhostColor.critical,
+                  size: PButtonSize.large,
+                  onPressed: onDelete,
+                ),
+              ],
+            )
+          : PFormDeleteFooter(
+              deleteLabel: l.actionDelete,
+              onDelete: onDelete,
+              save: settleAll,
+            ),
     );
   }
 }

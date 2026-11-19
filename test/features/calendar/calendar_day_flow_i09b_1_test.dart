@@ -379,6 +379,19 @@ void main() {
       await tapEvent(tester, '내 일정');
       expect(button(l.actionDelete), findsOneWidget);
       expect(button(l.actionEdit), findsOneWidget);
+      // 바닥 왼쪽 [삭제] 는 글자만큼, [수정] 이 남은 폭(bottom-sheet.md 바닥) — 반씩 나누지 않는다
+      final del = tester.getRect(button(l.actionDelete));
+      final edit = tester.getRect(button(l.actionEdit));
+      final delWidget = tester.widget<PButton>(button(l.actionDelete));
+      expect(
+        del.width,
+        closeTo(
+          delWidget.naturalWidth(tester.element(button(l.actionDelete))),
+          0.5,
+        ),
+      );
+      expect(edit.left, closeTo(del.right + 8, 0.5));
+      expect(edit.width, greaterThan(del.width * 2));
       await tester.tap(back());
       await tester.pumpAndSettle();
       await tapEvent(tester, '편집권한 일정');

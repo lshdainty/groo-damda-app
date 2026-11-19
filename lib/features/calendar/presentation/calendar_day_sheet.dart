@@ -26,6 +26,7 @@ import 'package:groo_damda_app/shared/ds/bottom_sheet/p_bottom_sheet.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/list/p_list.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/forms/form_delete_footer.dart';
 
 /// 날을 누르면 뜨는 그날 시트(I-09 11) — ds Bottom Sheet. 제목 "10월 22일 (목)", 본문은 일정 줄 목록(공휴일 먼저, 그다음 시작 시각
 /// 차례), 바닥 "일정 추가" 폭 전체. 높이는 내용만큼 · 90% 상한.
@@ -376,24 +377,20 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
           ),
         ],
       ),
-      // 버튼이 없으면 바닥 자체를 두지 않는다(읽기 전용 · 권한을 모르는 남의 일정)
-      footer: canEdit
-          ? [
-              PButton(
-                label: l.actionDelete,
-                variant: PButtonVariant.ghost,
-                ghostColor: PButtonGhostColor.critical,
-                size: PButtonSize.large,
-                loading: _busy,
-                onPressed: _busy ? null : () => _delete(e),
-              ),
-              PButton(
+      // 버튼이 없으면 바닥 자체를 두지 않는다(읽기 전용 · 권한을 모르는 남의 일정).
+      // 왼쪽 [삭제] 는 글자만큼, [수정] 이 남은 폭(bottom-sheet.md 바닥)
+      footerRow: canEdit
+          ? PFormDeleteFooter(
+              deleteLabel: l.actionDelete,
+              deleteLoading: _busy,
+              onDelete: _busy ? null : () => _delete(e),
+              save: PButton(
                 label: l.actionEdit,
                 size: PButtonSize.large,
                 onPressed: _busy ? null : _openEdit,
               ),
-            ]
-          : const [],
+            )
+          : null,
     );
   }
 }
