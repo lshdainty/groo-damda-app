@@ -25,7 +25,8 @@ class PDonutSlice {
 const _tabular = [FontFeature.tabularFigures()];
 
 /// 도넛 차트 — 카테고리 비율. 조각 사이 0 · 두께는 지름 160 에서 22(폰 120 에서 18) · 12시에서 시계 방향. 가운데는 합계
-/// (16 / 22 · 700)와 위 라벨(12) — 돈은 가운데서도 줄이지 않는다. 가운데에 들어가지 않으면 가운데 글을 그리지 않고
+/// (16 / 22 · 700)와 위 라벨(12) — 돈은 가운데서도 줄이지 않고, 도넛 모양과 함께 글자 크기 설정을 따르지 않는다(합계는 범례 ·
+/// 목록에서 크게 읽는다). 가운데에 들어가지 않으면 가운데 글을 그리지 않고
 /// [onFitChanged] 로 알린다 — 부르는 쪽이 목록 위에 합계를 둔다. 범례는 [PChartDonutLegend] 다.
 ///
 /// 그리는 자리가 [diameter] 보다 좁으면 자리 폭을 지름으로 쓰고 두께 · 가운데 글 자리도 그 지름으로 다시 낸다(320 보다 좁은
@@ -120,7 +121,9 @@ class _PDonutChartState extends State<PDonutChart> {
       fontFeatures: _tabular,
     );
     final labelStyle = PTypography.t2.copyWith(color: c.fgNeutralSubtle);
-    // 가운데 글 묶음(폭 × 높이)의 모서리가 구멍(원) 안에 들어가는지
+    // 가운데 글 묶음(폭 × 높이)의 모서리가 구멍(원) 안에 들어가는지 — 도넛 모양과 함께 글자 크기 설정을 따르지 않는다
+    // (chart.yaml 가운데 합계 text-t5-static · 위 라벨 text-t2-static, groo-design #263). 재는 쪽도 그리는 쪽도
+    // [TextScaler.noScaling] 이라 판정과 그림이 같은 글이다.
     var fits = true;
     if (widget.centerAmount != null) {
       final w = math.max(
@@ -129,7 +132,9 @@ class _PDonutChartState extends State<PDonutChart> {
             ? 0.0
             : measureText(widget.centerLabel!, labelStyle),
       );
-      final h = 22.0 + (widget.centerLabel == null ? 0 : 16);
+      final h =
+          chartTickLineHeight(amountStyle) +
+          (widget.centerLabel == null ? 0 : chartTickLineHeight(labelStyle));
       fits = math.sqrt(w * w + h * h) / 2 <= hole / 2 - kChartHoleInset;
       _report(fits);
     }
@@ -225,6 +230,7 @@ class _PDonutChartState extends State<PDonutChart> {
                                         key: const ValueKey(
                                           'chart-donut-center-label',
                                         ),
+                                        textScaler: TextScaler.noScaling,
                                         style: labelStyle,
                                       ),
                                     Text(
@@ -234,6 +240,7 @@ class _PDonutChartState extends State<PDonutChart> {
                                       ),
                                       maxLines: 1,
                                       softWrap: false,
+                                      textScaler: TextScaler.noScaling,
                                       style: amountStyle,
                                     ),
                                   ],

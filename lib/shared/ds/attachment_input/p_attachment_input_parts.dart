@@ -18,34 +18,32 @@ const double _maskSize = 24; // removeMask.size — × 둘레 구멍 지름
 const double _maskOffset = 6; // removeMask.offset — 모서리에서 구멍 가운데까지
 const double _badgeHeight = PSpacing.x6; // badge.height 24
 const double _actionIcon = 24; // actionButton.iconSize
+const double _icon = 24; // triggerIcon.size · thumbnailIcon.size
 const double _ringWidth = 2; // focusRing.width(안쪽)
 
-/// 글자 배율을 따르는 치수(03-B 결정 3 A) — 타일 · 사진 80 · 파일 카드 160 · 썸네일 48 · 아이콘 24 · × 20(누르는 44 · 위 여백 16) · ×
-/// 아이콘 10 · × 둘레 구멍에 `MediaQuery.textScalerOf` 를 곱한다. 웹은 rem 이라 이미 그렇다. 200% 에서 사진 160 · 파일 카드 320 × 160.
-/// 이름 폭은 카드에서 좌우 여백 · 썸네일 · 사이를 뺀 나머지다(100% 70 → 200% 182) — 이름 네 줄 + 크기가 다 보인다.
+/// 글자 배율을 따르는 치수 — 글을 담은 상자(첨부 타일 · 사진 80 · 파일 카드 160)만 `MediaQuery.textScalerOf` 를 곱한다. 웹은 rem 이라
+/// 이미 그렇다. 200% 에서 사진 160 · 파일 카드 320 × 160. 썸네일 48 · 아이콘 24 · × 20(누르는 44 · 위 여백 16) · × 아이콘 10 ·
+/// × 둘레 구멍 · 올리는 중 원 24 · 대표 띠 24 는 px 그대로다(attachment-input.yaml trigger.size 비고, groo-design #263).
+/// 이름 폭은 카드에서 좌우 여백 · 썸네일 · 사이를 뺀 나머지다(100% 70 → 200% 230) — 이름 네 줄 + 크기가 다 보인다.
+///
+/// 배율은 상자가 담는 글(이름 · 개수 · "다시 시도" 12)의 배율이다 — `scale(80)` 을 그대로 쓰면 안드로이드 비선형 글자 크기에서
+/// 큰 값이 덜 커져(200% 에서 80 → 82) 두 배가 된 글을 못 담는다.
 class _Dims {
-  const _Dims(this.scaler);
+  const _Dims(this.factor);
 
-  factory _Dims.of(BuildContext context) =>
-      _Dims(MediaQuery.textScalerOf(context));
+  factory _Dims.of(BuildContext context) {
+    final size = PTypography.t2.fontSize!;
+    return _Dims(MediaQuery.textScalerOf(context).scale(size) / size);
+  }
 
-  final TextScaler scaler;
+  /// 상자에 곱하는 글자 배율 — 100% 에서 1.
+  final double factor;
 
-  double s(double value) => scaler.scale(value);
-
-  double get tile => s(_tile);
-  double get fileWidth => s(_fileWidth);
-  double get thumb => s(_thumb);
-  double get icon => s(24);
-  double get removeSize => s(_removeSize);
-  double get removeIcon => s(_removeIcon);
-  double get removeTouch => s(_removeTouch);
-  double get maskSize => s(_maskSize);
-  double get maskOffset => s(_maskOffset);
-  double get touchBleed => s(_touchBleed);
+  double get tile => _tile * factor;
+  double get fileWidth => _fileWidth * factor;
 
   /// 파일 카드의 이름 · 크기 폭 — 카드 − 좌우 여백 − 썸네일 − 사이.
-  double get metaWidth => fileWidth - 2 * _filePaddingX - thumb - _fileGap;
+  double get metaWidth => fileWidth - 2 * _filePaddingX - _thumb - _fileGap;
 }
 
 /// 앱의 길게 눌러 끌기 문턱 — 웹 터치와 같은 250ms(Flutter 기본 길게 누름 500ms 가 아니다).
@@ -89,7 +87,7 @@ class _PressBox extends StatefulWidget {
   final Color? pressedColor;
   final BoxBorder? border;
 
-  /// 누름 축소의 기준 길이(80 · 24, 글자 배율을 곱한다) — 없으면 타일 한 변.
+  /// 누름 축소의 기준 길이(타일 80 은 글자 배율을 곱한다 · × 24 는 px) — 없으면 타일 한 변.
   final double? basis;
   final bool shrink;
   final bool blocked;
@@ -272,7 +270,7 @@ class _TriggerTile extends StatelessWidget {
           spacing: PSpacing.x1,
           children: [
             ExcludeSemantics(
-              child: Icon(icon, size: d.icon, color: iconColor),
+              child: Icon(icon, size: _icon, color: iconColor),
             ),
             if (max != null)
               ExcludeSemantics(
@@ -306,15 +304,9 @@ class _TriggerTile extends StatelessWidget {
 
 /// × 둘레 구멍 — 지름 24, 가운데가 오른쪽 위 모서리에서 안쪽 6(× 의 가운데와 같다). 사진 · 덮개 · 윤곽이 × 에 닿지 않게 파낸다.
 class _HoleClipper extends CustomClipper<Path> {
-  const _HoleClipper({
-    required this.radius,
-    this.maskSize = _maskSize,
-    this.maskOffset = _maskOffset,
-  });
+  const _HoleClipper({required this.radius});
 
   final double radius;
-  final double maskSize;
-  final double maskOffset;
 
   @override
   Path getClip(Size size) {
@@ -325,18 +317,15 @@ class _HoleClipper extends CustomClipper<Path> {
     final hole = Path()
       ..addOval(
         Rect.fromCircle(
-          center: Offset(size.width - maskOffset, maskOffset),
-          radius: maskSize / 2,
+          center: Offset(size.width - _maskOffset, _maskOffset),
+          radius: _maskSize / 2,
         ),
       );
     return Path.combine(PathOperation.difference, box, hole);
   }
 
   @override
-  bool shouldReclip(_HoleClipper old) =>
-      old.radius != radius ||
-      old.maskSize != maskSize ||
-      old.maskOffset != maskOffset;
+  bool shouldReclip(_HoleClipper old) => old.radius != radius;
 }
 
 /// 항목 자리 — 항목(80 · 160) · × · 다시 시도를 한 상자에 담는다. 위 16 · 오른쪽 [rightBleed] 는 × 의 누르는 자리 44 가 들어가는 여백이고,
@@ -655,8 +644,8 @@ class _ItemFace extends StatelessWidget {
           children: [
             Container(
               key: const ValueKey('attachment-thumbnail'),
-              width: d.thumb,
-              height: d.thumb,
+              width: _thumb,
+              height: _thumb,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: c.bgNeutralWeak,
@@ -667,7 +656,7 @@ class _ItemFace extends StatelessWidget {
                   : ExcludeSemantics(
                       child: Icon(
                         _fileIcon(entry),
-                        size: d.icon,
+                        size: _icon,
                         color: iconColor,
                       ),
                     ),
@@ -704,7 +693,7 @@ class _ItemFace extends StatelessWidget {
     final fallback = ColoredBox(
       color: c.bgNeutralWeak,
       child: Center(
-        child: Icon(LucideIcons.image, size: d.icon, color: c.fgNeutralSubtle),
+        child: Icon(LucideIcons.image, size: _icon, color: c.fgNeutralSubtle),
       ),
     );
     return Stack(
@@ -742,11 +731,14 @@ class _ItemFace extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: PSpacing.x1),
+                  // 사진 위 표식이라 띠 24 와 글은 글자 크기 설정을 따르지 않는다(attachment-input.yaml badge
+                  // text-t2-static, groo-design #263) — 대표인 사진은 맨 앞 자리와 항목 이름으로도 안다
                   child: Center(
                     child: Text(
                       badgeLabel!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      textScaler: TextScaler.noScaling,
                       style: PTypography.t2.copyWith(
                         fontWeight: FontWeight.w500,
                         color: c.staticWhite,
@@ -799,13 +791,12 @@ class _RemoveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final d = _Dims.of(context);
     return _PressBox(
       focusNode: focusNode,
-      radius: d.removeSize / 2,
+      radius: _removeSize / 2,
       label: label,
-      basis: d.s(24),
-      touch: d.removeTouch,
+      basis: 24,
+      touch: _removeTouch,
       blocked: blocked,
       disabled: disabled,
       restColor: c.bgLayerDefault,
@@ -813,13 +804,13 @@ class _RemoveButton extends StatelessWidget {
       border: Border.all(color: c.strokeNeutralWeak, width: 1),
       onTap: onTap,
       child: SizedBox(
-        width: d.removeSize,
-        height: d.removeSize,
+        width: _removeSize,
+        height: _removeSize,
         child: Center(
           child: ExcludeSemantics(
             child: Icon(
               LucideIcons.x,
-              size: d.removeIcon,
+              size: _removeIcon,
               color: blocked || disabled ? c.fgDisabled : c.fgNeutral,
             ),
           ),
@@ -862,11 +853,7 @@ Widget _itemBody(
     height: d.tile,
     child: hole
         ? ClipPath(
-            clipper: _HoleClipper(
-              radius: _itemRadius,
-              maskSize: d.maskSize,
-              maskOffset: d.maskOffset,
-            ),
+            clipper: const _HoleClipper(radius: _itemRadius),
             child: face,
           )
         : ClipRRect(
@@ -1037,20 +1024,16 @@ class _ItemSlot extends StatelessWidget {
 
     final stack = _OverflowStack(
       children: [
-        SizedBox(width: width + rightBleed, height: d.tile + d.touchBleed),
-        Positioned(top: d.touchBleed, left: 0, child: draggable),
+        SizedBox(width: width + rightBleed, height: d.tile + _touchBleed),
+        Positioned(top: _touchBleed, left: 0, child: draggable),
         if (error)
           Positioned(
-            top: d.touchBleed,
+            top: _touchBleed,
             left: 0,
             width: width,
             height: d.tile,
             child: ClipPath(
-              clipper: _HoleClipper(
-                radius: _itemRadius,
-                maskSize: d.maskSize,
-                maskOffset: d.maskOffset,
-              ),
+              clipper: const _HoleClipper(radius: _itemRadius),
               child: _PressBox(
                 key: const ValueKey('attachment-retry'),
                 radius: _itemRadius,
@@ -1067,7 +1050,7 @@ class _ItemSlot extends StatelessWidget {
                     ExcludeSemantics(
                       child: Icon(
                         LucideIcons.rotateCw,
-                        size: d.s(_actionIcon),
+                        size: _actionIcon,
                         color: image ? c.staticWhite : c.fgNeutralSubtle,
                       ),
                     ),
@@ -1089,8 +1072,8 @@ class _ItemSlot extends StatelessWidget {
           ),
         // × — 가운데가 오른쪽 위 모서리에서 안쪽 6. 누르는 44 는 보이는 원 둘레로 12 씩
         Positioned(
-          top: d.touchBleed + d.maskOffset - d.removeTouch / 2,
-          left: width - d.maskOffset - d.removeTouch / 2,
+          top: _touchBleed + _maskOffset - _removeTouch / 2,
+          left: width - _maskOffset - _removeTouch / 2,
           child: _RemoveTouch(
             enabled: !readOnly && !disabled,
             child: _RemoveButton(

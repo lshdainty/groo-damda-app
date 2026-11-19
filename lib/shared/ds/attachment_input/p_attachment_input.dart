@@ -221,9 +221,7 @@ class _PAttachmentInputState extends State<PAttachmentInput> {
     _dragStartFinger = finger;
     _dragFinger = finger;
     // 항목 몸의 왼쪽 위 — 자리 상자의 위 16(× 의 누르는 자리)을 뺀다
-    _dragStartTopLeft = box.localToGlobal(
-      Offset(0, _Dims.of(context).touchBleed),
-    );
+    _dragStartTopLeft = box.localToGlobal(Offset(0, _touchBleed));
     _dragTarget = widget.entries.indexWhere((e) => e.id == entry.id);
     _say(
       dsL(context)?.dsAttachLifted(_dragTarget + 1) ??
@@ -679,8 +677,8 @@ class _PAttachmentInputState extends State<PAttachmentInput> {
   @override
   Widget build(BuildContext context) {
     final field = PFieldScope.maybeOf(context)?.data;
-    // × 의 누르는 자리가 들어갈 위 · 오른쪽 여백 16 — 글자 배율을 따른다(03-B 결정 3 A)
-    final bleedPx = _Dims.of(context).touchBleed;
+    // × 의 누르는 자리가 들어갈 위 · 오른쪽 여백 16 — px 그대로다(× 가 글자 배율을 따르지 않는다, groo-design #263)
+    final bleedPx = _touchBleed;
     final disabled = _disabled;
     final readOnly = _readOnly;
     final limited = widget.maxFiles < PAttachmentInput.unlimited;

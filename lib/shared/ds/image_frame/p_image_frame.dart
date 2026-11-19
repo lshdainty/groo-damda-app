@@ -63,7 +63,8 @@ class PImageFrameFloater {
 }
 
 /// 장수 · 길이 글(Indicator) — "1 / 12" · "+9". 상태 · 강조에는 쓰지 않는다(그건 배지). 보이는 글은 보조 기술에 숨기고
-/// [label]("사진 12장 중 1번째")만 읽는다. 검정 65%(두 모드 같다) · 흰 11/15 500 · 좌우 6 · 위아래 2 · 높이 19 이상 · 알약.
+/// [label]("사진 12장 중 1번째")만 읽는다. 검정 65%(두 모드 같다) · 흰 11/15 500(글자 크기 설정을 따르지 않는다) · 좌우 6 ·
+/// 위아래 2 · 높이 19 이상 · 알약.
 class PImageFrameIndicator extends StatelessWidget {
   const PImageFrameIndicator({
     super.key,
@@ -95,10 +96,13 @@ class PImageFrameIndicator extends StatelessWidget {
               horizontal: PSpacing.x1_5,
               vertical: PSpacing.x0_5,
             ),
+            // 사진 위 표식이라 글자 크기 설정을 따르지 않는다(image-frame.yaml indicator text-t1-static, groo-design #263) —
+            // 같은 수는 [label] 로 읽는다
             child: Text(
               text,
               maxLines: 1,
               softWrap: false,
+              textScaler: TextScaler.noScaling,
               style: PTypography.t1.copyWith(
                 fontWeight: FontWeight.w500,
                 color: context.colors.staticWhite,
