@@ -276,13 +276,15 @@ void main() {
           (text.height / lineH - (text.height / lineH).round()).abs(),
           lessThan(0.05),
         );
-        if (scale == 1.0) {
+        // 고리는 108 그대로(글자 크기를 따르지 않는다, groo-design #260) — 문장 칸 188 이 8em(16 × 배율 × 8)보다 좁아지는
+        // 150% 부터 문장이 고리 아래로 내려간다
+        if (scale <= 1.3) {
           expect(
             text.left,
             greaterThanOrEqualTo(ring.right),
-            reason: '100% 360 은 고리 옆',
+            reason: '${scale * 100}% 360 은 고리 옆',
           );
-        } else if (scale >= 1.3) {
+        } else {
           expect(
             text.top,
             greaterThanOrEqualTo(ring.bottom),
@@ -495,7 +497,7 @@ void main() {
   group('추이 탭', () {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-        '저축률 고리 — 크기 = 배율 × 108, 가운데 글은 t9 정수 "100%" 이고 안쪽 지름에 든다(${(scale * 100).round()}%)',
+        '저축률 고리 — 108 그대로 · 가운데 글은 커지지 않는 t9 정수 "100%" 이고 안쪽 지름에 든다(${(scale * 100).round()}%)',
         (tester) async {
           await tester.runAsync(() async {
             final bytes = File(
@@ -528,14 +530,16 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
           final ring = tester.getSize(find.byType(StatsSavingsRing));
-          expect(ring.width, closeTo(108 * scale, 0.01));
-          expect(ring.height, closeTo(108 * scale, 0.01));
+          // 고리 · 안의 글은 모양의 일부라 글자 크기 설정을 따르지 않는다(groo-design #260)
+          expect(ring.width, closeTo(108, 0.01));
+          expect(ring.height, closeTo(108, 0.01));
           final value = find.byKey(const ValueKey('savings-ring-value'));
           final text = tester.widget<Text>(value);
           expect(text.data, '100%', reason: '소수 없이 정수');
           expect(text.style!.fontSize, PTypography.t9.fontSize);
-          // 안쪽 지름 = 2 × (반지름 48 − 선 두께 절반 5) × 비율
-          final inner = 2 * (48 - 5) * scale;
+          expect(text.textScaler, TextScaler.noScaling);
+          // 안쪽 지름 = 2 × (반지름 48 − 선 두께 절반 5)
+          const inner = 2 * (48 - 5);
           final w = tester.getSize(value).width;
           expect(
             w,

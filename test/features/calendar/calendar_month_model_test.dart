@@ -9,8 +9,11 @@ import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_grid.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_month_model.dart';
 
-const _metrics100 = ChipMetrics(avail: 73, chip: 18, more: 16, gap: 2);
-const _metrics200 = ChipMetrics(avail: 61, chip: 36, more: 32, gap: 2);
+/// 캘린더 칸의 칩 자리(칸 안 글은 글자 크기를 따르지 않아 고정 — groo-design #260).
+const _metrics100 = kCalendarChipMetrics;
+
+/// 칩이 큰 좁은 자리 — 모델 셈(웹 `planSlots` 와 같다)을 가장 나쁜 값으로 본다.
+const _metricsTight = ChipMetrics(avail: 61, chip: 36, more: 32, gap: 2);
 
 Map<String, dynamic> _fixture() =>
     jsonDecode(
@@ -108,7 +111,7 @@ void main() {
     );
   });
 
-  test('보이는 줄 수는 칸 높이가 정하고 나머지는 +N개 — 100% 22일 칩 둘 · 200% 칩 0', () {
+  test('보이는 줄 수는 칸 높이가 정하고 나머지는 +N개 — 22일 칩 둘 · 좁은 칩 자리면 칩 0', () {
     final positions = calculateMonthPositions(items, month);
     CellModel cell22(ChipMetrics m) => buildMonthModel(
       calendarGridDays(month),
@@ -117,13 +120,13 @@ void main() {
       positions,
       m,
     ).firstWhere((c) => c.day == DateTime(2026, 10, 22));
-    // 하루 종일 1 + 일정 다섯 = 6 줄 → 100%: 칩 둘 + "+4개"
+    // 하루 종일 1 + 일정 다섯 = 6 줄 → 칩 둘 + "+4개"
     final a = cell22(_metrics100);
     expect(a.slots.length, 2);
     expect(a.hidden, 4);
     expect(a.total, 6);
-    // 200%: 한 줄도 못 그리고 전부 "+6개"
-    final b = cell22(_metrics200);
+    // 좁은 칩 자리: 한 줄도 못 그리고 전부 "+6개"
+    final b = cell22(_metricsTight);
     expect(b.slots, isEmpty);
     expect(b.hidden, 6);
   });
@@ -149,7 +152,7 @@ void main() {
     expect(hosts, [(17, 1), (18, 3)]);
   });
 
-  test('글자 200% 에서 다음 칸이 접혀 "+N개" 만 남으면 제목 띠는 보이는 칸까지만 — 빈 칩만 남지 않는다', () {
+  test('다음 칸이 접혀 "+N개" 만 남으면 제목 띠는 보이는 칸까지만 — 빈 칩만 남지 않는다', () {
     final two = [
       CalendarGridItem(
         key: 'a',
@@ -165,7 +168,7 @@ void main() {
       month,
       two,
       calculateMonthPositions(two, month),
-      _metrics200,
+      _metricsTight,
     );
     CellModel at(int d) =>
         model.firstWhere((c) => c.day == DateTime(2026, 10, d));
@@ -174,6 +177,13 @@ void main() {
     expect(s8.labelDays, 1, reason: '9일 칸은 접혀 칩이 없다');
     expect(at(9).slots, isEmpty);
     expect(at(9).hidden, 2);
+  });
+
+  test('캘린더 칩 자리 — (103 − 2 − 원 26 − 2) · 칩 18 · "+N개" 16 · 사이 2', () {
+    expect(kCalendarChipMetrics.avail, 73);
+    expect(kCalendarChipMetrics.chip, 18);
+    expect(kCalendarChipMetrics.more, 16);
+    expect(kCalendarChipMetrics.gap, 2);
   });
 
   test('planSlots — 웹 planSlots 와 같다', () {
@@ -186,7 +196,7 @@ void main() {
       shown: 2,
       more: true,
     )); // 4*18+3*2=78 > 73
-    expect(planSlots(1, _metrics200), (shown: 1, more: false));
-    expect(planSlots(2, _metrics200), (shown: 0, more: true));
+    expect(planSlots(1, _metricsTight), (shown: 1, more: false));
+    expect(planSlots(2, _metricsTight), (shown: 0, more: true));
   });
 }

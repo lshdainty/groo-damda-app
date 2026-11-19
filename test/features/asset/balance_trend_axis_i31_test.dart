@@ -80,14 +80,14 @@ void main() {
       await _open(tester, scale);
       expect(find.byType(PLineChart), findsOneWidget);
       // 머리 금액("−85,000,000원")이 아니라 눈금 글이 그려진다 — 눈금은 줄인 글("−1억")
-      // 가리지 않으면 ds 기본 눈금 글(한 축은 한 단위 — 이 축은 −1억 ~ 0 이라 모두 억 단위). 간격은 100% 0.2억 · 200% 는 눈금
-      // 글 줄이 눈금 사이보다 커서 칸 수를 줄여 0.5억(chart.md "세로 눈금이 겹치면 수를 줄입니다")
+      // 가리지 않으면 ds 기본 눈금 글(한 축은 한 단위 — 이 축은 −1억 ~ 0 이라 모두 억 단위). 간격 0.2억 — 눈금 글은 글자 크기
+      // 설정을 따르지 않아(chart.md "글자 크기", groo-design #260) 200% 에서도 같다
       expect(
         tester.widget<PLineChart>(find.byType(PLineChart)).axisFormatter,
         isNull,
       );
       expect(findText('−1억'), findsOneWidget);
-      expect(findText(scale == 1 ? '−0.2억' : '−0.5억'), findsOneWidget);
+      expect(findText('−0.2억'), findsOneWidget);
       expect(findText('−2,500만'), findsNothing);
     });
   }
@@ -98,9 +98,5 @@ void main() {
     final w = chartAxisWidth(['0', '−5,000만', '−1억'], style);
     expect(w, wide + kChartTickMargin);
     expect(chartAxisWidth(const [], style), kChartTickMargin);
-    expect(
-      chartAxisWidth(['−5,000만'], style, scaler: const TextScaler.linear(2)),
-      greaterThan(w),
-    );
   });
 }

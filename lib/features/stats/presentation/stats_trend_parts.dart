@@ -369,12 +369,12 @@ class StatsSavingsRateSection extends StatelessWidget {
     );
     return statsSection(
       children: [
-        // 고리 크기 = 글자 배율 × 108 — 크게 보면 고리도 같이 커져 가운데 글이 안쪽에 든다(사용자 결정 10-25). 고리가 커서
-        // 문장 자리가 모자라면 문장을 고리 아래로 내린다
+        // 고리는 모양(디자인 틀)이라 108 그대로이고 안의 글도 커지지 않는다(DESIGN.md Typography "그대로 두는 것",
+        // groo-design #260) — 같은 저축률은 옆 문장 · 아래 범례에서 크게 읽는다. 문장이 커져 옆 자리가 모자라면 고리 아래로 내린다
         LayoutBuilder(
           builder: (context, constraints) {
             final ring = StatsSavingsRing(rate: saveRate);
-            final size = savingsRingSize(context);
+            const size = kSavingsRingSize;
             // 문장 칸 = 띠 폭 − 고리 − 간격. 글자 크기 기준 8em(= t5 16 × 배율 × 8)보다 좁으면 낱말이 칸보다 길어져 낱말 가운데서
             // 꺾이므로(v114 단어 단위) 문장을 고리 아래로 내린다 — 100% 360 은 188 이라 옆에 선다
             final em = MediaQuery.textScalerOf(
@@ -537,22 +537,14 @@ class StatsSavingsLegendRow extends StatelessWidget {
   }
 }
 
-/// 저축률 고리 한 변 — 글자 배율 × 108(100% 108 · 200% 216). 글자 배율은 고리 안 글(라벨 t2 · 값 t9)이 실제로 커진 배율
-/// 가운데 큰 값이다 — `scale(108)` 로 세면 안드로이드 비선형 글자 크기(작은 글은 설정만큼, 큰 값은 덜 커진다)에서 고리는 거의
-/// 그대로이고 안의 글만 커져 넘친다(QA 320 · 200% "BOTTOM OVERFLOWED BY 4.0 PIXELS"). 선형 배율(iOS)에서는 같은 값이다.
-double savingsRingSize(BuildContext context) {
-  final scaler = MediaQuery.textScalerOf(context);
-  double ratio(TextStyle t) => scaler.scale(t.fontSize!) / t.fontSize!;
-  return kSavingsRingBase *
-      math.max(ratio(PTypography.t2), ratio(PTypography.t9));
-}
-
-const double kSavingsRingBase = 108;
+/// 저축률 고리 한 변 — 108 고정(글자 크기 설정을 따르지 않는다, groo-design #260).
+const double kSavingsRingSize = 108;
 
 /// 고리 옆 문장 칸의 최소 폭(글자 크기 em) — 이보다 좁으면 문장을 고리 아래로 내린다.
 const double kSavingsSentenceMinEm = 8;
 
-/// 저축률 고리 + 가운데 글(라벨 t2 · 값 t9 700, 정수 "100%"). 고리의 선 두께 · 반지름도 같은 비율로 커진다.
+/// 저축률 고리 108 + 가운데 글(라벨 t2 · 값 t9 700, 정수 "100%"). 고리 · 안의 글은 글자 크기 설정을 따르지 않는다 — 고리
+/// 모양의 일부라서다(DESIGN.md Typography "그대로 두는 것", groo-design #260). 같은 값은 고리 옆 문장 · 범례에서 크게 읽는다.
 class StatsSavingsRing extends StatelessWidget {
   const StatsSavingsRing({super.key, required this.rate});
 
@@ -563,7 +555,7 @@ class StatsSavingsRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.colors;
-    final size = savingsRingSize(context);
+    const size = kSavingsRingSize;
     return SizedBox(
       width: size,
       height: size,
@@ -571,7 +563,7 @@ class StatsSavingsRing extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           CustomPaint(
-            size: Size(size, size),
+            size: const Size(size, size),
             painter: SavingsRingPainter(
               rate: rate ?? 0,
               track: c.bgNeutralWeak,
@@ -583,6 +575,7 @@ class StatsSavingsRing extends StatelessWidget {
             children: [
               Text(
                 l.statsSavingsRate,
+                textScaler: TextScaler.noScaling,
                 style: PTypography.t2.copyWith(
                   color: c.fgNeutralSubtle,
                   fontWeight: FontWeight.w500,
@@ -591,6 +584,7 @@ class StatsSavingsRing extends StatelessWidget {
               Text(
                 rate == null ? kNoRate : formatProgress(rate!),
                 key: const ValueKey('savings-ring-value'),
+                textScaler: TextScaler.noScaling,
                 style: PTypography.t9.copyWith(
                   color: c.fgNeutral,
                   fontWeight: FontWeight.w700,
@@ -619,8 +613,8 @@ class SavingsRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 그림 108 기준 값을 크기 비율로 키운다
-    final k = size.width / kSavingsRingBase;
+    // 그림 108 기준 값을 크기 비율로 맞춘다(고리는 108 고정이라 늘 1 — 견본이 다른 크기로 그려도 비율이 맞는다)
+    final k = size.width / kSavingsRingSize;
     final stroke = 10.0 * k;
     final r = 48.0 * k;
     final center = Offset(size.width / 2, size.height / 2);

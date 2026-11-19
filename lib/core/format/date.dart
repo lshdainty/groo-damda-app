@@ -175,7 +175,7 @@ List<String> weekdayLabels({bool mondayFirst = false}) {
 
 /// 일곱 칸 위 요일 머리 글 7개 — 날짜 고르기 달력 · 캘린더 화면 · 열지도 어디서나 같다(international-design.mdx "날짜",
 /// groo-design #256). 한국어 "일 … 토", 영어는 두 글자 "Su Mo Tu We Th Fr Sa"(date-picker.md ⓔ Weekday) — 넓어도 세 글자로 늘리지
-/// 않는다. 칸에 두 글자가 들지 않는 폭 · 글자 크기면 [weekdayRowNarrowLabels] 로 줄인다([fitWeekdayRowLabels]). [mondayFirst] 면
+/// 않는다. 칸에 두 글자가 들지 않는 폭이면 [weekdayRowNarrowLabels] 로 줄인다([fitWeekdayRowLabels]). [mondayFirst] 면
 /// 월요일부터(열지도). 요일 비교 막대 차트의 가로축은 [weekdayLabels](영어 "Sun") 그대로다.
 List<String> weekdayRowLabels({bool mondayFirst = false}) {
   if (!localeIsEn()) return weekdayLabels(mondayFirst: mondayFirst);
@@ -196,23 +196,12 @@ List<String> weekdayRowNarrowLabels({bool mondayFirst = false}) {
   ];
 }
 
-/// 일곱 칸 격자(날짜 고르기 달력 · 캘린더 화면 · 가계부 · 할 일 달력 · 열지도 · 7일 띠)의 요일 머리와 날짜 숫자의 글자 크기 상한
-/// — 200% 에서 멈춘다(DESIGN.md Layout "지원 폭" · date-picker.md "글자 크기 설정", groo-design #252 · #258). 320 폭에서 그보다
-/// 크면 요일 한 글자(영어 "W")도, 두 자리 숫자도 칸(화면 폭 ÷ 7)에 들지 않는다. 제목 · 일정 이름 · 금액 같은 다른 글은 그 위로도
-/// 커진다. WCAG 1.4.4 의 200% 는 지킨다.
-const double kWeekdayRowMaxTextScale = 2.0;
-
-/// 일곱 칸 격자의 요일 머리 · 날짜 숫자가 쓰는 글자 배율 — 화면 배율을 [kWeekdayRowMaxTextScale] 에서 멈춘다. 그 글 · 줄 높이 ·
-/// 칸 · 원 크기 · 칸 맞춤 셈이 모두 이 값을 쓴다.
-TextScaler weekdayRowScaler(TextScaler scaler) =>
-    scaler.clamp(maxScaleFactor: kWeekdayRowMaxTextScale);
-
 /// 요일 줄 글을 칸에 맞춘다 — [labels](두 글자)가 모두 칸 폭 [cellWidth] 안에 들면 그대로, 하나라도 넘치면 [narrow](한 글자).
-/// 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday). 폭은 화면 글자 크기([scaler])로 잰다.
+/// 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday). 일곱 칸 격자의 칸 안 글은 글자 크기 설정을 따르지 않으므로
+/// (DESIGN.md Typography "그대로 두는 것", groo-design #260) 폭도 글자 배율 없이([TextScaler.noScaling]) 잰다 — 폭만 가른다.
 List<String> fitWeekdayRowLabels(
   double cellWidth,
-  TextStyle style,
-  TextScaler scaler, {
+  TextStyle style, {
   List<String>? labels,
   List<String>? narrow,
 }) {
@@ -221,7 +210,7 @@ List<String> fitWeekdayRowLabels(
     final p = TextPainter(
       text: TextSpan(text: t, style: style),
       textDirection: TextDirection.ltr,
-      textScaler: scaler,
+      textScaler: TextScaler.noScaling,
       maxLines: 1,
     )..layout();
     final w = p.width;

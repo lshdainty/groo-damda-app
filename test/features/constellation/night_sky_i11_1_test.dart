@@ -456,7 +456,7 @@ void main() {
 
     for (final streak in [128, 1000]) {
       for (final scale in [1.0, 2.0]) {
-        semTest('도장 — $streak일째 x$scale 글이 원 안에 든다', (tester) async {
+        semTest('도장 — $streak일째 x$scale 원 72 그대로 · 글이 원 안에 든다', (tester) async {
           await pumpApp(
             tester,
             const ForestReportScreen(),
@@ -470,10 +470,10 @@ void main() {
           );
           expect(
             stampBox.size.width,
-            closeTo(72 * scale, 0.5),
-            reason: '원이 글자 배율을 따른다',
+            closeTo(72, 0.5),
+            reason: '도장은 모양이라 글자 크기 설정을 따르지 않는다(groo-design #260)',
           );
-          // 글 상자 네 귀퉁이를 회전까지 반영한 진짜 점으로 — 한계는 테두리 안쪽 선(반지름 36 × 배율 − 2)
+          // 글 상자 네 귀퉁이를 회전까지 반영한 진짜 점으로 — 한계는 테두리 안쪽 선(반지름 36 − 2)
           final center = stampBox.localToGlobal(
             stampBox.size.center(Offset.zero),
           );
@@ -489,7 +489,7 @@ void main() {
             ]) {
               expect(
                 (box.localToGlobal(local) - center).distance,
-                lessThanOrEqualTo(36.0 * scale - 2),
+                lessThanOrEqualTo(36.0 - 2),
                 reason: '$streak x$scale "$t" 가 테두리 안쪽 선 밖',
               );
             }
@@ -607,7 +607,7 @@ void main() {
     }
 
     for (final scale in [1.0, 2.0]) {
-      semTest('요일 원 — 최소 28 · 글이 커지면 따라 커진다 x$scale', (tester) async {
+      semTest('요일 원 — 28 그대로(차트 축 글이라 글자 크기를 따르지 않는다) x$scale', (tester) async {
         await pumpApp(
           tester,
           const ForestReportScreen(),
@@ -627,8 +627,7 @@ void main() {
               )
               .first,
         );
-        expect(circle.width, scale == 1 ? 28 : greaterThan(28));
-        expect(circle.height, circle.width);
+        expect(circle, const Size(28, 28));
       });
     }
 

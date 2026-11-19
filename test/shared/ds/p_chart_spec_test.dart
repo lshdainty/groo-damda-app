@@ -9,6 +9,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -897,7 +898,7 @@ void main() {
     });
 
     testWidgets(
-      '${mode.name} — 열지도: 글자 배율을 곱한 글이 칸보다 넓으면 칸 폭이 112 를 넘어도 글을 빼고 세기 색만 칠한다(03E-026b)',
+      '${mode.name} — 열지도: 칸 글은 글자 크기 설정을 따르지 않아 큰 글자에서도 100% 처럼 칸에 든다(03E-026b · groo-design #260)',
       (tester) async {
         _viewport(tester, const Size(1200, 1000));
         const rows = [PHeatmapRow(key: 'am', label: '오전', sub: '6~12시')];
@@ -944,19 +945,15 @@ void main() {
           );
           expect(cell.width, greaterThanOrEqualTo(112), reason: '칸은 112 이상');
           expect(tester.takeException(), isNull, reason: 'x$scale 넘침 없음');
-          if (scale == 1) {
-            expect(cellText, findsOneWidget, reason: 'x$scale 글이 든다');
-            expect(
-              tester.getSize(cellText).width,
-              lessThanOrEqualTo(cell.width - 4),
-            );
-          } else {
-            expect(
-              cellText,
-              findsNothing,
-              reason: 'x$scale 글이 칸보다 넓다 — 세기 색만(130% 139 · 200% 214)',
-            );
-          }
+          expect(cellText, findsOneWidget, reason: 'x$scale 글이 든다');
+          expect(
+            tester.getSize(cellText).width,
+            lessThanOrEqualTo(cell.width - 4),
+          );
+          final rp = tester.renderObject<RenderParagraph>(
+            find.descendant(of: cellText, matching: find.byType(RichText)),
+          );
+          expect(rp.textScaler, TextScaler.noScaling);
         }
       },
     );

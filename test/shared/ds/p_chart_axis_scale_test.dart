@@ -1,5 +1,6 @@
-// 선 차트 축 — 글자 배율 200% 에서도 눈금 글이 온전한지, 가로축 마지막 글자가 앞 글자와 겹치지 않는지(I-05 57).
-// 눈금 칸은 글자 배율을 곱한 폭으로 잡힌다 — 1배로 재면 "1,500억" 이 "1,5" 로 잘렸다.
+// 선 차트 축 — 눈금 글이 온전한지, 가로축 마지막 글자가 앞 글자와 겹치지 않는지(I-05 57). 눈금 칸은 가장 긴 눈금 글 폭으로
+// 잡힌다("1,500억" 이 "1,5" 로 잘리지 않는다). 차트 그림 안 글은 글자 크기 설정을 따르지 않으므로(chart.md "글자 크기",
+// groo-design #260) 축 자리 · 눈금 글은 큰 글자에서도 100% 와 같다.
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -56,54 +57,60 @@ Future<FlTitlesData> _titles(WidgetTester t, double scale) async {
 }
 
 void main() {
-  testWidgets('200% — 세로축 칸 폭이 눈금 글자(배율 곱) 폭 이상 · 가로축 자리도 배율을 곱한다', (
-    tester,
-  ) async {
-    final style = chartTickStyle(PColors.light);
-    final t1 = await _titles(tester, 1);
-    final t2 = await _titles(tester, 2);
-    for (final scale in [1.0, 2.0]) {
-      final titles = scale == 1 ? t1 : t2;
-      final widest = ['1,500억', '1,000억', '500억', '0']
-          .map((s) => measureText(s, style, scaler: TextScaler.linear(scale)))
-          .reduce((a, b) => a > b ? a : b);
-      expect(
-        titles.leftTitles.sideTitles.reservedSize!,
-        greaterThanOrEqualTo(widest),
-        reason:
-            '${scale * 100}% 세로축 칸 폭 ≥ 눈금 글자 폭($widest) — 안 그러면 "1,5" 로 잘린다',
-      );
-      // 가로축 자리 = 눈금 줄 높이(배율 곱) + 그리는 자리와 사이 max(8, ⌈줄 ÷ 2⌉ + 4)(chart.md "세로축 끝 글의 자리를 비웁니다")
-      final line = TextScaler.linear(scale).scale(15);
-      expect(
-        titles.bottomTitles.sideTitles.reservedSize,
-        moreOrLessEquals(
-          line + math.max(8, (line / 2).ceilToDouble() + 4),
-          epsilon: 0.01,
-        ),
-        reason: '100% 15 + 8 · 200% 30 + 19',
-      );
-    }
-    // 글이 커지면 달 글자 간격이 넓어져 붙지 않는다(보이는 달 수가 줄어든다)
-    await tester.pumpWidget(_host(1));
-    await tester.pump(const Duration(seconds: 1));
-    final n1 = findTextContaining(RegExp(r'^\d\d월$')).evaluate().length;
-    await tester.pumpWidget(_host(2));
-    await tester.pump(const Duration(seconds: 1));
-    final n2 = findTextContaining(RegExp(r'^\d\d월$')).evaluate().length;
-    expect(n2, lessThan(n1));
-  });
-
-  testWidgets('200% — 눈금 글이 온전하다("1,000억" 이 그대로 그려진다)', (tester) async {
-    await tester.pumpWidget(_host(2));
-    await tester.pump(const Duration(seconds: 1));
-    // 높이 140 · 200% 는 눈금 글 줄(30)이 500억 간격 눈금 사이보다 커서 칸 수를 줄인다(0 · 1,000억 · 2,000억 — chart.md
-    // "세로 눈금이 겹치면 수를 줄입니다"). 글자는 "1,5" 처럼 잘리지 않는다
-    expect(findText('1,000억'), findsOneWidget);
-    expect(findText('2,000억'), findsOneWidget);
-    expect(findText('1,500억'), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
+  for (final scale in [2.0, 3.0]) {
+    testWidgets(
+      '${(scale * 100).round()}% — 세로축 칸 폭 · 가로축 자리 · 눈금 글이 100% 와 같다',
+      (tester) async {
+        final style = chartTickStyle(PColors.light);
+        final t1 = await _titles(tester, 1);
+        final widest = [
+          '1,500억',
+          '1,000억',
+          '500억',
+          '0',
+        ].map((s) => measureText(s, style)).reduce((a, b) => a > b ? a : b);
+        expect(
+          t1.leftTitles.sideTitles.reservedSize,
+          greaterThanOrEqualTo(widest),
+          reason: '세로축 칸 폭 ≥ 눈금 글자 폭($widest) — 안 그러면 "1,5" 로 잘린다',
+        );
+        // 가로축 자리 = 눈금 줄 높이 15 + 그리는 자리와 사이 max(8, ⌈줄 ÷ 2⌉ + 4)(chart.md "세로축 끝 글의 자리를 비웁니다")
+        expect(
+          t1.bottomTitles.sideTitles.reservedSize,
+          moreOrLessEquals(15 + math.max(8, (15 / 2).ceilToDouble() + 4)),
+        );
+        final ticks1 = findTextContaining(
+          RegExp(r'억$|^0$'),
+        ).evaluate().map((e) => (e.widget as Text).data).toList();
+        final months1 = findTextContaining(
+          RegExp(r'^\d\d월$'),
+        ).evaluate().length;
+        final t2 = await _titles(tester, scale);
+        expect(
+          t2.leftTitles.sideTitles.reservedSize,
+          t1.leftTitles.sideTitles.reservedSize,
+        );
+        expect(
+          t2.bottomTitles.sideTitles.reservedSize,
+          t1.bottomTitles.sideTitles.reservedSize,
+        );
+        expect(
+          findTextContaining(
+            RegExp(r'억$|^0$'),
+          ).evaluate().map((e) => (e.widget as Text).data).toList(),
+          ticks1,
+          reason: '세로 눈금 글이 같다',
+        );
+        expect(
+          findTextContaining(RegExp(r'^\d\d월$')).evaluate().length,
+          months1,
+          reason: '보이는 달 수가 같다',
+        );
+        expect(findText('1,500억'), findsOneWidget, reason: '"1,500억" 이 그대로');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('100% 12개월 — 보이는 달 글자끼리 겹치지 않고 끝(마지막) 달을 지키고 앞에서부터 건너뛴다', (
     tester,

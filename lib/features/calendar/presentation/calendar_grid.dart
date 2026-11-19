@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
@@ -25,7 +23,7 @@ const double kCalendarGridInset = PSpacing.x0_5;
 /// 요일 줄 높이.
 const double kCalendarWeekdayRowHeight = 32;
 
-/// 칸 안 칩 높이(100% 글자) · 칩 사이.
+/// 칸 안 칩 높이 · 칩 사이.
 const double kCalendarChipHeight = 18;
 const double kCalendarChipGap = PSpacing.x0_5;
 
@@ -37,8 +35,11 @@ const double _chipPadX = 3;
 const double kCalendarCellTopPad = 1;
 const double _cellBorder = 1;
 
-/// 칸 안 날 숫자 원 — 글자가 커지면 따라 커진다.
+/// 칸 안 날 숫자 원.
 const double kCalendarDayCircle = 26;
+
+/// "+N개" 줄 높이.
+const double _moreHeight = 16;
 
 /// 그날(`day`)에 걸친 일정 — 시작 시각 차례.
 List<CalendarEvent> eventsOnDay(List<CalendarEvent> all, DateTime day) {
@@ -66,15 +67,17 @@ List<DateTime> calendarGridDays(DateTime month) {
 }
 
 /// 요일 줄 — 높이 32 · t3 · 평일 fg-neutral-subtle · 일 fg-critical · 토 지금 색 그대로(fg-brand). 영어는 두 글자(Su … Sa),
-/// 칸에 들지 않는 폭 · 글자 크기에서만 한 글자(S … S) — 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday).
+/// 칸에 들지 않는 폭에서만 한 글자(S … S) — 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday).
+///
+/// 캘린더 칸 안 글(요일 · 날짜 · 일정 이름 · "+N개")은 글자 크기 설정을 따르지 않는다 — 칸 폭이 화면 폭 ÷ 7 로 정해진 디자인
+/// 틀이라서다(DESIGN.md Typography "그대로 두는 것", groo-design #260). 넘치는 일정 이름은 칸에서 자르고, 같은 내용은 날을
+/// 누르면 여는 시트에서 크게 읽는다.
 class CalendarWeekdayRow extends StatelessWidget {
   const CalendarWeekdayRow({super.key});
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    // 요일 글 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(date-picker.md "글자 크기 설정", groo-design #258)
-    final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kCalendarGridInset),
       child: ConstrainedBox(
@@ -84,7 +87,6 @@ class CalendarWeekdayRow extends StatelessWidget {
             final labels = fitWeekdayRowLabels(
               constraints.maxWidth / 7,
               PTypography.t3,
-              scaler,
             );
             return Row(
               children: [
@@ -95,7 +97,7 @@ class CalendarWeekdayRow extends StatelessWidget {
                         labels[i],
                         maxLines: 1,
                         softWrap: false,
-                        textScaler: scaler,
+                        textScaler: TextScaler.noScaling,
                         style: PTypography.t3.copyWith(
                           color: switch (i) {
                             0 => c.fgCritical,
@@ -115,26 +117,6 @@ class CalendarWeekdayRow extends StatelessWidget {
   }
 }
 
-/// 칸 안 날 숫자 원의 한 변 — 26 이 최소이고 글을 따라 커진다(DESIGN.md Typography "글이 상자보다 커지는 자리는 그 값이 최소
-/// 높이라 글을 따라 늘어난다"). 날짜 숫자는 글자 크기 200% 에서 멈추므로([weekdayRowScaler], groo-design #258) 원도 멈춘 글로
-/// 잰다 — [s] 는 화면 배율 그대로 넘긴다. 글 줄 높이와 두 자리 날짜("28" · 오늘의 700 · 고정폭 숫자라 두 자리는 모두 같은 폭)의 폭 가운데
-/// 큰 값이다 — 줄 높이로만 키우면 안드로이드 비선형 글자 크기(작은 글은 설정만큼, 큰 값은 덜 커진다)에서 "10" 이 원보다 넓어
-/// 두 줄로 꺾여 잘린다(QA 320 · 200% "10" → "1"). 줄 높이도 `scale(19)` 가 아니라 글 크기를 키운 뒤 줄 비율을 곱한다.
-double calendarNumberBox(TextScaler screen) {
-  final s = weekdayRowScaler(screen);
-  final style = calendarDayNumberStyle(FontWeight.w700);
-  final line = s.scale(style.fontSize!) * style.height!;
-  final p = TextPainter(
-    text: TextSpan(text: '28', style: style),
-    textDirection: TextDirection.ltr,
-    textScaler: s,
-    maxLines: 1,
-  )..layout();
-  final width = p.width;
-  p.dispose();
-  return [kCalendarDayCircle, line, width].reduce(math.max).ceilToDouble();
-}
-
 /// 날 숫자 글 — t4 14 / 19 · 고정폭 숫자(오늘은 700 · 나머지 500).
 TextStyle calendarDayNumberStyle(FontWeight weight, {Color? color}) =>
     PTypography.t4.copyWith(
@@ -143,19 +125,16 @@ TextStyle calendarDayNumberStyle(FontWeight weight, {Color? color}) =>
       fontFeatures: const [FontFeature.tabularFigures()],
     );
 
-/// 칸 안 칩 한 줄 높이 — 글자 크기를 곱한다.
-double calendarChipHeight(TextScaler s) =>
-    s.scale(kCalendarChipHeight).clamp(kCalendarChipHeight, double.infinity);
-
-/// 칸 안 칩 자리의 실측 — (칸 높이 − 위 2 − 날 숫자 − 사이 2) · 칩 · "+N개" · 줄 사이 2.
-ChipMetrics calendarChipMetrics(TextScaler s) => ChipMetrics(
+/// 칸 안 칩 자리의 실측 — (칸 높이 − 위 2 − 날 숫자 원 − 사이 2) · 칩 · "+N개" · 줄 사이 2. 칸 안 글이 글자 크기 설정을 따르지
+/// 않으므로 고정이다.
+const ChipMetrics kCalendarChipMetrics = ChipMetrics(
   avail:
       kCalendarCellHeight -
       PSpacing.x0_5 -
-      calendarNumberBox(s) -
+      kCalendarDayCircle -
       kCalendarChipGap,
-  chip: calendarChipHeight(s),
-  more: s.scale(16).clamp(16, double.infinity),
+  chip: kCalendarChipHeight,
+  more: _moreHeight,
   gap: kCalendarChipGap,
 );
 
@@ -185,11 +164,9 @@ class CalendarMonthGrid extends StatelessWidget {
       for (final h in holidays.entries)
         CalendarGridItem.ofHoliday(h.key, h.value),
     ];
-    final scaler = MediaQuery.textScalerOf(context);
-    final metrics = calendarChipMetrics(scaler);
+    const metrics = kCalendarChipMetrics;
     final positions = calculateMonthPositions(items, month);
     final model = buildMonthModel(days, month, items, positions, metrics);
-    final numberBox = calendarNumberBox(scaler);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kCalendarGridInset),
       child: LayoutBuilder(
@@ -228,8 +205,6 @@ class CalendarMonthGrid extends StatelessWidget {
                               col: d,
                               row: i,
                               cellW: cellW,
-                              numberBox: numberBox,
-                              metrics: metrics,
                             ),
                     ],
                   ),
@@ -247,8 +222,6 @@ class CalendarMonthGrid extends StatelessWidget {
     required int col,
     required int row,
     required double cellW,
-    required double numberBox,
-    required ChipMetrics metrics,
   }) {
     final tone = slot.item.isHoliday
         ? holidayTone(context)
@@ -260,15 +233,15 @@ class CalendarMonthGrid extends StatelessWidget {
     final top =
         _cellBorder +
         kCalendarCellTopPad +
-        numberBox +
+        kCalendarDayCircle +
         kCalendarChipGap +
-        row * (metrics.chip + kCalendarChipGap);
+        row * (kCalendarChipHeight + kCalendarChipGap);
     return Positioned(
       key: ValueKey('calendar-band-label-${slot.item.key}-$col'),
       left: col * cellW + leftInset,
       top: top,
       width: slot.labelDays * cellW - leftInset - rightInset,
-      height: metrics.chip,
+      height: kCalendarChipHeight,
       child: IgnorePointer(
         child: Center(
           child: Padding(
@@ -279,6 +252,7 @@ class CalendarMonthGrid extends StatelessWidget {
               softWrap: false,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
+              textScaler: TextScaler.noScaling,
               style: _chipStyle(tone),
             ),
           ),
@@ -336,10 +310,9 @@ class CalendarDayCell extends StatelessWidget {
       dayColor = c.fgNeutral;
     }
 
-    final numberBox = calendarNumberBox(MediaQuery.textScalerOf(context));
     final dayNumber = Container(
-      width: numberBox,
-      height: numberBox,
+      width: kCalendarDayCircle,
+      height: kCalendarDayCircle,
       alignment: Alignment.center,
       // 오늘 = 옅은 원 bg-neutral-weak + 700 (date-picker.md — 브랜드 색으로 채우지 않는다)
       decoration: (isToday && !isOutside)
@@ -347,8 +320,7 @@ class CalendarDayCell extends StatelessWidget {
           : null,
       child: Text(
         '${day.day}',
-        // 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 일정 칩 글은 그 위로도 커진다
-        textScaler: weekdayRowScaler(MediaQuery.textScalerOf(context)),
+        textScaler: TextScaler.noScaling,
         maxLines: 1,
         softWrap: false,
         style: calendarDayNumberStyle(
@@ -396,7 +368,7 @@ class CalendarDayCell extends StatelessWidget {
                 if (cell.hidden > 0)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: _chipPadX),
-                    // 개수라 말줄임 대신 칸 폭에 맞춰 줄여 보인다(글자 200% 에서도 "+3개" 가 읽힌다)
+                    // 개수라 말줄임 대신 칸 폭에 맞춰 줄여 보인다(좁은 칸 · 영어 "+3 more" 도 읽힌다)
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
@@ -404,6 +376,7 @@ class CalendarDayCell extends StatelessWidget {
                         l.calMoreEvents(cell.hidden),
                         maxLines: 1,
                         softWrap: false,
+                        textScaler: TextScaler.noScaling,
                         style: PTypography.t2.copyWith(
                           color: c.fgNeutralMuted,
                           fontWeight: FontWeight.w700,
@@ -420,7 +393,7 @@ class CalendarDayCell extends StatelessWidget {
   }
 }
 
-/// 칩 한 줄 — 높이 18(글자 크기를 곱한다) · 모서리 4 · 한 줄 끝 말줄임. 이어지는 일정은 첫 · 사이 · 끝 조각이 이웃 칸으로
+/// 칩 한 줄 — 높이 18 · 모서리 4 · 한 줄 끝 말줄임. 이어지는 일정은 첫 · 사이 · 끝 조각이 이웃 칸으로
 /// 이어지고(연결 변은 안쪽 0) 제목은 주마다 한 번 위 겹(`CalendarMonthGrid._bandLabel`)에 그린다.
 class _EventChip extends StatelessWidget {
   const _EventChip({required this.slot, required this.height});
@@ -462,6 +435,7 @@ class _EventChip extends StatelessWidget {
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
+                textScaler: TextScaler.noScaling,
                 style: _chipStyle(tone),
               )
             : null,

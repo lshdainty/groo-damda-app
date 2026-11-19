@@ -159,14 +159,19 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('칸은 103 그대로 — 200% 에서 칩이 커지면 보이는 수가 줄고 넘침 0', (tester) async {
-    await pump(tester, events: five, scale: 2.0);
-    expect(tester.takeException(), isNull);
-    expect(findText('+5개'), findsOneWidget);
-    for (final c in tester.widgetList(find.byType(CalendarDayCell))) {
-      expect(tester.getSize(find.byWidget(c)).height, 103);
-    }
-  });
+  testWidgets(
+    '칸은 103 그대로 — 200% 에서도 칸 안 글은 커지지 않아 100% 와 같은 칩 · "+N개"(groo-design #260)',
+    (tester) async {
+      await pump(tester, events: five, scale: 2.0);
+      expect(tester.takeException(), isNull);
+      // 일정 다섯 → 100% 와 같이 칩 둘 + "+3개"(예전에는 칩이 커져 "+5개" 만 남았다)
+      expect(findPlainContaining('다섯째날일정'), findsNWidgets(2));
+      expect(findText('+3개'), findsOneWidget);
+      for (final c in tester.widgetList(find.byType(CalendarDayCell))) {
+        expect(tester.getSize(find.byWidget(c)).height, 103);
+      }
+    },
+  );
 
   testWidgets('다크에서도 넘침 0', (tester) async {
     await pump(tester, events: five, dark: true, scale: 2.0);

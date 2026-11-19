@@ -2,8 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'package:groo_damda_app/core/format/date.dart'
-    show fitWeekdayRowLabels, weekdayRowScaler;
+import 'package:groo_damda_app/core/format/date.dart' show fitWeekdayRowLabels;
 import 'package:groo_damda_app/l10n/ds_l10n.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart_parts.dart';
@@ -44,9 +43,15 @@ final TextStyle _rowLabelStyle = PTypography.t3.copyWith(
 );
 const TextStyle _rowSubStyle = PTypography.t1;
 
+/// 글 한 줄 높이(글자 크기 13 / 18 처럼 토큰 그대로).
+double _lineOf(TextStyle style) => style.fontSize! * style.height!;
+
 /// 열지도 — 요일 × 시간 같은 두 축의 세기. 왼쪽 시간대 라벨 열 56 + 요일 칸, 위 요일 머리 12. 칸은 정사각형 · 모서리 4 ·
 /// 사이 6. 세기는 다섯 단계 — 브랜드 채움을 카드 면에 18 · 35 · 55 · 76 · 100% 섞은 색(가장 큰 값의 8 · 22 · 45 · 75%
 /// 에서 끊는다), 값이 없으면 bg-neutral-weak. 가장 큰 칸에 고리를 두르지 않는다.
+///
+/// 열지도는 그림(디자인 틀)이라 칸 안 글 · 요일 머리 · 시간대 라벨이 글자 크기 설정을 따르지 않는다(chart.md "글자 크기" ·
+/// DESIGN.md Typography "그대로 두는 것", groo-design #260) — 값은 툴팁 · 표로 보기에서 크게 읽는다.
 ///
 /// 칸에 금액을 적는 것은 칸 폭이 [textMinCellWidth](112) 이상일 때뿐이다 — 원까지 11 / 15 · 700 · 고정폭 숫자(빈 칸은
 /// "—" fg-neutral-subtle). 폰은 늘 좁아 세기 색만 칠한다 — 좁다고 돈을 줄여 쓰거나 글자를 줄이지 않는다. 글자색은 단계마다
@@ -192,13 +197,12 @@ class _PHeatmapState extends State<PHeatmap> {
     );
   }
 
-  /// 칸에 적힐 글 가운데 가장 넓은 것의 폭(글자 배율 포함) — 빈 칸의 "—" 도 센다.
+  /// 칸에 적힐 글 가운데 가장 넓은 것의 폭 — 빈 칸의 "—" 도 센다.
   double _widestValue(
     BuildContext context,
     String Function(double) fmt,
     double max,
   ) {
-    final scaler = MediaQuery.textScalerOf(context);
     final style = PTypography.t1.copyWith(
       fontWeight: FontWeight.w700,
       fontFeatures: _tabular,
@@ -208,7 +212,7 @@ class _PHeatmapState extends State<PHeatmap> {
       final painter = TextPainter(
         text: TextSpan(text: text, style: style),
         textDirection: Directionality.of(context),
-        textScaler: scaler,
+        textScaler: TextScaler.noScaling,
         maxLines: 1,
       )..layout();
       widest = math.max(widest, painter.width);
@@ -255,37 +259,17 @@ class _PHeatmapState extends State<PHeatmap> {
             (constraints.maxWidth - kHeatLabelColumn - kHeatGap * cols) /
                 math.max(1, cols),
           );
-          // 칸 폭이 기준(112) 이상이어도 글자 설정을 키워 글이 칸보다 넓어지면 글을 뺀다 — 세기 색만(03E-026b).
-          // 좁다고 돈을 줄이거나 글자를 줄여 맞추지 않는다
+          // 칸 폭이 기준(112) 이상이어도 글이 칸보다 넓으면 글을 뺀다 — 세기 색만(03E-026b). 좁다고 돈을 줄이거나 글자를
+          // 줄여 맞추지 않는다
           final showText =
               cell >= widget.textMinCellWidth &&
               _widestValue(context, fmt, max) <= cell - kHeatCellTextPadding;
-          // 줄 높이 — 칸(정사각형)과 시간대 라벨(13 + 11) 중 큰 쪽
-          // 글자 크기 설정을 키우면 라벨 두 줄도 자라 칸 줄이 따라 자란다(200% 에서 라벨이 줄 밖으로 넘치지 않게)
-          // 라벨 높이는 그려지는 글 그대로 잰다 — `scale(33)` 처럼 줄 높이 합을 한 번에 키우면 안드로이드 비선형 글자 크기(작은
-          // 글은 설정만큼, 큰 값은 덜 커진다)에서 두 줄이 줄 높이를 넘친다
-          final scaler = MediaQuery.textScalerOf(context);
-          double lineOf(TextStyle style) {
-            final p = TextPainter(
-              text: TextSpan(text: '0', style: style),
-              textDirection: TextDirection.ltr,
-              textScaler: scaler,
-              maxLines: 1,
-            )..layout();
-            final h = p.height;
-            p.dispose();
-            return h;
-          }
-
+          // 줄 높이 — 칸(정사각형)과 시간대 라벨(13 / 18 + 11 / 15) 중 큰 쪽. 글자 크기 설정을 따르지 않으므로 글 줄 높이 그대로다
           final labelH =
-              lineOf(_rowLabelStyle) + (hasSub ? lineOf(_rowSubStyle) : 0);
-          final rowH = math.max(cell, labelH.ceilToDouble());
-          // 요일 머리는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 머리 줄 높이 · 칸 맞춤도 멈춘 글로 잰다.
-          // 시간대 라벨 · 칸 금액은 그 위로도 커진다
-          final headScaler = weekdayRowScaler(scaler);
+              _lineOf(_rowLabelStyle) + (hasSub ? _lineOf(_rowSubStyle) : 0);
+          final rowH = math.max(cell, labelH);
           final headStyle = PTypography.t2.copyWith(color: c.fgNeutralSubtle);
-          final headH =
-              headScaler.scale(headStyle.fontSize!) * headStyle.height!;
+          final headH = _lineOf(headStyle);
           final wideHeads = [
             for (final col in widget.columns) col.head ?? col.label,
           ];
@@ -293,7 +277,6 @@ class _PHeatmapState extends State<PHeatmap> {
               ? fitWeekdayRowLabels(
                   cell,
                   headStyle,
-                  headScaler,
                   labels: wideHeads,
                   narrow: [for (final col in widget.columns) col.narrowHead!],
                 )
@@ -327,7 +310,7 @@ class _PHeatmapState extends State<PHeatmap> {
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
                                 softWrap: false,
-                                textScaler: headScaler,
+                                textScaler: TextScaler.noScaling,
                                 style: headStyle,
                               ),
                             ),
@@ -354,6 +337,7 @@ class _PHeatmapState extends State<PHeatmap> {
                                     key: ValueKey('chart-heatmap-row-$r'),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                    textScaler: TextScaler.noScaling,
                                     style: _rowLabelStyle.copyWith(
                                       color: c.fgNeutral,
                                     ),
@@ -361,8 +345,10 @@ class _PHeatmapState extends State<PHeatmap> {
                                   if (widget.rows[r].sub != null)
                                     Text(
                                       widget.rows[r].sub!,
+                                      key: ValueKey('chart-heatmap-row-sub-$r'),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
+                                      textScaler: TextScaler.noScaling,
                                       style: _rowSubStyle.copyWith(
                                         color: c.fgNeutralSubtle,
                                       ),
@@ -471,6 +457,7 @@ class _Cell extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               overflow: TextOverflow.clip,
+              textScaler: TextScaler.noScaling,
               style: PTypography.t1.copyWith(
                 fontWeight: FontWeight.w700,
                 fontFeatures: _tabular,

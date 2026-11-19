@@ -1281,8 +1281,8 @@ Widget _titleColorAnimated({
 }
 
 /// WidgetSpan 안 위젯을 글 배율의 역수로 줄여 놓는다. Flutter 는 WidgetSpan 자식의 그려진 크기에 글자 배율을 한 번 더
-/// 곱하는데, 배지는 안의 글자가 이미 배율을 받고 여백은 배율을 따르지 않으므로 배율을 막는 것(withNoTextScaling)으로는
-/// 홀로 둔 배지와 크기가 같아지지 않는다. 자식은 평소 배율 그대로 배치하고, 자리 크기와 그림을 1/배율로 줄이면
+/// 곱하는데, 배지는 글 · 여백이 스스로 정한 크기(글자 크기 설정을 따르지 않는 static, groo-design #260)라 그 배율이 걸리면
+/// 홀로 둔 배지보다 커진다. 자식은 평소대로 배치하고, 자리 크기와 그림을 1/배율로 줄이면
 /// Flutter 가 곱하는 배율과 상쇄돼 홀로 둔 배지와 같은 크기로 그려진다. 배율 1 이면 아무것도 바꾸지 않는다.
 class _UnscaleBySpan extends SingleChildRenderObjectWidget {
   const _UnscaleBySpan({required this.scale, required Widget super.child});

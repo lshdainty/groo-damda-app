@@ -180,15 +180,14 @@ class _ForestReportScreenState extends ConsumerState<ForestReportScreen> {
                     padding: const EdgeInsets.symmetric(
                       horizontal: PSpacing.x3,
                     ),
-                    // 7일 띠 요일 머리 — 영어 두 글자(Mo … Su), 칸에 들지 않으면 한 글자. 글자 크기 200% 에서 멈춘다
-                    // (international-design.mdx "날짜" · DESIGN.md "지원 폭", groo-design #256 · #258). 아래 요일 막대의
-                    // 가로축은 차트 축이라 [dows](영어 "Mon") 그대로다
+                    // 7일 띠 요일 머리 — 영어 두 글자(Mo … Su), 칸에 들지 않으면 한 글자. 글자 크기 설정은 따르지 않는다
+                    // (international-design.mdx "날짜" · DESIGN.md Typography "그대로 두는 것", groo-design #256 · #260).
+                    // 아래 요일 막대의 가로축은 차트 축이라 [dows](영어 "Mon") 그대로다
                     child: LayoutBuilder(
                       builder: (context, box) {
                         final heads = fitWeekdayRowLabels(
                           box.maxWidth / 7,
                           _dayCellDowStyle,
-                          weekdayRowScaler(MediaQuery.textScalerOf(context)),
                           labels: weekdayRowLabels(mondayFirst: true),
                           narrow: weekdayRowNarrowLabels(mondayFirst: true),
                         );
@@ -333,15 +332,11 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
-    // 요일 머리 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 원도 멈춘 글로 잰다
-    final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
+    // 7일 띠 칸 안 글(요일 머리 · "오늘" · 날짜 숫자)은 글자 크기 설정을 따르지 않는다(DESIGN.md Typography "그대로 두는 것",
+    // groo-design #260) — 원도 36 그대로이고 칸 폭을 넘지 않는다
     return LayoutBuilder(
       builder: (context, box) {
-        // 원은 글자 크기를 따라 늘되 칸 폭을 넘지 않는다(200% 에서도 7칸이 한 줄).
-        final circle = math.min(
-          box.maxWidth,
-          math.max(PSpacing.x9, scaler.scale(22) + PSpacing.x2),
-        );
+        final circle = math.min(box.maxWidth, PSpacing.x9);
         return Semantics(
           button: true,
           enabled: !future,
@@ -364,7 +359,7 @@ class _DayCell extends StatelessWidget {
                       key: const ValueKey('forest-day-dow'),
                       maxLines: 1,
                       softWrap: false,
-                      textScaler: scaler,
+                      textScaler: TextScaler.noScaling,
                       style: _dayCellDowStyle.copyWith(
                         color: isToday ? c.fgBrand : c.fgNeutralSubtle,
                         fontWeight: isToday ? FontWeight.w700 : null,
@@ -372,10 +367,8 @@ class _DayCell extends StatelessWidget {
                     ),
                     const SizedBox(height: PSpacing.x1),
                     Container(
-                      // 원이 칸 폭에서 멈춰 글 줄(200% 44)보다 작으면 상자만 글 줄만큼 늘어난다 — 원(BoxShape.circle)은
-                      // 짧은 변 지름으로 그대로 그리고, 숫자 줄이 원 상자에 잘리지 않는다
                       width: circle,
-                      constraints: BoxConstraints(minHeight: circle),
+                      height: circle,
                       alignment: Alignment.center,
                       decoration: selected
                           ? BoxDecoration(
@@ -388,7 +381,7 @@ class _DayCell extends StatelessWidget {
                         key: const ValueKey('forest-day-number'),
                         maxLines: 1,
                         softWrap: false,
-                        textScaler: scaler,
+                        textScaler: TextScaler.noScaling,
                         style: PTypography.t5.copyWith(
                           color: selected
                               ? c.staticWhite
@@ -855,23 +848,21 @@ class _ResultLine extends StatelessWidget {
   }
 }
 
-/// 연속 관측 도장 — 지름 72 · 안쪽 2px · −8° 기울임. 줄 안 오른쪽에 자리를 가져 글과 겹치지 않는다.
+/// 연속 관측 도장 — 지름 72 · 안쪽 2px · −8° 기울임 · 안쪽 여백 12. 줄 안 오른쪽에 자리를 가져 글과 겹치지 않는다.
 ///
-/// 글을 줄여 맞추지 않는다 — 사용자가 키운 글자 크기를 화면이 다시 줄이는 꼴이라서, 원이 글자 배율을 따라 커진다
-/// (72 × 배율, 안쪽 여백 12 도 같은 비율. 저축률 고리와 같은 방식). 글 상자는 원에 내접한다.
+/// 도장은 모양(디자인 틀)이라 원 · 안의 글이 글자 크기 설정을 따르지 않는다(DESIGN.md Typography "그대로 두는 것",
+/// groo-design #260). 글 상자는 원에 내접한다.
 class _Stamp extends StatelessWidget {
   const _Stamp({required this.streak});
 
   final int streak;
 
-  static const double base = 72;
+  static const double size = 72;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
-    final k = MediaQuery.textScalerOf(context).scale(1);
-    final size = base * k;
     return Semantics(
       container: true,
       label: l.frpStampName(streak),
@@ -889,7 +880,7 @@ class _Stamp extends StatelessWidget {
               border: Border.all(color: c.strokeCriticalSolid, width: 2),
             ),
             child: Padding(
-              padding: EdgeInsets.all(PSpacing.x3 * k),
+              padding: const EdgeInsets.all(PSpacing.x3),
               child: OverflowBox(
                 maxWidth: double.infinity,
                 child: Column(
@@ -898,6 +889,7 @@ class _Stamp extends StatelessWidget {
                     Text(
                       l.frpStampDays(streak),
                       softWrap: false,
+                      textScaler: TextScaler.noScaling,
                       style: PTypography.t4.copyWith(
                         color: c.fgCriticalContrast,
                         fontWeight: FontWeight.w700,
@@ -906,6 +898,7 @@ class _Stamp extends StatelessWidget {
                     PText(
                       l.frpStampLabel,
                       softWrap: false,
+                      textScaler: TextScaler.noScaling,
                       style: PTypography.t1.copyWith(
                         color: c.fgCriticalContrast,
                         fontWeight: FontWeight.w700,
@@ -1064,15 +1057,10 @@ class _Bars extends StatelessWidget {
                 Container(height: 1, color: c.strokeNeutralSubtle),
                 const SizedBox(height: PSpacing.x2),
                 Container(
-                  // 최소 28 — 글자가 커지면 원도 따라 커진다(200% 글이 28 상자에 갇히지 않는다)
-                  width: math.max(
-                    PSpacing.x7,
-                    MediaQuery.textScalerOf(context).scale(18),
-                  ),
-                  height: math.max(
-                    PSpacing.x7,
-                    MediaQuery.textScalerOf(context).scale(18),
-                  ),
+                  // 원 28 — 막대 아래 요일은 차트 그림 안 글(축 눈금)이라 글자 크기 설정을 따르지 않는다(chart.md "글자 크기",
+                  // groo-design #260)
+                  width: PSpacing.x7,
+                  height: PSpacing.x7,
                   alignment: Alignment.center,
                   decoration: ymd(days[i]) == sel
                       ? BoxDecoration(
@@ -1082,6 +1070,10 @@ class _Bars extends StatelessWidget {
                       : null,
                   child: Text(
                     dows[i],
+                    key: const ValueKey('forest-bar-dow'),
+                    maxLines: 1,
+                    softWrap: false,
+                    textScaler: TextScaler.noScaling,
                     style: PTypography.t3.copyWith(
                       color: ymd(days[i]) == sel
                           ? c.staticWhite

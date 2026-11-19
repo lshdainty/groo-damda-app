@@ -34,10 +34,10 @@ class PChartSeries {
   Color colorOf(PColors c) => weak ? color.weakOf(c) : color.of(c);
 }
 
-/// 차트 맨 위 여백의 바닥값 — 실제 위 여백은 글자 크기 · 막대 위 값 글을 따라 이보다 커진다([_Plan.topPad]).
+/// 차트 맨 위 여백의 바닥값 — 실제 위 여백은 세로 눈금 글 · 막대 위 값 글 자리만큼 이보다 커진다([_Plan.topPad]).
 const double kChartTopPad = 8;
 
-/// 막대 위 값 글과 막대 윗끝 사이(chart.md "막대 위 값 자리도 글을 따릅니다" — 자리 = 글 줄 높이 + 4).
+/// 막대 위 값 글과 막대 윗끝 사이(chart.md "막대 위 값 자리" — 자리 = 글 줄 높이 + 4).
 const double kChartBarLabelGap = PSpacing.x1;
 
 /// 막대 위 값 글 — t2 12 / 16 · 700 · fg-neutral · 고정폭 숫자(`barValue`).
@@ -231,7 +231,6 @@ class _Plan {
     required this.topPad,
     required this.xLabelGap,
     required this.barLabelRoom,
-    required this.shownTicks,
   });
 
   /// 0 아래 · 위로 눈금이 몇 칸인가.
@@ -244,7 +243,7 @@ class _Plan {
   final double leftWidth;
   final double rightWidth;
 
-  /// 가장 긴 가로 눈금 글의 폭(글자 배율 포함).
+  /// 가장 긴 가로 눈금 글의 폭.
   final double labelWidth;
 
   /// 가로 눈금마다 그릴 글 — 건너뛴 칸은 null(끝 눈금은 늘 남고, 연도는 보이는 눈금 기준).
@@ -253,7 +252,7 @@ class _Plan {
   final double plotLeft;
   final double plotWidth;
 
-  /// 아래 눈금(가로축) 자리 — 글자 배율을 곱한 눈금 높이 + 사이 8.
+  /// 아래 눈금(가로축) 자리 — 눈금 글 줄 높이 + 사이([xLabelGap]).
   final double bottomReserved;
 
   /// 맨 위 여백 — max(8 + 막대 위 값 자리, ⌈세로 눈금 글 줄 높이 ÷ 2⌉)(chart.md "세로축 끝 글의 자리를 비웁니다").
@@ -264,10 +263,6 @@ class _Plan {
 
   /// 막대 위 값 자리 — 그 글 줄 높이 + 4(막대 위 값 글이 없으면 0).
   final double barLabelRoom;
-
-  /// 세로 눈금 글을 둘 칸(0 에서 센 칸 — 위 +, 아래 −). null 이면 모두. 가장 적은 축도 들지 않으면 큰 쪽 끝 하나(0 은 함께
-  /// 들어갈 때만)다 — 격자선은 그대로 긋는다([_measure]).
-  final Set<int>? shownTicks;
 
   double get minY => -below.toDouble();
   double get maxY => above.toDouble();
@@ -299,17 +294,12 @@ typedef _Measure = ({
   double topPad,
   double xLabelGap,
   double barLabelRoom,
-  Set<int>? shownTicks,
   int interval,
 });
 
-/// 눈금을 정한다 — 숨긴 계열도 포함해 정한다(지표 타일을 눌러도 축이 흔들리지 않는다).
-_Measure _measure(
-  PCartesianChart w,
-  double width,
-  PColors c,
-  TextScaler scaler,
-) {
+/// 눈금을 정한다 — 숨긴 계열도 포함해 정한다(지표 타일을 눌러도 축이 흔들리지 않는다). 차트 그림 안 글(축 눈금 · 막대 위 값)은
+/// 글자 크기 설정을 따르지 않으므로(chart.md "글자 크기", groo-design #260) 모든 글 폭 · 줄 높이를 배율 없이 잰다.
+_Measure _measure(PCartesianChart w, double width, PColors c) {
   final leftSeries = [
     for (final s in w.series)
       if (!s.onRight) s,
@@ -358,17 +348,16 @@ _Measure _measure(
   // 그리는 자리 밖으로 줄 높이의 절반만큼 나간다. 위 여백은 max(지금 위 여백, ⌈줄 ÷ 2⌉), 가로 눈금 줄은 그리는 자리 아래
   // max(8, ⌈줄 ÷ 2⌉ + 4) 에서 시작한다. 막대 위 값 자리는 그 글 줄 높이 + 4(고정 20 이 아니다). 그리는 높이는 차트 높이에서
   // 위 여백과 아래 눈금 자리(가로 눈금 줄 + 그 사이)를 뺀 것이다
-  final tickLine = chartTickLineHeight(tickStyle, scaler: scaler);
+  final tickLine = chartTickLineHeight(tickStyle);
   final halfTick = (tickLine / 2).ceilToDouble();
   final barLabelRoom = w._hasBarLabel
-      ? chartTickLineHeight(chartBarValueStyle(c), scaler: scaler) +
-            kChartBarLabelGap
+      ? chartTickLineHeight(chartBarValueStyle(c)) + kChartBarLabelGap
       : 0.0;
   final topPad = math.max(kChartTopPad + barLabelRoom, halfTick);
   final xLabelGap = math.max(kChartTickMargin, halfTick + PSpacing.x1);
   final bottomReserved = tickLine + xLabelGap;
   final plotHeight = math.max(1.0, w.height - topPad - bottomReserved);
-  // 세로 눈금이 겹치면 수를 줄인다(chart.md "큰 글자") — 눈금 사이가 눈금 글 줄 높이보다 좁으면 들어가는 칸 수로 1 · 2 · 5 축을
+  // 세로 눈금이 겹치면 수를 줄인다(chart.md "세로 눈금이 겹치면") — 낮은 차트에서 눈금 사이가 눈금 글 줄 높이보다 좁으면 들어가는 칸 수로 1 · 2 · 5 축을
   // 다시 센다. 이중 축은 두 축의 0 을 맞춘 뒤(아래 · 위 칸 수 중 큰 쪽)의 칸 수로 본다 — 한 축은 한 단위 그대로다
   final maxIntervals = w._hasValueAxis
       ? chartAxisMaxIntervals(plotHeight, tickLine)
@@ -392,28 +381,11 @@ _Measure _measure(
   final aboveFix = above == 0 && below == 0
       ? math.min(kChartAxisIntervals, maxIntervals)
       : above;
-  // 가장 적은 축도 들지 않으면 큰 쪽 끝 글만(chart.md "큰 글자", groo-design #253) — 칸을 가장 적게 줄여도(0 을 품어야 하는
-  // −50만 · 0 · 50만, 양수만이면 0 · 50만) 눈금 사이가 글 줄 높이보다 좁으면, 절댓값이 큰 쪽 끝 글 하나를 남기고 0 은 그 끝과
-  // 겹치지 않을 때만 둔다. 나머지 글은 빼고 격자선 · 차트 높이는 그대로다. 이중 축은 두 축이 같은 칸이라 같은 자리 글만 남는다
-  Set<int>? shownTicks;
-  final total = aboveFix + below;
-  if (w._hasValueAxis && total > 0 && plotHeight / total < tickLine - 1e-6) {
-    // 끝 눈금의 절댓값이 같으면(−50만 · 50만) 값의 절댓값이 큰 쪽(데이터가 닿는 쪽) 끝을 남긴다
-    final topIsBig = aboveFix != below
-        ? aboveFix > below
-        : (leftRange.hi ?? 0).abs() >= (leftRange.lo ?? 0).abs();
-    final big = topIsBig ? aboveFix : -below;
-    final zeroFits = big.abs() * plotHeight / total >= tickLine - 1e-6;
-    shownTicks = {big, if (zeroFits) 0};
-  }
-
   double axisWidth(double step) {
     final ticks = _ticksOf(below, aboveFix, step);
-    return chartAxisWidth(
-      [for (final v in ticks) _axisTextOf(w, v, ticks)],
-      tickStyle,
-      scaler: scaler,
-    );
+    return chartAxisWidth([
+      for (final v in ticks) _axisTextOf(w, v, ticks),
+    ], tickStyle);
   }
 
   final leftW = w._hasValueAxis ? axisWidth(l.step) : 0.0;
@@ -422,9 +394,9 @@ _Measure _measure(
   // 연도를 이어받아 길어진다("11월" → "2026. 11.") — 그 글까지 재야 끝 글 자리 · 글 상자가 모자라지 않는다
   var labelW = 0.0;
   for (final label in chartXTickDrawableLabels(_xTicksOf(w))) {
-    labelW = math.max(labelW, measureText(label, tickStyle, scaler: scaler));
+    labelW = math.max(labelW, measureText(label, tickStyle));
   }
-  // 끝 글 자리는 비워 둔다(chart.md "큰 글자") — 끝 글은 그리는 자리 오른쪽 끝에 가운데를 두므로 오른쪽에 끝 글 폭의 절반을
+  // 끝 글 자리는 비워 둔다(chart.md "끝 글 자리는 비워 둡니다") — 끝 글은 그리는 자리 오른쪽 끝에 가운데를 두므로 오른쪽에 끝 글 폭의 절반을
   // 비워 차트 끝을 넘지 않게 한다. 축 수와 관계없다 — 오른쪽 축이 있으면 그 축 자리(축 글 아래는 비어 있다)가 끝 글 반 폭보다
   // 넓을 때 그대로 두고, 좁으면 끝 글 반 폭까지 넓힌다. 끝 글을 안으로 당기지 않으므로 건너뛴 간격이 끝까지 고르다
   final rightPad = math.max(r == null ? PSpacing.x2 : rightW, labelW / 2);
@@ -445,7 +417,6 @@ _Measure _measure(
     topPad: topPad,
     xLabelGap: xLabelGap,
     barLabelRoom: barLabelRoom,
-    shownTicks: shownTicks,
     interval: interval,
   );
 }
@@ -477,11 +448,11 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
   bool get _dual => widget.series.any((s) => s.onRight);
 
   /// 눈금을 정한다 — 같은 화면 · 같은 기간 차트([PCartesianChart.xTickPeers])와 가로 눈금 건너뛰기를 맞춘다.
-  _Plan _plan(double width, PColors c, TextScaler scaler) {
-    final own = _measure(widget, width, c, scaler);
+  _Plan _plan(double width, PColors c) {
+    final own = _measure(widget, width, c);
     var interval = own.interval;
     for (final peer in widget.xTickPeers) {
-      interval = math.max(interval, _measure(peer, width, c, scaler).interval);
+      interval = math.max(interval, _measure(peer, width, c).interval);
     }
     return _Plan(
       below: own.below,
@@ -498,7 +469,6 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
       topPad: own.topPad,
       xLabelGap: own.xLabelGap,
       barLabelRoom: own.barLabelRoom,
-      shownTicks: own.shownTicks,
     );
   }
 
@@ -515,16 +485,13 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
         : null;
     Widget side(double v, TitleMeta meta, double? step, PChartColor? color) {
       if (v != v.roundToDouble() || step == null) return const SizedBox();
-      // 가장 적은 축도 들지 않으면 큰 쪽 끝 글(과 들어가면 0)만 — 격자선은 그대로다
-      if (p.shownTicks != null && !p.shownTicks!.contains(v.round())) {
-        return const SizedBox();
-      }
       return SideTitleWidget(
         meta: meta,
         space: kChartTickMargin,
         child: Text(
           _axisText(v * step, _ticksOf(p.below, p.above, step)),
           maxLines: 1,
+          textScaler: TextScaler.noScaling,
           style: chartTickStyle(c, color: color),
         ),
       );
@@ -559,7 +526,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
               ),
             ),
       // 가로 눈금 글은 자리만 잡고 [_bottomLabels] 가 그린다 — fl_chart 는 아래 눈금이 그림 안에 드는지 볼 때 좌우 축 자리 합을
-      // 높이에서도 빼서, 합이 차트 높이를 넘으면(낮은 차트 · 큰 글자 · 긴 세로 눈금 글) 가로 눈금을 하나도 그리지 않는다
+      // 높이에서도 빼서, 합이 차트 높이를 넘으면(낮은 차트 · 긴 세로 눈금 글) 가로 눈금을 하나도 그리지 않는다
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
@@ -592,6 +559,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
                     p.bottomLabels[i]!,
                     maxLines: 1,
                     softWrap: false,
+                    textScaler: TextScaler.noScaling,
                     style: i == _emphasized
                         ? chartTickStyle(c).copyWith(
                             color: c.fgNeutral,
@@ -692,11 +660,7 @@ abstract class _CartesianState<W extends PCartesianChart> extends State<W> {
       child: PChartDrawIn(
         builder: (context, progress) => LayoutBuilder(
           builder: (context, constraints) {
-            final p = _plan(
-              constraints.maxWidth,
-              c,
-              MediaQuery.textScalerOf(context),
-            );
+            final p = _plan(constraints.maxWidth, c);
             final h = math.max(1.0, widget.height - p.topPad);
             final overlay = _overlay(c, p, h);
             return TapRegion(
@@ -930,7 +894,7 @@ class _PBarChartState extends _CartesianState<PBarChart> {
           if (v == null) continue;
           final text = label(i, v);
           if (text == null) continue;
-          // 막대 윗끝(음수는 쓰지 않는다) 바로 위 — 글 줄 높이(글자 크기를 따름) + 사이 4
+          // 막대 윗끝(음수는 쓰지 않는다) 바로 위 — 글 줄 높이 + 사이 4
           final top =
               p.topPad +
               (p.maxY - _y(s, v, p)) / range * plotH -
@@ -942,7 +906,7 @@ class _PBarChartState extends _CartesianState<PBarChart> {
               width: 80,
               top: top,
               // 값 글 뒤에 카드 면 색 바탕(글 상자 크기) — 기준선(예산 100% 점선) · 격자가 글을 가로지르지 않고 글 뒤로
-              // 숨는다(chart.md "막대 위 값 자리도 글을 따릅니다", groo-design #253). 점선을 끊는 셈은 하지 않는다
+              // 숨는다(chart.md "막대 위 값 자리", groo-design #253). 점선을 끊는 셈은 하지 않는다
               child: IgnorePointer(
                 child: Align(
                   alignment: Alignment.topCenter,
@@ -953,6 +917,7 @@ class _PBarChartState extends _CartesianState<PBarChart> {
                       text,
                       textAlign: TextAlign.center,
                       maxLines: 1,
+                      textScaler: TextScaler.noScaling,
                       style: chartBarValueStyle(c),
                     ),
                   ),
