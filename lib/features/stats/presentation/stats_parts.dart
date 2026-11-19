@@ -409,8 +409,11 @@ class _StatsDonutSectionState extends State<StatsDonutSection> {
                 ),
                 const SizedBox(height: PSpacing.x4),
                 for (var i = 0; i < 5; i++)
-                  SizedBox(
-                    height: kChartDonutRowHeight,
+                  ConstrainedBox(
+                    // 범례 줄처럼 최소 높이 — 큰 글자에서 글 자리가 커지면 줄도 따라 커진다
+                    constraints: const BoxConstraints(
+                      minHeight: kChartDonutRowHeight,
+                    ),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: PSkeleton.text(PTypography.t4),

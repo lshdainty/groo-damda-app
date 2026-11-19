@@ -265,7 +265,11 @@ class _HideAmountsScreenState extends ConsumerState<HideAmountsScreen> {
                             ? null
                             : SizedBox(
                                 width: 40,
-                                child: PSkeleton.text(PTypography.t4),
+                                // 제목 글 안(WidgetSpan) — 자리째 글자 배율로 커진다
+                                child: PSkeleton.text(
+                                  PTypography.t4,
+                                  scaled: false,
+                                ),
                               ),
                         tabularFigures: true,
                         topInset: PSpacing.x4,

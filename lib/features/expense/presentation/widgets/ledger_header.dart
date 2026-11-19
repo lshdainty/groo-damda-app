@@ -509,7 +509,7 @@ class LedgerCalendar extends StatelessWidget {
       },
       markBuilder: (context, ds) {
         if (loading) {
-          return loadingInline(PSkeleton.text(PTypography.t1, width: 32));
+          return loadingInline(PSkeleton.staticText(PTypography.t1, width: 32));
         }
         final data = byDay[ds];
         if (data == null) return const SizedBox(height: PSpacing.x3);
