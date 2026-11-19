@@ -466,7 +466,7 @@ class _NamuHoldingBand extends StatelessWidget {
               stocksKvLine(
                 context,
                 l.stocksQuantityHeld,
-                l.stocksSharesUnit(stocksQty(h.quantity)),
+                l.stocksSharesUnit(stocksQty(h.quantity), h.quantity),
               ),
               stocksKvLine(
                 context,
@@ -485,7 +485,7 @@ class _NamuHoldingBand extends StatelessWidget {
                 stocksKvLine(
                   context,
                   l.stocksSellable,
-                  l.stocksSharesUnit(stocksQty(h.sellable!)),
+                  l.stocksSharesUnit(stocksQty(h.sellable!), h.sellable!),
                 ),
             ],
           ),
@@ -701,7 +701,7 @@ class _NamuDailyBand extends ConsumerWidget {
       final ts = cd.timestamp;
       final d = ts.length >= 10 ? DateTime.tryParse(ts.substring(0, 10)) : null;
       rows.add((
-        date: d == null ? ts : l.stocksDailyDate(d.month, d.day),
+        date: d == null ? ts : l.stocksDailyDate(d.month, d.day, monthDay(d)),
         close: close,
         chg: chg,
         vol: cd.volumeValue.round(),

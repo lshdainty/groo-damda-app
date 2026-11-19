@@ -916,7 +916,7 @@ class _HoldingsList extends StatelessWidget {
           StocksLine(
             name: h.name.isNotEmpty ? h.name : h.symbol,
             detail:
-                '${h.symbol} · ${l.stocksSharesUnit(stocksQty(h.quantityValue))}',
+                '${h.symbol} · ${l.stocksSharesUnit(stocksQty(h.quantityValue), h.quantityValue)}',
             amount: masked
                 ? '••••'
                 : fmtByCurrency(h.marketValueAmountValue, h.currency),
@@ -1401,7 +1401,10 @@ class _HoldingBand extends StatelessWidget {
     final pnl = h.profitLossAmountValue;
     final day = h.dailyProfitLossAmountValue;
     final avg = h.averagePurchasePriceValue;
-    final qtyLabel = l.stocksSharesUnit(stocksQty(h.quantityValue));
+    final qtyLabel = l.stocksSharesUnit(
+      stocksQty(h.quantityValue),
+      h.quantityValue,
+    );
     String money(num v) => masked ? '••••' : fmtByCurrency(v.toDouble(), cur);
     PDelta delta(num v) => stocksPnlDelta(v, null, masked, currency: cur);
     return PScreenSection(
@@ -1595,7 +1598,7 @@ class _DailyBand extends ConsumerWidget {
       final ts = cd.timestamp;
       final d = ts.length >= 10 ? DateTime.tryParse(ts.substring(0, 10)) : null;
       rows.add((
-        date: d == null ? ts : l.stocksDailyDate(d.month, d.day),
+        date: d == null ? ts : l.stocksDailyDate(d.month, d.day, monthDay(d)),
         close: close,
         chg: chg,
         vol: cd.volumeValue.round(),

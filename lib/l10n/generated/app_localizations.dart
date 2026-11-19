@@ -1182,7 +1182,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'바꾼 결제일은 다음 회차부터 적용돼요. {month}월분은 {date}에 결제돼요.'**
-  String assetPaymentDayChangeConfirm(int month, String date);
+  String assetPaymentDayChangeConfirm(int month, String date, String monthName);
 
   /// No description provided for @assetNewCard.
   ///
@@ -1763,7 +1763,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{qty}주 · 현재가 {price} 연동'**
-  String assetHoldingLinkedDetail(String qty, String price);
+  String assetHoldingLinkedDetail(String qty, String price, num count);
 
   /// No description provided for @assetHoldingManualDetail.
   ///
@@ -1871,7 +1871,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{n}주'**
-  String assetSharesCount(String n);
+  String assetSharesCount(String n, num count);
 
   /// No description provided for @assetUnlink.
   ///
@@ -2243,7 +2243,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{month}월 실적'**
-  String assetPerfTitle(String month);
+  String assetPerfTitle(String month, String monthName);
 
   /// No description provided for @assetPerfAchieved.
   ///
@@ -3227,7 +3227,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{month}월 가계부'**
-  String dashMonthLedger(int month);
+  String dashMonthLedger(int month, String monthName);
 
   /// No description provided for @dashDailyAvgPrefix.
   ///
@@ -3323,7 +3323,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{month}월 카테고리별 지출, 합계 {total}'**
-  String dashCategoryChartLabel(int month, String total);
+  String dashCategoryChartLabel(int month, String total, String monthName);
 
   /// No description provided for @dashCategoryOthers.
   ///
@@ -3989,7 +3989,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{month}월 총 예산'**
-  String budgetMonthOverallCap(int month);
+  String budgetMonthOverallCap(int month, String monthName);
 
   /// No description provided for @budgetOverallCapDesc.
   ///
@@ -4007,7 +4007,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{month}월 예산이 아직 없어요'**
-  String budgetEmptyMonthTitle(int month);
+  String budgetEmptyMonthTitle(int month, String monthName);
 
   /// No description provided for @budgetEmptyMonthDesc.
   ///
@@ -4271,7 +4271,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{month}월 총 예산'**
-  String budgetMonthTotal(int month);
+  String budgetMonthTotal(int month, String monthName);
 
   /// No description provided for @budgetNotSet.
   ///
@@ -4432,8 +4432,8 @@ abstract class AppLocalizations {
   /// No description provided for @cardTotalCount.
   ///
   /// In ko, this message translates to:
-  /// **'총 {count}장'**
-  String cardTotalCount(String count);
+  /// **'총 {countText}장'**
+  String cardTotalCount(int count, String countText);
 
   /// No description provided for @cardNoResults.
   ///
@@ -7649,7 +7649,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'마지막 {month}월 {day}일'**
-  String presetNoteLast(int month, int day);
+  String presetNoteLast(int month, int day, String monthDay);
 
   /// No description provided for @presetFixedOn.
   ///
@@ -8669,7 +8669,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{qty}주'**
-  String stocksSharesUnit(String qty);
+  String stocksSharesUnit(String qty, num count);
 
   /// No description provided for @stocksTradingSuspended.
   ///
@@ -11261,7 +11261,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{count}건에 사용 중'**
-  String calLabelUsage(Object count);
+  String calLabelUsage(int count);
 
   /// No description provided for @ttagEditTitle.
   ///
@@ -13457,7 +13457,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{month}월 {day}일'**
-  String stocksDailyDate(int month, int day);
+  String stocksDailyDate(int month, int day, String monthDay);
 
   /// No description provided for @stocksTradeSoon.
   ///
@@ -13823,7 +13823,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'매년 {month}월 {day}일'**
-  String recCycleYearly(int month, int day);
+  String recCycleYearly(int month, int day, String monthDay);
 
   /// No description provided for @recCountOf.
   ///
@@ -13835,7 +13835,7 @@ abstract class AppLocalizations {
   ///
   /// In ko, this message translates to:
   /// **'{year}년 {month}월까지'**
-  String recUntilMonth(int year, int month);
+  String recUntilMonth(int year, int month, String yearMonth);
 
   /// No description provided for @recDowShort0.
   ///

@@ -129,7 +129,7 @@
   "assetManageAdd": "Add",
   "assetManageEmptyHint": "Tap [Add] to register your first account or card.",
   "assetManageLoadFailed": "Couldn't load accounts and cards",
-  "assetHoldingsCount": "{count} holdings",
+  "assetHoldingsCount": "{count, plural, =1{1 holding} other{{count} holdings}}",
   "@assetHoldingsCount": {
     "placeholders": {
       "count": {
@@ -259,13 +259,16 @@
     }
   },
   "assetCarryoverAfterHintNoDate": "Spent after the last statement.",
-  "assetPaymentDayChangeConfirm": "The new payment day applies from the next cycle. Month {month} charges are still paid on {date}.",
+  "assetPaymentDayChangeConfirm": "The new payment day applies from the next cycle. {monthName} charges are still paid on {date}.",
   "@assetPaymentDayChangeConfirm": {
     "placeholders": {
       "month": {
         "type": "int"
       },
       "date": {
+        "type": "String"
+      },
+      "monthName": {
         "type": "String"
       }
     }
@@ -303,7 +306,7 @@
   "assetPeriod3m": "3 months",
   "assetPeriod6m": "6 months",
   "assetPeriod1y": "1 year",
-  "assetWeeksCount": "{weeks} weeks",
+  "assetWeeksCount": "{weeks, plural, =1{1 week} other{{weeks} weeks}}",
   "@assetWeeksCount": {
     "placeholders": {
       "weeks": {
@@ -429,9 +432,9 @@
     }
   },
   "assetHoldingBalance": "Holdings",
-  "assetHoldingsSummaryUnknown": "{count} holdings · —",
+  "assetHoldingsSummaryUnknown": "{count, plural, =1{1 holding · —} other{{count} holdings · —}}",
   "@assetHoldingsSummaryUnknown": {"placeholders": {"count": {"type": "int"}}},
-  "assetHoldingsSummary": "{count} holdings · {amount}",
+  "assetHoldingsSummary": "{count, plural, =1{1 holding · {amount}} other{{count} holdings · {amount}}}",
   "@assetHoldingsSummary": {
     "placeholders": {
       "count": {
@@ -463,7 +466,7 @@
       }
     }
   },
-  "assetHoldingLinkedDetail": "{qty} shares · linked at {price}",
+  "assetHoldingLinkedDetail": "{count, plural, =1{{qty} share · linked at {price}} other{{qty} shares · linked at {price}}}",
   "@assetHoldingLinkedDetail": {
     "placeholders": {
       "qty": {
@@ -471,6 +474,9 @@
       },
       "price": {
         "type": "String"
+      },
+      "count": {
+        "type": "num"
       }
     }
   },
@@ -515,11 +521,14 @@
       }
     }
   },
-  "assetSharesCount": "{n} shares",
+  "assetSharesCount": "{count, plural, =1{{n} share} other{{n} shares}}",
   "@assetSharesCount": {
     "placeholders": {
       "n": {
         "type": "String"
+      },
+      "count": {
+        "type": "num"
       }
     }
   },
@@ -691,10 +700,13 @@
   "assetDueThisMonth": "Due this month",
   "assetUsagePeriodLabel": "Card usage period",
   "assetCycleMix": "This cycle",
-  "assetPerfTitle": "Month {month} target",
+  "assetPerfTitle": "{monthName} target",
   "@assetPerfTitle": {
     "placeholders": {
       "month": {
+        "type": "String"
+      },
+      "monthName": {
         "type": "String"
       }
     }
@@ -831,7 +843,7 @@
     }
   },
   "calDatePicker": "Select month",
-  "calFilterChipName": "Showing {count} calendars",
+  "calFilterChipName": "Showing {count, plural, =1{1 calendar} other{{count} calendars}}",
   "@calFilterChipName": {
     "placeholders": {
       "count": {
@@ -897,7 +909,7 @@
   "calNoSharedCalendars": "No shared calendars",
   "calDefault": "Default",
   "calOnlyMe": "Only me",
-  "calMemberCount": "{count} members",
+  "calMemberCount": "{count, plural, =1{1 member} other{{count} members}}",
   "@calMemberCount": {
     "placeholders": {
       "count": {
@@ -1023,11 +1035,14 @@
   },
   "dashVsLastMonth": "vs. last month",
   "dashLiabilities": "Liabilities",
-  "dashMonthLedger": "{month} ledger",
+  "dashMonthLedger": "{monthName} ledger",
   "@dashMonthLedger": {
     "placeholders": {
       "month": {
         "type": "int"
+      },
+      "monthName": {
+        "type": "String"
       }
     }
   },
@@ -1053,13 +1068,16 @@
     }
   },
   "dashBudgetTotal": "Total budget",
-  "dashCategoryChartLabel": "Spending by category in month {month}, total {total}",
+  "dashCategoryChartLabel": "{monthName} spending by category, total {total}",
   "@dashCategoryChartLabel": {
     "placeholders": {
       "month": {
         "type": "int"
       },
       "total": {
+        "type": "String"
+      },
+      "monthName": {
         "type": "String"
       }
     }
@@ -1240,26 +1258,34 @@
   "tradeSaveFailed": "Couldn't process the trade.",
   "tradeSaveInsufficientQty": "Not enough shares held.",
   "budgetSelectMonth": "Select month",
-  "budgetMonthOverallCap": "Month {month} total budget",
+  "budgetMonthOverallCap": "{monthName} total budget",
   "@budgetMonthOverallCap": {
     "placeholders": {
       "month": {
         "type": "int"
+      },
+      "monthName": {
+        "type": "String"
       }
     }
   },
   "budgetOverallCapDesc": "The cap for this month's total spending (including spending without a category budget).",
   "budgetOverallCapEmptyHint": "There is no total budget yet. You can set this month's spending limit in settings.",
-  "budgetEmptyMonthTitle": "No budget for month {month} yet",
+  "budgetEmptyMonthTitle": "No budget for {monthName} yet",
   "@budgetEmptyMonthTitle": {
     "placeholders": {
-      "month": {"type": "int"}
+      "month": {
+        "type": "int"
+      },
+      "monthName": {
+        "type": "String"
+      }
     }
   },
   "budgetEmptyMonthDesc": "Set a budget to see what you spent and what is left at a glance.",
   "budgetFailCompliance": "Couldn't load the budget compliance",
   "budgetManagerLoadFailed": "Couldn't load budgets",
-  "budgetCategoryCount": "{count} categories",
+  "budgetCategoryCount": "{count, plural, =1{1 category} other{{count} categories}}",
   "@budgetCategoryCount": {
     "placeholders": {
       "count": {"type": "int"}
@@ -1358,7 +1384,7 @@
   "budgetLimit": "Limit",
   "budgetSetup": "Budget settings",
   "budgetCopyLastMonth": "Copy last month's budget?",
-  "budgetCopyOverwriteMessage": "{count} budgets this month will be replaced with last month's. This can't be undone once it's changed.",
+  "budgetCopyOverwriteMessage": "{count, plural, =1{1 budget this month will be replaced with last month's.} other{{count} budgets this month will be replaced with last month's.}} This can't be undone once it's changed.",
   "@budgetCopyOverwriteMessage": {
     "placeholders": {
       "count": {
@@ -1385,11 +1411,14 @@
     }
   },
   "budgetCopyLastMonthBtn": "Copy last month",
-  "budgetMonthTotal": "Month {month} Total Budget",
+  "budgetMonthTotal": "{monthName} Total Budget",
   "@budgetMonthTotal": {
     "placeholders": {
       "month": {
         "type": "int"
+      },
+      "monthName": {
+        "type": "String"
       }
     }
   },
@@ -1414,7 +1443,7 @@
   "cardDetailLoadError": "Couldn't load card information",
   "cardLastMonthPerf": "Last month spend",
   "cardKeyBenefitTags": "Key benefit tags",
-  "cardBenefitDetailCount": "{count} benefits",
+  "cardBenefitDetailCount": "{count, plural, =1{1 benefit} other{{count} benefits}}",
   "@cardBenefitDetailCount": {
     "placeholders": {
       "count": {
@@ -1454,10 +1483,13 @@
     }
   },
   "cardIncludeDiscontinued": "Include discontinued cards",
-  "cardTotalCount": "{count} cards",
+  "cardTotalCount": "{count, plural, =1{{countText} card} other{{countText} cards}}",
   "@cardTotalCount": {
     "placeholders": {
       "count": {
+        "type": "int"
+      },
+      "countText": {
         "type": "String"
       }
     }
@@ -1497,7 +1529,7 @@
   "categoryAddAction": "Add",
   "recurringAddAction": "Add",
   "presetAddAction": "Add",
-  "categoryListTitleExpense": "{count} expense categories",
+  "categoryListTitleExpense": "{count, plural, =1{1 expense category} other{{count} expense categories}}",
   "@categoryListTitleExpense": {
     "placeholders": {
       "count": {
@@ -1505,7 +1537,7 @@
       }
     }
   },
-  "categoryListTitleIncome": "{count} income categories",
+  "categoryListTitleIncome": "{count, plural, =1{1 income category} other{{count} income categories}}",
   "@categoryListTitleIncome": {
     "placeholders": {
       "count": {
@@ -1559,7 +1591,7 @@
   "categoryIconLabel": "Icon",
   "categoryLoadFailed": "Couldn't load the categories",
   "categoryDeleteMessage": "Recorded transactions stay as they are. Budgets set for this category are deleted too.",
-  "categoryDeleteRecurring": "{count} recurring transactions that use this category keep being recorded under it.",
+  "categoryDeleteRecurring": "{count, plural, =1{1 recurring transaction that uses this category keeps being recorded under it.} other{{count} recurring transactions that use this category keep being recorded under it.}}",
   "@categoryDeleteRecurring": {
     "placeholders": {
       "count": {
@@ -1652,7 +1684,7 @@
   "dutchDeleteFailed": "Couldn't delete the settlement.",
   "dutchToReceive": "To receive",
   "dutchToSend": "To send",
-  "dutchFromPeople": "from {count} people",
+  "dutchFromPeople": "from {count, plural, =1{1 person} other{{count} people}}",
   "@dutchFromPeople": {
     "placeholders": {
       "count": {
@@ -1660,7 +1692,7 @@
       }
     }
   },
-  "dutchToPeople": "to {count} people",
+  "dutchToPeople": "to {count, plural, =1{1 person} other{{count} people}}",
   "@dutchToPeople": {
     "placeholders": {
       "count": {
@@ -1669,7 +1701,7 @@
     }
   },
   "dutchPerPersonLabel": "Per person",
-  "dutchNPeople": "{count} people",
+  "dutchNPeople": "{count, plural, =1{1 person} other{{count} people}}",
   "@dutchNPeople": {
     "placeholders": {
       "count": {
@@ -1677,7 +1709,7 @@
       }
     }
   },
-  "dutchSettledTogetherCount": "Settled together {count} times",
+  "dutchSettledTogetherCount": "Settled together {count, plural, =1{1 time} other{{count} times}}",
   "@dutchSettledTogetherCount": {
     "placeholders": {
       "count": {
@@ -1728,7 +1760,7 @@
       }
     }
   },
-  "expTxCount": "{count} items",
+  "expTxCount": "{count, plural, =1{1 item} other{{count} items}}",
   "@expTxCount": {
     "placeholders": {
       "count": {
@@ -2203,7 +2235,7 @@
   "accountLogoutConfirm": "Log out of this device?",
   "accountWithdrawTitle": "Stop using 그루 담다",
   "withdrawIntro": "Stopping 그루 담다 signs you out immediately and cannot be undone.",
-  "withdrawImpactCalendarsOwned": "{count} shared calendar(s) you created will be deleted — members lose access too",
+  "withdrawImpactCalendarsOwned": "{count, plural, =1{1 shared calendar} other{{count} shared calendars}} you created will be deleted — members lose access too",
   "@withdrawImpactCalendarsOwned": {
     "placeholders": {
       "count": {
@@ -2211,7 +2243,7 @@
       }
     }
   },
-  "withdrawImpactCalendarMemberships": "You will be removed from {count} calendar(s) you joined",
+  "withdrawImpactCalendarMemberships": "You will be removed from {count, plural, =1{1 calendar} other{{count} calendars}} you joined",
   "@withdrawImpactCalendarMemberships": {
     "placeholders": {
       "count": {
@@ -2219,7 +2251,7 @@
       }
     }
   },
-  "withdrawImpactDutchPaysOwned": "{count} settlement(s) you created will be deleted",
+  "withdrawImpactDutchPaysOwned": "{count, plural, =1{1 settlement} other{{count} settlements}} you created will be deleted",
   "@withdrawImpactDutchPaysOwned": {
     "placeholders": {
       "count": {
@@ -2227,7 +2259,7 @@
       }
     }
   },
-  "withdrawImpactDutchPayParticipations": "You will appear as \"a former member\" in {count} settlement(s) you joined",
+  "withdrawImpactDutchPayParticipations": "You will appear as \"a former member\" in {count, plural, =1{1 settlement} other{{count} settlements}} you joined",
   "@withdrawImpactDutchPayParticipations": {
     "placeholders": {
       "count": {
@@ -2331,7 +2363,7 @@
   "presetSortUsed": "Frequent",
   "presetSortRecent": "Recent",
   "presetSortName": "By name",
-  "presetListTitle": "{count} presets",
+  "presetListTitle": "{count, plural, =1{1 preset} other{{count} presets}}",
   "@presetListTitle": {
     "placeholders": {
       "count": {
@@ -2339,7 +2371,7 @@
       }
     }
   },
-  "presetUses": "{count} uses",
+  "presetUses": "{count, plural, =1{1 use} other{{count} uses}}",
   "@presetUses": {
     "placeholders": {
       "count": {
@@ -2359,7 +2391,7 @@
     }
   },
   "presetNoteFixed": "Fixed amount",
-  "presetNoteUses": "Used {count} times",
+  "presetNoteUses": "Used {count, plural, =1{1 time} other{{count} times}}",
   "@presetNoteUses": {
     "placeholders": {
       "count": {
@@ -2368,7 +2400,7 @@
     }
   },
   "presetNoteUnused": "Not used yet",
-  "presetNoteLast": "Last used {month}/{day}",
+  "presetNoteLast": "Last used {monthDay}",
   "@presetNoteLast": {
     "placeholders": {
       "month": {
@@ -2376,6 +2408,9 @@
       },
       "day": {
         "type": "int"
+      },
+      "monthDay": {
+        "type": "String"
       }
     }
   },
@@ -2631,11 +2666,14 @@
       }
     }
   },
-  "stocksSharesUnit": "{qty} shares",
+  "stocksSharesUnit": "{count, plural, =1{{qty} share} other{{qty} shares}}",
   "@stocksSharesUnit": {
     "placeholders": {
       "qty": {
         "type": "String"
+      },
+      "count": {
+        "type": "num"
       }
     }
   },
@@ -2764,7 +2802,7 @@
   "todoNewTag": "Add tag",
   "todoTagNamePlaceholder": "Tag name",
   "todoDeleteTagTitle": "Delete tag",
-  "todoDeleteTagConfirm": "Deleting \"{name}\" will leave {count} todos using it untagged. A deleted tag cannot be restored.",
+  "todoDeleteTagConfirm": "Deleting \"{name}\" will leave {count, plural, =1{1 to-do} other{{count} to-dos}} using it untagged. A deleted tag cannot be restored.",
   "@todoDeleteTagConfirm": {
     "placeholders": {
       "name": {
@@ -2957,7 +2995,7 @@
   "memoNewTag": "Add tag",
   "memoTagNamePlaceholder": "e.g. Ideas",
   "memoDeleteTagTitle": "Delete tag",
-  "memoDeleteTagConfirm": "Deleting \"{name}\" will leave {count} memos using it untagged. A deleted tag cannot be restored.",
+  "memoDeleteTagConfirm": "Deleting \"{name}\" will leave {count, plural, =1{1 memo} other{{count} memos}} using it untagged. A deleted tag cannot be restored.",
   "@memoDeleteTagConfirm": {
     "placeholders": {
       "name": {
@@ -2973,7 +3011,7 @@
   "mtagDesc": "Tags you attach to memos. They are used to filter the memo screen. If you delete a tag, its memos stay as 'No tag'.",
   "mtagEmpty": "No tags yet",
   "mtagEditTitle": "Edit tag",
-  "mtagUsage": "Used by {count} memos",
+  "mtagUsage": "Used by {count, plural, =1{1 memo} other{{count} memos}}",
   "@mtagUsage": {
     "placeholders": {
       "count": {
@@ -3057,7 +3095,7 @@
       }
     }
   },
-  "constHeroCaptionRemain": "{count} stars to go",
+  "constHeroCaptionRemain": "{count, plural, =1{1 star to go} other{{count} stars to go}}",
   "@constHeroCaptionRemain": {
     "placeholders": {
       "count": {
@@ -3139,7 +3177,7 @@
   "importUploadDesc": "Upload a CSV or Excel (.xlsx, .xls) file. Up to 10MB.",
   "importNotice": "Imported data is added to existing transactions without overwriting. Check duplicates and errors in the preview.",
   "importFileTitle": "File to import",
-  "importRowsDetected": "{total} rows · {valid} valid",
+  "importRowsDetected": "{total, plural, =1{1 row} other{{total} rows}} · {valid} valid",
   "importChange": "Change",
   "importMapTitle": "Column mapping",
   "importMapDesc": "Connect file columns to ledger fields. Review auto-detected values and adjust.",
@@ -3187,7 +3225,7 @@
   "categoryMoveTxNoTarget": "No category to move to. Please create one first.",
   "categoryMoveTxErrChildName": "Please enter a name for the new subcategory.",
   "categoryMoveTxErrTarget": "Please choose a category to move to.",
-  "categoryMoveTxDone": "Moved {count} items.",
+  "categoryMoveTxDone": "{count, plural, =1{Moved 1 item.} other{Moved {count} items.}}",
   "@categoryMoveTxDone": {
     "placeholders": {
       "count": {
@@ -3201,17 +3239,17 @@
   "importFieldCategory": "Category",
   "importFieldAsset": "Asset/Method",
   "importFieldMemo": "Memo",
-  "importPreviewDesc": "{dup} possible duplicates",
+  "importPreviewDesc": "{dup, plural, =1{1 possible duplicate} other{{dup} possible duplicates}}",
   "importIncome": "Income",
   "importExpense": "Expense",
   "importOptionsTitle": "Import options",
   "importOptDupSkip": "Skip duplicate transactions",
-  "importOptDupSkipDesc": "Excludes {dup} rows with the same date, amount, and content.",
+  "importOptDupSkipDesc": "Excludes {dup, plural, =1{1 row} other{{dup} rows}} with the same date, amount, and content.",
   "importOptAutoCat": "Auto-create new categories",
   "importOptAutoCatDesc": "Missing categories are created automatically.",
   "importPrev": "Back",
   "importDoImport": "Import {count}",
-  "importDoneCount": "Imported {count} transactions",
+  "importDoneCount": "Imported {count, plural, =1{1 transaction} other{{count} transactions}}",
   "importDoneDetail": "{skipped} skipped · {failed} not imported.",
   "importAnother": "Import another file",
   "importStepUpload": "Choose file",
@@ -3237,11 +3275,11 @@
   "exportPreviewFooter": "Top {rows} rows · {types} selected types, about {total} in total",
   "@exportPreviewFooter": {"placeholders": {"rows": {"type": "int", "format": "decimalPattern"}, "types": {"type": "int"}, "total": {"type": "int", "format": "decimalPattern"}}},
   "exportPreviewEmptyTitle": "Nothing to preview",
-  "importCreatedCatTitle": "{count} categories created",
+  "importCreatedCatTitle": "{count, plural, =1{1 category created} other{{count} categories created}}",
   "@importCreatedCatTitle": {"placeholders": {"count": {"type": "int", "format": "decimalPattern"}}},
   "importNewCatMore": "+{count} more",
   "@importNewCatMore": {"placeholders": {"count": {"type": "int", "format": "decimalPattern"}}},
-  "importFailuresTitle": "{count} failed rows",
+  "importFailuresTitle": "{count, plural, =1{1 failed row} other{{count} failed rows}}",
   "@importFailuresTitle": {"placeholders": {"count": {"type": "int", "format": "decimalPattern"}}},
   "importFailureLine": "Line {line}",
   "@importFailureLine": {"placeholders": {"line": {"type": "int"}}},
@@ -3311,7 +3349,7 @@
   "txmEmptyMonthDesc": "Browse another month or add your first transaction.",
   "txmToday": "Today",
   "txmYesterday": "Yesterday",
-  "tdmTodayLeft": "{count} to-dos today",
+  "tdmTodayLeft": "{count, plural, =1{1 to-do today} other{{count} to-dos today}}",
   "@tdmTodayLeft": {
     "placeholders": {
       "count": {
@@ -3420,7 +3458,7 @@
   "constDetailStarCountValue": "{count}",
   "@constDetailStarCountValue": {"placeholders": {"count": {"type": "int"}}},
   "constDetailCollectLabel": "Collected",
-  "constDetailCollectValue": "{count} times",
+  "constDetailCollectValue": "{count, plural, =1{1 time} other{{count} times}}",
   "@constDetailCollectValue": {"placeholders": {"count": {"type": "int"}}},
   "frpPrevWeek": "Previous week",
   "frpNextWeek": "Next week",
@@ -3546,11 +3584,13 @@
   },
   "settingsMenuTodoTag": "To-do tags",
   "settingsMenuMemoTag": "Memo tags",
-  "ttagUsage": "Used by {count} to-dos",
-  "calLabelUsage": "Used by {count} events",
+  "ttagUsage": "Used by {count, plural, =1{1 to-do} other{{count} to-dos}}",
+  "calLabelUsage": "Used by {count, plural, =1{1 event} other{{count} events}}",
   "@calLabelUsage": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "@ttagUsage": {
@@ -3605,7 +3645,7 @@
     }
   },
   "smsInboxClearTitle": "Delete all messages?",
-  "smsInboxClearConfirm": "All {count} messages in the inbox will be removed. They won't be recorded.",
+  "smsInboxClearConfirm": "{count, plural, =1{The 1 message in the inbox will be removed. It won't be recorded.} other{All {count} messages in the inbox will be removed. They won't be recorded.}}",
   "@smsInboxClearConfirm": {
     "placeholders": {
       "count": {
@@ -3799,7 +3839,7 @@
   "statsFixedBulkTargetAria": "Change to",
   "statsFixedBulkToFixed": "Mark as fixed",
   "statsFixedBulkToVariable": "Back to variable",
-  "statsFixedBulkGroupSub": "{count} items",
+  "statsFixedBulkGroupSub": "{count, plural, =1{1 item} other{{count} items}}",
   "statsFixedBulkBadgeAll": "Fixed",
   "statsFixedBulkBadgeSome": "Fixed {fixed}/{count}",
   "statsFixedBulkEmpty": "No transactions to organize in this period",
@@ -4063,7 +4103,7 @@
     }
   },
   "stocksWatchGroupEmpty": "No stocks added yet",
-  "stocksWatchGroupDeleteConfirmCount": "\"{name}\" and its {count} stocks will be deleted together. A deleted group cannot be restored.",
+  "stocksWatchGroupDeleteConfirmCount": "{count, plural, =1{\"{name}\" and its 1 stock will be deleted together.} other{\"{name}\" and its {count} stocks will be deleted together.}} A deleted group cannot be restored.",
   "@stocksWatchGroupDeleteConfirmCount": {
     "placeholders": {
       "name": {
@@ -4086,7 +4126,7 @@
   "stocksWatchToggleLabel": "Add to watchlist",
   "stocksPortfolioTitle": "Portfolio breakdown",
   "stocksPortfolioSub": "Weight by stock · totals by currency",
-  "stocksPortfolioCount": "{count} stocks",
+  "stocksPortfolioCount": "{count, plural, =1{1 stock} other{{count} stocks}}",
   "@stocksPortfolioCount": {
     "placeholders": {
       "count": {
@@ -4115,7 +4155,7 @@
     }
   },
   "stocksFxBasis": "Base rate",
-  "stocksDailyDate": "{month}/{day}",
+  "stocksDailyDate": "{monthDay}",
   "@stocksDailyDate": {
     "placeholders": {
       "month": {
@@ -4123,6 +4163,9 @@
       },
       "day": {
         "type": "int"
+      },
+      "monthDay": {
+        "type": "String"
       }
     }
   },
@@ -4241,12 +4284,12 @@
   "@recCycleWeekly": {"placeholders": {"day": {"type": "String"}}},
   "recCycleMonthly": "Monthly on day {day}",
   "@recCycleMonthly": {"placeholders": {"day": {"type": "int"}}},
-  "recCycleYearly": "Yearly on {month}/{day}",
-  "@recCycleYearly": {"placeholders": {"month": {"type": "int"}, "day": {"type": "int"}}},
+  "recCycleYearly": "Yearly on {monthDay}",
+  "@recCycleYearly": {"placeholders": {"month": {"type": "int"}, "day": {"type": "int"}, "monthDay": {"type": "String"}}},
   "recCountOf": "{done} of {total}",
   "@recCountOf": {"placeholders": {"total": {"type": "int"}, "done": {"type": "int"}}},
-  "recUntilMonth": "Until {month}/{year}",
-  "@recUntilMonth": {"placeholders": {"year": {"type": "int"}, "month": {"type": "int"}}},
+  "recUntilMonth": "Until {yearMonth}",
+  "@recUntilMonth": {"placeholders": {"year": {"type": "int"}, "month": {"type": "int"}, "yearMonth": {"type": "String"}}},
   "recDowShort0": "Sun",
   "recDowShort1": "Mon",
   "recDowShort2": "Tue",
@@ -4265,7 +4308,7 @@
   "recEndSentenceNone": "repeats with no end date",
   "recEndSentenceDate": "repeats until {date}",
   "@recEndSentenceDate": {"placeholders": {"date": {"type": "String"}}},
-  "recEndSentenceCount": "repeats {total} times ({done} done)",
+  "recEndSentenceCount": "repeats {total, plural, =1{1 time} other{{total} times}} ({done} done)",
   "@recEndSentenceCount": {"placeholders": {"total": {"type": "int"}, "done": {"type": "int"}}},
   "recSentenceLead": "{cycle}, {end}.",
   "@recSentenceLead": {"placeholders": {"cycle": {"type": "String"}, "end": {"type": "String"}}},
@@ -4320,7 +4363,7 @@
   "recTimesUnit": "times",
   "recEndValueDate": "Until {date}",
   "@recEndValueDate": {"placeholders": {"date": {"type": "String"}}},
-  "recEndValueCount": "{count} times",
+  "recEndValueCount": "{count, plural, =1{1 time} other{{count} times}}",
   "@recEndValueCount": {"placeholders": {"count": {"type": "int"}}},
   "recOnWhichDay": "On which day",
   "recOnWhichWeekday": "On which weekday",
@@ -4585,7 +4628,7 @@
   "expSplitSaveFailed": "Couldn't save. Please try again in a moment.",
   "dutchMeIncludeTitle": "Include me",
   "dutchMeIncludeOn": "My share is counted too",
-  "dutchParticipantsLabel": "{count} participants",
+  "dutchParticipantsLabel": "{count, plural, =1{1 participant} other{{count} participants}}",
   "@dutchParticipantsLabel": {"placeholders": {"count": {"type": "int"}}},
   "dutchChipRemove": "Remove {name}",
   "@dutchChipRemove": {"placeholders": {"name": {"type": "String"}}},

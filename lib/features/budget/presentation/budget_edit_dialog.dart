@@ -7,6 +7,7 @@ import 'package:groo_damda_app/core/format/amount_input_formatter.dart';
 import 'package:groo_damda_app/core/format/amount_limit_guard.dart';
 import 'package:groo_damda_app/core/format/amount_limits.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/core/format/date.dart' show monthNameOf;
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/budget/application/budget_providers.dart';
@@ -366,7 +367,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
     final canDelete = _canDelete;
     final presets = _isOverall ? kBudgetTotalPresets : kBudgetCategoryPresets;
     final title = _isOverall
-        ? l.budgetMonthTotal(widget.month)
+        ? l.budgetMonthTotal(widget.month, monthNameOf(widget.month))
         : (_isEdit ? l.budgetCategoryEdit : l.budgetCategoryAdd);
 
     Widget? categoryRow;

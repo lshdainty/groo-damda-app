@@ -47,7 +47,7 @@ List<TodayRow> todayRowsOf(
     if (volume != null)
       (
         label: l.stocksVolume,
-        value: l.stocksSharesUnit(stocksQty(volume)),
+        value: l.stocksSharesUnit(stocksQty(volume), volume),
         color: null,
       ),
     if (upper != null)
@@ -355,7 +355,7 @@ class StocksInvestorBand extends StatelessWidget {
     final d = date.length >= 10
         ? DateTime.tryParse(date.substring(0, 10))
         : null;
-    return d == null ? date : l.stocksDailyDate(d.month, d.day);
+    return d == null ? date : l.stocksDailyDate(d.month, d.day, monthDay(d));
   }
 }
 

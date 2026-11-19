@@ -285,6 +285,9 @@
       },
       "date": {
         "type": "String"
+      },
+      "monthName": {
+        "type": "String"
       }
     }
   },
@@ -512,6 +515,9 @@
       },
       "price": {
         "type": "String"
+      },
+      "count": {
+        "type": "num"
       }
     }
   },
@@ -561,6 +567,9 @@
     "placeholders": {
       "n": {
         "type": "String"
+      },
+      "count": {
+        "type": "num"
       }
     }
   },
@@ -736,6 +745,9 @@
   "@assetPerfTitle": {
     "placeholders": {
       "month": {
+        "type": "String"
+      },
+      "monthName": {
         "type": "String"
       }
     }
@@ -1069,6 +1081,9 @@
     "placeholders": {
       "month": {
         "type": "int"
+      },
+      "monthName": {
+        "type": "String"
       }
     }
   },
@@ -1101,6 +1116,9 @@
         "type": "int"
       },
       "total": {
+        "type": "String"
+      },
+      "monthName": {
         "type": "String"
       }
     }
@@ -1287,6 +1305,9 @@
     "placeholders": {
       "month": {
         "type": "int"
+      },
+      "monthName": {
+        "type": "String"
       }
     }
   },
@@ -1295,7 +1316,12 @@
   "budgetEmptyMonthTitle": "{month}월 예산이 아직 없어요",
   "@budgetEmptyMonthTitle": {
     "placeholders": {
-      "month": {"type": "int"}
+      "month": {
+        "type": "int"
+      },
+      "monthName": {
+        "type": "String"
+      }
     }
   },
   "budgetEmptyMonthDesc": "예산을 정하면 쓴 돈과 남은 돈을 한눈에 볼 수 있어요.",
@@ -1432,6 +1458,9 @@
     "placeholders": {
       "month": {
         "type": "int"
+      },
+      "monthName": {
+        "type": "String"
       }
     }
   },
@@ -1496,10 +1525,13 @@
     }
   },
   "cardIncludeDiscontinued": "단종 카드 포함",
-  "cardTotalCount": "총 {count}장",
+  "cardTotalCount": "총 {countText}장",
   "@cardTotalCount": {
     "placeholders": {
       "count": {
+        "type": "int"
+      },
+      "countText": {
         "type": "String"
       }
     }
@@ -2418,6 +2450,9 @@
       },
       "day": {
         "type": "int"
+      },
+      "monthDay": {
+        "type": "String"
       }
     }
   },
@@ -2733,6 +2768,9 @@
     "placeholders": {
       "qty": {
         "type": "String"
+      },
+      "count": {
+        "type": "num"
       }
     }
   },
@@ -3733,7 +3771,9 @@
   "calLabelUsage": "{count}건에 사용 중",
   "@calLabelUsage": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "@ttagUsage": {
@@ -4410,6 +4450,9 @@
       },
       "day": {
         "type": "int"
+      },
+      "monthDay": {
+        "type": "String"
       }
     }
   },
@@ -4529,11 +4572,11 @@
   "recCycleMonthly": "매월 {day}일",
   "@recCycleMonthly": {"placeholders": {"day": {"type": "int"}}},
   "recCycleYearly": "매년 {month}월 {day}일",
-  "@recCycleYearly": {"placeholders": {"month": {"type": "int"}, "day": {"type": "int"}}},
+  "@recCycleYearly": {"placeholders": {"month": {"type": "int"}, "day": {"type": "int"}, "monthDay": {"type": "String"}}},
   "recCountOf": "{total}번 중 {done}번",
   "@recCountOf": {"placeholders": {"total": {"type": "int"}, "done": {"type": "int"}}},
   "recUntilMonth": "{year}년 {month}월까지",
-  "@recUntilMonth": {"placeholders": {"year": {"type": "int"}, "month": {"type": "int"}}},
+  "@recUntilMonth": {"placeholders": {"year": {"type": "int"}, "month": {"type": "int"}, "yearMonth": {"type": "String"}}},
   "recDowShort0": "일",
   "recDowShort1": "월",
   "recDowShort2": "화",

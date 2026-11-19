@@ -613,7 +613,11 @@ class _TotalSection extends StatelessWidget {
               maxHeight: kTextButtonHeight,
               child: Row(
                 children: [
-                  Expanded(child: BudgetEyebrow(l.budgetMonthTotal(month))),
+                  Expanded(
+                    child: BudgetEyebrow(
+                      l.budgetMonthTotal(month, monthNameOf(month)),
+                    ),
+                  ),
                   PTextButton(
                     label: has ? l.actionEdit : l.budgetSetup,
                     onPressed: onEdit,
@@ -638,7 +642,7 @@ class _TotalSection extends StatelessWidget {
           BudgetBar(
             value: totalSpent.toDouble(),
             max: monthlyLimit.toDouble(),
-            label: l.budgetMonthTotal(month),
+            label: l.budgetMonthTotal(month, monthNameOf(month)),
             meaning: PProgressMeaning.limit,
           ),
         ],

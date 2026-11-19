@@ -1183,8 +1183,12 @@ class _HoldingRow extends ConsumerWidget {
     final String sub;
     if (h.linked) {
       sub = rawPrice != null
-          ? l.assetHoldingLinkedDetail(qty, _fmtRawPrice(rawPrice!))
-          : '${l.assetSharesCount(qty)} · ${l.assetHoldingLinkedPending}';
+          ? l.assetHoldingLinkedDetail(
+              qty,
+              _fmtRawPrice(rawPrice!),
+              h.quantityValue,
+            )
+          : '${l.assetSharesCount(qty, h.quantityValue)} · ${l.assetHoldingLinkedPending}';
     } else {
       sub = h.quantityValue > 0
           ? '${l.assetHoldingQtyUnit(qty, holdingUnitLabel(l, h.holdingType))} · ${l.assetHoldingManualDetail}'
@@ -1876,7 +1880,7 @@ class _CardPerfBadge extends ConsumerWidget {
     final month = int.parse(ym.substring(5, 7));
     String money(int v) => krwSigned(v, false, unit: true);
     return PList(
-      semanticLabel: l.assetPerfTitle('$month'),
+      semanticLabel: l.assetPerfTitle('$month', monthNameOf(month)),
       children: [
         PListItem(
           gutter: gutter,
@@ -1886,7 +1890,7 @@ class _CardPerfBadge extends ConsumerWidget {
             color: done ? c.chartGreen : c.chartGray,
             child: Icon(done ? LucideIcons.check : LucideIcons.target),
           ),
-          title: l.assetPerfTitle('$month'),
+          title: l.assetPerfTitle('$month', monthNameOf(month)),
           detail: masked
               ? '••••••'
               : '${money(p.currentAmount)} / ${money(p.requiredAmount!)} · $pct%',

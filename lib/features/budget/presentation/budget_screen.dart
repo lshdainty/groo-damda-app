@@ -156,7 +156,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 kind: PResultKind.empty,
                 size: PResultSize.medium,
                 icon: LucideIcons.wallet,
-                title: l.budgetEmptyMonthTitle(_month.month),
+                title: l.budgetEmptyMonthTitle(_month.month, monthOnly(_month)),
                 description: l.budgetEmptyMonthDesc,
                 headingLevel: 2,
                 placement: PResultPlacement.card,
@@ -359,7 +359,7 @@ class _TotalSection extends StatelessWidget {
     final c = context.colors;
     String won(int n, {String sign = ''}) => budgetWon(n, masked, sign: sign);
     final head = <Widget>[
-      BudgetEyebrow(l.budgetMonthOverallCap(month)),
+      BudgetEyebrow(l.budgetMonthOverallCap(month, monthNameOf(month))),
       const _Gap(PSpacing.x1),
       BudgetDesc(l.budgetOverallCapDesc),
     ];
@@ -392,7 +392,7 @@ class _TotalSection extends StatelessWidget {
         BudgetBar(
           value: totalSpent.toDouble(),
           max: overallLimit.toDouble(),
-          label: l.budgetMonthOverallCap(month),
+          label: l.budgetMonthOverallCap(month, monthNameOf(month)),
         ),
         const _Gap(PSpacing.x2),
         BudgetBarCaption(

@@ -494,7 +494,11 @@ class _CardAddBodyState extends ConsumerState<CardAddBody> {
     return PAlertDialog.show(
       context,
       title: l.assetPaymentDayChangeAsk,
-      description: l.assetPaymentDayChangeConfirm(pending.month, date),
+      description: l.assetPaymentDayChangeConfirm(
+        pending.month,
+        date,
+        monthNameOf(pending.month),
+      ),
       cancelLabel: l.actionCancel,
       actionLabel: l.actionSave,
     );

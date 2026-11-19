@@ -370,7 +370,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetHoldingsCount(int count) {
-    return '$count holdings';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count holdings',
+      one: '1 holding',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -596,8 +602,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetCarryoverAfterHintNoDate => 'Spent after the last statement.';
 
   @override
-  String assetPaymentDayChangeConfirm(int month, String date) {
-    return 'The new payment day applies from the next cycle. Month $month charges are still paid on $date.';
+  String assetPaymentDayChangeConfirm(
+    int month,
+    String date,
+    String monthName,
+  ) {
+    return 'The new payment day applies from the next cycle. $monthName charges are still paid on $date.';
   }
 
   @override
@@ -682,7 +692,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetWeeksCount(int weeks) {
-    return '$weeks weeks';
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -899,12 +915,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String assetHoldingsSummaryUnknown(int count) {
-    return '$count holdings · —';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count holdings · —',
+      one: '1 holding · —',
+    );
+    return '$_temp0';
   }
 
   @override
   String assetHoldingsSummary(int count, String amount) {
-    return '$count holdings · $amount';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count holdings · $amount',
+      one: '1 holding · $amount',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -924,8 +952,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String assetHoldingLinkedDetail(String qty, String price) {
-    return '$qty shares · linked at $price';
+  String assetHoldingLinkedDetail(String qty, String price, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$qty shares · linked at $price',
+      one: '$qty share · linked at $price',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -988,8 +1022,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String assetSharesCount(String n) {
-    return '$n shares';
+  String assetSharesCount(String n, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n shares',
+      one: '$n share',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1209,8 +1249,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetCycleMix => 'This cycle';
 
   @override
-  String assetPerfTitle(String month) {
-    return 'Month $month target';
+  String assetPerfTitle(String month, String monthName) {
+    return '$monthName target';
   }
 
   @override
@@ -1462,7 +1502,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calFilterChipName(int count) {
-    return 'Showing $count calendars';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count calendars',
+      one: '1 calendar',
+    );
+    return 'Showing $_temp0';
   }
 
   @override
@@ -1547,7 +1593,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calMemberCount(int count) {
-    return '$count members';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1762,8 +1814,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashLiabilities => 'Liabilities';
 
   @override
-  String dashMonthLedger(int month) {
-    return '$month ledger';
+  String dashMonthLedger(int month, String monthName) {
+    return '$monthName ledger';
   }
 
   @override
@@ -1814,8 +1866,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashBudgetTotal => 'Total budget';
 
   @override
-  String dashCategoryChartLabel(int month, String total) {
-    return 'Spending by category in month $month, total $total';
+  String dashCategoryChartLabel(int month, String total, String monthName) {
+    return '$monthName spending by category, total $total';
   }
 
   @override
@@ -2185,8 +2237,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetSelectMonth => 'Select month';
 
   @override
-  String budgetMonthOverallCap(int month) {
-    return 'Month $month total budget';
+  String budgetMonthOverallCap(int month, String monthName) {
+    return '$monthName total budget';
   }
 
   @override
@@ -2198,8 +2250,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'There is no total budget yet. You can set this month\'s spending limit in settings.';
 
   @override
-  String budgetEmptyMonthTitle(int month) {
-    return 'No budget for month $month yet';
+  String budgetEmptyMonthTitle(int month, String monthName) {
+    return 'No budget for $monthName yet';
   }
 
   @override
@@ -2214,7 +2266,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String budgetCategoryCount(int count) {
-    return '$count categories';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count categories',
+      one: '1 category',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2336,7 +2394,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String budgetCopyOverwriteMessage(int count) {
-    return '$count budgets this month will be replaced with last month\'s. This can\'t be undone once it\'s changed.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budgets this month will be replaced with last month\'s.',
+      one: '1 budget this month will be replaced with last month\'s.',
+    );
+    return '$_temp0 This can\'t be undone once it\'s changed.';
   }
 
   @override
@@ -2371,8 +2435,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetCopyLastMonthBtn => 'Copy last month';
 
   @override
-  String budgetMonthTotal(int month) {
-    return 'Month $month Total Budget';
+  String budgetMonthTotal(int month, String monthName) {
+    return '$monthName Total Budget';
   }
 
   @override
@@ -2421,7 +2485,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cardBenefitDetailCount(int count) {
-    return '$count benefits';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count benefits',
+      one: '1 benefit',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2464,8 +2534,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardIncludeDiscontinued => 'Include discontinued cards';
 
   @override
-  String cardTotalCount(String count) {
-    return '$count cards';
+  String cardTotalCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText cards',
+      one: '$countText card',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2537,12 +2613,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String categoryListTitleExpense(int count) {
-    return '$count expense categories';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count expense categories',
+      one: '1 expense category',
+    );
+    return '$_temp0';
   }
 
   @override
   String categoryListTitleIncome(int count) {
-    return '$count income categories';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count income categories',
+      one: '1 income category',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2623,7 +2711,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String categoryDeleteRecurring(int count) {
-    return '$count recurring transactions that use this category keep being recorded under it.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count recurring transactions that use this category keep being recorded under it.',
+      one:
+          '1 recurring transaction that uses this category keeps being recorded under it.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2818,12 +2914,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dutchFromPeople(int count) {
-    return 'from $count people';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return 'from $_temp0';
   }
 
   @override
   String dutchToPeople(int count) {
-    return 'to $count people';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return 'to $_temp0';
   }
 
   @override
@@ -2831,12 +2939,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dutchNPeople(int count) {
-    return '$count people';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return '$_temp0';
   }
 
   @override
   String dutchSettledTogetherCount(int count) {
-    return 'Settled together $count times';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '1 time',
+    );
+    return 'Settled together $_temp0';
   }
 
   @override
@@ -2933,7 +3053,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String expTxCount(int count) {
-    return '$count items';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -3938,22 +4064,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String withdrawImpactCalendarsOwned(int count) {
-    return '$count shared calendar(s) you created will be deleted — members lose access too';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shared calendars',
+      one: '1 shared calendar',
+    );
+    return '$_temp0 you created will be deleted — members lose access too';
   }
 
   @override
   String withdrawImpactCalendarMemberships(int count) {
-    return 'You will be removed from $count calendar(s) you joined';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count calendars',
+      one: '1 calendar',
+    );
+    return 'You will be removed from $_temp0 you joined';
   }
 
   @override
   String withdrawImpactDutchPaysOwned(int count) {
-    return '$count settlement(s) you created will be deleted';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count settlements',
+      one: '1 settlement',
+    );
+    return '$_temp0 you created will be deleted';
   }
 
   @override
   String withdrawImpactDutchPayParticipations(int count) {
-    return 'You will appear as \"a former member\" in $count settlement(s) you joined';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count settlements',
+      one: '1 settlement',
+    );
+    return 'You will appear as \"a former member\" in $_temp0 you joined';
   }
 
   @override
@@ -4221,12 +4371,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String presetListTitle(int count) {
-    return '$count presets';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count presets',
+      one: '1 preset',
+    );
+    return '$_temp0';
   }
 
   @override
   String presetUses(int count) {
-    return '$count uses';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count uses',
+      one: '1 use',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -4248,15 +4410,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String presetNoteUses(int count) {
-    return 'Used $count times';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '1 time',
+    );
+    return 'Used $_temp0';
   }
 
   @override
   String get presetNoteUnused => 'Not used yet';
 
   @override
-  String presetNoteLast(int month, int day) {
-    return 'Last used $month/$day';
+  String presetNoteLast(int month, int day, String monthDay) {
+    return 'Last used $monthDay';
   }
 
   @override
@@ -4827,8 +4995,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String stocksSharesUnit(String qty) {
-    return '$qty shares';
+  String stocksSharesUnit(String qty, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$qty shares',
+      one: '$qty share',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5158,7 +5332,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String todoDeleteTagConfirm(String name, int count) {
-    return 'Deleting \"$name\" will leave $count todos using it untagged. A deleted tag cannot be restored.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count to-dos',
+      one: '1 to-do',
+    );
+    return 'Deleting \"$name\" will leave $_temp0 using it untagged. A deleted tag cannot be restored.';
   }
 
   @override
@@ -5449,7 +5629,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String memoDeleteTagConfirm(String name, int count) {
-    return 'Deleting \"$name\" will leave $count memos using it untagged. A deleted tag cannot be restored.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count memos',
+      one: '1 memo',
+    );
+    return 'Deleting \"$name\" will leave $_temp0 using it untagged. A deleted tag cannot be restored.';
   }
 
   @override
@@ -5470,7 +5656,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String mtagUsage(int count) {
-    return 'Used by $count memos';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count memos',
+      one: '1 memo',
+    );
+    return 'Used by $_temp0';
   }
 
   @override
@@ -5543,7 +5735,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String constHeroCaptionRemain(int count) {
-    return '$count stars to go';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stars to go',
+      one: '1 star to go',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5676,7 +5874,13 @@ class AppLocalizationsEn extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String validString = validNumberFormat.format(valid);
 
-    return '$totalString rows · $validString valid';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$totalString rows',
+      one: '1 row',
+    );
+    return '$_temp0 · $validString valid';
   }
 
   @override
@@ -5770,7 +5974,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String categoryMoveTxDone(int count) {
-    return 'Moved $count items.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Moved $count items.',
+      one: 'Moved 1 item.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5798,7 +6008,13 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     final String dupString = dupNumberFormat.format(dup);
 
-    return '$dupString possible duplicates';
+    String _temp0 = intl.Intl.pluralLogic(
+      dup,
+      locale: localeName,
+      other: '$dupString possible duplicates',
+      one: '1 possible duplicate',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5820,7 +6036,13 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     final String dupString = dupNumberFormat.format(dup);
 
-    return 'Excludes $dupString rows with the same date, amount, and content.';
+    String _temp0 = intl.Intl.pluralLogic(
+      dup,
+      locale: localeName,
+      other: '$dupString rows',
+      one: '1 row',
+    );
+    return 'Excludes $_temp0 with the same date, amount, and content.';
   }
 
   @override
@@ -5848,7 +6070,13 @@ class AppLocalizationsEn extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return 'Imported $countString transactions';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString transactions',
+      one: '1 transaction',
+    );
+    return 'Imported $_temp0';
   }
 
   @override
@@ -5951,7 +6179,13 @@ class AppLocalizationsEn extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString categories created';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString categories created',
+      one: '1 category created',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5969,7 +6203,13 @@ class AppLocalizationsEn extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString failed rows';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString failed rows',
+      one: '1 failed row',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6120,7 +6360,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String tdmTodayLeft(int count) {
-    return '$count to-dos today';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count to-dos today',
+      one: '1 to-do today',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6251,7 +6497,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String constDetailCollectValue(int count) {
-    return '$count times';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '1 time',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6406,12 +6658,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ttagUsage(int count) {
-    return 'Used by $count to-dos';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count to-dos',
+      one: '1 to-do',
+    );
+    return 'Used by $_temp0';
   }
 
   @override
-  String calLabelUsage(Object count) {
-    return 'Used by $count events';
+  String calLabelUsage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count events',
+      one: '1 event',
+    );
+    return 'Used by $_temp0';
   }
 
   @override
@@ -6521,7 +6785,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String smsInboxClearConfirm(int count) {
-    return 'All $count messages in the inbox will be removed. They won\'t be recorded.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'All $count messages in the inbox will be removed. They won\'t be recorded.',
+      one: 'The 1 message in the inbox will be removed. It won\'t be recorded.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6939,7 +7210,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String statsFixedBulkGroupSub(int count) {
-    return '$count items';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -7657,7 +7934,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String stocksWatchGroupDeleteConfirmCount(String name, int count) {
-    return '\"$name\" and its $count stocks will be deleted together. A deleted group cannot be restored.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '\"$name\" and its $count stocks will be deleted together.',
+      one: '\"$name\" and its 1 stock will be deleted together.',
+    );
+    return '$_temp0 A deleted group cannot be restored.';
   }
 
   @override
@@ -7679,7 +7962,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String stocksPortfolioCount(int count) {
-    return '$count stocks';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stocks',
+      one: '1 stock',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -7731,8 +8020,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stocksFxBasis => 'Base rate';
 
   @override
-  String stocksDailyDate(int month, int day) {
-    return '$month/$day';
+  String stocksDailyDate(int month, int day, String monthDay) {
+    return '$monthDay';
   }
 
   @override
@@ -7936,8 +8225,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String recCycleYearly(int month, int day) {
-    return 'Yearly on $month/$day';
+  String recCycleYearly(int month, int day, String monthDay) {
+    return 'Yearly on $monthDay';
   }
 
   @override
@@ -7946,8 +8235,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String recUntilMonth(int year, int month) {
-    return 'Until $month/$year';
+  String recUntilMonth(int year, int month, String yearMonth) {
+    return 'Until $yearMonth';
   }
 
   @override
@@ -8005,7 +8294,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recEndSentenceCount(int total, int done) {
-    return 'repeats $total times ($done done)';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total times',
+      one: '1 time',
+    );
+    return 'repeats $_temp0 ($done done)';
   }
 
   @override
@@ -8163,7 +8458,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recEndValueCount(int count) {
-    return '$count times';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '1 time',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -8609,7 +8910,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dutchParticipantsLabel(int count) {
-    return '$count participants';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
   }
 
   @override
