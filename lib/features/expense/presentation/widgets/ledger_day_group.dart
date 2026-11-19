@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -102,27 +104,64 @@ class LedgerDayGroup extends ConsumerWidget {
   }
 }
 
+/// 가계부 목록 자리의 기다리는 영역 — 날짜 묶음 스켈레톤 둘(줄 3 · 2). 화면 여백 24 와 첫 묶음 머리 위 12(위 4 + 머리 줄 8)는
+/// 기다리는 영역 밖에 둔다 — 5초 "오래 걸림" 글이 첫 스켈레톤 위에 왼쪽 맞춤으로 16 띄워 선다(skeleton.md "오래 걸림 글").
+/// 여백이 스켈레톤 안에 있으면 글만 화면 왼쪽 끝에 붙는다. 5초 전 스켈레톤 자리는 예전과 같다.
+Widget ledgerListLoading() => Padding(
+  padding: const EdgeInsets.fromLTRB(
+    PSpacing.globalGutter,
+    PSpacing.x1 + PSpacing.x2,
+    PSpacing.globalGutter,
+    0,
+  ),
+  child: loadingRegionWithText(
+    const Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LedgerDaySkeleton(rows: 3, first: true, inset: false),
+        LedgerDaySkeleton(rows: 2, inset: false),
+      ],
+    ),
+  ),
+);
+
 /// 불러오는 동안의 날짜 묶음 — 머리 한 줄 + 거래 줄 [rows] 개(List 두 줄 줄 66 = 위아래 12 + 타일 40 · 글 42).
 class LedgerDaySkeleton extends StatelessWidget {
-  const LedgerDaySkeleton({super.key, required this.rows, this.first = false});
+  const LedgerDaySkeleton({
+    super.key,
+    required this.rows,
+    this.first = false,
+    this.inset = true,
+  });
 
   final int rows;
   final bool first;
+
+  /// 화면 여백 24 와 첫 묶음 머리 위 12 를 스켈레톤 안에 두는가. false 면 부르는 쪽이 기다리는 영역 밖에 둔다
+  /// ([ledgerListLoading]).
+  final bool inset;
 
   /// 줄 하나의 높이 — 위아래 12 + 제목 t5(22) + 설명 t3(18) + 사이 2.
   static const double rowHeight = 66;
 
   @override
   Widget build(BuildContext context) {
+    final gutter = inset ? PSpacing.globalGutter : 0.0;
+    // 여백을 밖에 두면 첫 묶음의 위 4 · 머리 줄 위 8 도 밖에 있다
+    final edgeTop = first && !inset;
     return Padding(
-      padding: EdgeInsets.only(top: first ? PSpacing.x1 : PSpacing.x3),
+      padding: EdgeInsets.only(
+        top: edgeTop ? 0 : (first ? PSpacing.x1 : PSpacing.x3),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: PSpacing.globalGutter,
-              vertical: PSpacing.x2,
+            padding: EdgeInsets.fromLTRB(
+              gutter,
+              edgeTop ? 0 : PSpacing.x2,
+              gutter,
+              PSpacing.x2,
             ),
             child: Row(
               children: [
@@ -134,10 +173,10 @@ class LedgerDaySkeleton extends StatelessWidget {
           ),
           for (var i = 0; i < rows; i++)
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                PSpacing.globalGutter,
+              padding: EdgeInsetsDirectional.fromSTEB(
+                gutter,
                 PSpacing.x3,
-                PSpacing.globalGutter,
+                gutter,
                 PSpacing.x3,
               ),
               child: Row(

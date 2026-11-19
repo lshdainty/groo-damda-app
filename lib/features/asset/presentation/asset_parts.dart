@@ -175,7 +175,14 @@ class AssetSummarySection extends StatelessWidget {
         ),
       );
     }
-    if (loading) return loadingRegionWithText(const AssetSummarySkeleton());
+    // 화면 여백(위 24 · 좌우 24 · 아래 16)은 기다리는 영역 밖에 둔다 — 5초 "오래 걸림" 글이 첫 스켈레톤 위에 왼쪽 맞춤으로
+    // 16 띄워 선다(skeleton.md "오래 걸림 글"). 여백이 스켈레톤 안에 있으면 글만 화면 왼쪽 끝에 붙는다
+    if (loading) {
+      return Padding(
+        padding: kAssetSummarySkeletonPadding,
+        child: loadingRegionWithText(const AssetSummarySkeleton()),
+      );
+    }
 
     final Widget delta;
     if (!hasLastMonth) {
@@ -272,62 +279,62 @@ class AssetSummarySection extends StatelessWidget {
   }
 }
 
-/// 요약 자리 Skeleton — 실제 줄과 같은 높이(금액 t12 · 증감 t3 · 차트 140 · 지표 38 × 3).
+/// 요약 자리의 바깥 여백 — 화면 여백 24(위 · 좌우)와 아래 16. 기다리는 영역 밖에 둔다.
+const EdgeInsets kAssetSummarySkeletonPadding = EdgeInsets.fromLTRB(
+  PSpacing.globalGutter,
+  PSpacing.x6,
+  PSpacing.globalGutter,
+  PSpacing.x4,
+);
+
+/// 요약 자리 Skeleton — 실제 줄과 같은 높이(금액 t12 · 증감 t3 · 차트 140 · 지표 38 × 3). 바깥 여백은 두지 않는다 — 부르는
+/// 쪽이 [kAssetSummarySkeletonPadding] 을 기다리는 영역 밖에 둔다.
 class AssetSummarySkeleton extends StatelessWidget {
   const AssetSummarySkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: PSpacing.x6, bottom: PSpacing.x4),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FractionallySizedBox(
+            widthFactor: 0.25,
+            child: PSkeleton.text(PTypography.t3),
+          ),
+          const SizedBox(height: PSpacing.x2),
+          FractionallySizedBox(
+            widthFactor: 0.5,
+            child: PSkeleton.text(PTypography.t12),
+          ),
+          const SizedBox(height: PSpacing.x2),
+          FractionallySizedBox(
+            widthFactor: 0.33,
+            child: PSkeleton.text(PTypography.t3),
+          ),
+          const SizedBox(height: PSpacing.x4),
+          const PSkeleton(height: 140),
+        ],
+      ),
+      const SizedBox(height: PSpacing.x3),
+      for (var i = 0; i < 3; i++)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: PSpacing.x6),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(vertical: PSpacing.x2),
+          child: Row(
             children: [
-              FractionallySizedBox(
-                widthFactor: 0.25,
-                child: PSkeleton.text(PTypography.t3),
+              Expanded(
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: 0.33,
+                  child: PSkeleton.text(PTypography.t5),
+                ),
               ),
-              const SizedBox(height: PSpacing.x2),
-              FractionallySizedBox(
-                widthFactor: 0.5,
-                child: PSkeleton.text(PTypography.t12),
-              ),
-              const SizedBox(height: PSpacing.x2),
-              FractionallySizedBox(
-                widthFactor: 0.33,
-                child: PSkeleton.text(PTypography.t3),
-              ),
-              const SizedBox(height: PSpacing.x4),
-              const PSkeleton(height: 140),
+              PSkeleton.text(PTypography.t5, width: PSpacing.x10 * 2),
             ],
           ),
         ),
-        const SizedBox(height: PSpacing.x3),
-        for (var i = 0; i < 3; i++)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: PSpacing.x6,
-              vertical: PSpacing.x2,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: 0.33,
-                    child: PSkeleton.text(PTypography.t5),
-                  ),
-                ),
-                PSkeleton.text(PTypography.t5, width: PSpacing.x10 * 2),
-              ],
-            ),
-          ),
-      ],
-    ),
+    ],
   );
 }
 
