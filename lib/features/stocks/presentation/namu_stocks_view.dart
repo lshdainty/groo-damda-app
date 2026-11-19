@@ -464,7 +464,7 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
                   key: ValueKey(r.key),
                   name: r.name,
                   detail:
-                      '${r.symbol} · ${l.stocksSharesUnit(stocksQty(r.quantity))}',
+                      '${r.symbol} · ${l.stocksSharesUnit(stocksQty(r.quantity), r.quantity)}',
                   amount: masked
                       ? '••••'
                       : fmtByCurrency(r.evalAmount, r.currency),

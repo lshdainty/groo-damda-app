@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart' show monthDay, yearMonth;
 import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/features/recurring/domain/recurring_schedule.dart';
@@ -58,10 +59,9 @@ String recCycleSentence(
         dayOfMonth ?? int.tryParse(startDate.substring(8, 10)) ?? 1,
       );
     default:
-      return l.recCycleYearly(
-        int.tryParse(startDate.substring(5, 7)) ?? 1,
-        int.tryParse(startDate.substring(8, 10)) ?? 1,
-      );
+      final m = int.tryParse(startDate.substring(5, 7)) ?? 1;
+      final d = int.tryParse(startDate.substring(8, 10)) ?? 1;
+      return l.recCycleYearly(m, d, monthDay(DateTime(2000, m, d)));
   }
 }
 
@@ -81,10 +81,9 @@ String? recEndPiece(AppLocalizations l, RecurringTransaction it) {
   }
   final e = it.endDate;
   if (e != null && e.length >= 7) {
-    return l.recUntilMonth(
-      int.tryParse(e.substring(0, 4)) ?? 0,
-      int.tryParse(e.substring(5, 7)) ?? 0,
-    );
+    final y = int.tryParse(e.substring(0, 4)) ?? 0;
+    final m = int.tryParse(e.substring(5, 7)) ?? 0;
+    return l.recUntilMonth(y, m, yearMonth(DateTime(y, m)));
   }
   return null;
 }

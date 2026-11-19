@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:groo_damda_app/features/preset/application/preset_providers.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
+import 'package:groo_damda_app/core/format/date.dart' show monthDay;
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
 import 'package:groo_damda_app/features/expense/application/expense_providers.dart';
@@ -156,7 +157,8 @@ class _PresetDetailBodyState extends ConsumerState<PresetDetailBody> {
     return [
       presetHasAmount(p) ? l.presetNoteFixed : l.presetAmountEmpty,
       uses > 0 ? l.presetNoteUses(uses) : l.presetNoteUnused,
-      if (uses > 0 && last != null) l.presetNoteLast(last.month, last.day),
+      if (uses > 0 && last != null)
+        l.presetNoteLast(last.month, last.day, monthDay(last)),
     ].join(' · ');
   }
 

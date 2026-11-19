@@ -240,7 +240,10 @@ class _CardBenefitsScreenState extends ConsumerState<CardBenefitsScreen> {
                       title:
                           _initialLoading || (_error != null && _cards.isEmpty)
                           ? ''
-                          : l.cardTotalCount(krw(_totalElements)),
+                          : l.cardTotalCount(
+                              _totalElements,
+                              krw(_totalElements),
+                            ),
                       trailing: PCheckbox(
                         size: PCheckboxSize.large,
                         checked: _includeDiscontinued,

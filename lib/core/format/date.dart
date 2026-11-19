@@ -153,6 +153,10 @@ String yearOnly(DateTime d) =>
 String monthOnly(DateTime d) =>
     localeIsEn() ? DateFormat.MMM('en').format(d) : '${d.month}월';
 
+/// 달 번호(1~12)만 있을 때의 [monthOnly] — ko "11월" · en "Nov". 영어 문구에 달을 숫자로 끼우지 않는다
+/// (international-design.mdx "날짜" — 영어 달은 줄임 `MMM`: "Nov total budget").
+String monthNameOf(int month) => monthOnly(DateTime(2000, month));
+
 /// 요일 헤더 라벨 7개. ko 는 기존 수동 배열 그대로, en 은 DateFormat.E('en').
 /// [mondayFirst] true → 월~일, false → 일~토. 인라인 요일 배열 통일용.
 List<String> weekdayLabels({bool mondayFirst = false}) {

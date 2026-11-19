@@ -579,7 +579,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetCarryoverAfterHintNoDate => '지난 청구 뒤로 쓴 금액이에요.';
 
   @override
-  String assetPaymentDayChangeConfirm(int month, String date) {
+  String assetPaymentDayChangeConfirm(
+    int month,
+    String date,
+    String monthName,
+  ) {
     return '바꾼 결제일은 다음 회차부터 적용돼요. $month월분은 $date에 결제돼요.';
   }
 
@@ -904,7 +908,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String assetHoldingLinkedDetail(String qty, String price) {
+  String assetHoldingLinkedDetail(String qty, String price, num count) {
     return '$qty주 · 현재가 $price 연동';
   }
 
@@ -968,7 +972,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String assetSharesCount(String n) {
+  String assetSharesCount(String n, num count) {
     return '$n주';
   }
 
@@ -1185,7 +1189,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assetCycleMix => '이번 회차 구성';
 
   @override
-  String assetPerfTitle(String month) {
+  String assetPerfTitle(String month, String monthName) {
     return '$month월 실적';
   }
 
@@ -1725,7 +1729,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dashLiabilities => '부채';
 
   @override
-  String dashMonthLedger(int month) {
+  String dashMonthLedger(int month, String monthName) {
     return '$month월 가계부';
   }
 
@@ -1777,7 +1781,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dashBudgetTotal => '총 예산';
 
   @override
-  String dashCategoryChartLabel(int month, String total) {
+  String dashCategoryChartLabel(int month, String total, String monthName) {
     return '$month월 카테고리별 지출, 합계 $total';
   }
 
@@ -2137,7 +2141,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get budgetSelectMonth => '월 선택';
 
   @override
-  String budgetMonthOverallCap(int month) {
+  String budgetMonthOverallCap(int month, String monthName) {
     return '$month월 총 예산';
   }
 
@@ -2149,7 +2153,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '총 예산이 아직 없어요. 설정에서 이번 달 최대 지출 한도를 정할 수 있어요.';
 
   @override
-  String budgetEmptyMonthTitle(int month) {
+  String budgetEmptyMonthTitle(int month, String monthName) {
     return '$month월 예산이 아직 없어요';
   }
 
@@ -2309,7 +2313,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get budgetCopyLastMonthBtn => '지난달 복사';
 
   @override
-  String budgetMonthTotal(int month) {
+  String budgetMonthTotal(int month, String monthName) {
     return '$month월 총 예산';
   }
 
@@ -2402,8 +2406,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardIncludeDiscontinued => '단종 카드 포함';
 
   @override
-  String cardTotalCount(String count) {
-    return '총 $count장';
+  String cardTotalCount(int count, String countText) {
+    return '총 $countText장';
   }
 
   @override
@@ -4146,7 +4150,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get presetNoteUnused => '아직 쓰지 않았어요';
 
   @override
-  String presetNoteLast(int month, int day) {
+  String presetNoteLast(int month, int day, String monthDay) {
     return '마지막 $month월 $day일';
   }
 
@@ -4707,7 +4711,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String stocksSharesUnit(String qty) {
+  String stocksSharesUnit(String qty, num count) {
     return '$qty주';
   }
 
@@ -6265,7 +6269,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String calLabelUsage(Object count) {
+  String calLabelUsage(int count) {
     return '$count건에 사용 중';
   }
 
@@ -7514,7 +7518,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stocksFxBasis => '매매기준율';
 
   @override
-  String stocksDailyDate(int month, int day) {
+  String stocksDailyDate(int month, int day, String monthDay) {
     return '$month월 $day일';
   }
 
@@ -7718,7 +7722,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String recCycleYearly(int month, int day) {
+  String recCycleYearly(int month, int day, String monthDay) {
     return '매년 $month월 $day일';
   }
 
@@ -7728,7 +7732,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String recUntilMonth(int year, int month) {
+  String recUntilMonth(int year, int month, String yearMonth) {
     return '$year년 $month월까지';
   }
 

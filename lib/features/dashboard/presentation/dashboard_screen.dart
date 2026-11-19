@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/env.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
+import 'package:groo_damda_app/core/format/date.dart' show monthOnly;
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
@@ -755,7 +756,10 @@ class _MonthSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
-    final head = _head(context, l.dashMonthLedger(month.month));
+    final head = _head(
+      context,
+      l.dashMonthLedger(month.month, monthOnly(month)),
+    );
     final summary = rangeAsync.value;
     if (summary == null) {
       if (rangeAsync.hasError) {
@@ -1003,7 +1007,11 @@ class _CategorySection extends StatelessWidget {
     String pct(int v) => formatShareOf(v, total, underOne: l.percentUnderTenth);
     String money(int v) => masked ? _mask : formatWon(v);
     final totalText = masked ? _mask : formatWon(total);
-    final label = l.dashCategoryChartLabel(month.month, totalText);
+    final label = l.dashCategoryChartLabel(
+      month.month,
+      totalText,
+      monthOnly(month),
+    );
 
     return _TextSection(
       header: head,

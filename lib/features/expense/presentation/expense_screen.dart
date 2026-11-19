@@ -8,7 +8,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
-import 'package:groo_damda_app/core/format/format_locale.dart';
 import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/settings/hide_amounts_cards.dart';
 import 'package:groo_damda_app/core/settings/mask_flags.dart';
@@ -208,22 +207,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
   }
 
   /// 월 라벨 — ko "7월" / en "Jul" (monthnav·prevbtn·empty 공용, web txmMonthLabel 정합).
-  static String _monthLabel(DateTime m) => localeIsEn()
-      ? const [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ][m.month - 1]
-      : '${m.month}월';
+  static String _monthLabel(DateTime m) => monthOnly(m);
 
   Future<void> _pickMonth() async {
     final picked = await showPMonthPicker(context, initial: _month);
