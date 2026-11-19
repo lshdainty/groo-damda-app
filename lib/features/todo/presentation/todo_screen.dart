@@ -40,6 +40,7 @@ import 'package:groo_damda_app/shared/scroll/hold_ids.dart';
 import 'package:groo_damda_app/shared/scroll/scroll_to_keyed.dart';
 import 'package:groo_damda_app/shared/ds/snackbar/p_snackbar.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
+import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 /// 같은 줄의 두 번째 완료 누름을 무시하는 시간 — 따닥 막기(웹 `DOUBLE_CLICK_GUARD_MS`). 붙들기([kListHold] 700)보다 짧아야 한다.
@@ -664,6 +665,8 @@ class _StarlightHint extends StatelessWidget {
 
 /// 달력 칸 아래 표시 — 높이 15(t1 11 / 15) · 글자 크기 설정을 따르지 않는다. 장식이다(뜻은 칸 이름이 읽는다).
 /// 오늘의 남은 수는 `fg-brand` 700, 그 밖 남은 수는 `fg-neutral-subtle` 400, ★ 는 별자리 색, 구름은 `fg-neutral-subtle`, ✓ 는 `fg-positive`.
+/// 불러오는 동안은 칸을 비워 두지 않고 표시 자리를 static 글 줄(t1 · 폭 32) 스켈레톤으로 채운다 — 빈 칸은 "할 일 없음" 으로
+/// 읽힌다(skeleton.md "예외 — 달력 보기는 칸을 비워 두지 않습니다", groo-design #267). 가계부 칸 금액 자리와 같은 모양이다.
 class _CellMark extends StatelessWidget {
   const _CellMark({required this.mark, required this.loading});
   final TodoCellMark? mark;
@@ -677,7 +680,9 @@ class _CellMark extends StatelessWidget {
     final c = context.colors;
     final l = AppLocalizations.of(context);
     final Widget? child = switch (mark) {
-      _ when loading => null,
+      _ when loading => loadingInline(
+        PSkeleton.staticText(PTypography.t1, width: 32),
+      ),
       TodoCellCollected(:final colorKey) ||
       TodoCellGrown(:final colorKey) => PFilledStar(
         size: iconSize,

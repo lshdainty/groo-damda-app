@@ -336,6 +336,40 @@ void main() {
     expect(tester.getSize(mark).height, lessThanOrEqualTo(15));
   });
 
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+      '불러오는 중 · 글자 ${(scale * 100).round()}% — 달력 칸마다 표시 자리를 static 스켈레톤(32 × 15)으로 채운다(groo-design #267)',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const TodoScreen(),
+          overrides: todoOverrides(hang: true),
+          textScale: scale,
+          settle: false,
+        );
+        await tester.pump(const Duration(milliseconds: 1100));
+        final marks = find.descendant(
+          of: find.byType(LedgerCalendarGrid),
+          matching: find.byKey(const ValueKey('todo-cell-mark')),
+        );
+        // 접힌 달력 — 한 주(달 밖 칸은 표시가 없다)
+        expect(marks, findsAtLeastNWidgets(1));
+        for (final m in marks.evaluate()) {
+          final sk = find.descendant(
+            of: find.byWidget(m.widget),
+            matching: find.byType(PSkeleton),
+          );
+          expect(sk, findsOneWidget, reason: '칸 표시 자리가 비었다');
+          // 칸 안 글이라 글자 크기 설정을 따르지 않는다 — 가계부 칸 금액 자리와 같은 모양
+          final size = tester.getSize(sk);
+          expect(size.width, 32);
+          expect(size.height, closeTo(15, 0.01));
+          expect(tester.getSize(find.byWidget(m.widget)).height, 15);
+        }
+      },
+    );
+  }
+
   group('11 원장 머리 숨기기(Scroll Auto Hide) · 18 달 이동', () {
     List<Todo> many() => [
       for (var i = 0; i < 24; i++)
