@@ -290,13 +290,17 @@ class LedgerTotalRow extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, box) {
           final label = buttonLabel ?? l.txmSpendSummary;
-          // 보이는 단추 36 은 그대로, 놓인 자리를 44 로 — 누르는 영역이 부모 안에서만 넓어지므로(사이의 Semantics 는 가장 바깥)
+          // 보이는 단추 36 은 그대로, 놓인 자리를 44 로 — 누르는 영역이 부모 안에서만 넓어지므로(사이의 Semantics 는 가장 바깥).
+          // 44 는 최소다 — 큰 글자에서 단추가 글을 따라 커지면(button.md "큰 글자에서 높이") 자리도 따라 커진다. 고정 44 면
+          // AX4 · AX5 에서 단추가 44 에 눌려 글 위아래가 잘린다
           final button = Semantics(
             container: true,
             expanded: summaryOpen,
-            child: SizedBox(
-              height: PTouch.min,
+            child: ConstrainedBox(
+              key: const ValueKey('ledger-summary-slot'),
+              constraints: const BoxConstraints(minHeight: PTouch.min),
               child: Center(
+                heightFactor: 1,
                 child: PButton(
                   label: label,
                   prefixIcon: buttonIcon,
@@ -510,7 +514,8 @@ class LedgerCalendar extends StatelessWidget {
         final data = byDay[ds];
         if (data == null) return const SizedBox(height: PSpacing.x3);
         // 칸 글이 좁아 안 들어가는 금액은 말줄임 없이 점 "•" 으로 바꾼다(결정 2026-11-07 2A) — 전액은 날을 누르면
-        // 그날 묶음 머리에, 화면 낭독은 칸 이름에 있다. 들어가는지는 실제 칸 폭 · 글자 배율로 잰다.
+        // 그날 묶음 머리에, 화면 낭독은 칸 이름에 있다. 들어가는지는 실제 칸 폭으로 잰다(칸 안 글이라 배율은 늘 1 —
+        // [LedgerCalendarGrid] 가 이 자리를 배율 없음으로 둔다).
         return LayoutBuilder(
           builder: (context, box) {
             final scaler = MediaQuery.textScalerOf(context);
@@ -582,6 +587,9 @@ bool ledgerCellAmountFits(
 
 /// 접이식 캘린더의 격자 — 접힘: 선택 주 1줄 / 펼침: 월 전체. 요일 t2 · 날 숫자 t5. 칸 아래 표시는 쓰는 화면이 채운다
 /// ([markBuilder] — 가계부 = 금액, 할 일 = 남은 수 · ★ · 구름 · ✓). 가계부 · 할 일 폰 원장이 같이 쓴다.
+///
+/// 칸 안 글(요일 · 날짜 숫자 · 칸 아래 표시)은 글자 크기 설정을 따르지 않는다 — 칸 폭이 화면 폭 ÷ 7 로 정해진 디자인 틀이라서다
+/// (DESIGN.md Typography "그대로 두는 것", groo-design #260 · #261). 전체 금액은 날을 눌러 여는 그날 묶음 머리 · 칸 읽는 이름에 있다.
 ///
 /// [cellLabel] 을 주면 칸 하나가 그 이름 하나로 읽힌다(표시는 장식이 되어 읽지 않는다) — 할 일은 "10월 22일, 남은 할 일 3개".
 class LedgerCalendarGrid extends StatelessWidget {
@@ -682,11 +690,11 @@ class LedgerCalendarGrid extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(0, PSpacing.x1, 0, PSpacing.x2),
             child: Column(
               children: [
-                // 원이 칸보다 넓어지면(글자 200%) 가운데 기준으로 이웃 쪽으로 넘친다 — 글자는 줄이지 않고(웹 `LedgerCellNum` 과 같다)
+                // 원이 칸보다 넓어지면(좁은 칸) 가운데 기준으로 이웃 쪽으로 넘친다 — 글자는 줄이지 않고(웹 `LedgerCellNum` 과 같다)
                 // 숫자는 한 줄로 둔다(maxLines 1 · softWrap false)
                 POverflowCenter(
                   child: Container(
-                    // 최소 36 · 좌우 4 — 글자 200% 에서 두 자리 날이 잘리지 않게 글을 따라 늘어난다(웹 `min-w-x9 px-x1`)
+                    // 최소 36 · 좌우 4 — 두 자리 날이 원 안에 든다(웹 `min-w-x9 px-x1`)
                     constraints: const BoxConstraints(
                       minWidth: dayCircle,
                       minHeight: dayCircle,
@@ -713,10 +721,8 @@ class LedgerCalendarGrid extends StatelessWidget {
                         '${cellData.d}',
                         maxLines: 1,
                         softWrap: false,
-                        // 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258) — 칸 금액은 그 위로도 커진다
-                        textScaler: weekdayRowScaler(
-                          MediaQuery.textScalerOf(context),
-                        ),
+                        // 날짜 숫자는 글자 크기 설정을 따르지 않는다(달력 칸 안 글, groo-design #260)
+                        textScaler: TextScaler.noScaling,
                         style: PTypography.t5.copyWith(
                           fontWeight: isSel || isToday
                               ? FontWeight.w700
@@ -729,7 +735,11 @@ class LedgerCalendarGrid extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: PSpacing.x1),
-                markBuilder(context, cellData.ds),
+                // 칸 아래 표시(가계부 금액 · 점, 할 일 남은 수 · ★ · 구름 · ✓)도 칸 안 글이라 글자 크기 설정을 따르지 않는다
+                // (groo-design #261) — 표시를 그리는 쪽이 재는 배율(금액이 칸에 드는지)도 이 자리에서 배율 없음이 된다
+                MediaQuery.withNoTextScaling(
+                  child: markBuilder(context, cellData.ds),
+                ),
               ],
             ),
           ),
@@ -748,7 +758,7 @@ class LedgerCalendarGrid extends StatelessWidget {
       return Expanded(child: inner);
     }
 
-    // 요일 글 — 영어 두 글자(Su … Sa), 칸에 들지 않는 폭 · 글자 크기에서만 한 글자(date-picker.md ⓔ Weekday)
+    // 요일 글 — 영어 두 글자(Su … Sa), 칸에 들지 않는 폭에서만 한 글자(date-picker.md ⓔ Weekday)
     final dowStyle = PTypography.t2.copyWith(fontWeight: FontWeight.w400);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -761,14 +771,10 @@ class LedgerCalendarGrid extends StatelessWidget {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              // 요일 글 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(일곱 칸 격자, groo-design #258)
-              final dowScaler = weekdayRowScaler(
-                MediaQuery.textScalerOf(context),
-              );
+              // 요일 글 · 날짜 숫자는 글자 크기 설정을 따르지 않는다(일곱 칸 격자의 칸 안 글, groo-design #260)
               final dows = fitWeekdayRowLabels(
                 constraints.maxWidth / 7,
                 dowStyle,
-                dowScaler,
               );
               return Row(
                 children: [
@@ -786,7 +792,7 @@ class LedgerCalendarGrid extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           softWrap: false,
-                          textScaler: dowScaler,
+                          textScaler: TextScaler.noScaling,
                           // 일 = 치명 · 토 = 브랜드 · 평일 = 옅은 중립 (뜻은 그대로, 색 역할 이름만)
                           style: dowStyle.copyWith(
                             color: i == 0

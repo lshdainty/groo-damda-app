@@ -212,7 +212,7 @@ const double kChartTickSize = 11;
 /// 눈금과 그리는 자리 사이.
 const double kChartTickMargin = PSpacing.x2;
 
-/// 가로 눈금 글자 사이 최소 — `spacing-x2`(8). 겹치면 끝 눈금을 지키고 앞에서부터 건너뛴다(chart.md "큰 글자", 웹과 같다).
+/// 가로 눈금 글자 사이 최소 — `spacing-x2`(8). 겹치면 끝 눈금을 지키고 앞에서부터 건너뛴다(chart.md "가로 눈금 건너뛰기", 웹과 같다).
 const double kChartTickGap = PSpacing.x2;
 
 const _tabular = [FontFeature.tabularFigures()];
@@ -271,7 +271,7 @@ List<String> chartXTickDrawableLabels(List<PChartXTick> ticks) {
   ];
 }
 
-/// 보이는 눈금의 글 — 건너뛴 눈금은 null. 끝(가장 최근) 눈금에서 [interval] 칸마다 남긴다(chart.md "큰 글자").
+/// 보이는 눈금의 글 — 건너뛴 눈금은 null. 끝(가장 최근) 눈금에서 [interval] 칸마다 남긴다(chart.md "가로 눈금 건너뛰기").
 ///
 /// 연도는 **보이는 눈금** 기준이다: 앞에 보이는 눈금(첫 눈금이면 맨 앞 칸)과 해가 다르면 연도를 붙인다 — 해가 바뀌는 칸이
 /// 건너뛰기로 빠지면 그 뒤 처음 보이는 눈금이 연도를 이어받는다("12월 · 2026. 2. · 4월", 연도가 통째로 사라지지 않는다).
@@ -299,27 +299,23 @@ List<String?> chartXTickLabels(List<PChartXTick> ticks, int interval) {
 double chartAxisWidth(
   Iterable<String> labels,
   TextStyle style, {
-  TextScaler scaler = TextScaler.noScaling,
   double margin = kChartTickMargin,
 }) {
   var w = 0.0;
   for (final t in labels) {
-    w = math.max(w, measureText(t, style, scaler: scaler));
+    w = math.max(w, measureText(t, style));
   }
   return w + margin;
 }
 
 /// 눈금 하나의 폭을 잰다 — 세로축의 폭은 가장 긴 글자("−3,000만")가 잘리지 않게 잡는다.
-/// 글자는 화면의 글자 배율로 그려지므로 [scaler] 로 같은 배율을 넣어 잰다(안 넣으면 1배 — 200% 에서 눈금이 잘린다).
-double measureText(
-  String text,
-  TextStyle style, {
-  TextScaler scaler = TextScaler.noScaling,
-}) {
+/// 차트 그림 안 글(축 눈금 · 막대 위 값)은 글자 크기 설정을 따르지 않으므로(chart.md "글자 크기", groo-design #260) 글자 배율
+/// 없이 잰다 — 그리는 쪽도 [TextScaler.noScaling] 이다.
+double measureText(String text, TextStyle style) {
   final p = TextPainter(
     text: TextSpan(text: text, style: style),
     textDirection: TextDirection.ltr,
-    textScaler: scaler,
+    textScaler: TextScaler.noScaling,
     maxLines: 1,
   )..layout();
   final w = p.width;
@@ -327,15 +323,12 @@ double measureText(
   return w;
 }
 
-/// 눈금 글 한 줄의 높이 — 글자 크기 설정을 따른다(11 / 15 를 [scaler] 로 키운 줄 높이 — 100% 15 · 200% 30).
-double chartTickLineHeight(
-  TextStyle style, {
-  TextScaler scaler = TextScaler.noScaling,
-}) {
+/// 눈금 글 한 줄의 높이 — 글자 크기 설정을 따르지 않는다(11 / 15 → 15, chart.md "글자 크기", groo-design #260).
+double chartTickLineHeight(TextStyle style) {
   final p = TextPainter(
     text: TextSpan(text: '0', style: style),
     textDirection: TextDirection.ltr,
-    textScaler: scaler,
+    textScaler: TextScaler.noScaling,
     maxLines: 1,
   )..layout();
   final h = p.preferredLineHeight;
@@ -404,7 +397,7 @@ const double kChartHoleInset = PSpacing.x1;
 /// 칸 폭이 이 값 이상일 때만 칸에 금액을 적는다(px) — "99,999,999,999원" 이 107 이라 999억까지 들어간다.
 const double kHeatTextMinCellWidth = 112;
 
-/// 칸 글 좌우에 남기는 여백의 합 — 글(글자 배율 포함)이 칸 폭 − 이 값보다 넓으면 글을 빼고 세기 색만 칠한다.
+/// 칸 글 좌우에 남기는 여백의 합 — 글이 칸 폭 − 이 값보다 넓으면 글을 빼고 세기 색만 칠한다.
 /// 100% 에서 가장 넓은 글("99,999,999,999원" 107)이 112 칸에 드는 값이다.
 const double kHeatCellTextPadding = 4;
 

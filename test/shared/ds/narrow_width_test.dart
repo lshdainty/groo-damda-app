@@ -268,9 +268,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    /// 이어지는 달 — 요일 줄 + 달 스크롤의 높이.
-    double calendar(WidgetTester tester, TextScaler scaler) =>
-        datePickerRowHeight(scaler, lineHeight: 19) +
+    /// 이어지는 달 — 요일 줄(48 — 칸 안 글이라 글자 크기를 따르지 않는다) + 달 스크롤의 높이.
+    double calendar(WidgetTester tester) =>
+        kDatePickerCellHeight +
         tester.getSize(find.byKey(const ValueKey('date-scroll'))).height;
 
     testWidgets('보통 폭(360 × 640)은 그대로다 — 본문 = 90% − 머리 70 − 바닥 76', (
@@ -288,11 +288,9 @@ void main() {
         '좁고 낮은 화면(200 × 330 · 글자 ${text * 100}%) — 요일 줄 + 2주에서 멈추고 시트 본문이 스크롤한다',
         (tester) async {
           await open(tester, const Size(200, 330), text: text);
-          final scaler = TextScaler.linear(text);
-          final floor =
-              datePickerRowHeight(scaler, lineHeight: 19) +
-              2 * datePickerCellHeight(scaler);
-          expect(calendar(tester, scaler), greaterThanOrEqualTo(floor - 0.01));
+          // 요일 줄 + 2주 — 칸 · 요일 줄은 48 그대로(groo-design #260)
+          const floor = 3 * kDatePickerCellHeight;
+          expect(calendar(tester), greaterThanOrEqualTo(floor - 0.01));
           // 시트 본문이 스크롤한다
           final body = tester
               .state<ScrollableState>(

@@ -1,10 +1,13 @@
 // I-04 03-C — 달력의 큰 글자(1B) · 방향키(4A) · 읽는 역할(03C-004).
 //
-// 큰 글자: 칸 · 머리 · 요일 줄은 최소 48 이고 글이 크면 그만큼만 늘어난다. 글자 200% 에서 달력은 396(머리 48 · 요일 48 ·
-// 칸 50 × 6), 원 42 · 이전 · 다음 40 은 그대로다.
+// 큰 글자: 칸 안 글(날짜 숫자 · 요일)은 글자 크기 설정을 따르지 않아 칸 · 요일 줄 48, 원 42 · 이전 · 다음 40 그대로다. 머리 ·
+// 이어지는 달 이름 줄만 제목을 따라 48 에서 늘어난다(groo-design #260 · #261).
 // 방향키: date-picker.md 키보드 표 그대로 — 날짜 하나만 Tab 순서에 들고, 열 때 초점은 고른 날(없으면 오늘), 링은 키보드일 때만.
 // 읽기: 격자는 표(table) · 줄(row) · 칸(cell) · 요일은 columnHeader · 칸 안에 버튼 · 오늘은 이름 끝에 ", 오늘".
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter/semantics.dart'
     show SemanticsAction, SemanticsNode, SemanticsRole;
 import 'package:flutter/services.dart';
@@ -123,7 +126,7 @@ void main() {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
   });
 
-  group('큰 글자 — 글자만 배율, 칸은 최소 48(03-C 1B)', () {
+  group('큰 글자 — 칸 안 글은 그대로, 머리 제목만 커진다(groo-design #260 · #261)', () {
     testWidgets('100% — 머리 48 · 요일 48 · 칸 48 × 6 = 384', (tester) async {
       _viewport(tester, const Size(360, 900));
       await tester.pumpWidget(
@@ -145,86 +148,160 @@ void main() {
       );
     });
 
-    testWidgets(
-      '글자 200% — 머리 48 · 요일 48 · 칸 50 × 6 = 396, 원 42 · 이전 · 다음 40 그대로, 제목 한 줄',
-      (tester) async {
-        _viewport(tester, const Size(360, 900));
-        await tester.pumpWidget(
-          _app(
-            PDatePicker.single(labels: _labels, inset: 0, today: _today),
-            scale: 2,
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        expect(
-          tester.getSize(find.byKey(const ValueKey('date-header'))).height,
-          48,
-        );
-        expect(
-          tester.getSize(find.byKey(const ValueKey('date-weekdays'))).height,
-          48,
-        );
-        expect(tester.getSize(_day(_today)).height, 50);
-        expect(
-          tester.getSize(find.byKey(const ValueKey('date-root'))).height,
-          48 + 48 + 50 * 6,
-        );
-        // 원은 px — 글자 배율을 따르지 않는다
-        expect(
-          tester
-              .getSize(
-                find.descendant(
-                  of: _day(_today),
-                  matching: find.byKey(const ValueKey('date-day-visual')),
-                ),
-              )
-              .width,
-          42,
-        );
-        // 이전 · 다음 40
-        final nav = find.byType(PDatePicker);
-        expect(nav, findsOneWidget);
-        final prev = find.bySemanticsLabel('이전 달');
-        expect(tester.getSize(prev).width, lessThanOrEqualTo(44));
-        // 제목은 한 줄 — 글 높이가 한 줄(22 × 2 = 44) 이하
-        final title = tester.renderObject<RenderBox>(
-          find.descendant(
-            of: find.byKey(const ValueKey('date-title')),
-            matching: find.byType(Text),
-          ),
-        );
-        expect(title.size.height, lessThanOrEqualTo(44.5));
-      },
-    );
+    for (final scale in [2.0, 3.0]) {
+      testWidgets(
+        '글자 ${(scale * 100).round()}% — 요일 48 · 칸 48 × 6 · 원 42 · 이전 · 다음 40 그대로, 칸 안 글은 커지지 않고 제목만 커진다',
+        (tester) async {
+          _viewport(tester, const Size(360, 900));
+          await tester.pumpWidget(
+            _app(
+              PDatePicker.single(labels: _labels, inset: 0, today: _today),
+              scale: scale,
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          // 머리는 제목(22 × 배율)을 따라 48 에서 늘어난다
+          final header = math.max(48.0, 22 * scale);
+          expect(
+            tester.getSize(find.byKey(const ValueKey('date-header'))).height,
+            header,
+          );
+          expect(
+            tester.getSize(find.byKey(const ValueKey('date-weekdays'))).height,
+            48,
+          );
+          expect(tester.getSize(_day(_today)).height, 48);
+          expect(
+            tester.getSize(find.byKey(const ValueKey('date-root'))).height,
+            header + 48 + 48 * 6,
+          );
+          // 날짜 숫자 · 요일 글은 글자 크기 설정을 따르지 않는다(date-picker.md "글자 크기 설정", groo-design #260)
+          for (final of in [
+            _day(_today),
+            find.byKey(const ValueKey('date-weekdays')),
+          ]) {
+            for (final e
+                in find
+                    .descendant(of: of, matching: find.byType(RichText))
+                    .evaluate()) {
+              final rp = e.renderObject! as RenderParagraph;
+              expect(rp.textScaler, TextScaler.noScaling);
+            }
+          }
+          // 제목은 커진다
+          final titleText = tester.renderObject<RenderParagraph>(
+            find
+                .descendant(
+                  of: find.byKey(const ValueKey('date-title')),
+                  matching: find.byType(RichText),
+                )
+                .first,
+          );
+          expect(titleText.textScaler.scale(10), closeTo(10 * scale, 0.01));
+          // 원은 px — 글자 배율을 따르지 않는다
+          expect(
+            tester
+                .getSize(
+                  find.descendant(
+                    of: _day(_today),
+                    matching: find.byKey(const ValueKey('date-day-visual')),
+                  ),
+                )
+                .width,
+            42,
+          );
+          // 이전 · 다음 40
+          final prev = find.bySemanticsLabel('이전 달');
+          expect(tester.getSize(prev).width, lessThanOrEqualTo(44));
+          // 제목은 한 줄 — 글 높이가 한 줄(22 × 배율) 이하
+          final title = tester.renderObject<RenderBox>(
+            find.descendant(
+              of: find.byKey(const ValueKey('date-title')),
+              matching: find.byType(Text),
+            ),
+          );
+          expect(title.size.height, lessThanOrEqualTo(22 * scale + 0.5));
+        },
+      );
+    }
 
-    testWidgets('글자 200% 이어지는 달 — 달 이름 줄 48 · 칸 50, 한 달의 높이는 그 배율로 잰다', (
+    for (final scale in [2.0, 3.0]) {
+      testWidgets(
+        '글자 ${(scale * 100).round()}% 이어지는 달 — 칸 48 그대로, 달 이름 줄은 제목처럼 48 에서 글을 따라 늘어난다',
+        (tester) async {
+          _viewport(tester, const Size(360, 900));
+          await tester.pumpWidget(
+            _app(
+              PDatePicker.single(
+                labels: _labels,
+                inset: 0,
+                today: _today,
+                visibleRange: PDateVisibleRange.continuous,
+              ),
+              scale: scale,
+              height: 600,
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          // 2026년 10월은 5주 — 달 이름 max(48, 22 × 배율) + 5 × 48 + 아래 16(groo-design #261)
+          final label = math.max(48.0, 22 * scale);
+          final month = find.byKey(
+            ValueKey('date-month-${monthNumber(_today)}'),
+          );
+          expect(tester.getSize(month).height, label + 5 * 48 + 16);
+          expect(
+            tester
+                .getSize(
+                  find.descendant(
+                    of: month,
+                    matching: find.byKey(const ValueKey('date-month-label')),
+                  ),
+                )
+                .height,
+            label,
+          );
+          expect(tester.getSize(_day(_today)).height, 48);
+        },
+      );
+    }
+
+    testWidgets('이어지는 달 — 글자 크기가 바뀌어 달 이름 줄이 늘어나도 보던 달이 맨 위에 남는다', (
       tester,
     ) async {
       _viewport(tester, const Size(360, 900));
-      await tester.pumpWidget(
-        _app(
-          PDatePicker.single(
-            labels: _labels,
-            inset: 0,
-            today: _today,
-            visibleRange: PDateVisibleRange.continuous,
-          ),
-          scale: 2,
-          height: 600,
+      Widget picker(double scale) => _app(
+        PDatePicker.single(
+          labels: _labels,
+          inset: 0,
+          today: _today,
+          visibleRange: PDateVisibleRange.continuous,
         ),
+        scale: scale,
+        height: 600,
       );
+      final scroll = find.byKey(const ValueKey('date-scroll'));
+      final month = find.byKey(ValueKey('date-month-${monthNumber(_today)}'));
+      await tester.pumpWidget(picker(1));
+      await tester.pumpAndSettle();
+      final top = tester.getTopLeft(scroll).dy;
+      expect(tester.getTopLeft(month).dy, moreOrLessEquals(top, epsilon: 0.5));
+      // 300% — 달 이름 줄 48 → 66, 그 위 달들의 높이가 모두 바뀐다
+      await tester.pumpWidget(picker(3));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      // 2026년 10월은 5주 — 달 이름 48 + 5 × 50 + 아래 16
-      final month = find.byKey(ValueKey('date-month-${monthNumber(_today)}'));
-      expect(tester.getSize(month).height, 48 + 5 * 50 + 16);
-      expect(tester.getSize(_day(_today)).height, 50);
+      expect(
+        tester.getTopLeft(month).dy,
+        moreOrLessEquals(tester.getTopLeft(scroll).dy, epsilon: 0.5),
+        reason: '보던 달(2026년 10월)이 다시 맨 위',
+      );
     });
   });
 
   group('연 · 월 휠 높이(I-04 21) — 요일 줄 + 6주', () {
-    for (final (scale, want) in [(1.0, 336.0), (2.0, 348.0)]) {
+    // 요일 줄 · 칸이 48 그대로라 글자 크기와 상관없이 336(groo-design #260)
+    for (final (scale, want) in [(1.0, 336.0), (2.0, 336.0), (3.0, 336.0)]) {
       testWidgets('글자 ${(scale * 100).round()}% → $want', (tester) async {
         _viewport(tester, const Size(360, 900));
         await tester.pumpWidget(

@@ -662,7 +662,7 @@ class _StarlightHint extends StatelessWidget {
   }
 }
 
-/// 달력 칸 아래 표시 — 높이 15(t1 11 / 15). 장식이다(뜻은 칸 이름이 읽는다).
+/// 달력 칸 아래 표시 — 높이 15(t1 11 / 15) · 글자 크기 설정을 따르지 않는다. 장식이다(뜻은 칸 이름이 읽는다).
 /// 오늘의 남은 수는 `fg-brand` 700, 그 밖 남은 수는 `fg-neutral-subtle` 400, ★ 는 별자리 색, 구름은 `fg-neutral-subtle`, ✓ 는 `fg-positive`.
 class _CellMark extends StatelessWidget {
   const _CellMark({required this.mark, required this.loading});
@@ -706,9 +706,11 @@ class _CellMark extends StatelessWidget {
       null => null,
     };
     return ExcludeSemantics(
-      // 높이 15 는 100% 의 값 — 글자가 커지면 칸이 글을 따라 늘고 잘리지 않는다(I-10 9)
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: height),
+      // 높이 15 그대로 — 칸 아래 표시는 달력 칸 안 글이라 글자 크기 설정을 따르지 않는다(LedgerCalendarGrid 가 배율 없음으로
+      // 그린다, groo-design #261)
+      child: SizedBox(
+        key: const ValueKey('todo-cell-mark'),
+        height: height,
         child: Center(child: child),
       ),
     );

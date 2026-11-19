@@ -1,6 +1,7 @@
-// 돈 표기 · 요일 글 상한 — groo-design #252(international-design.mdx · date-picker.md, 사용자 결정).
+// 돈 표기 · 요일 글 — groo-design #252(international-design.mdx · date-picker.md, 사용자 결정) · #260(글자 크기 두 갈래).
 //
-// ⓐ 요일 줄 글자 크기는 200% 에서 멈춘다(기간 시트 · 달력 탭 · 가계부 달력) — 300% 에서도 한 줄 · 칸 안. 날짜 숫자도 200% 에서 멈춘다(groo-design #258)
+// ⓐ 요일 줄 · 날짜 숫자는 일곱 칸 격자의 칸 안 글이라 글자 크기 설정을 따르지 않는다(기간 시트 · 달력 탭 · 가계부 달력) —
+//    300% 에서도 100% 와 같은 두 글자 · 한 줄 · 칸 안
 // ⓑ 금액 프리셋 칩은 줄이지 않는다 — "12,000원" · "₩12,000"
 // ⓒ 규모 값(시가총액 · 주식 수)만 줄인다 — 차트 축과 같은 셈(한 단위 · 소수 한 자리, 조 · 억 · 만 / T · B · M · K)
 // ⓓ 문장 속 돈은 영어도 ₩ — 영어 ARB 에 "won" 이 없다
@@ -48,7 +49,7 @@ Widget _app(
 const _two = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const _one = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-/// [of] 안의 요일 글 — 한 줄 · 칸 안 · 글자 배율 200% 이하인지 보고 보인 글을 돌려준다.
+/// [of] 안의 요일 글 — 한 줄 · 칸 안 · 글자 배율 없음(100% 크기)인지 보고 보인 글을 돌려준다.
 List<String> _weekdays(WidgetTester tester, Finder of) {
   final out = <String>[];
   for (final e
@@ -64,11 +65,7 @@ List<String> _weekdays(WidgetTester tester, Finder of) {
           )
           .first,
     );
-    expect(
-      p.textScaler.scale(10),
-      lessThanOrEqualTo(20.0 + 1e-6),
-      reason: '요일 "$t" 글자 크기가 200% 를 넘는다',
-    );
+    expect(p.textScaler.scale(10), 10, reason: '요일 "$t" 이 글자 크기 설정을 따라 커졌다');
     final one = TextPainter(
       text: p.text,
       textScaler: p.textScaler,
@@ -99,10 +96,10 @@ void _viewport(WidgetTester tester, double width) {
 void main() {
   tearDown(() => Intl.defaultLocale = null);
 
-  group('ⓐ 요일 줄 글자 크기 200% 상한 — 320 · 300% 에서도 한 줄 · 칸 안', () {
+  group('ⓐ 요일 줄 · 날짜 숫자는 글자 크기를 따르지 않는다 — 320 · 300% 에서도 100% 와 같은 두 글자', () {
     setUp(() => Intl.defaultLocale = 'en');
 
-    for (final scale in [2.0, 3.0]) {
+    for (final scale in [1.0, 2.0, 3.0]) {
       testWidgets('기간 시트 달력 · 글자 ${(scale * 100).round()}%', (tester) async {
         _viewport(tester, 320);
         await tester.pumpWidget(
@@ -123,9 +120,9 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(
           _weekdays(tester, find.byKey(const ValueKey('date-weekdays'))),
-          _one,
+          _two,
         );
-        // 날짜 숫자도 요일처럼 200% 에서 멈춘다(일곱 칸 격자, groo-design #258)
+        // 날짜 숫자도 요일처럼 글자 크기를 따르지 않는다(일곱 칸 격자의 칸 안 글, groo-design #260)
         final day = tester.renderObject<RenderParagraph>(
           find
               .descendant(
@@ -134,10 +131,7 @@ void main() {
               )
               .first,
         );
-        expect(
-          day.textScaler.scale(10),
-          moreOrLessEquals(10 * (scale < 2 ? scale : 2)),
-        );
+        expect(day.textScaler.scale(10), 10);
       });
 
       testWidgets('달력 탭 요일 줄 · 글자 ${(scale * 100).round()}%', (tester) async {
@@ -150,7 +144,7 @@ void main() {
         );
         await tester.pump();
         expect(tester.takeException(), isNull);
-        expect(_weekdays(tester, find.byType(CalendarWeekdayRow)), _one);
+        expect(_weekdays(tester, find.byType(CalendarWeekdayRow)), _two);
       });
 
       testWidgets('가계부 달력 요일 줄 · 글자 ${(scale * 100).round()}%', (tester) async {
@@ -173,7 +167,7 @@ void main() {
         );
         await tester.pump();
         expect(tester.takeException(), isNull);
-        expect(_weekdays(tester, find.byType(LedgerCalendarGrid)), _one);
+        expect(_weekdays(tester, find.byType(LedgerCalendarGrid)), _two);
       });
     }
   });

@@ -311,7 +311,9 @@ void main() {
     });
   });
 
-  testWidgets('글자 200% — 칸 표시가 잘리지 않고 칸이 글을 따라 늘어난다', (tester) async {
+  testWidgets('글자 200% — 칸 표시는 칸 안 글이라 커지지 않고 높이 15 그대로(groo-design #261)', (
+    tester,
+  ) async {
     await pumpApp(
       tester,
       const TodoScreen(),
@@ -324,15 +326,14 @@ void main() {
     );
     final box = find.ancestor(
       of: mark,
-      matching: find.byWidgetPredicate(
-        (w) => w is ConstrainedBox && w.constraints.minHeight == 15,
-      ),
+      matching: find.byKey(const ValueKey('todo-cell-mark')),
     );
-    expect(tester.getSize(box).height, greaterThan(15));
-    expect(
-      tester.getSize(box).height,
-      greaterThanOrEqualTo(tester.getSize(mark).height),
+    expect(tester.getSize(box).height, 15);
+    final rp = tester.renderObject<RenderParagraph>(
+      find.descendant(of: mark, matching: find.byType(RichText)).first,
     );
+    expect(rp.textScaler, TextScaler.noScaling);
+    expect(tester.getSize(mark).height, lessThanOrEqualTo(15));
   });
 
   group('11 원장 머리 숨기기(Scroll Auto Hide) · 18 달 이동', () {
@@ -525,12 +526,10 @@ void main() {
         find.ancestor(of: mark, matching: find.byType(ExcludeSemantics)),
         findsWidgets,
       );
-      // 표시 높이 15 — 100% 의 값이다
+      // 표시 높이 15
       final box = find.ancestor(
         of: mark,
-        matching: find.byWidgetPredicate(
-          (w) => w is ConstrainedBox && w.constraints.minHeight == 15,
-        ),
+        matching: find.byKey(const ValueKey('todo-cell-mark')),
       );
       expect(box, findsOneWidget);
       expect(tester.getSize(box).height, 15);

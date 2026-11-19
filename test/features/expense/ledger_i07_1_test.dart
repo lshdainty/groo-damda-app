@@ -1155,7 +1155,9 @@ void main() {
     expect(findText(names[PDatePreset.thisYear]!), findsNothing);
   });
 
-  testWidgets('글자 200% — 두 자리 날 숫자 원이 글을 따라 늘어 잘리지 않는다', (tester) async {
+  testWidgets('글자 200% — 날 숫자는 칸 안 글이라 커지지 않고 원 36 그대로(groo-design #260)', (
+    tester,
+  ) async {
     await _pump(tester, textScale: 2, expenses: (_) async => const []);
     await tester.tap(find.bySemanticsLabel('월 달력'), warnIfMissed: false);
     await tester.pumpAndSettle();
@@ -1163,21 +1165,16 @@ void main() {
     final circle = find
         .ancestor(of: text, matching: find.byType(Container))
         .first;
+    expect(tester.getSize(circle), const Size(36, 36));
     expect(
-      tester.getSize(circle).width,
-      greaterThanOrEqualTo(tester.getSize(text).width + 8 - 0.5),
-      reason: '좌우 4 + 글 폭 이상',
+      tester.getSize(text).height,
+      22,
+      reason: '글자는 100% 크기 그대로(t5 16 / 22)',
     );
-    expect(tester.getSize(circle).width, greaterThanOrEqualTo(36));
-    // 글자를 줄이지 않는다 — 크기를 줄이는 FittedBox · Transform 이 원 위에 없다(웹처럼 넘치기만 한다)
+    // 글자를 줄이지 않는다 — 크기를 줄이는 FittedBox · Transform 이 원 위에 없다
     expect(
       find.ancestor(of: circle, matching: find.byType(FittedBox)),
       findsNothing,
-    );
-    expect(
-      tester.getSize(text).height,
-      greaterThan(35),
-      reason: '글자는 200% 크기 그대로(t5 16 → 32)',
     );
   });
 

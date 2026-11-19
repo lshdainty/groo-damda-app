@@ -6,8 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/format/date.dart'
-    show fitWeekdayRowLabels, weekdayRowScaler;
+import 'package:groo_damda_app/core/format/date.dart' show fitWeekdayRowLabels;
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
 import 'package:groo_damda_app/shared/ds/chip/p_chip.dart';
 import 'package:groo_damda_app/shared/ds/date_picker/date_picker_dates.dart';
@@ -204,13 +203,14 @@ class PDatePicker extends StatefulWidget {
     );
   }
 
-  /// 시트 본문이 멈추는 높이 — 빠른 기간 칩 줄(칩 medium + 아래 12) + 요일 줄 + 2주. 글자 배율을 따라 칩 · 요일 줄 · 칸이
-  /// 커지는 만큼 커진다. 빠른 기간이 없는 달력(하루)도 같은 값이다 — 그때는 2주보다 조금 더 남는다.
+  /// 시트 본문이 멈추는 높이 — 빠른 기간 칩 줄(칩 medium + 아래 12) + 요일 줄 + 2주. 칩 글은 글자 배율을 따라 커지고, 요일 줄
+  /// · 칸은 48 그대로다(칸 안 글은 글자 크기 설정을 따르지 않는다 — groo-design #260). 빠른 기간이 없는 달력(하루)도 같은 값이다
+  /// — 그때는 2주보다 조금 더 남는다.
   static double sheetBodyMinHeight(TextScaler scaler) =>
       chipHeight(PChipSize.medium, scaler) +
       PSpacing.x3 +
-      datePickerRowHeight(weekdayRowScaler(scaler), lineHeight: 19) +
-      2 * datePickerCellHeight(scaler);
+      kDatePickerCellHeight +
+      2 * kDatePickerCellHeight;
 
   @override
   State<PDatePicker> createState() => _PDatePickerState();
@@ -234,7 +234,6 @@ class _PDatePickerState extends State<PDatePicker> {
   List<double> _heights = const [];
   List<double> _offsets = const [];
   ({int start, int end})? _layoutYears;
-  double _cellH = kDatePickerCellHeight;
   double _labelH = kDatePickerCellHeight;
 
   DateTime get _today =>
@@ -309,7 +308,8 @@ class _PDatePickerState extends State<PDatePicker> {
     _syncContinuous();
   }
 
-  // 이어지는 달이면 달 위치를 글자 배율로 재고 스크롤을 만든다(글이 커지면 칸 · 달 이름 줄이 커진다)
+  // 이어지는 달이면 달 위치를 글자 배율로 재고 스크롤을 만든다(칸은 48 그대로, 달 이름 줄만 머리 제목처럼 글을 따라 커진다 —
+  // date-picker.md "글자 크기 설정", groo-design #261)
   void _syncContinuous() {
     if (_continuous) {
       final changed = _ensureLayout(MediaQuery.textScalerOf(context));
@@ -347,13 +347,12 @@ class _PDatePickerState extends State<PDatePicker> {
   // ── 이어지는 달: 달 위치 ──
   bool _ensureLayout(TextScaler scaler) {
     final years = (start: _yearStart, end: _yearEnd);
-    final cell = datePickerCellHeight(scaler);
+    const cell = kDatePickerCellHeight;
     final label = datePickerRowHeight(scaler);
-    if (_layoutYears == years && _cellH == cell && _labelH == label) {
+    if (_layoutYears == years && _labelH == label) {
       return false;
     }
     _layoutYears = years;
-    _cellH = cell;
     _labelH = label;
     final count = (years.end - years.start + 1) * 12;
     final heights = <double>[];
@@ -626,10 +625,10 @@ class _PDatePickerState extends State<PDatePicker> {
     final i = monthNumber(d) - _firstMonth;
     if (i < 0 || i >= _offsets.length) return;
     final week = (weekdayIndex(DateTime(d.year, d.month)) + d.day - 1) ~/ 7;
-    final top = _offsets[i] + _labelH + week * _cellH;
-    final bottom = top + _cellH;
+    final top = _offsets[i] + _labelH + week * kDatePickerCellHeight;
+    final bottom = top + kDatePickerCellHeight;
     final viewport = c.position.viewportDimension;
-    final usable = viewport > _fogHeight + 2 * _cellH
+    final usable = viewport > _fogHeight + 2 * kDatePickerCellHeight
         ? viewport - _fogHeight
         : viewport;
     var target = c.offset;
@@ -648,17 +647,15 @@ class _PDatePickerState extends State<PDatePicker> {
   Widget _weekdayRow(double cellW) {
     final c = context.colors;
     final l = widget.labels;
-    // 요일 글은 글자 크기 200% 에서 멈춘다(날짜 숫자도 같다 — groo-design #258, 제목은 그 위로도 커진다)
-    final scaler = weekdayRowScaler(MediaQuery.textScalerOf(context));
+    // 요일 글은 글자 크기 설정을 따르지 않는다(칸 안 글 — 날짜 숫자도 같다, groo-design #260). 제목만 커진다
     final style = PTypography.t4.copyWith(
       color: c.fgNeutralSubtle,
       fontWeight: FontWeight.w500,
     );
-    // 영어 두 글자가 칸에 들지 않는 폭 · 글자 크기에서만 한 글자로 — 요일 글은 줄을 바꾸지 않는다
+    // 영어 두 글자가 칸에 들지 않는 폭에서만 한 글자로 — 요일 글은 줄을 바꾸지 않는다
     final labels = fitWeekdayRowLabels(
       cellW,
       style,
-      scaler,
       labels: l.weekdays,
       narrow: l.weekdaysNarrow ?? l.weekdays,
     );
@@ -668,7 +665,7 @@ class _PDatePickerState extends State<PDatePicker> {
       role: SemanticsRole.row,
       child: SizedBox(
         key: const ValueKey('date-weekdays'),
-        height: datePickerRowHeight(scaler, lineHeight: 19),
+        height: kDatePickerCellHeight,
         child: Row(
           children: [
             for (var i = 0; i < 7; i++)
@@ -684,7 +681,7 @@ class _PDatePickerState extends State<PDatePicker> {
                       labels[i],
                       maxLines: 1,
                       softWrap: false,
-                      textScaler: scaler,
+                      textScaler: TextScaler.noScaling,
                       style: style,
                     ),
                   ),
@@ -813,12 +810,9 @@ class _PDatePickerState extends State<PDatePicker> {
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final title = l.month(_view.year, _view.month);
     final scaler = MediaQuery.textScalerOf(context);
-    // 요일 줄은 글자 크기 200% 에서 멈춘다 — 줄 높이도 멈춘 글로 잰다
-    final weekdayH = datePickerRowHeight(
-      weekdayRowScaler(scaler),
-      lineHeight: 19,
-    );
-    final cellH = datePickerCellHeight(scaler);
+    // 요일 줄 · 칸은 48 그대로다(칸 안 글은 글자 크기 설정을 따르지 않는다 — groo-design #260). 머리만 제목을 따라 늘어난다
+    const weekdayH = kDatePickerCellHeight;
+    const cellH = kDatePickerCellHeight;
 
     final header = SizedBox(
       key: const ValueKey('date-header'),
@@ -1095,7 +1089,7 @@ class _ContinuousMonth extends StatelessWidget {
   final String title;
   final Widget grid;
 
-  /// 달 이름 줄 높이 — 최소 48, 글자 배율에 따라 커진다.
+  /// 달 이름 줄 높이 — 최소 48, 머리 제목처럼 글자 배율에 따라 커진다(groo-design #261).
   final double labelHeight;
 
   @override

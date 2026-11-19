@@ -118,8 +118,8 @@ enum PBadgeSize { medium, large }
 /// 같은 값이다. 옛 위젯(lib/shared/widgets/p_badge.dart)과 이름이 같다 — 자리로 가른다.
 ///
 /// 누르지 않는다(상태가 하나뿐). 고르고 거르는 것은 Chip, 시간 · 개수 같은 메타는 Tag Group, 안 읽은 알림은
-/// Notification Badge 다. 글만큼 넓어지고 최대 폭이 없다 — 부모가 좁을 때만 한 줄 말줄임. 글은 글자 크기 설정을
-/// 따른다(최소 높이는 그대로, 글이 커지면 상자가 따라 커진다). outline 테두리는 안쪽 1px — 상자 크기가 변하지 않는다.
+/// Notification Badge 다. 글만큼 넓어지고 최대 폭이 없다 — 부모가 좁을 때만 한 줄 말줄임. 글 · 상자는 글자 크기 설정을
+/// 따르지 않는다(badge.yaml `$text-t1-static` · `$text-t2-static` — 정해진 디자인 틀, groo-design #260). outline 테두리는 안쪽 1px — 상자 크기가 변하지 않는다.
 /// 글은 그대로 읽힌다(앞뒤 글과 이어 읽힌다). 앞 아이콘은 글자색을 따르고 읽지 않는다.
 class PBadge extends StatelessWidget {
   const PBadge({
@@ -189,6 +189,7 @@ class PBadge extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               overflow: TextOverflow.ellipsis,
+              textScaler: TextScaler.noScaling,
               style: (large ? PTypography.t2 : PTypography.t1).copyWith(
                 color: colors.foreground,
                 fontWeight: weight,

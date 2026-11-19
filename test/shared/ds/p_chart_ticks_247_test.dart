@@ -243,11 +243,8 @@ void main() {
     expect(chartAxisMaxIntervals(20, 30), 1);
     // 100% 140: 140 − 8 − 23 = 109 → 7 칸(기본 4 칸 그대로)
     expect(chartAxisMaxIntervals(109, 15), 7);
+    // 눈금 글 줄 높이는 글자 크기 설정을 따르지 않는다(chart.md "글자 크기", groo-design #260) — 늘 15
     final style = chartTickStyle(PColors.light);
     expect(chartTickLineHeight(style), moreOrLessEquals(15, epsilon: 0.01));
-    expect(
-      chartTickLineHeight(style, scaler: const TextScaler.linear(2)),
-      moreOrLessEquals(30, epsilon: 0.01),
-    );
   });
 }

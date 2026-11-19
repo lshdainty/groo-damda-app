@@ -3,7 +3,8 @@
 // ⓐ 영어 축은 천 단위 K · M · B — 가장 큰 절댓값이 1B 이상 B, 1M 이상 M, 1K 이상 K, 아니면 쉼표 정수(0.5K · 1K · 500K · 1M ·
 //    1.5B, 1,000M 이 아니라 1B). 한국어 만 · 억 · 한 축 한 단위는 그대로
 // ⓑ 줄이지 않는 돈 — 영어 "₩1,240,000", 한국어 "1,240,000원"(툴팁 · 지표 타일 · 도넛 · 열지도)
-// ⓒ 영어 요일 줄(기간 시트 · 달력)은 두 글자 Su Mo Tu We Th Fr Sa, 칸에 들지 않는 폭 · 글자 크기에서만 한 글자 — 줄을 바꾸지 않는다
+// ⓒ 영어 요일 줄(기간 시트 · 달력)은 두 글자 Su Mo Tu We Th Fr Sa, 칸에 들지 않는 폭에서만 한 글자 — 줄을 바꾸지 않는다. 요일
+//    글은 글자 크기 설정을 따르지 않으므로(groo-design #260) 큰 글자에서도 100% 와 같다
 // 언어는 앱 로케일(`Intl.defaultLocale` — 앱이 화면 로케일로 맞춘다)을 따른다.
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -183,11 +184,12 @@ void main() {
       return out;
     }
 
-    // 320 · 200% 는 두 글자("We" 40)가 칸(약 40 − 여백)에 들지 않아 한 글자로 준다
+    // 요일 글은 글자 크기 설정을 따르지 않는다 — 320 · 200% · 300% 도 100% 와 같은 두 글자
     for (final (width, scale, expected) in [
       (360.0, 1.0, two),
       (320.0, 1.0, two),
-      (320.0, 2.0, one),
+      (320.0, 2.0, two),
+      (320.0, 3.0, two),
     ]) {
       testWidgets(
         '기간 시트 달력 · 폭 ${width.round()} · 글자 ${(scale * 100).round()}% → ${expected.first}',
@@ -225,20 +227,22 @@ void main() {
       );
     }
 
+    // 칸에 두 글자가 들지 않는 폭(120 — 칸 약 17)에서만 한 글자다
     for (final (width, scale, expected) in [
       (320.0, 1.0, two),
-      (320.0, 2.0, one),
+      (320.0, 2.0, two),
+      (120.0, 1.0, one),
     ]) {
       testWidgets(
         '달력 탭 요일 줄 · 폭 ${width.round()} · 글자 ${(scale * 100).round()}% → ${expected.first}',
         (tester) async {
           Intl.defaultLocale = 'en';
-          tester.view.physicalSize = Size(width, 600);
+          tester.view.physicalSize = const Size(320, 600);
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.reset);
           await tester.pumpWidget(
             _app(
-              const SizedBox(width: 320, child: CalendarWeekdayRow()),
+              SizedBox(width: width, child: const CalendarWeekdayRow()),
               locale: const Locale('en'),
               scale: scale,
             ),

@@ -1,11 +1,11 @@
-// 가장 적은 축 · 막대 위 값 바탕 — groo-design #253(chart.md "큰 글자", 사용자 결정).
+// 차트 그림 안 글 · 막대 위 값 바탕 — groo-design #260(chart.md "글자 크기", 사용자 결정) · #253.
 //
-// ⓐ 칸을 가장 적게 줄여도(0 을 품어야 하는 −50만 · 0 · 50만, 양수만이면 0 · 50만) 세로 글이 겹치면 절댓값이 큰 쪽 끝 글 하나를
-//    남기고 0 은 함께 들어갈 때만 둔다. 나머지 글은 빼고 격자선 · 차트 높이는 그대로다. 순자산 추이(높이 140 · 12달)가 iOS
-//    접근성 최대 글자(약 312%)에서 50만 · 0 · −50만 셋을 겹쳐 그리던 결함(QA app_ios_ax5_asset_trend_overlap).
+// ⓐ 차트 그림 안 글(세로 · 가로 눈금 · 막대 위 값)은 글자 크기 설정을 따르지 않는다 — 그림 칸이 정해진 디자인 틀이다. 순자산
+//    추이(높이 140 · 12달)가 iOS 접근성 최대 글자(약 312%) · 안드로이드 200% 에서도 100% 와 같은 눈금 글을 같은 자리에 그린다
+//    — 50만 · 0 · −50만 이 겹치지 않는다(QA app_ios_ax5_asset_trend_overlap).
 // ⓑ 막대 위 값 글 뒤에 카드 면 색 바탕(글 상자 크기) — 예산 100% 점선 · 격자가 글 뒤로 숨는다.
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -13,6 +13,7 @@ import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
 
+import '../../support/android_font_scale.dart';
 import '../../support/plain_text.dart';
 
 final _months = [for (var m = 1; m <= 12; m++) '$m월'];
@@ -29,7 +30,7 @@ final _negativeBig = [for (final v in _mixed) -v];
 Future<void> _pump(
   WidgetTester tester,
   Widget chart, {
-  required double scale,
+  required TextScaler scaler,
   Brightness brightness = Brightness.light,
 }) async {
   tester.view.physicalSize = const Size(700, 900);
@@ -44,9 +45,7 @@ Future<void> _pump(
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('ko'),
       builder: (context, c) => MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(textScaler: TextScaler.linear(scale)),
+        data: MediaQuery.of(context).copyWith(textScaler: scaler),
         child: c!,
       ),
       home: Scaffold(
@@ -103,55 +102,88 @@ void _noOverlap(List<({String text, Rect rect})> ticks) {
 }
 
 void main() {
-  group('ⓐ 가장 적은 축도 들지 않으면 큰 쪽 끝 글만', () {
-    // iOS AX3 235% · 300% · AX5 312% — 가장 적은 축(−50만 · 0 · 50만)도 그리는 높이에 들지 않는다
-    for (final scale in [2.35, 3.0, 3.12]) {
-      testWidgets(
-        '음수 섞임(−1.2만 ~ 47.6만) · 글자 ${(scale * 100).round()}% → "50만" 만',
-        (tester) async {
-          await _pump(tester, _netWorth(_mixed), scale: scale);
-          final ticks = _ticks(tester);
-          _noOverlap(ticks);
-          expect([for (final t in ticks) t.text], ['50만']);
-          // 격자선은 그대로(−50만 · 0 · 50만 세 줄)
-          final data = tester.widget<LineChart>(find.byType(LineChart)).data;
-          expect(data.minY, -1);
-          expect(data.maxY, 1);
-          expect(data.gridData.show, isTrue);
-          // 차트 높이는 그대로
-          expect(tester.getSize(find.byType(PLineChart)).height, 140);
-        },
-      );
+  group('ⓐ 차트 그림 안 글은 글자 크기를 따르지 않는다 — 큰 글자에서도 100% 와 같은 글 · 같은 자리', () {
+    final scalers = <(String, TextScaler)>[
+      ('iOS AX2(194%)', const TextScaler.linear(1.94)),
+      ('300%', const TextScaler.linear(3)),
+      ('iOS AX5(312%)', const TextScaler.linear(3.12)),
+      ('안드로이드 200%', const AndroidNonlinearTextScaler()),
+    ];
+    for (final (data, values) in [
+      ('음수 섞임(−1.2만 ~ 47.6만)', _mixed),
+      ('양수만', _positive),
+      ('음수 쪽이 큰 값(−47.6만 ~ 1.2만)', _negativeBig),
+    ]) {
+      for (final (name, scaler) in scalers) {
+        testWidgets('$data · $name', (tester) async {
+          await _pump(tester, _netWorth(values), scaler: TextScaler.noScaling);
+          final base = _ticks(tester);
+          final baseMonths = [
+            for (final m in _months)
+              if (findText(m).evaluate().isNotEmpty)
+                (m, tester.getRect(findText(m))),
+          ];
+          await _pump(tester, _netWorth(values), scaler: scaler);
+          final big = _ticks(tester);
+          expect(
+            [for (final t in big) t.text],
+            [for (final t in base) t.text],
+            reason: '세로 눈금 글이 100% 와 같다',
+          );
+          for (var k = 0; k < big.length; k++) {
+            expect(big[k].rect, base[k].rect, reason: '"${big[k].text}" 자리');
+          }
+          _noOverlap(big);
+          for (final (m, rect) in baseMonths) {
+            expect(tester.getRect(findText(m)), rect, reason: '가로 눈금 "$m" 자리');
+          }
+          // 그려지는 글 모두 배율 없음
+          for (final e
+              in find
+                  .descendant(
+                    of: find.byType(PLineChart),
+                    matching: find.byType(RichText),
+                  )
+                  .evaluate()) {
+            expect(
+              (e.renderObject! as RenderParagraph).textScaler,
+              TextScaler.noScaling,
+            );
+          }
+        });
+      }
     }
 
-    testWidgets('음수 쪽이 큰 값(−47.6만 ~ 1.2만) · 312% → "−50만" 만', (tester) async {
-      await _pump(tester, _netWorth(_negativeBig), scale: 3.12);
-      final ticks = _ticks(tester);
-      _noOverlap(ticks);
-      expect([for (final t in ticks) t.text], ['−50만']);
-    });
-
-    testWidgets('양수만 · 312%(0칸 — 0 · 50만 두 글이 겹친다) → "50만" 만', (tester) async {
-      await _pump(tester, _netWorth(_positive), scale: 3.12);
-      final ticks = _ticks(tester);
-      _noOverlap(ticks);
-      expect([for (final t in ticks) t.text], ['50만']);
-    });
-
-    testWidgets('양수만 · 300%(0 이 함께 들어간다) → "0 · 50만"', (tester) async {
-      await _pump(tester, _netWorth(_positive), scale: 3);
-      final ticks = _ticks(tester);
-      _noOverlap(ticks);
-      expect({for (final t in ticks) t.text}, {'0', '50만'});
-    });
-
-    testWidgets('iOS AX2(194%) — 셋이 들어가 줄이지 않는다(−50만 · 0 · 50만)', (
-      tester,
-    ) async {
-      await _pump(tester, _netWorth(_mixed), scale: 1.94);
-      final ticks = _ticks(tester);
-      _noOverlap(ticks);
-      expect({for (final t in ticks) t.text}, {'−50만', '0', '50만'});
+    testWidgets('막대 위 값 — 312% 에서도 100% 와 같은 자리 · 같은 크기', (tester) async {
+      Widget bars() => PBarChart(
+        label: '이행률',
+        height: 180,
+        categories: const ['6월', '7월', '8월', '9월', '10월', '11월'],
+        series: const [
+          PChartSeries(
+            key: 'r',
+            label: '이행률',
+            color: PChartColor.blue,
+            values: [92, 98, 110, 64, 99, 87],
+          ),
+        ],
+        showValueAxis: false,
+        referenceLines: const [100],
+        barLabel: (i, v) => '${v.round()}%',
+        valueFormatter: (v) => '${v.round()}%',
+      );
+      await _pump(tester, bars(), scaler: TextScaler.noScaling);
+      final base = [
+        for (var i = 0; i < 6; i++)
+          tester.getRect(find.byKey(ValueKey('chart-bar-label-bg-$i'))),
+      ];
+      await _pump(tester, bars(), scaler: const TextScaler.linear(3.12));
+      for (var i = 0; i < 6; i++) {
+        expect(
+          tester.getRect(find.byKey(ValueKey('chart-bar-label-bg-$i'))),
+          base[i],
+        );
+      }
     });
   });
 
@@ -177,7 +209,7 @@ void main() {
             barLabel: (i, v) => '${v.round()}%',
             valueFormatter: (v) => '${v.round()}%',
           ),
-          scale: 3.12,
+          scaler: const TextScaler.linear(3.12),
           brightness: brightness,
         );
         final colors = brightness == Brightness.light
