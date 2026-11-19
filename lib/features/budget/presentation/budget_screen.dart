@@ -239,7 +239,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   overAllocated: overAllocated,
                   masked: headerMasked,
                 )
-              : loadingRegionWithText(const _TotalSkeleton()),
+              : const _TotalSkeleton(),
           ready
               ? _PaceSection(
                   pct: pct,
@@ -710,6 +710,8 @@ class _ComplianceSection extends StatelessWidget {
 
 // ─── 불러오는 중 — 실제 구역과 같은 틀 ────────────────────
 
+/// 총 예산 자리의 기다림 — 구역 여백(위 12 · 좌우 24)은 기다리는 영역 밖이다. 5초 "오래 걸림" 글이 첫 스켈레톤 위에 왼쪽
+/// 맞춤으로 16 띄워 선다(skeleton.md "오래 걸림 글"). 영역이 구역을 감싸면 글만 구역 여백 밖(화면 왼쪽 끝)에 붙는다.
 class _TotalSkeleton extends StatelessWidget {
   const _TotalSkeleton();
 
@@ -717,21 +719,28 @@ class _TotalSkeleton extends StatelessWidget {
   Widget build(BuildContext context) => BudgetSection(
     topPadding: PSpacing.x3,
     children: [
-      PSkeleton.text(PTypography.t3, width: 96),
-      const _Gap(PSpacing.x1),
-      PSkeleton.text(PTypography.t3),
-      const _Gap(PSpacing.x3),
-      PSkeleton.text(PTypography.t9, width: 160),
-      const _Gap(PSpacing.x4),
-      const PSkeleton(
-        height: PProgressBar.height,
-        radius: PSkeletonRadius.full,
+      loadingRegionWithText(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PSkeleton.text(PTypography.t3, width: 96),
+            const SizedBox(height: PSpacing.x1),
+            PSkeleton.text(PTypography.t3),
+            const SizedBox(height: PSpacing.x3),
+            PSkeleton.text(PTypography.t9, width: 160),
+            const SizedBox(height: PSpacing.x4),
+            const PSkeleton(
+              height: PProgressBar.height,
+              radius: PSkeletonRadius.full,
+            ),
+            const SizedBox(height: PSpacing.x2),
+            PSkeleton.text(PTypography.t3, width: 120),
+            const SizedBox(height: PSpacing.x3),
+            for (var i = 0; i < 3; i++)
+              PSkeleton.text(PTypography.t5, width: double.infinity),
+          ],
+        ),
       ),
-      const _Gap(PSpacing.x2),
-      PSkeleton.text(PTypography.t3, width: 120),
-      const _Gap(PSpacing.x3),
-      for (var i = 0; i < 3; i++)
-        PSkeleton.text(PTypography.t5, width: double.infinity),
     ],
   );
 }
