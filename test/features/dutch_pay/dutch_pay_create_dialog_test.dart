@@ -9,6 +9,7 @@ import 'package:groo_damda_app/features/dutch_pay/domain/dutch_pay.dart';
 import 'package:groo_damda_app/features/dutch_pay/presentation/dutch_pay_create_dialog.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
+import 'package:groo_damda_app/shared/ds/button/p_responsive_pair.dart';
 import 'package:groo_damda_app/shared/ds/input/p_input.dart';
 import '../../support/plain_text.dart';
 
@@ -110,4 +111,16 @@ void main() {
     expect(findText('ㄱ' * 20), findsOneWidget);
     expect(findText('ㄱ' * 25), findsNothing);
   });
+
+  testWidgets(
+    '2단계 바닥 [이전] · [만들기] 는 짝 버튼(PResponsivePair) — 넘치면 세로로 쌓는 판정을 시트와 같이 탄다',
+    (tester) async {
+      final l = await _openStep2(tester);
+      final pair = find.byType(PResponsivePair);
+      expect(pair, findsOneWidget);
+      final p = tester.widget<PResponsivePair>(pair);
+      expect(p.primary.label, l.dutchCreate);
+      expect(p.secondary.label, l.dutchPrev);
+    },
+  );
 }

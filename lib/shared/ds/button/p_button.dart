@@ -9,7 +9,6 @@ import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/card/p_card_parts.dart'
     show PTouchTarget;
 import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
-import 'package:groo_damda_app/shared/ds/overflow_center/p_overflow_center.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 
 /// 변형 — 한 화면의 강조 버튼(Solid)은 하나.
@@ -113,7 +112,7 @@ class PButton extends StatefulWidget {
   /// 누름 색 위 로딩 원 + 누르기 막기.
   final bool loading;
 
-  /// 라벨 줄 수 — 기본 1(한 줄, 줄바꿈 · 말줄임 없음). 2 이상이면 글에 넣은 줄바꿈(`\n`)에서만 줄을 바꾼다(통계 기간 버튼의
+  /// 라벨 줄 수 — 기본 1(한 줄, 줄바꿈 없음 · 넘치면 끝 "…"). 2 이상이면 글에 넣은 줄바꿈(`\n`)에서만 줄을 바꾼다(통계 기간 버튼의
   /// 다른 해 직접 기간 "2025-01-01 ~ / 2026-03-31"). 버튼 높이는 글을 따라 자란다(최소 높이는 그대로).
   final int labelLines;
 
@@ -444,24 +443,25 @@ class _PButtonState extends State<PButton> {
         final iconSize = iconOnly ? s.iconOnlyIcon : s.textIcon;
         Widget glyph(IconData data) => Icon(data, size: iconSize, color: fg);
         if (iconOnly) return glyph(widget.icon!);
-        // 라벨은 한 줄이다 — 폭이 모자라도(200% · 좁은 칸) 줄바꿈 · 말줄임 없이 가운데에서 버튼 밖으로
-        // 그려지고 레이아웃 오류(RenderFlex overflow)를 내지 않는다(I-05 Q-021, 받아들임).
-        return POverflowCenter(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: s.gap,
-            children: [
-              if (widget.prefixIcon != null) glyph(widget.prefixIcon!),
-              Text(
+        // 라벨은 한 줄이다 — 폭이 모자라면(큰 글자 · 좁은 칸) 줄을 바꾸지 않고 끝을 "…" 로 줄여 버튼 안에 둔다. 전체 라벨은
+        // 보조 기술이 읽는다(button.md "글자 크기 설정", groo-design #263). 아이콘은 크기 그대로 라벨 줄 가운데
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: s.gap,
+          children: [
+            if (widget.prefixIcon != null) glyph(widget.prefixIcon!),
+            Flexible(
+              child: Text(
                 widget.label!,
                 maxLines: widget.labelLines,
                 softWrap: false,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: s.text.copyWith(color: fg, fontWeight: FontWeight.w700),
               ),
-              if (widget.suffixIcon != null) glyph(widget.suffixIcon!),
-            ],
-          ),
+            ),
+            if (widget.suffixIcon != null) glyph(widget.suffixIcon!),
+          ],
         );
       },
     );

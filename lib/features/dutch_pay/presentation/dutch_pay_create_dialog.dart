@@ -362,40 +362,26 @@ class _CreateSheetState extends ConsumerState<_CreateSheet> {
           step1 ? _step1(l) : _step2(l),
         ],
       ),
-      footer: step1
-          ? [
-              PButton(
-                label: l.dutchNext,
-                size: PButtonSize.large,
-                onPressed: _next,
-              ),
-            ]
-          : const [],
-      footerRow: step1
-          ? null
-          : Row(
-              spacing: PSpacing.x2,
-              children: [
-                Expanded(
-                  child: PButton(
-                    label: l.dutchPrev,
-                    variant: PButtonVariant.neutralWeak,
-                    size: PButtonSize.large,
-                    onPressed: _submitting
-                        ? null
-                        : () => setState(() => _step = 1),
-                  ),
-                ),
-                Expanded(
-                  child: PButton(
-                    label: l.dutchCreate,
-                    size: PButtonSize.large,
-                    loading: _submitting,
-                    onPressed: _submitting ? null : _submit,
-                  ),
-                ),
-              ],
-            ),
+      // 둘째 단계 바닥은 짝 버튼 — 시트가 [이전] · [만들기] 를 PResponsivePair 로 놓아, 큰 글자 · 긴 라벨이면 세로로 쌓는다
+      // (button.md "짝 버튼", groo-design #263)
+      footer: [
+        if (!step1)
+          PButton(
+            label: l.dutchPrev,
+            variant: PButtonVariant.neutralWeak,
+            size: PButtonSize.large,
+            onPressed: _submitting ? null : () => setState(() => _step = 1),
+          ),
+        if (step1)
+          PButton(label: l.dutchNext, size: PButtonSize.large, onPressed: _next)
+        else
+          PButton(
+            label: l.dutchCreate,
+            size: PButtonSize.large,
+            loading: _submitting,
+            onPressed: _submitting ? null : _submit,
+          ),
+      ],
     );
   }
 
