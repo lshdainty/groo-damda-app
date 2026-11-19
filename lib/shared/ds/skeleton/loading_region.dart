@@ -12,22 +12,25 @@ import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 /// 한 화면에 기다리는 영역(쿼리)이 여럿이면 영역마다 한 번씩 감싼다 — 읽는 글은 announcer 가 한 번만 읽는다.
 ///
 /// 폭이 정해진 자리(Column · ListView 안)에서 쓴다 — 기다리는 영역은 폭을 채우고 스켈레톤은 왼쪽 맞춤으로 제 폭을 지킨다.
-Widget loadingRegion(Widget skeleton, {bool slowText = false}) =>
-    PLoadingRegion(
-      pending: true,
-      showSlowText: slowText,
-      // 영역의 틀은 폭을 채우되 스켈레톤은 제 폭 그대로(고정 폭 조각이 늘어나지 않게) 왼쪽에 놓는다
-      fallback: Align(
-        alignment: AlignmentDirectional.topStart,
-        child: skeleton,
-      ),
-      child: const SizedBox.shrink(),
-    );
+///
+/// [bleed] — 스켈레톤이 화면 끝까지 그려지는 자리(캘린더 달 격자)면 5초 글을 화면 여백 24 에 세운다([PLoadingRegion.bleed]).
+Widget loadingRegion(
+  Widget skeleton, {
+  bool slowText = false,
+  bool bleed = false,
+}) => PLoadingRegion(
+  pending: true,
+  showSlowText: slowText,
+  bleed: bleed,
+  // 영역의 틀은 폭을 채우되 스켈레톤은 제 폭 그대로(고정 폭 조각이 늘어나지 않게) 왼쪽에 놓는다
+  fallback: Align(alignment: AlignmentDirectional.topStart, child: skeleton),
+  child: const SizedBox.shrink(),
+);
 
 /// 주요 화면(홈 · 가계부 · 자산 · 통계 · 예산 · 캘린더)의 기다리는 영역 — 5초에 화면에도 "평소보다 오래 걸리고 있어요." 를
 /// 더한다. 나머지 화면은 [loadingRegion](보조 기술 알림만, 화면 글은 B6 에서 정한다).
-Widget loadingRegionWithText(Widget skeleton) =>
-    loadingRegion(skeleton, slowText: true);
+Widget loadingRegionWithText(Widget skeleton, {bool bleed = false}) =>
+    loadingRegion(skeleton, slowText: true, bleed: bleed);
 
 /// 값 조각(줄 끝 · 달력 칸 안 · 글 옆 숫자 자리) — 폭이 정해지지 않은 Row 에서도 선다. 0~1초 보이지 않고, 알림 · 5초 글은 없다.
 Widget loadingInline(Widget skeleton) =>

@@ -321,6 +321,7 @@ class PLoadingRegion extends StatefulWidget {
     required Widget this.fallback,
     this.failure,
     this.showSlowText = true,
+    this.bleed = false,
     required this.child,
   }) : inline = false;
 
@@ -333,6 +334,7 @@ class PLoadingRegion extends StatefulWidget {
     this.showSlowText = true,
     required this.child,
   }) : fallback = null,
+       bleed = false,
        inline = false;
 
   final bool pending;
@@ -345,6 +347,10 @@ class PLoadingRegion extends StatefulWidget {
   /// 5초에 오래 걸림 글을 화면에 더하는가. false 여도 보조 기술 알림([PLoadingAnnouncer])은 그대로 읽는다 —
   /// 화면에 보이는 5초 글은 주요 화면(홈 · 가계부 · 자산 · 통계 · 예산 · 캘린더)만 켜고 나머지는 B6 에서 정한다.
   final bool showSlowText;
+
+  /// 스켈레톤이 화면 끝까지 그려지는 자리(캘린더 달 격자처럼 화면 여백 없이 그리는 영역)인가 — 그러면 5초 글은 첫 스켈레톤이
+  /// 아니라 화면 여백(global gutter 24)에 왼쪽을 맞춘다(skeleton.md "오래 걸림 글", groo-design #262). 위 16 은 그대로다.
+  final bool bleed;
   final Widget child;
 
   /// 값 조각용 — 줄 끝 · 칸 안 값 자리처럼 폭이 정해지지 않은 곳. 0 ~ 1초는 보이지 않게 그려 크기만 지키고 1초부터 보인다.
@@ -355,6 +361,7 @@ class PLoadingRegion extends StatefulWidget {
       failed = false,
       failure = null,
       showSlowText = false,
+      bleed = false,
       child = const SizedBox.shrink(),
       inline = true;
 
@@ -521,7 +528,18 @@ class _PLoadingRegionState extends State<PLoadingRegion> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             spacing: PSpacing.x4,
-            children: [if (slow) slowText, widget.fallback!],
+            children: [
+              if (slow)
+                widget.bleed
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: PSpacing.globalGutter,
+                        ),
+                        child: slowText,
+                      )
+                    : slowText,
+              widget.fallback!,
+            ],
           );
     // 0 ~ 1초 — 그려 두되 보이지 않게(높이는 지킨다)
     return Visibility(
