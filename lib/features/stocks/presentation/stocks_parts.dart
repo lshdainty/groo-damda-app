@@ -331,7 +331,7 @@ class StocksGroupSkeleton extends StatelessWidget {
                 PSpacing.x6,
                 PSpacing.x2,
               ),
-              child: PSkeleton(width: 96, height: 19),
+              child: PSkeleton.text(PTypography.t4, width: 96),
             ),
             for (var i = 0; i < 3; i++) const StocksLineSkeleton(),
           ],

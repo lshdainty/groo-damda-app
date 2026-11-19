@@ -205,14 +205,14 @@ class _Overview extends StatelessWidget {
     if (s == null) {
       return statsSection(
         header: head,
-        children: const [
-          PSkeleton(
+        children: [
+          const PSkeleton(
             width: double.infinity,
             height: PSpacing.x7,
             radius: PSkeletonRadius.r8,
           ),
-          SizedBox(height: PSpacing.x4),
-          PSkeleton(width: 160, height: 22),
+          const SizedBox(height: PSpacing.x4),
+          PSkeleton.text(PTypography.t5, width: 160),
         ],
       );
     }

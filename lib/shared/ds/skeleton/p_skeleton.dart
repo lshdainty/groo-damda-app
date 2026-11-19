@@ -57,6 +57,9 @@ abstract final class PLoadingTiming {
 ///
 /// 면 — bg-neutral-weak. 흰 면(bg-layer-default · bg-layer-floating) 위에만 둔다 — 페이지 바탕과 같은 색이라
 ///   바탕 위에서는 사라진다. 글 자리는 [PSkeleton.text] — 높이가 그 글자의 줄 높이다(글로 바뀌어도 줄이 밀리지 않는다).
+///   줄 높이는 올 글을 따른다(skeleton.md "크기 — 글은 글줄 높이", groo-design #262 · #263): 글자 크기 설정을 따라 커지는 글의
+///   자리는 같이 커지고, 디자인 틀 안 글(달력 칸 · 7일 띠 · 차트 그림 — 앱 TextScaler.noScaling)의 자리는
+///   [PSkeleton.staticText] 로 그대로 둔다. 글이 아닌 모양(아바타 · 그림 · 아이콘 · 막대)은 [PSkeleton] 의 px 크기다.
 /// 반짝임 — 면과 같은 폭의 흰 띠(gradient-shimmer-neutral, 다크는 흰 10%)가 자기 폭만큼 왼쪽 밖에서 오른쪽 밖으로
 ///   loop(1.5초) · easing 으로 쉬지 않고 지난다. 같은 화면의 띠는 한 박자로 지난다 — 띠의 위치를 프레임 시계에서
 ///   구해 늦게 붙은 띠도 먼저 붙은 띠와 같은 자리를 지난다. 모션 줄이기면 띠를 지운다 — 면만 남는다.
@@ -67,19 +70,49 @@ class PSkeleton extends StatelessWidget {
     this.width,
     this.height,
     this.radius = PSkeletonRadius.r8,
-  });
+  }) : _text = null,
+       _scaled = false;
 
-  /// 글 자리 — 높이를 그 글자의 줄 높이로(t4 14 → 19). 폭은 그 자리에 올 글 길이와 비슷하게.
+  /// 글 자리 — 높이를 그 글자의 줄 높이로(t4 14 → 19, 글자 크기 설정을 따라 커진다 — 안드로이드 비선형 배율도 그려지는 글과
+  /// 같은 셈). 폭은 그 자리에 올 글 길이와 비슷하게.
+  ///
+  /// [scaled] 를 false 로 두는 자리는 글 안(WidgetSpan — 목록 머리 제목 뒤 수 자리 등)이다 — Flutter 가 자리째 글자 배율로
+  /// 키우므로 여기서 또 키우지 않는다.
   PSkeleton.text(
     TextStyle style, {
     super.key,
     this.width,
     this.radius = PSkeletonRadius.r8,
-  }) : height = style.fontSize! * (style.height ?? 1);
+    bool scaled = true,
+  }) : height = style.fontSize! * (style.height ?? 1),
+       _text = style,
+       _scaled = scaled;
+
+  /// 틀 안 글 자리 — 달력 칸 · 7일 띠 · 차트 그림처럼 글자 크기 설정을 따르지 않는 글(웹 `-static` · 앱 noScaling)의 줄 높이.
+  PSkeleton.staticText(
+    TextStyle style, {
+    super.key,
+    this.width,
+    this.radius = PSkeletonRadius.r8,
+  }) : height = style.fontSize! * (style.height ?? 1),
+       _text = style,
+       _scaled = false;
 
   final double? width;
+
+  /// 높이 — 글 자리는 글자 100% 의 줄 높이(그릴 때는 [heightOf] 가 글자 배율을 건다).
   final double? height;
   final PSkeletonRadius radius;
+  final TextStyle? _text;
+  final bool _scaled;
+
+  /// 그릴 높이 — 글 자리는 줄 높이(글자 배율을 따르면 배율을 건 글자 크기 × 줄 비율), 모양은 준 값.
+  double? heightOf(BuildContext context) {
+    final t = _text;
+    if (t == null || !_scaled) return height;
+    return MediaQuery.textScalerOf(context).scale(t.fontSize!) *
+        (t.height ?? 1);
+  }
 
   /// 모서리(px).
   static double radiusOf(PSkeletonRadius radius) => switch (radius) {
@@ -98,7 +131,7 @@ class PSkeleton extends StatelessWidget {
     return ExcludeSemantics(
       child: SizedBox(
         width: width,
-        height: height,
+        height: heightOf(context),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(radiusOf(radius)),
           child: DecoratedBox(

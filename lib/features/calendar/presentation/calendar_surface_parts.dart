@@ -122,8 +122,9 @@ class CalendarSurfaceHeaderSkeleton extends StatelessWidget {
       PSpacing.globalGutter,
       action == null ? PSpacing.x2 : 0,
     ),
-    child: SizedBox(
-      height: action == null ? null : 36,
+    // 동작(글 버튼 36)이 있으면 그 최소 높이 — 큰 글자에서 글 자리 · 버튼이 커지면 줄도 따라 커진다
+    child: ConstrainedBox(
+      constraints: BoxConstraints(minHeight: action == null ? 0 : 36),
       child: Row(
         children: [
           PSkeleton.text(PTypography.t4, width: 96),

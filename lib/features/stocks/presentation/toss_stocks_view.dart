@@ -407,12 +407,12 @@ class _InvestBand extends ConsumerWidget {
                 ),
                 const SizedBox(height: PSpacing.x1),
                 loadingRegion(
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      PSkeleton(width: 200, height: 32),
-                      SizedBox(height: PSpacing.x1),
-                      PSkeleton(width: 160, height: 18),
+                      PSkeleton.text(PTypography.t9, width: 200),
+                      const SizedBox(height: PSpacing.x1),
+                      PSkeleton.text(PTypography.t3, width: 160),
                     ],
                   ),
                 ),
@@ -693,7 +693,7 @@ class _MarketStatusLineState extends ConsumerState<_MarketStatusLine> {
             if (loading[i])
               Semantics(
                 label: l.stocksRankingLoading,
-                child: PSkeleton(width: 110, height: 19),
+                child: PSkeleton.text(PTypography.t4, width: 110),
               )
             else if (markets[i] != null)
               _statusItem(c, markets[i]!),
@@ -2285,8 +2285,9 @@ class _OrderBookSkeleton extends StatelessWidget {
         widthFactor: factor,
         child: const PSkeleton(height: 28),
       );
-      return SizedBox(
-        height: 32,
+      // 실렌더 줄처럼 최소 높이 — 큰 글자에서 가격 글 자리가 커지면 줄도 따라 커진다
+      return ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 32),
         child: Row(
           children: [
             Expanded(child: isAsk ? const SizedBox.shrink() : bar),
