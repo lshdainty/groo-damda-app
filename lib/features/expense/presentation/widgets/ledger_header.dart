@@ -242,6 +242,19 @@ class LedgerMonthNav extends StatelessWidget {
   }
 }
 
+/// 글 [text] 를 한 줄로 그렸을 때의 폭 — 지금 글자 배율을 넣어 잰다.
+double _oneLineWidth(BuildContext context, String text, TextStyle style) {
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final w = painter.width;
+  painter.dispose();
+  return w;
+}
+
 /// 이달 지출 합계(R13 지표 t9) + 인사이트 한 줄 + [소비 요약] 단추. 할 일은 "오늘 할 일 3개" + 별빛 한 줄 + [밤하늘] 로 같이 쓴다.
 class LedgerTotalRow extends StatelessWidget {
   const LedgerTotalRow({
@@ -300,6 +313,7 @@ class LedgerTotalRow extends StatelessWidget {
               key: const ValueKey('ledger-summary-slot'),
               constraints: const BoxConstraints(minHeight: PTouch.min),
               child: Center(
+                widthFactor: 1,
                 heightFactor: 1,
                 child: PButton(
                   label: label,
@@ -310,6 +324,11 @@ class LedgerTotalRow extends StatelessWidget {
                 ),
               ),
             ),
+          );
+          final amountStyle = PTypography.t9.copyWith(
+            color: c.fgNeutral,
+            fontWeight: FontWeight.w700,
+            fontFeatures: const [FontFeature.tabularFigures()],
           );
           final figures = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,11 +349,7 @@ class LedgerTotalRow extends StatelessWidget {
                   // 금액은 쉼표 뒤에서만 줄을 바꾼다 — 큰 글자에서 숫자 가운데가 끊기지 않게
                   keepAllAmount(total ?? ''),
                   semanticsLabel: total,
-                  style: PTypography.t9.copyWith(
-                    color: c.fgNeutral,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                  style: amountStyle,
                 ),
                 if (insight != null)
                   Padding(
@@ -344,18 +359,28 @@ class LedgerTotalRow extends StatelessWidget {
               ],
             ],
           );
-          // 단추가 폭의 절반을 넘게 차지하면(큰 글자 · 영어) 합계가 글자 하나씩 꺾이므로 단추를 아래 줄로 내린다(웹 flex-wrap).
-          final wide = PButton(
+          // 금액이 먼저다(card.md "금액 옆 동작은 금액이 먼저", groo-design #265) — 금액 한 줄 폭 + 사이 12 + 단추 폭이 줄 폭에
+          // 들 때만 단추를 옆에 둔다. 들지 않으면 단추를 금액 아래 줄 오른쪽 끝으로 내려 금액이 쉼표 뒤에서 여러 줄로 갈리지
+          // 않게 한다. 폭은 지금 글자 배율(iOS 선형 · 안드로이드 비선형)을 넣어 잰다. 카드 머리의 "반 폭" 은 제목 줄 규칙이라
+          // 여기에는 쓰지 않는다. 금액 한 줄이 줄 폭보다 길 때만 쉼표 뒤 줄바꿈이 남는다
+          final buttonWidth = PButton(
             label: label,
             prefixIcon: buttonIcon,
             size: PButtonSize.small,
+            variant: PButtonVariant.neutralOutline,
             onPressed: null,
           ).naturalWidth(context);
-          if (wide > box.maxWidth * 0.5) {
+          final amountWidth = (loading || failed || total == null)
+              ? 0.0
+              : _oneLineWidth(context, total!, amountStyle);
+          if (amountWidth + PSpacing.x3 + buttonWidth > box.maxWidth) {
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: PSpacing.x3,
-              children: [figures, button],
+              children: [
+                figures,
+                Align(alignment: AlignmentDirectional.centerEnd, child: button),
+              ],
             );
           }
           return Row(

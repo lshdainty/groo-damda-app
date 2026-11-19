@@ -121,7 +121,7 @@ class PButton extends StatefulWidget {
 
   bool get _iconOnly => icon != null;
 
-  /// 이 버튼이 라벨 한 줄을 다 보이려면 필요한 폭 — 좌우 여백 + 글 + 아이콘. 짝 버튼([PResponsivePair])이 자기 몫(반 또는 비율)에
+  /// 이 버튼이 라벨 한 줄을 다 보이려면 필요한 폭 — 좌우 여백(테두리 포함) + 글 + 아이콘. 짝 버튼([PResponsivePair])이 자기 몫(반 또는 비율)에
   /// 들어가는지 재는 데 쓴다.
   double naturalWidth(BuildContext context) {
     final s = _sizes[size]!;
@@ -138,7 +138,15 @@ class PButton extends StatefulWidget {
     final iconWidth = (prefixIcon != null || suffixIcon != null)
         ? s.textIcon + s.gap
         : 0;
-    return painter.width + iconWidth + 2 * s.paddingX;
+    // 테두리 있는 변형은 테두리 1px 를 가로 여백에 더해 그린다(build 의 padding) — 그린 폭과 같게 더한다
+    final border =
+        variant == PButtonVariant.brandOutline ||
+            variant == PButtonVariant.neutralOutline
+        ? 1.0
+        : 0.0;
+    final w = painter.width;
+    painter.dispose();
+    return w + iconWidth + 2 * (s.paddingX + border);
   }
 
   @override
