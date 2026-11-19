@@ -3229,41 +3229,29 @@ abstract class AppLocalizations {
   /// **'{month}월 가계부'**
   String dashMonthLedger(int month, String monthName);
 
-  /// No description provided for @dashDailyAvgPrefix.
+  /// 홈 이번 달 안내 첫 문장 — 금액은 코드가 단위까지 붙여 넣고 굵게 그린다(ko 1,548원 · en ₩1,548)
   ///
   /// In ko, this message translates to:
-  /// **'하루 평균 '**
-  String get dashDailyAvgPrefix;
+  /// **'하루 평균 {amount} 썼어요.'**
+  String dashDailyAvg(String amount);
 
-  /// No description provided for @dashSpentSuffix.
+  /// 홈 이번 달 안내 둘째 문장 — 이번 달 지출이 전월 합계보다 줄었을 때. rate 는 소수 둘째 자리 % 로 굵게 그린다
   ///
   /// In ko, this message translates to:
-  /// **' 썼어요.'**
-  String get dashSpentSuffix;
+  /// **'전월 대비 {rate} 절약 중이에요.'**
+  String dashVsPrevLess(String rate);
 
-  /// No description provided for @dashVsPrevPrefix.
+  /// 홈 이번 달 안내 둘째 문장 — 이번 달 지출이 전월 합계보다 늘었을 때
   ///
   /// In ko, this message translates to:
-  /// **' 전월 대비 '**
-  String get dashVsPrevPrefix;
+  /// **'전월 대비 {rate} 더 썼어요.'**
+  String dashVsPrevMore(String rate);
 
-  /// No description provided for @dashSaving.
+  /// No description provided for @dashVsPrevSame.
   ///
   /// In ko, this message translates to:
-  /// **' 절약 중이에요.'**
-  String get dashSaving;
-
-  /// No description provided for @dashSpentMore.
-  ///
-  /// In ko, this message translates to:
-  /// **' 더 썼어요.'**
-  String get dashSpentMore;
-
-  /// No description provided for @dashSame.
-  ///
-  /// In ko, this message translates to:
-  /// **' 동일해요.'**
-  String get dashSame;
+  /// **'전월과 같아요.'**
+  String get dashVsPrevSame;
 
   /// No description provided for @dashNoCategoryData.
   ///

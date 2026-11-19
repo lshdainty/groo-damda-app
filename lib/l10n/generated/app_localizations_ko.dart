@@ -1734,22 +1734,22 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get dashDailyAvgPrefix => '하루 평균 ';
+  String dashDailyAvg(String amount) {
+    return '하루 평균 $amount 썼어요.';
+  }
 
   @override
-  String get dashSpentSuffix => ' 썼어요.';
+  String dashVsPrevLess(String rate) {
+    return '전월 대비 $rate 절약 중이에요.';
+  }
 
   @override
-  String get dashVsPrevPrefix => ' 전월 대비 ';
+  String dashVsPrevMore(String rate) {
+    return '전월 대비 $rate 더 썼어요.';
+  }
 
   @override
-  String get dashSaving => ' 절약 중이에요.';
-
-  @override
-  String get dashSpentMore => ' 더 썼어요.';
-
-  @override
-  String get dashSame => ' 동일해요.';
+  String get dashVsPrevSame => '전월과 같아요.';
 
   @override
   String get dashNoCategoryData => '이번 달 지출이 없어요';
