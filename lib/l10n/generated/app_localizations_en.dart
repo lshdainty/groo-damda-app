@@ -1819,22 +1819,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dashDailyAvgPrefix => 'Daily average ';
+  String dashDailyAvg(String amount) {
+    return 'You spent $amount a day on average.';
+  }
 
   @override
-  String get dashSpentSuffix => ' spent.';
+  String dashVsPrevLess(String rate) {
+    return 'You spent $rate less than last month.';
+  }
 
   @override
-  String get dashVsPrevPrefix => ', vs last month ';
+  String dashVsPrevMore(String rate) {
+    return 'You spent $rate more than last month.';
+  }
 
   @override
-  String get dashSaving => ' saved.';
-
-  @override
-  String get dashSpentMore => ' more.';
-
-  @override
-  String get dashSame => ' the same.';
+  String get dashVsPrevSame => 'You spent the same as last month.';
 
   @override
   String get dashNoCategoryData => 'No spending this month';

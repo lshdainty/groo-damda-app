@@ -82,22 +82,26 @@ DashboardSummary _dash({
   ],
 });
 
-RangeSummary _range(String start, String end, {int categories = 5}) =>
-    RangeSummary(
-      startDate: start,
-      endDate: end,
-      totalIncome: start == _monthStart() ? 1350000000 : 0,
-      totalExpense: start == _monthStart() ? 3912345678 : 3000000000,
-      categoryBreakdown: [
-        for (var i = 0; i < categories; i++)
-          CategoryBreakdown(
-            categoryRowId: i + 1,
-            categoryName: i == 0 ? _longCat : '분류 $i',
-            expenseType: 'EXPENSE',
-            totalAmount: 987654321 - i * 1000,
-          ),
-      ],
-    );
+RangeSummary _range(
+  String start,
+  String end, {
+  int categories = 5,
+  int prevExpense = 3000000000,
+}) => RangeSummary(
+  startDate: start,
+  endDate: end,
+  totalIncome: start == _monthStart() ? 1350000000 : 0,
+  totalExpense: start == _monthStart() ? 3912345678 : prevExpense,
+  categoryBreakdown: [
+    for (var i = 0; i < categories; i++)
+      CategoryBreakdown(
+        categoryRowId: i + 1,
+        categoryName: i == 0 ? _longCat : '분류 $i',
+        expenseType: 'EXPENSE',
+        totalAmount: 987654321 - i * 1000,
+      ),
+  ],
+);
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -121,6 +125,7 @@ Future<void> _pump(
   Brightness brightness = Brightness.light,
   String locale = 'ko',
   Map<String, Object> prefs = const {},
+  int prevExpense = 3000000000,
 }) async {
   tester.view.physicalSize = Size(width * 2, 4000 * 2);
   tester.view.devicePixelRatio = 2.0;
@@ -148,7 +153,12 @@ Future<void> _pump(
         reads?.update('range', (v) => v + 1, ifAbsent: () => 1);
       }
       if (rangeError != null) throw rangeError;
-      return _range(r.startDate, r.endDate, categories: categories);
+      return _range(
+        r.startDate,
+        r.endDate,
+        categories: categories,
+        prevExpense: prevExpense,
+      );
     }),
     monthExpensesProvider.overrideWith((ref, key) async {
       if (todayPending) return Completer<List<Expense>>().future;
@@ -940,13 +950,144 @@ void main() {
       expect(note(tester, '하루 평균'), startsWith('하루 평균 3,912,345,678원 썼어요.'));
     });
 
-    testWidgets('영어 — "Daily average ₩391,234,568 spent."', (tester) async {
+    testWidgets('영어 — "You spent ₩391,234,568 a day on average."', (
+      tester,
+    ) async {
       // 돈 · 날짜 포맷터의 로케일은 설정(pd-locale)이 배선한다 — 앱은 화면 로케일로 맞춘다(syncIntlLocale)
       await _pump(tester, locale: 'en', prefs: {'pd-locale': 'en'});
       expect(
-        note(tester, 'Daily average'),
-        startsWith('Daily average ₩391,234,568 spent.'),
+        note(tester, 'You spent'),
+        startsWith('You spent ₩391,234,568 a day on average.'),
       );
+    });
+  });
+
+  // 안내 문장 — 조각 이어 붙이기가 아니라 문장 둘(하루 평균 · 전월 대비), 전월 대비는 세 갈래(줄었음 · 늘었음 · 같음).
+  // QA 2026-11-19(앱 3032): 영어 "Daily average ₩2,106 spent., vs last month 0.00% the same." — 마침표 뒤 쉼표 · 어순 ·
+  // 같음에 0.00% 가 붙었다. 이번 달 지출 3,912,345,678 · 10일.
+  group('하루 평균 · 전월 대비 — 문장 둘 · 세 갈래', () {
+    late DateTime Function() saved;
+    setUp(() {
+      saved = dashboardNow;
+      final now = DateTime.now();
+      dashboardNow = () => DateTime(now.year, now.month, 10);
+    });
+    tearDown(() {
+      dashboardNow = saved;
+      Intl.defaultLocale = null;
+    });
+
+    RichText noteWidget(WidgetTester tester, String prefix) =>
+        tester.widget<RichText>(
+          find.byWidgetPredicate(
+            (w) =>
+                w is RichText &&
+                plainOf(w.text.toPlainText()).startsWith(prefix),
+          ),
+        );
+    String note(WidgetTester tester, String prefix) =>
+        plainOf(noteWidget(tester, prefix).text.toPlainText());
+
+    /// 굵게(700) 그린 글 — 금액 · % 만 굵다
+    List<String> bold(WidgetTester tester, String prefix) {
+      final out = <String>[];
+      noteWidget(tester, prefix).text.visitChildren((span) {
+        if (span is TextSpan &&
+            span.text != null &&
+            span.style?.fontWeight == FontWeight.w700) {
+          out.add(plainOf(span.text!));
+        }
+        return true;
+      });
+      return out;
+    }
+
+    const avgKo = '하루 평균 391,234,568원 썼어요.';
+    const avgEn = 'You spent ₩391,234,568 a day on average.';
+    // 지난달 7,824,691,356 → 50.00% 줄었음 · 3,000,000,000 → 30.41% 늘었음 · 같은 값 → 같음
+    const less = 7824691356;
+    const more = 3000000000;
+    const same = 3912345678;
+
+    for (final c in [
+      (
+        name: '한국어 줄었음',
+        locale: 'ko',
+        prev: less,
+        text: '$avgKo 전월 대비 50.00% 절약 중이에요.',
+        bold: ['391,234,568원', '50.00%'],
+      ),
+      (
+        name: '한국어 늘었음',
+        locale: 'ko',
+        prev: more,
+        text: '$avgKo 전월 대비 30.41% 더 썼어요.',
+        bold: ['391,234,568원', '30.41%'],
+      ),
+      (
+        name: '한국어 같음 — % 없음',
+        locale: 'ko',
+        prev: same,
+        text: '$avgKo 전월과 같아요.',
+        bold: ['391,234,568원'],
+      ),
+      (
+        name: '영어 줄었음',
+        locale: 'en',
+        prev: less,
+        text: '$avgEn You spent 50.00% less than last month.',
+        bold: ['₩391,234,568', '50.00%'],
+      ),
+      (
+        name: '영어 늘었음',
+        locale: 'en',
+        prev: more,
+        text: '$avgEn You spent 30.41% more than last month.',
+        bold: ['₩391,234,568', '30.41%'],
+      ),
+      (
+        name: '영어 같음 — % 없음',
+        locale: 'en',
+        prev: same,
+        text: '$avgEn You spent the same as last month.',
+        bold: ['₩391,234,568'],
+      ),
+    ]) {
+      testWidgets('${c.name} — "${c.text}"', (tester) async {
+        await _pump(
+          tester,
+          locale: c.locale,
+          prefs: {'pd-locale': c.locale},
+          prevExpense: c.prev,
+        );
+        final prefix = c.locale == 'en' ? 'You spent' : '하루 평균';
+        expect(note(tester, prefix), c.text);
+        expect(bold(tester, prefix), c.bold);
+      });
+    }
+
+    testWidgets('둘째 자리까지 반올림해 0 이면 같음 — "0.00% 더 썼어요" 가 아니다', (tester) async {
+      // 3,912,345,678 ÷ 3,912,345,677 — 늘었지만 0.00% 로 반올림된다
+      await _pump(tester, prevExpense: same - 1);
+      expect(note(tester, '하루 평균'), '$avgKo 전월과 같아요.');
+    });
+
+    testWidgets('지난달 지출이 0 이면 전월 대비 문장이 없다', (tester) async {
+      await _pump(
+        tester,
+        locale: 'en',
+        prefs: {'pd-locale': 'en'},
+        prevExpense: 0,
+      );
+      expect(note(tester, 'You spent'), avgEn);
+    });
+
+    testWidgets('금액을 가리면 금액만 점으로 — 문장 · % 는 그대로', (tester) async {
+      await _pump(tester, prevExpense: less, hidden: {'home.monthExpense'});
+      final text = note(tester, '하루 평균');
+      expect(text, startsWith('하루 평균 '));
+      expect(text, endsWith(' 썼어요. 전월 대비 50.00% 절약 중이에요.'));
+      expect(text, isNot(contains('391,234,568')));
     });
   });
 }

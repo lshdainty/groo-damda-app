@@ -1046,12 +1046,34 @@
       }
     }
   },
-  "dashDailyAvgPrefix": "Daily average ",
-  "dashSpentSuffix": " spent.",
-  "dashVsPrevPrefix": ", vs last month ",
-  "dashSaving": " saved.",
-  "dashSpentMore": " more.",
-  "dashSame": " the same.",
+  "dashDailyAvg": "You spent {amount} a day on average.",
+  "@dashDailyAvg": {
+    "description": "홈 이번 달 안내 첫 문장 — 금액은 코드가 단위까지 붙여 넣고 굵게 그린다(ko 1,548원 · en ₩1,548)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashVsPrevLess": "You spent {rate} less than last month.",
+  "@dashVsPrevLess": {
+    "description": "홈 이번 달 안내 둘째 문장 — 이번 달 지출이 전월 합계보다 줄었을 때. rate 는 소수 둘째 자리 % 로 굵게 그린다",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "dashVsPrevMore": "You spent {rate} more than last month.",
+  "@dashVsPrevMore": {
+    "description": "홈 이번 달 안내 둘째 문장 — 이번 달 지출이 전월 합계보다 늘었을 때",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "dashVsPrevSame": "You spent the same as last month.",
   "dashNoCategoryData": "No spending this month",
   "dashNoBudget": "No budgets set",
   "dashTodaySpend": "Spent today",

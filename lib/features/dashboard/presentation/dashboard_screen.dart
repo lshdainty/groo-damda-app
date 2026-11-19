@@ -45,6 +45,7 @@ import 'package:groo_damda_app/shared/ds/result_section/p_result_section.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
+import 'package:groo_damda_app/shared/ds/text/message_spans.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
@@ -804,10 +805,11 @@ class _MonthSection extends StatelessWidget {
     final savingsPct = prevExpense > 0
         ? ((prevExpense - expense) / prevExpense) * 100
         : 0.0;
-    final saving = savingsPct > 0;
+    // 둘째 자리까지 반올림해 0 이면 "같음" — "0.00% 더 썼어요" 처럼 %를 붙이지 않는다(등락률 표기와 같은 반올림)
+    final rate = formatChangeRateAbs(savingsPct);
+    final same = rate == formatChangeRateAbs(0);
     final expenseMasked = flags.of(MaskKind.expense);
 
-    final note = TextStyle(color: c.fgNeutralSubtle);
     final strong = TextStyle(
       color: c.fgNeutral,
       fontWeight: FontWeight.w700,
@@ -857,33 +859,31 @@ class _MonthSection extends StatelessWidget {
               PSpacing.x6,
               PSpacing.x6,
             ),
+            // 문장은 둘 — 하루 평균 · 전월 대비. 값 자리만 굵게 나눠 그린다(조각을 이어 붙이면 영어 어순이 깨진다)
             child: Text.rich(
               TextSpan(
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
                 children: [
-                  TextSpan(text: keepAll(l.dashDailyAvgPrefix), style: note),
-                  // 단위는 금액에 붙인다(ko "1,548원" · en "₩1,548") — 글은 뒤 말만 든다
-                  TextSpan(
-                    text: keepAllAmount(
-                      krwSigned(dailyAvg, expenseMasked, unit: true),
-                    ),
-                    style: strong,
-                  ),
-                  TextSpan(text: keepAll(l.dashSpentSuffix), style: note),
-                  if (prevExpense > 0) ...[
-                    TextSpan(text: keepAll(l.dashVsPrevPrefix), style: note),
+                  ...messageSpans(l.dashDailyAvg(messageMark(0)), [
+                    // 단위는 금액에 붙인다(ko "1,548원" · en "₩1,548") — 글은 뒤 말만 든다
                     TextSpan(
-                      text: formatChangeRateAbs(savingsPct),
+                      text: keepAllAmount(
+                        krwSigned(dailyAvg, expenseMasked, unit: true),
+                      ),
                       style: strong,
                     ),
-                    TextSpan(
-                      text: keepAll(
-                        saving
-                            ? l.dashSaving
-                            : (savingsPct < 0 ? l.dashSpentMore : l.dashSame),
+                  ]),
+                  if (prevExpense > 0) ...[
+                    const TextSpan(text: ' '),
+                    if (same)
+                      TextSpan(text: keepAll(l.dashVsPrevSame))
+                    else
+                      ...messageSpans(
+                        savingsPct > 0
+                            ? l.dashVsPrevLess(messageMark(0))
+                            : l.dashVsPrevMore(messageMark(0)),
+                        [TextSpan(text: rate, style: strong)],
                       ),
-                      style: note,
-                    ),
                   ],
                 ],
               ),
