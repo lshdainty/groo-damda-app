@@ -933,6 +933,13 @@ void main() {
       expect(note(tester, '하루 평균'), startsWith('하루 평균 391,234,568원 썼어요.'));
     });
 
+    testWidgets('오늘이 달 첫날 — 첫날 하루로 나눈다(DESIGN.md "하루 평균")', (tester) async {
+      final now = DateTime.now();
+      dashboardNow = () => DateTime(now.year, now.month);
+      await _pump(tester);
+      expect(note(tester, '하루 평균'), startsWith('하루 평균 3,912,345,678원 썼어요.'));
+    });
+
     testWidgets('영어 — "Daily average ₩391,234,568 spent."', (tester) async {
       // 돈 · 날짜 포맷터의 로케일은 설정(pd-locale)이 배선한다 — 앱은 화면 로케일로 맞춘다(syncIntlLocale)
       await _pump(tester, locale: 'en', prefs: {'pd-locale': 'en'});

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/clock/clock.dart';
 import 'package:groo_damda_app/core/format/date.dart';
@@ -195,8 +196,13 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       final daysRemaining = (daysInMonth - dayOfMonth)
           .clamp(1, daysInMonth)
           .toInt();
-      final dailyActual = (totalExpense / dayOfMonth.clamp(1, daysInMonth))
-          .round();
+      // 하루 평균 — 홈 · 통계와 같은 함수(오늘을 품은 달이면 오늘까지 지난 날수, 지난 달은 그 달 전체 · half-up)
+      final dailyActual = dailyAverageWon(
+        totalExpense,
+        DateTime(_month.year, _month.month),
+        DateTime(_month.year, _month.month, daysInMonth),
+        today,
+      );
       final dailyTarget =
           ((overallLimit - totalExpense).clamp(0, double.infinity).toDouble() /
                   daysRemaining)

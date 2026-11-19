@@ -789,11 +789,14 @@ class _MonthSection extends StatelessWidget {
     final prevExpense = prevSummary?.totalExpense ?? 0;
 
     final today = dashboardNow();
-    final isCurMonth = today.year == month.year && today.month == month.month;
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
-    final dayOfMonth = isCurMonth ? today.day : daysInMonth;
-    // 하루 평균 — 통계 비교 · 예산과 같은 함수 · 같은 반올림(half-up)
-    final dailyAvg = averageWon(expense, dayOfMonth < 1 ? 1 : dayOfMonth);
+    // 하루 평균 — 통계 · 예산과 같은 함수(오늘을 품은 달이면 오늘까지 지난 날수, 지난 달은 그 달 전체 · half-up)
+    final dailyAvg = dailyAverageWon(
+      expense,
+      DateTime(month.year, month.month),
+      DateTime(month.year, month.month, daysInMonth),
+      today,
+    );
     final savingsPct = prevExpense > 0
         ? ((prevExpense - expense) / prevExpense) * 100
         : 0.0;
