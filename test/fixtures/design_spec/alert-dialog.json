@@ -3,7 +3,7 @@
   "source": "specs/components/alert-dialog.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "overlay": "딤 — 확인창 뒤 화면 전체",
@@ -135,7 +135,7 @@
         "scale 1.3 → 1",
         "opacity 0 → 1"
       ],
-      "note": "크게 나타나며 줄어든다(SEED) — 모션 줄이기면 150ms 서서히 나타남"
+      "note": "크게 나타나며 줄어든다 — 모션 줄이기면 150ms 서서히 나타남"
     },
     "열림 — 딤": {
       "duration": "100ms",
@@ -165,7 +165,7 @@
       "state": "enabled",
       "slot": "overlay",
       "prop": "background",
-      "note": "groo 딤(v102)"
+      "note": "딤 0.50 · 다크 0.65"
     },
     {
       "rule": 0,
@@ -186,7 +186,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "shadow",
-      "note": "그림자 없이 딤과 표면 색으로 뜬다(SEED)"
+      "note": "그림자 없이 딤과 표면 색으로 뜬다"
     },
     {
       "rule": 0,
@@ -200,14 +200,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "maxHeight",
-      "note": "dvh 우선 — 넘치면 확인창 전체(제목 · 설명 · 버튼)가 스크롤된다. 끝 흐림 없음(SEED alert-dialog.css content max-height 100%). 2026-10-17 사용자 결정 03-F 1A"
+      "note": "dvh 우선 — 넘치면 확인창 전체(제목 · 설명 · 버튼)가 스크롤된다. 끝 흐림 없음"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "description",
       "prop": "foreground",
-      "note": "다른 떠 있는 표면과 달리 짙은 글자 — 꼭 읽어야 할 말이다(SEED)"
+      "note": "다른 떠 있는 표면과 달리 짙은 글자 — 꼭 읽어야 할 말이다"
     },
     {
       "rule": 0,
@@ -242,7 +242,7 @@
       "state": "enabled",
       "slot": "footer",
       "prop": "direction",
-      "note": "버튼 하나 폭 전체 — 알리기. 고를 것이 없는 결과 알림은 \"확인\", 버튼이 일을 하면(다시 저장) 그 동작 이름(2026-10-22 5B)"
+      "note": "버튼 하나 폭 전체 — 알리기. 고를 것이 없는 결과 알림은 \"확인\", 버튼이 일을 하면(다시 저장) 그 동작 이름"
     }
   ]
 }

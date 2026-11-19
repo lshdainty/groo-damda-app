@@ -3,7 +3,7 @@
   "source": "specs/components/switch.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "Switch 한 줄 — 스위치 + 라벨, 누르는 영역",
@@ -333,7 +333,7 @@
         "translate",
         "scale"
       ],
-      "note": "엄지가 옆으로 가며 0.8 ↔ 1 로 바뀐다(SEED)"
+      "note": "엄지가 옆으로 가며 0.8 ↔ 1 로 바뀝니다"
     },
     "끔 ↔ 켬 — 색": {
       "duration": "50ms",
@@ -342,7 +342,7 @@
         "track background",
         "thumb color"
       ],
-      "note": "20ms 뒤에 시작한다 — 엄지가 움직이기 시작한 뒤에 색이 바뀐다"
+      "note": "20ms 뒤에 시작합니다 — 엄지가 움직이기 시작한 뒤에 색이 바뀝니다"
     },
     "누름": {
       "duration": "150ms",
@@ -350,7 +350,7 @@
       "properties": [
         "scale"
       ],
-      "note": "스위치만 세로 2px 거리 축소 — 색은 바뀌지 않는다(v104)"
+      "note": "스위치만 세로 2px 거리 축소 — 색은 바뀌지 않습니다"
     }
   },
   "notes": [
@@ -359,21 +359,21 @@
       "state": "enabled",
       "slot": "root",
       "prop": "alignSelf",
-      "note": "줄은 스위치 + 라벨만큼만 차지한다 — 세로로 쌓아도 폭으로 늘이지 않는다"
+      "note": "줄은 스위치 + 라벨만큼만 차지합니다 — 세로로 쌓아도 폭으로 늘이지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "touchTarget",
-      "note": "라벨까지 묶어 44 — 설정 줄에 스위치만 끼우면 그 줄 전체가 누르는 영역(SEED touch target · 기초 Inclusive)"
+      "note": "라벨까지 묶어 44 — 설정 줄에 스위치만 끼우면 그 줄 전체가 누르는 영역입니다(기초 Inclusive)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "switchmark",
       "prop": "transitionDelay",
-      "note": "엄지가 움직이기 시작한 뒤에 색이 바뀐다(SEED)"
+      "note": "엄지가 움직이기 시작한 뒤에 색이 바뀝니다"
     },
     {
       "rule": 0,
@@ -384,45 +384,52 @@
     },
     {
       "rule": 0,
+      "state": "enabled",
+      "slot": "label",
+      "prop": "foreground",
+      "note": "글자 크기 설정을 따라 커지고 줄을 바꿔 받습니다 — 스위치(트랙 · 엄지, px)는 라벨 첫 줄 가운데에 섭니다"
+    },
+    {
+      "rule": 0,
       "state": "pressed",
       "slot": "switchmark",
       "prop": "scale",
-      "note": "스위치만 준다 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px. 색은 바뀌지 않는다(Feedback 의 눌림 피드백, v104)"
+      "note": "스위치만 줄입니다 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px. 색은 바뀌지 않습니다(Feedback 의 눌림 피드백)"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "width",
-      "note": "웹 · 앱 같다 — 앱은 하드웨어 키보드로 옮길 때만 그린다(Flutter FocusHighlightMode.traditional), 손가락으로 누를 때는 없다(2026-10-08 — DESIGN.md State · Button 과 같다)"
+      "note": "웹 · 앱이 같습니다 — 앱은 하드웨어 키보드로 옮길 때만 그리고(Flutter FocusHighlightMode.traditional), 손가락으로 누를 때는 그리지 않습니다(DESIGN.md State · Button 과 같습니다)"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "root",
       "prop": "cursor",
-      "note": "포인터 이벤트는 켜 둔다 — 끄면 이 커서가 안 보인다(SEED 와 같다)"
+      "note": "포인터 이벤트는 켜 둡니다 — 끄면 이 커서가 안 보입니다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "root",
       "prop": "minHeight",
-      "note": "트랙(16)보다 크다 — 누르는 영역의 바닥(SEED)"
+      "note": "트랙(16)보다 큽니다 — 누르는 영역의 바닥"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "switchmark",
       "prop": "background",
-      "note": "표면과 3:1 이상(v109). SEED 는 palette.gray-600"
+      "note": "표면과 3:1 이상"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "thumb",
       "prop": "scale",
-      "note": "끄면 엄지가 작아진다 — 색 말고도 자리 · 크기로 켬 · 끔이 갈린다(SEED)"
+      "note": "끄면 엄지가 작아집니다 — 색 말고도 자리 · 크기로 켬 · 끔이 갈립니다"
     },
     {
       "rule": 4,
@@ -436,7 +443,7 @@
       "state": "disabled",
       "slot": "switchmark",
       "prop": "background",
-      "note": "켜진 모양 그대로 색만(사용자 결정) — 채운 트랙 + 밝은 엄지"
+      "note": "켜진 모양 그대로 색만 바꿉니다 — 채운 트랙 + 밝은 엄지"
     }
   ]
 }

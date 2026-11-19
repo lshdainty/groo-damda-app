@@ -3,7 +3,7 @@
   "source": "specs/components/callout.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "상자 — 콘텐츠 폭 전체",
@@ -454,7 +454,7 @@
       "properties": [
         "바로 사라짐"
       ],
-      "note": "닫으면 바로 걷는다(SEED) — 초점은 다음 요소로"
+      "note": "닫으면 바로 걷는다 — 초점은 다음 요소로"
     }
   },
   "notes": [
@@ -491,7 +491,7 @@
       "state": "enabled",
       "slot": "description",
       "prop": "typography",
-      "note": "단어 단위 줄바꿈(v114)"
+      "note": "단어 단위 줄바꿈"
     },
     {
       "rule": 0,
@@ -533,7 +533,7 @@
       "state": "pressed",
       "slot": "root",
       "prop": "scale",
-      "note": "상자 전체(SEED scaleScope: self) — 모션 줄이기면 하지 않는다"
+      "note": "상자 전체 — 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 12,
@@ -547,7 +547,7 @@
       "state": "hovered",
       "slot": "closeButton",
       "prop": "background",
-      "note": "톤의 누름 바탕 — SEED 투명 누름 색의 불투명 짝"
+      "note": "톤의 누름 바탕 — 투명 누름 색 대신 불투명한 색"
     }
   ]
 }

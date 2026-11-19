@@ -3,7 +3,7 @@
   "source": "specs/components/badge.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "상자 — 둥근 사각. 글만큼 넓어지고 최대 폭이 없다(부모가 좁을 때만 글이 말줄임)",
@@ -464,7 +464,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "maxWidth",
-      "note": "최대 폭이 없다(SEED 3.0 — 옛 108 · 120 을 걷었다). 부모가 좁거나 따로 막을 때만 글이 한 줄 말줄임(min-width 0 · overflow hidden)"
+      "note": "최대 폭이 없다. 부모가 좁거나 따로 막을 때만 글이 한 줄 말줄임(min-width 0 · overflow hidden)"
     },
     {
       "rule": 0,
@@ -492,28 +492,28 @@
       "state": "enabled",
       "slot": "group",
       "prop": "gap",
-      "note": "배지 사이 4(SEED 그림) — 한 대상에 둘까지. 넘치면 줄바꿈하지 않고 줄인다(배지를 고른다)"
+      "note": "배지 사이 4 — 한 대상에 둘까지. 넘치면 줄바꿈하지 않고 줄인다(배지를 고른다)"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "label",
       "prop": "typography",
-      "note": "11 / 15 — 글자 크기 설정을 따른다(SEED rem). 최소 높이는 그대로, 글이 커지면 상자가 따라 커진다"
+      "note": "11 / 15 — 글자 크기 설정을 따르지 않습니다(웹 text-t1-static, 앱 TextScaler.noScaling)"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "label",
       "prop": "typography",
-      "note": "12 / 16 — 글자 크기 설정을 따른다(SEED rem)"
+      "note": "12 / 16 — 글자 크기 설정을 따르지 않습니다(웹 text-t2-static, 앱 TextScaler.noScaling)"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "root",
       "prop": "borderWidth",
-      "note": "안쪽 1px(inset box-shadow) — 상자 크기가 변하지 않는다(SEED)"
+      "note": "안쪽 1px(inset box-shadow) — 상자 크기가 변하지 않는다"
     },
     {
       "rule": 6,
@@ -569,7 +569,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "다크는 밝은 면 + 짙은 글자로 뒤집힌다(SEED 와 같은 방식)"
+      "note": "다크는 밝은 면 + 짙은 글자로 뒤집힌다"
     },
     {
       "rule": 12,
@@ -604,7 +604,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "주황 — SEED 의 노랑 + 검정 글자가 아니다(groo 주의 색은 주황, Page Banner 와 같다)"
+      "note": "주황 + 흰 글자 — 주의 색은 주황이다(Page Banner 와 같다)"
     },
     {
       "rule": 16,
@@ -639,7 +639,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "borderColor",
-      "note": "Desk 2.45 · 3.86 · HR 2.47 · 3.83 — 의미 색 넷보다 짙다(v109 값 그대로 · HR 은 v121 그루 초록)"
+      "note": "Desk 2.45 · 3.86 · HR 2.47 · 3.83 — 의미 색 넷보다 짙다(HR 은 그루 초록)"
     },
     {
       "rule": 19,
@@ -653,7 +653,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "borderColor",
-      "note": "v117 — 1.52 · 1.73(시트 위 1.50)"
+      "note": "1.52 · 1.73(시트 위 1.50)"
     },
     {
       "rule": 20,
@@ -667,7 +667,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "borderColor",
-      "note": "v117 — 1.51 · 1.71"
+      "note": "1.51 · 1.71"
     },
     {
       "rule": 21,
@@ -681,7 +681,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "borderColor",
-      "note": "v117 — 1.53 · 1.73"
+      "note": "1.53 · 1.73"
     },
     {
       "rule": 22,
@@ -695,7 +695,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "borderColor",
-      "note": "v117 — 1.52 · 1.73"
+      "note": "1.52 · 1.73"
     },
     {
       "rule": 23,

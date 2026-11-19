@@ -3,7 +3,7 @@
   "source": "specs/components/input.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "상자(Container) — 테두리 · 바탕 · 모서리. 어디를 눌러도 입력으로 포커스가 간다",
@@ -471,7 +471,7 @@
       "properties": [
         "border-color"
       ],
-      "note": "안쪽에 덧그린 2px 의 색이 나타나고 사라진다. SEED 는 0.1s — groo d2 = 100ms"
+      "note": "안쪽에 덧그린 2px 의 색이 나타나고 사라진다(d2 = 100ms)"
     }
   },
   "notes": [
@@ -480,21 +480,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "transitionProperty",
-      "note": "덧그린 2px 의 색만 — 두께는 바로 바뀐다(SEED)"
-    },
-    {
-      "rule": 0,
-      "state": "enabled",
-      "slot": "root",
-      "prop": "transitionDuration",
-      "note": "SEED 는 0.1s 를 바로 적었다"
+      "note": "덧그린 2px 의 색만 — 두께는 바로 바뀐다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "value",
       "prop": "caretColor",
-      "note": "캐럿은 글자색 — 고른 글은 기기 기본 하이라이트(::selection 을 두지 않는다). SEED 도 정하지 않았다. 앱은 cursorColor 를 이 색으로(사용자 결정 2026-10-08)"
+      "note": "캐럿은 글자색 — 고른 글은 기기 기본 하이라이트(::selection 을 두지 않는다). 앱은 cursorColor 를 이 색으로"
     },
     {
       "rule": 0,
@@ -508,14 +501,14 @@
       "state": "enabled",
       "slot": "clearButton",
       "prop": "touchTarget",
-      "note": "보이는 원(22 · 18)과 따로 둘레로 넓힌다 — 상자 밖은 상자가 자른다(medium 40 은 44 × 40). 기초 Inclusive Design v106(사용자 결정 2026-10-08)"
+      "note": "보이는 원(22 · 18)과 따로 둘레로 넓힌다 — 상자 밖은 상자가 자른다(medium 40 은 44 × 40). 기초 Inclusive Design"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "root",
       "prop": "borderColor",
-      "note": "읽기 전용이면 바뀌지 않는다 — 읽기 전용은 포커스 표시가 없다(SEED 와 같다, 사용자 결정 2026-10-08 — 까닭 · 2.4.7 은 input.md)"
+      "note": "읽기 전용이면 바뀌지 않는다 — 읽기 전용은 포커스 표시가 없다(까닭 · 2.4.7 은 input.md)"
     },
     {
       "rule": 0,
@@ -543,7 +536,7 @@
       "state": "disabled",
       "slot": "root",
       "prop": "background",
-      "note": "흐리게 하지 않는다(v106)"
+      "note": "흐리게 하지 않는다"
     },
     {
       "rule": 1,
@@ -571,7 +564,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "breakpoint",
-      "note": "미만은 large, 이상은 medium 의 값을 쓴다(SEED lg) — 앱은 늘 large"
+      "note": "미만은 large, 이상은 medium 의 값을 쓴다 — 앱은 늘 large"
     }
   ]
 }

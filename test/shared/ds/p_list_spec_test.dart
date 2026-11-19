@@ -412,6 +412,9 @@ Future<void> _checkFlat(
   k.px('prefix.paddingRight', prefixBox.right - icon.right);
   k.px('icon.size', icon.width);
   k.px('icon.size', icon.height);
+  // 들인 줄 — 앞 붙이개 자리에 앞 아이콘 크기의 빈 칸(부르는 쪽이 SizedBox(width: kPListIconSize) 로 둔다). 제목이 위 줄 제목
+  // 세로줄에 서는지는 아래 '들인 줄' 테스트가 잰다
+  k.px('indent.width', kPListIconSize);
 
   // 본문 — 제목 아래 2 · 제목 16 / 22 · 400 · 설명 13 / 18 · 본문 오른쪽 10
   final titleRect = tester.getRect(_titles.at(0));
@@ -681,6 +684,7 @@ Future<void> _checkParent(
       'background',
       'content',
       'prefix',
+      'indent',
       'icon',
       'tile',
       'body',
@@ -748,6 +752,7 @@ Future<void> _checkChild(
       'background',
       'content',
       'prefix',
+      'indent',
       'icon',
       'tile',
       'body',
@@ -3328,4 +3333,48 @@ void _worstTests() {
       });
     }
   });
+
+  testWidgets(
+    '들인 줄 — 앞 아이콘 크기(22)만큼 비워 제목이 위 스위치 줄 제목 세로줄(24 + 22 + 12 = 58)에 선다',
+    (tester) async {
+      final want = _spec.resolve({}, 'enabled');
+      await tester.pumpWidget(
+        _host(
+          Brightness.light,
+          PList(
+            children: [
+              PListItem(
+                title: '방해 금지',
+                prefix: const Icon(LucideIcons.moon),
+                suffix: PSwitch(
+                  label: '방해 금지',
+                  checked: true,
+                  onChanged: (_) {},
+                ),
+              ),
+              const PListItem(
+                title: '시작',
+                prefix: SizedBox(width: kPListIconSize),
+                suffix: Text('22:00'),
+              ),
+            ],
+          ),
+        ),
+      );
+      final list = tester.getRect(find.byType(PList));
+      final parent = tester.getRect(_titles.at(0));
+      final indented = tester.getRect(_titles.at(1));
+      expect(kPListIconSize, want['indent.width']);
+      expect(indented.left, closeTo(parent.left, 0.01));
+      expect(
+        indented.left - list.left,
+        closeTo(
+          (want['item.paddingX']! as num) +
+              (want['indent.width']! as num) +
+              (want['prefix.paddingRight']! as num),
+          0.01,
+        ),
+      );
+    },
+  );
 }

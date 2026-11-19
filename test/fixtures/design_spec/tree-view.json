@@ -3,7 +3,7 @@
   "source": "specs/components/tree-view.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "나무(role=tree) — 이름 필수. Tab 정지점 하나",
@@ -269,7 +269,7 @@
       "properties": [
         "rotate"
       ],
-      "note": "0 → 90° — 모션 줄이기면 바로"
+      "note": "0 → 90° — 모션 줄이기에서는 바로 바뀝니다"
     },
     "하위 묶음 — 펼침 · 접힘": {
       "duration": "300ms",
@@ -277,7 +277,7 @@
       "properties": [
         "height"
       ],
-      "note": "Accordion 과 같은 300ms(사용자 결정 3A) — 펼쳐도 초점은 그 항목에 그대로"
+      "note": "Accordion 과 같은 300ms 입니다 — 펼쳐도 초점은 그 항목에 그대로 둡니다"
     },
     "모션 줄이기 — 펼침 · 접힘": {
       "duration": "150ms",
@@ -285,7 +285,7 @@
       "properties": [
         "opacity"
       ],
-      "note": "높이를 움직이지 않고 150ms 서서히(v104)"
+      "note": "높이를 움직이지 않고 150ms 동안 서서히 나타나고 사라집니다"
     },
     "누름 · 호버 — 바탕": {
       "duration": "150ms",
@@ -300,7 +300,7 @@
       "properties": [
         "scale"
       ],
-      "note": "모션 줄이기면 하지 않는다"
+      "note": "모션 줄이기에서는 하지 않습니다"
     }
   },
   "notes": [
@@ -309,140 +309,140 @@
       "state": "enabled",
       "slot": "root",
       "prop": "paddingX",
-      "note": "패널 가장자리 ↔ 줄 바탕 8 — Side Navigation 내용과 같다"
+      "note": "패널 가장자리 ↔ 줄 바탕 8 — Side Navigation 내용과 같습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "paddingBottom",
-      "note": "마지막 줄 아래 16 — 패널 끝까지 스크롤할 때"
+      "note": "마지막 줄 아래 16 — 패널 끝까지 스크롤할 때의 여백입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "name",
-      "note": "aria-label(\"부서\") 또는 aria-labelledby(패널 제목) — 고른 항목 하나(aria-multiselectable 없음)"
+      "note": "aria-label(\"부서\") 또는 aria-labelledby(패널 제목) — 한 번에 하나만 고릅니다(aria-multiselectable 없음)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "keyboard",
-      "note": "나무 전체가 Tab 정지점 하나(roving tabindex) — APG Treeview. → ← 는 펴고 접기만(고르지 않는다), Enter · Space 는 누르기와 같다(부모는 고르면서 펴고 접는다 — APG 의 \"부모 노드의 기본 동작은 열고 닫기일 수 있다\"). 글자로 찾기 · * 는 두지 않는다"
+      "note": "나무 전체가 Tab 정지점 하나입니다(roving tabindex) — APG Treeview. → ← 는 펴고 접기만 하고(고르지 않습니다), Enter · Space 는 누르기와 같습니다(부모는 고르면서 펴고 접습니다 — APG 의 \"부모 노드의 기본 동작은 열고 닫기일 수 있다\"). 글자로 찾기 · * 는 두지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "row",
       "prop": "minHeight",
-      "note": "한 줄 — Side Navigation 항목과 같다. 이름이 줄을 바꾸면 늘어난다. AA ✓ · AAA ✓"
+      "note": "한 줄 — Side Navigation 항목과 같습니다. 이름이 줄을 바꾸면 늘어납니다. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "row",
       "prop": "paddingY",
-      "note": "이름 첫 줄 19 위아래 12 — 한 줄이면 43 이라 최소 높이 44 가 이긴다(Side Navigation 항목과 같다)"
+      "note": "이름 첫 줄 19 위아래 12 — 한 줄이면 43 이라 최소 높이 44 가 적용됩니다(Side Navigation 항목과 같습니다)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "row",
       "prop": "paddingLeft",
-      "note": "1단계 — 단계마다 indent 를 더한다"
+      "note": "1단계 — 단계마다 indent 를 더합니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "row",
       "prop": "indent",
-      "note": "단계마다 20 — 줄 왼쪽 여백 = 8 + (단계 − 1) × 20. 하위 꺾쇠가 부모 꺾쇠 · 아이콘 사이에 선다(비교 페이지 8A)"
+      "note": "단계마다 20 — 줄 왼쪽 여백 = 8 + (단계 − 1) × 20. 하위 꺾쇠가 부모 꺾쇠 · 아이콘 사이에 섭니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "row",
       "prop": "radius",
-      "note": "Side Navigation 항목 · List 누름 바탕과 같은 10"
+      "note": "Side Navigation 항목 · List 누름 바탕과 같은 10 입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "row",
       "prop": "touchTarget",
-      "note": "줄 폭 × 44 이상 — 부모 줄도 줄 전체가 하나의 누르는 자리다(사용자 결정 16D). 꺾쇠에 따로 누르는 자리를 두지 않는다. AA ✓ · AAA ✓"
+      "note": "줄 폭 × 44 이상 — 부모 줄도 줄 전체가 하나의 누르는 자리입니다. 꺾쇠에 따로 누르는 자리를 두지 않습니다. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "content",
       "prop": "gap",
-      "note": "꺾쇠 ↔ 아이콘 ↔ 이름 6"
+      "note": "꺾쇠 ↔ 아이콘 ↔ 이름 사이 6"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "content",
       "prop": "alignItems",
-      "note": "이름이 여러 줄이면 꺾쇠 · 아이콘은 첫 줄에 맞춘다"
+      "note": "이름이 여러 줄이면 꺾쇠 · 아이콘은 첫 줄에 맞춥니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "chevron",
       "prop": "width",
-      "note": "꺾쇠 칸 — 하위가 없는 항목은 같은 폭의 빈 자리"
+      "note": "꺾쇠 칸 — 하위가 없는 항목은 같은 폭을 비워 둡니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "chevron",
       "prop": "height",
-      "note": "이름 첫 줄 높이(t4 19)에 맞춘다"
+      "note": "이름 첫 줄 높이(t4 19)에 맞춥니다 — 글자 크기 설정을 따라 이름 줄이 높아지면 칸도 그 줄 높이를 따르고, 아이콘 16 은 그대로 첫 줄 가운데에 섭니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "chevron",
       "prop": "iconSize",
-      "note": "lucide chevron-right — 접혀 있으면 오른쪽, 펼치면 아래"
+      "note": "lucide chevron-right — 접혀 있으면 오른쪽, 펼치면 아래를 가리킵니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "chevron",
       "prop": "color",
-      "note": "면 위 5.50 · 다크 6.09 — 지금 HR #B9B9B9 는 1.88"
+      "note": "면 위 5.50 · 다크 6.09"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "chevron",
       "prop": "touchTarget",
-      "note": "표시만 — 누르면 줄을 누른 것과 같다(사용자 결정 16D). 꺾쇠만 누르는 31 × 44(16A) · 꺾쇠 칸 44(16B) · 들임 빈 자리로 44(16C)는 고르지 않았다"
+      "note": "표시만 합니다 — 누르면 줄을 누른 것과 같습니다. 꺾쇠만 누르는 자리 · 꺾쇠 칸을 넓힌 누르는 자리를 따로 두지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "icon",
       "prop": "size",
-      "note": "lucide building-2(부서) — 장식이라 보조 기술에 숨긴다"
+      "note": "lucide building-2(부서) — 장식이라 보조 기술에 숨깁니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "icon",
       "prop": "height",
-      "note": "이름 첫 줄에 맞춘다"
+      "note": "이름 첫 줄 높이(t4 19)에 맞춥니다 — 글자 크기 설정을 따라 이름 줄이 높아지면 칸도 따르고, 아이콘 16 은 그대로입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "label",
       "prop": "typography",
-      "note": "14 / 19 — Side Navigation 항목 글자"
+      "note": "14 / 19 — Side Navigation 항목과 같은 글자입니다. 글자 크기 설정을 따라 커지고 줄을 바꿔 받습니다"
     },
     {
       "rule": 0,
@@ -456,42 +456,42 @@
       "state": "enabled",
       "slot": "label",
       "prop": "lineClamp",
-      "note": "긴 이름은 줄을 바꾼다 — 말줄임 · title 없음(사용자 결정 8A · 10A)"
+      "note": "긴 이름은 줄을 바꿉니다 — 말줄임 · title 을 쓰지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "group",
       "prop": "display",
-      "note": "접힌 하위는 그리지 않는다 — 보조 기술도 읽지 않는다"
+      "note": "접힌 하위는 그리지 않습니다 — 보조 기술도 읽지 않습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "header",
       "prop": "paddingRight",
-      "note": "⋮ 가 패널 끝에 붙는다"
+      "note": "⋮ 가 패널 끝에 붙습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "header",
       "prop": "paddingLeft",
-      "note": "16 — 나무 줄의 글 시작(8 + 8)과 같은 자리"
+      "note": "16 — 나무 줄의 글 시작(8 + 8)과 같은 자리입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "title",
       "prop": "typography",
-      "note": "16 / 22 — 구역 · 카드 머리 제목과 한 벌(2026-10-16 사용자 결정 글자 역할 D3, 전 t6 18 / 24)"
+      "note": "16 / 22 — 구역 · 카드 머리 제목과 한 벌입니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "moreButton",
       "prop": "size",
-      "note": "Button ghost · iconOnly · medium — 패널 머리 오른쪽"
+      "note": "Button ghost · iconOnly · medium — 패널 머리 오른쪽에 둡니다"
     },
     {
       "rule": 0,
@@ -505,133 +505,133 @@
       "state": "enabled",
       "slot": "moreButton",
       "prop": "touchTarget",
-      "note": "보이는 40 바깥으로 2 씩. AA ✓ · AAA ✓"
+      "note": "보이는 40 바깥으로 2 씩 넓힙니다. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "moreButton",
       "prop": "name",
-      "note": "고른 부서가 바뀌면 이름도 바뀐다 — 노드마다 단추를 두지 않는다(단추 안 단추 금지)"
+      "note": "고른 부서가 바뀌면 이름도 바뀝니다 — 노드마다 단추를 두지 않습니다(단추 안 단추 금지)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "moreButton",
       "prop": "position",
-      "note": "1280 이상 Menu · 미만 Menu Sheet(menu.md) — 추가 · 수정 · 삭제"
+      "note": "1280 이상 Menu · 미만 Menu Sheet(menu.md)로 엽니다 — 추가 · 수정 · 삭제"
     },
     {
       "rule": 0,
       "state": "hovered",
       "slot": "row",
       "prop": "background",
-      "note": "Side Navigation 항목 · List 와 같다"
+      "note": "Side Navigation 항목 · List 와 같습니다"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "content",
       "prop": "scale",
-      "note": "콘텐츠 층만 — 꺾쇠 · 아이콘 · 이름(v104). 모션 줄이기면 하지 않는다"
+      "note": "콘텐츠 층(꺾쇠 · 아이콘 · 이름)만 줄입니다. 모션 줄이기에서는 하지 않습니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "줄 안쪽 — 붙은 줄 · 패널 끝에 걸리지 않는다"
+      "note": "줄 안쪽에 그려 붙은 줄 · 패널 끝에 걸리지 않습니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "radius",
-      "note": "줄 모서리 10"
+      "note": "줄 모서리와 같은 10"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "row",
       "prop": "background",
-      "note": "Side Navigation 지금 항목과 같은 색(사용자 결정 2026-10-08) — 면 위 1.15 · 다크 1.56. 고른 부서는 옆 패널의 제목으로도 보인다"
+      "note": "Side Navigation 지금 항목과 같은 색 — 면 위 1.15 · 다크 1.56. 고른 부서는 옆 패널의 제목으로도 보입니다"
     },
     {
       "rule": 1,
       "state": "hovered",
       "slot": "row",
       "prop": "background",
-      "note": "바탕 그대로 — 고른 바탕보다 짙은 불투명 역할이 없다"
+      "note": "바탕 그대로 — 고른 바탕보다 짙은 불투명 역할이 없습니다"
     },
     {
       "rule": 1,
       "state": "pressed",
       "slot": "row",
       "prop": "background",
-      "note": "바탕 그대로 — 콘텐츠의 2px 축소만"
+      "note": "바탕 그대로 — 콘텐츠만 2px 축소합니다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "row",
       "prop": "press",
-      "note": "접힌 부모 줄 — 누르면(마우스 · 터치 · Enter · Space) 그 항목을 고르면서 하위를 편다(사용자 결정 16D). 꺾쇠를 눌러도 같다"
+      "note": "접힌 부모 줄 — 누르면(마우스 · 터치 · Enter · Space) 그 항목을 고르면서 하위를 폅니다. 꺾쇠를 눌러도 같습니다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "row",
       "prop": "press",
-      "note": "펼친 부모를 누르면 고르면서 하위가 접힌다 — 사용자가 알고 골랐다(16D). 편 채 두려면 한 번 더 누르거나 → 로 편다"
+      "note": "펼친 부모를 누르면 고르면서 하위가 접힙니다. 편 채 두려면 한 번 더 누르거나 → 로 폅니다"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "chevron",
       "prop": "rotate",
-      "note": "아래로 — 하위 묶음이 펼쳐졌다"
+      "note": "아래를 가리킵니다 — 하위 묶음이 펼쳐진 상태입니다"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "row",
       "prop": "press",
-      "note": "하위가 없는 항목 — 고르기만"
+      "note": "하위가 없는 항목 — 고르기만 합니다"
     },
     {
       "rule": 4,
       "state": "enabled",
       "slot": "chevron",
       "prop": "display",
-      "note": "같은 폭 20 — 같은 단계의 이름이 같은 자리에 선다. aria-expanded 를 두지 않는다"
+      "note": "같은 폭 20 — 같은 단계의 이름이 같은 자리에 섭니다. aria-expanded 를 두지 않습니다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "row",
       "prop": "press",
-      "note": "늘 펼친 나무 — 부모 줄도 누르면 고르기만 한다(접히지 않는다)"
+      "note": "늘 펼친 나무 — 부모 줄도 누르면 고르기만 합니다(접히지 않습니다)"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "chevron",
       "prop": "display",
-      "note": "꺾쇠를 그리지 않고 칸도 뺀다 — 들임만으로 단계를 보인다. 접히지 않는데 꺾쇠 · \"펼쳐짐\" 이 남으면 누를 수 있는 것처럼 보인다"
+      "note": "꺾쇠를 그리지 않고 칸도 뺍니다 — 들임만으로 단계를 보입니다. 접히지 않는데 꺾쇠 · \"펼쳐짐\" 이 남으면 누를 수 있는 것처럼 보입니다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "chevron",
       "prop": "width",
-      "note": "아이콘이 줄 왼쪽 여백 바로 뒤에 선다"
+      "note": "아이콘이 줄 왼쪽 여백 바로 뒤에 섭니다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "group",
       "prop": "display",
-      "note": "늘 펼친다 — aria-expanded 를 두지 않고, → 는 첫 하위로 · ← 는 부모로 옮기기만 한다"
+      "note": "늘 펼칩니다 — aria-expanded 를 두지 않고, → 는 첫 하위로 · ← 는 부모로 옮기기만 합니다"
     }
   ]
 }

@@ -3,26 +3,19 @@
   "source": "specs/components/resizable.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
-    "group": "나눈 자리 — split 은 목록 | 상세 두 패널, widget 은 대시보드 칸(격자)",
+    "group": "나눈 자리 — 목록 | 상세 두 패널",
     "panel": "목록 패널(왼쪽) — 폭이 바뀐다. 상세 패널은 남는 폭",
     "handle": "손잡이 — 두 패널 사이. role=\"separator\", 누르는 폭 16",
     "line": "보이는 선 — 1px",
     "grip": "가운데 손잡이 표시 — 4 × 24",
-    "widgetHandle": "위젯 모서리 손잡이 — 오른쪽 아래, 누르는 24 × 24",
-    "widgetMark": "모서리 표식 — 9 × 9 꺾쇠",
-    "placeholder": "끄는 동안 자리표시 — 위젯이 놓일 칸",
-    "ghost": "끄는 동안 포인터를 따라오는 위젯",
-    "moreButton": "위젯 머리 ⋮ — \"크기\" 메뉴를 연다(Button ghost · iconOnly · medium)",
-    "sizeMenu": "위젯 ⋮ 의 \"크기\" — 끌지 않는 대안(Menu)",
     "focusRing": "키보드 포커스 링(웹) — 손잡이 둘레"
   },
   "axes": {
     "kind": [
-      "split",
-      "widget"
+      "split"
     ]
   },
   "defaults": {
@@ -119,84 +112,6 @@
           "cursor": "col-resize"
         }
       }
-    },
-    {
-      "when": {
-        "kind": "widget"
-      },
-      "enabled": {
-        "group": {
-          "columns": 12,
-          "rowHeight": 72,
-          "gap": 16
-        },
-        "widgetHandle": {
-          "size": 24,
-          "cursor": "se-resize",
-          "touchAction": "none",
-          "touchTarget": "24 × 24"
-        },
-        "widgetMark": {
-          "size": 9,
-          "borderWidth": 2,
-          "borderColor": {
-            "light": "#767C8B",
-            "dark": "#838997"
-          },
-          "right": 6,
-          "bottom": 6
-        },
-        "placeholder": {
-          "display": "숨김",
-          "background": {
-            "light": "#E8F1FE",
-            "dark": "#20314E"
-          },
-          "borderWidth": 1,
-          "borderStyle": "dashed",
-          "borderColor": {
-            "light": "#0147AD",
-            "dark": "#7AA9F6"
-          },
-          "radius": 16
-        },
-        "ghost": {
-          "display": "숨김",
-          "shadow": {
-            "light": "0 8px 24px -4px rgba(15, 18, 28, 0.10), 0 2px 6px -2px rgba(15, 18, 28, 0.05)",
-            "dark": "0 8px 24px -4px rgba(0, 0, 0, 0.50), 0 2px 6px -2px rgba(0, 0, 0, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.08)"
-          },
-          "radius": 16
-        },
-        "moreButton": {
-          "size": 40,
-          "iconSize": 18,
-          "touchTarget": "44 × 44",
-          "name": "{위젯} 더보기"
-        },
-        "sizeMenu": {
-          "label": "크기",
-          "items": "작게 — 4칸 · 보통 — 6칸 · 넓게 — 8칸 · 가득 — 12칸"
-        }
-      },
-      "pressed": {
-        "placeholder": {
-          "display": "보임"
-        },
-        "ghost": {
-          "display": "보임"
-        }
-      },
-      "focused": {
-        "focusRing": {
-          "width": 2,
-          "offset": 2,
-          "color": {
-            "light": "#0147AD",
-            "dark": "#7AA9F6"
-          }
-        }
-      }
     }
   ],
   "motion": {
@@ -221,14 +136,14 @@
       "state": "enabled",
       "slot": "group",
       "prop": "direction",
-      "note": "목록 | 상세 — 세로 나누기 · 셋 이상 나누기는 쓰는 곳이 없어 두지 않는다"
+      "note": "목록 | 상세 — 세로 나누기 · 셋 이상 나누기는 두지 않는다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "group",
       "prop": "breakpoint",
-      "note": "768 미만은 나누지 않는다 — 역할 · 사용자는 목록 → 상세, 회사는 탭(지금과 같다)"
+      "note": "768 미만은 나누지 않는다 — 역할 · 사용자는 목록 → 상세, 회사는 탭"
     },
     {
       "rule": 0,
@@ -249,7 +164,7 @@
       "state": "enabled",
       "slot": "panel",
       "prop": "maxWidth",
-      "note": "오른쪽 상세가 60% 아래로 줄지 않는다 — 지금 회사 · 부서 사용자는 0폭까지 민다"
+      "note": "오른쪽 상세가 60% 아래로 줄지 않는다"
     },
     {
       "rule": 0,
@@ -270,7 +185,7 @@
       "state": "enabled",
       "slot": "handle",
       "prop": "width",
-      "note": "누르는 폭 — 선 가운데로 양쪽 8. 768 이상 데스크톱의 마우스 경계라 44 가 아니다(사용자 결정 12B)"
+      "note": "누르는 폭 — 선 가운데로 양쪽 8. 768 이상 데스크톱의 마우스 경계라 44 가 아니다"
     },
     {
       "rule": 0,
@@ -305,7 +220,7 @@
       "state": "enabled",
       "slot": "handle",
       "prop": "step",
-      "note": "← → 한 번에 — 지금 HR 은 10%"
+      "note": "← → 한 번에"
     },
     {
       "rule": 0,
@@ -333,7 +248,7 @@
       "state": "enabled",
       "slot": "grip",
       "prop": "background",
-      "note": "흰 면 위 4.18 · 다크 4.13(WCAG 1.4.11 ≥ 3) — 지금 HR 은 선 · 손잡이가 모두 #EEEEEE 1.11"
+      "note": "흰 면 위 4.18 · 다크 4.13(WCAG 1.4.11 ≥ 3)"
     },
     {
       "rule": 0,
@@ -362,174 +277,6 @@
       "slot": "group",
       "prop": "cursor",
       "note": "끄는 동안 화면 전체 — 글을 고르지 않는다(user-select none)"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "group",
-      "prop": "columns",
-      "note": "대시보드 격자 — 지금 HR 값(react-grid-layout). 크기 · 위치는 편집 모드에서만 바꾸고 저장 단추로 서버에 저장한다"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "group",
-      "prop": "rowHeight",
-      "note": "격자 한 줄 — 지금 HR 값"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "group",
-      "prop": "gap",
-      "note": "칸 사이 16 — 지금 HR 값"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "widgetHandle",
-      "prop": "size",
-      "note": "누르는 자리 24 × 24 — 오른쪽 아래 모서리. 지금 20"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "widgetHandle",
-      "prop": "touchTarget",
-      "note": "AA ✓ · AAA ✗ — 끌지 않는 대안은 ⋮ 의 \"크기\"(moreButton)"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "widgetMark",
-      "prop": "size",
-      "note": "오른쪽 · 아래 두 변만 그린 꺾쇠 — 지금 5"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "widgetMark",
-      "prop": "borderColor",
-      "note": "카드 면 위 4.18 · 다크 4.13(≥ 3) — 지금 rgba(0,0,0,.4) 는 2.85 · 다크 1.14"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "widgetMark",
-      "prop": "right",
-      "note": "위젯 오른쪽 끝에서"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "widgetMark",
-      "prop": "bottom",
-      "note": "위젯 아래 끝에서"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "placeholder",
-      "prop": "display",
-      "note": "끄는 동안만 보인다"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "placeholder",
-      "prop": "background",
-      "note": "놓일 칸 — 브랜드 옅은 바탕. 지금은 라이브러리 기본 빨강 20%"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "placeholder",
-      "prop": "borderWidth",
-      "note": "비교 페이지 13A 그림은 1.5 였지만 크로미움은 1.5px 테두리를 1px 로 그린다(1 · 2배 화면 모두 — 레시피 하네스 실측) — 사용자가 본 모습 그대로 1"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "placeholder",
-      "prop": "borderColor",
-      "note": "바닥 위 HR 7.56 · 다크 6.88 · 옅은 바탕 위 7.18 · 5.47(≥ 3) — 자리표시의 경계"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "placeholder",
-      "prop": "radius",
-      "note": "위젯(Card 면)과 같은 16"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "ghost",
-      "prop": "display",
-      "note": "끄는 동안 포인터를 따라오는 위젯 — 위젯 모양 그대로"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "ghost",
-      "prop": "shadow",
-      "note": "떠 있는 동안만"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "moreButton",
-      "prop": "size",
-      "note": "Button ghost · iconOnly · medium — 표 · 줄의 ⋮ 와 같다. 위젯 머리 오른쪽"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "moreButton",
-      "prop": "iconSize",
-      "note": "lucide ellipsis-vertical"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "moreButton",
-      "prop": "touchTarget",
-      "note": "보이는 40 바깥으로 2 씩 — 모서리 손잡이(24)의 끌지 않는 대안. AA ✓ · AAA ✓"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "moreButton",
-      "prop": "name",
-      "note": "편집 모드에서만 — 위젯 제목을 붙인다"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "sizeMenu",
-      "prop": "label",
-      "note": "메뉴 묶음 이름(MenuGroupLabel) — 1280 미만은 Menu Sheet"
-    },
-    {
-      "rule": 1,
-      "state": "enabled",
-      "slot": "sizeMenu",
-      "prop": "items",
-      "note": "누르면 바로 그 폭 — 높이는 그대로. 메뉴는 실행만이라 체크 · 라디오가 없고, 지금 크기 줄에 설명 \"지금 크기\"(menu.md)"
-    },
-    {
-      "rule": 1,
-      "state": "pressed",
-      "slot": "placeholder",
-      "prop": "display",
-      "note": "손잡이를 끄는 동안 — 놓을 칸을 칸 단위로"
-    },
-    {
-      "rule": 1,
-      "state": "focused",
-      "slot": "focusRing",
-      "prop": "color",
-      "note": "⋮ 단추의 링(Button) — 모서리 손잡이는 키보드로 닿지 않는다(대안이 ⋮ \"크기\")"
     }
   ]
 }

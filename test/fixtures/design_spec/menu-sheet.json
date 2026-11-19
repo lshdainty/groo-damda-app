@@ -3,7 +3,7 @@
   "source": "specs/components/menu-sheet.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "overlay": "딤 — 시트 뒤 화면 전체. 누르면 닫힌다",
@@ -335,7 +335,7 @@
       "properties": [
         "translateY 100% → 0"
       ],
-      "note": "Bottom Sheet 와 같다 — 모션 줄이기면 150ms 서서히 나타남(v104)"
+      "note": "Bottom Sheet 와 같다 — 모션 줄이기면 150ms 서서히 나타남"
     },
     "열림 — 딤": {
       "duration": "300ms",
@@ -372,7 +372,7 @@
       "state": "enabled",
       "slot": "overlay",
       "prop": "background",
-      "note": "Bottom Sheet 와 같은 groo 딤(v102)"
+      "note": "Bottom Sheet 와 같은 딤"
     },
     {
       "rule": 0,
@@ -414,7 +414,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "paddingX",
-      "note": "SEED 16 → 화면 여백 24"
+      "note": "화면 여백 24"
     },
     {
       "rule": 0,
@@ -428,7 +428,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "maxHeight",
-      "note": "스크롤이 생기지 않게 묶음 · 줄 수를 줄인다(SEED) — 넘치면 목록만 스크롤"
+      "note": "스크롤이 생기지 않게 묶음 · 줄 수를 줄인다 — 넘치면 목록만 스크롤"
     },
     {
       "rule": 0,
@@ -477,7 +477,7 @@
       "state": "enabled",
       "slot": "itemLabel",
       "prop": "typography",
-      "note": "단어 단위 줄바꿈(v114)"
+      "note": "단어 단위 줄바꿈"
     },
     {
       "rule": 0,
@@ -533,7 +533,7 @@
       "state": "pressed",
       "slot": "item",
       "prop": "scale",
-      "note": "아이콘 · 글만 준다(SEED scaleScope: content) — 바탕은 그대로. 모션 줄이기면 하지 않는다"
+      "note": "아이콘 · 글만 준다 — 바탕은 그대로. 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 0,

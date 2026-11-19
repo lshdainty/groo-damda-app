@@ -3,7 +3,7 @@
   "source": "specs/components/image-frame.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "틀 — 비율 상자. 폭은 부르는 쪽, 높이는 폭 ÷ 비율. 모서리로 자르고(overflow hidden) 안의 층을 따로 쌓는다(isolation)",
@@ -297,14 +297,14 @@
       "state": "loaded",
       "slot": "root",
       "prop": "overflow",
-      "note": "모서리로 그림 · 스켈레톤 · 대체 그림을 자른다. 안의 층은 따로 쌓는다(isolation: isolate — SEED)"
+      "note": "모서리로 그림 · 스켈레톤 · 대체 그림을 자른다. 안의 층은 따로 쌓는다(isolation: isolate)"
     },
     {
       "rule": 0,
       "state": "loaded",
       "slot": "image",
       "prop": "objectFit",
-      "note": "가운데를 남겨 자른다(SEED — 사진은 늘 cover). 로고 · 글이 든 그림만 fit contain"
+      "note": "가운데를 남겨 자른다. 로고 · 글이 든 그림만 fit contain"
     },
     {
       "rule": 0,
@@ -318,28 +318,28 @@
       "state": "loaded",
       "slot": "stroke",
       "prop": "borderWidth",
-      "note": "안쪽(inset box-shadow) — 크기가 변하지 않는다. 그림 위에 그리고(SEED ::after) 누르기를 막지 않는다. 모서리는 틀을 따른다"
+      "note": "안쪽(inset box-shadow) — 크기가 변하지 않는다. 그림 위에 그리고(::after) 누르기를 막지 않는다. 모서리는 틀을 따른다"
     },
     {
       "rule": 0,
       "state": "loaded",
       "slot": "stroke",
       "prop": "borderColor",
-      "note": "v118 — 검정 4.7% · 다크 흰 5%. 흰 그림이 흰 바탕에 묻히지 않고(1.11 · 장식), 어두운 그림 둘레에는 테가 생기지 않는다. 늘 그린다 — 끄는 속성이 없다"
+      "note": "검정 4.7% · 다크 흰 5%. 흰 그림이 흰 바탕에 묻히지 않고(1.11 · 장식), 어두운 그림 둘레에는 테가 생기지 않는다. 늘 그린다 — 끄는 속성이 없다"
     },
     {
       "rule": 0,
       "state": "loaded",
       "slot": "floater",
       "prop": "offset",
-      "note": "틀 가장자리 → 요소 바깥 상자 6(SEED). 네 모서리 — 위 시작 · 위 끝 · 아래 시작 · 아래 끝. 한 자리에 하나 · 틀 하나에 둘까지 · 틀의 짧은 변이 80 이상일 때만"
+      "note": "틀 가장자리 → 요소 바깥 상자 6. 네 모서리 — 위 시작 · 위 끝 · 아래 시작 · 아래 끝. 한 자리에 하나 · 틀 하나에 둘까지 · 틀의 짧은 변이 80 이상일 때만"
     },
     {
       "rule": 0,
       "state": "loaded",
       "slot": "indicator",
       "prop": "background",
-      "note": "검정 65% — 두 모드 같다(그림은 모드를 따르지 않는다). SEED static-black-alpha-800(63.5%)의 가장 가까운 groo 값. overlay-dim-light(50%)면 흰 그림 위 흰 글자가 3.95 로 모자란다"
+      "note": "검정 65% — 두 모드 같다(그림은 모드를 따르지 않는다). overlay-dim-light(50%)면 흰 그림 위 흰 글자가 3.95 로 모자란다"
     },
     {
       "rule": 0,
@@ -353,14 +353,14 @@
       "state": "loaded",
       "slot": "indicator",
       "prop": "typography",
-      "note": "11 / 15 — 글자 크기 설정을 따른다(SEED rem)"
+      "note": "11 / 15 — 사진 위 표식이라 글자 크기 설정을 따르지 않는다. 읽는 글(label)은 화면 읽기 프로그램이 읽는다"
     },
     {
       "rule": 0,
       "state": "loaded",
       "slot": "indicator",
       "prop": "minHeight",
-      "note": "15 + 2 + 2 — 글이 커지면 따라 커진다"
+      "note": "15 + 2 + 2 — 글자가 그대로라 높이도 그대로"
     },
     {
       "rule": 0,
@@ -423,7 +423,7 @@
       "state": "loaded",
       "slot": "root",
       "prop": "aspectRatio",
-      "note": "≈ 1.33 — 기본(SEED)"
+      "note": "≈ 1.33 — 기본"
     },
     {
       "rule": 5,
@@ -465,28 +465,28 @@
       "state": "loaded",
       "slot": "root",
       "prop": "radius",
-      "note": "폭 24 이하(SEED r1)"
+      "note": "폭 24 이하"
     },
     {
       "rule": 10,
       "state": "loaded",
       "slot": "root",
       "prop": "radius",
-      "note": "폭 25 ~ 48(SEED r1.5) — 목록 앞 40 · 48"
+      "note": "폭 25 ~ 48 — 목록 앞 40 · 48"
     },
     {
       "rule": 11,
       "state": "loaded",
       "slot": "root",
       "prop": "radius",
-      "note": "폭 49 이상(SEED r2) — 목록 카드 56 · 격자 · 상세"
+      "note": "폭 49 이상 — 목록 카드 56 · 격자 · 상세"
     },
     {
       "rule": 12,
       "state": "loaded",
       "slot": "root",
       "prop": "radius",
-      "note": "화면 폭 — 좌우가 화면 끝에 닿는 그림(SEED 의 'Rounded 를 끈다'). 윤곽은 그대로"
+      "note": "화면 폭 — 좌우가 화면 끝에 닿는 그림. 윤곽은 그대로"
     },
     {
       "rule": 14,

@@ -3,7 +3,7 @@
   "source": "specs/components/logo-tile.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "타일 — 정사각 · 모서리 크기 × 0.3. 기관 색 면 또는 이름 색 면",
@@ -203,7 +203,7 @@
       "state": "enabled",
       "slot": "stroke",
       "prop": "borderColor",
-      "note": "v118 — 검정 4.7% · 다크 흰 5%. 다크 표면과 1.02 인 짙은 남색 타일 둘레도 1.14(윤곽 : 타일)로 잡힌다(장식 — 이름 글이 물건을 알린다)"
+      "note": "검정 4.7% · 다크 흰 5%. 다크 표면과 1.02 인 짙은 남색 타일 둘레도 1.14(윤곽 : 타일)로 잡힌다(장식 — 이름 글이 물건을 알린다)"
     },
     {
       "rule": 1,
@@ -266,7 +266,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "이름의 코드 포인트 합 % 10 → 차트 10색(v110 순서) — Avatar 와 같은 함수. 라이트 700 · 다크 800-dark. 웹 · 앱이 같다"
+      "note": "이름의 코드 포인트 합 % 10 → 차트 10색 — Avatar 와 같은 함수(같은 순서). 라이트 700 · 다크 800-dark. 웹 · 앱이 같다"
     },
     {
       "rule": 5,

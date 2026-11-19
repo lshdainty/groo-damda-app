@@ -3,7 +3,7 @@
   "source": "specs/components/pagination.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "넘김 줄 — 목록 아래 가운데. 칸을 사이 없이 잇는다",
@@ -248,28 +248,28 @@
       "state": "enabled",
       "slot": "root",
       "prop": "gap",
-      "note": "칸이 붙는다(SEED) — 9칸이면 360, 7칸이면 280"
+      "note": "칸이 붙는다 — 9칸이면 360, 7칸이면 280"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "justifyContent",
-      "note": "목록 아래 가운데(SEED)"
+      "note": "목록 아래 가운데"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "marginTop",
-      "note": "목록 끝 → 넘김 줄 24(옛 DESIGN.md Pagination 절의 값 — SEED 는 \"목록 하단\" 만 적었다)"
+      "note": "목록 끝 → 넘김 줄 24"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "item",
       "prop": "size",
-      "note": "40 × 40 — 칸 40 그대로(사용자 결정 2026-10-04)"
+      "note": "40 × 40"
     },
     {
       "rule": 0,
@@ -283,14 +283,21 @@
       "state": "enabled",
       "slot": "item",
       "prop": "touchTarget",
-      "note": "위아래만 44(보이지 않는 여백 2 씩), 옆은 칸 폭 40 — v106 '누르는 영역 44' 의 예외. AA ✓ · AAA ⚠"
+      "note": "위아래만 44(보이지 않는 여백 2 씩), 옆은 칸 폭 40 — '누르는 영역 44' 의 예외. AA ✓ · AAA ⚠"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "item",
       "prop": "transitionProperty",
-      "note": "바탕 색과 누름 축소 둘 다 — 다른 누르는 칸(card · chart …)과 같은 표기, SEED pagination-button 도 colorDuration · scaleDuration 둘(Q-011-6). 시간은 motion 절"
+      "note": "바탕 색과 누름 축소 둘 다 — 다른 누르는 칸(card · chart …)과 같은 표기. 시간은 motion 절"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "label",
+      "prop": "typography",
+      "note": "글자 크기 설정을 따르지 않는다 — 칸 40 안에 들어가는 틀"
     },
     {
       "rule": 0,
@@ -318,7 +325,7 @@
       "state": "enabled",
       "slot": "arrow",
       "prop": "transitionProperty",
-      "note": "쪽 번호 칸과 같다(Q-011-6)"
+      "note": "쪽 번호 칸과 같다"
     },
     {
       "rule": 0,
@@ -339,49 +346,49 @@
       "state": "hovered",
       "slot": "item",
       "prop": "background",
-      "note": "누름과 같은 색 — 축소 없음(v106)"
+      "note": "누름과 같은 색 — 축소 없음"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "item",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝"
+      "note": "불투명한 바탕"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "item",
       "prop": "scale",
-      "note": "기준 40 → 0.95(v104 — SEED 0.97). 모션 줄이기면 하지 않는다"
+      "note": "기준 40 → 0.95. 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "칸 바깥 — 붙은 이웃 칸 위에 그린다(SEED)"
+      "note": "칸 바깥 — 붙은 이웃 칸 위에 그린다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "item",
       "prop": "background",
-      "note": "짙은 채움 — SEED bg.neutral-solid 의 groo 짝(다크는 밝은 반전)"
+      "note": "짙은 채움(다크는 밝은 반전)"
     },
     {
       "rule": 1,
       "state": "pressed",
       "slot": "item",
       "prop": "background",
-      "note": "v112 — Button neutralSolid 의 누름과 같다"
+      "note": "Button neutralSolid 의 누름과 같다"
     },
     {
       "rule": 1,
       "state": "disabled",
       "slot": "item",
       "prop": "background",
-      "note": "흐리게 하지 않는다(v106)"
+      "note": "흐리게 하지 않는다"
     },
     {
       "rule": 2,

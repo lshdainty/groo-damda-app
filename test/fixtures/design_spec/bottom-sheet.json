@@ -3,7 +3,7 @@
   "source": "specs/components/bottom-sheet.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "overlay": "딤 — 시트 뒤 화면 전체",
@@ -250,7 +250,7 @@
       "properties": [
         "translateY 100% → 0"
       ],
-      "note": "모션 줄이기면 150ms 서서히 나타남(v104)"
+      "note": "모션 줄이기면 150ms 서서히 나타남"
     },
     "열림 — 딤": {
       "duration": "300ms",
@@ -288,7 +288,7 @@
       "state": "enabled",
       "slot": "overlay",
       "prop": "background",
-      "note": "groo 딤(v102 — SEED 0.455 는 들이지 않았다)"
+      "note": "딤 — 라이트 0.50 · 다크 0.65"
     },
     {
       "rule": 0,
@@ -309,7 +309,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "maxHeight",
-      "note": "처음부터 넘게 짠 내용은 시트가 아니라 페이지로 둔다(SEED) — 90% 로 늘려 버티지 않는다. 작은 화면 · 큰 글자 · 키보드로 넘친 것은 본문만 스크롤 + 끝 흐림(2026-10-22 9B)"
+      "note": "처음부터 넘게 짠 내용은 시트가 아니라 페이지로 둔다 — 90% 로 늘려 버티지 않는다. 작은 화면 · 큰 글자 · 키보드로 넘친 것은 본문만 스크롤 + 끝 흐림"
     },
     {
       "rule": 0,
@@ -323,7 +323,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "shadow",
-      "note": "그림자 없이 딤과 표면 색으로 뜬다(SEED · Elevation)"
+      "note": "그림자 없이 딤과 표면 색으로 뜬다(Elevation)"
     },
     {
       "rule": 0,
@@ -358,14 +358,14 @@
       "state": "enabled",
       "slot": "closeButton",
       "prop": "top",
-      "note": "시트 위에서 24 — 제목 첫 줄 가운데와 맞는다"
+      "note": "시트 위에서 24(글자 100%) — 제목 첫 줄 가운데와 맞는다. 큰 글자에서는 크기를 그대로 두고 제목 첫 줄 가운데를 따라 내려간다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "closeButton",
       "prop": "right",
-      "note": "SEED 16 → 화면 여백 24"
+      "note": "화면 여백 24"
     },
     {
       "rule": 0,
@@ -400,7 +400,7 @@
       "state": "enabled",
       "slot": "footer",
       "prop": "gap",
-      "note": "버튼 둘이면 반씩 나눈다 — 확인을 여는 [삭제](ghost critical)는 왼쪽에 글자만큼, 주 버튼이 남은 폭(2026-10-25)"
+      "note": "버튼 둘이면 반씩 나눈다 — 확인을 여는 [삭제](ghost critical)는 왼쪽에 글자만큼, 주 버튼이 남은 폭"
     },
     {
       "rule": 0,
@@ -414,14 +414,14 @@
       "state": "pressed",
       "slot": "closeButton",
       "prop": "scale",
-      "note": "기준 28 → 0.929(SEED scaleScope: self · v104) — 모션 줄이기면 하지 않는다"
+      "note": "기준 28 → 0.929(scaleScope: self) — 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 1,
       "state": "enabled",
       "slot": "handle",
       "prop": "background",
-      "note": "SEED palette.gray-400 의 짝(groo gray-400). 누름 색은 두지 않는다"
+      "note": "누름 색은 두지 않는다"
     },
     {
       "rule": 1,
@@ -435,7 +435,7 @@
       "state": "enabled",
       "slot": "handle",
       "prop": "touchTarget",
-      "note": "누르면 다음(더 높은) 스냅 높이로 — 가장 높은 높이에서 누르면 닫힌다(SEED). 보조 기술에는 숨긴다"
+      "note": "누르면 다음(더 높은) 스냅 높이로 — 가장 높은 높이에서 누르면 닫힌다. 보조 기술에는 숨긴다"
     },
     {
       "rule": 2,
@@ -456,7 +456,7 @@
       "state": "enabled",
       "slot": "backButton",
       "prop": "iconSize",
-      "note": "lucide arrow-left"
+      "note": "lucide chevron-left — 페이지 머리(Top Navigation) ← 와 같은 꺾쇠. 돌아가기 모양은 어디서나 하나다"
     },
     {
       "rule": 2,
@@ -470,7 +470,7 @@
       "state": "enabled",
       "slot": "backButton",
       "prop": "centerY",
-      "note": "시트 위 24 + 줄 높이 30 의 절반 = 39 — 글자 배율을 따라 함께 내려간다"
+      "note": "시트 위 24 + 줄 높이 30 의 절반 = 39 — 원 · 아이콘은 크기를 그대로 두고, 큰 글자에서는 제목 첫 줄 가운데를 따라 내려간다"
     },
     {
       "rule": 2,
@@ -484,7 +484,7 @@
       "state": "pressed",
       "slot": "backButton",
       "prop": "background",
-      "note": "호버도 같은 색. 거리 축소는 하지 않는다(구현 그대로)"
+      "note": "호버도 같은 색. 거리 축소는 하지 않는다"
     },
     {
       "rule": 3,
@@ -505,7 +505,7 @@
       "state": "enabled",
       "slot": "headerAction",
       "prop": "centerY",
-      "note": "시트 위 24 + 원 28 의 절반 = 38"
+      "note": "시트 위 24 + 원 28 의 절반 = 38 — 큰 글자에서는 닫기 원과 함께 제목 첫 줄을 따라 내려간다"
     },
     {
       "rule": 3,
@@ -540,7 +540,7 @@
       "state": "enabled",
       "slot": "fog",
       "prop": "size",
-      "note": "본문 상자의 위 · 아래 끝(SEED Bottom Sheet 의 권장)"
+      "note": "본문 상자의 위 · 아래 끝"
     },
     {
       "rule": 4,

@@ -3,7 +3,7 @@
   "source": "specs/components/chip-tabs.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "list": "목록 — 한 줄 가로 스크롤. 바탕 · 바닥 선이 없다",
@@ -100,14 +100,14 @@
       "state": "enabled",
       "slot": "list",
       "prop": "paddingX",
-      "note": "화면 여백 — Chip 의 가로 스크롤 줄과 같다(SEED 16)"
+      "note": "화면 여백 — Chip 의 가로 스크롤 줄과 같다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "list",
       "prop": "paddingY",
-      "note": "1차 Line 목록 아래 · 내용 위 8(SEED 에 없다 — 비교 페이지 그림의 값)"
+      "note": "1차 Line 목록 아래 · 내용 위 8"
     },
     {
       "rule": 0,
@@ -121,7 +121,7 @@
       "state": "enabled",
       "slot": "list",
       "prop": "fog",
-      "note": "Scroll Fog row(scroll-fog.yaml) — gradient-fade-mask 마스크, 늘 켜짐. 목록 좌우 여백 24 가 흐림보다 넓어 처음 · 끝의 칩은 흐리지 않는다(2026-10-03)"
+      "note": "Scroll Fog row(scroll-fog.yaml) — gradient-fade-mask 마스크, 늘 켜짐. 목록 좌우 여백 24 가 흐림보다 넓어 처음 · 끝의 칩은 흐리지 않는다"
     },
     {
       "rule": 0,
@@ -135,7 +135,7 @@
       "state": "enabled",
       "slot": "trigger",
       "prop": "shrink",
-      "note": "줄어들지 않는다 — 글이 여백을 침범하지 않게(SEED)"
+      "note": "줄어들지 않는다 — 글이 여백을 침범하지 않게"
     },
     {
       "rule": 0,
@@ -149,7 +149,7 @@
       "state": "enabled",
       "slot": "notification",
       "prop": "gap",
-      "note": "글 뒤 6, 세로 가운데 — 칩 폭이 그만큼 넓어진다(SEED)"
+      "note": "글 뒤 6, 세로 가운데 — 칩 폭이 그만큼 넓어진다"
     },
     {
       "rule": 1,

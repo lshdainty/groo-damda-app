@@ -3,7 +3,7 @@
   "source": "specs/components/radio-group.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "Radio 한 줄 — 동그라미 + 라벨, 누르는 영역",
@@ -323,7 +323,7 @@
         "border",
         "dot color"
       ],
-      "note": "채움 · 테두리 · 점이 색으로 함께 바뀐다(SEED Radiomark 와 같다) — 점은 커지거나 줄지 않는다"
+      "note": "채움 · 테두리 · 점이 색으로 함께 바뀐다 — 점은 커지거나 줄지 않는다"
     },
     "누름": {
       "duration": "150ms",
@@ -331,7 +331,7 @@
       "properties": [
         "scale"
       ],
-      "note": "동그라미만 세로 2px 거리 축소 — 라벨은 줄지 않는다(v104)"
+      "note": "동그라미만 세로 2px 거리 축소 — 라벨은 줄지 않는다"
     }
   },
   "notes": [
@@ -347,42 +347,42 @@
       "state": "enabled",
       "slot": "root",
       "prop": "touchTarget",
-      "note": "라벨까지 묶어 44 — 라벨이 따로 서는 자리에서 동그라미만 쓰면 그 줄 전체가 누르는 영역(SEED touch target · 기초 Inclusive)"
+      "note": "라벨까지 묶어 44 — 라벨이 따로 서는 자리에서 동그라미만 쓰면 그 줄 전체가 누르는 영역(기초 Inclusive)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "group",
       "prop": "gap",
-      "note": "묶음 안 줄 사이(세로) — 줄 32 · 36 에 12 를 더해 44 · 48 마다 한 줄이라 이웃 줄과 누르는 영역(44)이 겹치지 않는다(사용자 결정 — SEED 는 4). 가로 배치는 두지 않는다"
+      "note": "묶음 안 줄 사이(세로) — 줄 32 · 36 에 12 를 더해 44 · 48 마다 한 줄이라 이웃 줄과 누르는 영역(44)이 겹치지 않는다. 가로 배치는 두지 않는다"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "radiomark",
       "prop": "scale",
-      "note": "동그라미만 준다 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px(Feedback 의 눌림 피드백, v104)"
+      "note": "동그라미만 준다 — 기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px(Feedback 의 눌림 피드백)"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "width",
-      "note": "웹 · 앱 같다 — 앱은 하드웨어 키보드로 옮길 때만 그린다(Flutter FocusHighlightMode.traditional), 손가락으로 누를 때는 없다(2026-10-08 — DESIGN.md State · Button 과 같다)"
+      "note": "웹 · 앱 같다 — 앱은 하드웨어 키보드로 옮길 때만 그린다(Flutter FocusHighlightMode.traditional), 손가락으로 누를 때는 없다(DESIGN.md State · Button 과 같다)"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "root",
       "prop": "cursor",
-      "note": "포인터 이벤트는 켜 둔다 — 끄면 이 커서가 안 보인다(SEED 와 같다)"
+      "note": "포인터 이벤트는 켜 둔다 — 끄면 이 커서가 안 보인다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "radiomark",
       "prop": "borderColor",
-      "note": "3:1 이상 — v109(SEED 는 옅은 선)"
+      "note": "표면과 3:1 이상 — 동그라미를 선으로 알아본다"
     },
     {
       "rule": 5,
@@ -396,28 +396,14 @@
       "state": "pressed",
       "slot": "radiomark",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝"
-    },
-    {
-      "rule": 5,
-      "state": "disabled",
-      "slot": "radiomark",
-      "prop": "background",
-      "note": "SEED palette.gray-300 자리"
-    },
-    {
-      "rule": 5,
-      "state": "disabled",
-      "slot": "radiomark",
-      "prop": "borderColor",
-      "note": "SEED stroke.neutral-weak(gray-400)"
+      "note": "불투명한 누름 색"
     },
     {
       "rule": 6,
       "state": "disabled",
       "slot": "radiomark",
       "prop": "background",
-      "note": "Checkbox 와 같게 — 켜진 모양 그대로 색만(사용자 결정). SEED 는 채움을 빼고 테두리 + 커진 점"
+      "note": "Checkbox 와 같게 — 켜진 모양 그대로 색만"
     }
   ]
 }

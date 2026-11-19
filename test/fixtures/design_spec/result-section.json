@@ -3,7 +3,7 @@
   "source": "specs/components/result-section.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "묶음 — 놓인 자리 가운데",
@@ -185,7 +185,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "paddingX",
-      "note": "카드(card.md) 안에서는 0 — 카드 안 여백 24 가 가장자리를 맡는다(2026-10-09 사용자 결정, 데이터 표시 비교 페이지 23B). 표의 빈 줄도 카드 안이다(칸이 24). 목록 카드(body list)에 바로 두면 24 — 목록 카드는 줄마다 24 를 가져 카드 여백이 없다"
+      "note": "카드(card.md) 안에서는 0 — 카드 안 여백 24 가 가장자리를 맡는다. 표의 빈 줄도 카드 안이다(칸이 24). 목록 카드(body list)에 바로 두면 24 — 목록 카드는 줄마다 24 를 가져 카드 여백이 없다"
     },
     {
       "rule": 0,
@@ -206,14 +206,14 @@
       "state": "enabled",
       "slot": "description",
       "prop": "foreground",
-      "note": "단어 단위 줄바꿈(v114) — 최대 두 줄을 권한다"
+      "note": "단어 단위 줄바꿈 — 최대 두 줄을 권한다(100% 기준 — 큰 글자에서 줄 수로 자르지 않는다)"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "actions",
       "prop": "gap",
-      "note": "첫 버튼과 둘째 버튼(글 버튼) 사이 — 둘째 버튼이 위아래로 8 블리드해 상자 사이는 12(SEED 와 같다)"
+      "note": "첫 버튼과 둘째 버튼(글 버튼) 사이 — 둘째 버튼이 위아래로 8 블리드해 상자 사이는 12"
     },
     {
       "rule": 0,
@@ -227,14 +227,14 @@
       "state": "enabled",
       "slot": "secondaryButton",
       "prop": "buttonSize",
-      "note": "글 버튼(SEED Text Button) — Button ghost small 의 상자(36 · 좌우 14 · 모서리 8 · 누름 bg-layer-default-pressed)가 SEED Text Button 과 같다. 위아래로 블리드해 글 자리만 차지"
+      "note": "글 버튼 — Button ghost small 의 상자(36 · 좌우 14 · 모서리 8 · 누름 bg-layer-default-pressed). 위아래로 블리드해 글 자리만 차지"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "secondaryButton",
       "prop": "foreground",
-      "note": "지금 값은 fg-neutral-muted — SEED Text Button 글자 t4 · 700 · fg.neutral-muted(2026-10-16 사용자 결정 글자 역할 D2). D2 이전에는 Button ghost 의 fg-neutral 이었고 D2 가 바꿨다 — 둘째 버튼을 ghost 그대로 두면 틀린다"
+      "note": "글 버튼 글자 t4 · 700 · fg-neutral-muted — Button ghost 의 fg-neutral 이 아니므로 둘째 버튼을 ghost 그대로 두면 틀린다"
     },
     {
       "rule": 1,

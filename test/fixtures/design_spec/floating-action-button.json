@@ -3,7 +3,7 @@
   "source": "specs/components/floating-action-button.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "버튼 — 원 56. 오른쪽 아래에 떠 있다",
@@ -102,14 +102,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "size",
-      "note": "원 — 아이콘만(SEED extended=false). 누르는 영역도 56. AA ✓ · AAA ✓"
+      "note": "원 — 아이콘만. 누르는 영역도 56. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "브랜드 채움 — 화면의 주 동작 하나. 바꾸지 않는다(SEED)"
+      "note": "브랜드 채움 — 화면의 주 동작 하나. 바꾸지 않는다"
     },
     {
       "rule": 0,
@@ -130,14 +130,14 @@
       "state": "enabled",
       "slot": "root",
       "prop": "marginRight",
-      "note": "화면 끝 → 버튼 20 + 오른쪽 안전 영역(SEED)"
+      "note": "화면 끝 → 버튼 20 + 오른쪽 안전 영역"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "marginBottom",
-      "note": "화면 아래 끝(또는 바닥 고정 버튼 위 끝) → 버튼 20 + 아래 안전 영역(SEED)"
+      "note": "화면 아래 끝(또는 바닥 고정 버튼 위 끝) → 버튼 20 + 아래 안전 영역"
     },
     {
       "rule": 0,
@@ -165,7 +165,7 @@
       "state": "pressed",
       "slot": "root",
       "prop": "scale",
-      "note": "기준 56 → 0.964(SEED scaleScope: self · v104) — 모션 줄이기면 하지 않는다"
+      "note": "기준 56 → 0.964 — 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 0,

@@ -3,7 +3,7 @@
   "source": "specs/components/icon-picker.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "trigger": "트리거 — Input Button. 라벨 \"아이콘\"(Field) · 앞 지금 아이콘 · 값 = 아이콘 이름 · 뒤 chevron-down",
@@ -285,7 +285,7 @@
       "state": "enabled",
       "slot": "cell",
       "prop": "touchTarget",
-      "note": "AA ✓ · AAA ✓ — SEED Iconography \"24px 크기에서는 44px 이상\""
+      "note": "AA ✓ · AAA ✓ — 아이콘 24 에는 누르는 영역 44 이상"
     },
     {
       "rule": 0,
@@ -299,7 +299,7 @@
       "state": "enabled",
       "slot": "icon",
       "prop": "size",
-      "note": "lucide 기본 격자 — v106 의 24"
+      "note": "lucide 기본 격자"
     },
     {
       "rule": 0,
@@ -341,7 +341,7 @@
       "state": "pressed",
       "slot": "cell",
       "prop": "scale",
-      "note": "기준 48 — Feedback 의 눌림 피드백(v104). 모션 줄이기면 하지 않는다"
+      "note": "기준 48 — Feedback 의 눌림 피드백. 모션 줄이기면 하지 않는다"
     },
     {
       "rule": 0,
@@ -355,7 +355,7 @@
       "state": "enabled",
       "slot": "cell",
       "prop": "borderWidth",
-      "note": "안쪽에 덧그린다 — 아이콘이 밀리지 않는다(Select Box v113 의 고른 테두리와 같다). 바탕은 칠하지 않는다(반전 · 브랜드 채움은 고르지 않았다 — 17B)"
+      "note": "안쪽에 덧그린다 — 아이콘이 밀리지 않는다(Select Box 의 고른 테두리와 같다). 바탕은 칠하지 않는다"
     },
     {
       "rule": 1,
@@ -369,7 +369,7 @@
       "state": "enabled",
       "slot": "icon",
       "prop": "strokeWidth",
-      "note": "v106 — 선택은 선 2.5"
+      "note": "선택은 선 2.5"
     },
     {
       "rule": 2,
@@ -397,14 +397,14 @@
       "state": "enabled",
       "slot": "scroll",
       "prop": "scrollFog",
-      "note": "격자가 넘친다 — Bottom Sheet 본문의 끝 흐림(Scroll Fog overlayBody, 위 20 · 아래 80 늘 켜짐 · 2026-10-03 규칙). 찾기 칸은 스크롤 상자 밖이라 흐리지 않는다"
+      "note": "격자가 넘친다 — Bottom Sheet 본문의 끝 흐림(Scroll Fog overlayBody, 위 20 · 아래 80 늘 켜짐). 찾기 칸은 스크롤 상자 밖이라 흐리지 않는다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "search",
       "prop": "height",
-      "note": "밑줄형 large — 글 18 / 24 · 돋보기 24"
+      "note": "최소 — 밑줄형 large(input.yaml minHeight) · 글 18 / 24 · 돋보기 24. 글이 커지면 칸이 따라 늘어난다"
     },
     {
       "rule": 3,
@@ -439,14 +439,14 @@
       "state": "enabled",
       "slot": "scroll",
       "prop": "scrollFog",
-      "note": "격자가 넘친다 — Popover 본문의 끝 흐림(Scroll Fog overlayBody, 위 20 · 아래 80 늘 켜짐 · 2026-10-03 규칙). 찾기 칸은 스크롤 상자 밖"
+      "note": "격자가 넘친다 — Popover 본문의 끝 흐림(Scroll Fog overlayBody, 위 20 · 아래 80 늘 켜짐). 찾기 칸은 스크롤 상자 밖"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "search",
       "prop": "height",
-      "note": "밑줄형 medium — 글 16 / 22 · 돋보기 20"
+      "note": "최소 — 밑줄형 medium(input.yaml minHeight) · 글 16 / 22 · 돋보기 20. 글이 커지면 칸이 따라 늘어난다"
     }
   ]
 }

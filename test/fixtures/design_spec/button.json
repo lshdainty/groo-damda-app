@@ -3,7 +3,7 @@
   "source": "specs/components/button.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "버튼 상자(Container) — 배경 · 테두리 · 모양, 글자 · 아이콘 색(currentColor)",
@@ -736,35 +736,35 @@
       "state": "enabled",
       "slot": "root",
       "prop": "touchTarget",
-      "note": "보이는 크기와 따로 — 누르는 영역을 가로 · 세로 44 까지 넓힌다(v106). AA ✓ · AAA ✓"
+      "note": "보이는 크기와 따로 — 누르는 영역을 가로 · 세로 44 까지 넓힌다. AA ✓ · AAA ✓"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "press",
-      "note": "onClick 이 Promise 를 돌려주면 이행 · 거부될 때까지 다음 누름(포인터 · Enter · Space)을 버린다 — 시간 창은 없다. 비동기 동작은 Promise 를 돌려준다(mutateAsync). 돌려주지 않으면 잠그지 않는다. 앱은 Future 가 끝날 때까지. 사용자 결정 2026-10-08"
+      "note": "onClick 이 Promise 를 돌려주면 이행 · 거부될 때까지 다음 누름(포인터 · Enter · Space)을 버린다 — 시간 창은 없다. 비동기 동작은 Promise 를 돌려준다(mutateAsync). 돌려주지 않으면 잠그지 않는다. 앱은 Future 가 끝날 때까지"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "root",
       "prop": "scale",
-      "note": "기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px — Feedback 의 눌림 피드백(v104)"
+      "note": "기준 길이 max(높이, 폭 ÷ 4, 24) 에서 2px — Feedback 의 눌림 피드백"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "width",
-      "note": "웹 · 앱 같다 — 앱은 키보드로 옮길 때만 그린다(Flutter FocusHighlightMode.traditional), 손가락으로 누를 때는 없다. 앱 버튼도 포커스를 받아 Tab 순서에 든다(사용자 결정 2026-10-08)"
+      "note": "웹 · 앱 같다 — 앱은 키보드로 옮길 때만 그린다(Flutter FocusHighlightMode.traditional), 손가락으로 누를 때는 없다. 앱 버튼도 포커스를 받아 Tab 순서에 든다"
     },
     {
       "rule": 0,
       "state": "loading",
       "slot": "root",
       "prop": "press",
-      "note": "누르기(포인터 · Enter · Space)를 삼켜 두 번 제출을 막는다 — 축소도 없다. aria-busy=true. SEED 는 막지 않는다"
+      "note": "누르기(포인터 · Enter · Space)를 삼켜 두 번 제출을 막는다 — 축소도 없다. aria-busy=true"
     },
     {
       "rule": 0,
@@ -778,63 +778,63 @@
       "state": "disabled",
       "slot": "root",
       "prop": "cursor",
-      "note": "포인터 이벤트는 켜 둔다 — 끄면 이 커서가 안 보인다(SEED 와 같다)"
+      "note": "포인터 이벤트는 켜 둔다 — 끄면 이 커서가 안 보인다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "root",
       "prop": "borderColor",
-      "note": "SEED stroke.neutral-muted(투명도 있는 검정)의 불투명 짝"
+      "note": "투명도 있는 색 대신 불투명한 역할 — lint 가 8자리 hex 를 받지 않는다"
     },
     {
       "rule": 5,
       "state": "enabled",
       "slot": "progressCircle",
       "prop": "range",
-      "note": "Progress Circle brand 톤과 같다 — 다크는 밝은 짝(바탕 위 라이트 Desk 8.38 · HR 8.17, 다크 Desk 6.10 · HR 6.07 — 트랙과 Desk 6.59 · 4.73). 2026-10-08 까지 bg-brand-solid 라 다크 바탕 위 1.73 이었다(채움 색은 다크에서도 짙다)"
+      "note": "Progress Circle brand 톤과 같다 — 다크는 밝은 짝(바탕 위 라이트 Desk 8.38 · HR 8.17, 다크 Desk 6.10 · HR 6.07 — 트랙과 Desk 6.59 · 4.73). 채움 색 bg-brand-solid 는 다크에서도 짙어 투명한 버튼 위에서 보이지 않는다"
     },
     {
       "rule": 5,
       "state": "pressed",
       "slot": "root",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝"
+      "note": "투명 누름 색 대신 불투명한 역할"
     },
     {
       "rule": 11,
       "state": "enabled",
       "slot": "root",
       "prop": "height",
-      "note": "최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다(2026-10-22 사용자 결정 — 버튼 큰 글자 A, SEED action-button root.minHeight)"
+      "note": "최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다"
     },
     {
       "rule": 12,
       "state": "enabled",
       "slot": "root",
       "prop": "height",
-      "note": "최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다(2026-10-22 사용자 결정 — 버튼 큰 글자 A, SEED action-button root.minHeight)"
+      "note": "최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다"
     },
     {
       "rule": 13,
       "state": "enabled",
       "slot": "root",
       "prop": "height",
-      "note": "최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다(2026-10-22 사용자 결정 — 버튼 큰 글자 A, SEED action-button root.minHeight)"
+      "note": "최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다"
     },
     {
       "rule": 14,
       "state": "enabled",
       "slot": "root",
       "prop": "height",
-      "note": "SEED 52 — groo 는 48(사용자 결정). 최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다(2026-10-22 사용자 결정 — 버튼 큰 글자 A, SEED action-button root.minHeight)"
+      "note": "최소 높이 — 글이 상자보다 크면(큰 글자) 상자가 글을 따라 늘어난다"
     },
     {
       "rule": 21,
       "state": "enabled",
       "slot": "root",
       "prop": "paddingY",
-      "note": "(48 − 줄 높이 24) ÷ 2 — SEED 52 는 14"
+      "note": "(48 − 줄 높이 24) ÷ 2"
     }
   ]
 }

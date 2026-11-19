@@ -3,13 +3,13 @@
   "source": "specs/components/segmented-control.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
-    "root": "트랙 — 알약. 놓인 자리 폭을 채우고 칸이 그 폭을 똑같이 나눈다",
+    "root": "트랙 — 알약. 놓인 자리 폭을 채우고 칸이 그 폭을 똑같이 나눕니다",
     "item": "칸 — 누르는 자리. 모든 칸이 같은 폭 · 같은 높이",
-    "label": "글 — 짧게. 길면 단어 단위로 줄을 바꾼다",
-    "indicator": "고른 알약 — 고른 칸 뒤에 깔리고, 다른 칸을 고르면 미끄러져 옮긴다",
+    "label": "글 — 짧게. 길면 단어 단위로 줄을 바꿉니다",
+    "indicator": "고른 알약 — 고른 칸 뒤에 깔리고, 다른 칸을 고르면 미끄러져 옮깁니다",
     "notification": "알림 점 — 새 소식이 있는 칸에만, 글 오른쪽 위",
     "focusRing": "키보드 포커스 링(웹) — 칸 바깥"
   },
@@ -242,7 +242,7 @@
       "properties": [
         "scale"
       ],
-      "note": "칸 안의 글만 2px 거리 축소 — 모션 줄이기면 하지 않는다"
+      "note": "칸 안의 글만 2px 거리 축소 — 모션 줄이기면 하지 않습니다"
     }
   },
   "notes": [
@@ -251,21 +251,21 @@
       "state": "enabled",
       "slot": "root",
       "prop": "background",
-      "note": "SEED 그대로 투명(검정 4.7% · 다크 흰 12.5%) — 놓인 바탕에 섞여 회색 바닥 · 흰 면 위 1.11 · 다크 1.47:1(v120)"
+      "note": "투명(검정 4.7% · 다크 흰 12.5%) — 놓인 바탕에 섞여 회색 바닥 · 흰 면 위 1.11 · 다크 1.47:1"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "width",
-      "note": "트랙이 자리를 채우고 칸 수로 똑같이 나눈다(최소 폭 없음) — 넓은 화면에서는 놓는 자리를 좁힌다. 머리 오른쪽 자리(카드 · 구역 머리)에서는 내용 폭 = (가장 긴 칸 글 + 칸 좌우 12 · 12) × 칸 수 + 트랙 안쪽 4 · 4 — 칸 글이 글자 크기를 따르지 않아(t5-static) 폭이 흔들리지 않는다. 제목이 머리 폭의 50% 이상을 지키지 못하면 머리 아래 줄 오른쪽 끝으로 내려간다(2026-10-25 08-2 — 웹 · 앱이 이 규칙으로 맞췄다)"
+      "note": "트랙이 자리를 채우고 칸 수로 똑같이 나눕니다(최소 폭 없음) — 넓은 화면에서는 놓는 자리를 좁힙니다. 머리 오른쪽 자리(카드 · 구역 머리)에서는 내용 폭 = (가장 긴 칸 글 + 칸 좌우 12 · 12) × 칸 수 + 트랙 안쪽 4 · 4 — 칸 글이 글자 크기를 따르지 않아(t5-static) 폭이 흔들리지 않습니다. 제목이 머리 폭의 50% 이상을 지키지 못하면 머리 아래 줄 오른쪽 끝으로 내려갑니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "root",
       "prop": "columns",
-      "note": "모든 칸이 같은 폭 · 같은 높이(가장 높은 칸에 맞춘다)"
+      "note": "모든 칸이 같은 폭 · 같은 높이(가장 높은 칸에 맞춥니다)"
     },
     {
       "rule": 0,
@@ -279,21 +279,21 @@
       "state": "enabled",
       "slot": "item",
       "prop": "paddingX",
-      "note": "SEED 24 → 12 — 칸이 트랙을 나누므로 폰에서 4개도 들어간다. 예외 — 증권 차트 기간 5칸만 4(2026-10-30 I-13)"
+      "note": "칸이 트랙을 나누므로 폰에서 4개도 들어갑니다. 예외 — 증권 차트 기간 5칸만 4"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "item",
       "prop": "touchTarget",
-      "note": "34 × 칸 폭 — AA ✓(24 이상) · AAA 는 44 에 모자란다(SEED 와 같다)"
+      "note": "34 × 칸 폭 — AA ✓(24 이상) · AAA 는 44 에 모자랍니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "label",
       "prop": "typography",
-      "note": "16 / 22 — 고르든 안 고르든 같다. -static — 글자 크기 설정을 따르지 않는다(웹 text-t5-static, 앱 TextScaler.noScaling). 큰 글자에서 4칸이 \"오 / 늘\" 처럼 한 글자씩 쪼개지지 않게 — WCAG 1.4.4 의 예외(하단 탭 라벨과 같은 대가, 2026-10-17 사용자 결정 — 03-B 결정 4 A. 2 × 2 격자는 고르지 않았다)"
+      "note": "16 / 22 — 고르든 안 고르든 같습니다. -static — 글자 크기 설정을 따르지 않습니다(웹 text-t5-static, 앱 TextScaler.noScaling). 큰 글자에서 4칸이 \"오 / 늘\" 처럼 한 글자씩 쪼개지지 않게 — WCAG 1.4.4 의 예외입니다(하단 탭 라벨과 같은 대가)"
     },
     {
       "rule": 0,
@@ -307,70 +307,70 @@
       "state": "enabled",
       "slot": "label",
       "prop": "foreground",
-      "note": "다크는 한 단계 짙게 — 투명 트랙이 다크 표면에 섞여 밝아져 fg-neutral-subtle 이 카드 위 4.09 · 시트 위 3.56 이다. muted 는 카드 5.18 · 시트 4.50 · 바닥 5.93, 라이트는 subtle 그대로 4.59 ~ 4.95(2026-10-17 사용자 결정 — 01-040 B 후속)"
+      "note": "다크는 한 단계 짙게 — 투명 트랙이 다크 표면에 섞여 밝아져 fg-neutral-subtle 이 카드 위 4.09 · 시트 위 3.56 입니다. muted 는 카드 5.18 · 시트 4.50 · 바닥 5.93, 라이트는 subtle 그대로 4.59 ~ 4.95"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "label",
       "prop": "textAlign",
-      "note": "길면 단어 단위로 줄을 바꾼다(v114)"
+      "note": "길면 단어 단위로 줄을 바꿉니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "indicator",
       "prop": "background",
-      "note": "흰 알약 — 다크에서는 트랙보다 어둡다(SEED 도 다크 알약이 검정)"
+      "note": "흰 알약 — 다크에서는 트랙보다 어둡습니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "indicator",
       "prop": "borderColor",
-      "note": "안쪽 1px(inset) 짙은 테두리 — 고른 칸을 트랙과 라이트 13.71 ~ 14.79 · 다크 7.84 ~ 10.33:1 로 가른다(SEED 옅은 1px 은 1.14 · 1.20 — 사용자 결정 2026-10-02)"
+      "note": "안쪽 1px(inset) 짙은 테두리 — 고른 칸을 트랙과 라이트 13.71 ~ 14.79 · 다크 7.84 ~ 10.33:1 로 가릅니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "indicator",
       "prop": "inset",
-      "note": "트랙 안쪽 4 — 폭 = (트랙 − 8) ÷ 칸 수, 고른 칸 번호만큼 옆으로 옮긴다"
+      "note": "트랙 안쪽 4 — 폭 = (트랙 − 8) ÷ 칸 수, 고른 칸 번호만큼 옆으로 옮깁니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "indicator",
       "prop": "transitionProperty",
-      "note": "고른 칸으로 미끄러진다"
+      "note": "고른 칸으로 미끄러집니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "notification",
       "prop": "background",
-      "note": "브랜드 글자색 — 트랙 위 Desk 라이트 7.00 ~ 7.55 · 다크 3.56 ~ 4.69 · HR 6.82 ~ 7.36 · 3.55 ~ 4.67(v120 투명 트랙 — 놓인 바탕에 따라, bg-brand-solid 는 다크에서 Desk · HR 1.33 이라 안 보인다). 고른 칸에는 없다 — 고르면 사라진다"
+      "note": "브랜드 글자색 — 트랙 위 Desk 라이트 7.00 ~ 7.55 · 다크 3.56 ~ 4.69 · HR 6.82 ~ 7.36 · 3.55 ~ 4.67(투명 트랙 — 놓인 바탕에 따라, bg-brand-solid 는 다크에서 Desk · HR 1.33 이라 안 보입니다). 고른 칸에는 없습니다 — 고르면 사라집니다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "notification",
       "prop": "gap",
-      "note": "글 끝에서 2, 글 위쪽에 맞춘다"
+      "note": "글 끝에서 2, 글 위쪽에 맞춥니다"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "label",
       "prop": "scale",
-      "note": "칸 바탕은 그대로, 안의 글만 준다(SEED scaleScope: content · v104) — 모션 줄이기면 하지 않는다"
+      "note": "칸 바탕은 그대로, 안의 글만 줄입니다 — 모션 줄이기면 하지 않습니다"
     },
     {
       "rule": 0,
       "state": "focused",
       "slot": "focusRing",
       "prop": "offset",
-      "note": "칸 바깥 — 알약을 따라 둥글다"
+      "note": "칸 바깥 — 알약을 따라 둥급니다"
     },
     {
       "rule": 0,
@@ -405,28 +405,28 @@
       "state": "hovered",
       "slot": "item",
       "prop": "background",
-      "note": "칸에 칠해 알약을 덮는다 — 짙은 테두리는 그대로"
+      "note": "칸에 칠해 알약을 덮습니다 — 짙은 테두리는 그대로입니다"
     },
     {
       "rule": 2,
       "state": "pressed",
       "slot": "item",
       "prop": "background",
-      "note": "SEED palette.gray-100 의 역할 짝 — 짙은 테두리는 그대로"
+      "note": "짙은 테두리는 그대로입니다"
     },
     {
       "rule": 2,
       "state": "disabled",
       "slot": "item",
       "prop": "background",
-      "note": "고른 채 막힘 — 칸에 칠해 알약을 덮는다"
+      "note": "고른 채 막힘 — 칸에 칠해 알약을 덮습니다"
     },
     {
       "rule": 2,
       "state": "disabled",
       "slot": "item",
       "prop": "borderColor",
-      "note": "짙은 1px 를 회색으로 남겨 무엇을 골랐는지 보인다(Chip 의 고른 채 막힘과 같다)"
+      "note": "짙은 1px 를 회색으로 남겨 무엇을 골랐는지 보입니다(Chip 의 고른 채 막힘과 같습니다)"
     }
   ]
 }

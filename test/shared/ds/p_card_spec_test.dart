@@ -233,7 +233,7 @@ void main() {
         final box = tester.getSize(
           find.byKey(const ValueKey('text-button-box')),
         );
-        if (box.height != want['headerAction.height']) {
+        if (box.height != want['headerAction.minHeight']) {
           failures.add('$where — 동작 높이 ${box.height}');
         }
         final deco =

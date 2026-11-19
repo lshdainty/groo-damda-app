@@ -3,7 +3,7 @@
   "source": "specs/components/input-otp.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "field": "코드 칸 — Input 상자형 한 칸. 이름은 Field 라벨(\"인증 코드\")",
@@ -227,7 +227,7 @@
       "state": "enabled",
       "slot": "field",
       "prop": "variant",
-      "note": "Input 상자형(input.yaml) — 크기 · 모서리 · 테두리 · 포커스 · 오류 · 막힘은 Input 그대로. 칸을 자릿수만큼 나누지 않는다(사용자 결정 10A — 6칸 · 6칸 모양은 고르지 않았다)"
+      "note": "Input 상자형(input.yaml) — 크기 · 모서리 · 테두리 · 포커스 · 오류 · 막힘은 Input 그대로. 칸을 자릿수만큼 나누지 않고, 6칸 모양도 그리지 않는다"
     },
     {
       "rule": 0,
@@ -297,7 +297,7 @@
       "state": "enabled",
       "slot": "description",
       "prop": "content",
-      "note": "늘 보인다(사용자 결정 11B) — 서버 규칙(유효 600초 · 틀림 5번 · 다시 받기 60초 — porest-sso-back ReauthServiceImpl)이 바뀌면 글도 바꾼다. 오류가 나면 Field 규칙대로 오류 글이 이 자리를 대신하고, 칸을 고치면 돌아온다"
+      "note": "늘 보인다 — 서버 규칙(유효 600초 · 틀림 5번 · 다시 받기 60초 — groo-sso-back ReauthServiceImpl)이 바뀌면 글도 바꾼다. 오류가 나면 Field 규칙대로 오류 글이 이 자리를 대신하고, 칸을 고치면 돌아온다"
     },
     {
       "rule": 0,
@@ -318,7 +318,7 @@
       "state": "enabled",
       "slot": "resend",
       "prop": "height",
-      "note": "Button medium — 칸 옆이 아니라 아래에 둬 칸(52 · 40)과 높이를 맞출 일이 없다(지금 웹은 칸 40 옆 36)"
+      "note": "최소 — Button medium, 글이 커지면 따라 높아진다. 칸 옆이 아니라 아래에 둬 칸(52 · 40)과 높이를 맞출 일이 없다"
     },
     {
       "rule": 0,
@@ -360,21 +360,21 @@
       "state": "invalid",
       "slot": "description",
       "prop": "content",
-      "note": "Field 오류(14 · fg-critical + 아이콘 16)가 설명을 대신한다(18A) — 칸을 고치기 시작하면 설명 줄이 돌아온다"
+      "note": "Field 오류(14 · fg-critical + 아이콘 16)가 설명을 대신한다 — 칸을 고치기 시작하면 설명 줄이 돌아온다"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "field",
       "prop": "background",
-      "note": "Input 그대로 — 흐리게 하지 않는다(v106)"
+      "note": "Input 그대로 — 흐리게 하지 않는다"
     },
     {
       "rule": 0,
       "state": "disabled",
       "slot": "placeholder",
       "prop": "foreground",
-      "note": "막혀도 자리 글은 그대로 — Input · Textarea · SEED text-input(fg-disabled)과 다른 자리다. 막힌 칸은 바탕(bg-disabled) · 커서로 갈린다(2026-10-17 사용자 결정 01T-013 — 추천 fg-disabled 는 고르지 않았다)"
+      "note": "막혀도 자리 글은 그대로 — Input · Textarea(fg-disabled)와 다른 자리다. 막힌 칸은 바탕(bg-disabled) · 커서로 갈린다"
     },
     {
       "rule": 3,
@@ -402,7 +402,7 @@
       "state": "enabled",
       "slot": "resend",
       "prop": "background",
-      "note": "Button 막힘 — 흐리게 하지 않는다(v106)"
+      "note": "Button 막힘 — 흐리게 하지 않는다"
     }
   ]
 }

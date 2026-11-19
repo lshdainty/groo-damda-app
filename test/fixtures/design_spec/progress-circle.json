@@ -3,7 +3,7 @@
   "source": "specs/components/progress-circle.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "원 상자 — 지름 · 두께, 정사각",
@@ -227,7 +227,7 @@
       "state": "reducedMotion",
       "slot": "root",
       "prop": "rotate",
-      "note": "돌지 않는다(v104) — 값 없는 원은 고정된 호, 값 있는 원은 채움이 바로 바뀐다"
+      "note": "돌지 않는다 — 값 없는 원은 고정된 호, 값 있는 원은 채움이 바로 바뀐다"
     },
     {
       "rule": 1,
@@ -269,7 +269,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "range",
-      "note": "흰 면 위 4.18 · 다크 4.13(떠 있는 면 3.58), 트랙과 3.63 · 3.18 — 3:1 이상(사용자 결정)"
+      "note": "흰 면 위 4.18 · 다크 4.13(떠 있는 면 3.58), 트랙과 3.63 · 3.18 — 3:1 이상"
     },
     {
       "rule": 5,
@@ -290,7 +290,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "track",
-      "note": "Button v112 의 채운 버튼과 같다(SEED 18%)"
+      "note": "Button 의 채운 버튼 로딩 원과 같다"
     },
     {
       "rule": 6,

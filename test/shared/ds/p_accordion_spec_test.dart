@@ -665,7 +665,7 @@ void main() {
       _near(
         failures,
         '모두 펼치기 높이',
-        want['expandAll.height']! as num,
+        want['expandAll.minHeight']! as num,
         box.height,
       );
       final deco =

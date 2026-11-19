@@ -221,7 +221,7 @@ void main() {
       // 묶음 — 검색칸 ↔ 결과 8, 검색칸 40 · 좌우 24
       final list = tester.getRect(find.byType(PSearchableList));
       final field = tester.getRect(find.byType(PInput));
-      k.px('field.height', field.height);
+      k.px('field.minHeight', field.height);
       k.px('field.marginX', field.left - list.left);
       k.px('field.marginX', list.right - field.right);
       final results = tester.getRect(

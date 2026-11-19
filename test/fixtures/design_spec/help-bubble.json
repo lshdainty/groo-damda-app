@@ -3,7 +3,7 @@
   "source": "specs/components/help-bubble.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "말풍선 — 짙은 바탕, 트리거 쪽에 화살표",
@@ -165,7 +165,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "maxWidth",
-      "note": "여백을 포함한 폭 — 한 줄 20자 안팎, 2 ~ 3줄이면 넘지 않는다. 쓸 수 있는 폭(화면 − 양쪽 16)이 더 좁으면 그만큼(SEED 와 같다)"
+      "note": "여백을 포함한 폭 — 한 줄 20자 안팎, 2 ~ 3줄이면 넘지 않는다. 쓸 수 있는 폭(화면 − 양쪽 16)이 더 좁으면 그만큼"
     },
     {
       "rule": 0,
@@ -186,7 +186,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "margin",
-      "note": "화면 가장자리와 16 — 모자라면 반대편으로 뒤집고 옆으로 민다. 화살표를 트리거 가운데 · 모서리 14 에 두느라 모자라면 이 값이 진다 — 하한 없이 화면 끝(0)까지(2026-10-15 사용자 결정 — 구현 세션 질문 Q-004-1)"
+      "note": "화면 가장자리와 16 — 모자라면 반대편으로 뒤집고 옆으로 민다. 화살표를 트리거 가운데 · 모서리 14 에 두느라 모자라면 이 값이 진다 — 하한 없이 화면 끝(0)까지"
     },
     {
       "rule": 0,
@@ -200,7 +200,7 @@
       "state": "enabled",
       "slot": "root",
       "prop": "announce",
-      "note": "열릴 때 한 번, 초점을 옮기지 않고 — 웹 aria-live polite · 앱 Semantics liveRegion. 처음부터 열린 안내도(2026-10-15 사용자 결정 — 구현 세션 질문 Q-004-2)"
+      "note": "열릴 때 한 번, 초점을 옮기지 않고 — 웹 aria-live polite · 앱 Semantics liveRegion. 처음부터 열린 안내도"
     },
     {
       "rule": 0,
@@ -214,7 +214,7 @@
       "state": "enabled",
       "slot": "arrow",
       "prop": "height",
-      "note": "끝 모서리 2 — 말풍선과 같은 색. 트리거와 4 는 이 상자의 끝에서 잰다 — 둥근 끝 때문에 그림 끝은 1 더 떨어져 보인다(SEED 와 같다)"
+      "note": "끝 모서리 2 — 말풍선과 같은 색. 트리거와 4 는 이 상자의 끝에서 잰다 — 둥근 끝 때문에 그림 끝은 1 더 떨어져 보인다"
     },
     {
       "rule": 0,
@@ -235,7 +235,7 @@
       "state": "enabled",
       "slot": "title",
       "prop": "typography",
-      "note": "단어 단위 줄바꿈(v114) · 줄바꿈 문자는 그대로"
+      "note": "단어 단위 줄바꿈 · 줄바꿈 문자는 그대로"
     },
     {
       "rule": 0,
@@ -298,14 +298,14 @@
       "state": "enabled",
       "slot": "closeButton",
       "prop": "size",
-      "note": "투명 상자 — 말풍선 오른쪽 위 모서리에 붙는다(위 0 · 오른쪽 0). 글과 이 상자 사이 4(SEED 와 같다)"
+      "note": "투명 상자 — 말풍선 오른쪽 위 모서리에 붙는다(위 0 · 오른쪽 0). 글과 이 상자 사이 4. 글자가 커져도 크기를 그대로 두고 제목 첫 줄 가운데에 선다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "closeButton",
       "prop": "touchTarget",
-      "note": "사방 3 넓힌다(SEED 38)"
+      "note": "사방 3 넓힌다"
     },
     {
       "rule": 2,
@@ -319,7 +319,7 @@
       "state": "enabled",
       "slot": "closeButton",
       "prop": "radius",
-      "note": "바탕이 없어 초점 링에만 보인다(SEED 와 같다)"
+      "note": "바탕이 없어 초점 링에만 보인다"
     },
     {
       "rule": 2,

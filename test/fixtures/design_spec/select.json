@@ -3,7 +3,7 @@
   "source": "specs/components/select.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "trigger": "트리거 — Input Button 과 같은 상자. 누르면 목록이 열린다",
@@ -312,7 +312,7 @@
         "item": {
           "paddingY": 12,
           "gap": 12,
-          "height": 46
+          "minHeight": 46
         },
         "itemIcon": {
           "size": 22
@@ -384,7 +384,7 @@
         "item": {
           "paddingY": 10,
           "gap": 8,
-          "height": 39
+          "minHeight": 39
         },
         "itemIcon": {
           "size": 18
@@ -544,7 +544,7 @@
       "state": "enabled",
       "slot": "content",
       "prop": "maxHeight",
-      "note": "남은 화면 = 목록이 놓이는 쪽(아래에 다 들어가면 아래, 아니면 아래 · 위 중 넓은 쪽)의 트리거 ~ 화면 가장자리 8. 화면 키보드는 세지 않는다 — 열면 초점이 목록으로 가 키보드가 내려간다(Q-008-1). 남은 화면이 200 보다 좁아도 200 은 둔다 — 넘치면 목록 안에서 스크롤. 열면 고른 선택지가 보이게 스크롤된다"
+      "note": "남은 화면 = 목록이 놓이는 쪽(아래에 다 들어가면 아래, 아니면 아래 · 위 중 넓은 쪽)의 트리거 ~ 화면 가장자리 8. 화면 키보드는 세지 않는다 — 열면 초점이 목록으로 가 키보드가 내려간다. 남은 화면이 200 보다 좁아도 200 은 둔다 — 넘치면 목록 안에서 스크롤. 열면 고른 선택지가 보이게 스크롤된다"
     },
     {
       "rule": 0,
@@ -565,7 +565,7 @@
       "state": "enabled",
       "slot": "indicator",
       "prop": "color",
-      "note": "lucide check · 선 2.5 — 앱은 2.5 굵기 글꼴 LucideIcons.check500(Q-008-2)"
+      "note": "lucide check · 선 2.5 — 앱은 2.5 굵기 글꼴 LucideIcons.check500"
     },
     {
       "rule": 0,
@@ -586,14 +586,14 @@
       "state": "pressed",
       "slot": "trigger",
       "prop": "background",
-      "note": "SEED bg.transparent-pressed 의 불투명 짝. 마우스는 호버에 같은 바탕"
+      "note": "불투명한 누름 바탕. 마우스는 호버에 같은 바탕"
     },
     {
       "rule": 0,
       "state": "pressed",
       "slot": "trigger",
       "prop": "scale",
-      "note": "값 · 아이콘만 준다(SEED scaleScope: content) — 테두리 · 바탕은 그대로"
+      "note": "값 · 아이콘만 준다 — 테두리 · 바탕은 그대로"
     },
     {
       "rule": 0,
@@ -642,7 +642,7 @@
       "state": "disabled",
       "slot": "trigger",
       "prop": "background",
-      "note": "흐리게 하지 않는다(v106)"
+      "note": "흐리게 하지 않는다"
     },
     {
       "rule": 0,
@@ -655,22 +655,22 @@
       "rule": 1,
       "state": "enabled",
       "slot": "item",
-      "prop": "height",
-      "note": "한 줄 — 설명이 있으면 66"
+      "prop": "minHeight",
+      "note": "한 줄 — 설명이 있으면 66. 최소 높이라 글자가 커지면 줄을 바꿔 받고 늘어난다"
     },
     {
       "rule": 2,
       "state": "enabled",
       "slot": "item",
-      "prop": "height",
-      "note": "한 줄 — 설명이 있으면 57"
+      "prop": "minHeight",
+      "note": "한 줄 — 설명이 있으면 57. 최소 높이(large 비고)"
     },
     {
       "rule": 3,
       "state": "enabled",
       "slot": "trigger",
       "prop": "breakpoint",
-      "note": "미만은 large, 이상은 medium 의 값을 쓴다(SEED lg) — 앱은 늘 large"
+      "note": "미만은 large, 이상은 medium 의 값을 쓴다 — 앱은 늘 large"
     }
   ]
 }

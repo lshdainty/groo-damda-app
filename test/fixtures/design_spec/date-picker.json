@@ -3,7 +3,7 @@
   "source": "specs/components/date-picker.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "달력 — 시트 · 팝오버의 본문",
@@ -388,7 +388,7 @@
       "state": "enabled",
       "slot": "header",
       "prop": "height",
-      "note": "최소 — 글자가 크면 그만큼만 늘어난다. 칸 · 머리 · 요일 줄 · 원 · 이전 · 다음은 px, 글자만 배율(SEED, 03-C 1B)"
+      "note": "최소 — 제목이 커지면 글을 따라 늘어난다. 칸 · 요일 줄 · 원 · 이전 · 다음은 px 로 그대로"
     },
     {
       "rule": 0,
@@ -423,7 +423,7 @@
       "state": "enabled",
       "slot": "navButton",
       "prop": "size",
-      "note": "Button ghost iconOnly medium 을 px 로 — 글자 크기를 따르지 않는다(03-C 1B). 둘 사이 0, 머리 오른쪽 끝, 누르는 영역 44"
+      "note": "Button ghost iconOnly medium 을 px 로 — 글자 크기를 따르지 않는다. 둘 사이 0, 머리 오른쪽 끝, 누르는 영역 44"
     },
     {
       "rule": 0,
@@ -437,14 +437,14 @@
       "state": "enabled",
       "slot": "weekday",
       "prop": "height",
-      "note": "최소 — 글자가 크면 그만큼만 늘어난다(03-C 1B)"
+      "note": "글자 크기 설정을 따르지 않는다 — 요일 글은 칸 안 글이라 그대로"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "cell",
       "prop": "height",
-      "note": "최소(SEED dateCell minHeight) — 글자가 크면 그만큼만 늘어난다(03-C 1B): max(48, 숫자 줄 높이 + 위아래 3 · 3) — 날짜 버튼 · 앞뒤 달 숫자가 위아래 3 을 가진다(200% 44 + 6 = 50 · 달력 396). 폭은 달력 폭 ÷ 7 — 칸 전체가 누르는 자리, 칸 사이 0"
+      "note": "글자 크기 설정을 따르지 않는다 — 숫자가 칸 안 글이라 칸 높이도 그대로. 폭은 달력 폭 ÷ 7 — 칸 전체가 누르는 자리, 칸 사이 0"
     },
     {
       "rule": 0,
@@ -458,14 +458,14 @@
       "state": "enabled",
       "slot": "dayVisual",
       "prop": "size",
-      "note": "px — 글자 크기를 따르지 않는다(03-C 1B, SEED). 칸 위 3 · 가로 가운데 — 원 · 띠끼리 6 떨어진다. 칸이 44 보다 좁으면(320 화면) 칸 폭 − 2"
+      "note": "px — 글자 크기를 따르지 않는다. 칸 위 3 · 가로 가운데 — 원 · 띠끼리 6 떨어진다. 칸이 44 보다 좁으면(320 화면) 칸 폭 − 2"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "dayLabel",
       "prop": "typography",
-      "note": "숫자 폭을 같게(tabular-nums)"
+      "note": "칸 안 글이라 글자 크기 설정을 따르지 않는다. 숫자 폭을 같게(tabular-nums)"
     },
     {
       "rule": 0,
@@ -479,21 +479,21 @@
       "state": "enabled",
       "slot": "monthLabel",
       "prop": "height",
-      "note": "최소 — 글자가 크면 그만큼만 늘어난다(03-C 1B)"
+      "note": "최소 — 달 이름이 커지면 글을 따라 늘어난다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "wheel",
       "prop": "height",
-      "note": "요일 줄 + 6주 자리를 덮는다 — 높이는 요일 줄 + 6 × 칸이라 글이 크면 달력을 따라 늘어난다(100% 요일 줄 48 + 6주 288 · 200% 48 + 50 × 6 → 348, 열고 닫아도 달력 높이가 그대로). Wheel Picker medium 44 × 7 = 308 을 가운데에(100% 위아래 14). 열린 동안 이전 · 다음은 막힌다"
+      "note": "요일 줄 48 + 6주 288 자리를 덮는다 — 열고 닫아도 달력 높이가 그대로다. Wheel Picker medium 44 × 7 = 308 을 가운데에(위아래 14). 휠 항목은 글자 크기 설정을 따르지 않는다. 열린 동안 이전 · 다음은 막힌다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "wheel",
       "prop": "columns",
-      "note": "연은 오른쪽 · 월은 왼쪽 정렬로 가운데에 모은다(SEED 와 같다) — 항목은 \"2026년\" · \"10월\""
+      "note": "연은 오른쪽 · 월은 왼쪽 정렬로 가운데에 모은다 — 항목은 \"2026년\" · \"10월\""
     },
     {
       "rule": 0,
@@ -507,7 +507,7 @@
       "state": "hovered",
       "slot": "dayVisual",
       "prop": "background",
-      "note": "SEED 투명 색 — 바탕 1.15 · 다크 1.77(2026-10-21 03-C 2B). 마우스(고운 포인터)만 — 축소 없음. 오늘(옅은 원) · 기간 사이 날(띠) 위에서는 불투명 bg-neutral-weak-pressed(투명 색을 띠에 얹으면 또 다른 색이 된다). 막힌 날 · 읽기 전용 · 앞뒤 달에는 없다"
+      "note": "투명 색 — 바탕과 1.15 · 다크 1.77. 마우스(고운 포인터)만 — 축소 없음. 오늘(옅은 원) · 기간 사이 날(띠) 위에서는 불투명 bg-neutral-weak-pressed(투명 색을 띠에 얹으면 또 다른 색이 된다). 막힌 날 · 읽기 전용 · 앞뒤 달에는 없다"
     },
     {
       "rule": 0,
@@ -563,7 +563,7 @@
       "state": "readOnly",
       "slot": "dayVisual",
       "prop": "background",
-      "note": "확정된 시작일 — 채움은 남기고 톤을 낮춘다(SEED palette gray-600 의 역할 짝). 누르지 못하지만 초점은 간다"
+      "note": "확정된 시작일 — 채움은 남기고 톤을 낮춘다. 누르지 못하지만 초점은 간다"
     },
     {
       "rule": 1,

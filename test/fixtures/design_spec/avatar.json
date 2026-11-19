@@ -3,7 +3,7 @@
   "source": "specs/components/avatar.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "원 — 폭 = 높이. 사진 또는 이니셜을 원으로 자른다",
@@ -235,7 +235,7 @@
       "state": "enabled",
       "slot": "initial",
       "prop": "background",
-      "note": "이름의 코드 포인트 합 % 10 → 차트 10색(v110 순서 blue · green · orange · violet · pink · indigo · red · yellow · brown · gray) — 라이트 700 · 다크 800-dark. 색은 뜻이 없다(장식)"
+      "note": "이름의 코드 포인트 합 % 10 → 차트 10색(차트 색 순서 blue · green · orange · violet · pink · indigo · red · yellow · brown · gray) — 라이트 700 · 다크 800-dark. 색은 뜻이 없다(장식)"
     },
     {
       "rule": 0,
@@ -263,14 +263,14 @@
       "state": "enabled",
       "slot": "border",
       "prop": "borderWidth",
-      "note": "모든 크기 1 — 원 안쪽(inset box-shadow), 크기가 변하지 않는다(SEED)"
+      "note": "모든 크기 1 — 원 안쪽(inset box-shadow), 크기가 변하지 않는다"
     },
     {
       "rule": 0,
       "state": "enabled",
       "slot": "border",
       "prop": "borderColor",
-      "note": "v118 — 검정 4.7% · 다크 흰 5%(SEED stroke.neutral-subtle 의 값). 흰 사진이 흰 바탕에 묻히지 않고, 어두운 사진 · 이니셜 원 둘레에는 테가 생기지 않는다. Image Frame · Logo Tile 의 윤곽과 같은 색"
+      "note": "검정 4.7% · 다크 흰 5%. 흰 사진이 흰 바탕에 묻히지 않고, 어두운 사진 · 이니셜 원 둘레에는 테가 생기지 않는다. Image Frame · Logo Tile 의 윤곽과 같은 색"
     },
     {
       "rule": 1,

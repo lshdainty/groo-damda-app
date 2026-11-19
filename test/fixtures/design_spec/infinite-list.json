@@ -3,7 +3,7 @@
   "source": "specs/components/infinite-list.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "목록 끝 자리 — 목록 맨 아래 가운데. 상태 하나를 보인다",
@@ -106,7 +106,7 @@
       "state": "enabled",
       "slot": "sentinel",
       "prop": "threshold",
-      "note": "목록 끝이 화면 아래 끝에서 300 안으로 오면 다음 쪽을 받는다(지금 Desk 앱 값). 받는 중이거나 끝이면 부르지 않는다"
+      "note": "목록 끝이 화면 아래 끝에서 300 안으로 오면 다음 쪽을 받는다. 받는 중이거나 끝이면 부르지 않는다"
     },
     {
       "rule": 1,
@@ -120,7 +120,7 @@
       "state": "enabled",
       "slot": "message",
       "prop": "foreground",
-      "note": "\"더 불러오지 못했어요.\" — 이미 받은 줄은 그대로 둔다. 문장으로 된 상태 문구라 muted(2026-10-16 사용자 결정 글자 역할 D5 — 그대로 둔다)"
+      "note": "\"더 불러오지 못했어요.\" — 이미 받은 줄은 그대로 둔다. 문장으로 된 상태 문구라 muted"
     },
     {
       "rule": 2,

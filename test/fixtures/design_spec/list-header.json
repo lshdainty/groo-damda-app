@@ -3,7 +3,7 @@
   "source": "specs/components/list-header.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "ce410e4e7025"
+    "sha256": "91ea036bd903"
   },
   "slots": {
     "root": "목록 제목 — 글자 + 오른쪽 작은 버튼 자리",
@@ -105,7 +105,7 @@
       "state": "enabled",
       "slot": "action",
       "prop": "height",
-      "note": "글 버튼(SEED Text Button minHeight x9) — 누름 바탕 bg-layer-default-pressed · 모서리 8. 2026-10-16 사용자 결정 글자 역할 D2. 아이콘만인 버튼(도움말)은 Button ghost small iconOnly"
+      "note": "글 버튼 — 누름 바탕 bg-layer-default-pressed · 모서리 8. 아이콘만인 버튼(도움말)은 Button ghost small iconOnly"
     },
     {
       "rule": 0,
