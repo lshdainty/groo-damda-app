@@ -16,7 +16,8 @@ export 'package:groo_damda_app/shared/ds/help_bubble/help_bubble_layout.dart'
 typedef PHelpBubbleTriggerBuilder =
     Widget Function(BuildContext context, VoidCallback toggle, bool open);
 
-/// 닫기 버튼 — 38 상자(오른쪽 위 모서리에 붙는다), 아이콘 14, 누르는 영역 44(사방 3 넓힌다).
+/// 닫기 버튼 — 38 상자(100% 에서 오른쪽 위 모서리, 큰 글자에서는 제목 첫 줄 가운데를 따라 내려간다), 아이콘 14, 누르는 영역 44(사방
+/// 3 넓힌다).
 const double _closeSize = 38;
 const double _closeIcon = 14;
 const double _closeTouch = 44;
@@ -445,9 +446,19 @@ class _BubbleBody extends StatelessWidget {
               child: text,
             ),
             if (showClose)
-              // 38 상자의 사방 3 을 넓힌 44(말풍선 모서리 밖은 Flutter 가 받지 않는다 — 말풍선 안쪽만)
+              // 38 상자의 사방 3 을 넓힌 44(말풍선 모서리 밖은 Flutter 가 받지 않는다 — 말풍선 안쪽만). 상자 가운데는 제목 첫 줄
+              // 가운데 — 위 여백 10 + (제목 t3 의 실제 줄 높이 − 38) ÷ 2. 100% 는 줄 18 이라 0(오른쪽 위 모서리), 글자를 키우면
+              // 크기를 그대로 두고 첫 줄을 따라 내려간다(help-bubble 레시피, groo-design #263)
               PositionedDirectional(
-                top: -(_closeTouch - _closeSize) / 2,
+                top:
+                    PSpacing.x2_5 +
+                    (MediaQuery.textScalerOf(
+                                  context,
+                                ).scale(PTypography.t3.fontSize!) *
+                                PTypography.t3.height! -
+                            _closeSize) /
+                        2 -
+                    (_closeTouch - _closeSize) / 2,
                 end: -(_closeTouch - _closeSize) / 2,
                 width: _closeTouch,
                 height: _closeTouch,

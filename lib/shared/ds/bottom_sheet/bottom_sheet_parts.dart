@@ -37,6 +37,25 @@ const double _closeCircle = 28;
 const double _closeIcon = 14;
 const double _handleWidth = 36;
 
+/// 제목(t8) 줄 높이의 100% 값 — 머리 버튼은 지금 줄 높이와의 차이 ÷ 2 만큼 내려간다.
+const double _titleLineBase = 30;
+
+/// 위 글(eyebrow)이 [width] 안에서 차지하는 높이 — 큰 글자에서 줄을 바꾸면 여러 줄이다.
+double _eyebrowHeight(BuildContext context, String text, double width) {
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: PTypography.t3),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout(maxWidth: math.max(0, width));
+  final h = painter.height;
+  painter.dispose();
+  return h;
+}
+
+/// 글 한 줄의 실제 높이 — 글자 배율(안드로이드 비선형 포함)을 글자 크기에 걸고 줄 비율을 곱한다(그려지는 줄과 같은 셈).
+double _lineHeight(TextScaler scaler, TextStyle style) =>
+    scaler.scale(style.fontSize!) * style.height!;
+
 /// 머리 오른쪽 동작([PBottomSheetContent.headerAction]) — 보이는 단추 36, 닫기 원 왼쪽 사이 4.
 const double kBottomSheetHeaderActionSize = 36;
 const double kBottomSheetHeaderActionGap = 4;
@@ -322,6 +341,12 @@ class PBottomSheetContent extends StatelessWidget {
     final c = context.colors;
     final controller = PBottomSheetScope.maybeOf(context);
 
+    // ← 가 있으면 위 글 · 제목이 원 오른쪽 사이 4 에서 시작한다
+    const backInset =
+        kBottomSheetBackSize +
+        kBottomSheetBackGap -
+        (kBottomSheetBackSize - kBottomSheetBackIcon) / 2;
+
     final header = Padding(
       key: const ValueKey('p-bottom-sheet-header'),
       padding: const EdgeInsets.fromLTRB(
@@ -336,13 +361,7 @@ class PBottomSheetContent extends StatelessWidget {
         children: [
           if (eyebrow != null)
             Padding(
-              padding: EdgeInsets.only(
-                left: onBack == null
-                    ? 0
-                    : kBottomSheetBackSize +
-                          kBottomSheetBackGap -
-                          (kBottomSheetBackSize - kBottomSheetBackIcon) / 2,
-              ),
+              padding: EdgeInsets.only(left: onBack == null ? 0 : backInset),
               child: Text(
                 eyebrow!,
                 key: const ValueKey('p-bottom-sheet-eyebrow'),
@@ -352,11 +371,7 @@ class PBottomSheetContent extends StatelessWidget {
           Padding(
             // 닫기 버튼 자리 — 24 + 원 28 + 12 = 64 중 화면 여백 24 를 뺀 40
             padding: EdgeInsets.only(
-              left: onBack == null
-                  ? 0
-                  : kBottomSheetBackSize +
-                        kBottomSheetBackGap -
-                        (kBottomSheetBackSize - kBottomSheetBackIcon) / 2,
+              left: onBack == null ? 0 : backInset,
               right:
                   (showCloseButton ? PSpacing.x10 : 0) +
                   (headerAction == null
@@ -388,73 +403,90 @@ class PBottomSheetContent extends StatelessWidget {
       ),
     );
 
-    final headerBox = Stack(
-      children: [
-        // 읽는 차례: 뒤로 → 제목 → 동작 → 닫기
-        if (onBack != null)
-          Positioned(
-            key: const ValueKey('p-bottom-sheet-back-slot'),
-            // 보이는 원 40 의 왼쪽은 화면 여백 24 보다 8 안쪽(아이콘 24 가 여백 24 에 온다), 세로는 제목 첫 줄 가운데에 맞춘다.
-            // 누르는 영역은 사방 2 넓은 44 — 제목 첫 줄은 글자 배율을 따라 커지므로 가운데도 따라간다
-            top:
-                PSpacing.x6 +
-                (eyebrow == null
-                    ? 0
-                    : MediaQuery.textScalerOf(context).scale(18) +
-                          PSpacing.x2) +
-                MediaQuery.textScalerOf(context).scale(30) / 2 -
-                PTouch.min / 2,
-            left:
-                PSpacing.globalGutter -
-                (kBottomSheetBackSize - kBottomSheetBackIcon) / 2 -
-                (PTouch.min - kBottomSheetBackSize) / 2,
-            width: PTouch.min,
-            height: PTouch.min,
-            // 저장 중에는 누름을 삼킨다 — 앞 단계로 가면 실패 Callout 을 그릴 폼이 없어진다(모양은 그대로)
-            child: _BackButton(
-              label: backLabel!,
-              onTap: () {
-                if (controller?.busy ?? false) return;
-                onBack!();
-              },
+    // 머리 버튼(닫기 원 · ⋮ · ←)은 px 그대로이고, 자리만 제목 첫 줄 가운데를 따른다 — 제목(t8 22 / 30) · 위 글(t3 13 / 18)의 실제
+    // 줄 높이(글자 배율 × 줄 비율)로 잰다. 100% 에서 줄 높이 30 이라 닫기 원 위 24 · ⋮ 위 20 그대로다(bottom-sheet 레시피,
+    // groo-design #263 — top = x6 + 줄 높이 ÷ 2 − 15)
+    final scaler = MediaQuery.textScalerOf(context);
+    final titleLine = _lineHeight(scaler, PTypography.t8);
+    final titleShift = (titleLine - _titleLineBase) / 2;
+
+    final headerBox = LayoutBuilder(
+      builder: (context, constraints) => Stack(
+        children: [
+          // 읽는 차례: 뒤로 → 제목 → 동작 → 닫기
+          if (onBack != null)
+            Positioned(
+              key: const ValueKey('p-bottom-sheet-back-slot'),
+              // 보이는 원 40 의 왼쪽은 화면 여백 24 보다 8 안쪽(아이콘 24 가 여백 24 에 온다), 세로는 제목 첫 줄 가운데에 맞춘다.
+              // 누르는 영역은 사방 2 넓은 44 — 제목 첫 줄은 글자 배율을 따라 커지므로 가운데도 따라간다
+              // 위 글이 있으면 그 높이(큰 글자에서 줄을 바꾸면 여러 줄) + 사이 8 아래가 제목이다
+              top:
+                  PSpacing.x6 +
+                  (eyebrow == null
+                      ? 0
+                      : _eyebrowHeight(
+                              context,
+                              eyebrow!,
+                              constraints.maxWidth -
+                                  2 * PSpacing.globalGutter -
+                                  backInset,
+                            ) +
+                            PSpacing.x2) +
+                  titleLine / 2 -
+                  PTouch.min / 2,
+              left:
+                  PSpacing.globalGutter -
+                  (kBottomSheetBackSize - kBottomSheetBackIcon) / 2 -
+                  (PTouch.min - kBottomSheetBackSize) / 2,
+              width: PTouch.min,
+              height: PTouch.min,
+              // 저장 중에는 누름을 삼킨다 — 앞 단계로 가면 실패 Callout 을 그릴 폼이 없어진다(모양은 그대로)
+              child: _BackButton(
+                label: backLabel!,
+                onTap: () {
+                  if (controller?.busy ?? false) return;
+                  onBack!();
+                },
+              ),
             ),
-          ),
-        header,
-        if (headerAction != null)
-          Positioned(
-            key: const ValueKey('p-bottom-sheet-header-action'),
-            // 보이는 단추 36 은 닫기 원(위 24 · 높이 28)과 가운데를 맞추고 원 왼쪽 끝에서 4 떨어진다.
-            // 누르는 영역은 사방 4 넓은 44 — 닫기의 누르는 영역과 겹치는 자리는 닫기가 이긴다(뒤에 그려진다)
-            top:
-                PSpacing.x6 +
-                (_closeCircle - kBottomSheetHeaderActionSize) / 2 -
-                (PTouch.min - kBottomSheetHeaderActionSize) / 2,
-            right:
-                PSpacing.globalGutter +
-                (showCloseButton
-                    ? _closeCircle + kBottomSheetHeaderActionGap
-                    : 0) -
-                (PTouch.min - kBottomSheetHeaderActionSize) / 2,
-            width: PTouch.min,
-            height: PTouch.min,
-            child: Center(child: headerAction!),
-          ),
-        if (showCloseButton)
-          Positioned(
-            // 원 28 의 자리는 위 24 · 오른쪽 24 — 누르는 영역 44 는 사방 8 넓다
-            top: PSpacing.x6 - (PTouch.min - _closeCircle) / 2,
-            right: PSpacing.globalGutter - (PTouch.min - _closeCircle) / 2,
-            child: _CloseButton(
-              label: closeLabel!,
-              pressed: closePressed,
-              // 저장 중에는 아무 일도 없다 — 덮어쓴 onClose 도 같다
-              onTap: () {
-                if (controller?.busy ?? false) return;
-                (onClose ?? () => controller?.requestClose())();
-              },
+          header,
+          if (headerAction != null)
+            Positioned(
+              key: const ValueKey('p-bottom-sheet-header-action'),
+              // 보이는 단추 36 은 닫기 원(위 24 · 높이 28)과 가운데를 맞추고 원 왼쪽 끝에서 4 떨어진다.
+              // 누르는 영역은 사방 4 넓은 44 — 닫기의 누르는 영역과 겹치는 자리는 닫기가 이긴다(뒤에 그려진다)
+              top:
+                  PSpacing.x6 +
+                  titleShift +
+                  (_closeCircle - kBottomSheetHeaderActionSize) / 2 -
+                  (PTouch.min - kBottomSheetHeaderActionSize) / 2,
+              right:
+                  PSpacing.globalGutter +
+                  (showCloseButton
+                      ? _closeCircle + kBottomSheetHeaderActionGap
+                      : 0) -
+                  (PTouch.min - kBottomSheetHeaderActionSize) / 2,
+              width: PTouch.min,
+              height: PTouch.min,
+              child: Center(child: headerAction!),
             ),
-          ),
-      ],
+          if (showCloseButton)
+            Positioned(
+              // 원 28 의 자리는 위 24 · 오른쪽 24(큰 글자에서는 제목 첫 줄을 따라 내려간다) — 누르는 영역 44 는 사방 8 넓다
+              top: PSpacing.x6 + titleShift - (PTouch.min - _closeCircle) / 2,
+              right: PSpacing.globalGutter - (PTouch.min - _closeCircle) / 2,
+              child: _CloseButton(
+                label: closeLabel!,
+                pressed: closePressed,
+                // 저장 중에는 아무 일도 없다 — 덮어쓴 onClose 도 같다
+                onTap: () {
+                  if (controller?.busy ?? false) return;
+                  (onClose ?? () => controller?.requestClose())();
+                },
+              ),
+            ),
+        ],
+      ),
     );
 
     // 본문 — 넘치면 이 안에서 스크롤. 끝에서 더 끌어도 뒤로 번지지 않는다(clamping)
