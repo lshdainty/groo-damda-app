@@ -1044,7 +1044,7 @@ void main() {
             k.weight('label.fontWeight', labelStyle);
             k.color('label.foreground', labelStyle.color!);
 
-            // 필수 점 — 6 · 위 4 · 앞 2(rem)
+            // 필수 점 — 6 · 위 4 · 앞 2(px)
             final dot = find.descendant(
               of: find.byType(PField),
               matching: find.byWidgetPredicate(
@@ -1054,14 +1054,14 @@ void main() {
               ),
             );
             final dotRect = tester.getRect(dot);
-            k.rem('requiredIndicator.size', dotRect.width);
-            k.rem('requiredIndicator.size', dotRect.height);
+            k.px('requiredIndicator.size', dotRect.width);
+            k.px('requiredIndicator.size', dotRect.height);
             k.color(
               'requiredIndicator.color',
               (tester.widget<DecoratedBox>(dot).decoration as BoxDecoration)
                   .color!,
             );
-            k.rem('requiredIndicator.marginTop', dotRect.top - labelRect.top);
+            k.px('requiredIndicator.marginTop', dotRect.top - labelRect.top);
             final dotPadding =
                 tester
                         .widget<Padding>(
@@ -1071,8 +1071,8 @@ void main() {
                         )
                         .padding
                     as EdgeInsetsDirectional;
-            k.rem('requiredIndicator.marginLeft', dotPadding.start);
-            k.rem('requiredIndicator.marginTop', dotPadding.top);
+            k.px('requiredIndicator.marginLeft', dotPadding.start);
+            k.px('requiredIndicator.marginTop', dotPadding.top);
 
             // 꼬리 — 좌우 2, 설명 · 오류 ↔ 글자 수 8, 위 맞춤
             k.px('footer.paddingX', footer.left - field.left);
@@ -1591,7 +1591,7 @@ void main() {
       expect(one.center.dy, closeTo(oneLabel.center.dy, 0.5));
     });
 
-    testWidgets('필수 점 · "선택" 은 글자 크기 설정을 따라 커진다(rem) — 라벨 줄 위에서 4rem 아래', (
+    testWidgets('필수 점은 px 그대로(라벨 줄 위에서 4 아래) · "선택" 은 글자 크기 설정을 따라 커진다(rem)', (
       tester,
     ) async {
       final want = _field.resolve({}, 'enabled');
@@ -1619,12 +1619,10 @@ void main() {
       );
       final dotRect = tester.getRect(dot);
       final labelRect = tester.getRect(_richText(RegExp('^이름')));
-      k.rem('requiredIndicator.size', dotRect.width, scale: 2);
-      k.rem(
-        'requiredIndicator.marginTop',
-        dotRect.top - labelRect.top,
-        scale: 2,
-      );
+      // 필수 점은 컨트롤 모양 — 2배에서도 6 · 라벨 줄 위에서 4 · 라벨 끝 뒤 2(px)
+      k.px('requiredIndicator.size', dotRect.width);
+      k.px('requiredIndicator.size', dotRect.height);
+      k.px('requiredIndicator.marginTop', dotRect.top - labelRect.top);
 
       await tester.pumpWidget(
         _host(
