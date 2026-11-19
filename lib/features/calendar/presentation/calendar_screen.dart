@@ -154,8 +154,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         child: Column(
                           children: [
                             if (firstLoading)
+                              // 달 격자는 화면 끝까지 그린다 — 5초 글은 화면 여백 24 에(skeleton.md "오래 걸림 글")
                               loadingRegionWithText(
                                 _CalendarGridSkeleton(month: _focused),
+                                bleed: true,
                               )
                             else
                               CalendarMonthGrid(
