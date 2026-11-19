@@ -896,6 +896,8 @@ class _Markers extends StatelessWidget {
   final bool rtl;
   final Color color;
 
+  // 트랙에 붙은 눈금 표식이라 글자 크기 설정을 따르지 않는다(slider.yaml 표식 text-t3-static, groo-design #263) — 지금 값은
+  // 머리 값 · 말풍선이 크게 보인다. 줄 높이 18 의 자리도 그대로다
   @override
   Widget build(BuildContext context) {
     final style = PTypography.t3.copyWith(color: color);
@@ -908,13 +910,23 @@ class _Markers extends StatelessWidget {
             PositionedDirectional(
               start: 0,
               top: 0,
-              child: Text(texts[k], style: style, softWrap: false),
+              child: Text(
+                texts[k],
+                style: style,
+                softWrap: false,
+                textScaler: TextScaler.noScaling,
+              ),
             )
           else if (k == last)
             PositionedDirectional(
               end: 0,
               top: 0,
-              child: Text(texts[k], style: style, softWrap: false),
+              child: Text(
+                texts[k],
+                style: style,
+                softWrap: false,
+                textScaler: TextScaler.noScaling,
+              ),
             )
           else
             Positioned(
@@ -924,7 +936,12 @@ class _Markers extends StatelessWidget {
               top: 0,
               child: FractionalTranslation(
                 translation: const Offset(-0.5, 0),
-                child: Text(texts[k], style: style, softWrap: false),
+                child: Text(
+                  texts[k],
+                  style: style,
+                  softWrap: false,
+                  textScaler: TextScaler.noScaling,
+                ),
               ),
             ),
       ],

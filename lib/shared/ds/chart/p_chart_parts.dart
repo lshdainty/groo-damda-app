@@ -596,9 +596,10 @@ class _DonutRow extends StatelessWidget {
     );
     // 줄 안 폭이 글자 16개(16em)보다 좁으면(큰 글자) 이름이 한 글자 폭이 되지 않게 % · 금액을 이름 아래로 내린다
     // (List "큰 글자에서 값을 본문 아래로" 와 같은 문턱 — I-06 20, 스펙 보강 질문)
+    final scaler = MediaQuery.textScalerOf(context);
     final narrowBelow =
-        kPListStackBelowEm *
-        MediaQuery.textScalerOf(context).scale(PTypography.t5.fontSize!);
+        kPListStackBelowEm * scaler.scale(PTypography.t5.fontSize!);
+    final firstLine = scaler.scale(base.fontSize!) * base.height!;
     return ConstrainedBox(
       key: const ValueKey('chart-donut-row'),
       constraints: const BoxConstraints(minHeight: kChartDonutRowHeight),
@@ -613,8 +614,9 @@ class _DonutRow extends StatelessWidget {
                 spacing: PSpacing.x2,
                 children: [
                   Padding(
+                    // 첫 글줄의 높이는 글자 배율을 따른다 — 네모(10 px)는 크기를 그대로 두고 그 가운데에 선다
                     padding: EdgeInsets.only(
-                      top: (base.fontSize! * base.height! - PSpacing.x2_5) / 2,
+                      top: (firstLine - PSpacing.x2_5) / 2,
                     ),
                     child: swatch,
                   ),

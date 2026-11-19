@@ -37,7 +37,7 @@ String _defaultValueText(int value) => '$value';
 /// 흔한 값이 열 단계 안쪽인 수(승인 필요 횟수 0 ~ 3 · 부여 시간 0 ~ 7시간)에 쓴다 — 더 멀거나 돈 · 소수면 Input 의 숫자 칸,
 /// 띄엄띄엄 이름 붙은 값은 Select, 범위 안의 자리는 Slider 다.
 ///
-/// 앱은 늘 large 52 — 테두리 상자(모서리 12, 안쪽 1px stroke-neutral-weak) 안에 줄이기 · 선(1 × 16) · 값 · 선 · 늘리기.
+/// 앱은 늘 large 52(최소 높이 — 큰 글자에서 값을 따라 높아지고 버튼은 52 그대로 세로 가운데) — 테두리 상자(모서리 12, 안쪽 1px stroke-neutral-weak) 안에 줄이기 · 선(1 × 16) · 값 · 선 · 늘리기.
 ///   버튼은 정사각 52 · 투명 · 아이콘 22(lucide minus · plus), 값 칸은 좌우 8 · t6(18/24) · 500 · 고정폭 숫자.
 ///   값 칸 폭은 가장 긴 표시 글([getValueText] 의 min · max · 지금 값) — max 를 주지 않으면 그 글은 뺀다.
 ///
@@ -261,8 +261,12 @@ class _PQuantityPickerState extends State<PQuantityPicker> {
             width: invalid ? 2 : 1,
           ),
         ),
-        // 테두리는 안쪽에 그리고 버튼은 그 위를 덮는다 — 높이는 버튼이 정한다
-        child: SizedBox(height: _height, child: row),
+        // 테두리는 안쪽에 그리고 버튼은 그 위를 덮는다. 높이 52 는 최소 높이 — 큰 글자에서 값이 높아지면 상자가 따라 높아지고,
+        // − · + 버튼(52 정사각 px)은 크기를 그대로 두고 세로 가운데에 선다(quantity-picker.md "글자 크기 설정", groo-design #263)
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: _height),
+          child: row,
+        ),
       ),
     );
     // hug — 세로 Flex(Field)가 폭을 늘려도 내용 폭을 지킨다(웹 w-fit)

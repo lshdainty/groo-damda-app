@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -18,6 +19,7 @@ import 'package:groo_damda_app/shared/ds/field/p_field.dart';
 import 'package:groo_damda_app/shared/ds/image_frame/p_image_frame.dart';
 import 'package:groo_damda_app/shared/ds/progress_circle/p_progress_circle.dart';
 
+import '../../support/android_font_scale.dart';
 import '../../support/design_spec.dart';
 import '../../support/plain_text.dart';
 import '../../support/spec_check.dart';
@@ -1913,60 +1915,70 @@ void main() {
     });
   });
 
-  group('큰 글자 — 상자도 글자 배율을 따른다(03-B 결정 3 A)', () {
-    Widget scaled(double factor, Widget child) => MediaQuery(
-      data: MediaQueryData(textScaler: TextScaler.linear(factor)),
+  group('큰 글자 — 글을 담은 상자만 글자 배율을 따르고 아이콘 · × · 대표 띠는 px(groo-design #263)', () {
+    Widget scaled(TextScaler scaler, Widget child) => MediaQuery(
+      data: MediaQueryData(textScaler: scaler),
       child: child,
     );
 
+    // 100% · 선형 200% · 300% · 안드로이드 200%(비선형 — 12 는 24 로 두 배, 80 은 82 로 덜 커진다)
+    const scalers = <(String, TextScaler)>[
+      ('100%', TextScaler.noScaling),
+      ('200%', TextScaler.linear(2)),
+      ('300%', TextScaler.linear(3)),
+      ('안드로이드 200%', AndroidNonlinearTextScaler()),
+    ];
+    // 상자의 배율 = 담은 글(12)의 배율
+    double factor(TextScaler s) => s.scale(12) / 12;
+
     testWidgets(
-      '200% 에서 타일 · 사진 160, 파일 카드 320 × 160, 썸네일 96, × 40(누르는 88), 아이콘 48',
+      '타일 · 사진 · 파일 카드는 담은 글의 배율만큼, 썸네일 48 · 아이콘 24 · × 20(누르는 44) · × 아이콘 10 은 그대로',
       (tester) async {
-        tester.view.physicalSize = const Size(900, 900);
+        tester.view.physicalSize = const Size(1200, 900);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
-        for (final factor in [1.0, 2.0]) {
+        for (final (name, scaler) in scalers) {
+          final f = factor(scaler);
           await tester.pumpWidget(
             scaled(
-              factor,
+              scaler,
               _host(
                 Brightness.light,
                 _input(
                   entries: [_entry('p'), _entry('f', image: false)],
                   onRemove: (_) {},
                 ),
-                width: 800,
+                width: 1100,
               ),
             ),
           );
-          expect(tester.takeException(), isNull, reason: 'x$factor 넘침');
+          expect(tester.takeException(), isNull, reason: '$name 넘침');
           expect(
             tester.getSize(_trigger),
-            Size.square(80 * factor),
-            reason: 'x$factor 타일',
+            Size.square(80 * f),
+            reason: '$name 타일',
           );
-          final bodies = tester.widgetList(_body).length;
-          expect(bodies, 2);
+          expect(tester.widgetList(_body).length, 2);
           expect(
             tester.getSize(_body.at(0)),
-            Size.square(80 * factor),
-            reason: 'x$factor 사진',
+            Size.square(80 * f),
+            reason: '$name 사진',
           );
           expect(
             tester.getSize(_body.at(1)),
-            Size(160 * factor, 80 * factor),
-            reason: 'x$factor 파일 카드',
+            Size(160 * f, 80 * f),
+            reason: '$name 파일 카드',
           );
           expect(
             tester.getSize(find.byKey(const ValueKey('attachment-thumbnail'))),
-            Size.square(48 * factor),
-            reason: 'x$factor 썸네일',
+            const Size.square(48),
+            reason: '$name 썸네일',
           );
           // × — 누르는 자리 44, 보이는 원 20
           expect(
             tester.getSize(_remove.first),
-            Size.square(44 * factor),
-            reason: 'x$factor × 누르는 자리',
+            const Size.square(44),
+            reason: '$name × 누르는 자리',
           );
           final circle = find
               .ancestor(
@@ -1979,111 +1991,172 @@ void main() {
               .first;
           expect(
             tester.getSize(circle),
-            Size.square(20 * factor),
-            reason: 'x$factor × 원',
+            const Size.square(20),
+            reason: '$name × 원',
           );
+          // × 의 가운데는 사진의 오른쪽 위 모서리에서 안쪽 6
+          final photo = tester.getRect(_body.at(0));
+          final x = tester.getRect(_remove.first);
+          expect(x.center.dx, closeTo(photo.right - 6, 0.01), reason: name);
+          expect(x.center.dy, closeTo(photo.top + 6, 0.01), reason: name);
           // 아이콘 24 · × 아이콘 10
           final triggerIcon = tester.widget<Icon>(
             find.descendant(of: _trigger, matching: find.byType(Icon)),
           );
-          expect(triggerIcon.size, 24 * factor);
+          expect(triggerIcon.size, 24, reason: '$name 타일 아이콘');
+          final fileIcon = tester.widget<Icon>(
+            find.descendant(
+              of: find.byKey(const ValueKey('attachment-thumbnail')),
+              matching: find.byType(Icon),
+            ),
+          );
+          expect(fileIcon.size, 24, reason: '$name 썸네일 아이콘');
           final xIcon = tester.widget<Icon>(
             find.descendant(of: _remove.first, matching: find.byType(Icon)),
           );
-          expect(xIcon.size, 10 * factor);
+          expect(xIcon.size, 10, reason: '$name × 아이콘');
         }
       },
     );
 
-    testWidgets('200% 파일 카드 — 이름 폭이 카드를 따라 넓어져 이름 네 줄 + 크기가 모두 보인다', (
-      tester,
-    ) async {
+    testWidgets('대표 띠 — 띠 24 와 글 "대표" 는 글자 크기를 따르지 않고 띠 안에 든다', (tester) async {
       tester.view.physicalSize = const Size(900, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await tester.pumpWidget(
-        scaled(
-          2,
-          _host(
-            Brightness.light,
-            _input(
-              entries: [
-                _entry(
-                  'f',
-                  image: false,
-                  name: '2026년_9월_카드_이용대금_명세서_최종_수정본_사본_프린트용.pdf',
-                ),
-              ],
+      Size? base;
+      for (final (name, scaler) in scalers) {
+        await tester.pumpWidget(
+          scaled(
+            scaler,
+            _host(
+              Brightness.light,
+              _input(entries: [_entry('p')], badge: '대표'),
+              width: 800,
             ),
-            width: 800,
           ),
-        ),
-      );
-      expect(tester.takeException(), isNull);
-      final card = tester.getRect(_body.first);
-      expect(card.size, const Size(320, 160));
-      final lines = find.byWidgetPredicate(
-        (w) =>
-            w.key is ValueKey &&
-            '${(w.key! as ValueKey).value}'.startsWith('attachment-name-line-'),
-      );
-      expect(lines, findsAtLeastNWidgets(1));
-      expect(lines.evaluate().length, lessThanOrEqualTo(4));
-      final size = tester.getRect(
-        find.byKey(const ValueKey('attachment-size')),
-      );
-      // 크기까지 카드 안에 든다
-      expect(size.bottom, lessThanOrEqualTo(card.bottom));
-      for (final line in lines.evaluate()) {
-        final r = tester.getRect(find.byElementPredicate((e) => e == line));
-        expect(r.bottom, lessThanOrEqualTo(card.bottom));
-        expect(r.right, lessThanOrEqualTo(card.right));
+        );
+        expect(tester.takeException(), isNull, reason: '$name 넘침');
+        final band = find.byKey(const ValueKey('attachment-badge'));
+        expect(tester.getSize(band).height, 24, reason: '$name 띠 높이');
+        final text = find.descendant(of: band, matching: find.byType(RichText));
+        final rp = tester.renderObject<RenderParagraph>(text);
+        expect(rp.textScaler, TextScaler.noScaling, reason: '$name 띠 글');
+        final size = tester.getSize(text);
+        base ??= size;
+        expect(size, base, reason: '$name 띠 글 크기 = 100%');
+        final r = tester.getRect(text);
+        final b = tester.getRect(band);
+        expect(r.top, greaterThanOrEqualTo(b.top), reason: name);
+        expect(r.bottom, lessThanOrEqualTo(b.bottom), reason: name);
       }
-      // 이름 폭 = 카드 − 좌우 여백 16 × 2 − 썸네일 96 − 사이 10
-      final meta = tester.getSize(
-        find
-            .ancestor(
-              of: find.byKey(const ValueKey('attachment-size')),
-              matching: find.byType(SizedBox),
-            )
-            .first,
-      );
-      expect(meta.width, 320 - 32 - 96 - 10);
     });
 
-    testWidgets('200% 실패한 사진 — "다시 시도" 가 잘리지 않고 × 의 누르는 자리가 배율을 따른다', (
+    testWidgets('파일 카드 — 이름 폭이 카드를 따라 넓어져 이름 네 줄까지 + 크기가 카드 안에 다 든다', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      for (final (name, scaler) in scalers) {
+        final f = factor(scaler);
+        await tester.pumpWidget(
+          scaled(
+            scaler,
+            _host(
+              Brightness.light,
+              _input(
+                entries: [
+                  _entry(
+                    'f',
+                    image: false,
+                    name: '2026년_9월_카드_이용대금_명세서_최종_수정본_사본_프린트용.pdf',
+                  ),
+                ],
+              ),
+              width: 1100,
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull, reason: '$name 넘침');
+        final card = tester.getRect(_body.first);
+        expect(card.size, Size(160 * f, 80 * f), reason: name);
+        final lines = find.byWidgetPredicate(
+          (w) =>
+              w.key is ValueKey &&
+              '${(w.key! as ValueKey).value}'.startsWith(
+                'attachment-name-line-',
+              ),
+        );
+        expect(lines, findsAtLeastNWidgets(1));
+        expect(lines.evaluate().length, lessThanOrEqualTo(4));
+        final size = find.byKey(const ValueKey('attachment-size'));
+        // 크기 · 이름 줄이 잘리지 않고(그린 높이 = 줄 높이) 카드 안에 든다
+        for (final e in [...lines.evaluate(), ...size.evaluate()]) {
+          final f = find.byElementPredicate((x) => x == e);
+          final rp = tester.renderObject<RenderParagraph>(
+            find.descendant(of: f, matching: find.byType(RichText)),
+          );
+          expect(rp.didExceedMaxLines, isFalse, reason: name);
+          expect(
+            rp.size.height,
+            closeTo(
+              rp.textScaler.scale(rp.text.style!.fontSize!) *
+                  rp.text.style!.height!,
+              0.5,
+            ),
+            reason: '$name 줄 높이',
+          );
+          final r = tester.getRect(f);
+          expect(r.top, greaterThanOrEqualTo(card.top), reason: name);
+          expect(r.bottom, lessThanOrEqualTo(card.bottom), reason: name);
+          expect(r.right, lessThanOrEqualTo(card.right + 0.01), reason: name);
+        }
+        // 이름 폭 = 카드 − 좌우 여백 16 × 2 − 썸네일 48 − 사이 10
+        final meta = tester.getSize(
+          find.ancestor(of: size, matching: find.byType(SizedBox)).first,
+        );
+        expect(meta.width, closeTo(160 * f - 32 - 48 - 10, 0.01), reason: name);
+      }
+    });
+
+    testWidgets('실패한 사진 — "다시 시도" 가 잘리지 않고 × 는 px 그대로', (tester) async {
       tester.view.physicalSize = const Size(900, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      var retried = 0;
-      await tester.pumpWidget(
-        scaled(
-          2,
-          _host(
-            Brightness.light,
-            _input(
-              entries: [_entry('p', status: PAttachmentStatus.error)],
-              onRetry: (_) => retried++,
+      for (final (name, scaler) in scalers) {
+        final f = factor(scaler);
+        var retried = 0;
+        await tester.pumpWidget(
+          scaled(
+            scaler,
+            _host(
+              Brightness.light,
+              _input(
+                entries: [_entry('p', status: PAttachmentStatus.error)],
+                onRetry: (_) => retried++,
+              ),
+              width: 800,
             ),
-            width: 800,
           ),
-        ),
-      );
-      expect(tester.takeException(), isNull);
-      final retry = tester.getRect(_retry);
-      expect(retry.size, const Size.square(160));
-      final label = tester.getRect(findText('다시 시도'));
-      expect(label.left, greaterThanOrEqualTo(retry.left));
-      expect(label.right, lessThanOrEqualTo(retry.right));
-      // × 의 누르는 자리 = 44 × 2, 가운데는 오른쪽 위 모서리에서 안쪽 12
-      final x = tester.getRect(_remove);
-      expect(x.size, const Size.square(88));
-      expect(x.center.dx, closeTo(retry.right - 12, 0.01));
-      expect(x.center.dy, closeTo(retry.top + 12, 0.01));
-      await tester.tapAt(retry.center);
-      expect(retried, 1);
+        );
+        expect(tester.takeException(), isNull, reason: '$name 넘침');
+        final retry = tester.getRect(_retry);
+        expect(retry.size, Size.square(80 * f), reason: name);
+        final label = tester.getRect(findText('다시 시도'));
+        expect(label.left, greaterThanOrEqualTo(retry.left), reason: name);
+        expect(label.right, lessThanOrEqualTo(retry.right), reason: name);
+        final icon = tester.widget<Icon>(
+          find.descendant(of: _retry, matching: find.byType(Icon)),
+        );
+        expect(icon.size, 24, reason: '$name 다시 시도 아이콘');
+        // × 의 누르는 자리 44, 가운데는 오른쪽 위 모서리에서 안쪽 6
+        final x = tester.getRect(_remove);
+        expect(x.size, const Size.square(44), reason: name);
+        expect(x.center.dx, closeTo(retry.right - 6, 0.01), reason: name);
+        expect(x.center.dy, closeTo(retry.top + 6, 0.01), reason: name);
+        await tester.tapAt(retry.center);
+        expect(retried, 1, reason: name);
+      }
     });
   });
 }
