@@ -30,6 +30,8 @@ import 'package:groo_damda_app/features/money/presentation/money_bundle_screen.d
 import 'package:groo_damda_app/features/sms/presentation/sms_clipboard_banner.dart';
 import 'package:groo_damda_app/features/stats/application/stats_providers.dart';
 import 'package:groo_damda_app/features/stats/domain/stats_models.dart';
+import 'package:groo_damda_app/features/stats/presentation/stats_parts.dart'
+    show StatsNameAmount;
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/async/load_failure.dart';
 import 'package:groo_damda_app/shared/ds/badge/p_badge.dart';
@@ -46,7 +48,6 @@ import 'package:groo_damda_app/shared/ds/screen_band/p_screen_band.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/p_skeleton.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 import 'package:groo_damda_app/shared/ds/text/message_spans.dart';
-import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
@@ -1060,23 +1061,12 @@ class _CategorySection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: PSpacing.x4),
-          // 합계 줄 — 폰은 값과 상관없이 늘 목록 위 한 줄(가운데 글 없음)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            spacing: PSpacing.x3,
-            children: [
-              PText(
-                l.dashThisMonthExpense,
-                style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
-              ),
-              Expanded(
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: _amount(totalText, c.fgNeutral),
-                ),
-              ),
-            ],
+          // 합계 줄 — 폰은 값과 상관없이 늘 목록 위 한 줄(가운데 글 없음). 라벨 옆에 금액이 한 줄로 들지 않으면 금액을
+          // 통째로 아래 줄 오른쪽 끝으로 내린다 — 쉼표 뒤 꺾기는 금액 하나가 줄보다 길 때만(Typography v114, 통계 합계 줄과 같은 부품)
+          StatsNameAmount(
+            name: l.dashThisMonthExpense,
+            nameStyle: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
+            amount: totalText,
           ),
           const SizedBox(height: PSpacing.x1),
           PChartDonutLegend(
