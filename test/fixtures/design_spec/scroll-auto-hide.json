@@ -3,7 +3,7 @@
   "source": "specs/components/scroll-auto-hide.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "22ab4829300f"
+    "sha256": "7b3ba0bb826a"
   },
   "slots": {
     "root": "숨는 영역 — 스크롤 상자 맨 위에 붙고(sticky) 스크롤 거리만큼 위로 옮겨 숨는다",

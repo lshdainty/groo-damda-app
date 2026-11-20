@@ -3,7 +3,7 @@
   "source": "specs/components/image-frame.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "22ab4829300f"
+    "sha256": "7b3ba0bb826a"
   },
   "slots": {
     "root": "틀 — 비율 상자. 폭은 부르는 쪽, 높이는 폭 ÷ 비율. 모서리로 자르고(overflow hidden) 안의 층을 따로 쌓는다(isolation)",

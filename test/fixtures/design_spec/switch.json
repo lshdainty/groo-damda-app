@@ -3,7 +3,7 @@
   "source": "specs/components/switch.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "22ab4829300f"
+    "sha256": "7b3ba0bb826a"
   },
   "slots": {
     "root": "Switch 한 줄 — 스위치 + 라벨, 누르는 영역",
@@ -387,7 +387,7 @@
       "state": "enabled",
       "slot": "label",
       "prop": "foreground",
-      "note": "글자 크기 설정을 따라 커지고 줄을 바꿔 받습니다 — 스위치(트랙 · 엄지, px)는 라벨 첫 줄 가운데에 섭니다"
+      "note": "글자 크기 설정을 따라 커지고 줄을 바꿔 받습니다 — 스위치(트랙 · 엄지, px)는 라벨 전체의 세로 가운데에 섭니다"
     },
     {
       "rule": 0,
