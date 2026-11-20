@@ -3,7 +3,7 @@
   "source": "specs/components/bottom-sheet.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "overlay": "딤 — 시트 뒤 화면 전체",

@@ -3,7 +3,7 @@
   "source": "specs/components/slider.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "root": "Slider — 손잡이 줄 + 표식. 폭은 놓인 자리",

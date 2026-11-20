@@ -3,7 +3,7 @@
   "source": "specs/components/accordion.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "root": "아코디언 — 항목을 세로로 잇는다. 항목은 2개 이상(하나면 Collapsible)",

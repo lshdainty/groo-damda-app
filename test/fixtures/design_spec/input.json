@@ -3,7 +3,7 @@
   "source": "specs/components/input.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "root": "상자(Container) — 테두리 · 바탕 · 모서리. 어디를 눌러도 입력으로 포커스가 간다",
