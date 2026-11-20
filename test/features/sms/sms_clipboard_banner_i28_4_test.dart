@@ -85,8 +85,8 @@ void main() {
     final row = find.byType(PListButtonItem);
     expect(row, findsOneWidget);
     expect(t.widget<PListButtonItem>(row).highlighted, isTrue);
-    expect(findPlain('복사한 결제 문자가 있어요'), findsOneWidget);
-    expect(findPlain('붙여넣어 지출로 기록할 수 있어요.'), findsOneWidget);
+    expect(findPlain('복사한 글로 지출을 기록할까요?'), findsOneWidget);
+    expect(findPlain('결제 문자라면 붙여넣어 바로 기록할 수 있어요.'), findsOneWidget);
     // 화면 폭 흰 면(PScreenBandBody) 안 — 바깥 여백 없음
     final body = find.byType(PScreenBandBody);
     expect(body, findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
       pushed: pushed,
       clipboard: (c) => c.method == 'Clipboard.getData' ? {'text': _sms} : null,
     );
-    await t.tap(findPlain('복사한 결제 문자가 있어요'));
+    await t.tap(findPlain('복사한 글로 지출을 기록할까요?'));
     await t.pump();
     await t.pump(const Duration(milliseconds: 400));
     expect(findText('paste-screen'), findsOneWidget);

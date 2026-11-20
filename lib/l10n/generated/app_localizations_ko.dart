@@ -6340,10 +6340,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreDescSmsPaste => '카드 결제 문자를 붙여넣어 지출 추가';
 
   @override
-  String get smsClipboardBannerTitle => '복사한 결제 문자가 있어요';
+  String get smsClipboardBannerTitle => '복사한 글로 지출을 기록할까요?';
 
   @override
-  String get smsClipboardBannerDesc => '붙여넣어 지출로 기록할 수 있어요.';
+  String get smsClipboardBannerDesc => '결제 문자라면 붙여넣어 바로 기록할 수 있어요.';
 
   @override
   String get smsInboxTitle => '결제 알림 수신함';

@@ -6749,10 +6749,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreDescSmsPaste => 'Paste a card payment text to add an expense';
 
   @override
-  String get smsClipboardBannerTitle => 'You have a copied payment text';
+  String get smsClipboardBannerTitle => 'Record an expense from copied text?';
 
   @override
-  String get smsClipboardBannerDesc => 'Paste it to record as an expense.';
+  String get smsClipboardBannerDesc =>
+      'If it\'s a payment text, paste it to record it.';
 
   @override
   String get smsInboxTitle => 'Payment inbox';
