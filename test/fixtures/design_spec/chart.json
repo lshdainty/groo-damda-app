@@ -3,7 +3,7 @@
   "source": "specs/components/chart.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "root": "차트 상자 — 카드 본문 안, 폭 100%. 높이는 쓰는 자리가 정한다",
@@ -721,7 +721,7 @@
       "state": "enabled",
       "slot": "legendList",
       "prop": "minHeight",
-      "note": "카테고리 목록 줄 — 색 네모 10 · 이름 14 · % 14 fg-neutral-subtle · 금액 14 · 700 · \"원\". 누르면 하위 카테고리가 있는 줄만 누르는 줄(List)"
+      "note": "카테고리 목록 줄 — 색 네모 10 · 이름 14 · % 14 fg-neutral-subtle · 금액 14 · 700 · \"원\". 누르면 하위 카테고리가 있는 줄만 누르는 줄(List). 이름이 줄을 바꾸면 색 네모 · % · 금액은 줄 전체의 세로 가운데"
     },
     {
       "rule": 0,

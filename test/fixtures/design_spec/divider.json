@@ -3,7 +3,7 @@
   "source": "specs/components/divider.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "root": "1px 선 — 바깥 여백이 없다(사이 간격은 쓰는 자리가 정한다)"

@@ -599,7 +599,6 @@ class _DonutRow extends StatelessWidget {
     final scaler = MediaQuery.textScalerOf(context);
     final narrowBelow =
         kPListStackBelowEm * scaler.scale(PTypography.t5.fontSize!);
-    final firstLine = scaler.scale(base.fontSize!) * base.height!;
     return ConstrainedBox(
       key: const ValueKey('chart-donut-row'),
       constraints: const BoxConstraints(minHeight: kChartDonutRowHeight),
@@ -607,19 +606,13 @@ class _DonutRow extends StatelessWidget {
         builder: (context, constraints) {
           if (constraints.maxWidth < narrowBelow) {
             return Padding(
-              // 줄 위아래는 List 줄과 같은 12, 네모는 첫 글줄 가운데
+              // 줄 위아래는 List 줄과 같은 12. 네모(10 px)는 크기를 그대로 두고 이름 · % · 금액 묶음 전체의 세로 가운데에
+              // 선다 — 첫 글줄이 아니다(groo-design #269 chart.md 도넛 범례)
               padding: const EdgeInsets.symmetric(vertical: PSpacing.x3),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: PSpacing.x2,
                 children: [
-                  Padding(
-                    // 첫 글줄의 높이는 글자 배율을 따른다 — 네모(10 px)는 크기를 그대로 두고 그 가운데에 선다
-                    padding: EdgeInsets.only(
-                      top: (firstLine - PSpacing.x2_5) / 2,
-                    ),
-                    child: swatch,
-                  ),
+                  swatch,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

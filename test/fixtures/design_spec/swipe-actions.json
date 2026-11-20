@@ -3,7 +3,7 @@
   "source": "specs/components/swipe-actions.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "row": "ⓐ 감싸는 목록 줄 — 스펙이 내부를 정의하지 않는다. 높이는 원래 줄의 것이되 56 보다 낮으면 56(칸이 들어가게, 큰 글자면 칸만큼). 닫혔을 때 초점을 받을 수 있다(tabIndex -1)",

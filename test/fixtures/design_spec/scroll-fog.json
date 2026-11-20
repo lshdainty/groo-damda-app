@@ -3,7 +3,7 @@
   "source": "specs/components/scroll-fog.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "root": "스크롤 상자 — 넘친 내용이 이 안에서 스크롤된다. 마스크를 이 상자에 건다",

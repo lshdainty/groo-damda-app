@@ -3,7 +3,7 @@
   "source": "specs/components/table-pagination.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "91ea036bd903"
+    "sha256": "22ab4829300f"
   },
   "slots": {
     "root": "줄 — 표 아래, 한 줄. 왼쪽 줄 수 · 오른쪽 범위 · 이전 · 다음",
