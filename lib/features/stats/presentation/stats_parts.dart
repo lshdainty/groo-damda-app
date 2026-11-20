@@ -144,7 +144,8 @@ class StatsChartSkeleton extends StatelessWidget {
 }
 
 /// 구역 이름 · 금액 한 줄 — 이름은 줄바꿈, 금액은 한 줄 · 고정폭 · 오른쪽 끝. 한 줄에 이름 최소 폭(8rem)이 안 남으면 금액이 아래 줄
-/// 오른쪽 끝으로 내려간다.
+/// 오른쪽 끝으로 **통째로** 내려간다(Typography v114 "띄어쓰기에서 먼저 넘긴다" — 이름 옆에서 쉼표 뒤로 꺾지 않는다). 아래 줄에서도
+/// 금액 하나가 줄보다 길 때만 쉼표 뒤에서 꺾는다(DESIGN.md 금액 줄바꿈 예외 — [keepAllAmount], 읽는 이름은 원래 글).
 class StatsNameAmount extends StatelessWidget {
   const StatsNameAmount({
     super.key,
@@ -206,6 +207,7 @@ class StatsNameAmount extends StatelessWidget {
         final minName = scaler.scale(128);
         final fits =
             tp.width + PSpacing.x3 + minName <= constraints.maxWidth + 0.01;
+        tp.dispose();
         if (fits) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -221,7 +223,15 @@ class StatsNameAmount extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             nameText,
-            Align(alignment: AlignmentDirectional.centerEnd, child: amountText),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                keepAllAmount(amount),
+                semanticsLabel: amount,
+                textAlign: TextAlign.end,
+                style: aStyle,
+              ),
+            ),
           ],
         );
       },
