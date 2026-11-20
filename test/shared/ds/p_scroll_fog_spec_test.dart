@@ -70,6 +70,51 @@ void main() {
     });
   }
 
+  // sliver 로 짠 화면(업데이트 안내 — 바닥 짝 위 영역)도 같은 깊이 · 여백이다
+  for (final use in [PScrollFogUse.page, PScrollFogUse.overlayBody]) {
+    testWidgets('slivers · ${use.name} — 흐림 깊이 · 앞뒤 여백이 같은 표다', (tester) async {
+      final m = scrollFogMetrics(use);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: GrooTheme.light(),
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              height: 300,
+              child: PScrollFog.slivers(
+                use: use,
+                slivers: const [
+                  SliverToBoxAdapter(
+                    child: SizedBox(key: ValueKey('body'), height: 600),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      final mask = tester.widget<PScrollFogMask>(find.byType(PScrollFogMask));
+      expect((mask.start, mask.end), (m.fogStart, m.fogEnd));
+      expect(mask.axis, Axis.vertical);
+      // 앞 여백 — 내용이 그만큼 아래에서 시작한다
+      expect(
+        tester.getTopLeft(find.byKey(const ValueKey('body'))).dy,
+        m.padStart,
+      );
+      // 끝 여백 — 끝까지 내리면 내용 끝이 그만큼 위에서 멈춘다
+      await tester.drag(find.byType(Scrollable), const Offset(0, -10000));
+      await tester.pumpAndSettle();
+      expect(
+        300 - tester.getBottomLeft(find.byKey(const ValueKey('body'))).dy,
+        m.padEnd,
+      );
+      expect(
+        tester.widget<PScrollFogInset>(find.byType(PScrollFogInset)).top,
+        m.fogStart,
+      );
+    });
+  }
+
   test('마스크는 흐린 쪽마다 상자 전체 크기의 층 하나 — 단계는 그 쪽 깊이의 몫이다', () {
     final want = specGradient(_spec.resolve({}, 'enabled')['fog.mask']);
     final fade = PGradients.light.fadeMask;

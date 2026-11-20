@@ -19,8 +19,8 @@ enum PScrollFogUse {
   page,
 }
 
-/// 자리의 값(scroll-fog.yaml) — 흐림 깊이와 흐린 쪽 안쪽 여백. 위젯과 테스트가 같은 표를 본다.
-@visibleForTesting
+/// 자리의 값(scroll-fog.yaml) — 흐림 깊이와 흐린 쪽 안쪽 여백. 위젯과 테스트가 같은 표를 본다. 여백을 뺀 남은 높이를
+/// 재야 하는 화면([PScrollFog.slivers] 의 sliver)도 이 표를 읽는다.
 ({double fogStart, double fogEnd, double padStart, double padEnd})
 scrollFogMetrics(PScrollFogUse use) => switch (use) {
   PScrollFogUse.box => (fogStart: 20, fogEnd: 20, padStart: 20, padEnd: 20),
@@ -53,19 +53,57 @@ class PScrollFog extends StatelessWidget {
     this.use = PScrollFogUse.box,
     this.axis,
     this.controller,
-    required this.child,
-  });
+    required Widget this.child,
+  }) : slivers = null,
+       primary = null;
+
+  /// sliver 로 짠 세로 스크롤(`CustomScrollView`) — 같은 흐림 · 안쪽 여백. 여백은 맨 앞 · 맨 끝 빈 sliver 라 내용과
+  /// 함께 스크롤되고, 안쪽 sliver 의 `precedingScrollExtent` 에 앞 여백이 들어 있다(남은 높이를 잴 때 끝 여백
+  /// `scrollFogMetrics(use).padEnd` 는 직접 뺀다).
+  const PScrollFog.slivers({
+    super.key,
+    this.use = PScrollFogUse.box,
+    this.controller,
+    this.primary,
+    required List<Widget> this.slivers,
+  }) : axis = Axis.vertical,
+       child = null;
 
   final PScrollFogUse use;
 
   /// 스크롤 방향 — row 는 가로, 나머지는 세로가 기본. box 는 가로로도 넘길 수 있다.
   final Axis? axis;
   final ScrollController? controller;
-  final Widget child;
+  final Widget? child;
+
+  /// [PScrollFog.slivers] 의 내용.
+  final List<Widget>? slivers;
+
+  /// [PScrollFog.slivers] 의 `CustomScrollView.primary`.
+  final bool? primary;
 
   @override
   Widget build(BuildContext context) {
     final m = scrollFogMetrics(use);
+    final slivers = this.slivers;
+    if (slivers != null) {
+      return PScrollFogMask(
+        start: m.fogStart,
+        end: m.fogEnd,
+        child: PScrollFogInset(
+          top: m.fogStart,
+          child: CustomScrollView(
+            controller: controller,
+            primary: primary,
+            slivers: [
+              SliverToBoxAdapter(child: SizedBox(height: m.padStart)),
+              ...slivers,
+              SliverToBoxAdapter(child: SizedBox(height: m.padEnd)),
+            ],
+          ),
+        ),
+      );
+    }
     final direction =
         axis ?? (use == PScrollFogUse.row ? Axis.horizontal : Axis.vertical);
     final padding = direction == Axis.vertical
@@ -76,7 +114,7 @@ class PScrollFog extends StatelessWidget {
       controller: controller,
       scrollDirection: direction,
       padding: padding,
-      child: child,
+      child: child!,
     );
     // 가로 줄은 스크롤바를 숨긴다
     if (use == PScrollFogUse.row) {
