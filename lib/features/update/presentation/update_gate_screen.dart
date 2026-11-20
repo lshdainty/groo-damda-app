@@ -71,21 +71,44 @@ class UpdateGateScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: PSpacing.x6),
-                  _Header(release: release, currentBuild: status.currentBuild),
-                  if (forced) ...[
-                    const SizedBox(height: PSpacing.x6),
-                    PCallout(
-                      tone: PCalloutTone.warning,
-                      description: AppLocalizations.of(
-                        context,
-                      ).updateRequiredDesc,
+                  // 바닥 [취소][설치] 위가 한 스크롤 영역이다. 보통은 넘치지 않고 "바뀐 내용"
+                  // 상자가 남는 공간을 다 써 그 안에서 스크롤한다. 글자가 아주 크면(iOS AX5 ·
+                  // 안드 200%) 제목 · 안내만으로 공간이 차 상자가 0 으로 눌렸다 — 그때는 상자가
+                  // 내용 높이를 갖고 이 영역 전체가 스크롤된다([_ChangesSliver]).
+                  Expanded(
+                    child: CustomScrollView(
+                      // 넘치지 않을 때(보통 글자) 영역이 끌리지 않게 — primary 면 늘 스크롤되는 물리를 받아
+                      // iOS 에서 머리까지 같이 튕긴다. 넘치면 플랫폼 물리로 스크롤된다.
+                      primary: false,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: PSpacing.x6),
+                              _Header(
+                                release: release,
+                                currentBuild: status.currentBuild,
+                              ),
+                              if (forced) ...[
+                                const SizedBox(height: PSpacing.x6),
+                                PCallout(
+                                  tone: PCalloutTone.warning,
+                                  description: AppLocalizations.of(
+                                    context,
+                                  ).updateRequiredDesc,
+                                ),
+                              ],
+                              const SizedBox(height: PSpacing.x8),
+                            ],
+                          ),
+                        ),
+                        // 노트가 비어 있으면(옛 version.json) 섹션 자체를 숨긴다.
+                        if (PReleaseNotes.hasContent(release.notes))
+                          _ChangesSliver(notes: release.notes),
+                      ],
                     ),
-                  ],
-                  const SizedBox(height: PSpacing.x8),
-                  // 바뀐 내용은 길 수 있어 남는 공간을 다 쓰고 그 안에서 스크롤한다.
-                  // 노트가 비어 있으면(옛 version.json) 섹션 자체를 숨긴다.
-                  Expanded(child: _Changes(notes: release.notes)),
+                  ),
                   const SizedBox(height: PSpacing.x6),
                   _Actions(
                     release: release,
@@ -200,16 +223,57 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _Changes extends StatelessWidget {
-  const _Changes({required this.notes});
+/// "바뀐 내용" 섹션 — 스크롤 영역의 남은 높이를 보고 두 모양 중 하나로 선다.
+///
+/// - 남은 높이가 영역의 절반 이상(보통 글자): 그 높이를 다 쓰고 상자 안이 스크롤된다(끝 흐림).
+/// - 그보다 작으면(아주 큰 글자): 상자가 내용 높이를 갖고 영역 전체가 스크롤된다. 남은 높이에
+///   맞추면 상자가 몇 줄 · 0 으로 눌려 내용이 안 보인다(QA 2026-11-20 iOS AX5).
+///
+/// 남은 높이는 앞 sliver 의 길이(`precedingScrollExtent`)로 잰다 — 스크롤 위치와 상관없어 스크롤하는
+/// 동안 모양이 바뀌지 않는다.
+class _ChangesSliver extends StatelessWidget {
+  const _ChangesSliver({required this.notes});
 
   final String notes;
 
   @override
   Widget build(BuildContext context) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final viewport = constraints.viewportMainAxisExtent;
+        final remaining = viewport - constraints.precedingScrollExtent;
+        final fill = remaining >= viewport / 2;
+        return SliverToBoxAdapter(
+          child: fill
+              ? SizedBox(
+                  height: remaining,
+                  child: _Changes(notes: notes, fill: true),
+                )
+              : _Changes(notes: notes, fill: false),
+        );
+      },
+    );
+  }
+}
+
+class _Changes extends StatelessWidget {
+  const _Changes({required this.notes, required this.fill});
+
+  final String notes;
+
+  /// 받은 높이를 다 쓰고 상자 안이 스크롤된다 — 아니면 상자가 내용 높이다.
+  final bool fill;
+
+  @override
+  Widget build(BuildContext context) {
     final c = context.colors;
     final l = AppLocalizations.of(context);
-    if (!PReleaseNotes.hasContent(notes)) return const SizedBox.shrink();
+
+    // 회색 상자는 ds 부품이 없다 — 모양은 두고 이름만. 흰 면 위라 라이트에서도 보인다(76)
+    BoxDecoration decoration() => BoxDecoration(
+      color: c.bgNeutralWeak,
+      borderRadius: BorderRadius.circular(PRounded.r3),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,19 +287,27 @@ class _Changes extends StatelessWidget {
           ),
         ),
         const SizedBox(height: PSpacing.x3),
-        Expanded(
-          // 회색 상자는 ds 부품이 없다 — 모양은 두고 이름만. 흰 면 위라 라이트에서도 보인다(76)
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: PSpacing.x4),
-            decoration: BoxDecoration(
-              color: c.bgNeutralWeak,
-              borderRadius: BorderRadius.circular(PRounded.r3),
+        if (fill)
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: PSpacing.x4),
+              decoration: decoration(),
+              // 상자 안이 스크롤된다 — 넘치면 끝 흐림
+              child: PScrollFog(child: PReleaseNotes(notes: notes)),
             ),
-            // 상자 안이 스크롤된다 — 넘치면 끝 흐림
-            child: PScrollFog(child: PReleaseNotes(notes: notes)),
+          )
+        else
+          Container(
+            width: double.infinity,
+            // 위아래는 상자 흐림(box)의 안쪽 여백 20 과 같다 — 두 모양의 글 자리가 같다
+            padding: const EdgeInsets.symmetric(
+              horizontal: PSpacing.x4,
+              vertical: PSpacing.x5,
+            ),
+            decoration: decoration(),
+            child: PReleaseNotes(notes: notes),
           ),
-        ),
       ],
     );
   }

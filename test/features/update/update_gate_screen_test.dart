@@ -15,6 +15,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/update/apk_installer.dart';
 import 'package:groo_damda_app/core/update/app_update.dart';
+import 'package:groo_damda_app/features/update/presentation/release_notes_view.dart';
 import 'package:groo_damda_app/features/update/presentation/update_gate_screen.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/button/p_button.dart';
@@ -43,10 +44,18 @@ Future<void> _pump(
   bool dark = false,
   bool forced = false,
   double scale = 1,
+  Size size = const Size(360, 780),
+  EdgeInsets safeArea = EdgeInsets.zero,
   ApkProgress progress = const ApkProgress(),
 }) async {
-  tester.view.physicalSize = const Size(360 * 3, 780 * 3);
+  tester.view.physicalSize = size * 3;
   tester.view.devicePixelRatio = 3.0;
+  final inset = FakeViewPadding(
+    top: safeArea.top * 3,
+    bottom: safeArea.bottom * 3,
+  );
+  tester.view.padding = inset;
+  tester.view.viewPadding = inset;
   addTearDown(tester.view.reset);
   SharedPreferences.setMockInitialValues({});
   final status = UpdateStatus(
@@ -101,6 +110,15 @@ Future<void> _pump(
   }
 }
 
+/// "바뀐 내용" 회색 상자 — 노트를 담은 가장 가까운 Container.
+/// 아주 큰 글자에서는 처음에 화면 밖(스크롤 아래)일 수 있어 화면 밖도 찾는다.
+Finder _box() => find
+    .ancestor(
+      of: find.byType(PReleaseNotes, skipOffstage: false),
+      matching: find.byType(Container, skipOffstage: false),
+    )
+    .first;
+
 void main() {
   for (final dark in [false, true]) {
     testWidgets('${dark ? "다크" : "라이트"} — 바닥은 흰 면이고 상자 바탕은 바닥과 다르다', (
@@ -147,6 +165,91 @@ void main() {
     await _pump(tester, forced: true, scale: 2);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('100% — 상자가 남는 높이를 다 쓰고 안에서 스크롤한다(바닥 짝 위 24)', (tester) async {
+    await _pump(tester, forced: true);
+    final box = tester.getRect(_box());
+    expect(find.byType(PScrollFog), findsOneWidget);
+    expect(
+      tester.getRect(find.byType(PButton).first).top - box.bottom,
+      closeTo(24, 0.01),
+      reason: '상자 끝 ↔ 바닥 짝 24',
+    );
+    // 화면(바깥)은 스크롤되지 않는다 — 넘친 노트는 상자 안에서 넘긴다
+    final outer = tester.state<ScrollableState>(find.byType(Scrollable).first);
+    expect(outer.position.maxScrollExtent, 0);
+  });
+
+  // QA 2026-11-20(iOS 3048 AX5): 제목 · 안내 · 쌓인 바닥 짝만으로 공간이 차 "이번에 달라진 점" 아래 상자가
+  // 0 으로 눌렸다(Expanded 가 남은 0 을 받음). 읽는 내용은 커진다(#260) — 상자가 내용 높이를 갖고 화면이 스크롤된다.
+  for (final c in [
+    (
+      name: 'iOS AX5(310%) · 393×852',
+      scale: 3.1,
+      size: const Size(393, 852),
+      safe: const EdgeInsets.only(top: 59, bottom: 34),
+      platform: TargetPlatform.iOS,
+    ),
+    (
+      name: '안드 200% · 412×915',
+      scale: 2.0,
+      size: const Size(412, 915),
+      safe: const EdgeInsets.only(top: 24, bottom: 24),
+      platform: TargetPlatform.android,
+    ),
+    (
+      name: '안드 200% · 360×780',
+      scale: 2.0,
+      size: const Size(360, 780),
+      safe: EdgeInsets.zero,
+      platform: TargetPlatform.android,
+    ),
+  ]) {
+    for (final forced in [false, true]) {
+      testWidgets(
+        '${c.name}${forced ? ' · 강제' : ''} — 바뀐 내용 글이 보이고 높이가 있다',
+        (tester) async {
+          await _pump(
+            tester,
+            forced: forced,
+            scale: c.scale,
+            size: c.size,
+            safeArea: c.safe,
+          );
+          expect(tester.takeException(), isNull, reason: '넘침 없음');
+          // 상자가 눌리지 않았다 — 적어도 한 줄과 위아래 안쪽 여백(20 · 20)이 든다
+          final box = tester.getRect(_box());
+          final first = findTextContaining(
+            '지어낸 변경 내용 0-0',
+            skipOffstage: false,
+          );
+          final last = findTextContaining('지어낸 변경 내용 7-3', skipOffstage: false);
+          final lineHeight = tester.getSize(first).height;
+          expect(lineHeight, greaterThan(0));
+          expect(box.height, greaterThanOrEqualTo(lineHeight + 40));
+          expect(tester.getRect(first).top, greaterThanOrEqualTo(box.top));
+
+          // 첫 줄 · 마지막 줄 모두 스크롤해서 화면 안(상단 안전 영역 아래 · 바닥 짝 위)에서 시작한다.
+          // AX5 는 항목 하나가 영역보다 길 수 있어 시작 자리를 본다.
+          final actionsTop = tester.getRect(find.byType(PButton).first).top;
+          for (final line in [first, last]) {
+            await tester.ensureVisible(line);
+            await tester.pumpAndSettle();
+            final r = tester.getRect(line);
+            expect(r.top, greaterThanOrEqualTo(c.safe.top));
+            expect(r.top, lessThan(actionsTop));
+          }
+          // 끝까지 스크롤하면 마지막 줄의 끝도 바닥 짝 위에 든다 — 잘리지 않는다
+          // 큰 글자면 영역 전체(스크롤 하나), 보통이면 상자 안 스크롤 — 둘 중 안쪽이 마지막이다
+          final scrollable = find.byType(Scrollable).last;
+          await tester.drag(scrollable, const Offset(0, -100000));
+          await tester.pumpAndSettle();
+          expect(tester.getRect(last).bottom, lessThanOrEqualTo(actionsTop));
+        },
+        variant: TargetPlatformVariant.only(c.platform),
+      );
+    }
+  }
 
   testWidgets('바닥 짝 [취소][설치] — 100% 는 한 줄 3 : 7, 200% 는 쌓인다', (tester) async {
     await _pump(tester, forced: true);
