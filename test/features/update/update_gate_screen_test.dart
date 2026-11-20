@@ -3,12 +3,13 @@
 //  - 바닥 = 흰 면(bgLayerDefault), "바뀐 내용" 상자 = bgNeutralWeak 라 라이트에서도 바닥과 다르다
 //  - 제목은 머리말 1단계(R1 t6 · 700), 강제 안내는 Callout(warning)
 //  - 받는 중 = 값 있는 ds 원 24 · 모르면 값 없는 원
-//  - 상자 안이 길면 끝 흐림(PScrollFog)
+//  - 상자 안이 길면 끝 흐림(PScrollFog box), 바닥 짝 위 영역은 늘 page 흐림(위 20 · 아래 80)
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
@@ -119,6 +120,12 @@ Finder _box() => find
     )
     .first;
 
+/// 흐림 — 바닥 짝 위 영역(page) · "바뀐 내용" 상자 안(box).
+Finder _fog(PScrollFogUse use) => find.byWidgetPredicate(
+  (w) => w is PScrollFog && w.use == use,
+  skipOffstage: false,
+);
+
 void main() {
   for (final dark in [false, true]) {
     testWidgets('${dark ? "다크" : "라이트"} — 바닥은 흰 면이고 상자 바탕은 바닥과 다르다', (
@@ -130,10 +137,12 @@ void main() {
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.backgroundColor, c.bgLayerDefault);
       final box = tester.widget<Container>(
-        find.ancestor(
-          of: find.byType(PScrollFog),
-          matching: find.byType(Container),
-        ),
+        find
+            .ancestor(
+              of: _fog(PScrollFogUse.box),
+              matching: find.byType(Container),
+            )
+            .first,
       );
       final fill = (box.decoration! as BoxDecoration).color;
       expect(fill, c.bgNeutralWeak);
@@ -157,7 +166,8 @@ void main() {
       tester.widget<PCallout>(find.byType(PCallout)).tone,
       PCalloutTone.warning,
     );
-    expect(find.byType(PScrollFog), findsOneWidget);
+    expect(_fog(PScrollFogUse.box), findsOneWidget);
+    expect(_fog(PScrollFogUse.page), findsOneWidget);
     handle.dispose();
   });
 
@@ -166,14 +176,38 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('100% — 상자가 남는 높이를 다 쓰고 안에서 스크롤한다(바닥 짝 위 24)', (tester) async {
+  // 바닥 짝 위는 늘 page 흐림 — 넘치지 않으면 흐림이 위 20 · 아래 80 빈 여백 위에 놓이고, 상자는 그 여백을 뺀
+  // 남은 높이를 다 쓴다(scroll-fog.md "넘쳤는지 재서 켜고 끄지 않는다").
+  testWidgets('100% — page 흐림 여백을 뺀 남은 높이를 상자가 다 쓰고 안에서 스크롤한다', (tester) async {
     await _pump(tester, forced: true);
     final box = tester.getRect(_box());
-    expect(find.byType(PScrollFog), findsOneWidget);
+    final region = tester.getRect(_fog(PScrollFogUse.page));
+    final actionsTop = tester.getRect(find.byType(PButton).first).top;
+    expect(_fog(PScrollFogUse.box), findsOneWidget);
     expect(
-      tester.getRect(find.byType(PButton).first).top - box.bottom,
-      closeTo(24, 0.01),
-      reason: '상자 끝 ↔ 바닥 짝 24',
+      actionsTop - box.bottom,
+      closeTo(80, 0.01),
+      reason: '상자 끝 → 바닥 짝 80',
+    );
+    expect(
+      actionsTop - region.bottom,
+      closeTo(0, 0.01),
+      reason: '영역은 바닥 짝 바로 위에서 끝난다(여백 80 이 간격을 대신)',
+    );
+    expect(
+      tester
+              .getRect(
+                find
+                    .ancestor(
+                      of: find.byIcon(LucideIcons.download),
+                      matching: find.byType(Container),
+                    )
+                    .first,
+              )
+              .top -
+          region.top,
+      closeTo(20, 0.01),
+      reason: '위 여백 20',
     );
     // 화면(바깥)은 스크롤되지 않는다 — 넘친 노트는 상자 안에서 넘긴다
     final outer = tester.state<ScrollableState>(find.byType(Scrollable).first);
@@ -217,34 +251,46 @@ void main() {
             safeArea: c.safe,
           );
           expect(tester.takeException(), isNull, reason: '넘침 없음');
-          // 상자가 눌리지 않았다 — 적어도 한 줄과 위아래 안쪽 여백(20 · 20)이 든다
+          // 두 모양 모두 바닥 짝 위 영역은 page 흐림이다
+          expect(_fog(PScrollFogUse.page), findsOneWidget);
+          final region = tester.getRect(_fog(PScrollFogUse.page));
+
+          // 상자가 눌리지 않았다 — 위아래 안쪽 여백(20 · 20) 말고도 글 자리가 있다
           final box = tester.getRect(_box());
           final first = findTextContaining(
             '지어낸 변경 내용 0-0',
             skipOffstage: false,
           );
           final last = findTextContaining('지어낸 변경 내용 7-3', skipOffstage: false);
-          final lineHeight = tester.getSize(first).height;
-          expect(lineHeight, greaterThan(0));
-          expect(box.height, greaterThanOrEqualTo(lineHeight + 40));
+          expect(tester.getSize(first).height, greaterThan(0));
+          expect(box.height, greaterThan(40));
           expect(tester.getRect(first).top, greaterThanOrEqualTo(box.top));
 
-          // 첫 줄 · 마지막 줄 모두 스크롤해서 화면 안(상단 안전 영역 아래 · 바닥 짝 위)에서 시작한다.
-          // AX5 는 항목 하나가 영역보다 길 수 있어 시작 자리를 본다.
-          final actionsTop = tester.getRect(find.byType(PButton).first).top;
+          // 첫 줄 · 마지막 줄 모두 스크롤해서 영역 안에 보인다.
+          // AX5 는 항목 하나가 영역보다 길 수 있어 걸친 자리를 본다.
           for (final line in [first, last]) {
             await tester.ensureVisible(line);
             await tester.pumpAndSettle();
             final r = tester.getRect(line);
-            expect(r.top, greaterThanOrEqualTo(c.safe.top));
-            expect(r.top, lessThan(actionsTop));
+            expect(r.bottom, greaterThan(region.top));
+            expect(r.top, lessThan(region.bottom));
           }
-          // 끝까지 스크롤하면 마지막 줄의 끝도 바닥 짝 위에 든다 — 잘리지 않는다
+          // 끝까지 스크롤하면 마지막 줄이 흐림 밖에 보인다 — 상자 안 여백 20 위, 상자는 page 아래 여백 80 위.
           // 큰 글자면 영역 전체(스크롤 하나), 보통이면 상자 안 스크롤 — 둘 중 안쪽이 마지막이다
-          final scrollable = find.byType(Scrollable).last;
-          await tester.drag(scrollable, const Offset(0, -100000));
+          await tester.drag(
+            find.byType(Scrollable).last,
+            const Offset(0, -100000),
+          );
           await tester.pumpAndSettle();
-          expect(tester.getRect(last).bottom, lessThanOrEqualTo(actionsTop));
+          final endBox = tester.getRect(_box());
+          expect(
+            tester.getRect(last).bottom,
+            lessThanOrEqualTo(endBox.bottom - 20 + 0.01),
+          );
+          expect(endBox.bottom, lessThanOrEqualTo(region.bottom - 80 + 0.01));
+          // 영역은 바닥 짝 바로 위에서 끝난다 — 끝까지 내린 상자 끝은 바닥 짝 위 80
+          final actionsTop = tester.getRect(find.byType(PButton).first).top;
+          expect(region.bottom, closeTo(actionsTop, 0.01));
         },
         variant: TargetPlatformVariant.only(c.platform),
       );

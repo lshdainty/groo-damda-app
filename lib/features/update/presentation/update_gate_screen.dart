@@ -71,12 +71,15 @@ class UpdateGateScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 바닥 [취소][설치] 위가 한 스크롤 영역이다. 보통은 넘치지 않고 "바뀐 내용"
-                  // 상자가 남는 공간을 다 써 그 안에서 스크롤한다. 글자가 아주 크면(iOS AX5 ·
-                  // 안드 200%) 제목 · 안내만으로 공간이 차 상자가 0 으로 눌렸다 — 그때는 상자가
-                  // 내용 높이를 갖고 이 영역 전체가 스크롤된다([_ChangesSliver]).
+                  // 바닥 [취소][설치] 위가 한 스크롤 영역이다 — 바닥 고정 버튼 위 화면 전체 스크롤이라
+                  // page 흐림(위 20 · 아래 80, 같은 만큼의 안쪽 여백)을 두 모양 모두에 늘 건다
+                  // (scroll-fog.md "넘쳤는지 재서 켜고 끄지 않는다"). 보통은 넘치지 않고 "바뀐 내용"
+                  // 상자가 여백을 뺀 남은 공간을 다 써 그 안에서 스크롤한다(흐림은 빈 여백 위). 글자가
+                  // 아주 크면(iOS AX5 · 안드 200%) 상자가 내용 높이를 갖고 이 영역 전체가 스크롤된다
+                  // ([_ChangesSliver]).
                   Expanded(
-                    child: CustomScrollView(
+                    child: PScrollFog.slivers(
+                      use: PScrollFogUse.page,
                       // 넘치지 않을 때(보통 글자) 영역이 끌리지 않게 — primary 면 늘 스크롤되는 물리를 받아
                       // iOS 에서 머리까지 같이 튕긴다. 넘치면 플랫폼 물리로 스크롤된다.
                       primary: false,
@@ -85,7 +88,7 @@ class UpdateGateScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: PSpacing.x6),
+                              // 위 간격은 page 흐림의 안쪽 여백(20)이 맡는다
                               _Header(
                                 release: release,
                                 currentBuild: status.currentBuild,
@@ -109,7 +112,8 @@ class UpdateGateScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: PSpacing.x6),
+                  // 영역은 바닥 짝 바로 위에서 끝난다 — 사이 간격은 page 흐림의 아래 여백 80 이 맡는다
+                  // (scroll-fog.yaml page: 화면 아래 여백 대신 80, "바닥 고정 버튼 위에서 끝난다")
                   _Actions(
                     release: release,
                     forced: forced,
@@ -225,7 +229,7 @@ class _Header extends StatelessWidget {
 
 /// "바뀐 내용" 섹션 — 스크롤 영역의 남은 높이를 보고 두 모양 중 하나로 선다.
 ///
-/// - 남은 높이가 영역의 절반 이상(보통 글자): 그 높이를 다 쓰고 상자 안이 스크롤된다(끝 흐림).
+/// - 남은 높이(page 흐림 여백을 뺀 값)가 영역의 절반 이상(보통 글자): 그 높이를 다 쓰고 상자 안이 스크롤된다(끝 흐림).
 /// - 그보다 작으면(아주 큰 글자): 상자가 내용 높이를 갖고 영역 전체가 스크롤된다. 남은 높이에
 ///   맞추면 상자가 몇 줄 · 0 으로 눌려 내용이 안 보인다(QA 2026-11-20 iOS AX5).
 ///
@@ -240,9 +244,16 @@ class _ChangesSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverLayoutBuilder(
       builder: (context, constraints) {
-        final viewport = constraints.viewportMainAxisExtent;
-        final remaining = viewport - constraints.precedingScrollExtent;
-        final fill = remaining >= viewport / 2;
+        // page 흐림의 안쪽 여백(위 20 · 아래 80)을 뺀 높이로 잰다 — 앞 여백은 precedingScrollExtent 에
+        // 들어 있고 끝 여백은 이 sliver 뒤라 직접 뺀다.
+        final m = scrollFogMetrics(PScrollFogUse.page);
+        final available =
+            constraints.viewportMainAxisExtent - m.padStart - m.padEnd;
+        final remaining =
+            constraints.viewportMainAxisExtent -
+            constraints.precedingScrollExtent -
+            m.padEnd;
+        final fill = remaining >= available / 2;
         return SliverToBoxAdapter(
           child: fill
               ? SizedBox(
