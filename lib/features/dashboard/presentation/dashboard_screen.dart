@@ -635,16 +635,23 @@ Widget _prefixLine(BuildContext context, Widget child) => SizedBox(
 );
 
 /// 브랜드 채움 위 불러오는 자리 — 채움 위 Skeleton 짝이 ds 에 없어 흰 18% 막대를 쓴다(ds 짝 없음 — 결과표).
+///
+/// 숫자 자리 하나(값 조각)라 다른 카드와 같은 시간표를 탄다(skeleton.md "값 조각" — 0 ~ 1초 틀만) — 0 ~ 1초는 크기만
+/// 지키고 보이지 않다가 1초부터 보인다. 띠 바탕 · 라벨 · 눈 단추 같은 틀은 처음부터 그린다. 5초 글은 두지 않는다 —
+/// 브랜드 채움 위라 흰 면 글색(fg-neutral-muted)이 맞지 않고, 알림은 앱 맨 위 상태 글이 맡는다.
 Widget _heroSkelBar(
   PColors c, {
   required double width,
   required double height,
-}) => Container(
-  width: width,
-  height: height,
-  decoration: BoxDecoration(
-    color: c.staticWhite.withValues(alpha: 0.18),
-    borderRadius: BorderRadius.circular(PRounded.r1_5),
+}) => loadingInline(
+  Container(
+    key: const ValueKey('home-hero-skeleton'),
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: c.staticWhite.withValues(alpha: 0.18),
+      borderRadius: BorderRadius.circular(PRounded.r1_5),
+    ),
   ),
 );
 
