@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:groo_damda_app/app/session_scope.dart' show appProviderRetry;
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/app/theme/theme_data.dart';
 import 'package:groo_damda_app/core/auth/auth_notifier.dart';
@@ -29,8 +30,16 @@ import '../../support/memory_secure_storage.dart';
 import '../../support/plain_text.dart';
 
 class _FakeAuth extends AuthNotifier {
+  _FakeAuth({this.bootError});
+
+  /// 앱을 켤 때 세션 확인(`/auth/check`)이 401 이 아닌 오류로 실패했다 — 네트워크 끊김 · 시간 초과.
+  final Object? bootError;
+
   @override
-  Future<User?> build() async => null;
+  Future<User?> build() async {
+    if (bootError != null) throw bootError!;
+    return null;
+  }
 
   void failLogin(Object e) => state = AsyncError(e, StackTrace.current);
 
@@ -44,13 +53,16 @@ Future<_FakeAuth> _pump(
   double width = 360,
   double textScale = 1,
   List<Override> overrides = const [],
+  Object? bootError,
 }) async {
   tester.view.physicalSize = Size(width * 3, 780 * 3);
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.reset);
-  final auth = _FakeAuth();
+  final auth = _FakeAuth(bootError: bootError);
   await tester.pumpWidget(
     ProviderScope(
+      // 앱과 같이 Riverpod 재시도를 끈다 — 켜 두면 켤 때 실패한 세션 확인이 재시도 로딩으로 남는다
+      retry: appProviderRetry,
       overrides: [authProvider.overrideWith(() => auth), ...overrides],
       child: MaterialApp(
         theme: dark ? GrooTheme.dark() : GrooTheme.light(),
@@ -233,6 +245,99 @@ void main() {
     expect(launched, hasLength(2));
     expect(launched.last.queryParameters['prompt'], 'login');
     expect(find.byType(PCallout), findsNothing);
+  });
+
+  // QA 2026-11-20(안드 3048): 앱을 켤 때 세션 확인이 네트워크로 실패한 채 로그인하니, 딥링크 교환
+  // 3초(exchange-code 14:05:12 → 200 14:05:16) 동안 "로그인하지 못했어요." 가 버튼의 원과 같이 떴다가
+  // 홈으로 들어갔다. Riverpod 는 `state = AsyncLoading()` 에 앞 오류를 실어 두어(로딩이면서 hasError)
+  // 화면이 그것을 실패로 읽었다.
+  group('교환 중 실패 글 — 교환이 실제로 실패했을 때만', () {
+    late List<Uri> launched;
+    late List<Override> launcher;
+
+    setUp(() {
+      launched = [];
+      launcher = [
+        oauthLoginLauncherProvider.overrideWithValue(
+          OAuthLoginLauncher(
+            store: OAuthFlowStore(MemorySecureStorage()),
+            // Android Custom Tabs — 탭을 띄우면 바로 true(창을 닫아도 아무 신호가 없다)
+            launch: (url) async {
+              launched.add(url);
+              return true;
+            },
+          ),
+        ),
+      ];
+    });
+
+    testWidgets('켤 때 세션 확인 실패 → 로그인 → 교환 대기 중에는 실패 글 없이 원만', (tester) async {
+      final auth = await _pump(
+        tester,
+        overrides: launcher,
+        bootError: ApiException(code: 'NETWORK', message: 'timeout'),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.widget<PButton>(find.byType(PButton)).loading, isFalse);
+
+      // 누르면 앞 글은 걷힌다 — 흐름이 앱 안 창으로 넘어간다
+      await tester.tap(find.byType(PButton));
+      await tester.pumpAndSettle();
+      expect(launched, hasLength(1));
+      expect(find.byType(PCallout), findsNothing);
+
+      // 앱 안 창에서 [계속] → 딥링크 → 교환 시작(AuthNotifier.exchangeAndLoginWithCode 의 첫 줄과 같다)
+      auth.startExchange();
+      await tester.pump();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(LoginScreen)),
+      );
+      expect(
+        container.read(authProvider).hasError,
+        isTrue,
+        reason: '로딩 상태가 앞 오류를 들고 있다(이 결함의 전제)',
+      );
+      expect(tester.widget<PButton>(find.byType(PButton)).loading, isTrue);
+      expect(find.byType(PCallout), findsNothing);
+      expect(findText('로그인하지 못했어요.'), findsNothing);
+    });
+
+    testWidgets('교환이 실패하면 그때 실패 글 — 다음 교환이 시작되면 걷힌다', (tester) async {
+      final auth = await _pump(tester, overrides: launcher);
+      auth.startExchange();
+      await tester.pump();
+      expect(find.byType(PCallout), findsNothing);
+
+      auth.failLogin(ApiException(code: 'AUTH_004', message: 'used code'));
+      await tester.pump();
+      expect(findText('로그인하지 못했어요.'), findsOneWidget);
+      expect(tester.widget<PButton>(find.byType(PButton)).loading, isFalse);
+
+      // 딥링크가 버튼을 거치지 않고 다시 교환을 시작해도(AUTH_030 다시 시작 등) 대기 중엔 글이 없다
+      auth.startExchange();
+      await tester.pump();
+      expect(find.byType(PCallout), findsNothing);
+      expect(tester.widget<PButton>(find.byType(PButton)).loading, isTrue);
+    });
+
+    testWidgets('창을 그냥 닫으면(취소) 원이 남지 않고 다시 누를 수 있다', (tester) async {
+      await _pump(
+        tester,
+        overrides: launcher,
+        bootError: ApiException(code: 'NETWORK', message: 'timeout'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(PButton));
+      await tester.pumpAndSettle();
+      // 딥링크가 오지 않는다 — 교환도 없다
+      expect(tester.widget<PButton>(find.byType(PButton)).loading, isFalse);
+      expect(find.byType(PCallout), findsNothing);
+
+      await tester.tap(find.byType(PButton));
+      await tester.pumpAndSettle();
+      expect(launched, hasLength(2));
+      expect(tester.widget<PButton>(find.byType(PButton)).loading, isFalse);
+    });
   });
 
   testWidgets('브라우저를 열지 못하면 버튼 위 Callout — 다시 누를 수 있다', (tester) async {
