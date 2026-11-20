@@ -104,7 +104,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // 실패(AsyncError)는 버튼 위 Callout 으로 흘려보낸다.
     final exchanging = ref.watch(authProvider).isLoading;
     ref.listen(authProvider, (prev, next) {
-      if (next.hasError && mounted) {
+      if (!mounted) return;
+      // 교환이 도는 동안(AsyncLoading)은 실패 글을 걷고 버튼의 원만 보인다. 실패 글은 교환이
+      // 실제로 끝나 실패했을 때(로딩이 아닌 AsyncError)만이다.
+      //
+      // Riverpod 는 `state = AsyncLoading()` 에 앞 상태의 오류를 실어 둔다(로딩이면서
+      // hasError). 앱을 켤 때 세션 확인이 네트워크로 실패한 채 로그인하면 교환 3초 동안 그
+      // 옛 오류가 "로그인하지 못했어요." 로 원과 같이 떴다.
+      if (next.isLoading) {
+        if (_error != null) setState(() => _error = null);
+        return;
+      }
+      if (next.hasError) {
         final e = next.error;
         // 해지한 계정은 라우터가 해지 완료 화면으로 보낸다 — 여기서 에러 글을 그리면
         // 화면이 바뀌기 전 한 프레임 번쩍인다.
