@@ -5,7 +5,7 @@
 //    text-t3-static), Image Frame 장수 표식(image-frame.yaml text-t1-static). 배율 없이 그려지고 크기가 100% 와 같다.
 //    도넛 가운데는 넣을 수 있는지 판정과 그림이 같은 글이라, 그려진 글이 늘 구멍 안에 든다.
 // ⓑ 커지는 것 — Quantity Picker 값(상자 52 는 최소 높이 — 값을 따라 높아지고 − · + 52 는 그대로 세로 가운데), 도넛 범례 글
-//    (색 네모 10 은 그대로 첫 글줄 가운데).
+//    (색 네모 10 은 그대로 — 자리는 이름 · % · 금액 묶음 전체의 세로 가운데, groo-design #269).
 // 첨부(Attachment Input)는 p_attachment_input_spec_test.dart 의 "큰 글자" 묶음이 잰다.
 import 'dart:io';
 import 'dart:math' as math;
@@ -291,7 +291,9 @@ void main() {
       },
     );
 
-    testWidgets('도넛 범례 — 이름 아래로 내린 줄에서 색 네모(10)는 첫 글줄 가운데', (tester) async {
+    testWidgets('도넛 범례 — 이름 아래로 내린 줄에서 색 네모(10)는 묶음 전체의 세로 가운데', (
+      tester,
+    ) async {
       for (final (name, scaler) in _scalers) {
         await _pump(
           tester,
@@ -318,13 +320,15 @@ void main() {
         final labelFinder = find.byKey(const ValueKey('chart-donut-label'));
         final rp = _paragraph(tester, labelFinder);
         expect(rp.textScaler, scaler, reason: '$name 범례 글 배율');
-        final firstLine =
-            scaler.scale(rp.text.style!.fontSize!) * rp.text.style!.height!;
+        // groo-design #269 — 첫 글줄이 아니라 이름 · % · 금액 묶음 전체의 세로 가운데
         final label = tester.getRect(labelFinder);
+        final amount = tester.getRect(
+          find.byKey(const ValueKey('chart-donut-amount')),
+        );
         expect(
           swatch.center.dy,
-          closeTo(label.top + firstLine / 2, 0.01),
-          reason: '$name 네모가 첫 글줄 가운데',
+          closeTo((label.top + amount.bottom) / 2, 0.01),
+          reason: '$name 네모가 묶음 전체의 세로 가운데',
         );
       }
     });
