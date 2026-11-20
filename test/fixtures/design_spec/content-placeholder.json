@@ -3,7 +3,7 @@
   "source": "specs/components/content-placeholder.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "22ab4829300f"
+    "sha256": "7b3ba0bb826a"
   },
   "slots": {
     "root": "자리 — 담는 틀(이미지 틀)을 채운다. 모서리는 담는 틀이 자른다",

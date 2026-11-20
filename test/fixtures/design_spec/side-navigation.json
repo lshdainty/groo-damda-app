@@ -3,7 +3,7 @@
   "source": "specs/components/side-navigation.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "22ab4829300f"
+    "sha256": "7b3ba0bb826a"
   },
   "slots": {
     "root": "사이드바 — 화면 왼쪽, 높이 전체. 흰 면 + 오른쪽 1px 선. 본문과 따로 스크롤됩니다",

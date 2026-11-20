@@ -3,7 +3,7 @@
   "source": "specs/components/table.yaml",
   "design": {
     "file": "DESIGN.desk.md",
-    "sha256": "22ab4829300f"
+    "sha256": "7b3ba0bb826a"
   },
   "slots": {
     "root": "표 상자 — 카드 안에 가장자리까지 붙습니다. 표와 넘김 줄(Table Pagination)을 담고, 넘치면 함께 가로로 밉니다",
