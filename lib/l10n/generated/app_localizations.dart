@@ -11380,13 +11380,13 @@ abstract class AppLocalizations {
   /// No description provided for @smsClipboardBannerTitle.
   ///
   /// In ko, this message translates to:
-  /// **'복사한 결제 문자가 있어요'**
+  /// **'복사한 글로 지출을 기록할까요?'**
   String get smsClipboardBannerTitle;
 
   /// No description provided for @smsClipboardBannerDesc.
   ///
   /// In ko, this message translates to:
-  /// **'붙여넣어 지출로 기록할 수 있어요.'**
+  /// **'결제 문자라면 붙여넣어 바로 기록할 수 있어요.'**
   String get smsClipboardBannerDesc;
 
   /// No description provided for @smsInboxTitle.
