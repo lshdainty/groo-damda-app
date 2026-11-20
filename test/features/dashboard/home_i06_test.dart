@@ -117,6 +117,8 @@ Future<void> _pump(
   Object? budgetsError,
   bool dashPending = false,
   bool todayPending = false,
+  bool summaryPending = false,
+  bool settle = true,
   List<String>? rangeStarts,
   Object? dashError,
   List<String?>? categoryColors,
@@ -138,6 +140,7 @@ Future<void> _pump(
     assetSummaryProvider.overrideWith((ref, key) async {
       reads?.update('summary', (v) => v + 1, ifAbsent: () => 1);
       if (summaryError != null) throw summaryError;
+      if (summaryPending) return Completer<AssetSummary>().future;
       return summary ??
           const AssetSummary(
             netWorth: 98765432100,
@@ -227,6 +230,8 @@ Future<void> _pump(
     ),
   );
   await tester.pump();
+  // 콜드 스타트 첫 순간을 볼 때 — 시간표(1초)를 흘리지 않고 멈춘다
+  if (!settle) return;
   await tester.pump(const Duration(seconds: 1));
   await tester.pump(const Duration(seconds: 1));
   if (hidden.isNotEmpty) {
@@ -381,6 +386,39 @@ void main() {
   });
 
   group('순자산 — 11 ~ 15', () {
+    testWidgets('불러오는 중 — 0 ~ 1초는 틀만(숫자 자리 크기만), 1초부터 막대 · 높이 그대로', (
+      tester,
+    ) async {
+      await _pump(tester, summaryPending: true, settle: false);
+      final bars = find.byKey(const ValueKey('home-hero-skeleton'));
+      final face = find.byKey(const ValueKey('home-hero-face'));
+      // 순자산 · 자산 · 부채 · 증감 — 숫자 자리 넷
+      expect(bars, findsNWidgets(4));
+      List<bool> shown() => [
+        for (var i = 0; i < 4; i++)
+          tester
+              .widget<Visibility>(
+                find
+                    .ancestor(of: bars.at(i), matching: find.byType(Visibility))
+                    .first,
+              )
+              .visible,
+      ];
+      // 틀(라벨 · 눈 단추)은 처음부터 그린다
+      expect(findPlain('순자산'), findsOneWidget);
+      expect(find.byKey(const ValueKey('home-hero-eye')), findsOneWidget);
+      final h0 = tester.getSize(face).height;
+      expect(shown(), everyElement(isFalse), reason: '0초');
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(shown(), everyElement(isFalse), reason: '500ms');
+      expect(tester.getSize(face).height, h0);
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(shown(), everyElement(isTrue), reason: '1100ms');
+      expect(tester.getSize(face).height, h0, reason: '띠 높이 그대로');
+      // 남은 시간표(5초)를 흘려 타이머를 비운다
+      await tester.pump(const Duration(seconds: 5));
+    });
+
     testWidgets('금액 · 원 같은 줄 · 라벨 불투명 · 눈 40 · 이름 · 토글 아님', (tester) async {
       final handle = tester.ensureSemantics();
       await _pump(tester);
