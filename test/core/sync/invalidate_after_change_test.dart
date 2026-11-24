@@ -453,6 +453,8 @@ final _event = CalendarEvent.fromJson(const <String, dynamic>{
   'startDate': '2026-09-10T09:00:00',
   'endDate': '2026-09-10T10:00:00',
   'isAllDay': 'N',
+  // [삭제] 는 그 캘린더의 내 권한(소유자 · 편집)으로만 보인다 — 아래 캘린더 목록의 7(소유자)
+  'calendarRowId': 7,
 });
 
 Finder _pButton(String label) =>
@@ -551,7 +553,9 @@ Future<_DeleteHarness> _pumpDeleteProbe(WidgetTester tester) async {
           (ref) async => _FakeCalendarRepo(),
         ),
         userCalendarListProvider.overrideWith(
-          (ref) async => const <UserCalendar>[],
+          (ref) async => const <UserCalendar>[
+            UserCalendar(rowId: 7, calendarName: '개인', myRole: 'OWNER'),
+          ],
         ),
       ],
       child: MaterialApp(

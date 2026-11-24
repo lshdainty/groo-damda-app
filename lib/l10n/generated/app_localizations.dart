@@ -2539,6 +2539,12 @@ abstract class AppLocalizations {
   /// **'불러오지 못했어요'**
   String get calFormCalendarLoadFailed;
 
+  /// No description provided for @calFormCalendarSharedLocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'공유 캘린더의 일정은 다른 캘린더로 옮길 수 없어요'**
+  String get calFormCalendarSharedLocked;
+
   /// No description provided for @calFormLabelHint.
   ///
   /// In ko, this message translates to:

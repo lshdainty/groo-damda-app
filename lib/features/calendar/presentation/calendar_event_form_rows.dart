@@ -108,6 +108,7 @@ class CalendarEventFormRows extends StatelessWidget {
     required this.calendarsLoading,
     required this.selectedCalendar,
     required this.onPickCalendar,
+    this.calendarLocked = false,
     required this.onRetryCalendars,
     required this.labels,
     required this.selectedLabel,
@@ -140,6 +141,9 @@ class CalendarEventFormRows extends StatelessWidget {
   final bool calendarsLoading;
   final int? selectedCalendar;
   final VoidCallback onPickCalendar;
+
+  /// 공유 캘린더 일정이라 캘린더를 못 바꾼다 — 칸에 까닭 한 줄을 단다([calendarLockedTo]).
+  final bool calendarLocked;
   final VoidCallback onRetryCalendars;
   final List<CalendarChoiceSource> labels;
   final int? selectedLabel;
@@ -191,8 +195,10 @@ class CalendarEventFormRows extends StatelessWidget {
           Color? dot,
           bool chevron = false,
           int? maxLines,
+          String? detail,
         }) => PListButtonItem(
           title: title,
+          detail: detail,
           prefix: Icon(icon, size: _rowIcon),
           onTap: onTap,
           suffix: value == null && !chevron
@@ -252,6 +258,9 @@ class CalendarEventFormRows extends StatelessWidget {
                         value: cal?.name,
                         dot: cal?.dot,
                         onTap: onPickCalendar,
+                        detail: calendarLocked
+                            ? l.calFormCalendarSharedLocked
+                            : null,
                       )
                     : row(
                         title: l.calFieldCalendar,

@@ -2,17 +2,16 @@ import 'package:groo_damda_app/features/calendar/domain/calendar_event.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 
-/// 일정 상세의 [수정] · [삭제] 를 보일 사람인가(I-09b 7) — 서버 규칙 그대로(`CalendarMembershipValidator.canEditOrDelete`):
-/// **일정을 만든 사람이거나, 그 일정 캘린더의 내 권한이 OWNER · EDIT**.
+/// 일정 상세의 [수정] · [삭제] 를 보일 사람인가(I-09b 7) — 서버 규칙 그대로(`CalendarEventServiceImpl.validateEventOwnership`):
+/// **그 일정 캘린더의 내 권한이 OWNER · EDIT**. 권한은 캘린더에 걸린다 — 읽기 전용(READ)이면 내가 만든 일정이라도
+/// 버튼이 없다(2026-11-24 사용자 결정).
 ///
-/// 캘린더 목록을 아직 못 받았거나(불러오는 중 · 실패) 그 캘린더를 못 찾으면 권한을 모르는 것이다 — 이때는 만든 사람 판정만 쓴다
-/// (버튼이 떴다 사라지지 않게, 모르는 동안은 남의 일정에 버튼을 그리지 않는다). 공휴일은 [CalendarEvent] 가 아니라 이 길에 오지 않는다.
+/// 캘린더 목록을 아직 못 받았거나(불러오는 중 · 실패) 그 캘린더를 못 찾으면 권한을 모르는 것이다 — 버튼을 그리지 않는다
+/// (떴다 사라지지 않게). 공휴일은 [CalendarEvent] 가 아니라 이 길에 오지 않는다.
 bool canEditCalendarEvent({
   required CalendarEvent event,
-  required int? myUserRowId,
   required List<UserCalendar>? calendars,
 }) {
-  if (myUserRowId != null && event.userRowId == myUserRowId) return true;
   final calendarId = event.calendarRowId;
   if (calendarId == null || calendars == null) return false;
   for (final c in calendars) {
