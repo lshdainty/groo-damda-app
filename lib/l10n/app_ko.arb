@@ -2328,7 +2328,7 @@
   "accountLogoutConfirm": "이 기기에서 로그아웃할까요?",
   "accountWithdrawTitle": "그루 담다 이용 해지",
   "withdrawIntro": "이용을 해지하면 바로 로그인이 막히고 되돌릴 수 없어요.",
-  "withdrawImpactCalendarsOwned": "내가 만든 공유 캘린더 {count}개가 삭제되고 멤버도 볼 수 없어요",
+  "withdrawImpactCalendarsOwned": "내가 만든 캘린더 {count}개가 삭제돼요",
   "@withdrawImpactCalendarsOwned": {
     "placeholders": {
       "count": {

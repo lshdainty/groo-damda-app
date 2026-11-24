@@ -4108,10 +4108,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count shared calendars',
-      one: '1 shared calendar',
+      other: '$count calendars',
+      one: '1 calendar',
     );
-    return '$_temp0 you created will be deleted — members lose access too';
+    return '$_temp0 you created will be deleted';
   }
 
   @override

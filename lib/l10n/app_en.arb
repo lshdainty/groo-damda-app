@@ -2286,7 +2286,7 @@
   "accountLogoutConfirm": "Log out of this device?",
   "accountWithdrawTitle": "Stop using 그루 담다",
   "withdrawIntro": "Stopping 그루 담다 signs you out immediately and cannot be undone.",
-  "withdrawImpactCalendarsOwned": "{count, plural, =1{1 shared calendar} other{{count} shared calendars}} you created will be deleted — members lose access too",
+  "withdrawImpactCalendarsOwned": "{count, plural, =1{1 calendar} other{{count} calendars}} you created will be deleted",
   "@withdrawImpactCalendarsOwned": {
     "placeholders": {
       "count": {

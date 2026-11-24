@@ -3886,7 +3886,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String withdrawImpactCalendarsOwned(int count) {
-    return '내가 만든 공유 캘린더 $count개가 삭제되고 멤버도 볼 수 없어요';
+    return '내가 만든 캘린더 $count개가 삭제돼요';
   }
 
   @override

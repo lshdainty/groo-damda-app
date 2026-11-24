@@ -7144,7 +7144,7 @@ abstract class AppLocalizations {
   /// No description provided for @withdrawImpactCalendarsOwned.
   ///
   /// In ko, this message translates to:
-  /// **'내가 만든 공유 캘린더 {count}개가 삭제되고 멤버도 볼 수 없어요'**
+  /// **'내가 만든 캘린더 {count}개가 삭제돼요'**
   String withdrawImpactCalendarsOwned(int count);
 
   /// No description provided for @withdrawImpactCalendarMemberships.
