@@ -39,27 +39,46 @@ class _Repo extends UserCalendarRepository {
   int deletes = 0;
   int roleChanges = 0;
   int stops = 0;
+  int leaves = 0;
+  final transfers = <int>[];
+
+  /// 멤버 목록을 바꿔 보는 자리 — null 이면 아래 기본(나 · 편집 · 읽기).
+  List<CalendarMember>? memberList;
 
   @override
   Future<void> stopSharing(int id) async => stops++;
 
   @override
-  Future<List<CalendarMember>> members(int id) async => const [
-    CalendarMember(rowId: 1, userRowId: 10, userName: '나', permission: 'OWNER'),
-    CalendarMember(
-      rowId: 2,
-      userRowId: 11,
-      userName: '아주긴이름을가진가족구성원',
-      userEmail: 'very.long.family.member.address@example.com',
-      permission: 'EDIT',
-    ),
-    CalendarMember(
-      rowId: 3,
-      userRowId: 12,
-      userName: '읽는이',
-      permission: 'READ',
-    ),
-  ];
+  Future<void> transferOwnership(int id, int memberId) async =>
+      transfers.add(memberId);
+
+  @override
+  Future<void> leave(int id) async => leaves++;
+
+  @override
+  Future<List<CalendarMember>> members(int id) async =>
+      memberList ??
+      const [
+        CalendarMember(
+          rowId: 1,
+          userRowId: 10,
+          userName: '나',
+          permission: 'OWNER',
+        ),
+        CalendarMember(
+          rowId: 2,
+          userRowId: 11,
+          userName: '아주긴이름을가진가족구성원',
+          userEmail: 'very.long.family.member.address@example.com',
+          permission: 'EDIT',
+        ),
+        CalendarMember(
+          rowId: 3,
+          userRowId: 12,
+          userName: '읽는이',
+          permission: 'READ',
+        ),
+      ];
 
   @override
   Future<void> delete(int id) async => deletes++;
@@ -197,7 +216,7 @@ void main() {
       expect(findText('끄기'), findsNothing);
     });
 
-    testWidgets('소유자 — 이름 · 색상 줄 · 초대 코드 · 멤버 아바타 + 권한 배지 · 삭제 줄', (
+    testWidgets('소유자 — 이름 · 색상 줄 · 초대 코드 · 멤버 아바타 + 권한 배지 · 넘기고 나가기 줄', (
       tester,
     ) async {
       await size(tester);
@@ -210,7 +229,9 @@ void main() {
       expect(findText('3F9A1C2B'), findsOneWidget);
       expect(find.byType(PAvatar), findsNWidgets(3));
       expect(find.byType(PBadge), findsNWidgets(3));
-      expect(findPlain('캘린더 삭제'), findsOneWidget);
+      // 다른 멤버가 남은 캘린더는 지우지 않는다 — 소유자를 넘기고 나간다(2026-11-24)
+      expect(findPlain('캘린더 삭제'), findsNothing);
+      expect(findPlain('소유자 넘기고 나가기'), findsOneWidget);
       expect(findRichText('초대 코드'), findsOneWidget);
       expect(findText('복사'), findsOneWidget);
       // 줄 끝 ⋮ 는 없다 — 내보낼 수 있는 멤버 줄은 누르는 줄이다
@@ -235,6 +256,7 @@ void main() {
       expect(findPlain('이름'), findsNothing);
       expect(findRichText('초대 코드'), findsNothing);
       expect(findPlain('캘린더 삭제'), findsNothing);
+      expect(findPlain('캘린더 나가기'), findsOneWidget);
       expect(find.byType(PAvatar), findsNWidgets(3));
     });
 
@@ -311,7 +333,16 @@ void main() {
 
     testWidgets('캘린더를 지우면 이 페이지 하나만 닫힌다(목록은 남는다)', (tester) async {
       await size(tester);
-      final repo = _Repo();
+      // 나 혼자 남은 캘린더만 지울 수 있다
+      final repo = _Repo()
+        ..memberList = const [
+          CalendarMember(
+            rowId: 1,
+            userRowId: 10,
+            userName: '나',
+            permission: 'OWNER',
+          ),
+        ];
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -364,6 +395,97 @@ void main() {
       expect(repo.deletes, 1);
       expect(findText('목록'), findsOneWidget);
       expect(findText('설정'), findsNothing);
+    });
+  });
+
+  group('소유자 넘기기 · 나가기(2026-11-24)', () {
+    testWidgets('넘기기 — 편집 가능 멤버가 있으면 읽기 전용 줄은 막힘 · 고르고 확인하면 그 멤버 줄 id 로 요청', (
+      tester,
+    ) async {
+      await size(tester);
+      final repo = _Repo();
+      await tester.pumpWidget(
+        app(const CalendarManageScreen(calendarId: 2), repo),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('소유자 넘기고 나가기'));
+      await tester.pumpAndSettle();
+      expect(findPlain('새 소유자 고르기'), findsWidgets);
+      expect(findPlain('편집 가능한 멤버가 있어 고를 수 없어요'), findsOneWidget);
+      // 막힌 줄은 눌러도 시트가 닫히지 않는다
+      await tester.tap(findPlain('읽는이').last);
+      await tester.pumpAndSettle();
+      expect(findPlain('새 소유자 고르기'), findsWidgets);
+      await tester.tap(findPlain('아주긴이름을가진가족구성원').last);
+      await tester.pumpAndSettle();
+      expect(findPlain('소유자를 넘길까요?'), findsOneWidget);
+      await tester.tap(findText('넘기고 나가기').last);
+      await tester.pumpAndSettle();
+      expect(repo.transfers, [2]);
+    });
+
+    testWidgets('넘기기 — 읽기 전용 멤버만 남았으면 그 멤버를 고를 수 있다', (tester) async {
+      await size(tester);
+      final repo = _Repo()
+        ..memberList = const [
+          CalendarMember(
+            rowId: 1,
+            userRowId: 10,
+            userName: '나',
+            permission: 'OWNER',
+          ),
+          CalendarMember(
+            rowId: 3,
+            userRowId: 12,
+            userName: '읽는이',
+            permission: 'READ',
+          ),
+        ];
+      await tester.pumpWidget(
+        app(const CalendarManageScreen(calendarId: 2), repo),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('소유자 넘기고 나가기'));
+      await tester.pumpAndSettle();
+      expect(findPlain('편집 가능한 멤버가 있어 고를 수 없어요'), findsNothing);
+      await tester.tap(findPlain('읽는이').last);
+      await tester.pumpAndSettle();
+      await tester.tap(findText('넘기고 나가기').last);
+      await tester.pumpAndSettle();
+      expect(repo.transfers, [3]);
+    });
+
+    testWidgets('혼자 남은 내 캘린더 — 삭제 줄', (tester) async {
+      await size(tester);
+      final repo = _Repo()
+        ..memberList = const [
+          CalendarMember(
+            rowId: 1,
+            userRowId: 10,
+            userName: '나',
+            permission: 'OWNER',
+          ),
+        ];
+      await tester.pumpWidget(
+        app(const CalendarManageScreen(calendarId: 2), repo),
+      );
+      await tester.pumpAndSettle();
+      expect(findPlain('캘린더 삭제'), findsOneWidget);
+      expect(findPlain('소유자 넘기고 나가기'), findsNothing);
+    });
+
+    testWidgets('공유받은 캘린더 — 나가기 확인 뒤 leave 요청', (tester) async {
+      await size(tester);
+      final repo = _Repo();
+      await tester.pumpWidget(
+        app(const CalendarManageScreen(calendarId: 3), repo),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(findPlain('캘린더 나가기'));
+      await tester.pumpAndSettle();
+      await tester.tap(findText('나가기').last);
+      await tester.pumpAndSettle();
+      expect(repo.leaves, 1);
     });
   });
 

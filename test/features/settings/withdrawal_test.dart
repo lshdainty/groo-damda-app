@@ -48,6 +48,19 @@ void main() {
       expect(WithdrawalCheck.blockSubscription, 'SUBSCRIPTION_ACTIVE');
     });
 
+    test('멤버가 남은 공유 캘린더를 소유하면 막고, 넘겨야 할 수를 함께 읽는다', () {
+      final blocked = WithdrawalCheck.fromJson(const {
+        'blocked': ['SHARED_CALENDAR_OWNED'],
+        'sharedCalendarsToTransfer': 2,
+      });
+      expect(blocked.isBlocked, isTrue);
+      expect(blocked.blockedBySharedCalendar, isTrue);
+      expect(blocked.blockedBySubscription, isFalse);
+      expect(blocked.sharedCalendarsToTransfer, 2);
+      expect(WithdrawalCheck.blockSharedCalendar, 'SHARED_CALENDAR_OWNED');
+      expect(WithdrawalCheck.blockedSharedCalendarCode, 'USER_022');
+    });
+
     test('모르는 사유도 막는 것으로 본다 — 서버가 늘려도 앱이 뚫리지 않게', () {
       final unknown = WithdrawalCheck.fromJson(const {
         'blocked': ['SOMETHING_NEW'],
@@ -64,6 +77,7 @@ void main() {
       expect(empty.dutchPaysOwned, 0);
       expect(empty.dutchPayParticipations, 0);
       expect(empty.subscriptionPeriodEnd, isNull);
+      expect(empty.sharedCalendarsToTransfer, 0);
     });
   });
 

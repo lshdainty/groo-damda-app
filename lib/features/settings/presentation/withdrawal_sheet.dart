@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -237,6 +239,12 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
       auth.logout();
     } on ApiException catch (e) {
       if (!mounted) return;
+      // 점검 뒤에 공유 캘린더 소유가 생겼다(USER_022) — 점검을 다시 받아 막는 사유 화면으로 바꾼다
+      if (e.code == WithdrawalCheck.blockedSharedCalendarCode) {
+        setState(() => _submitting = false);
+        unawaited(_load());
+        return;
+      }
       setState(() {
         // 응답을 읽지 못했거나 받지 못했다 — 해지됐을 수 있다. 실패라 하지 않는다(디자인시스템 판단 6)
         _reauthError = isUnconfirmedSave(e)
@@ -351,15 +359,40 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
               ? formatDay(endDt).md
               : check.subscriptionPeriodEnd!.substring(0, 10))
         : null;
-    final headline = check.blockedBySubscription
-        ? (until != null
+    // 사유마다 Callout 하나 — 둘 다면 둘 다 보여야 무엇부터 풀지 안다. 모르는 사유만 있으면 일반 글 하나.
+    final callouts = <PCallout>[
+      if (check.blockedBySubscription)
+        PCallout(
+          tone: PCalloutTone.warning,
+          title: until != null
               ? l.withdrawBlockedSubscriptionUntil(until)
-              : l.withdrawBlockedSubscription)
-        : l.withdrawBlockedOther;
-    return PCallout(
-      tone: PCalloutTone.warning,
-      title: headline,
-      description: l.withdrawBlockedHint,
+              : l.withdrawBlockedSubscription,
+          description: l.withdrawBlockedHint,
+        ),
+      if (check.blockedBySharedCalendar)
+        PCallout(
+          tone: PCalloutTone.warning,
+          title: l.withdrawBlockedSharedCalendar(
+            check.sharedCalendarsToTransfer < 1
+                ? 1
+                : check.sharedCalendarsToTransfer,
+          ),
+          description: l.withdrawBlockedSharedCalendarHint,
+        ),
+    ];
+    if (callouts.isEmpty) {
+      return PCallout(
+        tone: PCalloutTone.warning,
+        title: l.withdrawBlockedOther,
+        description: l.withdrawBlockedHint,
+      );
+    }
+    if (callouts.length == 1) return callouts.single;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: PSpacing.x3,
+      children: callouts,
     );
   }
 

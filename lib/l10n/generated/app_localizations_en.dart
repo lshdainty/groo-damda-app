@@ -1642,11 +1642,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String calDeleteCalendarConfirm(String name) {
-    return 'Delete the \"$name\" calendar? Events move to the default calendar and members can no longer see it. This action cannot be undone.';
+    return 'Delete the \"$name\" calendar? Events move to the default calendar. This action cannot be undone.';
   }
 
   @override
   String get calDeleteCalendarFailed => 'Couldn\'t delete the calendar.';
+
+  @override
+  String get calTransferAndLeave => 'Hand over and leave';
+
+  @override
+  String get calTransferPickTitle => 'Choose the new owner';
+
+  @override
+  String get calTransferPickHint =>
+      'You can hand over to a member who can edit. If no one can edit, you can choose a view-only member.';
+
+  @override
+  String get calTransferReaderLocked => 'Not available while a member can edit';
+
+  @override
+  String get calTransferConfirmTitle => 'Hand over ownership?';
+
+  @override
+  String calTransferConfirm(String member, String calendar) {
+    return '$member becomes the owner of the \"$calendar\" calendar and you leave it. Events you wrote stay in the calendar.';
+  }
+
+  @override
+  String get calTransferAction => 'Hand over and leave';
+
+  @override
+  String get calTransferFailed => 'Couldn\'t hand over ownership.';
+
+  @override
+  String get calLeaveCalendar => 'Leave calendar';
+
+  @override
+  String calLeaveConfirm(String name) {
+    return 'Leave the \"$name\" calendar? You won\'t see its events anymore. Events you wrote stay in the calendar.';
+  }
+
+  @override
+  String get calLeaveAction => 'Leave';
+
+  @override
+  String get calLeaveFailed => 'Couldn\'t leave the calendar.';
 
   @override
   String get calLabelDeleteFailed => 'Couldn\'t delete the label.';
@@ -4178,6 +4219,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get withdrawBlockedHint =>
       'Cancel your subscription first — you can stop using 그루 담다 once the paid period ends.';
+
+  @override
+  String withdrawBlockedSharedCalendar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shared calendars',
+      one: '1 shared calendar',
+    );
+    return 'You own $_temp0 with other members, so you cannot stop using 그루 담다 yet.';
+  }
+
+  @override
+  String get withdrawBlockedSharedCalendarHint =>
+      'In calendar settings, hand over ownership to another member and leave — then you can stop using 그루 담다.';
 
   @override
   String get withdrawnTitle => 'Your 그루 담다 account is closed';

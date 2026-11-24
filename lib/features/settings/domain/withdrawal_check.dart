@@ -10,9 +10,10 @@ class WithdrawalCheck {
     required this.calendarMemberships,
     required this.dutchPaysOwned,
     required this.dutchPayParticipations,
+    this.sharedCalendarsToTransfer = 0,
   });
 
-  /// 막는 사유. 비어 있어야 해지할 수 있다. 지금은 [blockSubscription] 하나뿐.
+  /// 막는 사유. 비어 있어야 해지할 수 있다 — [blockSubscription] · [blockSharedCalendar].
   final List<String> blocked;
 
   /// 구독이 막고 있을 때 **언제부터 가능한지**. 서버가 시간대 없이 주는 `[UTC]` 라
@@ -31,6 +32,10 @@ class WithdrawalCheck {
   /// 남의 정산에 참가한 수 — "탈퇴한 사용자" 로 남는다.
   final int dutchPayParticipations;
 
+  /// 내가 소유자이고 다른 멤버가 남은 캘린더 수 — 0 이 아니면 해지가 막힌다([blockSharedCalendar]).
+  /// 소유자를 넘기고 나가야 풀린다(2026-11-24 사용자 결정: 공유 캘린더는 지우지 않는다).
+  final int sharedCalendarsToTransfer;
+
   /// 해지를 막는 사유 코드.
   ///
   /// **서버가 짓는 문자열이다** — desk-back `WithdrawalServiceImpl.check()` 가
@@ -40,8 +45,16 @@ class WithdrawalCheck {
   /// 서버를 고치면 여기도 같이 고쳐야 한다.
   static const blockSubscription = 'SUBSCRIPTION_ACTIVE';
 
+  /// 멤버가 남은 공유 캘린더의 소유자 — 서버 `WithdrawalServiceImpl` 이 `"SHARED_CALENDAR_OWNED"` 로 넣는다.
+  /// 위와 같이 서버 문자열 그대로다.
+  static const blockSharedCalendar = 'SHARED_CALENDAR_OWNED';
+
+  /// 해지 실행이 같은 까닭으로 막혔을 때의 오류 코드(409) — 점검 뒤에 상황이 바뀐 경우다.
+  static const blockedSharedCalendarCode = 'USER_022';
+
   bool get isBlocked => blocked.isNotEmpty;
   bool get blockedBySubscription => blocked.contains(blockSubscription);
+  bool get blockedBySharedCalendar => blocked.contains(blockSharedCalendar);
 
   factory WithdrawalCheck.fromJson(Map<String, dynamic> json) {
     return WithdrawalCheck(
@@ -53,6 +66,7 @@ class WithdrawalCheck {
       calendarMemberships: json['calendarMemberships'] as int? ?? 0,
       dutchPaysOwned: json['dutchPaysOwned'] as int? ?? 0,
       dutchPayParticipations: json['dutchPayParticipations'] as int? ?? 0,
+      sharedCalendarsToTransfer: json['sharedCalendarsToTransfer'] as int? ?? 0,
     );
   }
 }

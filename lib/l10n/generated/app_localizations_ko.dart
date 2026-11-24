@@ -1565,11 +1565,52 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calDeleteCalendarConfirm(String name) {
-    return '\"$name\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요. 삭제한 캘린더는 되돌릴 수 없어요.';
+    return '\"$name\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨져요. 삭제한 캘린더는 되돌릴 수 없어요.';
   }
 
   @override
   String get calDeleteCalendarFailed => '캘린더를 삭제하지 못했어요.';
+
+  @override
+  String get calTransferAndLeave => '소유자 넘기고 나가기';
+
+  @override
+  String get calTransferPickTitle => '새 소유자 고르기';
+
+  @override
+  String get calTransferPickHint =>
+      '편집 가능한 멤버에게 넘길 수 있어요. 편집 가능한 멤버가 없으면 읽기 전용 멤버도 고를 수 있어요.';
+
+  @override
+  String get calTransferReaderLocked => '편집 가능한 멤버가 있어 고를 수 없어요';
+
+  @override
+  String get calTransferConfirmTitle => '소유자를 넘길까요?';
+
+  @override
+  String calTransferConfirm(String member, String calendar) {
+    return '$member 님이 \"$calendar\" 캘린더의 새 소유자가 되고, 나는 이 캘린더에서 빠져요. 내가 쓴 일정은 캘린더에 남아요.';
+  }
+
+  @override
+  String get calTransferAction => '넘기고 나가기';
+
+  @override
+  String get calTransferFailed => '소유자를 넘기지 못했어요.';
+
+  @override
+  String get calLeaveCalendar => '캘린더 나가기';
+
+  @override
+  String calLeaveConfirm(String name) {
+    return '\"$name\" 캘린더에서 나갈까요? 이 캘린더의 일정을 더 볼 수 없어요. 내가 쓴 일정은 캘린더에 남아요.';
+  }
+
+  @override
+  String get calLeaveAction => '나가기';
+
+  @override
+  String get calLeaveFailed => '캘린더에서 나가지 못했어요.';
 
   @override
   String get calLabelDeleteFailed => '라벨을 삭제하지 못했어요.';
@@ -3928,6 +3969,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get withdrawBlockedHint => '구독을 먼저 해지하면 남은 기간이 끝난 뒤에 이용 해지를 할 수 있어요.';
+
+  @override
+  String withdrawBlockedSharedCalendar(int count) {
+    return '멤버가 있는 공유 캘린더 $count개의 소유자라 아직 해지할 수 없어요.';
+  }
+
+  @override
+  String get withdrawBlockedSharedCalendarHint =>
+      '캘린더 관리에서 다른 멤버에게 소유자를 넘기고 나가면 해지할 수 있어요.';
 
   @override
   String get withdrawnTitle => '이용 해지가 끝났어요';
