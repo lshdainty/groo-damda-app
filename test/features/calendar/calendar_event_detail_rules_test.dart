@@ -27,33 +27,24 @@ UserCalendar _cal(String role) =>
     UserCalendar(rowId: 1, calendarName: '캘린더', myRole: role);
 
 void main() {
-  group('canEditCalendarEvent — 서버 규칙(만든 사람 || 소유자 · 편집)', () {
-    bool can(CalendarEvent e, {int? me = 7, List<UserCalendar>? cals}) =>
-        canEditCalendarEvent(event: e, myUserRowId: me, calendars: cals);
+  group('canEditCalendarEvent — 서버 규칙(그 캘린더의 소유자 · 편집)', () {
+    bool can(CalendarEvent e, {List<UserCalendar>? cals}) =>
+        canEditCalendarEvent(event: e, calendars: cals);
 
-    test('내가 만든 일정은 읽기 전용 캘린더여도 버튼이 있다', () {
-      expect(can(_ev(user: 7), cals: [_cal('READ')]), isTrue);
-    });
-
-    test('남이 만든 일정은 읽기 전용 캘린더면 버튼이 없다', () {
+    test('읽기 전용 캘린더면 내가 만든 일정에도 버튼이 없다', () {
+      expect(can(_ev(user: 7), cals: [_cal('READ')]), isFalse);
       expect(can(_ev(user: 9), cals: [_cal('READ')]), isFalse);
     });
 
-    test('남이 만든 일정이어도 캘린더 권한이 편집 · 소유자면 있다', () {
+    test('캘린더 권한이 편집 · 소유자면 있다', () {
       expect(can(_ev(user: 9), cals: [_cal('EDIT')]), isTrue);
       expect(can(_ev(user: 9), cals: [_cal('OWNER')]), isTrue);
     });
 
-    test('권한을 모르는 동안(목록 없음 · 못 찾음)은 남의 일정에 버튼이 없고 내 일정에는 있다', () {
-      expect(can(_ev(user: 9), cals: null), isFalse, reason: '불러오는 중 · 실패');
+    test('권한을 모르는 동안(목록 없음 · 못 찾음)은 없다', () {
+      expect(can(_ev(user: 7), cals: null), isFalse, reason: '불러오는 중 · 실패');
       expect(can(_ev(user: 9, calendar: 2), cals: [_cal('OWNER')]), isFalse);
       expect(can(_ev(user: 9, calendar: null), cals: [_cal('OWNER')]), isFalse);
-      expect(can(_ev(user: 7), cals: null), isTrue);
-    });
-
-    test('내가 누구인지 모르면(로그인 확인 전) 만든 사람 판정은 거짓이다', () {
-      expect(can(_ev(user: 7), me: null, cals: [_cal('READ')]), isFalse);
-      expect(can(_ev(user: null), me: null, cals: null), isFalse);
     });
   });
 

@@ -1407,6 +1407,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calFormCalendarLoadFailed => 'Could not load';
 
   @override
+  String get calFormCalendarSharedLocked =>
+      'Events in a shared calendar can\'t be moved to another calendar';
+
+  @override
   String get calFormLabelHint =>
       'Create labels in Settings under Calendar labels';
 

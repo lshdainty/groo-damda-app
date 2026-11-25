@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
-import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
 import 'package:groo_damda_app/features/calendar/domain/calendar_clock.dart';
@@ -354,7 +353,6 @@ class _CalendarDayFlowState extends ConsumerState<_CalendarDayFlow> {
   ) {
     final canEdit = canEditCalendarEvent(
       event: e,
-      myUserRowId: ref.watch(authProvider).value?.rowId,
       calendars: calendarsAsync.value,
     );
     return PBottomSheetContent(

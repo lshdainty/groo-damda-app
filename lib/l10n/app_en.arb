@@ -781,6 +781,7 @@
   "calFormNone": "None",
   "calFormNoReminder": "No reminder",
   "calFormCalendarLoadFailed": "Could not load",
+  "calFormCalendarSharedLocked": "Events in a shared calendar can't be moved to another calendar",
   "calFormLabelHint": "Create labels in Settings under Calendar labels",
   "calFormStartDay": "Start date",
   "calFormStartTime": "Start time",

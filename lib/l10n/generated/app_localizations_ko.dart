@@ -1347,6 +1347,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calFormCalendarLoadFailed => '불러오지 못했어요';
 
   @override
+  String get calFormCalendarSharedLocked => '공유 캘린더의 일정은 다른 캘린더로 옮길 수 없어요';
+
+  @override
   String get calFormLabelHint => '라벨은 설정의 캘린더 라벨에서 만들어요';
 
   @override

@@ -180,6 +180,27 @@ void main() {
       );
     });
 
+    test('편집 중인 일정이 공유 중인 캘린더에 있으면 그 하나로 잠긴다(소유자도)', () {
+      const shared = UserCalendar(
+        rowId: 5,
+        calendarName: '팀',
+        isShared: true,
+        memberCount: 3,
+      );
+      expect(
+        selectableCalendars(const [
+          _personal,
+          shared,
+          _family,
+        ], keepRowId: 5).map((c) => c.rowId),
+        [5],
+        reason: '공유 캘린더 일정은 다른 캘린더로 옮길 수 없다(2026-11-24 사용자 결정)',
+      );
+      expect(calendarLockedTo(const [_personal, shared], 5), shared);
+      expect(calendarLockedTo(const [_personal, shared], 1), isNull);
+      expect(calendarLockedTo(const [_personal, shared], null), isNull);
+    });
+
     test('내 목록에 없는 캘린더를 남기라 해도 없던 것이 생기지는 않는다', () {
       expect(
         selectableCalendars(const [

@@ -667,6 +667,12 @@ class _CalendarEventFormSheetState
         calendarsLoading: calendarsAsync.isLoading,
         selectedCalendar: selected,
         onPickCalendar: _pickCalendar,
+        calendarLocked:
+            calendarLockedTo(
+              calendarsAsync.value ?? const [],
+              widget.edit?.calendarRowId,
+            ) !=
+            null,
         onRetryCalendars: () => ref.invalidate(userCalendarListProvider),
         labels: [
           for (final x in labels)
