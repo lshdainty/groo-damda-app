@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/shared/ds/help_bubble/help_bubble_layout.dart';
+import 'package:groo_damda_app/shared/ds/scroll_area/p_scroll_area.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 export 'package:groo_damda_app/shared/ds/help_bubble/help_bubble_layout.dart'
@@ -306,25 +307,30 @@ class _PTooltipState extends State<PTooltip>
         color: c.bgNeutralInverted,
         borderRadius: BorderRadius.circular(PRounded.r3),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: PSpacing.x3,
-          vertical: PSpacing.x2_5,
-        ),
-        child: Text(
-          keepAll(widget.message),
-          key: const ValueKey('p-tooltip-text'),
-          semanticsLabel: widget.message,
-          style: PTypography.t3.copyWith(
-            fontWeight: FontWeight.w700,
-            color: c.fgNeutralInverted,
+      // 화면에 다 들지 않으면(큰 글자) 놓는 쪽이 높이를 줄이고 글은 이 안에서 스크롤한다 — Help Bubble 과 같다. 읽는 말은
+      // 아래 묶음이 이름으로 읽는다(스크롤 노드가 글을 떼어 가지 않게 뺀다)
+      child: ExcludeSemantics(
+        child: PScrollArea(
+          use: PScrollAreaUse.overlay,
+          padding: const EdgeInsets.symmetric(
+            horizontal: PSpacing.x3,
+            vertical: PSpacing.x2_5,
+          ),
+          child: Text(
+            keepAll(widget.message),
+            key: const ValueKey('p-tooltip-text'),
+            semanticsLabel: widget.message,
+            style: PTypography.t3.copyWith(
+              fontWeight: FontWeight.w700,
+              color: c.fgNeutralInverted,
+            ),
           ),
         ),
       ),
     );
     // 역할 tooltip 은 Flutter 3.44 가 아직 검사를 두지 않아(SemanticsRole.tooltip 은 debug 에서 assert) 달지 못한다 —
     // 트리거의 tooltip(설명)이 읽는 길이고 말풍선은 글 하나의 묶음이다
-    body = Semantics(container: true, child: body);
+    body = Semantics(container: true, label: widget.message, child: body);
     // 말풍선 위로 옮겨도 닫히지 않는다
     body = MouseRegion(
       onEnter: _onEnterBubble,
@@ -338,6 +344,7 @@ class _PTooltipState extends State<PTooltip>
         arrowColor: c.bgNeutralInverted,
         look: _look,
         repaint: _anim,
+        safeArea: helpBubbleSafeArea(context),
         child: body,
       ),
     );

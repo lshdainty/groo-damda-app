@@ -586,6 +586,214 @@ void main() {
     });
   });
 
+  group('화면 안에 든다 — 큰 글자(QA 2026-11-25 금액 가리기 ⓘ)', () {
+    // iPhone 17 Pro — 393 × 852, 안전 영역 위 59 · 아래 34
+    const phone = Size(393, 852);
+    const safeTop = 59.0;
+    const safeBottom = 34.0;
+    const kindTitle = '거래 종류';
+    const kindNote =
+        '화면과 상관없이 그 종류의 거래 금액을 가려요. 수입이나 지출을 가리면 합계 · 잔액도 함께 가려져요.';
+
+    test('안전 영역 경계부터 16 — 위에 안 들면 아래로, 양쪽 다 안 들면 넓은 쪽에 그 공간만큼의 높이', () {
+      const safe = EdgeInsets.only(top: safeTop, bottom: safeBottom);
+      // 100% 한 줄 말풍선, 위 90 의 ⓘ — 안전 영역이 없으면 위에 든다(90 − 12 − 58 = 20 ≥ 16)
+      final noSafe = placeHelpBubble(
+        target: const Rect.fromLTWH(330, 90, 40, 40),
+        bubble: const Size(200, 58),
+        viewport: phone,
+      );
+      expect(noSafe.side, PHelpBubbleSide.top);
+      // 상태 표시줄 59 가 있으면 16 은 그 아래부터라 위에 안 든다(90 − 12 − 58 = 20 < 59 + 16) → 아래로, 높이는 그대로
+      final top = placeHelpBubble(
+        target: const Rect.fromLTWH(330, 90, 40, 40),
+        bubble: const Size(200, 58),
+        viewport: phone,
+        safeArea: safe,
+      );
+      expect(top.side, PHelpBubbleSide.bottom);
+      expect(top.body.height, 58);
+      // 키 큰 말풍선(600) — 위 공간 400 − 12 − 75 = 313, 아래 공간 852 − 34 − 16 − 440 − 12 = 350 → 아래, 높이 350
+      final tall = placeHelpBubble(
+        target: const Rect.fromLTWH(330, 400, 40, 40),
+        bubble: const Size(280, 600),
+        viewport: phone,
+        safeArea: safe,
+      );
+      expect(tall.side, PHelpBubbleSide.bottom);
+      expect(tall.body.top, 452);
+      expect(tall.body.bottom, phone.height - safeBottom - helpBubbleMargin);
+      // 위 공간이 더 넓으면 위 — 몸통 위 끝은 안전 영역 + 16
+      final up = placeHelpBubble(
+        target: const Rect.fromLTWH(330, 600, 40, 40),
+        bubble: const Size(280, 900),
+        viewport: phone,
+        safeArea: safe,
+      );
+      expect(up.side, PHelpBubbleSide.top);
+      expect(up.body.top, safeTop + helpBubbleMargin);
+      expect(up.body.bottom, 600 - 12);
+      // 화살표는 그대로 트리거 가운데 · 끝과 4
+      expect(up.tip, const Offset(350, 596));
+      // 옆 말풍선 — 화면 높이(안전 영역 안) − 위아래 16 까지
+      final side = placeHelpBubble(
+        target: const Rect.fromLTWH(20, 400, 40, 40),
+        bubble: const Size(200, 2000),
+        viewport: phone,
+        safeArea: safe,
+        preferred: PHelpBubbleSide.right,
+      );
+      expect(side.body.height, phone.height - safeTop - safeBottom - 32);
+      expect(side.body.top, safeTop + helpBubbleMargin);
+    });
+
+    /// 393 × 852 · 안전 영역 59 / 34 화면의 [at] 자리에 ⓘ(PButton small)를 두고 연다. 말풍선 자리의 MediaQuery 는 앱 바가
+    /// 있는 화면처럼 위 · 아래 여백을 지운다 — 말풍선은 오버레이 쪽 안전 영역을 읽어야 한다.
+    Future<void> openAt(WidgetTester tester, Offset at, double scale) async {
+      tester.view.physicalSize = phone;
+      tester.view.devicePixelRatio = 1;
+      tester.view.padding = const FakeViewPadding(
+        top: safeTop,
+        bottom: safeBottom,
+      );
+      tester.view.viewPadding = const FakeViewPadding(
+        top: safeTop,
+        bottom: safeBottom,
+      );
+      tester.platformDispatcher.textScaleFactorTestValue = scale;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await tester.pumpWidget(
+        _host(
+          Brightness.light,
+          Builder(
+            builder: (context) => MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              removeBottom: true,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: at.dx,
+                    top: at.dy,
+                    child: PHelpBubble(
+                      title: kindTitle,
+                      description: kindNote,
+                      triggerBuilder: (context, toggle, open) => PButton.icon(
+                        icon: LucideIcons.info,
+                        semanticLabel: '거래 종류 안내',
+                        variant: PButtonVariant.ghost,
+                        size: PButtonSize.small,
+                        onPressed: toggle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(PButton));
+      await _settle(tester);
+    }
+
+    // 화면 안 = 안전 영역 + 16 안
+    void expectInside(WidgetTester tester) {
+      final body = tester.getRect(_bodyFinder);
+      expect(body.top, greaterThanOrEqualTo(safeTop + helpBubbleMargin - 0.01));
+      expect(
+        body.bottom,
+        lessThanOrEqualTo(phone.height - safeBottom - helpBubbleMargin + 0.01),
+      );
+      expect(body.left, greaterThanOrEqualTo(0));
+      expect(body.right, lessThanOrEqualTo(phone.width));
+      // 화살표는 트리거 가운데를 가리키고 끝과 4
+      final target = tester.getRect(find.byType(PButton));
+      final p = _layout(tester).placement;
+      expect(p.tip.dx, closeTo(target.center.dx, 0.01));
+      expect(
+        p.side == PHelpBubbleSide.top
+            ? target.top - p.tip.dy
+            : p.tip.dy - target.bottom,
+        closeTo(helpBubbleOffset, 0.01),
+      );
+    }
+
+    /// 글을 끝까지 내리면 마지막 줄이 말풍선 안(아래 여백 10 위)에 보인다.
+    Future<void> expectLastLineReachable(WidgetTester tester) async {
+      final scrollable = find.descendant(
+        of: _bodyFinder,
+        matching: find.byType(Scrollable),
+      );
+      final position = tester.state<ScrollableState>(scrollable).position;
+      expect(position.maxScrollExtent, greaterThan(0), reason: '넘치면 스크롤');
+      position.jumpTo(position.maxScrollExtent);
+      await tester.pump();
+      final body = tester.getRect(_bodyFinder);
+      final desc = tester.getRect(_descFinder);
+      expect(desc.bottom, closeTo(body.bottom - PSpacing.x2_5, 0.01));
+      expect(tester.takeException(), isNull);
+    }
+
+    // (글자 크기, 이름) — iOS AX5 는 선형 3.1 정도, 안드로이드는 200%
+    for (final (scale, name) in [(3.1, 'iOS AX5'), (2.0, '안드 200%')]) {
+      for (final (y, where) in [
+        (400.0, '가운데(QA 자리)'),
+        (760.0, '아래쪽'),
+        (90.0, '위쪽'),
+      ]) {
+        testWidgets('$name · ⓘ $where — 말풍선이 화면 안에 들고 마지막 줄까지 스크롤된다', (
+          tester,
+        ) async {
+          await openAt(tester, Offset(337, y), scale);
+          expectInside(tester);
+          final body = tester.getRect(_bodyFinder);
+          final desc = tester.getRect(_descFinder);
+          if (desc.bottom > body.bottom - PSpacing.x2_5 + 0.01) {
+            await expectLastLineReachable(tester);
+          }
+          // 큰 글자에서 글은 커지고 화살표는 그대로
+          expect(_layout(tester).placement.arrow.shortestSide, 8);
+          expect(tester.takeException(), isNull);
+        });
+      }
+    }
+
+    testWidgets('iOS AX5 · ⓘ 가운데 — 몸통이 남는 공간에 맞춰 줄고 넘친 글은 안에서 스크롤한다', (
+      tester,
+    ) async {
+      await openAt(tester, const Offset(337, 400), 3.1);
+      final body = tester.getRect(_bodyFinder);
+      final p = _layout(tester).placement;
+      // 위 공간(400 − 12 − 75 = 313) < 아래 공간(818 − 16 − 440 − 12 = 350 … 트리거 40) → 넓은 아래, 아래 끝은 안전 영역 + 16
+      expect(p.side, PHelpBubbleSide.bottom);
+      expect(body.bottom, closeTo(phone.height - safeBottom - 16, 0.01));
+      await expectLastLineReachable(tester);
+    });
+
+    testWidgets('100% — 지금 모양 그대로: 위로 뜨고 내용만큼, 스크롤 없음', (tester) async {
+      await openAt(tester, const Offset(337, 400), 1);
+      final target = tester.getRect(find.byType(PButton));
+      final body = tester.getRect(_bodyFinder);
+      final p = _layout(tester).placement;
+      expect(p.side, PHelpBubbleSide.top);
+      expect(body.bottom, closeTo(target.top - 12, 0.01));
+      expect(body.width, 280);
+      // 높이는 내용 그대로 — 글이 다 보이고 스크롤할 것이 없다
+      final desc = tester.getRect(_descFinder);
+      expect(desc.bottom, closeTo(body.bottom - PSpacing.x2_5, 0.01));
+      final scrollable = find.descendant(
+        of: _bodyFinder,
+        matching: find.byType(Scrollable),
+      );
+      expect(
+        tester.state<ScrollableState>(scrollable).position.maxScrollExtent,
+        0,
+      );
+    });
+  });
+
   group('여닫기', () {
     testWidgets('트리거를 누르면 열고 다시 누르면 닫는다 — 닫힘은 투명해진 뒤 내려간다', (tester) async {
       final calls = <bool>[];

@@ -39,6 +39,18 @@ PHelpBubbleSide _opposite(PHelpBubbleSide side) => switch (side) {
 bool _vertical(PHelpBubbleSide side) =>
     side == PHelpBubbleSide.top || side == PHelpBubbleSide.bottom;
 
+/// 말풍선이 비켜야 할 안전 영역 — 말풍선이 그려지는 오버레이(대개 앱 전체 화면)의 상태 표시줄 · 홈 표시줄 · 화면 키보드.
+/// [context] 는 OverlayPortal 의 overlayChildBuilder 것이다. 그 자리의 MediaQuery 는 트리거 쪽에서 물려받아 Scaffold 가 위 ·
+/// 아래 여백을 지워 두었을 수 있으므로 오버레이 쪽 값을 읽는다(의존은 걸지 않는다 — 트리거가 움직일 때마다 빌더가 다시 돈다).
+EdgeInsets helpBubbleSafeArea(BuildContext context) {
+  final overlay = Overlay.maybeOf(context)?.context;
+  final data =
+      overlay?.getInheritedWidgetOfExactType<MediaQuery>()?.data ??
+      MediaQuery.maybeOf(context);
+  if (data == null) return EdgeInsets.zero;
+  return data.padding + data.viewInsets;
+}
+
 /// 말풍선을 놓은 결과 — 몸통 · 화살표 상자 · 화살표 끝. 좌표는 오버레이 안이다.
 @immutable
 class HelpBubblePlacement {
@@ -66,11 +78,15 @@ class HelpBubblePlacement {
   final double arrowOffset;
 }
 
-/// 말풍선 몸통 크기 [bubble] 을 트리거 [target] 의 [preferred] 쪽에 놓는다 — [viewport] 는 오버레이 크기다.
+/// 말풍선 몸통 크기 [bubble] 을 트리거 [target] 의 [preferred] 쪽에 놓는다 — [viewport] 는 오버레이 크기, [safeArea] 는
+/// 그 안에서 비켜야 할 안전 영역(상태 표시줄 · 홈 표시줄 · 화면 키보드)이다. 가장자리 16 은 안전 영역 경계부터 잰다.
 ///
 /// 1. 몸통은 트리거에서 화살표 높이 + 4 = 12 떨어진 곳에 놓는다(화살표 끝이 트리거와 4).
-/// 2. 그 쪽에 가장자리 16 을 남기고 들어가지 않으면 반대편으로 뒤집는다. 양쪽 다 안 들어가면 넘침이 적은 쪽(floating-ui
-///    bestFit).
+/// 2. 그 쪽에 가장자리 16 을 남기고 들어가지 않으면 반대편으로 뒤집는다. 양쪽 다 안 들어가면 넘침이 적은 쪽 — 곧 남는
+///    공간이 넓은 쪽(floating-ui bestFit).
+/// 2-1. 고른 쪽에도 다 들지 않으면(큰 글자) 몸통 높이를 그 쪽에 남는 공간까지로 줄인다 — 화면 밖으로 넘치지 않고 글은 말풍선
+///    안에서 스크롤한다(Popover 의 "가용 높이까지 — 넘치면 본문 스크롤" 과 같은 길, WCAG 1.4.4 — 글이 잘리지 않는다). 옆
+///    말풍선은 화면 높이 − 위아래 16 까지다.
 /// 3. 화살표는 늘 트리거 가운데를 가리키고 몸통 모서리와 14 를 남긴다(화살표 가운데가 몸통 끝에서 20 안쪽).
 /// 4. 트리거 가운데에 맞춰 놓고 가장자리 16 안으로 옆으로 민다. 16 은 지는 값이다 — 트리거 가운데가 끝에서 20 안쪽이면 그만큼
 ///    남기고 0 까지 붙는다(root.marginMin 0). 말풍선이 화면보다 넓으면 왼쪽 가장자리에 맞춘다.
@@ -79,37 +95,54 @@ HelpBubblePlacement placeHelpBubble({
   required Size bubble,
   required Size viewport,
   PHelpBubbleSide preferred = PHelpBubbleSide.top,
+  EdgeInsets safeArea = EdgeInsets.zero,
 }) {
   const gap = helpBubbleOffset + helpBubbleArrowHeight;
-  // 그 쪽으로 놓았을 때 가장자리 16 밖으로 나가는 길이 — 0 이하면 들어간다
-  double overflow(PHelpBubbleSide side) => switch (side) {
-    PHelpBubbleSide.top =>
-      helpBubbleMargin - (target.top - gap - bubble.height),
+  // 놓을 수 있는 곳 — 오버레이에서 안전 영역을 뺀 사각형
+  final bounds = Rect.fromLTRB(
+    safeArea.left,
+    safeArea.top,
+    viewport.width - safeArea.right,
+    viewport.height - safeArea.bottom,
+  );
+  // 그 쪽에 가장자리 16 을 남기고 몸통이 쓸 수 있는 길이(위 · 아래는 높이, 옆은 폭)
+  double space(PHelpBubbleSide side) => switch (side) {
+    PHelpBubbleSide.top => target.top - gap - (bounds.top + helpBubbleMargin),
     PHelpBubbleSide.bottom =>
-      target.bottom +
-          gap +
-          bubble.height -
-          (viewport.height - helpBubbleMargin),
+      bounds.bottom - helpBubbleMargin - target.bottom - gap,
     PHelpBubbleSide.left =>
-      helpBubbleMargin - (target.left - gap - bubble.width),
+      target.left - gap - (bounds.left + helpBubbleMargin),
     PHelpBubbleSide.right =>
-      target.right + gap + bubble.width - (viewport.width - helpBubbleMargin),
+      bounds.right - helpBubbleMargin - target.right - gap,
   };
+  // 그 쪽으로 놓았을 때 가장자리 16 밖으로 나가는 길이 — 0 이하면 들어간다
+  double overflow(PHelpBubbleSide side) =>
+      (_vertical(side) ? bubble.height : bubble.width) - space(side);
   final other = _opposite(preferred);
   final side = overflow(preferred) <= 0
       ? preferred
       : overflow(other) <= 0
       ? other
       : (overflow(other) < overflow(preferred) ? other : preferred);
+  // 몸통 높이 — 고른 쪽에 남는 공간까지(넘치면 말풍선 안에서 스크롤)
+  final height = math.max(
+    0.0,
+    math.min(
+      bubble.height,
+      _vertical(side) ? space(side) : bounds.height - 2 * helpBubbleMargin,
+    ),
+  );
 
   // 옆으로 미는 쪽(가로 말풍선은 x, 세로 말풍선은 y)의 시작 — 트리거 가운데에 맞춰 놓고 가장자리 안으로 민다. 가장자리 16 은
   // 지는 값이다(root.marginMin 0): 트리거 가운데가 끝에서 20 안쪽이면 그만큼만 남기고 0 까지 붙는다. 화살표는 그대로 트리거
   // 가운데를 가리키고, 말풍선만 밀린다(Q-004).
-  double slide(double center, double length, double extent) {
-    final lo = math.max(0.0, math.min(helpBubbleMargin, center - arrowEdge));
+  double slide(double center, double length, double from, double to) {
+    final lo =
+        from +
+        math.max(0.0, math.min(helpBubbleMargin, center - from - arrowEdge));
     final hi =
-        extent -
-        math.max(0.0, math.min(helpBubbleMargin, extent - center - arrowEdge)) -
+        to -
+        math.max(0.0, math.min(helpBubbleMargin, to - center - arrowEdge)) -
         length;
     final start = hi < lo ? lo : (center - length / 2).clamp(lo, hi);
     // 화살표 가운데가 몸통 끝에서 20 안쪽에 남게(작은 몸통이면 그 반까지)
@@ -119,16 +152,16 @@ HelpBubblePlacement placeHelpBubble({
 
   final vertical = _vertical(side);
   final x = vertical
-      ? slide(target.center.dx, bubble.width, viewport.width)
+      ? slide(target.center.dx, bubble.width, bounds.left, bounds.right)
       : (side == PHelpBubbleSide.left
             ? target.left - gap - bubble.width
             : target.right + gap);
   final y = vertical
       ? (side == PHelpBubbleSide.top
-            ? target.top - gap - bubble.height
+            ? target.top - gap - height
             : target.bottom + gap)
-      : slide(target.center.dy, bubble.height, viewport.height);
-  final body = Rect.fromLTWH(x, y, bubble.width, bubble.height);
+      : slide(target.center.dy, height, bounds.top, bounds.bottom);
+  final body = Rect.fromLTWH(x, y, bubble.width, height);
 
   // 화살표 — 늘 트리거 가운데를 가리킨다(비키지도 지우지도 않는다). 말풍선이 밀려 몸통 끝에서 20 안쪽을 지키므로 clamp 가 없다
   final center = vertical
@@ -211,6 +244,7 @@ class HelpBubbleLayout extends SingleChildRenderObjectWidget {
     required this.arrowColor,
     required this.look,
     required this.repaint,
+    this.safeArea = EdgeInsets.zero,
     required Widget child,
   }) : super(child: child);
 
@@ -219,6 +253,9 @@ class HelpBubbleLayout extends SingleChildRenderObjectWidget {
   final PHelpBubbleSide side;
   final Color arrowColor;
   final ValueGetter<HelpBubbleLook> look;
+
+  /// 오버레이 안에서 비켜야 할 안전 영역 — 상태 표시줄 · 홈 표시줄 · 화면 키보드. 가장자리 16 은 이 경계부터 잰다.
+  final EdgeInsets safeArea;
 
   /// [look] 이 바뀌는 때 — 다시 그린다.
   final Listenable repaint;
@@ -231,6 +268,7 @@ class HelpBubbleLayout extends SingleChildRenderObjectWidget {
         arrowColor: arrowColor,
         look: look,
         repaint: repaint,
+        safeArea: safeArea,
       );
 
   @override
@@ -243,7 +281,8 @@ class HelpBubbleLayout extends SingleChildRenderObjectWidget {
       ..side = side
       ..arrowColor = arrowColor
       ..look = look
-      ..repaint = repaint;
+      ..repaint = repaint
+      ..safeArea = safeArea;
   }
 }
 
@@ -255,10 +294,12 @@ class RenderHelpBubbleLayout extends RenderShiftedBox {
     required Color arrowColor,
     required this.look,
     required Listenable repaint,
+    EdgeInsets safeArea = EdgeInsets.zero,
   }) : _target = target,
        _side = side,
        _arrowColor = arrowColor,
        _repaint = repaint,
+       _safeArea = safeArea,
        super(null);
 
   ValueGetter<HelpBubbleLook> look;
@@ -275,6 +316,13 @@ class RenderHelpBubbleLayout extends RenderShiftedBox {
   set side(PHelpBubbleSide value) {
     if (value == _side) return;
     _side = value;
+    markNeedsLayout();
+  }
+
+  EdgeInsets _safeArea;
+  set safeArea(EdgeInsets value) {
+    if (value == _safeArea) return;
+    _safeArea = value;
     markNeedsLayout();
   }
 
@@ -314,26 +362,32 @@ class RenderHelpBubbleLayout extends RenderShiftedBox {
     size = constraints.biggest;
     final child = this.child;
     if (child == null) return;
-    // 최대 폭 280 — 쓸 수 있는 폭이 더 좁으면 그만큼. 위 · 아래는 화면 − 양쪽 16, 옆은 트리거 옆의 넓은 쪽
+    // 최대 폭 280 — 쓸 수 있는 폭이 더 좁으면 그만큼. 위 · 아래는 화면(안전 영역 안) − 양쪽 16, 옆은 트리거 옆의 넓은 쪽
     const gap = helpBubbleOffset + helpBubbleArrowHeight;
+    final left = _safeArea.left;
+    final right = size.width - _safeArea.right;
     final available =
         (_side == PHelpBubbleSide.top || _side == PHelpBubbleSide.bottom)
-        ? size.width - 2 * helpBubbleMargin
-        : math.max(_target.left, size.width - _target.right) -
+        ? right - left - 2 * helpBubbleMargin
+        : math.max(_target.left - left, right - _target.right) -
               gap -
               helpBubbleMargin;
-    child.layout(
-      BoxConstraints(
-        maxWidth: math.max(0, math.min(helpBubbleMaxWidth, available)),
-      ),
-      parentUsesSize: true,
-    );
+    final maxWidth = math.max(0.0, math.min(helpBubbleMaxWidth, available));
+    // 먼저 내용만큼 재어 놓을 쪽을 고르고, 그 쪽에 남는 공간보다 크면 그 높이로 다시 잰다 — 넘친 글은 몸통 안에서 스크롤한다
+    child.layout(BoxConstraints(maxWidth: maxWidth), parentUsesSize: true);
     _placement = placeHelpBubble(
       target: _target,
       bubble: child.size,
       viewport: size,
       preferred: _side,
+      safeArea: _safeArea,
     );
+    if (_placement!.body.height < child.size.height) {
+      child.layout(
+        BoxConstraints(maxWidth: maxWidth, maxHeight: _placement!.body.height),
+        parentUsesSize: true,
+      );
+    }
     (child.parentData! as BoxParentData).offset = _placement!.body.topLeft;
   }
 

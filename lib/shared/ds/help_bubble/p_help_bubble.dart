@@ -7,6 +7,7 @@ import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/checkbox/selection_control.dart';
 import 'package:groo_damda_app/shared/ds/help_bubble/help_bubble_layout.dart';
+import 'package:groo_damda_app/shared/ds/scroll_area/p_scroll_area.dart';
 import 'package:groo_damda_app/shared/ds/text/keep_all.dart';
 
 export 'package:groo_damda_app/shared/ds/help_bubble/help_bubble_layout.dart'
@@ -37,8 +38,10 @@ const double _closeTouch = 44;
 /// 모양 — 폭은 내용만큼 최대 280(여백 포함), 위아래 10 · 좌우 12 · 모서리 12 · bg-neutral-inverted(다크는 밝은 말풍선) ·
 /// 그림자 없음. 제목 t3 13 / 18 · 700, 설명 t3 · 400(사이 2), 글은 fg-neutral-inverted — 낱말 단위로 줄을 바꾸고 줄바꿈
 /// 문자는 살린다. 화살표는 12 × 8 로 늘 트리거 가운데를 가리키고 말풍선 모서리와 14 를 남긴다. 화살표 끝 ↔ 트리거 4, 화면
-/// 가장자리 16 — 모자라면 반대편으로 뒤집고 옆으로 민다. 트리거가 움직이면(스크롤) 따라간다. 닫기 버튼은 오른쪽 위 모서리에
-/// 붙은 38 투명 상자 · 아이콘 14 · 글과 4, 누르면 아이콘만 2px 거리 줄고(바탕 없음) 이름은 "닫기".
+/// 가장자리 16(안전 영역 경계부터) — 모자라면 반대편으로 뒤집고 옆으로 민다. 양쪽 다 모자라면(큰 글자) 남는 공간이 넓은
+/// 쪽에 그 공간만큼의 높이로 띄우고 글은 말풍선 안에서 스크롤한다 — 화면 밖으로 넘쳐 잘리지 않는다. 트리거가 움직이면(스크롤)
+/// 따라간다. 닫기 버튼은 오른쪽 위 모서리에 붙은 38 투명 상자 · 아이콘 14 · 글과 4, 누르면 아이콘만 2px 거리 줄고(바탕
+/// 없음) 이름은 "닫기".
 /// 열림은 200ms 에 화살표 끝에서 0.9 → 1 · 투명도, 닫힘은 200ms 에 투명도만(모션 줄이기면 크기는 그대로).
 ///
 /// 닫는 법 — 트리거(또는 기준) 다시 누르기 · 바깥 누르기 · 닫기 버튼 · Esc. [closeOnInteractOutside] 를 끄면 바깥 누르기 ·
@@ -334,6 +337,9 @@ class _PHelpBubbleState extends State<PHelpBubble>
       container: true,
       role: SemanticsRole.dialog,
       liveRegion: true,
+      // 제목 · 설명 — 글은 스크롤 상자 안이라(스크롤 상자는 제 노드를 따로 세운다) 말풍선이 직접 이름으로 읽는다. 글이 말풍선
+      // 안에서 스크롤해 가려져 있어도 화면 읽기는 전부 읽는다
+      label: [widget.title, ?widget.description].join('\n'),
       child: body,
     );
     body = Focus(focusNode: _scopeNode, onKeyEvent: _onBubbleKey, child: body);
@@ -348,6 +354,7 @@ class _PHelpBubbleState extends State<PHelpBubble>
       child: HelpBubbleLayout(
         target: target,
         side: widget.side,
+        safeArea: helpBubbleSafeArea(context),
         arrowColor: c.bgNeutralInverted,
         look: _look,
         repaint: _anim,
@@ -435,15 +442,21 @@ class _BubbleBody extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Padding(
-              // 닫기 버튼이 있으면 글과 그 상자 사이 4 — 상자는 오른쪽 끝에 붙는다
-              padding: EdgeInsetsDirectional.fromSTEB(
-                PSpacing.x3,
-                PSpacing.x2_5,
-                showClose ? PSpacing.x1 + _closeSize : PSpacing.x3,
-                PSpacing.x2_5,
+            // 글 — 말풍선이 화면에 다 들지 않으면(큰 글자) 놓는 쪽이 높이를 줄이고 글은 이 안에서 스크롤한다. 닫기 버튼은 스크롤
+            // 밖이라 늘 그 자리에 있다(스크롤 전에는 제목 첫 줄 가운데). 읽는 말은 말풍선(dialog)이 이름으로 한 번에 읽는다 —
+            // 스크롤 노드가 글을 따로 떼어 가지 않게 뺀다
+            ExcludeSemantics(
+              child: PScrollArea(
+                use: PScrollAreaUse.overlay,
+                // 닫기 버튼이 있으면 글과 그 상자 사이 4 — 상자는 오른쪽 끝에 붙는다
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  PSpacing.x3,
+                  PSpacing.x2_5,
+                  showClose ? PSpacing.x1 + _closeSize : PSpacing.x3,
+                  PSpacing.x2_5,
+                ),
+                child: text,
               ),
-              child: text,
             ),
             if (showClose)
               // 38 상자의 사방 3 을 넓힌 44(말풍선 모서리 밖은 Flutter 가 받지 않는다 — 말풍선 안쪽만). 상자 가운데는 제목 첫 줄
