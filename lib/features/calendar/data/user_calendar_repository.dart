@@ -79,6 +79,32 @@ class UserCalendarRepository {
     }
   }
 
+  /// 소유자 넘기고 나가기 — [memberId] 는 멤버 목록의 멤버 줄 id(내보내기 · 권한 바꾸기와 같은 id).
+  /// 성공하면 나는 이 캘린더에서 빠진다. 받을 수 없는 멤버면 400 `CAL_020`.
+  Future<void> transferOwnership(int id, int memberId) async {
+    try {
+      await _dio.post<dynamic>(
+        '/calendar/calendars/$id/transfer-ownership',
+        data: {'memberId': memberId},
+        options: _silent,
+      );
+    } catch (e, s) {
+      throwAsApiException(e, s);
+    }
+  }
+
+  /// 공유받은 캘린더에서 나가기 — 소유자는 400 `CAL_013`(넘기고 나가기를 쓴다).
+  Future<void> leave(int id) async {
+    try {
+      await _dio.post<dynamic>(
+        '/calendar/calendars/$id/leave',
+        options: _silent,
+      );
+    } catch (e, s) {
+      throwAsApiException(e, s);
+    }
+  }
+
   // ── 공유 ──
 
   Future<List<CalendarMember>> members(int id) async {

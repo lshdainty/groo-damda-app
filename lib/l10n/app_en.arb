@@ -943,8 +943,37 @@
     }
   },
   "calRemove": "Remove",
-  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar and members can no longer see it. This action cannot be undone.",
+  "calDeleteCalendarConfirm": "Delete the \"{name}\" calendar? Events move to the default calendar. This action cannot be undone.",
   "calDeleteCalendarFailed": "Couldn't delete the calendar.",
+  "calTransferAndLeave": "Hand over and leave",
+  "calTransferPickTitle": "Choose the new owner",
+  "calTransferPickHint": "You can hand over to a member who can edit. If no one can edit, you can choose a view-only member.",
+  "calTransferReaderLocked": "Not available while a member can edit",
+  "calTransferConfirmTitle": "Hand over ownership?",
+  "calTransferConfirm": "{member} becomes the owner of the \"{calendar}\" calendar and you leave it. Events you wrote stay in the calendar.",
+  "@calTransferConfirm": {
+    "placeholders": {
+      "member": {
+        "type": "String"
+      },
+      "calendar": {
+        "type": "String"
+      }
+    }
+  },
+  "calTransferAction": "Hand over and leave",
+  "calTransferFailed": "Couldn't hand over ownership.",
+  "calLeaveCalendar": "Leave calendar",
+  "calLeaveConfirm": "Leave the \"{name}\" calendar? You won't see its events anymore. Events you wrote stay in the calendar.",
+  "@calLeaveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "calLeaveAction": "Leave",
+  "calLeaveFailed": "Couldn't leave the calendar.",
   "calLabelDeleteFailed": "Couldn't delete the label.",
   "@calDeleteCalendarConfirm": {
     "placeholders": {
@@ -2258,7 +2287,7 @@
   "accountLogoutConfirm": "Log out of this device?",
   "accountWithdrawTitle": "Stop using 그루 담다",
   "withdrawIntro": "Stopping 그루 담다 signs you out immediately and cannot be undone.",
-  "withdrawImpactCalendarsOwned": "{count, plural, =1{1 shared calendar} other{{count} shared calendars}} you created will be deleted — members lose access too",
+  "withdrawImpactCalendarsOwned": "{count, plural, =1{1 calendar} other{{count} calendars}} you created will be deleted",
   "@withdrawImpactCalendarsOwned": {
     "placeholders": {
       "count": {
@@ -2318,6 +2347,15 @@
   },
   "withdrawBlockedOther": "Your account cannot be stopped right now.",
   "withdrawBlockedHint": "Cancel your subscription first — you can stop using 그루 담다 once the paid period ends.",
+  "withdrawBlockedSharedCalendar": "You own {count, plural, =1{1 shared calendar} other{{count} shared calendars}} with other members, so you cannot stop using 그루 담다 yet.",
+  "@withdrawBlockedSharedCalendar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "withdrawBlockedSharedCalendarHint": "In calendar settings, hand over ownership to another member and leave — then you can stop using 그루 담다.",
   "withdrawnTitle": "Your 그루 담다 account is closed",
   "withdrawnBody": "Thank you for using 그루 담다. Remaining data is kept and then destroyed under our privacy policy.",
   "withdrawnToLogin": "Go to sign in",

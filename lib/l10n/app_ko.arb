@@ -984,8 +984,37 @@
     }
   },
   "calRemove": "내보내기",
-  "calDeleteCalendarConfirm": "\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요. 삭제한 캘린더는 되돌릴 수 없어요.",
+  "calDeleteCalendarConfirm": "\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨져요. 삭제한 캘린더는 되돌릴 수 없어요.",
   "calDeleteCalendarFailed": "캘린더를 삭제하지 못했어요.",
+  "calTransferAndLeave": "소유자 넘기고 나가기",
+  "calTransferPickTitle": "새 소유자 고르기",
+  "calTransferPickHint": "편집 가능한 멤버에게 넘길 수 있어요. 편집 가능한 멤버가 없으면 읽기 전용 멤버도 고를 수 있어요.",
+  "calTransferReaderLocked": "편집 가능한 멤버가 있어 고를 수 없어요",
+  "calTransferConfirmTitle": "소유자를 넘길까요?",
+  "calTransferConfirm": "{member} 님이 \"{calendar}\" 캘린더의 새 소유자가 되고, 나는 이 캘린더에서 빠져요. 내가 쓴 일정은 캘린더에 남아요.",
+  "@calTransferConfirm": {
+    "placeholders": {
+      "member": {
+        "type": "String"
+      },
+      "calendar": {
+        "type": "String"
+      }
+    }
+  },
+  "calTransferAction": "넘기고 나가기",
+  "calTransferFailed": "소유자를 넘기지 못했어요.",
+  "calLeaveCalendar": "캘린더 나가기",
+  "calLeaveConfirm": "\"{name}\" 캘린더에서 나갈까요? 이 캘린더의 일정을 더 볼 수 없어요. 내가 쓴 일정은 캘린더에 남아요.",
+  "@calLeaveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "calLeaveAction": "나가기",
+  "calLeaveFailed": "캘린더에서 나가지 못했어요.",
   "calLabelDeleteFailed": "라벨을 삭제하지 못했어요.",
   "@calDeleteCalendarConfirm": {
     "placeholders": {
@@ -2300,7 +2329,7 @@
   "accountLogoutConfirm": "이 기기에서 로그아웃할까요?",
   "accountWithdrawTitle": "그루 담다 이용 해지",
   "withdrawIntro": "이용을 해지하면 바로 로그인이 막히고 되돌릴 수 없어요.",
-  "withdrawImpactCalendarsOwned": "내가 만든 공유 캘린더 {count}개가 삭제되고 멤버도 볼 수 없어요",
+  "withdrawImpactCalendarsOwned": "내가 만든 캘린더 {count}개가 삭제돼요",
   "@withdrawImpactCalendarsOwned": {
     "placeholders": {
       "count": {
@@ -2360,6 +2389,15 @@
   },
   "withdrawBlockedOther": "아직 해지할 수 없는 상태예요.",
   "withdrawBlockedHint": "구독을 먼저 해지하면 남은 기간이 끝난 뒤에 이용 해지를 할 수 있어요.",
+  "withdrawBlockedSharedCalendar": "멤버가 있는 공유 캘린더 {count}개의 소유자라 아직 해지할 수 없어요.",
+  "@withdrawBlockedSharedCalendar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "withdrawBlockedSharedCalendarHint": "캘린더 관리에서 다른 멤버에게 소유자를 넘기고 나가면 해지할 수 있어요.",
   "withdrawnTitle": "이용 해지가 끝났어요",
   "withdrawnBody": "그동안 그루 담다를 써 주셔서 감사했습니다. 남은 데이터는 개인정보 처리방침에 따라 보관 후 파기돼요.",
   "withdrawnToLogin": "로그인 화면으로",

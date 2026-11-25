@@ -238,6 +238,33 @@ void main() {
     expect(callout.description, isNot(contains('시면')));
   });
 
+  testWidgets('막힘 — 공유 캘린더 소유 · 구독 둘 다면 Callout 둘', (tester) async {
+    await _open(
+      tester,
+      _Repo(
+        check_: const WithdrawalCheck(
+          blocked: [
+            WithdrawalCheck.blockSubscription,
+            WithdrawalCheck.blockSharedCalendar,
+          ],
+          subscriptionPeriodEnd: null,
+          sharedCalendarsOwned: 0,
+          calendarMemberships: 0,
+          dutchPaysOwned: 0,
+          dutchPayParticipations: 0,
+          sharedCalendarsToTransfer: 2,
+        ),
+      ),
+    );
+    expect(find.byType(PButton), findsNothing);
+    final callouts = tester
+        .widgetList<PCallout>(find.byType(PCallout))
+        .toList();
+    expect(callouts, hasLength(2));
+    expect(callouts.last.title, _l.withdrawBlockedSharedCalendar(2));
+    expect(callouts.last.description, _l.withdrawBlockedSharedCalendarHint);
+  });
+
   testWidgets('2단계 코드 — 붙여넣기 뒤 6자리로 자름 · 6자리 전 누르면 칸 오류 · 다시 받기 60초', (
     tester,
   ) async {

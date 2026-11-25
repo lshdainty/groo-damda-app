@@ -2926,7 +2926,7 @@ abstract class AppLocalizations {
   /// No description provided for @calDeleteCalendarConfirm.
   ///
   /// In ko, this message translates to:
-  /// **'\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨지고, 멤버는 이 캘린더를 더 볼 수 없어요. 삭제한 캘린더는 되돌릴 수 없어요.'**
+  /// **'\"{name}\" 캘린더를 삭제할까요? 일정은 기본 캘린더로 옮겨져요. 삭제한 캘린더는 되돌릴 수 없어요.'**
   String calDeleteCalendarConfirm(String name);
 
   /// No description provided for @calDeleteCalendarFailed.
@@ -2934,6 +2934,78 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'캘린더를 삭제하지 못했어요.'**
   String get calDeleteCalendarFailed;
+
+  /// No description provided for @calTransferAndLeave.
+  ///
+  /// In ko, this message translates to:
+  /// **'소유자 넘기고 나가기'**
+  String get calTransferAndLeave;
+
+  /// No description provided for @calTransferPickTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 소유자 고르기'**
+  String get calTransferPickTitle;
+
+  /// No description provided for @calTransferPickHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'편집 가능한 멤버에게 넘길 수 있어요. 편집 가능한 멤버가 없으면 읽기 전용 멤버도 고를 수 있어요.'**
+  String get calTransferPickHint;
+
+  /// No description provided for @calTransferReaderLocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'편집 가능한 멤버가 있어 고를 수 없어요'**
+  String get calTransferReaderLocked;
+
+  /// No description provided for @calTransferConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'소유자를 넘길까요?'**
+  String get calTransferConfirmTitle;
+
+  /// No description provided for @calTransferConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'{member} 님이 \"{calendar}\" 캘린더의 새 소유자가 되고, 나는 이 캘린더에서 빠져요. 내가 쓴 일정은 캘린더에 남아요.'**
+  String calTransferConfirm(String member, String calendar);
+
+  /// No description provided for @calTransferAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'넘기고 나가기'**
+  String get calTransferAction;
+
+  /// No description provided for @calTransferFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'소유자를 넘기지 못했어요.'**
+  String get calTransferFailed;
+
+  /// No description provided for @calLeaveCalendar.
+  ///
+  /// In ko, this message translates to:
+  /// **'캘린더 나가기'**
+  String get calLeaveCalendar;
+
+  /// No description provided for @calLeaveConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'\"{name}\" 캘린더에서 나갈까요? 이 캘린더의 일정을 더 볼 수 없어요. 내가 쓴 일정은 캘린더에 남아요.'**
+  String calLeaveConfirm(String name);
+
+  /// No description provided for @calLeaveAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'나가기'**
+  String get calLeaveAction;
+
+  /// No description provided for @calLeaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'캘린더에서 나가지 못했어요.'**
+  String get calLeaveFailed;
 
   /// No description provided for @calLabelDeleteFailed.
   ///
@@ -7078,7 +7150,7 @@ abstract class AppLocalizations {
   /// No description provided for @withdrawImpactCalendarsOwned.
   ///
   /// In ko, this message translates to:
-  /// **'내가 만든 공유 캘린더 {count}개가 삭제되고 멤버도 볼 수 없어요'**
+  /// **'내가 만든 캘린더 {count}개가 삭제돼요'**
   String withdrawImpactCalendarsOwned(int count);
 
   /// No description provided for @withdrawImpactCalendarMemberships.
@@ -7224,6 +7296,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'구독을 먼저 해지하면 남은 기간이 끝난 뒤에 이용 해지를 할 수 있어요.'**
   String get withdrawBlockedHint;
+
+  /// No description provided for @withdrawBlockedSharedCalendar.
+  ///
+  /// In ko, this message translates to:
+  /// **'멤버가 있는 공유 캘린더 {count}개의 소유자라 아직 해지할 수 없어요.'**
+  String withdrawBlockedSharedCalendar(int count);
+
+  /// No description provided for @withdrawBlockedSharedCalendarHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'캘린더 관리에서 다른 멤버에게 소유자를 넘기고 나가면 해지할 수 있어요.'**
+  String get withdrawBlockedSharedCalendarHint;
 
   /// No description provided for @withdrawnTitle.
   ///

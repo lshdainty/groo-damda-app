@@ -9,9 +9,11 @@ import 'package:groo_damda_app/core/auth/auth_notifier.dart';
 import 'package:groo_damda_app/core/format/chart_palette.dart';
 import 'package:groo_damda_app/core/network/api_exception.dart';
 import 'package:groo_damda_app/features/calendar/application/calendar_providers.dart';
+import 'package:groo_damda_app/features/calendar/domain/calendar_ownership.dart';
 import 'package:groo_damda_app/features/calendar/domain/user_calendar.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_manage_forms.dart';
 import 'package:groo_damda_app/features/calendar/presentation/calendar_surface_parts.dart';
+import 'package:groo_damda_app/features/calendar/presentation/calendar_transfer_sheet.dart';
 import 'package:groo_damda_app/l10n/generated/app_localizations.dart';
 import 'package:groo_damda_app/shared/ds/text/p_text.dart';
 import 'package:groo_damda_app/shared/forms/color_pick.dart';
@@ -406,6 +408,67 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
     if (ok && mounted) widget.onLeave();
   }
 
+  /// 소유자 넘기고 나가기 — 넘겨받을 멤버 고르기 → 확인 → 요청. 성공하면 나는 빠지므로 목록으로 돌아간다.
+  Future<void> _transfer() async {
+    final l = AppLocalizations.of(context);
+    final snack = PSnackbar.maybeOf(context);
+    final container = ProviderScope.containerOf(context);
+    final id = cal.rowId;
+    final calendarName = cal.calendarName;
+    final myId = ref.read(authProvider).value?.rowId;
+    final List<CalendarMember> members;
+    try {
+      members = await container.read(calendarMembersProvider(id).future);
+    } catch (_) {
+      snack?.show(message: l.calMemberLoadFailed, tone: PSnackbarTone.critical);
+      return;
+    }
+    if (!mounted) return;
+    final others = otherCalendarMembers(members, myUserRowId: myId);
+    final picked = await showCalendarTransferSheet(context, others: others);
+    if (picked == null || !mounted) return;
+    final ok = await askConfirmThenRequest(
+      context,
+      title: l.calTransferConfirmTitle,
+      description: l.calTransferConfirm(picked.userName, calendarName),
+      cancelLabel: l.actionCancel,
+      actionLabel: l.calTransferAction,
+      request: () => _transferRequest(container, id, picked.rowId),
+      failedMessage: l.calTransferFailed,
+      retryLabel: l.actionRetry,
+      onRetried: () {
+        if (mounted) widget.onLeave();
+      },
+      kind: WriteKind.process,
+      // 응답을 못 받았다 — 넘어갔을 수 있다. 목록 · 멤버 · 일정을 다시 받아 보이는 상태를 맞춘다
+      onUnconfirmed: () => _invalidateUnconfirmed(container, id),
+    );
+    if (ok && mounted) widget.onLeave();
+  }
+
+  /// 공유받은 캘린더에서 나가기 — 확인 → 요청. 성공하면 목록으로 돌아간다.
+  Future<void> _leaveCalendar() async {
+    final l = AppLocalizations.of(context);
+    final container = ProviderScope.containerOf(context);
+    final id = cal.rowId;
+    final ok = await askConfirmThenRequest(
+      context,
+      title: l.calLeaveCalendar,
+      description: l.calLeaveConfirm(cal.calendarName),
+      cancelLabel: l.actionCancel,
+      actionLabel: l.calLeaveAction,
+      request: () => _leaveRequest(container, id),
+      failedMessage: l.calLeaveFailed,
+      retryLabel: l.actionRetry,
+      onRetried: () {
+        if (mounted) widget.onLeave();
+      },
+      kind: WriteKind.process,
+      onUnconfirmed: () => _invalidateUnconfirmed(container, id),
+    );
+    if (ok && mounted) widget.onLeave();
+  }
+
   void _openMenu(CalendarMember member) {
     final l = AppLocalizations.of(context);
     PMenuSheet.show(
@@ -443,6 +506,21 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
     final myId = ref.watch(authProvider).value?.rowId;
     final isOwner = cal.isOwner;
     final stored = cal.color ?? chartHexOf(PChartColor.blue);
+    // 맨 아래 동작 — 멤버 목록을 받았으면 그걸로, 아직이면 목록 응답의 memberCount(나 포함)로 센다
+    final loaded = membersAsync.value;
+    final exit = calendarExitAction(
+      isOwner: isOwner,
+      isDefault: cal.isDefault,
+      otherMemberCount: loaded != null
+          ? otherCalendarMembers(loaded, myUserRowId: myId).length
+          : cal.memberCount - 1,
+    );
+    final (String? exitLabel, VoidCallback? onExit) = switch (exit) {
+      CalendarExitAction.delete => (l.calDeleteCalendar, _delete),
+      CalendarExitAction.transferAndLeave => (l.calTransferAndLeave, _transfer),
+      CalendarExitAction.leave => (l.calLeaveCalendar, _leaveCalendar),
+      CalendarExitAction.none => (null, null),
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -527,16 +605,16 @@ class _ManageBodyState extends ConsumerState<_ManageBody> {
             ],
           ),
         ),
-        if (isOwner && !cal.isDefault) ...[
+        if (exitLabel != null && onExit != null) ...[
           // 되돌릴 수 없는 동작을 멤버 줄과 떼어 놓는 흰 여백
           const SizedBox(height: PSpacing.x2),
           PList(
-            semanticLabel: l.calDeleteCalendar,
+            semanticLabel: exitLabel,
             children: [
               PListButtonItem(
-                title: l.calDeleteCalendar,
+                title: exitLabel,
                 titleColor: c.fgCritical,
-                onTap: _delete,
+                onTap: onExit,
               ),
             ],
           ),
@@ -738,4 +816,34 @@ Future<void> _deleteCalendarRequest(ProviderContainer container, int id) async {
   // 서버가 이 캘린더의 일정을 기본 캘린더로 옮긴다(UserCalendarServiceImpl).
   // 월 일정을 다시 받지 않으면 지운 캘린더 소속인 채로(색·소속 모두 옛것) 남는다.
   container.invalidate(monthEventsProvider);
+}
+
+/// 소유자 넘기기 요청 — 성공하면 나는 이 캘린더에서 빠진다. 실패는 던진다.
+Future<void> _transferRequest(
+  ProviderContainer container,
+  int id,
+  int memberId,
+) async {
+  final repo = await container.read(userCalendarRepositoryProvider.future);
+  await repo.transferOwnership(id, memberId);
+  _invalidateAfterExit(container);
+}
+
+/// 공유받은 캘린더에서 나가기 요청. 실패는 던진다.
+Future<void> _leaveRequest(ProviderContainer container, int id) async {
+  final repo = await container.read(userCalendarRepositoryProvider.future);
+  await repo.leave(id);
+  _invalidateAfterExit(container);
+}
+
+/// 캘린더에서 빠진 뒤 — 목록(빠진 캘린더 · 기본 캘린더를 넘겼으면 새 기본) · 월 일정(그 캘린더 일정이 사라진다).
+/// 멤버는 다시 받지 않는다 — 빠진 캘린더의 멤버를 물으면 거절되어 나가는 사이 실패 칸이 번쩍인다.
+/// 응답을 못 받았을 때(넘어갔는지 모름)만 멤버까지 다시 받는다([_invalidateUnconfirmed]).
+void _invalidateAfterExit(ProviderContainer container) => container
+  ..invalidate(userCalendarListProvider)
+  ..invalidate(monthEventsProvider);
+
+void _invalidateUnconfirmed(ProviderContainer container, int id) {
+  _invalidateAfterExit(container);
+  container.invalidate(calendarMembersProvider(id));
 }

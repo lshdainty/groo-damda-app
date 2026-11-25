@@ -157,7 +157,7 @@ void main() {
       expect(ko.stocksSharesUnit('1,234', 1234), '1,234주');
       expect(
         en.withdrawImpactCalendarsOwned(1),
-        '1 shared calendar you created will be deleted — members lose access too',
+        '1 calendar you created will be deleted',
       );
       expect(
         en.withdrawImpactDutchPayParticipations(2),
