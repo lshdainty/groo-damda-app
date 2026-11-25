@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/settings/settings_notifier.dart';
@@ -55,7 +56,7 @@ class NetWorthChart extends ConsumerWidget {
       );
     }
 
-    String won(num v) => masked ? kBudgetMask : formatWon(v);
+    String won(num v) => masked ? kHideMask : formatWon(v);
     // 날짜 규칙 — 월은 앞 0 을 채우지 않고, 해가 바뀌는 첫 눈금에만 해를 붙인다(통계와 같은 규칙)
     final labels = monthTicks([
       for (final p in points) (year: p.year, month: p.month),
@@ -84,7 +85,7 @@ class NetWorthChart extends ConsumerWidget {
             ),
           ],
           // 가리면 눈금도 점 — 안 가리면 ds 기본(한 축은 한 단위)
-          axisFormatter: masked ? (_) => kBudgetMask : null,
+          axisFormatter: masked ? (_) => kHideMask : null,
           valueFormatter: won,
         ),
         PChartDataTable(

@@ -23,7 +23,6 @@ import 'package:groo_damda_app/shared/icons/lucide_icon_map.dart';
 // 앞 구역 아래 24 + 다음 머리 위 24 = 48.
 
 const tabularFigures = [FontFeature.tabularFigures()];
-const kBudgetMask = '••••';
 
 /// 띠 하나 — 화면 폭 흰 면. 안 구역이 제 위아래 여백을 가진다.
 Widget budgetBand(List<Widget> sections) => PScreenSection(
@@ -481,7 +480,7 @@ class BudgetFailure extends StatelessWidget {
 
 /// 금액 글 — 원까지, 가리면 점.
 String budgetWon(int n, bool masked, {String sign = ''}) =>
-    krwSigned(n, masked, sign: sign, unit: true, mask: kBudgetMask);
+    krwSigned(n, masked, sign: sign, unit: true);
 
 /// 카테고리 예산 줄 이름 — 카테고리 → 예산에 적힌 이름 → 번호 순.
 String budgetRowName(

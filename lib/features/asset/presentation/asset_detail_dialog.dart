@@ -49,7 +49,7 @@ import 'package:groo_damda_app/shared/ds/text_button/p_text_button.dart';
 import 'package:groo_damda_app/shared/ds/segmented_control/p_segmented_control.dart';
 import 'package:groo_damda_app/shared/ds/chart/p_chart.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart'
-    show BudgetFailure, kBudgetMask;
+    show BudgetFailure;
 import 'package:groo_damda_app/shared/scroll/reveal_below_fog.dart';
 import 'package:groo_damda_app/core/format/date.dart';
 import 'package:groo_damda_app/core/format/format_locale.dart';
@@ -654,7 +654,7 @@ class _InvChangeLine extends ConsumerWidget {
         child: PDelta(
           direction: up ? PDeltaDirection.up : PDeltaDirection.down,
           value: masked
-              ? '••••'
+              ? kHideMask
               : '${formatChangeRateAbs(pct)} · ${l.assetTodayChange(krwSigned(chg.abs(), false, sign: up ? '+' : '−', unit: true))}',
         ),
       ),
@@ -850,14 +850,14 @@ Widget _tradeRow(
   final desc = [
     tradeRowDate(tr),
     if (tr.tradeType == 'SELL' && pl != null && pl != 0)
-      '${l.tradeRealizedPreview} ${masked ? '••••' : tradeSignedKrw(pl)}',
+      '${l.tradeRealizedPreview} ${masked ? kHideMask : tradeSignedKrw(pl)}',
   ].join(' · ');
   return PListButtonItem(
     title: '${tradeKindLabel(l, tr)} · $holdingName ${tradeQtyText(l, tr)}',
     detail: desc,
     onTap: onTap,
     suffix: Text(
-      masked ? '••••' : keepAllAmount('${krw(tr.amount ?? 0)}${wonUnit()}'),
+      masked ? kHideMask : keepAllAmount('${krw(tr.amount ?? 0)}${wonUnit()}'),
       textAlign: TextAlign.end,
       style: PTypography.t5.copyWith(
         color: c.fgNeutral,
@@ -1092,7 +1092,7 @@ class TradeDetailBody extends StatelessWidget {
     final unit = (qtyValue != null && qtyValue > 0)
         ? (amount / qtyValue).round()
         : null;
-    String money(int v) => masked ? '••••' : '${krw(v)}${wonUnit()}';
+    String money(int v) => masked ? kHideMask : '${krw(v)}${wonUnit()}';
     final pl = tr.realizedPl;
     return PBottomSheetContent(
       title: l.tradeDetailTitle,
@@ -1119,7 +1119,7 @@ class TradeDetailBody extends StatelessWidget {
           KvRow(
             label: l.tradeRealizedPreview,
             value: sell && pl != null && pl != 0
-                ? (masked ? '••••' : tradeSignedKrw(pl))
+                ? (masked ? kHideMask : tradeSignedKrw(pl))
                 : null,
           ),
           KvRow(label: l.tradeDateTime, value: tradeDateTimeText(tr)),
@@ -1211,7 +1211,7 @@ class _HoldingRow extends ConsumerWidget {
       pct = (unitKrw! - prevUnitKrw!) / prevUnitKrw! * 100;
     }
 
-    String won(int v) => masked ? '••••••' : krwSigned(v, false, unit: true);
+    String won(int v) => masked ? kHideMask : krwSigned(v, false, unit: true);
     // 보유 줄(50) — List 줄 위 맞춤. 줄 자체는 누르지 않는다(수정은 머리 하나, 4-3A).
     // 뒤 기둥(오른쪽 맞춤): 평가액 R13 → 등락 Delta → [매수] [매도] ghost small(금액 아래 · 오른쪽 끝 −8).
     return PListItem(
@@ -1240,7 +1240,7 @@ class _HoldingRow extends ConsumerWidget {
             if (pct != null)
               PDelta(
                 direction: pct >= 0 ? PDeltaDirection.up : PDeltaDirection.down,
-                value: masked ? '••••' : formatChangeRateAbs(pct),
+                value: masked ? kHideMask : formatChangeRateAbs(pct),
               ),
             // 매수·매도는 상세를 어디서 열었든 가능해야 한다 — 편집 진입 여부에 묶으면 자산 화면에서 연 상세만 매매가 막힌다.
             if (onTrade != null)
@@ -1335,7 +1335,7 @@ class _HeroCard extends StatelessWidget {
     // 머리(45) — Logo 48 + 오른쪽 12 + 이름 t6 700 줄바꿈 + 설명 t3 `fg-neutral-subtle`. 구분선 · 띠를 두지 않는다.
     final c = context.colors;
     final amountText = masked
-        ? '••••••'
+        ? kHideMask
         : keepAllAmount(
             '${heroBalance < 0 ? kMinus : ''}${krw(heroBalance.abs())}${wonUnit()}',
           );
@@ -1398,7 +1398,7 @@ class _HeroCard extends StatelessWidget {
               padding: const EdgeInsets.only(top: PSpacing.x0_5),
               child: Text(
                 masked
-                    ? '••••••'
+                    ? kHideMask
                     : keepAllAmount(
                         foreignText(asset.cashBalance ?? rawBalance),
                       ),
@@ -1417,7 +1417,7 @@ class _HeroCard extends StatelessWidget {
               inset: 0,
               label: l.assetCashBalance,
               value: masked
-                  ? '••••••'
+                  ? kHideMask
                   : foreign
                   ? foreignText(asset.cashBalance!)
                   : '${krw(asset.cashBalance!)}${wonUnit()}',
@@ -1430,7 +1430,7 @@ class _HeroCard extends StatelessWidget {
               inset: 0,
               label: l.assetHoldingBalance,
               value: masked
-                  ? '••••••'
+                  ? kHideMask
                   : '${krw(asset.holdingBalance ?? 0)}${wonUnit()}',
             ),
           ],
@@ -1441,7 +1441,7 @@ class _HeroCard extends StatelessWidget {
 }
 
 /// 잔액 추이 차트(I-17 48) — 05-3 57 의 변형 하나: ds 선 차트 + 데이터 점마다 점 · 채움 없음 · 눈금 글 줄임("3억") · 툴팁 원까지.
-/// 불러오는 중은 Skeleton, 실패는 이 자리에서 다시 시도, 데이터가 없으면 가운데 한 줄. 금액을 가리면 눈금 · 툴팁이 "••••".
+/// 불러오는 중은 Skeleton, 실패는 이 자리에서 다시 시도, 데이터가 없으면 가운데 한 줄. 금액을 가리면 눈금 · 툴팁이 점([kHideMask]).
 class _BalanceTrendChart extends StatelessWidget {
   const _BalanceTrendChart({
     required this.async,
@@ -1484,7 +1484,7 @@ class _BalanceTrendChart extends StatelessWidget {
         ),
       );
     }
-    String won(num v) => masked ? kBudgetMask : formatWon(v);
+    String won(num v) => masked ? kHideMask : formatWon(v);
     final labels = [
       for (var i = 0; i < list.length; i++) l.assetWeeksCount(i + 1),
     ];
@@ -1508,7 +1508,7 @@ class _BalanceTrendChart extends StatelessWidget {
             ),
           ],
           // 가리면 눈금도 점 — 안 가리면 ds 기본(한 축은 한 단위)
-          axisFormatter: masked ? (_) => kBudgetMask : null,
+          axisFormatter: masked ? (_) => kHideMask : null,
           valueFormatter: won,
         ),
         PChartDataTable(
@@ -1892,7 +1892,7 @@ class _CardPerfBadge extends ConsumerWidget {
           ),
           title: l.assetPerfTitle('$month', monthNameOf(month)),
           detail: masked
-              ? '••••••'
+              ? kHideMask
               : '${money(p.currentAmount)} / ${money(p.requiredAmount!)} · $pct%',
           suffix: PBadge(
             size: PBadgeSize.large,
@@ -2264,7 +2264,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     return _confirmThen(
       title: l.assetInstallmentPayoff,
       description: l.assetInstallmentPayoffConfirm(
-        widget.masked ? '••••' : krwWithUnit(installmentPayoffAmount(due)),
+        widget.masked ? kHideMask : krwWithUnit(installmentPayoffAmount(due)),
       ),
       failedMessage: l.assetInstallmentPayoffFailed,
       kind: WriteKind.process,
@@ -2300,7 +2300,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     return _confirmThen(
       title: l.assetCancelPayment,
       description: l.assetCancelPaymentConfirm(
-        widget.masked ? '••••' : krwWithUnit(billing.billingAmount),
+        widget.masked ? kHideMask : krwWithUnit(billing.billingAmount),
         _paymentDateLabel(billing.paymentDate),
       ),
       failedMessage: l.assetCancelPaymentFailed,
@@ -2456,7 +2456,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
     final closedMix = closed && st.installments.isNotEmpty;
     // 지금 결제 — 닫힌 회차를 보고 있을 땐 숨긴다(D10). 그 회차는 이미 결제일이 지나 더 낼 것이 없다.
     final showPayNow = st == null || st.scheduled;
-    String won(int v) => masked ? '••••••' : krwSigned(v, false, unit: true);
+    String won(int v) => masked ? kHideMask : krwSigned(v, false, unit: true);
 
     Widget note(String text, Key key) => Padding(
       padding: const EdgeInsets.fromLTRB(gutter, PSpacing.x1, gutter, 0),
@@ -2481,7 +2481,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
             children: [
               // 앞 말 + 금액 — 띄어쓰기에서 먼저 넘기고 쉼표 뒤는 금액이 칸보다 길 때만(keepAllFit, Typography v114)
               KeepAllFitText(
-                '${masked ? '••••••' : l.assetInstallmentPrincipal(won(due.principalAmount))}${due.recordOnly ? ' · ${l.expRecordOnlyBadge}' : ''}',
+                '${masked ? kHideMask : l.assetInstallmentPrincipal(won(due.principalAmount))}${due.recordOnly ? ' · ${l.expRecordOnlyBadge}' : ''}',
                 style: PTypography.t3.copyWith(color: c.fgNeutralSubtle),
               ),
               // 정리/되돌리기 — 상환하면 남은 원금이 이 회차에 몰리므로 두 상태가 같은 자리를 쓴다.
@@ -2533,7 +2533,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
             ],
           ),
           suffix: Text(
-            masked ? '••••••' : keepAllAmount(won(due.amount)),
+            masked ? kHideMask : keepAllAmount(won(due.amount)),
             textAlign: TextAlign.end,
             style: PTypography.t5.copyWith(
               color: c.fgNeutral,
@@ -2585,8 +2585,8 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
         Padding(
           padding: const EdgeInsets.fromLTRB(gutter, PSpacing.x1, gutter, 0),
           child: Text(
-            masked ? '••••••' : keepAllAmount(won(st?.amount ?? 0)),
-            semanticsLabel: masked ? '••••••' : won(st?.amount ?? 0),
+            masked ? kHideMask : keepAllAmount(won(st?.amount ?? 0)),
+            semanticsLabel: masked ? kHideMask : won(st?.amount ?? 0),
             style: PTypography.t9.copyWith(
               color: c.fgNeutral,
               fontWeight: FontWeight.w700,
@@ -2675,7 +2675,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                   title: l.assetAlreadyPaidLabel,
                   suffix: Text(
                     masked
-                        ? '••••••'
+                        ? kHideMask
                         : keepAllAmount('$kMinus${won(st.alreadyPaidAmount!)}'),
                     textAlign: TextAlign.end,
                     style: PTypography.t5.copyWith(
@@ -2776,7 +2776,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                       flex: 3,
                       child: KeepAllFitText(
                         masked
-                            ? '••••••'
+                            ? kHideMask
                             : l.assetLimitOf(won(used), won(limit)),
                         style: PTypography.t3.copyWith(
                           color: c.fgNeutralSubtle,
@@ -2788,7 +2788,7 @@ class _CardDetailBodyState extends ConsumerState<_CardDetailBody> {
                       flex: 2,
                       child: KeepAllFitText(
                         masked
-                            ? '••••••'
+                            ? kHideMask
                             : (over
                                   ? l.dsProgressOver(won(used - limit))
                                   : l.assetLimitRemain(won(limit - used))),
@@ -3197,7 +3197,7 @@ class _PeriodPickBodyState extends State<_PeriodPickBody> {
                       ? [PBadge(label: l.assetScheduledTag)]
                       : null,
                   detail: widget.masked
-                      ? '••••••'
+                      ? kHideMask
                       : krwSigned(s.amount, false, unit: true),
                 ),
             ],

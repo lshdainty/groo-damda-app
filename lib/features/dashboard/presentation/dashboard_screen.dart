@@ -53,7 +53,6 @@ import 'package:groo_damda_app/shared/ds/focus_ring/p_focus_ring.dart';
 import 'package:groo_damda_app/shared/ds/screen_band/p_screen_content.dart';
 
 const _tabular = [FontFeature.tabularFigures()];
-const _mask = '••••';
 
 /// 홈 / 대시보드 — 폰 띠 화면. 구역마다 띠다(사용자 10-23) — 순자산 · 이번 달 가계부 · 카테고리 · 예산 · 다가오는 일정 ·
 /// 최근 할 일 · 오늘 쓴 돈. 머리 바로 아래 첫 띠 · 마지막 띠 아래에는 틈을 두지 않고 8 은 띠 사이에만 둔다.
@@ -423,7 +422,7 @@ class _EmptyLine extends StatelessWidget {
 }
 
 String _won(int n, bool masked, {String sign = ''}) =>
-    krwSigned(n, masked, sign: sign, unit: true, mask: _mask);
+    krwSigned(n, masked, sign: sign, unit: true);
 
 /// 금액 값 글 — R13(t5 · 700 · 고정폭), 쉼표 뒤에서만 줄을 바꾼다.
 Widget _amount(String text, Color color, {TextStyle? base}) => Text(
@@ -1016,8 +1015,8 @@ class _CategorySection extends StatelessWidget {
       ),
     );
     String pct(int v) => formatShareOf(v, total, underOne: l.percentUnderTenth);
-    String money(int v) => masked ? _mask : formatWon(v);
-    final totalText = masked ? _mask : formatWon(total);
+    String money(int v) => masked ? kHideMask : formatWon(v);
+    final totalText = masked ? kHideMask : formatWon(total);
     final label = l.dashCategoryChartLabel(
       month.month,
       totalText,
@@ -1044,7 +1043,7 @@ class _CategorySection extends StatelessWidget {
                       color: colored[i].color,
                     ),
                 ],
-                valueFormatter: masked ? (_) => _mask : null,
+                valueFormatter: masked ? (_) => kHideMask : null,
               ),
             ),
           ),
@@ -1165,7 +1164,7 @@ class _BudgetSection extends StatelessWidget {
       }
     }
     final totalEx = summary.totalExpense;
-    String fmt(double v) => masked ? _mask : _won(v.round(), false);
+    String fmt(double v) => masked ? kHideMask : _won(v.round(), false);
     return _TextSection(
       header: head,
       body: Column(

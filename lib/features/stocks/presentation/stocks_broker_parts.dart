@@ -406,7 +406,7 @@ Widget stocksBuyingPowerRow(
     value = Text('—', style: stocksMoneyStyle(context));
   } else {
     value = Text(
-      masked ? '••••' : keepAllAmount(format(state.amount!)),
+      masked ? kHideMask : keepAllAmount(format(state.amount!)),
       textAlign: TextAlign.right,
       style: stocksMoneyStyle(context),
     );

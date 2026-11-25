@@ -39,7 +39,7 @@ import 'package:groo_damda_app/shared/ds/skeleton/loading_region.dart';
 
 // 자산 화면의 구역 부품(I-05 55 ~ 62) — 웹 `pages/asset/ui/asset-parts.tsx` 와 같은 구조 · 같은 값이다(짝 1).
 // 폰은 띠 화면이다: 구역마다 화면 폭 흰 띠, 띠 안은 구역이 제 좌우 24 를 갖고(목록 줄은 줄이 제 24), 띠 사이 8 만 틈이다(74).
-// 금액은 원까지 · 가리면 "••••". 카드(띠)마다 따로 불러오고 따로 실패한다(화면 전체 게이트 없음 — 62).
+// 금액은 원까지 · 가리면 점(kHideMask). 카드(띠)마다 따로 불러오고 따로 실패한다(화면 전체 게이트 없음 — 62).
 
 /// 평가 맵 → 자산 rowId 별 라이브 평가액(보유분).
 Map<int, int> liveValuationMap(Map<int, InvestmentValuation> inv) => {
@@ -208,7 +208,7 @@ class AssetSummarySection extends StatelessWidget {
       BudgetKv(
         l.assetSummaryColCards,
         masked
-            ? kBudgetMask
+            ? kHideMask
             : (cardsTotal > 0
                   ? '$kMinus${assetWon(cardsTotal, false)}'
                   : assetWon(cardsTotal, false)),
@@ -448,7 +448,7 @@ class AssetRow extends StatelessWidget {
                   asset.assetType != 'INVESTMENT')
                 Text(
                   masked
-                      ? kBudgetMask
+                      ? kHideMask
                       : formatAssetAmount(
                           asset.cashBalance ?? asset.balance ?? 0,
                           asset.currency!,
@@ -457,7 +457,7 @@ class AssetRow extends StatelessWidget {
                   textAlign: TextAlign.end,
                   style: small,
                 ),
-              // 투자 행 등락 — 오름 · 내림 방향 색은 Delta 가 정한다. 가려도 줄은 두고 값만 점이다(웹 `▲ •••`)
+              // 투자 행 등락 — 오름 · 내림 방향 색은 Delta 가 정한다. 가려도 줄은 두고 값만 점이다(웹과 같은 kHideMask)
               if (val != null && change != null)
                 Builder(
                   builder: (context) {
@@ -469,7 +469,7 @@ class AssetRow extends StatelessWidget {
                           ? PDeltaDirection.up
                           : PDeltaDirection.down,
                       value: masked
-                          ? '•••'
+                          ? kHideMask
                           : '${formatChangeRateAbs(pct)} '
                                 '(${change >= 0 ? '+' : kMinus}${assetWon(change.abs(), false)})',
                     );
@@ -533,7 +533,7 @@ class AssetRow extends StatelessWidget {
               const SizedBox(height: PSpacing.x2),
               BudgetBarCaption(
                 left: masked
-                    ? kBudgetMask
+                    ? kHideMask
                     : '${assetWon(used, false)} / ${assetWon(limit, false)}',
                 right: over
                     ? l.dsProgressOver(assetWon(used - limit, masked))
@@ -649,7 +649,7 @@ class AssetGroupSection extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final c = context.colors;
     final totalText = masked
-        ? kBudgetMask
+        ? kHideMask
         : (negativeTotal && total != 0
               ? '$kMinus${assetWon(total, false)}'
               : assetWon(total, false));

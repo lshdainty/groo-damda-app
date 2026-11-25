@@ -442,7 +442,7 @@ class _NamuHoldingBand extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final h = holding;
     final cur = h.currency;
-    String money(double v) => masked ? '••••' : fmtByCurrency(v, cur);
+    String money(double v) => masked ? kHideMask : fmtByCurrency(v, cur);
     return PScreenSection(
       padding: const EdgeInsets.only(bottom: PSpacing.x2),
       child: Column(

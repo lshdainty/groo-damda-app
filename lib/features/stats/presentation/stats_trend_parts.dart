@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'package:groo_damda_app/core/format/krw.dart';
 import 'package:groo_damda_app/core/format/percent.dart';
 import 'package:groo_damda_app/app/theme/groo_tokens.g.dart';
 import 'package:groo_damda_app/features/budget/presentation/budget_parts.dart';
@@ -250,7 +251,7 @@ PBarChart _savingsChart(
 
 /// 순저축 글 — 부호를 붙인 원까지("+12,000원" · "−3,000원"), 가리면 가림 글.
 String _savingsText(double v, bool masked) {
-  if (masked) return kBudgetMask;
+  if (masked) return kHideMask;
   final n = v.round();
   final text = statsWon(n.abs(), false);
   return n > 0 ? '+$text' : (n < 0 ? '$kChartMinus$text' : text);

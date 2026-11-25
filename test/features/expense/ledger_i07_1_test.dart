@@ -1134,8 +1134,8 @@ void main() {
       expenses: (key) async =>
           key == cur ? [_tx(1, '이번 달 가게', 100000)] : [_tx(2, '지난달 가게', 400000)],
     );
-    // 가림 점은 krw.dart 기본 마스크 6개
-    expect(_text('••••••', contains: true), findsWidgets);
+    // 가림 점은 공용 상수 kHideMask(4개)
+    expect(_text('••••', contains: true), findsWidgets);
     expect(_text('만원', contains: true), findsNothing);
   });
 
