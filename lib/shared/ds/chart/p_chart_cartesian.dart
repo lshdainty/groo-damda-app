@@ -99,7 +99,7 @@ abstract class PCartesianChart extends StatefulWidget {
   /// 툴팁 값 — 기본 원까지(빼기 U+2212).
   final String Function(double value)? valueFormatter;
 
-  /// 세로축 눈금 글을 통째로 바꾼다(가림 "••••" 등). 주지 않으면 ds 기본 [formatAxisWon] — 한 축은 한 단위라 그 축의
+  /// 세로축 눈금 글을 통째로 바꾼다(가림 점 [kHideMask] 등). 주지 않으면 ds 기본 [formatAxisWon] — 한 축은 한 단위라 그 축의
   /// 눈금 묶음을 보고 만 단위 · 쉼표 정수를 정한다.
   final String Function(double value)? axisFormatter;
 

@@ -421,13 +421,13 @@ void main() {
       expect(deltaValue(tester), contains('12,345원'));
     });
 
-    testWidgets('투자 카드 가림 — 줄은 두고 값만 •••', (tester) async {
+    testWidgets('투자 카드 가림 — 줄은 두고 값만 ••••', (tester) async {
       await _pump(tester, valuation: val, hidden: {'asset.investments'});
       expect(find.byKey(const ValueKey('asset-delta-7')), findsOneWidget);
-      expect(deltaValue(tester), '•••');
+      expect(deltaValue(tester), '••••');
     });
 
-    testWidgets('이 자산만 가림 — 줄은 두고 값만 •••', (tester) async {
+    testWidgets('이 자산만 가림 — 줄은 두고 값만 ••••', (tester) async {
       await _pump(
         tester,
         valuation: val,
@@ -435,7 +435,7 @@ void main() {
           _a(7, '주식 계좌', 'INVESTMENT', balance: 3000000, hidden: 'Y'),
         ],
       );
-      expect(deltaValue(tester), '•••');
+      expect(deltaValue(tester), '••••');
     });
   });
 

@@ -434,7 +434,7 @@ class _InvestBand extends ConsumerWidget {
             count: 0,
           )
         : investSummaryOf(h);
-    String money(int v) => masked ? '••••' : krwSigned(v, false, unit: true);
+    String money(int v) => masked ? kHideMask : krwSigned(v, false, unit: true);
     return PScreenSection(
       padding: const EdgeInsets.only(top: PSpacing.x6, bottom: PSpacing.x2),
       child: Column(
@@ -918,7 +918,7 @@ class _HoldingsList extends StatelessWidget {
             detail:
                 '${h.symbol} · ${l.stocksSharesUnit(stocksQty(h.quantityValue), h.quantityValue)}',
             amount: masked
-                ? '••••'
+                ? kHideMask
                 : fmtByCurrency(h.marketValueAmountValue, h.currency),
             pct: h.profitLossRateValue,
             onTap: () => onTap(h.symbol),
@@ -1405,7 +1405,8 @@ class _HoldingBand extends StatelessWidget {
       stocksQty(h.quantityValue),
       h.quantityValue,
     );
-    String money(num v) => masked ? '••••' : fmtByCurrency(v.toDouble(), cur);
+    String money(num v) =>
+        masked ? kHideMask : fmtByCurrency(v.toDouble(), cur);
     PDelta delta(num v) => stocksPnlDelta(v, null, masked, currency: cur);
     return PScreenSection(
       padding: const EdgeInsets.only(bottom: PSpacing.x2),
@@ -1436,7 +1437,7 @@ class _HoldingBand extends StatelessWidget {
               stocksKvLine(
                 context,
                 l.stocksAvgPrice,
-                masked ? '••••' : fmtByCurrency(avg, cur),
+                masked ? kHideMask : fmtByCurrency(avg, cur),
               ),
               stocksKvLine(
                 context,

@@ -466,7 +466,7 @@ class _NamuStocksViewState extends ConsumerState<NamuStocksView> {
                   detail:
                       '${r.symbol} · ${l.stocksSharesUnit(stocksQty(r.quantity), r.quantity)}',
                   amount: masked
-                      ? '••••'
+                      ? kHideMask
                       : fmtByCurrency(r.evalAmount, r.currency),
                   pct: r.returnPct,
                   onTap: () => _openDetail(r.symbol),
@@ -489,7 +489,7 @@ PDelta namuPnlDelta(
   String? text,
 }) {
   final d = directionOf(pnl);
-  final amount = masked ? '••••' : fmtByCurrency(pnl.abs(), currency);
+  final amount = masked ? kHideMask : fmtByCurrency(pnl.abs(), currency);
   return PDelta(
     direction: stocksDir(d),
     value: d == StockDirection.flat
@@ -603,9 +603,9 @@ class NamuInvestBand extends ConsumerWidget {
     }
 
     String won(double v) =>
-        masked ? '••••' : krwSigned(v.round(), false, unit: true);
+        masked ? kHideMask : krwSigned(v.round(), false, unit: true);
     String cur(NamuCurrencyTotal t) =>
-        masked ? '••••' : fmtByCurrency(t.evalAmount, t.currency);
+        masked ? kHideMask : fmtByCurrency(t.evalAmount, t.currency);
     PDelta pnl(NamuCurrencyTotal t, {String? text}) => namuPnlDelta(
       t.profitLoss,
       t.profitRatePct,
@@ -623,7 +623,7 @@ class NamuInvestBand extends ConsumerWidget {
     String? note;
     if (total) {
       label = l.namuKrwTotal;
-      amount = masked ? '••••' : '≈ ${won(view.totalKrw!)}';
+      amount = masked ? kHideMask : '≈ ${won(view.totalKrw!)}';
       note = l.namuFxApplied(krw((view.appliedFxRate ?? 0).round()));
     } else if (main != null) {
       label = main.currency == 'KRW'

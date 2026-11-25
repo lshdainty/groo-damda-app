@@ -448,7 +448,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('가리면 눈 꺼짐 아이콘 · 금액 ••••••', (tester) async {
+    testWidgets('가리면 눈 꺼짐 아이콘 · 금액 ••••', (tester) async {
       await _pump(tester, hidden: {'home.netWorth'});
       expect(find.byIcon(LucideIcons.eyeOff), findsOneWidget);
       expect(findPlain('98,765,432,100원'), findsNothing);

@@ -65,7 +65,7 @@ String statsWon(int n, bool masked, {String sign = ''}) => n < 0 && sign.isEmpty
 
 /// 차트 글 가림 — 가리면 눈금 · 툴팁 값도 점(null 이면 ds 기본).
 String Function(double)? maskFormatter(bool masked) =>
-    masked ? (_) => kBudgetMask : null;
+    masked ? (_) => kHideMask : null;
 
 PChartColor? savedChartColor(String? hex) {
   final key = chartKeyOfHex(hex);
@@ -728,7 +728,7 @@ class StatsHeatmapSection extends StatelessWidget {
             for (final row in matrix)
               [for (final v in row) v > 0 ? v.toDouble() : null],
           ],
-          formatValue: masked ? (_) => kBudgetMask : null,
+          formatValue: masked ? (_) => kHideMask : null,
           valueLabel: l.statsChartHeatValue,
           tooltipLabel: (row, col) => '${col.label} ${row.label} ${row.sub}',
         ),

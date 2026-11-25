@@ -312,7 +312,7 @@ class _GroupSection extends ConsumerWidget {
     final sum = assetSumIncluded(items);
     final total = debt ? sum.abs() : sum;
     final totalText = masked
-        ? kBudgetMask
+        ? kHideMask
         : (debt && total != 0
               ? '$kMinus${assetWon(total, false)}'
               : assetWon(total, false));

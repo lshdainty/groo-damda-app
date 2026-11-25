@@ -98,7 +98,7 @@ PDelta stocksPnlDelta(
 }) {
   final d = directionOf(pnl.toDouble());
   final amount = masked
-      ? '••••'
+      ? kHideMask
       : fmtByCurrency(pnl.abs().toDouble(), currency);
   return PDelta(
     direction: stocksDir(d),
@@ -546,7 +546,7 @@ class StocksCompositionBody extends StatelessWidget {
               label: l.stocksPortfolioTitle,
               diameter: 112,
               centerAmount: l.stocksPortfolioCount(comp.length),
-              valueFormatter: masked ? (_) => '••••' : null,
+              valueFormatter: masked ? (_) => kHideMask : null,
               slices: [
                 for (var i = 0; i < comp.length; i++)
                   PDonutSlice(
@@ -577,7 +577,7 @@ class StocksCompositionBody extends StatelessWidget {
                   suffix: PListValue(
                     child: PText(
                       masked
-                          ? '••••'
+                          ? kHideMask
                           : formatShare(
                               comp[i].weightPct,
                               underOne: l.percentUnderTenth,
