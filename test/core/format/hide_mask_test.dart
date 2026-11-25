@@ -40,4 +40,22 @@ void main() {
       'lib/features/expense/presentation/widgets/ledger_header.dart',
     ]);
   });
+
+  test('가리면 점만 — 부호 · 단위를 점 앞뒤에 붙인 글이 없다', () {
+    // '−${masked ? kHideMask : …}' · '$sign${won(…, masked)}' 처럼 부호를 가림 밖에 두거나,
+    // '$kHideMask${wonUnit()}' · '${kHideMask}원' 처럼 단위를 점 뒤에 붙이면 가린 금액에 부호 · 단위가 남는다.
+    final signOutside = RegExp(
+      r"""['"](\$sign|\$\{sign\}|[−+]|\$kMinus|\$kChartMinus|\$\{kMinus\}|\$\{kChartMinus\})\$\{[^}]*(kHideMask|masked|flags\.of|hidden)""",
+    );
+    final unitAround = RegExp(
+      r"""\$\{?kHideMask(Narrow)?\}?\s*(\$\{wonUnit\(\)\}|원|₩)|(₩|[−+]|\$kMinus|\$sign)\$\{?kHideMask""",
+    );
+    final hits = [
+      for (final s in sources)
+        for (final (i, line) in s.text.split('\n').indexed)
+          if (signOutside.hasMatch(line) || unitAround.hasMatch(line))
+            '${s.path}:${i + 1}: ${line.trim()}',
+    ];
+    expect(hits, isEmpty);
+  });
 }

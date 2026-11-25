@@ -53,10 +53,10 @@ int dailyAverageWon(int total, DateTime from, DateTime to, DateTime today) =>
     averageWon(total, averageDays(from, to, today));
 
 /// 가린 금액 자리의 점 — 담다 웹 · 앱 어디서나 **4개**다(2026-11-25 사용자 결정, web `HIDE_AMOUNTS_MASK` 와 같다).
-/// 점 글자를 직접 쓰지 말고 이 상수를 쓴다.
+/// 점 글자를 직접 쓰지 말고 이 상수를 쓴다. 가리면 **점만** 둔다 — 부호(− · +)와 단위(원 · ₩)도 함께 가린다(groo-design 6027446).
 const String kHideMask = '••••';
 
-/// 아주 좁은 칸만의 예외 — 가계부 달력 칸(한 칸에 지출 · 수입 두 줄, 폰 폭 7등분)은 4개가 칸을 넘친다.
+/// 아주 좁은 칸만의 예외 — 가계부 달력 칸(한 칸에 지출 · 수입 두 줄, 폰 폭 7등분)은 4개가 칸을 넘친다. 이때도 부호까지 가린다.
 /// 다른 자리에 쓰지 않는다(web `HIDE_AMOUNTS_MASK_NARROW` 와 같다).
 const String kHideMaskNarrow = '••';
 

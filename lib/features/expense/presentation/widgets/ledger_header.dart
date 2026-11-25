@@ -572,12 +572,16 @@ class LedgerCalendar extends StatelessWidget {
               children: [
                 if (data.out > 0)
                   line(
-                    '−${flags.of(MaskKind.expense) ? kHideMaskNarrow : krw(data.out)}',
+                    flags.of(MaskKind.expense)
+                        ? kHideMaskNarrow
+                        : '−${krw(data.out)}',
                     c.fgNeutral,
                   ),
                 if (data.inn > 0)
                   line(
-                    '+${flags.of(MaskKind.income) ? kHideMaskNarrow : krw(data.inn)}',
+                    flags.of(MaskKind.income)
+                        ? kHideMaskNarrow
+                        : '+${krw(data.inn)}',
                     c.fgBrand,
                   ),
               ],

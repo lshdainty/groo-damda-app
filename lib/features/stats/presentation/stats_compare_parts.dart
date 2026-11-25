@@ -517,9 +517,14 @@ class StatsCompareCategorySection extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          keepAllAmount('$sign${statsWon(diff.abs(), masked)}'),
-                          semanticsLabel:
-                              '$sign${statsWon(diff.abs(), masked)}',
+                          keepAllAmount(
+                            statsWon(diff.abs(), masked, sign: sign),
+                          ),
+                          semanticsLabel: statsWon(
+                            diff.abs(),
+                            masked,
+                            sign: sign,
+                          ),
                           textAlign: TextAlign.end,
                           style: PTypography.t5.copyWith(
                             color: tone,

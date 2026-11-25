@@ -810,7 +810,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
       // 문장 속 돈도 줄이지 않는다 — "11,881원" · "₩11,881"(international-design, groo-design #252). 예전엔 만원으로
       // 반올림해 11,881 을 `1만원`(QA #38), 그 뒤엔 `1.2만원` 으로 줄여 말했다.
       final amount = krwSigned(diff.abs(), false, unit: true);
-      // 가림 점은 krw.dart 의 기본 마스크(6개)와 한 벌
+      // 가리면 공용 점(kHideMask)만 — 부호 · 단위도 함께 가린다
       final shownAmount = masked ? kHideMask : amount;
       final less = diff > 0;
       return Text.rich(
