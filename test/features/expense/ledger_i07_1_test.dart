@@ -1122,7 +1122,10 @@ void main() {
     await _pump(tester, hidden: {'ledger.txList'});
     await tester.tap(find.bySemanticsLabel('월 달력'));
     await tester.pumpAndSettle();
-    expect(findTextContaining('−••'), findsWidgets);
+    // 부호까지 가린다 — 칸에는 점 두 개만(웹 달력 칸과 같다)
+    expect(_text('••'), findsWidgets);
+    expect(findTextContaining('−••'), findsNothing);
+    expect(findTextContaining('+••'), findsNothing);
   });
 
   testWidgets('가림: 월 합계 카드를 켜면 인사이트 금액도 가린다', (tester) async {

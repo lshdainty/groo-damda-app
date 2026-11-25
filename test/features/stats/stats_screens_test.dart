@@ -587,6 +587,21 @@ void main() {
       expect(findPlain('2,435,323,333원'), findsWidgets);
     });
 
+    testWidgets('가리면 점만 — 증감 줄에 부호 · 단위가 남지 않는다', (tester) async {
+      await _pump(tester, tab: StatsTab.compare, masked: {'stats.compare'});
+      // 낱말 이음(U+2060)은 줄바꿈 제어 글자라 빼고 본다
+      final shown = [
+        for (final e in find.byType(Text).evaluate())
+          ((e.widget as Text).data ??
+                  (e.widget as Text).textSpan?.toPlainText() ??
+                  '')
+              .replaceAll('\u2060', ''),
+      ];
+      expect(shown.where((t) => t.contains('••••')), isNotEmpty);
+      final leftover = RegExp(r'[−+\-]\s*•|•\s*원|₩\s*•');
+      expect(shown.where(leftover.hasMatch).toList(), isEmpty);
+    });
+
     testWidgets('지난 기간과 같으면 "지난 기간과 같아요." 와 변화 없음', (tester) async {
       // 이번 · 지난 기간이 같은 합계
       await _pump(
